@@ -1,0 +1,55 @@
+@import '../../../../style/vars.less';
+
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 320px;
+  .ant-input-search-button.ant-btn-primary {
+    background-color: @theme-color;
+    border-color: @theme-color;
+    height: 42px;
+  }
+  .ant-input-search {
+    .ant-input {
+      padding: 5px;
+      background-color: @theme-color;
+      color: @white;
+      height: 30px;
+    }
+  }
+  .ant-input-group-wrapper {
+    border-radius: 5px;
+    overflow: hidden;
+    background-color: @theme-color;
+  }
+  .ant-input-affix-wrapper {
+    background-color: @theme-color;
+    border-color: @theme-color;
+    box-shadow: none;
+  }
+  @media (max-width: @tablet-screen) {
+    width: 100%;
+  }
+}
+.drop-hint {
+  position: absolute;
+  top: 82%;
+  width: 100%;
+  background: @theme-color;
+  border: 1px solid @theme-color;
+  padding: 0;
+  z-index: 999;
+
+  li {
+    padding: 5px 10px;
+    cursor: pointer;
+    a {
+      color: @white;
+    }
+    &:hover {
+      background-color: @primary-color;
+      opacity: 0.8;
+    }
+  }
+}
