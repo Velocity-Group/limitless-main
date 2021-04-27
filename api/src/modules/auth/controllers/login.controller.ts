@@ -50,14 +50,6 @@ export class LoginController {
     if (!user && !performer) {
       throw new HttpException('This account is not found. Please sign up', 404);
     }
-    // const requireEmailVerification = SettingService.getValueByKey('requireEmailVerification');
-    // if (
-    //   (requireEmailVerification && user && user.status === STATUS_PENDING_EMAIL_CONFIRMATION)
-    //   || (requireEmailVerification && user && !user.verifiedEmail)
-    //   || (requireEmailVerification && performer && performer.status === PERFORMER_STATUSES.PENDING)
-    //   || (requireEmailVerification && performer && !performer.verifiedEmail)) {
-    //   throw new EmailNotVerifiedException();
-    // }
     if ((user && user.status === STATUS_INACTIVE) || (performer && performer.status === PERFORMER_STATUSES.INACTIVE)) {
       throw new AccountInactiveException();
     }
@@ -85,11 +77,12 @@ export class LoginController {
     // TODO - check for user status here
 
     let token = null;
+    // auth token expired in 30d
     if (authUser) {
-      token = req.remember ? this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 365 }) : this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 1 });
+      token = this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 30 });
     }
     if (!authUser && authPerformer) {
-      token = req.remember ? this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 365 }) : this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 1 });
+      token = this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 30 });
     }
 
     return DataResponse.ok({ token });
@@ -107,14 +100,6 @@ export class LoginController {
     if (!user && !performer) {
       throw new HttpException('This account is not found. Please Sign up', 404);
     }
-    // const requireEmailVerification = SettingService.getValueByKey('requireEmailVerification');
-    // if (
-    //   (requireEmailVerification && user && user.status === STATUS_PENDING_EMAIL_CONFIRMATION)
-    //   || (requireEmailVerification && user && !user.verifiedEmail)
-    //   || (requireEmailVerification && performer && performer.status === PERFORMER_STATUSES.PENDING)
-    //   || (requireEmailVerification && performer && !performer.verifiedEmail)) {
-    //   throw new EmailNotVerifiedException();
-    // }
     if ((user && user.status === STATUS_INACTIVE) || (performer && performer.status === PERFORMER_STATUSES.INACTIVE)) {
       throw new AccountInactiveException();
     }
@@ -141,11 +126,12 @@ export class LoginController {
     }
 
     let token = null;
+    // auth token expired in 30d
     if (authUser) {
-      token = req.remember ? this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 365 }) : this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 1 });
+      token = this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 30 });
     }
     if (!authUser && authPerformer) {
-      token = req.remember ? this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 365 }) : this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 1 });
+      token = this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 30 });
     }
 
     return DataResponse.ok({ token });

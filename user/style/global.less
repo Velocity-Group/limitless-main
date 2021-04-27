@@ -30,7 +30,7 @@
 
 .ant-layout-footer {
   padding: 7px 20px 7px;
-  background-color: @primary-color;
+  background-color: @light-blue;
 }
 
 .ant-drawer-close {
@@ -67,8 +67,7 @@
 
 .main-footer {
   padding: 10px 0;
-  position: unset;
-  background-image: linear-gradient(to bottom, @theme-color 0%, @primary-color 100%);
+  background-color: @light-blue;
 
   ul {
     display: flex;
@@ -82,7 +81,7 @@
       margin: 0 10px;
 
       a {
-        color: @white;
+        color: @grey-color;
         font-weight: 600;
       }
     }
@@ -103,14 +102,13 @@
     }
   }
   .footer-content {
-    color: @white;
-    background: unset!important;
+    color: @grey-color;
+    background: transparent;
     text-align: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid @light-grey;
     padding-top: 1em;
     p, span {
-      background: unset!important;
-      color: @white!important;
+      color: @grey-color;
     }
   }
 
@@ -203,7 +201,7 @@
     padding: 0 11px;
   }
   .ant-input {
-    height: 40px;
+    height: 42px;
     padding: 5px 10px;
     font-weight: 500;
     font-size: 12px;
@@ -226,7 +224,7 @@
   .ant-picker {
     width: 100%;
     input {
-      height: 28px;
+      height: 30px;
       font-size: 12px;
       padding: 0
     }
@@ -234,9 +232,8 @@
 }
 
 .ant-select-selector {
-  border-radius: 0.5em!important;
-  height: 40px!important;
-  line-height: 40px!important;
+  border-radius: 0.5em;
+  height: 42px;
   padding: 5px 12px;
   .ant-select-selection-item {
     font-size: 12px;
@@ -256,7 +253,7 @@
 }
 
 .ant-picker-input > input {
-  height: 32px;
+  height: 34px;
   padding: 0 5px;
 }
 

@@ -18,14 +18,14 @@ import '../style/index.less';
 function redirectLogin(ctx: any) {
   if (process.browser) {
     authService.removeToken();
-    return Router.push('/auth/login');
+    Router.push('/auth/login');
+    return;
   }
 
   // fix for production build
   ctx.res.clearCookie && ctx.res.clearCookie('token');
   ctx.res.writeHead && ctx.res.writeHead(302, { Location: '/auth/login' });
   ctx.res.end && ctx.res.end();
-  return undefined;
 }
 
 async function auth(ctx: NextPageContext) {

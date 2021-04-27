@@ -197,7 +197,7 @@ export class StreamService {
       user._id
     );
     if (!subscribed) {
-      throw new HttpException('You haven\'t subscribed this content creator yet', 403);
+      throw new HttpException('You haven\'t subscribed this model yet', 422);
     }
 
     const data: IStream = {

@@ -3,7 +3,6 @@ import {
   IsOptional,
   Validate,
   IsEmail,
-  IsNotEmpty,
   IsIn,
   IsArray,
   MinLength,

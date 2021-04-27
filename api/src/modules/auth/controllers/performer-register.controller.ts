@@ -5,12 +5,12 @@ import {
   Body,
   Controller,
   UseInterceptors,
-  HttpException,
+  // HttpException,
   forwardRef,
   Inject
 } from '@nestjs/common';
 import { DataResponse, getConfig } from 'src/kernel';
-import { SettingService } from 'src/modules/settings';
+// import { SettingService } from 'src/modules/settings';
 import {
   MultiFileUploadInterceptor,
   FilesUploaded,
@@ -61,21 +61,21 @@ export class PerformerRegisterController {
     @FilesUploaded() files: Record<string, FileDto>
   ): Promise<DataResponse<{ message: string }>> {
     try {
-      if (!files.idVerification || !files.documentVerification) {
-        throw new HttpException('Missing ID documents!', 404);
-      }
+      // if (!files.idVerification || !files.documentVerification) {
+      //   throw new HttpException('Missing ID documents!', 404);
+      // }
 
       // TODO - define key for performer separately
-      const requireEmailVerification = SettingService.getValueByKey(
-        'requireEmailVerification'
-      );
+      // const requireEmailVerification = SettingService.getValueByKey(
+      //   'requireEmailVerification'
+      // );
 
       const performer = await this.performerService.register({
         ...payload,
         avatarId: null,
-        status: requireEmailVerification ? PERFORMER_STATUSES.PENDING : PERFORMER_STATUSES.INACTIVE,
-        idVerificationId: files.idVerification._id as any,
-        documentVerificationId: files.documentVerification._id as any
+        status: PERFORMER_STATUSES.ACTIVE,
+        idVerificationId: files?.idVerification?._id as any,
+        documentVerificationId: files?.documentVerification?._id as any
       });
 
       // create auth, email notification, etc...

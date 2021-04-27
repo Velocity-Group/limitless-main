@@ -240,7 +240,7 @@ export class FeedService {
       fromSourceId
     } as any);
     if (feed.fileIds && feed.fileIds.length) {
-      await Promise.all([feed.fileIds.forEach(async (fileId) => {
+      await Promise.all([feed.fileIds.map(async (fileId) => {
         await this.fileService.addRef((fileId as any), {
           itemId: feed._id,
           itemType: REF_TYPE.FEED

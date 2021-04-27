@@ -39,7 +39,7 @@ export class AuthService extends APIRequest {
     return this.post('/auth/email-verification', data);
   }
 
-  setToken(token: string, remember = false): void {
+  setToken(token: string, remember = true): void {
     const expired = { expires: !remember ? 1 : 365 };
     cookie.set(TOKEN, token, expired);
     this.setAuthHeaderToken(token);
@@ -49,24 +49,17 @@ export class AuthService extends APIRequest {
     return cookie.get(TOKEN);
   }
 
-  setTwitterToken(data: any) {
-    process.browser && localStorage.setItem('oauthToken', data.oauthToken);
-    process.browser && localStorage.setItem('oauthTokenSecret', data.oauthTokenSecret);
-    // https://github.com/js-cookie/js-cookie
-    // since Safari does not support, need a better solution
-    cookie.set('oauthToken', data.oauthToken);
-    cookie.set('oauthTokenSecret', data.oauthTokenSecret);
+  setTwitterToken(data: any, role: string) {
+    cookie.set('oauthToken', data.oauthToken, { expires: 1 });
+    cookie.set('oauthTokenSecret', data.oauthTokenSecret, { expires: 1 });
+    cookie.set('role', role, { expires: 1 });
   }
 
   getTwitterToken() {
-    let oauthToken = cookie.get('oauthToken');
-    let oauthTokenSecret = cookie.get('oauthTokenSecret');
-    if (oauthToken && oauthTokenSecret) {
-      return { oauthToken, oauthTokenSecret };
-    }
-    oauthToken = !oauthToken && process.browser ? localStorage.getItem('oauthToken') : null;
-    oauthTokenSecret = !oauthTokenSecret && process.browser ? localStorage.getItem('oauthTokenSecret') : null;
-    return { oauthToken, oauthTokenSecret };
+    const oauthToken = cookie.get('oauthToken');
+    const oauthTokenSecret = cookie.get('oauthTokenSecret');
+    const role = cookie.get('role');
+    return { oauthToken, oauthTokenSecret, role };
   }
 
   removeToken(): void {

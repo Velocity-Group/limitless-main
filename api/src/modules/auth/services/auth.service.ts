@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+/* eslint-disable no-param-reassign */
 import {
   Injectable, Inject, forwardRef, HttpException
 } from '@nestjs/common';
@@ -299,6 +301,9 @@ export class AuthService {
   }
 
   public async twitterLoginCallback(req: any) {
+    const {
+      oauthToken, oauthTokenSecret, oauth_verifier, role
+    } = req;
     const twitterClientId = await SettingService.getValueByKey(SETTING_KEYS.TWITTER_CLIENT_ID);
     const twitterClientSecret = await SettingService.getValueByKey(SETTING_KEYS.TWITTER_CLIENT_SECRET);
     const _twitterConsumerKey = twitterClientId || process.env.TWITTER_CLIENT_ID;
@@ -317,12 +322,12 @@ export class AuthService {
     return new Promise((resolver, reject) => {
       try {
         consumer.getOAuthAccessToken(
-          req.oauthToken,
-          req.oauthTokenSecret,
-          req.oauth_verifier,
+          oauthToken,
+          oauthTokenSecret,
+          oauth_verifier,
           async (error, oauthAccessToken, oauthAccessTokenSecret, profile) => {
             if (error) {
-              return reject(new HttpException(error.message ? error.message : 'Twitter Authentication Error', 422));
+              return reject(new HttpException(error?.message || 'Twitter Authentication Error', 403));
             }
             if (!profile || !profile.user_id) {
               return reject(new EntityNotFoundException());
@@ -371,23 +376,33 @@ export class AuthService {
               const token = _this.generateJWT(authUser);
               return resolver({ token });
             }
-            const newUser = await _this.userService.socialCreate({
+            const newUser = role === 'user' ? await _this.userService.socialCreate({
               username: profile.screen_name,
               status: STATUS_ACTIVE,
               roles: [ROLE_USER],
               gender: GENDER_MALE,
               twitterConnected: true,
-              twitterProfile: profile
+              twitterProfile: profile,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }) : await _this.performerService.modelCreate({
+              username: profile.screen_name,
+              status: STATUS_ACTIVE,
+              gender: GENDER_MALE,
+              twitterConnected: true,
+              twitterProfile: profile,
+              createdAt: new Date(),
+              updatedAt: new Date()
             });
             const newAuth = await _this.create(
               new AuthCreateDto({
-                source: 'user',
+                source: role || 'user',
                 sourceId: newUser._id,
                 type: 'username',
                 key: profile.screen_name
               })
             );
-            const token = await _this.generateJWT(newAuth);
+            const token = _this.generateJWT(newAuth);
             return resolver({ token });
           }
         );
@@ -398,11 +413,12 @@ export class AuthService {
   }
 
   public async verifyLoginGoogle(payload: AuthGooglePayload) {
+    const { tokenId, role } = payload;
     const googleClientId = await SettingService.getValueByKey(SETTING_KEYS.GOOGLE_CLIENT_ID);
     const _googleClientId = googleClientId || process.env.GOOGLE_CLIENT_ID;
     const client = new OAuth2Client(_googleClientId);
     const ticket = await client.verifyIdToken({
-      idToken: payload.tokenId,
+      idToken: tokenId,
       audience: _googleClientId
     });
     const profile = ticket.payload;
@@ -453,7 +469,7 @@ export class AuthService {
       const token = this.generateJWT(authUser);
       return { token };
     }
-    const newUser = await this.userService.socialCreate({
+    const newUser = role === 'user' ? await this.userService.socialCreate({
       email: profile.email.toLowerCase(),
       firstName: profile.given_name,
       lastName: profile.family_name,
@@ -465,10 +481,21 @@ export class AuthService {
       gender: GENDER_MALE,
       googleConnected: true,
       googleProfile: profile
+    }) : await this.performerService.modelCreate({
+      email: profile.email.toLowerCase(),
+      firstName: profile.given_name,
+      lastName: profile.family_name,
+      name: profile.name,
+      avatarPath: profile.picture || null,
+      verifiedEmail: true,
+      status: STATUS_ACTIVE,
+      gender: GENDER_MALE,
+      googleConnected: true,
+      googleProfile: profile
     });
     const newAuth = await this.create(
       new AuthCreateDto({
-        source: 'user',
+        source: role || 'user',
         sourceId: newUser._id,
         type: 'email',
         key: profile.email
@@ -522,16 +549,18 @@ export class AuthService {
     if (!verifications || !verifications.length) {
       throw new EntityNotFoundException();
     }
-    verifications.forEach(async (verification) => {
-      verification.verified = true;
-      await verification.save();
-      verification.sourceType === 'user' && (
-        await this.userService.updateVerificationStatus(verification.sourceId)
-      );
-      verification.sourceType === 'performer' && (
-        await this.performerService.updateVerificationStatus(verification.sourceId)
-      );
-    });
+    await Promise.all(
+      verifications.map(async (verification) => {
+        verification.verified = true;
+        await verification.save();
+        if (verification.sourceType === 'user') {
+          await this.userService.updateVerificationStatus(verification.sourceId);
+        }
+        if (verification.sourceType === 'performer') {
+          await this.performerService.updateVerificationStatus(verification.sourceId);
+        }
+      })
+    );
   }
 
   async switchUserAccount(userId: string): Promise<void> {
@@ -539,9 +568,9 @@ export class AuthService {
     if (!user) {
       throw new EntityNotFoundException();
     }
-    if (await SettingService.getValueByKey(SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION) && !user.verifiedEmail) {
-      throw new HttpException('Please verify your email address!', 403);
-    }
+    // if (await SettingService.getValueByKey(SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION) && !user.verifiedEmail) {
+    //   throw new HttpException('Please verify your email address!', 403);
+    // }
     const userAuths = await this.authModel.find({
       sourceId: user._id
     });
@@ -549,7 +578,7 @@ export class AuthService {
       throw new EntityNotFoundException();
     }
     try {
-      const newPerformer = await this.performerService.userSwitchAccount({
+      const newPerformer = await this.performerService.modelCreate({
         firstName: user?.firstName,
         lastName: user?.lastName,
         name: user?.name,
@@ -570,12 +599,11 @@ export class AuthService {
         updatedAt: new Date()
       });
       await user.remove();
-      userAuths.forEach(async (auth) => {
+      await Promise.all(userAuths.map((auth) => {
         auth.source = 'performer';
         auth.sourceId = newPerformer._id;
-        await auth.save();
-        return auth;
-      });
+        return auth.save();
+      }));
     } catch (e) {
       console.log(e);
     }

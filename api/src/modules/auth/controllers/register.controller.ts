@@ -93,6 +93,6 @@ export class RegisterController {
     @Param('id') userId: string
   ): Promise<DataResponse<{ message: string }>> {
     await this.authService.switchUserAccount(userId);
-    return DataResponse.ok({ message: 'Your user account has switched to become a content creator!' });
+    return DataResponse.ok({ message: 'Your user account has switched to become a model!' });
   }
 }

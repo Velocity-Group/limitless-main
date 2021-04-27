@@ -49,21 +49,6 @@ const plugins = [
       return config
     }
   }),
-  withCSS,
-
-  // (nextConfig = {}) => {
-  //   return Object.assign({}, nextConfig, {
-  //     webpack(config, options) {
-  //       config.resolve.plugins = [new TsconfigPathsPlugin()];
-  //       // if (config.resolve.plugins) {
-  //       //   config.resolve.plugins(new TsconfigPathsPlugin());
-  //       // } else {
-  //       //   config.resolve.plugins = [new TsconfigPathsPlugin()];
-  //       // }
-    
-  //       return config;
-  //     }
-  //   })
-  // }
+  withCSS
 ];
 module.exports = withPlugins(plugins, nextConfig);

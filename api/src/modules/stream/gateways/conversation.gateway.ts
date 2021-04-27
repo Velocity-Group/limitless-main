@@ -4,7 +4,6 @@ import { SocketUserService } from 'src/modules/socket/services/socket-user.servi
 import { RequestService } from 'src/modules/stream/services';
 import { AuthService } from 'src/modules/auth';
 import { ConversationService } from 'src/modules/message/services';
-import { Socket } from 'socket.io';
 import { Model } from 'mongoose';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
@@ -47,7 +46,7 @@ export class StreamConversationWsGateway {
 
   @SubscribeMessage(JOIN_ROOM)
   async handleJoinPrivateRoom(
-    client: Socket,
+    client: any,
     payload: { conversationId: string }
   ) {
     try {
@@ -159,7 +158,7 @@ export class StreamConversationWsGateway {
 
   @SubscribeMessage(LEAVE_ROOM)
   async handleLeavePrivateRoom(
-    client: Socket,
+    client: any,
     payload: { conversationId: string }
   ) {
     try {

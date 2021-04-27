@@ -30,7 +30,7 @@ export const ORDER_PAID_SUCCESS_CHANNEL = 'ORDER_PAID_SUCCESS_CHANNEL';
 
 export const OVER_PRODUCT_STOCK = 'OVER_PRODUCT_STOCK';
 export const DIFFERENT_PERFORMER_PRODUCT = 'DIFFERENT_PERFORMER_PRODUCT';
-export const MISSING_CONFIG_PAYMENT_GATEWAY = 'Missing payment configuration for this content creator';
+export const MISSING_CONFIG_PAYMENT_GATEWAY = 'Missing payment configuration for this model';
 
 export const ORDER_STATUS = {
   PROCESSING: 'processing',

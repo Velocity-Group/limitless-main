@@ -6,4 +6,9 @@ export class AuthGooglePayload {
   @IsString()
   @IsNotEmpty()
   tokenId: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  role: string;
 }

@@ -68,7 +68,7 @@ export class MessageListener {
       await this.notificationMessageModel.updateMany({ _id: { $in: Ids } }, {
         $inc: { totalNotReadMessage: num }, updatedAt: new Date()
       }, { upsert: true });
-      return receiverIds && receiverIds.forEach(async (receiverId) => {
+      await Promise.all(receiverIds.map(async (receiverId) => {
         const totalNotReadMessage = await this.notificationMessageModel.aggregate([
           {
             $match: { recipientId: receiverId }
@@ -88,10 +88,11 @@ export class MessageListener {
             total += 1;
           }
         });
-        return this.notifyCountingNotReadMessageInConversation(receiverId, total);
-      });
+        await this.notifyCountingNotReadMessageInConversation(receiverId, total);
+      }));
+      return;
     }
-    receiverIds.forEach(async (rId) => {
+    await Promise.all(receiverIds.map(async (rId) => {
       // eslint-disable-next-line new-cap
       await new this.notificationMessageModel({
         conversationId: conversation._id,
@@ -120,7 +121,7 @@ export class MessageListener {
         }
       });
       await this.notifyCountingNotReadMessageInConversation(rId, total);
-    });
+    }));
   }
 
   private async notifyCountingNotReadMessageInConversation(receiverId, total): Promise<void> {

@@ -27,30 +27,27 @@
   max-width: 1100px;
   margin: 5px auto 20px;
   min-height: 80vh;
+
   .title {
+    text-align: center;
     font-size: 24px;
     font-weight: bolder;
     margin: 20px 0;
     font-family: @primary-font-bold;
   }
+
   .ant-picker {
     width: 100%;
   }
+
   input {
     height: 36px;
     width: 100%;
     padding: 0 15px;
   }
 
-  Button.login-form-button {
-    height: 50px;
-    font-size: 16px;
-    color: @black;
-    margin-bottom: 15px;
-  }
-
   .login-content {
-    padding: 20px 0 20px 100px;
+    padding: 20px 0;
     position: relative;
     min-height: 550px;
     margin: 0 auto;
@@ -70,12 +67,14 @@
     //model
     &.left {
       background-image: url('/static/ct-bg.jpg');
-      background-size: 90%;
+      background-size: 85%;
       background-repeat: no-repeat;
       background-position: center;
+
       &.fixed {
         background-size: 65%;
       }
+
       @media (max-width: @mobile-screen) {
         display: none;
       }
@@ -83,11 +82,17 @@
 
     //member
     &.right {
-      Button.login-form-button {
+      max-width: 400px;
+
+      .login-form-button {
         width: 100%;
         background-image: linear-gradient(0deg, @primary-color, @theme-color);
         border-color: @theme-color;
         color: @white;
+        height: 48px;
+        border-radius: 25px;
+        font-size: 16px;
+        margin-bottom: 25px;
       }
 
       .title {
@@ -102,7 +107,11 @@
 
       a {
         font-weight: 600;
-        color: @theme-color
+        font-size: 11px;
+        color: @primary-color;
+      }
+      p a {
+        font-size: 12px;
       }
 
       .ant-checkbox-wrapper .ant-checkbox-inner,
@@ -122,30 +131,13 @@
         box-shadow: 0 5px 10px rgba(50, 50, 50, 0.2);
       }
     }
-  }
-}
 
-.form {
-  position: absolute;
-  top: 45%;
-  left: 50%;
-  margin: -160px 0 0 -160px;
-  width: 320px;
-  height: 320px;
-  padding: 36px;
-  box-shadow: 0 0 100px rgba(0, 0, 0, 0.08);
-
-  button {
-    width: 100%;
-  }
-
-  p {
-    color: rgb(204, 204, 204);
-    text-align: center;
-    margin-top: 16px;
-    font-size: 12px;
-    display: flex;
-    justify-content: space-between;
+    &.custom {
+      padding: 25px;
+      @media (max-width: @mobile-screen) {
+        padding: 0;
+      }
+    }
   }
 }
 
@@ -228,6 +220,7 @@
 .switch-btn {
   display: flex;
   justify-content: center;
+  margin-bottom: 20px;
 
   button {
     background-color: transparent;
@@ -279,7 +272,7 @@
 .welcome-box {
   background-color: @light-blue;
   margin: 3em 0;
-  padding: 3em;
+  padding: 30px 0 30px 30px;
   border-radius: 10px;
 
   h3 {
@@ -299,7 +292,7 @@
 }
 
 .social-login {
-  margin: 10px;
+  margin: 10px 0;
   text-align: center;
   font-size: 15px;
 
@@ -308,7 +301,7 @@
     color: @white;
     border: none;
     padding: 12px;
-    border-radius: 20px;
+    border-radius: 25px;
     cursor: pointer;
     width: 100%;
     outline: none;
@@ -321,7 +314,7 @@
     align-items: center;
     justify-content: center;
     font-size: 15px !important;
-    border-radius: 20px !important;
+    border-radius: 25px !important;
     outline: none;
 
     &:hover {
@@ -346,15 +339,18 @@
   width: 100%;
   justify-content: space-between;
   align-items: center;
+
   .ant-upload-picture-card-wrapper.avatar-uploader {
     width: unset;
   }
+
   .img-id {
     width: 140px;
     height: 140px;
     object-fit: cover;
   }
 }
+
 .login-logo {
   text-align: center;
 }

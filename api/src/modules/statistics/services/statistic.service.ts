@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { FEED_PROVIDER } from 'src/modules/feed/providers';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
-import { FEED_TYPE } from 'src/modules/feed/constants';
+// import { FEED_TYPE } from 'src/modules/feed/constants';
 import { FeedModel } from 'src/modules/feed/models';
 import {
   PERFORMER_GALLERY_MODEL_PROVIDER, PERFORMER_PHOTO_MODEL_PROVIDER,
@@ -22,7 +22,6 @@ import { OrderModel } from '../../payment/models';
 import { EARNING_MODEL_PROVIDER } from '../../earning/providers/earning.provider';
 import { EarningModel } from '../../earning/models/earning.model';
 import { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING_EMAIL_CONFIRMATION } from '../../user/constants';
-import { PERFORMER_STATUSES } from '../../performer/constants';
 import { ORDER_STATUS } from '../../payment/constants';
 
 @Injectable()
@@ -57,12 +56,12 @@ export class StatisticService {
     const totalActivePerformers = await this.performerModel.countDocuments({ status: STATUS_ACTIVE });
     const totalInactivePerformers = await this.performerModel.countDocuments({ status: STATUS_INACTIVE });
     const totalPendingPerformers = await this.performerModel.countDocuments({ verifiedDocument: false });
-    // const totalGalleries = await this.galleryModel.countDocuments({ });
-    // const totalPhotos = await this.photoModel.countDocuments({ });
-    // const totalVideos = await this.videoModel.countDocuments({});
+    const totalGalleries = await this.galleryModel.countDocuments({ });
+    const totalPhotos = await this.photoModel.countDocuments({ });
+    const totalVideos = await this.videoModel.countDocuments({});
     const totalPosts = await this.feedModel.countDocuments({ });
-    const totalPhotoPosts = await this.feedModel.countDocuments({ type: FEED_TYPE.PHOTO });
-    const totalVideoPosts = await this.feedModel.countDocuments({ type: FEED_TYPE.VIDEO });
+    // const totalPhotoPosts = await this.feedModel.countDocuments({ type: FEED_TYPE.PHOTO });
+    // const totalVideoPosts = await this.feedModel.countDocuments({ type: FEED_TYPE.VIDEO });
     const totalActiveSubscribers = await this.subscriptionModel.countDocuments({ expiredAt: { $gte: new Date() }, status: SUBSCRIPTION_STATUS.ACTIVE });
     const totalSubscribers = await this.subscriptionModel.countDocuments({ });
     const totalDeliveriedOrders = await this.orderModel.countDocuments({ deliveryStatus: ORDER_STATUS.DELIVERED });
@@ -99,8 +98,11 @@ export class StatisticService {
       totalInactivePerformers,
       totalPendingPerformers,
       totalPosts,
-      totalPhotoPosts,
-      totalVideoPosts,
+      totalGalleries,
+      totalPhotos,
+      totalVideos,
+      // totalPhotoPosts,
+      // totalVideoPosts,
       totalProducts,
       totalActiveSubscribers,
       totalSubscribers,

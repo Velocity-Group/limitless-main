@@ -84,38 +84,35 @@ export class PerformerTrendingService {
       const performers = await this.performerModel.find({
         _id: { $in: performerIds }, status: PERFORMER_STATUSES.ACTIVE
       }).lean().limit(40);
-      await Promise.all([performers.forEach(async (per, index) => {
+      await Promise.all(performers.map(async (per, index) => {
         if (newData.find((p) => `${p.performerId}` === `${per._id}` && p.listType === TRENDING_TYPES.SUBSCRIPTION)) return;
         const subsNumber = subscriptions.filter((s) => s.performerId === per._id).length || 0;
-        try {
-          await this.performerTrendingModel.create({
-            performerId: per._id,
-            name: per.name,
-            firstName: per.firstName,
-            lastName: per.lastName,
-            username: per.username,
-            dateOfBirth: per.dateOfBirth,
-            avatarId: per.avatarId,
-            avatarPath: per.avatarPath,
-            coverId: per.coverId,
-            coverPath: per.coverPath,
-            welcomeVideoId: per.welcomeVideoId,
-            welcomeVideoPath: per.welcomeVideoPath,
-            activateWelcomeVideo: per.activateWelcomeVideo,
-            verifiedAccount: per.verifiedAccount,
-            gender: per.gender,
-            country: per.country,
-            bio: per.bio,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            totalSubscribersInDay: subsNumber,
-            listType: TRENDING_TYPES.SUBSCRIPTION,
-            ordering: index,
-            isProtected: false
-          });
-          // eslint-disable-next-line no-empty
-        } catch { }
-      })]);
+        await this.performerTrendingModel.create({
+          performerId: per._id,
+          name: per.name,
+          firstName: per.firstName,
+          lastName: per.lastName,
+          username: per.username,
+          dateOfBirth: per.dateOfBirth,
+          avatarId: per.avatarId,
+          avatarPath: per.avatarPath,
+          coverId: per.coverId,
+          coverPath: per.coverPath,
+          welcomeVideoId: per.welcomeVideoId,
+          welcomeVideoPath: per.welcomeVideoPath,
+          activateWelcomeVideo: per.activateWelcomeVideo,
+          verifiedAccount: per.verifiedAccount,
+          gender: per.gender,
+          country: per.country,
+          bio: per.bio,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          totalSubscribersInDay: subsNumber,
+          listType: TRENDING_TYPES.SUBSCRIPTION,
+          ordering: index,
+          isProtected: false
+        });
+      }));
     } catch (e) {
       console.log('Check & update trending profiles', e);
     } finally {
@@ -146,37 +143,34 @@ export class PerformerTrendingService {
         .limit(40)
         .sort({ createdAt: -1 });
 
-      await Promise.all([performers.forEach(async (per, index) => {
+      await Promise.all(performers.map(async (per, index) => {
         if (newData.find((p) => `${p.performerId}` === `${per._id}` && p.listType === TRENDING_TYPES.NEWEST)) return;
-        try {
-          await this.performerTrendingModel.create({
-            performerId: per._id,
-            name: per.name,
-            firstName: per.firstName,
-            lastName: per.lastName,
-            username: per.username,
-            dateOfBirth: per.dateOfBirth,
-            avatarId: per.avatarId,
-            avatarPath: per.avatarPath,
-            coverId: per.coverId,
-            coverPath: per.coverPath,
-            welcomeVideoId: per.welcomeVideoId,
-            welcomeVideoPath: per.welcomeVideoPath,
-            activateWelcomeVideo: per.activateWelcomeVideo,
-            verifiedAccount: per.verifiedAccount,
-            gender: per.gender,
-            country: per.country,
-            bio: per.bio,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            totalSubscribersInDay: 0,
-            listType: TRENDING_TYPES.NEWEST,
-            ordering: index,
-            isProtected: false
-          });
-          // eslint-disable-next-line no-empty
-        } catch { }
-      })]);
+        await this.performerTrendingModel.create({
+          performerId: per._id,
+          name: per.name,
+          firstName: per.firstName,
+          lastName: per.lastName,
+          username: per.username,
+          dateOfBirth: per.dateOfBirth,
+          avatarId: per.avatarId,
+          avatarPath: per.avatarPath,
+          coverId: per.coverId,
+          coverPath: per.coverPath,
+          welcomeVideoId: per.welcomeVideoId,
+          welcomeVideoPath: per.welcomeVideoPath,
+          activateWelcomeVideo: per.activateWelcomeVideo,
+          verifiedAccount: per.verifiedAccount,
+          gender: per.gender,
+          country: per.country,
+          bio: per.bio,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          totalSubscribersInDay: 0,
+          listType: TRENDING_TYPES.NEWEST,
+          ordering: index,
+          isProtected: false
+        });
+      }));
     } catch (e) {
       console.log('Check & update newest profiles', e);
     } finally {

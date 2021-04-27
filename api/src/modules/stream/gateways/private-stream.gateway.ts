@@ -3,7 +3,6 @@ import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Inject, forwardRef } from '@nestjs/common';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { AuthService } from 'src/modules/auth/services';
-import { Socket } from 'socket.io';
 import { Model } from 'mongoose';
 import { UserService } from 'src/modules/user/services';
 // import { UserDto } from 'src/modules/user/dtos';
@@ -40,7 +39,7 @@ export class PrivateStreamWsGateway {
 
   @SubscribeMessage('private-stream/join')
   async handleJoinStream(
-    client: Socket,
+    client: any,
     payload: { conversationId: string; streamId: string; sessionId: string }
   ): Promise<void> {
     try {
@@ -126,7 +125,7 @@ export class PrivateStreamWsGateway {
 
   @SubscribeMessage('private-stream/leave')
   async handleLeaveStream(
-    client: Socket,
+    client: any,
     payload: { conversationId: string; streamId: string; sessionId: string }
   ): Promise<void> {
     try {

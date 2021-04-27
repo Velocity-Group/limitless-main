@@ -13,7 +13,6 @@ import { PasswordController } from './controllers/password.controller';
 import { PerformerRegisterController } from './controllers/performer-register.controller';
 import { FileModule } from '../file/file.module';
 import { PerformerModule } from '../performer/performer.module';
-import { PerformerLoginController } from './controllers/performer-login.controller';
 import { SettingModule } from '../settings/setting.module';
 
 @Module({
@@ -36,8 +35,7 @@ import { SettingModule } from '../settings/setting.module';
     RegisterController,
     LoginController,
     PasswordController,
-    PerformerRegisterController,
-    PerformerLoginController
+    PerformerRegisterController
   ],
   exports: [
     ...authProviders,

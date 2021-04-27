@@ -33,7 +33,7 @@ implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   @SubscribeMessage('connect')
-  async handleConnection(client: Socket): Promise<void> {
+  async handleConnection(client: any): Promise<void> {
     if (!client.handshake.query.token) {
       return;
     }
@@ -41,7 +41,7 @@ implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('disconnect')
-  async handleDisconnect(client: Socket) {
+  async handleDisconnect(client: any) {
     if (!client.handshake.query.token) {
       return;
     }
@@ -51,11 +51,7 @@ implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('auth/login')
   async handleLogin(client: Socket, payload: { token: string }) {
     if (!payload || !payload.token) {
-      // TODO - should do something?
       return;
-      // client.emit('auth_error', {
-      //   message: 'Invalid token!'
-      // });
     }
 
     await this.login(client, payload.token);
@@ -64,23 +60,16 @@ implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('auth/logout')
   async handleLogout(client: Socket, payload: { token: string }) {
     if (!payload || !payload.token) {
-      // TODO - should do something?
       return;
-      // client.emit('auth_error', {
-      //   message: 'Invalid token!'
-      // });
     }
 
     await this.logout(client, payload.token);
   }
 
-  async login(client: Socket, token: string) {
+  async login(client: any, token: string) {
     const decodeded = this.authService.verifyJWT(token);
     if (!decodeded) {
       return;
-      // client.emit('auth_error', {
-      //   message: 'Invalid token!'
-      // });
     }
     await this.socketUserService.addConnection(decodeded.sourceId, client.id);
     // eslint-disable-next-line no-param-reassign
@@ -101,7 +90,7 @@ implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  async logout(client: Socket, token: string) {
+  async logout(client: any, token: string) {
     const decodeded = this.authService.verifyJWT(token);
     if (!decodeded) {
       return;

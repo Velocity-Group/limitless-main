@@ -88,17 +88,17 @@ export class SettingMigration {
         editable: true,
         type: 'text-editor'
       },
-      {
-        key: SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
-        value: false,
-        name: 'Mandatory email verification',
-        description:
-          'If active, user must verify email before login to system',
-        type: 'boolean',
-        public: true,
-        group: 'general',
-        editable: true
-      },
+      // {
+      //   key: SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
+      //   value: false,
+      //   name: 'Mandatory email verification',
+      //   description:
+      //     'If active, user must verify email before login to system',
+      //   type: 'boolean',
+      //   public: true,
+      //   group: 'general',
+      //   editable: true
+      // },
       {
         key: SETTING_KEYS.MAINTENANCE_MODE,
         value: false,

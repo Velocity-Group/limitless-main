@@ -476,7 +476,7 @@ export class PerformerService {
     ]);
     const adminEmail = await SettingService.getValueByKey(SETTING_KEYS.ADMIN_EMAIL);
     adminEmail && await this.mailService.send({
-      subject: 'New content creator sign up',
+      subject: 'New model sign up',
       to: adminEmail,
       data: performer,
       template: 'new-performer-notify-admin.html'
@@ -728,7 +728,7 @@ export class PerformerService {
     return true;
   }
 
-  public async userSwitchAccount(data): Promise<PerformerModel> {
+  public async modelCreate(data): Promise<PerformerModel> {
     return this.performerModel.create(data);
   }
 

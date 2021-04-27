@@ -2,7 +2,6 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Model } from 'mongoose';
 import { Inject, forwardRef } from '@nestjs/common';
-import { Socket } from 'socket.io';
 import { AuthService } from 'src/modules/auth/services';
 import { StreamService } from 'src/modules/stream/services';
 import { PUBLIC_CHAT } from 'src/modules/stream/constant';
@@ -34,7 +33,7 @@ export class PublicStreamWsGateway {
   ) {}
 
   @SubscribeMessage('public-stream/live')
-  async goLive(client: Socket, payload: { conversationId: string }) {
+  async goLive(client: any, payload: { conversationId: string }) {
     try {
       const { conversationId } = payload;
       if (!conversationId) {
@@ -63,7 +62,7 @@ export class PublicStreamWsGateway {
 
   @SubscribeMessage('public-stream/join')
   async handleJoinPublicRoom(
-    client: Socket,
+    client: any,
     payload: { conversationId: string }
   ): Promise<void> {
     try {
@@ -154,7 +153,7 @@ export class PublicStreamWsGateway {
 
   @SubscribeMessage('public-stream/leave')
   async handleLeavePublicRoom(
-    client: Socket,
+    client: any,
     payload: { conversationId: string }
   ): Promise<void> {
     try {

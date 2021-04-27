@@ -272,7 +272,7 @@ export class PerformerRegisterPayload {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
+  @MinLength(8)
   password?: string;
 
   @ApiProperty()

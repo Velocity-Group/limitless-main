@@ -1,8 +1,5 @@
-/* eslint-disable no-console */
-/* eslint-disable react/no-unescaped-entities */
 import {
   Form,
-  Checkbox,
   Input,
   Button,
   Row,
@@ -27,7 +24,7 @@ import { TwitterOutlined } from '@ant-design/icons';
 import Loader from '@components/common/base/loader';
 import GoogleLogin from 'react-google-login';
 import { isEmail } from '@lib/string';
-import { GoogleReCaptcha } from '@components/common';
+// import { GoogleReCaptcha } from '@components/common';
 
 interface IProps {
   loginAuth: any;
@@ -46,6 +43,7 @@ class Login extends PureComponent<IProps> {
   recaptchaSuccess = false;
 
   state = {
+    loginAs: 'user',
     isLoading: false,
     loginInput: ''
   }
@@ -56,11 +54,11 @@ class Login extends PureComponent<IProps> {
   }
 
   async handleLogin(values: any) {
-    const { login: handleLogin, ui } = this.props;
+    const { login: handleLogin } = this.props;
     const { loginInput } = this.state;
-    if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
-      return message.error('Are you a robot?');
-    }
+    // if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
+    //   return message.error('Are you a robot?');
+    // }
     const data = values;
     const isInputEmail = isEmail(loginInput);
     data.loginUsername = !isInputEmail;
@@ -86,9 +84,8 @@ class Login extends PureComponent<IProps> {
       return;
     }
     const { loginSocial: handleLogin } = this.props;
-    const payload = {
-      tokenId: resp.tokenId
-    };
+    const { loginAs } = this.state;
+    const payload = { tokenId: resp.tokenId, role: loginAs };
     try {
       await this.setState({ isLoading: true });
       const response = await (await authService.loginGoogle(payload)).data;
@@ -129,16 +126,17 @@ class Login extends PureComponent<IProps> {
   async callbackTwitter() {
     const { loginSocial: handleLogin } = this.props;
     const oauthVerifier = Router.router.query && Router.router.query.oauth_verifier;
-    const twitterToken = authService.getTwitterToken();
-    if (!oauthVerifier || !twitterToken.oauthToken || !twitterToken.oauthTokenSecret) {
+    const twitterInfo = authService.getTwitterToken();
+    if (!oauthVerifier || !twitterInfo.oauthToken || !twitterInfo.oauthTokenSecret) {
       return;
     }
     try {
       await this.setState({ isLoading: true });
       const auth = await authService.callbackLoginTwitter({
         oauth_verifier: oauthVerifier,
-        oauthToken: twitterToken.oauthToken,
-        oauthTokenSecret: twitterToken.oauthTokenSecret
+        oauthToken: twitterInfo.oauthToken,
+        oauthTokenSecret: twitterInfo.oauthTokenSecret,
+        role: twitterInfo.role || 'user'
       });
       auth.data && auth.data.token && handleLogin({ token: auth.data.token });
     } catch (e) {
@@ -150,11 +148,12 @@ class Login extends PureComponent<IProps> {
   }
 
   async loginTwitter() {
+    const { loginAs } = this.state;
     try {
       await this.setState({ isLoading: true });
       const resp = await (await authService.loginTwitter()).data;
       if (resp && resp.url) {
-        authService.setTwitterToken({ oauthToken: resp.oauthToken, oauthTokenSecret: resp.oauthTokenSecret });
+        authService.setTwitterToken({ oauthToken: resp.oauthToken, oauthTokenSecret: resp.oauthTokenSecret }, loginAs);
         window.location.href = resp.url;
       }
     } catch (e) {
@@ -167,14 +166,14 @@ class Login extends PureComponent<IProps> {
 
   render() {
     const { ui } = this.props;
-    const { isLoading } = this.state;
+    const { isLoading, loginAs } = this.state;
     return (
       <>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Welcome
+            | Login
           </title>
         </Head>
         <Layout>
@@ -184,97 +183,98 @@ class Login extends PureComponent<IProps> {
                 <Col
                   xs={24}
                   sm={24}
-                  md={6}
+                  md={12}
                   lg={12}
-                  className="login-content left fixed"
-                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
-                />
+                >
+                  <div className="login-content left fixed" style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null} />
+                </Col>
                 <Col
                   xs={24}
                   sm={24}
-                  md={18}
+                  md={12}
                   lg={12}
-                  className="login-content right"
                 >
-                  {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
-                  <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
-                  <div className="social-login">
-                    <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
-                      <TwitterOutlined />
-                      {' '}
-                      SIGN IN/ SIGN UP WITH TWITTER
-                    </button>
-                    <GoogleLogin
-                      className="google-button"
-                      clientId={ui.googleClientId}
-                      buttonText="SIGN IN/ SIGN UP WITH GOOGLE"
-                      onSuccess={this.onGoogleLogin.bind(this)}
-                      onFailure={this.onGoogleLogin.bind(this)}
-                      cookiePolicy="single_host_origin"
-                    />
-                  </div>
-                  <Divider>Or</Divider>
-                  <div className="login-form">
-                    <Form
-                      name="normal_login"
-                      className="login-form"
-                      initialValues={{ remember: true }}
-                      onFinish={this.handleLogin.bind(this)}
-                    >
-                      <Form.Item
-                        name="email"
-                        hasFeedback
-                        validateTrigger={['onChange', 'onBlur']}
-                        rules={[
-                          { required: true, message: 'E-mail or Username is missing' }
-                        ]}
+                  <div className="login-content right">
+                    {/* {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>} */}
+                    {/* <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p> */}
+                    <div className="switch-btn">
+                      <button type="button" className={loginAs === 'user' ? 'active' : ''} onClick={() => this.setState({ loginAs: 'user' })} style={{ marginRight: '20px' }}>Fan Login</button>
+                      <button type="button" className={loginAs === 'performer' ? 'active' : ''} onClick={() => this.setState({ loginAs: 'performer' })}>Model Login</button>
+                    </div>
+
+                    <div className="social-login">
+                      <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
+                        <TwitterOutlined />
+                        {' '}
+                        SIGN IN/ SIGN UP WITH TWITTER
+                      </button>
+                      <GoogleLogin
+                        className="google-button"
+                        clientId={ui.googleClientId}
+                        buttonText="SIGN IN/ SIGN UP WITH GOOGLE"
+                        onSuccess={this.onGoogleLogin.bind(this)}
+                        onFailure={this.onGoogleLogin.bind(this)}
+                        cookiePolicy="single_host_origin"
+                      />
+                    </div>
+                    <Divider>Or</Divider>
+                    <div className="login-form">
+                      <Form
+                        name="normal_login"
+                        className="login-form"
+                        initialValues={{ remember: true }}
+                        onFinish={this.handleLogin.bind(this)}
                       >
-                        <Input onChange={this.onInputChange.bind(this)} placeholder="E-mail or Username" />
-                      </Form.Item>
-                      <Form.Item
-                        name="password"
-                        hasFeedback
-                        validateTrigger={['onChange', 'onBlur']}
-                        rules={[
-                          { required: true, message: 'Please enter your password!' },
-                          { min: 6, message: 'Password is at least 6 characters' }
-                        ]}
-                      >
-                        <Input.Password placeholder="Password" />
-                      </Form.Item>
-                      <Form.Item>
-                        <Row>
-                          <Col span={12}>
-                            <Form.Item name="remember" valuePropName="checked" noStyle>
-                              <Checkbox>Remember me</Checkbox>
-                            </Form.Item>
-                          </Col>
-                          <Col span={12} style={{ textAlign: 'right' }}>
-                            <Link
-                              href={{
-                                pathname: '/auth/forgot-password'
-                              }}
-                            >
-                              <a className="login-form-forgot">Forgot password?</a>
-                            </Link>
-                          </Col>
-                        </Row>
-                      </Form.Item>
-                      <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} />
-                      <Form.Item style={{ textAlign: 'center' }}>
-                        <Button type="primary" htmlType="submit" className="login-form-button">
-                          Login
-                        </Button>
-                        <p>
-                          Don't have an account yet?
+                        <Form.Item
+                          name="email"
+                          hasFeedback
+                          validateTrigger={['onChange', 'onBlur']}
+                          rules={[
+                            { required: true, message: 'E-mail or Username is missing' }
+                          ]}
+                        >
+                          <Input onChange={this.onInputChange.bind(this)} placeholder="E-mail or Username" />
+                        </Form.Item>
+                        <Form.Item
+                          name="password"
+                          hasFeedback
+                          validateTrigger={['onChange', 'onBlur']}
+                          rules={[
+                            { required: true, message: 'Please enter your password!' },
+                            { min: 6, message: 'Password is at least 6 characters' }
+                          ]}
+                        >
+                          <Input.Password placeholder="Password" />
+                        </Form.Item>
+                        <p style={{ padding: '0 5px' }}>
                           <Link
-                            href="/auth/register"
+                            href={{
+                              pathname: '/auth/forgot-password'
+                            }}
                           >
-                            <a> Sign up</a>
+                            <a className="login-form-forgot">Forgot password?</a>
                           </Link>
                         </p>
-                      </Form.Item>
-                    </Form>
+                        {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
+                        <Form.Item style={{ textAlign: 'center' }}>
+                          <Button type="primary" htmlType="submit" className="login-form-button">
+                            LOGIN
+                          </Button>
+                          <p>
+                            Don&apos;t have an account yet?
+                          </p>
+                          <p>
+                            <Link href="/auth/register">
+                              <a>
+                                Sign up for
+                                {' '}
+                                {ui?.siteName}
+                              </a>
+                            </Link>
+                          </p>
+                        </Form.Item>
+                      </Form>
+                    </div>
                   </div>
                 </Col>
               </Row>

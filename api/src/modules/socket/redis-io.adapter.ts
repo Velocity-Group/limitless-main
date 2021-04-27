@@ -1,6 +1,7 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import * as redisIoAdapter from 'socket.io-redis';
 import { ConfigService } from 'nestjs-config';
+
+const redisIoAdapter = require('socket.io-redis');
 
 export class RedisIoAdapter extends IoAdapter {
   createIOServer(port: number, options?: any): any {
