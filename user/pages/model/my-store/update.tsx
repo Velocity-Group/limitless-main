@@ -91,7 +91,7 @@ class ProductUpdate extends PureComponent<IProps> {
         this.onUploading.bind(this)
       );
       message.success('Changes saved.');
-      this.setState({ submitting: false }, () => Router.push('/content-creator/my-store'));
+      this.setState({ submitting: false }, () => Router.push('/model/my-store'));
     } catch (e) {
       // TODO - check and show error here
       message.error(

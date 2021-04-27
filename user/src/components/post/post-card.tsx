@@ -328,7 +328,7 @@ class FeedCard extends Component<IProps> {
         )}
         {user._id === feed.fromSourceId && (
           <Menu.Item key={`edit_post_${feed._id}`}>
-            <Link href={{ pathname: '/content-creator/my-post/edit', query: { id: feed._id } }}>
+            <Link href={{ pathname: '/model/my-post/edit', query: { id: feed._id } }}>
               <a>
                 Edit post
               </a>
@@ -354,7 +354,7 @@ class FeedCard extends Component<IProps> {
     return (
       <div className="feed-card">
         <div className="feed-top">
-          <Link href={{ pathname: '/content-creator/profile', query: { username: performer?.username } }} as={`/${performer?.username}`}>
+          <Link href={{ pathname: '/model/profile', query: { username: performer?.username } }} as={`/${performer?.username}`}>
             <div className="feed-top-left">
               <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
               <div className="feed-name">

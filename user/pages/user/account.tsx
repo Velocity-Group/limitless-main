@@ -74,7 +74,7 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
   async handleSwitchToPerformer() {
     const { user, logout: handleLogout } = this.props;
     if (!user._id) return;
-    if (!window.confirm('By confirm to become a content creator, your current account will be change immediately!')) return;
+    if (!window.confirm('By confirm to become a model, your current account will be change immediately!')) return;
     try {
       const resp = await authService.userSwitchToPerformer(user._id);
       message.success(resp?.data?.message || 'Switched account success!');

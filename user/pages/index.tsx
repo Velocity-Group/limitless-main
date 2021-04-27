@@ -117,7 +117,7 @@ class Login extends PureComponent<IProps> {
       if (!user || !user.data || !user.data._id) return;
       handleLogin();
       handleUpdateUser(user.data);
-      user.data.isPerformer && user.data.username ? Router.push({ pathname: '/content-creator/profile', query: { username: user.data.username } }, `/${user.data.username}`) : Router.push('/home');
+      user.data.isPerformer && user.data.username ? Router.push({ pathname: '/model/profile', query: { username: user.data.username } }, `/${user.data.username}`) : Router.push('/home');
     } catch (e) {
       console.log(await e);
     }

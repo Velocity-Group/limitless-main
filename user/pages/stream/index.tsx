@@ -31,7 +31,7 @@ import {
 } from '@redux/stream-chat/actions';
 import { getResponseError, videoDuration } from '@lib/index';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
-import '../content-creator/live/index.less';
+import '../model/live/index.less';
 
 // eslint-disable-next-line no-shadow
 enum STREAM_EVENT {
@@ -335,7 +335,7 @@ class LivePage extends PureComponent<IProps> {
   modelLeftHandler() {
     this.setState({ sessionDuration: 0 });
     this.streamDurationInterval && clearInterval(this.streamDurationInterval);
-    message.info('Content creator left chat room!');
+    message.info('Broadcaster left chat room!');
   }
 
   render() {

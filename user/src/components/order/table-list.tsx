@@ -162,7 +162,7 @@ const OrderTableList = ({
       render(id: string) {
         return (
           // eslint-disable-next-line react/prop-types
-          <Link href={{ pathname: user.isPerformer ? '/content-creator/my-order/detail' : '/user/orders/detail', query: { id } }}>
+          <Link href={{ pathname: user.isPerformer ? '/model/my-order/detail' : '/user/orders/detail', query: { id } }}>
             <a>
               <EyeOutlined />
             </a>

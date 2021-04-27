@@ -58,7 +58,6 @@ export class SearchFilter extends PureComponent<IProps> {
         )}
         {statuses && statuses.length ? (
           <Col lg={4} md={6} xs={10}>
-            {/* <label >Status</label> */}
             <Select
               onChange={(val) => this.setState({ status: val })}
               style={{ width: '100%' }}
@@ -75,7 +74,6 @@ export class SearchFilter extends PureComponent<IProps> {
         ) : null}
         {type && type.length ? (
           <Col lg={4} md={6} xs={10}>
-            {/* <label >Type</label> */}
             <Select
               onChange={(val) => this.setState({ type: val })}
               style={{ width: '100%' }}
@@ -92,9 +90,8 @@ export class SearchFilter extends PureComponent<IProps> {
         ) : null}
         {searchWithPerformer && (
           <Col lg={6} md={6} xs={24}>
-            {/* <label htmlFor="">Performer</label> */}
             <SelectPerformerDropdown
-              placeholder="Search content creator here"
+              placeholder="Search model here"
               style={{ width: '100%' }}
               onSelect={(val) => this.setState({ performerId: val || '' })}
             />

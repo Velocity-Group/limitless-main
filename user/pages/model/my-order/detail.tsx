@@ -123,7 +123,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
         <div className="main-container">
           <BreadcrumbComponent
             breadcrumbs={[
-              { title: 'My orders', href: '/content-creator/my-order' },
+              { title: 'My orders', href: '/model/my-order' },
               {
                 title:
                     order && order.orderNumber

@@ -353,7 +353,7 @@ class PageSearch extends PureComponent<IProps> {
               </TabPane>
               <TabPane
                 tab={(
-                  <Tooltip title="Content Creators">
+                  <Tooltip title="Models">
                     <UserOutlined />
                     <Badge count={totalPerformer} showZero />
                   </Tooltip>

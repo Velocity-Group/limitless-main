@@ -170,7 +170,7 @@ class StoryCard extends Component<IProps> {
     return (
       <div className="feed-card">
         <div className="feed-top">
-          <Link href={{ pathname: '/content-creator/profile', query: { username: performer?.username } }} as={`/${performer?.username}`}>
+          <Link href={{ pathname: '/model/profile', query: { username: performer?.username } }} as={`/${performer?.username}`}>
             <div className="feed-top-left">
               <img alt="per_atv" src={performer && performer.avatar ? performer.avatar : '/static/no-avatar.png'} width="50px" />
               <div className="feed-name">

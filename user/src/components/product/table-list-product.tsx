@@ -105,10 +105,10 @@ export class TableListProduct extends PureComponent<IProps> {
             <Button className="info">
               <Link
                 href={{
-                  pathname: '/content-creator/my-store/update',
+                  pathname: '/model/my-store/update',
                   query: { id }
                 }}
-                as={`/content-creator/my-store/update?id=${id}`}
+                as={`/model/my-store/update?id=${id}`}
               >
                 <a>
                   <EditOutlined />

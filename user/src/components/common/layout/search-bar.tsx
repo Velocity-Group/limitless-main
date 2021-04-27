@@ -61,7 +61,7 @@ class SearchBar extends PureComponent<IProps> {
       searching, result, searched
     } = this.state;
     const {
-      totalPerformer = 0, totalFeed = 0, totalStory = 0, totalProduct = 0, totalBlog = 0
+      totalPerformer = 0, totalFeed = 0, totalStory = 0, totalProduct = 0
     } = result;
 
     return (
@@ -78,10 +78,9 @@ class SearchBar extends PureComponent<IProps> {
         />
         {!searching && searched && (
           <ul className="drop-hint">
-            <li aria-hidden onClick={() => this.onChangeRoute('performer')}><a>{`${totalPerformer} Content Creators`}</a></li>
+            <li aria-hidden onClick={() => this.onChangeRoute('performer')}><a>{`${totalPerformer} Models`}</a></li>
             <li aria-hidden onClick={() => this.onChangeRoute('feed')}><a>{`${totalFeed} Posts`}</a></li>
             <li aria-hidden onClick={() => this.onChangeRoute('story')}><a>{`${totalStory} Stories`}</a></li>
-            <li aria-hidden onClick={() => this.onChangeRoute('blog')}><a>{`${totalBlog} Blogs`}</a></li>
             <li aria-hidden onClick={() => this.onChangeRoute('product')}><a>{`${totalProduct} Products`}</a></li>
           </ul>
         )}

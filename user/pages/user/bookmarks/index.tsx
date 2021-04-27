@@ -320,7 +320,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                     )}
                   />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Content Creators" key="performers">
+                <Tabs.TabPane tab="Models" key="performers">
                   <UserPerformerBookmarks
                     loading={loading}
                     performers={performers.map((p) => p.objectInfo)}

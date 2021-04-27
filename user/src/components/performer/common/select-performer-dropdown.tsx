@@ -45,7 +45,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
       <Select
         showSearch
         defaultValue={defaultValue}
-        placeholder="Type to search content creator here"
+        placeholder="Type to search model..."
         style={style}
         onSearch={this.loadPerformers.bind(this)}
         onChange={(val) => onSelect(val)}

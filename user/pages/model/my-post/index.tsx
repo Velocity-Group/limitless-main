@@ -2,24 +2,23 @@
 import Head from 'next/head';
 import { PureComponent } from 'react';
 import {
-  message, Layout, Row, Col
+  message, Layout
 } from 'antd';
-import { blogService } from '@services/index';
+import { feedService } from '@services/index';
 import { SearchFilter } from '@components/common/search-filter';
 import Page from '@components/common/layout/page';
 import Link from 'next/link';
 import { connect } from 'react-redux';
-import { IPerformer, IUIConfig, IUser } from '@interfaces/index';
-import ScrollListBlog from '@components/blog/scroll-list';
-
+import { IUIConfig, IUser } from '@interfaces/index';
+import ScrollListFeed from '@components/post/scroll-list';
 import { PlusCircleOutlined } from '@ant-design/icons';
 
 interface IProps {
   ui: IUIConfig;
-  user: IUser | IPerformer;
+  user: IUser;
 }
 
-class BlogListing extends PureComponent<IProps> {
+class PostListing extends PureComponent<IProps> {
   static authenticate = true;
 
   static onlyPerformer = true;
@@ -50,7 +49,7 @@ class BlogListing extends PureComponent<IProps> {
     } = this.state;
     try {
       await this.setState({ loading: true });
-      const resp = await blogService.search({
+      const resp = await feedService.search({
         ...filter,
         limit,
         offset: (page - 1) * limit,
@@ -70,21 +69,23 @@ class BlogListing extends PureComponent<IProps> {
   }
 
   async loadMore() {
-    const { currentPage } = this.state;
+    const {
+      currentPage
+    } = this.state;
     await this.setState({ currentPage: currentPage + 1 });
     this.search(currentPage);
   }
 
-  async deleteBlog(blog) {
+  async deleteFeed(feed) {
     const { list } = this.state;
-    if (!confirm('Are you sure you want to delete this blog?')) {
+    if (!confirm('Are you sure you want to delete this video?')) {
       return false;
     }
     try {
-      await blogService.delete(blog._id);
-      const newList = list.filter((f) => f._id !== blog._id);
+      await feedService.delete(feed._id);
+      const newList = list.filter((f) => f._id !== feed._id);
       await this.setState({ list: newList });
-      message.success('Deleted blog successfully!');
+      message.success('Deleted post successfully!');
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
@@ -95,50 +96,65 @@ class BlogListing extends PureComponent<IProps> {
   render() {
     const { list, loading, canLoadMore } = this.state;
     const { ui } = this.props;
+    const type = [
+      {
+        key: '',
+        text: 'All posts'
+      },
+      {
+        key: 'text',
+        text: 'Text posts'
+      },
+      {
+        key: 'video',
+        text: 'Video posts'
+      },
+      {
+        key: 'photo',
+        text: 'Photo posts'
+      }
+    ];
     return (
       <Layout>
         <Head>
           <title>
+            { ui?.siteName }
             {' '}
-            {ui?.siteName}
-            {' '}
-            | My Blogs
+            | My Posts
           </title>
         </Head>
         <div className="main-container">
           <Page>
-            <div
-              className="page-heading"
-              style={{ display: 'flex', justifyContent: 'space-between' }}
-            >
-              <span>My Blogs</span>
-              <Link href="/content-creator/my-blog/create">
+            <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>My Posts</span>
+              <Link href="/model/my-post/create">
                 <a>
                   {' '}
                   <PlusCircleOutlined />
                   {' '}
-                  New Blog
+                  New Post
                 </a>
               </Link>
             </div>
             <div />
             <div>
-              <Row>
-                <Col xl={16}>
-                  <SearchFilter searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
-                </Col>
-              </Row>
+              <SearchFilter
+                onSubmit={this.handleFilter.bind(this)}
+                type={type}
+                searchWithKeyword
+              />
             </div>
 
-            <div className="main-container">
-              <ScrollListBlog
+            <div className="main-container custom">
+              <ScrollListFeed
                 items={list}
                 loading={loading}
                 canLoadmore={canLoadMore}
                 loadMore={this.loadMore.bind(this)}
-                onDelete={this.deleteBlog.bind(this)}
+                onDelete={this.deleteFeed.bind(this)}
               />
             </div>
+
           </Page>
         </div>
       </Layout>
@@ -146,6 +162,7 @@ class BlogListing extends PureComponent<IProps> {
   }
 }
 const mapStates = (state) => ({
-  ui: { ...state.ui }
+  ui: { ...state.ui },
+  user: { ...state.user.current }
 });
-export default connect(mapStates)(BlogListing);
+export default connect(mapStates)(PostListing);

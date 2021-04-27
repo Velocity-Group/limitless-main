@@ -33,7 +33,7 @@ const UserPerformerBookmarks = ({
           ))}
       </Row>
     </InfiniteScroll>
-    {!performers.length && !loading && <Alert type="info" message="No content creator found" />}
+    {!performers.length && !loading && <Alert type="info" message="No data was found" />}
     {loading && (
     <div className="text-center">
       <Spin />

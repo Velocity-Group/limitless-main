@@ -46,7 +46,7 @@ const ConfirmChangeCart = ({ visible, onOk, onCancel }: IStoreProps) => (
       onCancel={onCancel}
     >
       <Alert
-        message="You are ordering product of another content creator, please confirm that you want to switch cart."
+        message="You are ordering product of another model, please confirm that you want to switch cart."
         type="warning"
       />
     </Modal>

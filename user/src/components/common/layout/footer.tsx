@@ -29,7 +29,7 @@ class Footer extends PureComponent<IProps> {
         <div className="main-container">
           <ul>
             <li>
-              <Link href="/content-creator">
+              <Link href="/model">
                 <a>Explore</a>
               </Link>
             </li>

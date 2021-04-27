@@ -145,7 +145,7 @@ class MessageList extends PureComponent<IProps> {
                </div>
                {fetching && <div className="text-center"><Spin /></div>}
                {this.renderMessages()}
-               {!conversation.isSubscribed && <div className="sub-text">Please subscribe to this content creator to start the conversation</div>}
+               {!conversation.isSubscribed && <div className="sub-text">Please subscribe to this model to start the conversation</div>}
              </div>
 
              {conversation.isSubscribed && <Compose conversation={conversation} />}

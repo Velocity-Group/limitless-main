@@ -154,11 +154,11 @@ class Header extends PureComponent<IProps> {
           handler={this.handlePrivateChat.bind(this)}
         />
         <div className="main-container">
-          {/* {((currentUser._id && !currentUser.email) || (currentUser._id && !currentUser.username)) && !['/content-creator/account', '/user/account'].includes(router.asPath) && (
+          {/* {((currentUser._id && !currentUser.email) || (currentUser._id && !currentUser.username)) && !['/model/account', '/user/account'].includes(router.asPath) && (
             <div className="alert-email">
               Your account is missing email address or username.
               &nbsp;
-              <Link href={currentUser.isPerformer ? '/content-creator/account' : '/user/account'} as={currentUser.isPerformer ? '/content-creator/account' : '/user/account'}>
+              <Link href={currentUser.isPerformer ? '/model/account' : '/user/account'} as={currentUser.isPerformer ? '/model/account' : '/user/account'}>
                 <a>click here to update.</a>
               </Link>
             </div>
@@ -194,7 +194,7 @@ class Header extends PureComponent<IProps> {
                         >
                           <Link
                             href={{
-                              pathname: '/content-creator/profile',
+                              pathname: '/model/profile',
                               query: { username: currentUser.username }
                             }}
                             as={`/${currentUser.username}`}
@@ -220,8 +220,8 @@ class Header extends PureComponent<IProps> {
                   {currentUser && currentUser._id && currentUser.isPerformer && (
                     <>
                       <Tooltip key="live" title="Go Live">
-                        <li className={router.pathname === '/content-creator/live' ? 'active' : ''}>
-                          <Link href="/content-creator/live" as="/content-creator/live">
+                        <li className={router.pathname === '/model/live' ? 'active' : ''}>
+                          <Link href="/model/live" as="/model/live">
                             <a>
                               <VideoCameraAddOutlined />
                             </a>
@@ -245,8 +245,8 @@ class Header extends PureComponent<IProps> {
                         </li>
                       </Tooltip>
                       <Tooltip key="new_post" title="Compose new post">
-                        <li className={router.pathname === '/content-creator/my-post/create' ? 'active' : ''}>
-                          <Link href="/content-creator/my-post/create">
+                        <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
+                          <Link href="/model/my-post/create">
                             <a>
                               <PlusSquareOutlined />
                             </a>
@@ -256,9 +256,9 @@ class Header extends PureComponent<IProps> {
                     </>
                   )}
                   {currentUser && currentUser._id && !currentUser.isPerformer && [
-                    <Tooltip key="models" title="Content Creators">
-                      <li key="models" className={router.pathname === '/content-creator' ? 'active' : ''}>
-                        <Link href="/content-creator">
+                    <Tooltip key="models" title="Models">
+                      <li key="models" className={router.pathname === '/model' ? 'active' : ''}>
+                        <Link href="/model">
                           <a>
                             <StarOutlined />
                           </a>
@@ -286,7 +286,7 @@ class Header extends PureComponent<IProps> {
                         onClick={() => this.setState({ openCallRequest: true })}
                         aria-hidden
                         key="private_call"
-                        className={router.pathname === `/content-creator/live/${settings.optionForPrivate === 'webrtc'
+                        className={router.pathname === `/model/live/${settings.optionForPrivate === 'webrtc'
                           ? 'webrtc/'
                           : ''
                         }privatechat` ? 'active' : ''}
@@ -398,8 +398,8 @@ class Header extends PureComponent<IProps> {
           >
             {currentUser.isPerformer && (
               <div className="profile-menu-item">
-                <Link href="/content-creator/account" as="/content-creator/account">
-                  <div className={router.pathname === '/content-creator/account' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/model/account" as="/model/account">
+                  <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
                     <UserOutlined />
                     {' '}
                     Edit Profile
@@ -412,66 +412,66 @@ class Header extends PureComponent<IProps> {
                     Keywords
                   </div>
                 </Link>
-                <Link href={{ pathname: '/content-creator/my-subscriber' }} as="/content-creator/my-subscriber">
-                  <div className={router.pathname === '/content-creator/my-subscriber' ? 'menu-item active' : 'menu-item'}>
+                <Link href={{ pathname: '/model/my-subscriber' }} as="/model/my-subscriber">
+                  <div className={router.pathname === '/model/my-subscriber' ? 'menu-item active' : 'menu-item'}>
                     <StarOutlined />
                     {' '}
                     Subscribers
                   </div>
                 </Link>
                 <Divider />
-                <Link href="/content-creator/my-post" as="/content-creator/my-post">
-                  <div className={router.pathname === '/content-creator/my-post' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/model/my-post" as="/model/my-post">
+                  <div className={router.pathname === '/model/my-post' ? 'menu-item active' : 'menu-item'}>
                     <FireOutlined />
                     {' '}
                     Posts
                   </div>
                 </Link>
-                <Link href="/content-creator/my-story" as="/content-creator/my-story">
-                  <div className={router.pathname === '/content-creator/my-story' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/model/my-story" as="/model/my-story">
+                  <div className={router.pathname === '/model/my-story' ? 'menu-item active' : 'menu-item'}>
                     <HistoryOutlined />
                     {' '}
                     Stories
                   </div>
                 </Link>
-                <Link href="/content-creator/my-blog" as="/content-creator/my-blog">
-                  <div className={router.pathname === '/content-creator/my-blog' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/model/my-blog" as="/model/my-blog">
+                  <div className={router.pathname === '/model/my-blog' ? 'menu-item active' : 'menu-item'}>
                     <GlobalOutlined />
                     {' '}
                     Blogs
                   </div>
                 </Link>
-                {/* <Link href="/content-creator/my-video" as="/content-creator/my-video">
-                  <div className={router.pathname === '/content-creator/my-video' ? 'menu-item active' : 'menu-item'}>
+                {/* <Link href="/model/my-video" as="/model/my-video">
+                  <div className={router.pathname === '/model/my-video' ? 'menu-item active' : 'menu-item'}>
                     <VideoCameraOutlined />
                     {' '}
                     Videos
                   </div>
                 </Link>
-                <Link href="/content-creator/my-gallery/listing" as="/content-creator/my-gallery/listing">
-                  <div className={router.pathname === '/content-creator/my-gallery/listing' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/model/my-gallery/listing" as="/model/my-gallery/listing">
+                  <div className={router.pathname === '/model/my-gallery/listing' ? 'menu-item active' : 'menu-item'}>
                     <PictureOutlined />
                     {' '}
                     Galleries
                   </div>
                 </Link> */}
-                <Link href="/content-creator/my-store" as="/content-creator/my-store">
-                  <div className={router.pathname === '/content-creator/my-store' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/model/my-store" as="/model/my-store">
+                  <div className={router.pathname === '/model/my-store' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingOutlined />
                     {' '}
                     Store
                   </div>
                 </Link>
                 <Divider />
-                <Link href={{ pathname: '/content-creator/my-order' }} as="/content-creator/my-order">
-                  <div className={router.pathname === '/content-creator/my-order' ? 'menu-item active' : 'menu-item'}>
+                <Link href={{ pathname: '/model/my-order' }} as="/model/my-order">
+                  <div className={router.pathname === '/model/my-order' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingCartOutlined />
                     {' '}
                     Orders
                   </div>
                 </Link>
-                <Link href="/content-creator/earning" as="/content-creator/earning">
-                  <div className={router.pathname === '/content-creator/earning' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/model/earning" as="/model/earning">
+                  <div className={router.pathname === '/model/earning' ? 'menu-item active' : 'menu-item'}>
                     <DollarOutlined />
                     {' '}
                     Earnings
@@ -496,7 +496,7 @@ class Header extends PureComponent<IProps> {
                 </Link>
                 <Divider />
                 <Link href="/user/bookmarks" as="/user/bookmarks">
-                  <div className={router.pathname === '/content-creator/account' ? 'menu-item active' : 'menu-item'}>
+                  <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
                     <StarOutlined />
                     {' '}
                     Bookmarks

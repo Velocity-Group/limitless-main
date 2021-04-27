@@ -45,13 +45,13 @@ export class PrivateCallCard extends PureComponent<IProps> {
             block
             className="success"
             onClick={() => Router.push({
-              pathname: `/content-creator/live/${
+              pathname: `/model/live/${
                 settings.optionForPrivate === 'webrtc'
                   ? 'webrtc/'
                   : ''
               }privatechat`,
               query: { id: request.conversationId }
-            }, `/content-creator/live/${
+            }, `/model/live/${
               settings.optionForPrivate === 'webrtc'
                 ? 'webrtc/'
                 : ''

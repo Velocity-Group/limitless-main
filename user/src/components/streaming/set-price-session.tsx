@@ -37,7 +37,7 @@ export default class StreamPriceForm extends PureComponent<IProps> {
           }}
           className="account-form"
         >
-          {streamType === 'private' && <p>Add your budget to ensure content creator accept your call request!</p>}
+          {streamType === 'private' && <p>Add your budget to ensure model accept your call request!</p>}
           {streamType === 'public' && (
           <Form.Item
             name="name"
@@ -49,7 +49,7 @@ export default class StreamPriceForm extends PureComponent<IProps> {
           <Form.Item
             name="price"
             label="Price"
-            help={streamType === 'private' ? `Content creator require minimum price is $${performer.privateChatPrice}` : null}
+            help={streamType === 'private' ? `Model require minimum price is $${performer.privateChatPrice}` : null}
           >
             <InputNumber style={{ width: '100%' }} min={streamType === 'private' ? performer.privateChatPrice : 1} />
           </Form.Item>
@@ -57,7 +57,7 @@ export default class StreamPriceForm extends PureComponent<IProps> {
           <Form.Item
             name="userNote"
             label="Note"
-            help="Note something to content creator"
+            help="Note something to model"
           >
             <Input.TextArea allowClear maxLength={150} rows={2} showCount />
           </Form.Item>

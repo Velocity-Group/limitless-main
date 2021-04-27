@@ -149,7 +149,7 @@ class Products extends PureComponent<IProps> {
                 </Col>
                 <Col xl={3} style={{ display: 'flex', alignItems: 'center' }}>
                   <Button className="secondary">
-                    <Link href="/content-creator/my-store/create">
+                    <Link href="/model/my-store/create">
                       <a>New Product</a>
                     </Link>
                   </Button>

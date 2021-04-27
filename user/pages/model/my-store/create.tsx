@@ -84,7 +84,7 @@ class CreateProduct extends PureComponent<IProps> {
         this.onUploading.bind(this)
       )) as IResponse;
       message.success('Product created');
-      Router.push('/content-creator/my-store');
+      Router.push('/model/my-store');
     } catch (error) {
       message.error(
         getResponseError(error) || 'Something went wrong, please try again!'

@@ -8,9 +8,9 @@ import { ImageUpload } from '@components/file';
 import './performer.less';
 import { performerService, authService } from '@services/index';
 import { enquireScreen, unenquireScreen } from 'enquire-js';
-import dynamic from 'next/dynamic';
+// import dynamic from 'next/dynamic';
 
-const FaceImage = dynamic(() => import('../face-detect/index'), { ssr: false });
+// const FaceImage = dynamic(() => import('../face-detect/index'), { ssr: false });
 
 const layout = {
   labelCol: { span: 24 },
@@ -103,8 +103,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
       onFinish, updating
     } = this.props;
     const {
-      isUploading, idImage, documentImage, idImgProgress, documentImgProgress,
-      isMobile
+      isUploading, idImage, documentImage, idImgProgress, documentImgProgress
     } = this.state;
     const documentUploadUrl = performerService.getDocumentUploadUrl();
     const headers = {
@@ -136,7 +135,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               help="Upload a photo of yourself holding your indentity document next to your face"
             >
               <div className="document-upload">
-                {isMobile ? <ImageUpload accept="image/*;capture=camera" headers={headers} uploadUrl={documentUploadUrl} onFileReaded={this.onFileUploaded.bind(this, 'idFile')} /> : <FaceImage onOk={this.onFaceSelect.bind(this, 'idFile')} />}
+                <ImageUpload accept="image/*;capture=camera" headers={headers} uploadUrl={documentUploadUrl} onFileReaded={this.onFileUploaded.bind(this, 'idFile')} />
                 {idImage && (
                 <a title="Click to view" href={idImage} rel="noreferrer" target="_blank">
                   <img alt="id-img" src={idImage} style={{ margin: 5, width: '250px' }} />
@@ -156,7 +155,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
             >
               <div className="document-upload">
-                {isMobile ? <ImageUpload accept="image/*;capture=camera" headers={headers} uploadUrl={documentUploadUrl} onFileReaded={this.onFileUploaded.bind(this, 'documentFile')} /> : <FaceImage onOk={this.onFaceSelect.bind(this, 'documentFile')} />}
+                <ImageUpload accept="image/*;capture=camera" headers={headers} uploadUrl={documentUploadUrl} onFileReaded={this.onFileUploaded.bind(this, 'documentFile')} />
                 {documentImage && (
                 <a title="Click to view" href={documentImage} rel="noreferrer" target="_blank">
                   <img alt="id-img" src={documentImage} style={{ margin: 5, width: '250px' }} />

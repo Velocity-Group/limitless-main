@@ -25,7 +25,7 @@ export default class PerformerTrendingCard extends PureComponent<IProps> {
       >
         <Link
           href={{
-            pathname: '/content-creator/profile',
+            pathname: '/model/profile',
             query: { username: performer?.username }
           }}
           as={`/${performer?.username}`}

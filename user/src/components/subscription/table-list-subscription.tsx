@@ -1,7 +1,5 @@
+/* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/require-default-props */
-/* eslint-disable default-case */
-/* eslint-disable consistent-return */
-/* eslint-disable no-restricted-globals */
 import { Table, Tag, Button } from 'antd';
 import { ISubscription } from 'src/interfaces';
 import { formatDate, formatDateNoTime } from '@lib/date';
@@ -25,20 +23,20 @@ export const TableListSubscription = ({
   cancelSubscription
 }: IProps) => {
   const onCancel = (value) => {
-    if (!confirm('By aggree to cancel subscription, your will not able to access to this content creator posts immediately ')) {
+    if (!window.confirm('By aggree to cancel subscription, your will not able to access to this model posts immediately ')) {
       return;
     }
     cancelSubscription(value);
   };
   const columns = [
     {
-      title: 'Content Creator',
+      title: 'Model',
       dataIndex: 'performerInfo',
       render(performerInfo) {
         return (
           <Link
             href={{
-              pathname: '/content-creator/profile',
+              pathname: '/model/profile',
               query: { username: performerInfo?.username }
             }}
             as={`/${performerInfo?.username}`}
@@ -61,6 +59,13 @@ export const TableListSubscription = ({
             return <Tag color="orange">Yearly Subscription</Tag>;
           case 'free':
             return <Tag color="orange">Free Subscription</Tag>;
+          default: return (
+            <Tag color="orange">
+              {subscriptionType}
+              {' '}
+              Subscription
+            </Tag>
+          );
         }
       }
     },

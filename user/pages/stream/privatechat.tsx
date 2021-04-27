@@ -22,7 +22,7 @@ import PrivateHlsPublisher from '@components/streaming/hls/private/publisher';
 import PrivateHlsSubscriber from 'src/components/streaming/hls/private/subscriber';
 import StreamPriceForm from '@components/streaming/set-price-session';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
-import '../content-creator/live/index.less';
+import '../model/live/index.less';
 import Layout from 'antd/lib/layout/layout';
 // import { PaymentIframeForm } from '@components/payment/form-iframe';
 // eslint-disable-next-line no-shadow

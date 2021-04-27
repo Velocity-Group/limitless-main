@@ -39,7 +39,7 @@ class BlogCard extends PureComponent<IProps> {
           <Menu.Item key={`edit_post_${blog._id}`}>
             <Link
               href={{
-                pathname: '/content-creator/my-blog/edit',
+                pathname: '/model/my-blog/edit',
                 query: { id: blog._id }
               }}
             >

@@ -214,7 +214,7 @@ export const UserAccountForm = ({
       <Button htmlType="submit" className="primary" disabled={updating} loading={updating}>
         Update Profile
       </Button>
-      <Button style={{ margin: '0 5px' }} className="secondary" onClick={() => onSwitchToPerformer()}>Become Content Creator</Button>
+      {/* <Button style={{ margin: '0 5px' }} className="secondary" onClick={() => onSwitchToPerformer()}>Become a Model</Button> */}
     </Form.Item>
   </Form>
 );

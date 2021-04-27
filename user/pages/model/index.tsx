@@ -11,7 +11,7 @@ import { IUIConfig } from 'src/interfaces/';
 import '@components/performer/performer.less';
 import { DropOption } from '@components/common/base/drop-option';
 import {
-  CrownOutlined
+  StarOutlined
 } from '@ant-design/icons';
 import Router from 'next/router';
 
@@ -104,7 +104,7 @@ class Performers extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Content Creators
+            | Models
           </title>
         </Head>
         <Layout>
@@ -117,11 +117,11 @@ class Performers extends PureComponent<IProps> {
             <div className="main-background">
               <div className="md-heading">
                 <span>
-                  <CrownOutlined />
+                  <StarOutlined />
                   {' '}
                   {total}
                   {' '}
-                  Content Creators
+                  Models
                 </span>
                 <span className="sort-model">
                   <DropOption
@@ -144,7 +144,7 @@ class Performers extends PureComponent<IProps> {
                     ))}
 
               </Row>
-              {!total && !isLoading && <p>No content creator found.</p>}
+              {!total && !isLoading && <p>No data was found.</p>}
               {isLoading && (
                 <div className="text-center">
                   <Spin />

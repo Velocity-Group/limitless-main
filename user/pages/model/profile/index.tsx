@@ -416,9 +416,9 @@ class PerformerProfile extends PureComponent<IProps> {
           ...error,
           message:
             error.message === 'BLOCKED_BY_PERFORMER'
-              ? 'You have been blocked by this performer, please contact us for any questions'
+              ? 'You have been blocked by this model!'
               : error.message === 'BLOCK_COUNTRY'
-                ? 'You cannot view the profile of this content creator. This content creator has blocked access from your country'
+                ? 'This model blocked accessbility from your country!'
                 : error.message
         }
       });
@@ -695,7 +695,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {currentUser._id === performer._id ? currentUser.name : performer?.name}
                     &nbsp;
-                    {currentUser._id === performer._id ? <Link href="/content-creator/account"><a><EditOutlined className="primary-color" /></a></Link> : (
+                    {currentUser._id === performer._id ? <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link> : (
                       <>
                         {performer?.verifiedAccount && (
                           <CheckCircleOutlined className="theme-color" />

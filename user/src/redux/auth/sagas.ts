@@ -44,7 +44,7 @@ const authSagas = [
           Router.push((!userResp.data.email || !userResp.data.username) ? '/user/account' : '/home');
         }
         if (userResp?.data?.isPerformer) {
-          (!userResp.data.email || !userResp.data.username) ? Router.push('/content-creator/account') : Router.push({ pathname: '/content-creator/profile', query: { username: userResp.data.username } }, `/${userResp.data.username}`);
+          (!userResp.data.email || !userResp.data.username) ? Router.push('/model/account') : Router.push({ pathname: '/model/profile', query: { username: userResp.data.username } }, `/${userResp.data.username}`);
         }
       } catch (e) {
         const error = yield Promise.resolve(e);
@@ -67,7 +67,7 @@ const authSagas = [
           Router.push((!userResp.data.email || !userResp.data.username) ? '/user/account' : '/home');
         }
         if (userResp?.data?.isPerformer) {
-          (!userResp.data.email || !userResp.data.username) ? Router.push('/content-creator/account') : Router.push({ pathname: '/content-creator/profile', query: { username: userResp.data.username } }, `/${userResp.data.username}`);
+          (!userResp.data.email || !userResp.data.username) ? Router.push('/model/account') : Router.push({ pathname: '/model/profile', query: { username: userResp.data.username } }, `/${userResp.data.username}`);
         }
       } catch (e) {
         const error = yield Promise.resolve(e);
@@ -87,7 +87,7 @@ const authSagas = [
         const userResp = (yield performerService.me()).data;
         yield put(updateCurrentUser(userResp));
         yield put(loginSuccess());
-        Router.push({ pathname: '/content-creator/profile', query: { username: userResp.username } }, `/${userResp.username}`);
+        Router.push({ pathname: '/model/profile', query: { username: userResp.username } }, `/${userResp.username}`);
       } catch (e) {
         const error = yield Promise.resolve(e);
         message.error(error?.message || 'Incorrect credentials!');
