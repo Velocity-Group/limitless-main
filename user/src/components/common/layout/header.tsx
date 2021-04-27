@@ -9,8 +9,8 @@ import { IUser, StreamSettings } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined,
-  MessageOutlined, GlobalOutlined, FireOutlined,
-  DollarOutlined, HistoryOutlined, StarOutlined, ShoppingOutlined,
+  MessageOutlined, VideoCameraOutlined, FireOutlined,
+  DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined,
   HomeOutlined, LogoutOutlined, SearchOutlined,
   UsergroupAddOutlined, VideoCameraAddOutlined,
   HeartOutlined, PlusSquareOutlined, BulbOutlined
@@ -19,12 +19,11 @@ import './header.less';
 import { withRouter, Router as RouterEvent } from 'next/router';
 import { addCart } from 'src/redux/cart/actions';
 import {
-  cartService, messageService, authService, streamService
+  messageService, authService, streamService
 } from 'src/services';
 import { Event, SocketContext } from 'src/socket';
-import StoryForm from '@components/story/form';
 import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/actions';
-import { PrivateCallCard } from '@components/streaming/private-call-request-card';
+// import { PrivateCallCard } from '@components/streaming/private-call-request-card';
 import { updateUIValue } from 'src/redux/ui/actions';
 import SearchBar from './search-bar';
 
@@ -34,7 +33,6 @@ interface IProps {
   logout: Function;
   router: any;
   ui: any;
-  cart: any;
   privateRequests: any;
   addCart: Function;
   addPrivateRequest: Function;
@@ -45,43 +43,22 @@ interface IProps {
 class Header extends PureComponent<IProps> {
   state = {
     totalNotReadMessage: 0,
-    openAddStory: false,
-    openSearch: false,
     openProfile: false,
     openCallRequest: false
   };
 
   async componentDidMount() {
-    if (process.browser) {
-      const { cart, currentUser, addCart: handleAddCart } = this.props;
-      RouterEvent.events.on(
-        'routeChangeStart',
-        async () => this.setState({
-          openProfile: false, openSearch: false, openCallRequest: false, openAddStory: false
-        })
-      );
-      if (!cart || (cart && cart.items.length <= 0)) {
-        if (currentUser._id) {
-          const existCart = await cartService.getCartByUser(currentUser._id);
-          if (existCart && existCart.length > 0) {
-            handleAddCart(existCart);
-          }
-        }
-      }
-    }
+    RouterEvent.events.on(
+      'routeChangeStart',
+      async () => this.setState({
+        openProfile: false, openCallRequest: false
+      })
+    );
   }
 
   async componentDidUpdate(prevProps: any) {
-    const { currentUser, cart, addCart: handleAddCart } = this.props;
-    if (prevProps.currentUser._id !== currentUser._id && currentUser._id) {
-      if (!cart || (cart && cart.items.length <= 0)) {
-        if (currentUser._id && process.browser) {
-          const existCart = await cartService.getCartByUser(currentUser._id);
-          if (existCart && existCart.length > 0) {
-            handleAddCart(existCart);
-          }
-        }
-      }
+    const { currentUser } = this.props;
+    if (currentUser._id && prevProps.currentUser._id !== currentUser._id) {
       this.handleCountNotificationMessage();
     }
   }
@@ -137,10 +114,10 @@ class Header extends PureComponent<IProps> {
 
   render() {
     const {
-      currentUser, router, ui, cart, privateRequests, settings
+      currentUser, router, ui, privateRequests, settings
     } = this.props;
     const {
-      totalNotReadMessage, openAddStory, openSearch, openProfile, openCallRequest
+      totalNotReadMessage, openProfile, openCallRequest
     } = this.state;
 
     return (
@@ -154,18 +131,9 @@ class Header extends PureComponent<IProps> {
           handler={this.handlePrivateChat.bind(this)}
         />
         <div className="main-container">
-          {/* {((currentUser._id && !currentUser.email) || (currentUser._id && !currentUser.username)) && !['/model/account', '/user/account'].includes(router.asPath) && (
-            <div className="alert-email">
-              Your account is missing email address or username.
-              &nbsp;
-              <Link href={currentUser.isPerformer ? '/model/account' : '/user/account'} as={currentUser.isPerformer ? '/model/account' : '/user/account'}>
-                <a>click here to update.</a>
-              </Link>
-            </div>
-          )} */}
           <Layout.Header className="header" id="layoutHeader">
             <div className="nav-bar">
-              <div className={currentUser._id ? 'left-conner hide-mobile' : 'left-conner'}>
+              {/* <div className={currentUser._id ? 'left-conner hide-mobile' : 'left-conner'}>
                 <Link href="/home">
                   <a className="logo-nav">
                     {ui?.logo ? (
@@ -178,57 +146,54 @@ class Header extends PureComponent<IProps> {
                   </a>
                 </Link>
                 <div className="hide-tablet"><SearchBar /></div>
-              </div>
-              <div className="mid-conner">
-                <ul className="nav-icons">
-                  {currentUser
-                    && currentUser.isPerformer
-                    && router.asPath !== `/${currentUser.username}` && (
-                      <Tooltip key="profile" title="Profile">
-                        <li
-                          className={
+              </div> */}
+              <ul className="nav-icons">
+                {currentUser._id && currentUser.isPerformer && (
+                  <Tooltip key="profile" title="Profile">
+                    <li
+                      className={
                             router.asPath === `/${currentUser.username}`
                               ? 'active'
                               : ''
                           }
-                        >
-                          <Link
-                            href={{
-                              pathname: '/model/profile',
-                              query: { username: currentUser.username }
-                            }}
-                            as={`/${currentUser.username}`}
-                          >
-                            <a>
-                              <HomeOutlined />
-                            </a>
-                          </Link>
-                        </li>
-                      </Tooltip>
-                  )}
-                  {currentUser._id && !currentUser.isPerformer && (
-                    <Tooltip key="home" title="Home">
-                      <li className={router.pathname === '/home' ? 'active' : ''}>
-                        <Link href="/home">
-                          <a>
-                            <HomeOutlined />
-                          </a>
-                        </Link>
-                      </li>
-                    </Tooltip>
-                  )}
-                  {currentUser && currentUser._id && currentUser.isPerformer && (
-                    <>
-                      <Tooltip key="live" title="Go Live">
-                        <li className={router.pathname === '/model/live' ? 'active' : ''}>
-                          <Link href="/model/live" as="/model/live">
-                            <a>
-                              <VideoCameraAddOutlined />
-                            </a>
-                          </Link>
-                        </li>
-                      </Tooltip>
-                      <Tooltip key="story" title="Add a story">
+                    >
+                      <Link
+                        href={{
+                          pathname: '/model/profile',
+                          query: { username: currentUser.username }
+                        }}
+                        as={`/${currentUser.username}`}
+                      >
+                        <a>
+                          <HomeOutlined />
+                        </a>
+                      </Link>
+                    </li>
+                  </Tooltip>
+                )}
+                {currentUser._id && !currentUser.isPerformer && (
+                <Tooltip key="home" title="Home">
+                  <li className={router.pathname === '/home' ? 'active' : ''}>
+                    <Link href="/home">
+                      <a>
+                        <HomeOutlined />
+                      </a>
+                    </Link>
+                  </li>
+                </Tooltip>
+                )}
+                {currentUser && currentUser._id && currentUser.isPerformer && (
+                <>
+                  <Tooltip key="live" title="Go Live">
+                    <li className={router.pathname === '/model/live' ? 'active' : ''}>
+                      <Link href="/home" as="/home">
+                        <a>
+                          <VideoCameraAddOutlined />
+                        </a>
+                      </Link>
+                    </li>
+                  </Tooltip>
+                  {/* <Tooltip key="story" title="Add a story">
                         <li
                           aria-hidden
                           onClick={() => {
@@ -243,114 +208,55 @@ class Header extends PureComponent<IProps> {
                             <HistoryOutlined />
                           </a>
                         </li>
-                      </Tooltip>
-                      <Tooltip key="new_post" title="Compose new post">
-                        <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
-                          <Link href="/model/my-post/create">
-                            <a>
-                              <PlusSquareOutlined />
-                            </a>
-                          </Link>
-                        </li>
-                      </Tooltip>
-                    </>
-                  )}
-                  {currentUser && currentUser._id && !currentUser.isPerformer && [
-                    <Tooltip key="models" title="Models">
-                      <li key="models" className={router.pathname === '/model' ? 'active' : ''}>
-                        <Link href="/model">
-                          <a>
-                            <StarOutlined />
-                          </a>
-                        </Link>
-                      </li>
-                    </Tooltip>,
-                    <Tooltip key="cart" title="Cart">
-                      <li key="cart" className={router.pathname === '/cart' ? 'active' : ''}>
-                        <Link href="/cart">
-                          <a>
-                            <ShoppingCartOutlined />
-                            <Badge
-                              className="cart-total"
-                              count={cart.total}
-                              showZero
-                            />
-                          </a>
-                        </Link>
-                      </li>
-                    </Tooltip>
-                  ]}
-                  {currentUser._id && currentUser.isPerformer && (
-                    <Tooltip key="private_call_requests" title={privateRequests.length > 0 ? '' : 'Private chat requests'}>
-                      <li
-                        onClick={() => this.setState({ openCallRequest: true })}
-                        aria-hidden
-                        key="private_call"
-                        className={router.pathname === `/model/live/${settings.optionForPrivate === 'webrtc'
-                          ? 'webrtc/'
-                          : ''
-                        }privatechat` ? 'active' : ''}
-                      >
+                      </Tooltip> */}
+                  <Tooltip key="new_post" title="Compose new post">
+                    <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
+                      <Link href="/model/my-post/create">
                         <a>
-                          <UsergroupAddOutlined />
-                          <Badge className="cart-total" showZero count={privateRequests.length} />
+                          <PlusSquareOutlined />
                         </a>
-                      </li>
-                    </Tooltip>
-                  )}
-                  {currentUser._id && (
-                    <Tooltip key="messenger" title="Messenger">
-                      <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
-                        <Link href="/messages">
-                          <a>
-                            <MessageOutlined />
-                            <Badge
-                              className="cart-total"
-                              count={totalNotReadMessage}
-                              showZero
-                            />
-                          </a>
-                        </Link>
-                      </li>
-                    </Tooltip>
-                  )}
-                  {!currentUser._id && (
-                    <li key="search" className="hide-desktop" aria-hidden onClick={() => this.setState({ openSearch: !openSearch })}>
-                      <a className="search-mobile"><SearchOutlined /></a>
-                    </li>
-                  )}
-                  {!currentUser._id && [
-                    <li key="login" className={router.pathname === '/' ? 'active' : ''}>
-                      <Link href="/">
-                        <a>Login</a>
-                      </Link>
-                    </li>,
-                    <li key="signup" className={router.pathname === '/auth/register' ? 'active' : ''}>
-                      <Link href="/auth/register">
-                        <a>Sign Up</a>
                       </Link>
                     </li>
-                  ]}
-                  {currentUser._id && (
-                    <li key="avatar" aria-hidden onClick={() => this.setState({ openProfile: true })}>
-                      <Avatar src={currentUser.avatar || '/static/no-avatar.png'} />
-                    </li>
-                  )}
-                </ul>
-              </div>
+                  </Tooltip>
+                </>
+                )}
+                {currentUser._id && (
+                <Tooltip key="messenger" title="Messenger">
+                  <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
+                    <Link href="/messages">
+                      <a>
+                        <MessageOutlined />
+                        <Badge
+                          className="cart-total"
+                          count={totalNotReadMessage}
+                          showZero
+                        />
+                      </a>
+                    </Link>
+                  </li>
+                </Tooltip>
+                )}
+                {!currentUser._id && [
+                  <li key="login" className={router.pathname === '/' ? 'active' : ''}>
+                    <Link href="/">
+                      <a>Login</a>
+                    </Link>
+                  </li>,
+                  <li key="signup" className={router.pathname === '/auth/register' ? 'active' : ''}>
+                    <Link href="/auth/register">
+                      <a>Sign Up</a>
+                    </Link>
+                  </li>
+                ]}
+                {currentUser._id && (
+                <li key="avatar" aria-hidden onClick={() => this.setState({ openProfile: true })}>
+                  <Avatar src={currentUser.avatar || '/static/no-avatar.png'} />
+                </li>
+                )}
+              </ul>
             </div>
           </Layout.Header>
-          <Modal
-            width={990}
-            title="Add a story"
-            visible={openAddStory}
-            onOk={() => this.setState({ openAddStory: false })}
-            onCancel={() => this.setState({ openAddStory: false })}
-            footer={null}
-          >
-            <StoryForm onCloseModal={() => this.setState({ openAddStory: false })} />
-          </Modal>
-          <Drawer
+          {/* <Drawer
             title="Private Call Requests"
             closable
             onClose={() => this.setState({ openCallRequest: false })}
@@ -362,18 +268,7 @@ class Header extends PureComponent<IProps> {
             {privateRequests.length > 0 ? privateRequests.map((request) => (
               <PrivateCallCard key={request.conversationId} request={request} settings={settings} onDecline={this.handleDeclineCall.bind(this)} />
             )) : <p className="text-center">No Call Request</p>}
-          </Drawer>
-          <Drawer
-            title={null}
-            closable
-            onClose={() => this.setState({ openSearch: false })}
-            visible={openSearch}
-            key="search-drawer"
-            className={ui.theme === 'light' ? 'profile-drawer' : 'profile-drawer dark'}
-            width={350}
-          >
-            <SearchBar />
-          </Drawer>
+          </Drawer> */}
           <Drawer
             title={(
               <>
@@ -405,13 +300,13 @@ class Header extends PureComponent<IProps> {
                     Edit Profile
                   </div>
                 </Link>
-                <Link href={{ pathname: '/search/analytics' }} as="/search/analytics">
+                {/* <Link href={{ pathname: '/search/analytics' }} as="/search/analytics">
                   <div className={router.pathname === '/search/analytics' ? 'menu-item active' : 'menu-item'}>
                     <SearchOutlined />
                     {' '}
                     Keywords
                   </div>
-                </Link>
+                </Link> */}
                 <Link href={{ pathname: '/model/my-subscriber' }} as="/model/my-subscriber">
                   <div className={router.pathname === '/model/my-subscriber' ? 'menu-item active' : 'menu-item'}>
                     <StarOutlined />
@@ -420,28 +315,14 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 <Divider />
-                <Link href="/model/my-post" as="/model/my-post">
+                {/* <Link href="/model/my-post" as="/model/my-post">
                   <div className={router.pathname === '/model/my-post' ? 'menu-item active' : 'menu-item'}>
                     <FireOutlined />
                     {' '}
                     Posts
                   </div>
-                </Link>
-                <Link href="/model/my-story" as="/model/my-story">
-                  <div className={router.pathname === '/model/my-story' ? 'menu-item active' : 'menu-item'}>
-                    <HistoryOutlined />
-                    {' '}
-                    Stories
-                  </div>
-                </Link>
-                <Link href="/model/my-blog" as="/model/my-blog">
-                  <div className={router.pathname === '/model/my-blog' ? 'menu-item active' : 'menu-item'}>
-                    <GlobalOutlined />
-                    {' '}
-                    Blogs
-                  </div>
-                </Link>
-                {/* <Link href="/model/my-video" as="/model/my-video">
+                </Link> */}
+                <Link href="/model/my-video" as="/model/my-video">
                   <div className={router.pathname === '/model/my-video' ? 'menu-item active' : 'menu-item'}>
                     <VideoCameraOutlined />
                     {' '}
@@ -454,7 +335,7 @@ class Header extends PureComponent<IProps> {
                     {' '}
                     Galleries
                   </div>
-                </Link> */}
+                </Link>
                 <Link href="/model/my-store" as="/model/my-store">
                   <div className={router.pathname === '/model/my-store' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingOutlined />
@@ -495,13 +376,13 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 <Divider />
-                <Link href="/user/bookmarks" as="/user/bookmarks">
+                {/* <Link href="/user/bookmarks" as="/user/bookmarks">
                   <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
                     <StarOutlined />
                     {' '}
                     Bookmarks
                   </div>
-                </Link>
+                </Link> */}
                 <Link href="/user/my-subscription" as="/user/my-subscription">
                   <div className={router.pathname === '/user/my-subscription' ? 'menu-item active' : 'menu-item'}>
                     <HeartOutlined />
@@ -531,7 +412,7 @@ class Header extends PureComponent<IProps> {
                 </div>
               </div>
             )}
-            <div className="switchTheme">
+            {/* <div className="switchTheme">
               <span>
                 <BulbOutlined />
                 <span>Switch Theme</span>
@@ -542,7 +423,7 @@ class Header extends PureComponent<IProps> {
                 checkedChildren="Dark"
                 unCheckedChildren="Light"
               />
-            </div>
+            </div> */}
           </Drawer>
         </div>
       </div>

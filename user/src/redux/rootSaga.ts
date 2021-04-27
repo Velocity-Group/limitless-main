@@ -11,8 +11,6 @@ import bannerSagas from './banner/sagas';
 import messageSagas from './message/sagas';
 import systemSagas from './system/sagas';
 import feedSagas from './post/sagas';
-import storySagas from './story/sagas';
-import blogSagas from './blog/sagas';
 import streamChatSagas from './stream-chat/sagas';
 
 function* rootSaga() {
@@ -29,8 +27,6 @@ function* rootSaga() {
       ...messageSagas,
       ...systemSagas,
       ...feedSagas,
-      ...storySagas,
-      ...blogSagas,
       ...streamChatSagas
     ].map(spawn)
   );

@@ -1,0 +1,103 @@
+@import '../../../style/vars.less';
+
+.vid-card {
+  box-shadow: 0 4px 16px rgba(0,0,0,.05);
+  position: relative;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  .vid-thumb {
+    height: 150px;
+    position: relative;
+    img {
+      border-top-left-radius: 0.5em;
+      border-top-right-radius: 0.5em;
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+  .vid-stats {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    color: @white;
+    font-size: 13px;
+    padding: 4em 1em 1em 1em;
+    font-weight: 600;
+    position: absolute;
+    bottom: 0;
+    background-image: linear-gradient(to bottom,#04040e00 0%,@card-theme-color 100%);
+    @media screen and (max-width: @mobile-screen) {
+      font-size: 10px;
+    }
+  }
+  &:hover .vid-info {
+    a {
+      color: @white!important;
+    }
+    color: @white!important;
+    background-color: @primary-color;
+  }
+  .vid-info {
+    font-family: @primary-font-bold;
+    color: #323232;
+    background-color: @light-card;
+    padding: 1em;
+    text-align: center;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+    font-weight: 600;
+    text-transform: capitalize;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    @media screen and (max-width: @mobile-screen) {
+      font-size: 11px;
+    }
+  }
+  .vid-price {
+    position: absolute;
+    left: 0px;
+    top: 10px;
+    z-index: 99;
+    .label-price {
+      color: #2d2529!important;
+      line-height: 2em;
+      background-color: @secondary-color;;
+      width: auto;
+      padding: 0.2em 2em;
+      clip-path: polygon(0px 0px,0px 100%,100% 100%,90% 50%,100% 0);
+      font-size: 12px;
+      font-weight: 600;
+      margin: 5px 0;
+    }
+  }
+}
+.videojs-player {
+  .video-js {
+    width: 100%;
+    height: 650px;
+    @media screen and (max-width: @tablet-screen) {
+      height: 350px;
+    }
+    @media screen and (max-width: @mobile-screen) {
+      height: 250px;
+    }
+    .vjs-big-play-button {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+.video-thumbs {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  img {
+    max-width: 50%;
+    border-radius: 5px;
+  }
+}

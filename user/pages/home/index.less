@@ -1,5 +1,53 @@
 @import '../../style/vars.less';
 
+.home-heading {
+  padding: 10px 0;
+  margin: 0 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid @light-grey;
+  h3 {
+    width: 50%;
+    color: @black;
+    font-size: 1.2em;
+    height: 40px;
+    line-height: 40px;
+    margin: 0;
+  }
+  .search-bar-feed {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    .ant-input-affix-wrapper {
+      opacity: 0;
+      border: none;
+      padding: 0;
+      outline: none;
+      box-shadow: none;
+      transition: all 0.3s ease-in-out;
+      &.active {
+        opacity: 1;
+      }
+      .ant-input-prefix {
+        font-size: 25px;
+        margin-right: 10px;
+      }
+      input {
+        height: 40px;
+      }
+    }
+    .open-search {
+      color: @gray;
+      .anticon {
+        font-size: 25px;
+      }
+    }
+  }
+}
+
 .ant-carousel {
   .slick-slide {
     text-align: center;

@@ -30,12 +30,12 @@ class Footer extends PureComponent<IProps> {
           <ul>
             <li>
               <Link href="/model">
-                <a>Explore</a>
+                <a>Models</a>
               </Link>
             </li>
             <li>
               <Link href="/contact">
-                <a>Contact us</a>
+                <a>Contact</a>
               </Link>
             </li>
             {menus
