@@ -49,6 +49,10 @@
         white-space: nowrap;
         text-align: right;
       }
+      .dropdown-options {
+        font-size: 14px;
+        color: @gray;
+      }
     }
   }
   .feed-container {
@@ -97,12 +101,14 @@
       }
     }
     .feed-text {
-      font-size: 12px;
+      font-size: 14px;
+      margin-bottom: 15px;
       .ant-collapse {
         background-color: transparent;
         .ant-collapse-item {
           border: none;
           .ant-collapse-header {
+            padding-left: 0;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -112,6 +118,9 @@
               display: none;
             }
           }
+        }
+        .ant-collapse-content-box {
+          padding: 0;
         }
       }
     }

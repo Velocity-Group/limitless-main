@@ -15,7 +15,7 @@ import {
   getComments, moreComment, createComment, deleteComment
 } from '@redux/comment/actions';
 import './index.less';
-import { formatDateFromnow, videoDuration } from '@lib/index';
+import { formatDateShort, videoDuration } from '@lib/index';
 import { reactionService, paymentService, feedService } from '@services/index';
 import { connect } from 'react-redux';
 import { TipPerformerForm } from '@components/performer/tip-form';
@@ -346,7 +346,7 @@ class FeedCard extends Component<IProps> {
     );
     const dropdown = (
       <Dropdown overlay={menu}>
-        <a aria-hidden className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
+        <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
           <MoreOutlined />
         </a>
       </Dropdown>
@@ -372,11 +372,23 @@ class FeedCard extends Component<IProps> {
             </div>
           </Link>
           <div className="feed-top-right">
-            <span className="feed-time">{formatDateFromnow(feed.updatedAt)}</span>
+            <span className="feed-time">{formatDateShort(feed.updatedAt)}</span>
             {dropdown}
           </div>
         </div>
         <div className="feed-container">
+          <div className="feed-text">
+            <Collapse
+              bordered={false}
+              expandIcon={({ isActive }) => <CaretDownOutlined rotate={isActive ? 180 : 0} />}
+              className="site-collapse-custom-collapse"
+              expandIconPosition="right"
+            >
+              <Collapse.Panel header={feed.text} key="1" className="site-collapse-custom-panel">
+                {feed.text}
+              </Collapse.Panel>
+            </Collapse>
+          </div>
           {((!feed.isSale && feed.isSubscribed) || (feed.isSale && feed.isBought)) && (
             <div className="feed-content">
               <FeedSlider feed={feed} />
@@ -437,23 +449,6 @@ class FeedCard extends Component<IProps> {
               )}
             </div>
           )}
-          {feed.tagline && (
-          <div className="feed-tagline">
-            <Link href={{ pathname: '/search', query: { type: 'feed', keyword: feed.tagline } }}><a>{feed.tagline}</a></Link>
-          </div>
-          )}
-          <div className="feed-text">
-            <Collapse
-              bordered={false}
-              expandIcon={({ isActive }) => <CaretDownOutlined rotate={isActive ? 180 : 0} />}
-              className="site-collapse-custom-collapse"
-              expandIconPosition="right"
-            >
-              <Collapse.Panel header={feed.text} key="1" className="site-collapse-custom-panel">
-                {feed.text}
-              </Collapse.Panel>
-            </Collapse>
-          </div>
           {polls && polls.length > 0 && polls.map((poll) => (
             <div aria-hidden className="feed-poll" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
               <span>{poll.description}</span>
@@ -501,13 +496,11 @@ class FeedCard extends Component<IProps> {
               )}
             </div>
             <div className="action-item">
-              <Twitter link={shareUrl} />
-              <Facebook link={shareUrl} />
-              {user._id && !user.isPerformer && (
+              {/* <Twitter link={shareUrl} />
+              <Facebook link={shareUrl} /> */}
               <span aria-hidden className={isBookMarked ? 'action-ico active' : 'action-ico'} onClick={this.handleBookmark.bind(this)}>
                 <Tooltip title={!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}><BookOutlined /></Tooltip>
               </span>
-              )}
             </div>
           </div>
           {isOpenComment && (
