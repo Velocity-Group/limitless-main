@@ -109,20 +109,15 @@ class Performers extends PureComponent<IProps> {
         </Head>
         <Layout>
           <div className="main-container">
-            <PerformerAdvancedFilter
-              onSubmit={this.handleFilter.bind(this)}
-              countries={ui?.countries || []}
-            />
-            <div className="hr-divider" />
             <div className="main-background">
               <div className="md-heading">
-                <span>
-                  <StarOutlined />
-                  {' '}
-                  {total}
-                  {' '}
-                  Models
-                </span>
+                Models
+              </div>
+              <div className="md-below-heading">
+                <PerformerAdvancedFilter
+                  onSubmit={this.handleFilter.bind(this)}
+                  countries={ui?.countries || []}
+                />
                 <span className="sort-model">
                   <DropOption
                     menuOptions={[

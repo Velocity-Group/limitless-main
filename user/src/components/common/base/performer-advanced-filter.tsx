@@ -128,8 +128,8 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
     const { countries } = this.props;
     const { showMore, heights, weights } = this.state;
     return (
-      <Row gutter={24} className="filter-block relative">
-        <Col md={{ span: 20 }} xs={{ span: 24 }}>
+      <Row gutter={24} className="filter-block">
+        <Col md={{ span: 20 }} xs={{ span: 24 }} style={{ padding: 0 }}>
           <Row>
             <Col md={{ span: 12 }} xs={{ span: 24 }}>
               <Input
@@ -316,7 +316,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             </Row>
           </Row>
         </Col>
-        <Col md={{ span: 4 }} xs={{ span: 24 }}>
+        <Col md={{ span: 4 }} xs={{ span: 24 }} style={{ padding: 0 }}>
           <Button
             type="primary"
             className="primary"
@@ -325,13 +325,13 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
           >
             Search
           </Button>
-          <span className={showMore ? 'btn-show-more active' : 'btn-show-more'}>
+          {/* <span className={showMore ? 'btn-show-more active' : 'btn-show-more'}>
             <a aria-hidden onClick={() => this.setState({ showMore: !showMore })}>
               Advanced search
               {' '}
               {showMore ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
             </a>
-          </span>
+          </span> */}
         </Col>
       </Row>
     );

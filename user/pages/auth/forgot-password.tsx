@@ -8,7 +8,7 @@ import Head from 'next/head';
 import { IForgot } from 'src/interfaces';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { GoogleReCaptcha } from '@components/common';
+// import { GoogleReCaptcha } from '@components/common';
 import './index.less';
 
 interface IProps {
@@ -135,8 +135,7 @@ class Forgot extends PureComponent<IProps, IState> {
                   <h3
                     style={{
                       fontSize: 30,
-                      textAlign: 'center',
-                      fontFamily: 'Merriweather Sans Bold'
+                      textAlign: 'center'
                     }}
                   >
                     Reset password
@@ -160,7 +159,7 @@ class Forgot extends PureComponent<IProps, IState> {
                       >
                         <Input placeholder="Enter your email address" />
                       </Form.Item>
-                      <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} />
+                      {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                       <Form.Item style={{ textAlign: 'center' }}>
                         <Button
                           className="primary"

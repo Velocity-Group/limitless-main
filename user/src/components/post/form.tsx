@@ -355,11 +355,11 @@ export default class FeedForm extends PureComponent<IProps> {
               </span>
             </div>
           </Form.Item>
-          {['video', 'photo'].includes(feed?.type || type) && (
+          {/* {['video', 'photo'].includes(feed?.type || type) && (
             <Form.Item name="tagline">
               <Input className="feed-input" placeholder="Add a tagline here" />
             </Form.Item>
-          )}
+          )} */}
 
           {addPoll
               && (

@@ -836,9 +836,35 @@
 .md-heading {
   display: flex;
   justify-content: space-between;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  color: @theme-color
+  color: @grey-color;
+  margin-top: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.md-below-heading {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  .sort-model {
+    text-align: right;
+    width: 30%;
+    button {
+      border: 1px solid @light-grey!important;
+      height: 40px;
+      width: 100px;
+    }
+  }
+  @media screen and (max-width: @mobile-screen) {
+    flex-direction: column-reverse;
+    .sort-model {
+      width: 100%;
+      button {
+        width: 100%;
+      }
+    }
+  }
 }
 
 .trending-carousel {
