@@ -17,7 +17,6 @@ import {
 } from '@ant-design/icons';
 import './header.less';
 import { withRouter, Router as RouterEvent } from 'next/router';
-import { addCart } from 'src/redux/cart/actions';
 import {
   messageService, authService, streamService
 } from 'src/services';
@@ -25,7 +24,7 @@ import { Event, SocketContext } from 'src/socket';
 import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/actions';
 // import { PrivateCallCard } from '@components/streaming/private-call-request-card';
 import { updateUIValue } from 'src/redux/ui/actions';
-import SearchBar from './search-bar';
+// import SearchBar from './search-bar';
 
 interface IProps {
   updateUIValue: Function;
@@ -34,7 +33,6 @@ interface IProps {
   router: any;
   ui: any;
   privateRequests: any;
-  addCart: Function;
   addPrivateRequest: Function;
   accessPrivateRequest: Function;
   settings: StreamSettings;
@@ -133,30 +131,10 @@ class Header extends PureComponent<IProps> {
         <div className="main-container">
           <Layout.Header className="header" id="layoutHeader">
             <div className="nav-bar">
-              {/* <div className={currentUser._id ? 'left-conner hide-mobile' : 'left-conner'}>
-                <Link href="/home">
-                  <a className="logo-nav">
-                    {ui?.logo ? (
-                      <img
-                        alt="logo"
-                        src={ui?.logo}
-                        height="60px"
-                      />
-                    ) : <span>{ui?.siteName}</span>}
-                  </a>
-                </Link>
-                <div className="hide-tablet"><SearchBar /></div>
-              </div> */}
-              <ul className="nav-icons">
+              <ul className={currentUser._id ? 'nav-icons' : 'nav-icons custom'}>
                 {currentUser._id && currentUser.isPerformer && (
                   <Tooltip key="profile" title="Profile">
-                    <li
-                      className={
-                            router.asPath === `/${currentUser.username}`
-                              ? 'active'
-                              : ''
-                          }
-                    >
+                    <li className={router.asPath === `/${currentUser.username}` ? 'active' : ''}>
                       <Link
                         href={{
                           pathname: '/model/profile',
@@ -172,28 +150,28 @@ class Header extends PureComponent<IProps> {
                   </Tooltip>
                 )}
                 {currentUser._id && !currentUser.isPerformer && (
-                <Tooltip key="home" title="Home">
-                  <li className={router.pathname === '/home' ? 'active' : ''}>
-                    <Link href="/home">
-                      <a>
-                        <HomeOutlined />
-                      </a>
-                    </Link>
-                  </li>
-                </Tooltip>
-                )}
-                {currentUser && currentUser._id && currentUser.isPerformer && (
-                <>
-                  <Tooltip key="live" title="Go Live">
-                    <li className={router.pathname === '/model/live' ? 'active' : ''}>
-                      <Link href="/home" as="/home">
+                  <Tooltip key="home" title="Home">
+                    <li className={router.pathname === '/home' ? 'active' : ''}>
+                      <Link href="/home">
                         <a>
-                          <VideoCameraAddOutlined />
+                          <HomeOutlined />
                         </a>
                       </Link>
                     </li>
                   </Tooltip>
-                  {/* <Tooltip key="story" title="Add a story">
+                )}
+                {currentUser && currentUser._id && currentUser.isPerformer && (
+                  <>
+                    {/* <Tooltip key="live" title="Go Live">
+                      <li className={router.pathname === '/model/live' ? 'active' : ''}>
+                        <Link href="/home" as="/home">
+                          <a>
+                            <VideoCameraAddOutlined />
+                          </a>
+                        </Link>
+                      </li>
+                    </Tooltip> */}
+                    {/* <Tooltip key="story" title="Add a story">
                         <li
                           aria-hidden
                           onClick={() => {
@@ -209,33 +187,44 @@ class Header extends PureComponent<IProps> {
                           </a>
                         </li>
                       </Tooltip> */}
-                  <Tooltip key="new_post" title="Compose new post">
-                    <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
-                      <Link href="/model/my-post/create">
-                        <a>
-                          <PlusSquareOutlined />
-                        </a>
-                      </Link>
-                    </li>
-                  </Tooltip>
-                </>
+                    <Tooltip key="new_post" title="Compose new post">
+                      <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
+                        <Link href="/model/my-post/create">
+                          <a>
+                            <PlusSquareOutlined />
+                          </a>
+                        </Link>
+                      </li>
+                    </Tooltip>
+                  </>
                 )}
-                {currentUser._id && (
-                <Tooltip key="messenger" title="Messenger">
-                  <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
-                    <Link href="/messages">
+                {currentUser._id && !currentUser.isPerformer && (
+                <Tooltip key="model" title="Models">
+                  <li key="model" className={router.pathname === '/model' ? 'active' : ''}>
+                    <Link href="/model">
                       <a>
-                        <MessageOutlined />
-                        <Badge
-                          className="cart-total"
-                          count={totalNotReadMessage}
-                          showZero
-                        />
+                        <UserOutlined />
                       </a>
                     </Link>
                   </li>
                 </Tooltip>
                 )}
+                {currentUser._id && [
+                  <Tooltip key="messenger" title="Messenger">
+                    <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
+                      <Link href="/messages">
+                        <a>
+                          <MessageOutlined />
+                          <Badge
+                            className="cart-total"
+                            count={totalNotReadMessage}
+                            showZero
+                          />
+                        </a>
+                      </Link>
+                    </li>
+                  </Tooltip>
+                ]}
                 {!currentUser._id && [
                   <li key="login" className={router.pathname === '/' ? 'active' : ''}>
                     <Link href="/">
@@ -249,9 +238,9 @@ class Header extends PureComponent<IProps> {
                   </li>
                 ]}
                 {currentUser._id && (
-                <li key="avatar" aria-hidden onClick={() => this.setState({ openProfile: true })}>
-                  <Avatar src={currentUser.avatar || '/static/no-avatar.png'} />
-                </li>
+                  <li key="avatar" aria-hidden onClick={() => this.setState({ openProfile: true })}>
+                    <UserOutlined />
+                  </li>
                 )}
               </ul>
             </div>
@@ -315,13 +304,13 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 <Divider />
-                {/* <Link href="/model/my-post" as="/model/my-post">
+                <Link href="/model/my-post" as="/model/my-post">
                   <div className={router.pathname === '/model/my-post' ? 'menu-item active' : 'menu-item'}>
                     <FireOutlined />
                     {' '}
-                    Posts
+                    Feeds
                   </div>
-                </Link> */}
+                </Link>
                 <Link href="/model/my-video" as="/model/my-video">
                   <div className={router.pathname === '/model/my-video' ? 'menu-item active' : 'menu-item'}>
                     <VideoCameraOutlined />
@@ -435,10 +424,9 @@ Header.contextType = SocketContext;
 const mapState = (state: any) => ({
   currentUser: { ...state.user.current },
   ui: { ...state.ui },
-  cart: { ...state.cart },
   ...state.streaming
 });
 const mapDispatch = {
-  logout, addCart, addPrivateRequest, accessPrivateRequest, updateUIValue
+  logout, addPrivateRequest, accessPrivateRequest, updateUIValue
 };
 export default withRouter(connect(mapState, mapDispatch)(Header)) as any;

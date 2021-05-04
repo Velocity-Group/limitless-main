@@ -1,23 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
 import { FileDto } from 'src/modules/file';
-import { UserDto } from 'src/modules/user/dtos';
 
-interface ValueSchedule {
-  start: string;
-  end: string;
-  closed: boolean;
-}
-
-export interface ISchedule {
-  mon: ValueSchedule;
-  tue: ValueSchedule;
-  wed: ValueSchedule;
-  thu: ValueSchedule;
-  fri: ValueSchedule;
-  sat: ValueSchedule;
-  sun: ValueSchedule;
-}
 export interface IPerformerResponse {
   _id?: ObjectId;
   name?: string;
@@ -38,7 +22,7 @@ export interface IPerformerResponse {
   zipcode?: string;
   address?: string;
   languages?: string[];
-  studioId?: ObjectId;
+  agentId?: ObjectId;
   categoryIds?: ObjectId[];
   height?: string;
   weight?: string;
@@ -53,24 +37,27 @@ export interface IPerformerResponse {
   monthlyPrice?: number;
   yearlyPrice?: number;
   publicChatPrice?: number;
+  groupChatPrice?: number;
   privateChatPrice?: number;
   stats?: {
     likes?: number;
     subscribers?: number;
     views?: number;
-    totalVideos: number;
-    totalPhotos: number;
-    totalGalleries: number;
-    totalProducts: number;
-    totalBlogs: number;
-    totalStories: number;
-    totalStreamTime: number;
+    totalVideos?: number;
+    totalPhotos?: number;
+    totalGalleries?: number;
+    totalProducts?: number;
+    totalBlogs?: number;
+    totalStories?: number;
+    totalStreamTime?: number;
+    totalViewTime?: number;
+    totalRating?: number;
+    avgRating?: number;
   };
   verifiedEmail?: boolean;
   verifiedAccount?: boolean;
   verifiedDocument?: boolean;
   score?: number;
-  isPerformer: boolean;
   bankingInformation?: any;
   ccbillSetting?: any;
   commissionSetting?: any;
@@ -82,18 +69,22 @@ export interface IPerformerResponse {
   activateWelcomeVideo?: boolean;
   lastStreamingTime?: Date;
   maxParticipantsAllowed?: number;
-  live?: boolean;
+  live?: number;
   streamingStatus?: string;
   twitterConnected?: boolean;
   googleConnected?: boolean;
   dateOfBirth?: Date;
   bodyType?: string;
-}
-
-export interface IBlockedUsersResponse {
-  _id?: string | ObjectId;
-  userId?: string | ObjectId;
-  userInfo?: UserDto;
+  balance?: number;
+  socialsLink?: {
+    facebook: String;
+    twitter: String;
+    google: String;
+    instagram: String;
+    linkedIn: String;
+  },
+  invitationId?: ObjectId;
+  referralId?: ObjectId;
 }
 
 export class PerformerDto {
@@ -159,15 +150,9 @@ export class PerformerDto {
 
   languages?: string[];
 
-  studioId?: ObjectId;
+  agentId?: ObjectId;
 
   categoryIds?: ObjectId[];
-
-  schedule?: ISchedule;
-
-  timezone?: string;
-
-  noteForUser?: string;
 
   height?: string;
 
@@ -195,6 +180,8 @@ export class PerformerDto {
 
   publicChatPrice?: number;
 
+  groupChatPrice?: number;
+
   privateChatPrice?: number;
 
   stats?: {
@@ -209,11 +196,12 @@ export class PerformerDto {
     totalBlogs: number;
     totalStories: number;
     totalStreamTime: number;
+    totalViewTime: number;
+    totalRating: number;
+    avgRating: number;
   };
 
   score?: number;
-
-  isPerformer: boolean;
 
   bankingInformation?: any;
 
@@ -245,13 +233,23 @@ export class PerformerDto {
 
   maxParticipantsAllowed?: number;
 
-  live?: boolean;
+  live?: number;
 
   streamingStatus?: string;
 
   dateOfBirth?: Date;
 
   bodyType?: string;
+
+  balance: number;
+
+  socialsLink: {
+    facebook: String;
+    twitter: String;
+    google: String;
+    instagram: String;
+    linkedIn: String;
+  }
 
   constructor(data?: Partial<any>) {
     Object.assign(
@@ -261,7 +259,6 @@ export class PerformerDto {
         'name',
         'firstName',
         'lastName',
-        'name',
         'username',
         'email',
         'phone',
@@ -283,11 +280,9 @@ export class PerformerDto {
         'zipcode',
         'address',
         'languages',
-        'studioId',
+        'agentId',
+        'agentInfo',
         'categoryIds',
-        'schedule',
-        'timezone',
-        'noteForUser',
         'height',
         'weight',
         'bio',
@@ -301,10 +296,10 @@ export class PerformerDto {
         'monthlyPrice',
         'yearlyPrice',
         'publicChatPrice',
+        'groupChatPrice',
         'privateChatPrice',
         'stats',
         'score',
-        'isPerformer',
         'bankingInformation',
         'ccbillSetting',
         'commissionSetting',
@@ -328,7 +323,9 @@ export class PerformerDto {
         'live',
         'streamingStatus',
         'dateOfBirth',
-        'bodyType'
+        'bodyType',
+        'balance',
+        'socialsLink'
       ])
     );
   }
@@ -345,7 +342,6 @@ export class PerformerDto {
       lastName: this.lastName,
       country: this.country,
       stats: this.stats,
-      isPerformer: true,
       blockCountries: this.blockCountries,
       isOnline: this.isOnline,
       welcomeVideoPath: FileDto.getPublicUrl(this.welcomeVideoPath),
@@ -358,6 +354,7 @@ export class PerformerDto {
       dateOfBirth: this.dateOfBirth
     };
     const privateInfo = {
+      balance: this.balance,
       twitterConnected: this.twitterConnected,
       googleConnected: this.googleConnected,
       verifiedEmail: this.verifiedEmail,
@@ -377,9 +374,6 @@ export class PerformerDto {
       idVerification: this.idVerification,
       documentVerificationId: this.documentVerificationId,
       documentVerification: this.documentVerification,
-      schedule: this.schedule,
-      timezone: this.timezone,
-      noteForUser: this.noteForUser,
       height: this.height,
       weight: this.weight,
       hair: this.hair,
@@ -394,10 +388,12 @@ export class PerformerDto {
       monthlyPrice: this.monthlyPrice,
       yearlyPrice: this.yearlyPrice,
       publicChatPrice: this.publicChatPrice,
+      groupChatPrice: this.groupChatPrice,
       privateChatPrice: this.privateChatPrice,
       bankingInformation: this.bankingInformation,
       welcomeVideoId: this.welcomeVideoId,
       maxParticipantsAllowed: this.maxParticipantsAllowed,
+      agentId: this.agentId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
@@ -438,13 +434,13 @@ export class PerformerDto {
       languages: this.languages,
       stats: this.stats,
       score: this.score,
-      isPerformer: true,
       isOnline: this.isOnline,
       isFreeSubscription: this.isFreeSubscription,
       verifiedAccount: this.verifiedAccount,
       lastStreamingTime: this.lastStreamingTime,
       live: this.live,
-      streamingStatus: this.streamingStatus
+      streamingStatus: this.streamingStatus,
+      socialsLink: this.socialsLink
     };
   }
 
@@ -466,9 +462,6 @@ export class PerformerDto {
       address: this.address,
       languages: this.languages,
       categoryIds: this.categoryIds,
-      schedule: this.schedule,
-      timezone: this.timezone,
-      noteForUser: this.noteForUser,
       height: this.height,
       weight: this.weight,
       bio: this.bio,
@@ -482,9 +475,9 @@ export class PerformerDto {
       monthlyPrice: this.monthlyPrice,
       yearlyPrice: this.yearlyPrice,
       publicChatPrice: this.publicChatPrice,
+      groupChatPrice: this.groupChatPrice,
       privateChatPrice: this.privateChatPrice,
       stats: this.stats,
-      isPerformer: true,
       score: this.score,
       blockCountries: this.blockCountries,
       createdAt: this.createdAt,
@@ -499,7 +492,14 @@ export class PerformerDto {
       live: this.live,
       streamingStatus: this.streamingStatus,
       dateOfBirth: this.dateOfBirth,
-      bodyType: this.bodyType
+      bodyType: this.bodyType,
+      socialsLink: this.socialsLink
     };
   }
+}
+
+export interface IBlockedUsersResponse {
+  _id?: string | ObjectId;
+  userId?: string | ObjectId;
+  userInfo?: PerformerDto;
 }

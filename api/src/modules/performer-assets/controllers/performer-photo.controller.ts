@@ -12,9 +12,7 @@ import {
   Delete,
   Get,
   Query,
-  Request,
-  Inject,
-  forwardRef
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig, ForbiddenException } from 'src/kernel';
@@ -30,17 +28,15 @@ import { AuthService } from '../../auth/services';
 @Controller('performer/performer-assets/photos')
 export class PerformerPhotoController {
   constructor(
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
     private readonly photoService: PhotoService,
-    private readonly photoSearchService: PhotoSearchService
-
-  ) { }
+    private readonly photoSearchService: PhotoSearchService,
+    private readonly authService: AuthService
+  ) {}
 
   @Post('/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor([
@@ -69,8 +65,8 @@ export class PerformerPhotoController {
 
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async update(
     @Param('id') id: string,
     @Body() payload: PhotoUpdatePayload,
@@ -82,8 +78,8 @@ export class PerformerPhotoController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async delete(@Param('id') id: string) {
     const details = await this.photoService.delete(id);
     return DataResponse.ok(details);
@@ -91,8 +87,8 @@ export class PerformerPhotoController {
 
   @Get('/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async search(
     @Query() query: PhotoSearchRequest,
     @CurrentUser() user: UserDto,
@@ -104,8 +100,8 @@ export class PerformerPhotoController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async details(@Param('id') id: string) {
     const details = await this.photoService.details(id);
     return DataResponse.ok(details);

@@ -22,7 +22,7 @@ export class VideoModel extends Document {
 
   teaserStatus: string;
 
-  isSaleVideo: boolean;
+  isSale: boolean;
 
   isSchedule: boolean;
 
@@ -32,7 +32,7 @@ export class VideoModel extends Document {
 
   stats: {
     likes: number,
-    favorite: number,
+    favourites: number,
     views: number,
     comments: number
   };

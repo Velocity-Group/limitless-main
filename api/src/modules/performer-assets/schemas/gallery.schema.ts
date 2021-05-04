@@ -2,12 +2,12 @@ import { Schema } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 export const GallerySchema = new Schema({
-  performerId: ObjectId,
+  performerId: { type: ObjectId, index: true },
   type: {
     type: String,
     index: true
   },
-  name: {
+  title: {
     type: String
     // TODO - text index?
   },
@@ -21,14 +21,18 @@ export const GallerySchema = new Schema({
     type: Number,
     default: 0
   },
+  isSale: {
+    type: Boolean,
+    default: false
+  },
   numOfItems: {
     type: Number,
     default: 0
   },
+  tagline: String,
   coverPhotoId: ObjectId,
   createdBy: ObjectId,
   updatedBy: ObjectId,
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-  tagline: String
+  updatedAt: { type: Date, default: Date.now }
 });

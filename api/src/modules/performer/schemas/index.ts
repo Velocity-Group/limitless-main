@@ -4,4 +4,4 @@ export * from './commission-schema';
 export * from './banking.schema';
 export * from './block-countries.schema';
 export * from './blocked-by-performer.schema';
-export * from './performer-trending.schema';
+export * from './admin-change-token-balance-log.schema';

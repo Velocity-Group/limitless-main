@@ -165,7 +165,9 @@
   width: 100%;
   margin: 0;
   padding: 0;
-
+  &.custom {
+    justify-content: flex-end;
+  }
   li {
     padding: 7px 15px;
     display: flex;
@@ -175,7 +177,7 @@
     font-weight: 600;
 
     .ant-badge-count {
-      background: @orange-color;
+      background: @theme-color;
       font-size: 11px;
       box-shadow: none;
       padding: 0 5px;

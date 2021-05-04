@@ -13,7 +13,7 @@ export interface IConvertResponse {
   toPath: string;
 }
 
-export class VideoService {
+export class VideoFileService {
   public async convert2Mp4(
     filePath: string,
     options = {} as IConvertOptions

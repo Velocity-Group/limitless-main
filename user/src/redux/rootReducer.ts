@@ -15,7 +15,7 @@ import cart from './cart/reducers';
 import banner from './banner/reducers';
 import message from './message/reducers';
 import system from './system/reducers';
-import feed from './post/reducers';
+import feed from './feed/reducers';
 import streaming from './streaming/reducers';
 import conversation from './stream-chat/reducers';
 

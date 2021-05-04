@@ -1,0 +1,83 @@
+@import '../../style/vars.less';
+
+.title {
+  color: @theme-color;
+  font-family: @primary-font-bold;
+  text-align: center;
+}
+
+.site-card-wrapper {
+  text-align: center;
+  border: 1px solid @theme-color;
+  margin-bottom: 15px;
+}
+
+.ant-card-head {
+  font-size: 25px;
+  border-bottom: 1px solid @theme-color;
+  background-color: @theme-color;
+  color: @white;
+  font-family: @primary-font;
+}
+
+.buy-btn {
+  color: @white;
+  background-color: @theme-color;
+}
+
+.price-style {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.text-size {
+  font-size: 15px;
+}
+
+.token-style {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+#style-3::-webkit-scrollbar-track {
+  background-color: @white;
+}
+
+#style-3::-webkit-scrollbar {
+  width: 1px;
+  background-color: @white;
+}
+
+#style-3::-webkit-scrollbar-thumb {
+  background-color: @theme-color;
+}
+
+.scrollbar {
+  height: 100px;
+  overflow-y: auto;
+}
+
+.payment-gateway {
+  display: flex;
+  width: 100%;
+  margin: 10px 0;
+  .gateway-item {
+    width: 50%;
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0.6;
+    box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.75);
+    img { 
+      width: 60px;
+    }
+    &.active {
+      background-image: url('/green-tick-ico.png');
+      background-repeat: no-repeat;
+      background-position: left;
+      background-size: 50px;
+      opacity: 1;
+    }
+  }
+}

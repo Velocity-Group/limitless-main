@@ -8,12 +8,9 @@ import PerformerCard from '@components/performer/card';
 import Head from 'next/head';
 import { PerformerAdvancedFilter } from '@components/common/base/performer-advanced-filter';
 import { IUIConfig } from 'src/interfaces/';
-import '@components/performer/performer.less';
 import { DropOption } from '@components/common/base/drop-option';
-import {
-  StarOutlined
-} from '@ant-design/icons';
 import Router from 'next/router';
+import '@components/performer/performer.less';
 
 interface IProps {
   getList: Function;

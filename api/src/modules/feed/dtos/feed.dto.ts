@@ -65,6 +65,10 @@ export class FeedDto {
 
   status: string;
 
+  isSchedule: boolean;
+
+  scheduleAt: Date;
+
   constructor(data: Partial<FeedDto>) {
     Object.assign(
       this,
@@ -101,7 +105,9 @@ export class FeedDto {
         'tagline',
         'isPinned',
         'pinnedAt',
-        'status'
+        'status',
+        'isSchedule',
+        'scheduleAt'
       ])
     );
   }

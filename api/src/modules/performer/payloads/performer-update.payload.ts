@@ -6,7 +6,6 @@ import {
   IsIn,
   IsArray,
   MinLength,
-  IsObject,
   Min,
   IsNumber,
   IsBoolean,
@@ -16,7 +15,6 @@ import { Username } from 'src/modules/user/validators/username.validator';
 import { GENDERS } from 'src/modules/user/constants';
 import { ApiProperty } from '@nestjs/swagger';
 import { PERFORMER_STATUSES } from '../constants';
-import { ISchedule } from '../dtos';
 
 export class PerformerUpdatePayload {
   @ApiProperty()
@@ -150,21 +148,6 @@ export class PerformerUpdatePayload {
   @IsArray()
   @IsString({ each: true })
   categoryIds: string[];
-
-  @ApiProperty()
-  @IsOptional()
-  @IsObject()
-  schedule: ISchedule;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  timezone: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  noteForUser: string;
 
   @ApiProperty()
   @IsString()
@@ -329,21 +312,6 @@ export class SelfUpdatePayload {
   @IsArray()
   @IsString({ each: true })
   categoryIds: string[];
-
-  @ApiProperty()
-  @IsOptional()
-  @IsObject()
-  schedule: ISchedule;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  timezone: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  noteForUser: string;
 
   @ApiProperty()
   @IsString()

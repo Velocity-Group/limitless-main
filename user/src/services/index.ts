@@ -19,3 +19,4 @@ export * from './stream.service';
 export * from './search.service';
 export * from './video.service';
 export * from './gallery.service';
+export * from './token-package.service';

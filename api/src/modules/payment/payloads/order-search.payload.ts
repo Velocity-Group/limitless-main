@@ -11,22 +11,12 @@ export class OrderSearchPayload extends SearchRequest {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  buyerId: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  sellerId: string;
+  performerId: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
   deliveryStatus: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  status: string;
 
   @ApiProperty()
   @IsOptional()

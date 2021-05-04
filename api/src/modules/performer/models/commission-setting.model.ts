@@ -10,15 +10,17 @@ export class CommissionSettingModel extends Document {
 
   videoSaleCommission: number;
 
+  gallerySaleCommission: number;
+
   productSaleCommission: number;
 
   feedSaleCommission: number;
 
   tipCommission: number;
 
-  publicChatCommission: number;
+  streamCommission: number;
 
-  privateChatCommission: number;
+  messageSaleCommission: number;
 
   createdAt: Date;
 

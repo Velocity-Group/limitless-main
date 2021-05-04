@@ -12,8 +12,6 @@ import { FEED_PROVIDER } from 'src/modules/feed/providers';
 import { FeedModel } from 'src/modules/feed/models';
 import { PERFORMER_STORY_PROVIDER } from 'src/modules/performer-story/providers';
 import { StoryModel } from 'src/modules/performer-story/models';
-import { BlogModel } from 'src/modules/performer-blog/models';
-import { PERFORMER_BLOG_PROVIDER } from 'src/modules/performer-blog/providers';
 import * as moment from 'moment';
 import { SearchDto } from '../dtos/search.dto';
 import { UserDto } from '../../user/dtos';
@@ -40,9 +38,7 @@ export class SearchKeywordService {
     @Inject(FEED_PROVIDER)
     private readonly feedModel: Model<FeedModel>,
     @Inject(PERFORMER_STORY_PROVIDER)
-    private readonly storyModel: Model<StoryModel>,
-    @Inject(PERFORMER_BLOG_PROVIDER)
-    private readonly blogModel: Model<BlogModel>
+    private readonly storyModel: Model<StoryModel>
   ) {
     this.defindJobs();
   }
@@ -142,12 +138,11 @@ export class SearchKeywordService {
         ]
       }];
     }
-    const [totalPerformer, totalProduct, totalFeed, totalStory, totalBlog] = await Promise.all([
+    const [totalPerformer, totalProduct, totalFeed, totalStory] = await Promise.all([
       this.performerModel.countDocuments(queryPerformer),
       this.productModel.countDocuments(queryProduct),
       this.feedModel.countDocuments(queryFeed),
-      this.storyModel.countDocuments(queryStory),
-      this.blogModel.countDocuments(queryBlog)
+      this.storyModel.countDocuments(queryStory)
     ]);
     await this.queueEventService.publish(
       new QueueEvent({
@@ -164,8 +159,7 @@ export class SearchKeywordService {
       totalPerformer,
       totalProduct,
       totalFeed,
-      totalStory,
-      totalBlog
+      totalStory
     };
   }
 

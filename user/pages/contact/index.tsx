@@ -8,7 +8,7 @@ import Head from 'next/head';
 import '../auth/index.less';
 import { settingService } from '@services/setting.service';
 import { connect } from 'react-redux';
-import { GoogleReCaptcha } from '@components/common';
+// import { GoogleReCaptcha } from '@components/common';
 import { IUIConfig } from '../../src/interfaces';
 
 const { TextArea } = Input;
@@ -24,14 +24,14 @@ class ContactPage extends PureComponent<IProps> {
 
   _intervalCountdown: any;
 
+  formRef: any;
+
+  recaptchaSuccess = false;
+
   state = {
     submiting: false,
     countTime: 60
   }
-
-  formRef: any;
-
-  recaptchaSuccess = false;
 
   componentDidMount() {
     if (!this.formRef) this.formRef = createRef();
@@ -68,21 +68,20 @@ class ContactPage extends PureComponent<IProps> {
   }
 
   async onFinish(values) {
-    const { ui } = this.props;
-    if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
-      message.error('Are you a robot?', 10);
-      return;
-    }
-    this.setState({ submiting: true });
+    // const { ui } = this.props;
+    // if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
+    //   message.error('Are you a robot?', 10);
+    //   return;
+    // }
     try {
+      await this.setState({ submiting: true });
       await settingService.contact(values);
       message.success('Thank you for contact us, we will reply within 48hrs.');
       this.handleCountdown();
-      this.formRef.current.resetFields();
     } catch (e) {
       message.error('Error occured, please try again later');
-      this.formRef.current.resetFields();
     } finally {
+      this.formRef.current.resetFields();
       this.setState({ submiting: false });
     }
   }
@@ -170,7 +169,7 @@ class ContactPage extends PureComponent<IProps> {
                   >
                     <TextArea rows={3} placeholder="What can we help you?" />
                   </Form.Item>
-                  <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} />
+                  {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                   <div className="text-center">
                     <Button
                       size="large"

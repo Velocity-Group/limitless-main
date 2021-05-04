@@ -255,7 +255,7 @@ class PerformerRegister extends PureComponent<IProps> {
 }
 const mapStatesToProps = (state: any) => ({
   ui: { ...state.ui },
-  registerPerformer: { ...state.auth.registerPerformerData }
+  registerPerformerData: { ...state.auth.registerPerformerData }
 });
 
 const mapDispatchToProps = { registerPerformer, loginSocial };

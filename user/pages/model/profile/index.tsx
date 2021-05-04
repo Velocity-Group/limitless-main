@@ -6,7 +6,7 @@ import {
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { getVideos, moreVideo } from '@redux/video/actions';
-import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/post/actions';
+import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
 import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import {
@@ -31,7 +31,8 @@ import {
   HeartOutlined,
   DollarOutlined,
   MessageOutlined,
-  EditOutlined
+  EditOutlined,
+  BookOutlined
 } from '@ant-design/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
@@ -580,11 +581,11 @@ class PerformerProfile extends PureComponent<IProps> {
               && currentUser._id !== ((performer?._id) || '') && (
                 <div className="btn-grp">
                   <div style={{ marginBottom: '4px' }}>
-                    {/* <button disabled={requesting} type="button" className={isBookMarked ? 'primary' : 'normal custom'} onClick={this.handleBookmark.bind(this)}>
-                        <BookOutlined />
-                        {' '}
-                        {isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
-                      </button> */}
+                    <button disabled={requesting} type="button" className={isBookMarked ? 'primary' : 'normal custom'} onClick={this.handleBookmark.bind(this)}>
+                      <BookOutlined />
+                      {' '}
+                      {isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
+                    </button>
                     <button
                       type="button"
                       className="normal"

@@ -21,7 +21,7 @@ export class VideoSearchRequest extends SearchRequest {
 
   @ApiProperty()
   @IsOptional()
-  isSaleVideo: boolean;
+  isSale: boolean;
 
   ids?: string[] | ObjectId[];
 }

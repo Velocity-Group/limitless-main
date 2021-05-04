@@ -32,7 +32,10 @@ export class AdminPerformerGalleryController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createGallery(@Body() payload: GalleryCreatePayload, @CurrentUser() creator: UserDto): Promise<any> {
+  async createGallery(
+    @Body() payload: GalleryCreatePayload,
+   @CurrentUser() creator: UserDto
+  ): Promise<any> {
     const resp = await this.galleryService.create(payload, creator);
     return DataResponse.ok(resp);
   }

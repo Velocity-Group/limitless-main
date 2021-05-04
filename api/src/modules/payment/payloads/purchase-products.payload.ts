@@ -14,7 +14,7 @@ export class PurchaseProductsPayload {
   @IsString()
   couponCode: string
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   deliveryAddress: string
 }

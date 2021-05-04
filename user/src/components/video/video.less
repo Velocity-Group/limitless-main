@@ -20,14 +20,16 @@
     display: flex;
     width: 100%;
     align-items: center;
-    justify-content: space-between;
     color: @white;
     font-size: 13px;
     padding: 4em 1em 1em 1em;
     font-weight: 600;
     position: absolute;
     bottom: 0;
-    background-image: linear-gradient(to bottom,#04040e00 0%,@card-theme-color 100%);
+    background-image: linear-gradient(to bottom, #04040e00 0%, rgba(33,108,161, .5) 100%);
+    span {
+      padding: 0 5px;
+    }
     @media screen and (max-width: @mobile-screen) {
       font-size: 10px;
     }
@@ -75,6 +77,7 @@
   }
 }
 .videojs-player {
+  width: 100%;
   .video-js {
     width: 100%;
     height: 650px;
@@ -97,7 +100,7 @@
   justify-content: space-around;
   flex-wrap: wrap;
   img {
-    max-width: 50%;
+    width: 50%;
     border-radius: 5px;
   }
 }

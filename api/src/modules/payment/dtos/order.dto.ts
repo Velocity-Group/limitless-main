@@ -4,41 +4,43 @@ import { pick } from 'lodash';
 export class OrderDto {
   _id: ObjectId;
 
-  buyerId: ObjectId;
+  transactionId: ObjectId;
 
-  buyerSource: string;
+  performerId: ObjectId;
 
-  sellerId: ObjectId;
+  performerInfo?: any;
 
-  sellerSource: string;
+  userId: ObjectId;
 
-  type: string;
+  userInfo?: any;
 
-  details: any[];
+  orderNumber: string;
 
-  status: string;
+  shippingCode: string;
+
+  productIds: ObjectId[];
+
+  productsInfo: any[];
 
   quantity: number;
 
   totalPrice: number;
 
-  originalPrice: number;
-
   deliveryAddress?: string;
+
+  deliveryStatus: string;
 
   postalCode?: string;
 
-  couponInfo: any;
+  userNote?: string;
 
-  seller: any;
-
-  buyer: any;
-
-  orderNumber: string;
+  phoneNumber?: string;
 
   createdAt: Date;
 
   updatedAt: Date;
+
+  digitalPath: string;
 
   constructor(data?: Partial<OrderDto>) {
     data
@@ -46,24 +48,25 @@ export class OrderDto {
         this,
         pick(data, [
           '_id',
-          'buyerId',
-          'buyerSource',
-          'sellerId',
-          'sellerSource',
-          'type',
+          'transactionId',
+          'performerId',
+          'performerInfo',
+          'userId',
+          'userInfo',
+          'orderNumber',
+          'shippingCode',
+          'productIds',
+          'productsInfo',
           'quantity',
           'totalPrice',
-          'originalPrice',
           'deliveryAddress',
+          'deliveryStatus',
           'postalCode',
-          'couponInfo',
-          'buyer',
-          'seller',
-          'status',
-          'details',
-          'orderNumber',
+          'userNote',
+          'phoneNumber',
           'createdAt',
-          'updatedAt'
+          'updatedAt',
+          'digitalPath'
         ])
       );
   }

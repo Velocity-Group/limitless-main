@@ -4,7 +4,8 @@ import {
   Injectable,
   Inject,
   NotAcceptableException,
-  forwardRef
+  forwardRef,
+  HttpException
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import {
@@ -18,19 +19,17 @@ import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
 import { FileDto } from 'src/modules/file';
-import { UserDto } from 'src/modules/user/dtos';
 import { AuthService } from 'src/modules/auth/services';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
-import { OFFLINE } from 'src/modules/stream/constant';
 import { REF_TYPE } from 'src/modules/file/constants';
 import {
-  PERFORMER_UPDATE_STATUS_CHANNEL, PERFORMER_UPDATE_GENDER_CHANNEL, DELETE_PERFORMER_CHANNEL
+  PERFORMER_UPDATE_STATUS_CHANNEL, PERFORMER_UPDATE_GENDER_CHANNEL, DELETE_PERFORMER_CHANNEL, CHANGE_TOKEN_LOG_SOURCES
 } from 'src/modules/performer/constants';
 import { difference } from 'lodash';
-import { EmailHasBeenTakenException } from 'src/modules/user/exceptions';
 import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { MailerService } from 'src/modules/mailer';
+import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';
 import { PerformerDto } from '../dtos';
 import {
@@ -45,7 +44,8 @@ import {
   CommissionSettingModel,
   BankingModel,
   BlockCountriesSettingModel,
-  BlockedByPerformerModel
+  BlockedByPerformerModel,
+  AdminChangeTokenModel
 } from '../models';
 import {
   PerformerCreatePayload,
@@ -65,7 +65,8 @@ import {
   PERFORMER_BLOCK_COUNTRIES_SETTING_MODEL_PROVIDER,
   PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER,
   PERFORMER_MODEL_PROVIDER,
-  PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER
+  PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER,
+  ADMIN_CHANGE_TOKEN_BALANCE_LOGS
 } from '../providers';
 
 const CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA = 'CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA';
@@ -73,10 +74,10 @@ const CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA = 'CHECK_REF_REMOVE_PERFORMER_FILE_
 @Injectable()
 export class PerformerService {
   constructor(
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
     @Inject(forwardRef(() => SettingService))
@@ -91,24 +92,22 @@ export class PerformerService {
     private readonly queueEventService: QueueEventService,
     private readonly mailService: MailerService,
     @Inject(PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER)
-    private readonly paymentGatewaySettingModel: Model<
-      PaymentGatewaySettingModel
-    >,
+    private readonly paymentGatewaySettingModel: Model<PaymentGatewaySettingModel>,
     @Inject(PERFORMER_BANKING_SETTING_MODEL_PROVIDER)
     private readonly bankingSettingModel: Model<BankingModel>,
     @Inject(PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER)
     private readonly commissionSettingModel: Model<CommissionSettingModel>,
     @Inject(PERFORMER_BLOCK_COUNTRIES_SETTING_MODEL_PROVIDER)
-    private readonly blockCountriesSettingModel: Model<
-      BlockCountriesSettingModel
-    >,
+    private readonly blockCountriesSettingModel: Model<BlockCountriesSettingModel>,
     @Inject(BLOCKED_BY_PERFORMER_PROVIDER)
-    private readonly blockedByPerformerModel: Model<BlockedByPerformerModel>
+    private readonly blockedByPerformerModel: Model<BlockedByPerformerModel>,
+    @Inject(ADMIN_CHANGE_TOKEN_BALANCE_LOGS)
+    private readonly changeTokenLogModel: Model<AdminChangeTokenModel>
   ) {
-    this.defindJobs();
+    this.defineJobs();
   }
 
-  private async defindJobs() {
+  private async defineJobs() {
     const collection = (this.agenda as any)._collection;
     await collection.deleteMany({
       name: {
@@ -173,22 +172,27 @@ export class PerformerService {
     return blocked > 0;
   }
 
-  public async findById(
-    id: string | ObjectId
-  ): Promise<PerformerModel> {
-    const model = await this.performerModel.findById(id);
-    if (!model) return null;
-    return model;
-  }
-
-  public async findOne(query) {
-    const data = await this.performerModel.findOne(query).lean();
-    return data;
-  }
-
   public async checkExistedEmailorUsername(payload) {
     const data = payload.username ? await this.performerModel.countDocuments({ username: payload.username.trim().toLowerCase() })
       : await this.performerModel.countDocuments({ email: payload.email.toLowerCase() });
+    return data;
+  }
+
+  public async findById(
+    id: string | ObjectId
+  ): Promise<PerformerDto> {
+    const model = await this.performerModel.findById(id);
+    if (!model) return null;
+    return new PerformerDto(model);
+  }
+
+  public async findOne(query) {
+    const data = await this.performerModel.findOne(query);
+    return data;
+  }
+
+  public async find(query) {
+    const data = await this.performerModel.find(query);
     return data;
   }
 
@@ -197,10 +201,10 @@ export class PerformerService {
     countryCode?: string,
     currentUser?: UserDto
   ): Promise<PerformerDto> {
-    const model = await this.performerModel.findOne({ username: username.trim() }).lean();
+    const model = await this.performerModel.findOne({ username: username.trim().toLowerCase() }).lean();
     if (!model) throw new BlockedCountryException();
     let isBlocked = false;
-    if (countryCode) {
+    if (countryCode && `${currentUser?._id}` !== `${model._id}`) {
       isBlocked = await this.checkBlockedByIp(model._id, countryCode);
       if (isBlocked) {
         throw new BlockedCountryException();
@@ -210,7 +214,7 @@ export class PerformerService {
     let isBookMarked = null;
     let isSubscribed = false;
     if (currentUser) {
-      isBlockedByPerformer = await this.checkBlockedByPerformer(
+      isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.checkBlockedByPerformer(
         model._id,
         currentUser._id
       );
@@ -380,7 +384,7 @@ export class PerformerService {
       data.coverPath = cover.path;
     }
 
-    // TODO - check for category Id, studio
+    // TODO - check for category Id, agent
     if (user) {
       data.createdBy = user._id;
     }
@@ -476,9 +480,9 @@ export class PerformerService {
     ]);
     const adminEmail = await SettingService.getValueByKey(SETTING_KEYS.ADMIN_EMAIL);
     adminEmail && await this.mailService.send({
-      subject: 'New model sign up',
+      subject: 'New user sign up',
       to: adminEmail,
-      data: performer,
+      data: { performer },
       template: 'new-performer-notify-admin.html'
     });
 
@@ -512,7 +516,7 @@ export class PerformerService {
       data.email = data.email.toLowerCase();
     }
 
-    if (data.username && data.username.trim() !== performer.username) {
+    if (data.username && data.username.trim().toLowerCase() !== performer.username) {
       const usernameCheck = await this.performerModel.countDocuments({
         username: data.username.trim().toLowerCase(),
         _id: { $ne: performer._id }
@@ -554,10 +558,20 @@ export class PerformerService {
     if (data.dateOfBirth) {
       data.dateOfBirth = new Date(data.dateOfBirth);
     }
-    await this.performerModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.performerModel.updateOne({ _id: id }, data, { new: true });
     const newPerformer = await this.performerModel.findById(performer._id);
     const oldStatus = performer.status;
     const oldGender = performer.gender;
+    const oldBalance = performer.balance;
+    // logs change token
+    if (oldBalance !== newPerformer.balance) {
+      await this.changeTokenLogModel.create({
+        source: CHANGE_TOKEN_LOG_SOURCES.PERFORMER,
+        sourceId: newPerformer._id,
+        token: newPerformer.balance - oldBalance,
+        createdAt: new Date()
+      });
+    }
     // fire event that updated performer status
     if (data.status !== performer.status) {
       await this.queueEventService.publish(
@@ -613,7 +627,7 @@ export class PerformerService {
       await auth.save();
     }
     // update auth key if username has changed
-    if ((data.username && data.username.trim() !== performer.username)) {
+    if ((data.username && data.username.trim().toLowerCase() !== performer.username)) {
       const auth = await this.authService.findOne({
         source: 'performer',
         sourceId: id,
@@ -644,33 +658,30 @@ export class PerformerService {
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
-    if (data.email && data.email.toLowerCase() !== performer.email) {
-      const emailCheck = await this.performerModel.countDocuments({
-        email: data.email.toLowerCase(),
-        _id: { $ne: performer._id }
-      });
-      const countUserEmail = await this.userService.checkExistedEmailorUsername({ email: data.email });
-      if (emailCheck || countUserEmail) {
-        throw new EmailHasBeenTakenException();
-      }
-      data.email = data.email.toLowerCase();
-    }
-
-    if (data.username && data.username.trim() !== performer.username) {
+    if (data.username && data.username !== performer.username) {
       const usernameCheck = await this.performerModel.countDocuments({
         username: data.username.trim().toLowerCase(),
         _id: { $ne: performer._id }
       });
-      const countUserUsername = await this.userService.checkExistedEmailorUsername({ username: data.username });
-      if (usernameCheck || countUserUsername) {
+      if (usernameCheck) {
         throw new UsernameExistedException();
       }
       data.username = data.username.trim().toLowerCase();
     }
+    if (data.email && data.email !== performer.email) {
+      const count = await this.performerModel.countDocuments({
+        email: data.email.toLowerCase(),
+        _id: { $ne: performer._id }
+      });
+      if (count) {
+        throw new EmailExistedException();
+      }
+      data.email = data.email.toLowerCase();
+    }
     if (data.dateOfBirth) {
       data.dateOfBirth = new Date(data.dateOfBirth);
     }
-    await this.performerModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.performerModel.updateOne({ _id: id }, data, { new: true });
     const newPerformer = await this.performerModel.findById(id);
     const oldGender = performer.gender;
     // fire event that updated performer gender
@@ -716,7 +727,7 @@ export class PerformerService {
       await auth.save();
     }
     // update auth key if username has changed
-    if (data.username && data.username.trim() !== performer.username) {
+    if (data.username && data.username.trim().toLowerCase() !== performer.username) {
       const auth = await this.authService.findOne({
         source: 'performer',
         sourceId: id,
@@ -732,7 +743,7 @@ export class PerformerService {
     return this.performerModel.create(data);
   }
 
-  public async updateAvatar(user: PerformerDto, file: FileDto) {
+  public async updateAvatar(user: UserDto, file: FileDto) {
     await this.performerModel.updateOne(
       { _id: user._id },
       {
@@ -750,7 +761,7 @@ export class PerformerService {
     return file;
   }
 
-  public async updateCover(user: PerformerDto, file: FileDto) {
+  public async updateCover(user: UserDto, file: FileDto) {
     await this.performerModel.updateOne(
       { _id: user._id },
       {
@@ -766,7 +777,7 @@ export class PerformerService {
     return file;
   }
 
-  public async updateWelcomeVideo(user: PerformerDto, file: FileDto) {
+  public async updateWelcomeVideo(user: UserDto, file: FileDto) {
     await this.performerModel.updateOne(
       { _id: user._id },
       {
@@ -783,6 +794,13 @@ export class PerformerService {
     return file;
   }
 
+  public async getBankInfo(performerId) {
+    const data = await this.bankingSettingModel.findOne({
+      performerId
+    });
+    return data;
+  }
+
   public async checkSubscribed(performerId: string | ObjectId, user: UserDto) {
     const count = performerId && user ? await this.subscriptionService.checkSubscribed(
       performerId,
@@ -797,7 +815,7 @@ export class PerformerService {
       {
         $inc: { 'stats.views': 1 }
       },
-      { upsert: true }
+      { new: true }
     );
   }
 
@@ -808,10 +826,9 @@ export class PerformerService {
     return this.performerModel.updateOne(
       { _id: id },
       {
-        $set: { lastStreamingTime: new Date(), live: false, streamingStatus: OFFLINE },
+        $set: { lastStreamingTime: new Date(), live: 0, streamingStatus: 'offline' },
         $inc: { 'stats.totalStreamTime': streamTime }
-      },
-      { upsert: true }
+      }
     );
   }
 
@@ -819,15 +836,15 @@ export class PerformerService {
     id: string | ObjectId,
     payload: Record<string, number>
   ) {
-    return this.performerModel.updateOne({ _id: id }, { $inc: payload }, { upsert: true });
+    return this.performerModel.updateOne({ _id: id }, { $inc: payload });
   }
 
   public async goLive(id: string | ObjectId) {
-    return this.performerModel.updateOne({ _id: id }, { $set: { live: true } }, { upsert: true });
+    return this.performerModel.updateOne({ _id: id }, { $set: { live: 1 } });
   }
 
   public async setStreamingStatus(id: string | ObjectId, streamingStatus: string) {
-    return this.performerModel.updateOne({ _id: id }, { $set: { streamingStatus } }, { upsert: true });
+    return this.performerModel.updateOne({ _id: id }, { $set: { streamingStatus } });
   }
 
   public async updatePaymentGateway(payload: PaymentGatewaySettingPayload) {
@@ -895,9 +912,11 @@ export class PerformerService {
     item.monthlySubscriptionCommission = payload.monthlySubscriptionCommission;
     item.yearlySubscriptionCommission = payload.yearlySubscriptionCommission;
     item.videoSaleCommission = payload.videoSaleCommission;
+    item.gallerySaleCommission = payload.gallerySaleCommission;
     item.productSaleCommission = payload.productSaleCommission;
     item.tipCommission = payload.tipCommission;
     item.feedSaleCommission = payload.feedSaleCommission;
+    item.streamCommission = payload.streamCommission;
     return item.save();
   }
 
@@ -906,15 +925,10 @@ export class PerformerService {
     payload: BankingSettingPayload,
     currentUser: UserDto
   ) {
-    if (
-      (currentUser.roles
-        && currentUser.roles.indexOf('admin') === -1
-        && currentUser._id.toString() !== performerId)
-      || (!currentUser.roles
-        && currentUser
-        && currentUser._id.toString() !== performerId)
-    ) {
-      throw new NotAcceptableException('Permission denied');
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
+    if (!currentUser?.roles.includes('admin') && `${currentUser._id}` !== `${performerId}`) {
+      throw new HttpException('Permission denied', 403);
     }
     let item = await this.bankingSettingModel.findOne({
       performerId
@@ -946,7 +960,7 @@ export class PerformerService {
         _id: userId
       },
       { status: STATUS.INACTIVE, verifiedEmail: true },
-      { upsert: true }
+      { new: true }
     );
   }
 
@@ -1039,6 +1053,10 @@ export class PerformerService {
     subscription.blockedUser = false;
     await subscription.save();
     return true;
+  }
+
+  public async updatePerformerBalance(performerId: string | ObjectId, tokens: number) {
+    await this.performerModel.updateOne({ _id: performerId }, { $inc: { balance: tokens } }, { upsert: true });
   }
 
   public async getBlockedUsers(

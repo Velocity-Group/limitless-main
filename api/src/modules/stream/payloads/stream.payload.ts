@@ -22,9 +22,8 @@ export class StreamPayload {
   id: string;
 
   @ApiProperty()
-  @IsBoolean()
   @IsOptional()
-  isStreaming: boolean;
+  isStreaming: number;
 
   @ApiProperty()
   @IsOptional()
@@ -34,9 +33,4 @@ export class StreamPayload {
   @IsNumber()
   @IsOptional()
   streamingTime: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  totalViewer: number;
 }

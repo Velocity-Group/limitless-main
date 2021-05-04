@@ -3,60 +3,69 @@ import { pick } from 'lodash';
 import { GalleryModel } from '../models';
 
 export class GalleryDto {
-  _id?: ObjectId;
+  _id: ObjectId;
 
-  performerId?: ObjectId;
+  performerId: ObjectId;
 
-  type?: string;
+  type: string;
 
-  name?: string;
+  title: string;
 
-  description?: string;
+  description: string;
 
-  status?: string;
+  status: string;
 
-  processing?: boolean;
+  processing: boolean;
 
-  coverPhotoId?: ObjectId;
+  coverPhotoId: ObjectId;
 
-  price?: number;
+  price: number;
 
-  coverPhoto?: Record<string, any>;
+  coverPhoto: Record<string, any>;
 
-  performer?: any;
+  performer: any;
 
-  createdBy?: ObjectId;
+  createdBy: ObjectId;
 
-  updatedBy?: ObjectId;
+  updatedBy: ObjectId;
 
-  createdAt?: Date;
+  createdAt: Date;
 
-  updatedAt?: Date;
+  updatedAt: Date;
 
-  tagline?: string;
+  isSale: boolean;
 
-  isBookMarked?: boolean;
+  isBookMarked: boolean;
 
-  constructor(init?: Partial<GalleryDto>) {
+  isSubscribed: boolean;
+
+  isBought: boolean;
+
+  isGallery = true;
+
+  constructor(init: Partial<GalleryDto>) {
     Object.assign(
       this,
       pick(init, [
         '_id',
         'performerId',
         'type',
-        'name',
+        'title',
         'description',
         'status',
         'coverPhotoId',
         'price',
+        'isSale',
         'coverPhoto',
         'performer',
         'createdBy',
         'updatedBy',
         'createdAt',
         'updatedAt',
-        'tagline',
-        'isBookMarked'
+        'isBookMarked',
+        'isSubscribed',
+        'isBought',
+        'isGallery'
       ])
     );
   }

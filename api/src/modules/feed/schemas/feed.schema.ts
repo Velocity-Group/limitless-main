@@ -2,7 +2,10 @@ import { Schema } from 'mongoose';
 import { STATUS } from 'src/kernel/constants';
 
 export const FeedSchema = new Schema({
-  type: { type: String, index: true },
+  type: {
+    type: String,
+    index: true
+  },
   fromSourceId: {
     type: Schema.Types.ObjectId,
     index: true
@@ -15,28 +18,25 @@ export const FeedSchema = new Schema({
   text: { type: String },
   fileIds: [{
     type: Schema.Types.ObjectId,
-    _id: false,
-    index: true
+    _id: false
   }],
   pollIds: [{
     type: Schema.Types.ObjectId,
-    _id: false,
-    index: true
+    _id: false
   }],
   pollExpiredAt: {
-    type: Date, default: Date.now
+    type: Date,
+    default: Date.now
   },
   orientation: {
     type: String,
     index: true
   },
   teaserId: {
-    type: Schema.Types.ObjectId,
-    index: true
+    type: Schema.Types.ObjectId
   },
   thumbnailId: {
-    type: Schema.Types.ObjectId,
-    index: true
+    type: Schema.Types.ObjectId
   },
   status: {
     type: String,
@@ -50,6 +50,8 @@ export const FeedSchema = new Schema({
   totalComment: { type: Number, default: 0 },
   isSale: { type: Boolean, default: false },
   price: { type: Number, default: 0 },
+  isSchedule: { type: Boolean, default: false },
+  scheduleAt: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

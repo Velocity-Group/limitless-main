@@ -1,10 +1,11 @@
 /* eslint-disable no-shadow */
-export const FEED_TYPES = ['text', 'video', 'photo'];
+export const FEED_TYPES = ['text', 'video', 'photo', 'audio'];
 
 export enum FEED_TYPE {
   TEXT = 'text',
   VIDEO = 'video',
-  PHOTO = 'photo'
+  PHOTO = 'photo',
+  AUDIO = 'audio'
 }
 
 export const FEED_SOURCE = {
@@ -26,3 +27,7 @@ export const VOTE_FEED_CHANNEL = 'VOTE_FEED_CHANNEL';
 export const FEED_VIDEO_CHANNEL = 'FEED_VIDEO_CHANNEL';
 
 export const FEED_TEASER_CHANNEL = 'FEED_TEASER_CHANNEL';
+
+export const FEED_AUDIO_CHANNEL = 'FEED_AUDIO_CHANNEL';
+
+export const SCHEDULE_FEED_AGENDA = 'SCHEDULE_FEED_AGENDA';

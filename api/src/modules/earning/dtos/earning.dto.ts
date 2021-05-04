@@ -18,11 +18,17 @@ export class EarningDto {
 
   sourceType: string;
 
+  type: string;
+
   grossPrice: number;
 
   netPrice: number;
 
-  commission: number;
+  referralPrice: number;
+
+  siteCommission: number;
+
+  referralCommission: number;
 
   isPaid?: boolean;
 
@@ -31,6 +37,14 @@ export class EarningDto {
   paidAt?: Date;
 
   transactionStatus?: string;
+
+  isToken?: boolean;
+
+  agentId?: ObjectId | string;
+
+  agentCommission?: number;
+
+  agentPrice?: number;
 
   constructor(data?: Partial<EarningDto>) {
     Object.assign(
@@ -44,13 +58,17 @@ export class EarningDto {
         'performerId',
         'performerInfo',
         'sourceType',
+        'type',
         'grossPrice',
         'netPrice',
+        'referralPrice',
         'isPaid',
-        'commission',
+        'siteCommission',
+        'referralCommission',
         'createdAt',
         'paidAt',
-        'transactionStatus'
+        'transactionStatus',
+        'isToken'
       ])
     );
   }
@@ -59,5 +77,7 @@ export class EarningDto {
 export interface IEarningStatResponse {
   totalGrossPrice: number;
   totalNetPrice: number;
-  totalCommission: number;
+  totalSiteCommission: number;
+  totalReferralCommission?: number;
+  totalAgentCommission?: number;
 }

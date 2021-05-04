@@ -9,7 +9,7 @@ export class SubscriptionCreatePayload {
   @IsIn([
     SUBSCRIPTION_TYPE.MONTHLY,
     SUBSCRIPTION_TYPE.YEARLY,
-    SUBSCRIPTION_TYPE.SYSTEM
+    SUBSCRIPTION_TYPE.FREE
   ])
   subscriptionType = SUBSCRIPTION_TYPE.MONTHLY;
 

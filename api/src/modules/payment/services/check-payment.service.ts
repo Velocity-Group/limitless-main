@@ -1,43 +1,65 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { UserDto } from 'src/modules/user/dtos';
 import { EntityNotFoundException } from 'src/kernel';
 import { Model } from 'mongoose';
 import { ProductDto, VideoDto } from 'src/modules/performer-assets/dtos';
-import { ORDER_DETAIL_MODEL_PROVIDER } from '../providers';
-import { OrderDetailsModel } from '../models';
+import { FeedDto } from 'src/modules/feed/dtos';
+import { PerformerDto } from 'src/modules/performer/dtos';
+import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
+import { PaymentTransactionModel } from '../models';
 import {
-  ORDER_STATUS
+  PAYMENT_STATUS,
+  PAYMENT_TYPE
 } from '../constants';
 
 @Injectable()
 export class CheckPaymentService {
   constructor(
-    @Inject(ORDER_DETAIL_MODEL_PROVIDER)
-    private readonly orderDetailsModel: Model<OrderDetailsModel>
+    @Inject(PAYMENT_TRANSACTION_MODEL_PROVIDER)
+    private readonly paymentTransactionModel: Model<PaymentTransactionModel>
   ) { }
 
-  public checkBoughtVideo = async (video: VideoDto, user: UserDto) => {
+  public checkBoughtVideo = async (video: VideoDto, user: PerformerDto) => {
+    if (!video || (video && !video.isSale) || (video && !video.price)) {
+      throw new EntityNotFoundException();
+    }
     if (video.performerId.toString() === user._id.toString()) {
       return 1;
     }
-    return this.orderDetailsModel.countDocuments({
-      status: ORDER_STATUS.PAID,
-      productId: video._id,
-      buyerId: user._id
+    return this.paymentTransactionModel.countDocuments({
+      type: PAYMENT_TYPE.SALE_VIDEO,
+      targetId: video._id,
+      sourceId: user._id,
+      status: PAYMENT_STATUS.SUCCESS
     });
   }
 
-  public async checkBoughtProduct(product: ProductDto, user: UserDto) {
+  public async checkBoughtProduct(product: ProductDto, user: PerformerDto) {
     if (!product || (product && !product.price)) {
       throw new EntityNotFoundException();
     }
     if (product.performerId.toString() === user._id.toString()) {
       return 1;
     }
-    return this.orderDetailsModel.countDocuments({
-      status: ORDER_STATUS.PAID,
-      productId: product._id,
-      buyerId: user._id
+    return this.paymentTransactionModel.countDocuments({
+      type: PAYMENT_TYPE.PRODUCT,
+      targetId: product._id,
+      sourceId: user._id,
+      status: PAYMENT_STATUS.SUCCESS
+    });
+  }
+
+  public checkBoughtFeed = async (feed: FeedDto, user: PerformerDto) => {
+    if (!feed || (feed && !feed.isSale) || (feed && !feed.price)) {
+      throw new EntityNotFoundException();
+    }
+    if (feed.fromSourceId.toString() === user._id.toString()) {
+      return 1;
+    }
+    return this.paymentTransactionModel.countDocuments({
+      type: PAYMENT_TYPE.FEED,
+      targetId: feed._id,
+      sourceId: user._id,
+      status: PAYMENT_STATUS.SUCCESS
     });
   }
 }

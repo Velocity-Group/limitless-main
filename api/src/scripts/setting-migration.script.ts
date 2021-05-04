@@ -88,17 +88,17 @@ export class SettingMigration {
         editable: true,
         type: 'text-editor'
       },
-      // {
-      //   key: SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
-      //   value: false,
-      //   name: 'Mandatory email verification',
-      //   description:
-      //     'If active, user must verify email before login to system',
-      //   type: 'boolean',
-      //   public: true,
-      //   group: 'general',
-      //   editable: true
-      // },
+      {
+        key: SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
+        value: false,
+        name: 'Mandatory email verification',
+        description:
+          'If active, user must verify email before login to system',
+        type: 'boolean',
+        public: false,
+        group: 'general',
+        editable: true
+      },
       {
         key: SETTING_KEYS.MAINTENANCE_MODE,
         value: false,
@@ -191,7 +191,7 @@ export class SettingMigration {
         key: SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION,
         value: 0.2,
         name: 'Monthly subscription commission',
-        description: 'Monthly subscription commission 0.01-0.99 (1%-99%)',
+        description: 'Commission is 0.01 to 0.99 (1%-99%)',
         public: false,
         group: 'commission',
         editable: true,
@@ -201,27 +201,37 @@ export class SettingMigration {
         key: SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION,
         value: 0.2,
         name: 'Yearly subscription commission',
-        description: 'Yearly subscription commission 0.01-0.99 (1%-99%)',
+        description: '0.2 mean that Admin will get 20% of total tokens earned & user will get 80%',
         public: false,
         group: 'commission',
         editable: true,
         type: 'number'
       },
-      // {
-      //   key: SETTING_KEYS.VIDEO_SALE_COMMISSION,
-      //   value: 0.2,
-      //   name: 'Video for sale commission',
-      //   description: 'Video for sale commission 0.01-0.99 (1%-99%)',
-      //   public: false,
-      //   group: 'commission',
-      //   editable: true,
-      //   type: 'number'
-      // },
+      {
+        key: SETTING_KEYS.VIDEO_SALE_COMMISSION,
+        value: 0.2,
+        name: 'Video commission',
+        description: '',
+        public: false,
+        group: 'commission',
+        editable: true,
+        type: 'number'
+      },
+      {
+        key: SETTING_KEYS.GALLERY_SALE_COMMISSION,
+        value: 0.2,
+        name: 'Gallery commission',
+        description: '',
+        public: false,
+        group: 'commission',
+        editable: true,
+        type: 'number'
+      },
       {
         key: SETTING_KEYS.PRODUCT_SALE_COMMISSION,
         value: 0.2,
-        name: 'Product for sale commission',
-        description: 'Product for sale commission 0.01-0.99 (1%-99%)',
+        name: 'Product commission',
+        description: '',
         public: false,
         group: 'commission',
         editable: true,
@@ -230,8 +240,7 @@ export class SettingMigration {
       {
         key: SETTING_KEYS.FEED_SALE_COMMISSION,
         value: 0.2,
-        name: 'Post for sale commission',
-        description: 'Post for sale commission 0.01-0.99 (1%-99%)',
+        name: 'Post Feed commission',
         public: false,
         group: 'commission',
         editable: true,
@@ -241,27 +250,27 @@ export class SettingMigration {
         key: SETTING_KEYS.TIP_COMMISSION,
         value: 0.2,
         name: 'Tip commission',
-        description: 'Setting tip commission 0.01-0.99 (1%-99%)',
+        description: '',
         public: false,
         group: 'commission',
         editable: true,
         type: 'number'
       },
+      // {
+      //   key: SETTING_KEYS.MESSAGE_COMMISSION,
+      //   value: 0.2,
+      //   name: 'Message commission',
+      //   description: '',
+      //   public: false,
+      //   group: 'commission',
+      //   editable: true,
+      //   type: 'number'
+      // },
       {
-        key: SETTING_KEYS.PUBLIC_CHAT_COMMISSION,
+        key: SETTING_KEYS.STREAM_COMMISSION,
         value: 0.2,
-        name: 'Public chat commission',
-        description: 'Setting public chat commission 0.01-0.99 (1%-99%)',
-        public: false,
-        group: 'commission',
-        editable: true,
-        type: 'number'
-      },
-      {
-        key: SETTING_KEYS.PRIVATE_CHAT_COMMISSION,
-        value: 0.2,
-        name: 'Private chat commission',
-        description: 'Setting private chat commission 0.01-0.99 (1%-99%)',
+        name: 'Streaming commission',
+        description: '',
         public: false,
         group: 'commission',
         editable: true,
@@ -281,27 +290,7 @@ export class SettingMigration {
         key: SETTING_KEYS.CCBILL_SUB_ACCOUNT_NUMBER,
         value: '',
         name: 'Sub account number',
-        description: 'CCbill sub account number (using for card authorization)',
-        public: false,
-        group: 'ccbill',
-        editable: true,
-        type: 'text'
-      },
-      {
-        key: SETTING_KEYS.CCBILL_USERNAME,
-        value: '',
-        name: 'Data link service username',
-        description: 'Log in to CCbill admin panel -> Account Info -> Data link services suite',
-        public: false,
-        group: 'ccbill',
-        editable: true,
-        type: 'text'
-      },
-      {
-        key: SETTING_KEYS.CCBILL_PASSWORD,
-        value: '',
-        name: 'Data link service password',
-        description: 'https://admin.ccbill.com/megamenus/ccbillHome.html#AccountInfo/DataLinkServicesSuite(234)',
+        description: 'CCbill sub account number',
         public: false,
         group: 'ccbill',
         editable: true,
@@ -310,7 +299,7 @@ export class SettingMigration {
       {
         key: SETTING_KEYS.CCBILL_FLEXFORM_ID,
         value: '',
-        name: '',
+        name: 'Flexform ID',
         description: 'CCbill flexform ID',
         public: false,
         group: 'ccbill',
@@ -321,22 +310,12 @@ export class SettingMigration {
         key: SETTING_KEYS.CCBILL_SALT,
         value: '',
         name: 'Salt key',
-        description: 'CCbill salt key',
+        description: 'CCbill main-account or sub-account salt key',
         public: false,
         group: 'ccbill',
         editable: true,
         type: 'text'
       },
-      // {
-      //   key: SETTING_KEYS.CCBILL_CURRENCY_CODE,
-      //   value: '840',
-      //   name: 'Currency code',
-      //   description: 'CCbill currency code',
-      //   public: false,
-      //   group: 'ccbill',
-      //   editable: true,
-      //   type: 'text'
-      // },
       {
         key: SETTING_KEYS.SMTP_TRANSPORTER,
         value: {
@@ -484,6 +463,20 @@ export class SettingMigration {
         value: 'hls',
         name: 'Option for broadcast ',
         description: 'Option Broadcast',
+        public: true,
+        group: 'ant',
+        editable: true,
+        type: 'radio',
+        extra: 'Apply for Ant enterprise option only',
+        meta: {
+          value: [{ key: 'hls', name: 'HLS' }, { key: 'webrtc', name: 'webRTC' }]
+        }
+      },
+      {
+        key: SETTING_KEYS.OPTION_FOR_GROUP,
+        value: 'hls',
+        name: 'Option for group ',
+        description: 'Option Group',
         public: true,
         group: 'ant',
         editable: true,

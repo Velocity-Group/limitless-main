@@ -13,6 +13,8 @@ export class EarningSearchRequestPayload extends SearchRequest {
 
   sourceType?: string;
 
+  type?: string;
+
   fromDate?: string | Date;
 
   toDate?: Date;
@@ -20,6 +22,8 @@ export class EarningSearchRequestPayload extends SearchRequest {
   paidAt?: Date;
 
   isPaid?: boolean;
+
+  isToken?: any;
 }
 
 export class UpdateEarningStatusPayload {

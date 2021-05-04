@@ -6,11 +6,10 @@ import { AuthService } from 'src/modules/auth/services';
 import { StreamService } from 'src/modules/stream/services';
 import { PUBLIC_CHAT } from 'src/modules/stream/constant';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
-import { UserService } from 'src/modules/user/services';
-import { UserDto } from 'src/modules/user/dtos';
 import * as moment from 'moment';
 import { PerformerService } from 'src/modules/performer/services';
 import { ConversationService } from 'src/modules/message/services';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { StreamModel } from '../models';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
 
@@ -19,8 +18,6 @@ export class PublicStreamWsGateway {
   constructor(
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
-    @Inject(forwardRef(() => UserService))
-    private readonly userService: UserService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
     @Inject(forwardRef(() => ConversationService))
@@ -54,7 +51,7 @@ export class PublicStreamWsGateway {
         performerId: user._id,
         conversationId
       });
-      await Promise.all([this.performerService.goLive(user._id), this.streamModel.updateOne({ _id: conversation.streamId }, { $set: { isStreaming: true } })]);
+      await Promise.all([this.performerService.goLive(user._id), this.streamModel.updateOne({ _id: conversation.streamId }, { $set: { isStreaming: 1 } })]);
     } catch (error) {
       console.log(error);
     }
@@ -78,23 +75,17 @@ export class PublicStreamWsGateway {
 
       const { performerId, type } = conversation;
       const decodded = token && await this.authService.verifyJWT(token);
-      let user: any;
-      if (decodded && decodded.source === 'user') {
-        user = await this.userService.findById(decodded.sourceId);
-      }
-      if (decodded && decodded.source === 'performer') {
-        user = await this.performerService.findById(decodded.sourceId);
-      }
+      const user = await this.performerService.findById(decodded.sourceId);
       const roomName = this.streamService.getRoomName(conversationId, type);
-      client.join(roomName);
+      await client.join(roomName);
       let role = 'guest';
       if (user) {
-        role = user.roles && user.roles.includes('user') ? 'member' : 'model';
+        role = `${user._id}` === `${performerId}` ? 'model' : 'member';
         await this.socketService.emitToRoom(
           roomName,
           `message_created_conversation_${conversation._id}`,
           {
-            text: `${user.username} has joined this conversation`,
+            text: `${user?.name || user?.username || 'N/A'} has joined this conversation`,
             _id: conversation._id,
             conversationId,
             isSystem: true
@@ -126,11 +117,11 @@ export class PublicStreamWsGateway {
         await this.socketService.emitToUsers(memberIds, 'model-joined', { conversationId });
       }
 
-      const members = (memberIds.length && await this.userService.findByIds(memberIds)) || [];
+      const members = (memberIds.length && await this.performerService.findByIds(memberIds)) || [];
       const data = {
         conversationId,
         total: members.length,
-        members: members.map((m) => new UserDto(m).toResponse())
+        members: members.map((m) => new PerformerDto(m).toResponse())
       };
       this.socketService.emitToRoom(roomName, 'public-room-changed', data);
 
@@ -138,7 +129,6 @@ export class PublicStreamWsGateway {
         type: PUBLIC_CHAT
       });
       if (!stream) return;
-
       if (stream.isStreaming) {
         this.socketService.emitToRoom(roomName, 'join-broadcaster', {
           performerId,
@@ -172,7 +162,7 @@ export class PublicStreamWsGateway {
         token && this.authService.getSourceFromJWT(token)
       ]);
       const roomName = this.streamService.getRoomName(conversationId, type);
-      client.leave(roomName);
+      await client.leave(roomName);
 
       const [stream] = await Promise.all([
         this.streamService.findByPerformerId(performerId, {
@@ -185,7 +175,7 @@ export class PublicStreamWsGateway {
           roomName,
           `message_created_conversation_${payload.conversationId}`,
           {
-            text: `${user.username} has left this conversation`,
+            text: `${user?.name || user?.username || 'N/A'} left this conversation`,
             _id: payload.conversationId,
             conversationId,
             isSystem: true
@@ -203,23 +193,21 @@ export class PublicStreamWsGateway {
             const streamTime = moment()
               .toDate()
               .getTime() - timeJoined;
+
             if (role === 'model') {
               await Promise.all([
-                // this.performerService.updateStats(user._id, {
-                //   'stats.totalStreamTime': streamTime
-                // }),
                 this.performerService.updateLastStreamingTime(
                   user._id,
                   streamTime
                 ),
-                stream && stream.isStreaming && this.streamModel.updateOne({ _id: stream._id }, { $set: { lastStreamingTime: new Date(), isStreaming: false } }),
+                stream && stream.isStreaming && this.streamModel.updateOne({ _id: stream._id }, { $set: { lastStreamingTime: new Date(), isStreaming: 0, streamingTime: streamTime / 1000 } }),
                 this.socketService.emitToRoom(roomName, 'model-left', {
                   performerId,
                   conversationId
                 })
               ]);
             } else if (role === 'member') {
-              await this.userService.updateStats(user._id, {
+              await this.performerService.updateStats(user._id, {
                 'stats.totalViewTime': streamTime
               });
             }
@@ -242,11 +230,11 @@ export class PublicStreamWsGateway {
           memberIds.push(id);
         }
       });
-      const members = await this.userService.findByIds(memberIds);
+      const members = await this.performerService.findByIds(memberIds);
       const data = {
         conversationId,
         total: members.length,
-        members: members.map((m) => new UserDto(m).toResponse())
+        members: members.map((m) => new PerformerDto(m).toResponse())
       };
       await this.socketService.emitToRoom(roomName, 'public-room-changed', data);
     } catch (e) {

@@ -5,27 +5,29 @@ import {
   IsEmail,
   IsNotEmpty,
   IsIn,
-  MinLength
+  MinLength,
+  IsBoolean
 } from 'class-validator';
 import { Username } from 'src/modules/user/validators/username.validator';
-import { GENDERS } from 'src/modules/user/constants';
+import { PERFORMER_STATUSES } from 'src/modules/performer/constants';
 import { ApiProperty } from '@nestjs/swagger';
+import { ObjectId } from 'mongodb';
 
 export class PerformerRegisterPayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  name: string;
+  name?: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  firstName: string;
+  firstName?: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  lastName: string;
+  lastName?: string;
 
   @ApiProperty()
   @IsString()
@@ -38,7 +40,13 @@ export class PerformerRegisterPayload {
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  password?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsIn([PERFORMER_STATUSES.ACTIVE, PERFORMER_STATUSES.INACTIVE, PERFORMER_STATUSES.PENDING])
+  @IsOptional()
+  status = PERFORMER_STATUSES.ACTIVE;
 
   @ApiProperty()
   @IsEmail()
@@ -47,12 +55,56 @@ export class PerformerRegisterPayload {
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsIn(GENDERS)
-  gender: string;
+  @IsOptional()
+  phone?: string;
 
   @ApiProperty()
-  @IsNotEmpty()
   @IsString()
-  dateOfBirth: string
+  @IsOptional()
+  phoneCode?: string; // international code prefix
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  avatarId?: ObjectId;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  verifiedEmail?: boolean;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  verifiedAccount?: boolean;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  idVerificationId?: ObjectId;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  documentVerificationId?: ObjectId;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  gender?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  dateOfBirth: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  invitationId: string | ObjectId;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  referralId: string | ObjectId;
 }

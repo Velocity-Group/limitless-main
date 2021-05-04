@@ -15,13 +15,14 @@ import {
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
+import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserDto } from 'src/modules/user/dtos';
 import { EarningService } from '../services/earning.service';
 import {
   EarningSearchRequestPayload,
   UpdateEarningStatusPayload
 } from '../payloads';
 import { EarningDto, IEarningStatResponse } from '../dtos/earning.dto';
-import { UserDto } from '../../user/dtos';
 
 @Injectable()
 @Controller('earning')
@@ -34,11 +35,9 @@ export class EarningController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async adminSearch(
-    @Query() req: EarningSearchRequestPayload,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @CurrentUser() user: UserDto
+    @Query() req: EarningSearchRequestPayload
   ): Promise<DataResponse<PageableData<EarningDto>>> {
-    const data = await this.earningService.search(req, true);
+    const data = await this.earningService.admminSearch(req);
     return DataResponse.ok(data);
   }
 
@@ -51,8 +50,7 @@ export class EarningController {
     @Query() req: EarningSearchRequestPayload,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<PageableData<EarningDto>>> {
-    req.performerId = user._id;
-    const data = await this.earningService.search(req);
+    const data = await this.earningService.search(req, user);
     return DataResponse.ok(data);
   }
 
@@ -75,7 +73,7 @@ export class EarningController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async performerStats(
     @Query() req: EarningSearchRequestPayload,
-    @CurrentUser() user: UserDto
+    @CurrentUser() user: PerformerDto
   ): Promise<DataResponse<IEarningStatResponse>> {
     req.performerId = user._id;
     const data = await this.earningService.stats(req);

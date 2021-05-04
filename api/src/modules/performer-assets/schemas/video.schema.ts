@@ -30,7 +30,7 @@ export const VideoSchema = new Schema({
     type: Boolean,
     default: false
   },
-  isSaleVideo: {
+  isSale: {
     type: Boolean,
     default: false
   },
@@ -48,6 +48,10 @@ export const VideoSchema = new Schema({
   },
   stats: {
     likes: {
+      type: Number,
+      default: 0
+    },
+    favourites: {
       type: Number,
       default: 0
     },

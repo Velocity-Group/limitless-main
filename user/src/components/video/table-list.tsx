@@ -26,15 +26,13 @@ export class TableListVideo extends PureComponent<IProps> {
     const columns = [
       {
         title: 'Title',
-        dataIndex: 'title',
-        sorter: true
+        dataIndex: 'title'
       },
       {
         title: 'For Sale',
-        dataIndex: 'isSaleVideo',
-        sorter: true,
-        render(isSaleVideo: boolean) {
-          switch (isSaleVideo) {
+        dataIndex: 'isSale',
+        render(isSale: boolean) {
+          switch (isSale) {
             case true:
               return <Tag color="green">Y</Tag>;
             case false:
@@ -45,14 +43,13 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Price',
+        title: 'Amount of Tokens',
         dataIndex: 'price',
-        sorter: true,
         render(price: number) {
           return (
             <span>
-              $
-              {price}
+              <img src="/coin-ico.png" alt="coin" width="20px" />
+              {(price || 0).toFixed(2)}
             </span>
           );
         }
@@ -60,7 +57,6 @@ export class TableListVideo extends PureComponent<IProps> {
       {
         title: 'Status',
         dataIndex: 'status',
-        sorter: true,
         render(status: string) {
           switch (status) {
             case 'active':

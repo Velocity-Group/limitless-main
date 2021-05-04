@@ -3,18 +3,14 @@ import {
   Input, Row, Col, Button, Select
 } from 'antd';
 import { omit } from 'lodash';
-import {
-  ArrowDownOutlined,
-  ArrowUpOutlined
-} from '@ant-design/icons';
+import { } from '@ant-design/icons';
 import { ICountry } from '@interfaces/index';
 import { utilsService } from '@services/index';
 
 const genders = [
-  { key: '', text: 'All orientations' },
+  { key: '', text: 'All genders' },
   { key: 'male', text: 'Male' },
   { key: 'female', text: 'Female' },
-  { key: 'couple', text: 'Couple' },
   { key: 'transgender', text: 'Trans' }
 ];
 

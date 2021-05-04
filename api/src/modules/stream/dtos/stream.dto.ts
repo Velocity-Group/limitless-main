@@ -9,8 +9,7 @@ export interface IStream {
   type?: string;
   userIds?: ObjectId[];
   sessionId?: string;
-  isStreaming?: boolean;
-  totalViewer?: number;
+  isStreaming?: number;
   streamingTime?: number;
   lastStreamingTime?: Date;
   price?: number;
@@ -23,6 +22,8 @@ export class StreamDto {
 
   performerId: string | ObjectId;
 
+  performerInfo: any;
+
   userIds: ObjectId[];
 
   streamIds: string[];
@@ -31,15 +32,13 @@ export class StreamDto {
 
   sessionId: string;
 
-  isStreaming: boolean;
-
-  totalViewer: number;
+  isStreaming: number;
 
   streamingTime: number;
 
   lastStreamingTime: Date;
 
-  price: number;
+  isFree: boolean;
 
   createdAt: Date;
 
@@ -51,15 +50,15 @@ export class StreamDto {
       _.pick(data, [
         '_id',
         'performerId',
+        'performerInfo',
         'userIds',
         'type',
         'streamIds',
         'sessionId',
         'isStreaming',
-        'totalViewer',
         'streamingTime',
         'lastStreamingTime',
-        'price',
+        'isFree',
         'createdAt',
         'updatedAt'
       ])
@@ -70,11 +69,11 @@ export class StreamDto {
     const publicInfo = {
       _id: this._id,
       isStreaming: this.isStreaming,
-      totalViewer: this.totalViewer,
       streamingTime: this.streamingTime,
       lastStreamingTime: this.lastStreamingTime,
-      price: this.price,
-      performerId: this.performerId
+      isFree: this.isFree,
+      performerId: this.performerId,
+      performerInfo: this.performerInfo
     };
     if (!includePrivateInfo) {
       return publicInfo;

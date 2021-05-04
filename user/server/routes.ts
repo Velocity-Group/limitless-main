@@ -19,6 +19,7 @@ export default routes()
   .add('error', '/error', '/error')
   .add('home', '/home', '/home')
   .add('search', '/search', '/search')
+  .add('token-package', '/token-package', '/token-package')
   // performer
   .add('models', '/model', '/model')
   .add('account', '/model/account', '/model/account')

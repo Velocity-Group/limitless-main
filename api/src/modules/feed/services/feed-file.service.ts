@@ -4,7 +4,6 @@ import {
 import { FileDto } from 'src/modules/file';
 import { FileService } from 'src/modules/file/services';
 import { InvalidFeedTypeException } from '../exceptions';
-import { FEED_VIDEO_CHANNEL } from '../constants';
 
 @Injectable()
 export class FeedFileService {
@@ -29,13 +28,17 @@ export class FeedFileService {
       throw new InvalidFeedTypeException('Invalid video file!');
     }
 
-    await this.fileService.queueProcessVideo(video._id, {
-      publishChannel: FEED_VIDEO_CHANNEL,
-      meta: {
-        videoId: video._id
-      }
-    });
+    await this.fileService.queueProcessVideo(video._id, {});
+    return true;
+  }
 
+  public async validateAudio(audio: FileDto): Promise<any> {
+    if (!audio.isAudio()) {
+      await this.fileService.remove(audio._id);
+
+      throw new InvalidFeedTypeException('Invalid audio file!');
+    }
+    await this.fileService.queueProcessAudio(audio._id, {});
     return true;
   }
 }

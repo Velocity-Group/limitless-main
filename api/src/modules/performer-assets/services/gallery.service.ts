@@ -1,4 +1,7 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+/* eslint-disable no-param-reassign */
+import {
+  Injectable, Inject, forwardRef, HttpException
+} from '@nestjs/common';
 import { Model } from 'mongoose';
 import {
   EntityNotFoundException,
@@ -6,11 +9,14 @@ import {
 } from 'src/kernel';
 import { PerformerService } from 'src/modules/performer/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
-import { UserDto } from 'src/modules/user/dtos';
 import { ObjectId } from 'mongodb';
 import { merge } from 'lodash';
 import { FileService } from 'src/modules/file/services';
 import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
+import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
+import { PaymentTokenService, PurchasedItemSearchService } from 'src/modules/purchased-item/services';
+import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
+import { UserDto } from 'src/modules/user/dtos';
 import { GalleryUpdatePayload } from '../payloads/gallery-update.payload';
 import { GalleryDto } from '../dtos';
 import { GalleryCreatePayload, GallerySearchRequest } from '../payloads';
@@ -24,18 +30,23 @@ import { PhotoService } from './photo.service';
 @Injectable()
 export class GalleryService {
   constructor(
+    @Inject(forwardRef(() => SubscriptionService))
+    private readonly subscriptionService: SubscriptionService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
+    @Inject(forwardRef(() => PhotoService))
+    private readonly photoService: PhotoService,
+    @Inject(forwardRef(() => PaymentTokenService))
+    private readonly paymentTokenService: PaymentTokenService,
+    @Inject(forwardRef(() => PurchasedItemSearchService))
+    private readonly purchasedItemSearchService: PurchasedItemSearchService,
     @Inject(PERFORMER_GALLERY_MODEL_PROVIDER)
     private readonly galleryModel: Model<GalleryModel>,
-    // Circular dependency, cannot query
     @Inject(PERFORMER_PHOTO_MODEL_PROVIDER)
     private readonly photoModel: Model<PhotoModel>,
-    private readonly fileService: FileService,
-    @Inject(forwardRef(() => PhotoService))
-    private readonly photoService: PhotoService
+    private readonly fileService: FileService
   ) {}
 
   public async create(
@@ -127,11 +138,43 @@ export class GalleryService {
     return dto;
   }
 
+  public async downloadZipPhotos(galleryId: string | ObjectId, user: UserDto) {
+    const gallery = await this.galleryModel.findOne({ _id: galleryId });
+    if (!gallery) {
+      throw new EntityNotFoundException();
+    }
+    if (!gallery.isSale) {
+      const isSubscribed = await this.subscriptionService.checkSubscribed(gallery.performerId, user._id);
+      if (!isSubscribed) throw new HttpException('Please subscribe model before downloading', 403);
+    }
+    if (gallery.isSale) {
+      const isBought = await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
+      if (!isBought) throw new HttpException('Please unlock gallery before downloading', 403);
+    }
+    const photos = await this.photoModel.find({ galleryId });
+    const fileIds = photos.map((d) => d.fileId);
+    const files = await this.fileService.findByIds(fileIds);
+    return files.map((f) => ({ path: f.getUrl(), name: f.name }));
+  }
+
   public async adminSearch(
     req: GallerySearchRequest
   ): Promise<PageableData<GalleryDto>> {
     const query = {} as any;
-    if (req.q) query.name = { $regex: req.q };
+    if (req.q) {
+      const regexp = new RegExp(
+        req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+        'i'
+      );
+      query.$or = [
+        {
+          name: { $regex: regexp }
+        },
+        {
+          description: { $regex: regexp }
+        }
+      ];
+    }
     if (req.performerId) query.performerId = req.performerId;
     if (req.status) query.status = req.status;
     let sort = {};
@@ -207,7 +250,20 @@ export class GalleryService {
     user: UserDto
   ): Promise<PageableData<GalleryDto>> {
     const query = {} as any;
-    if (req.q) query.name = { $regex: req.q };
+    if (req.q) {
+      const regexp = new RegExp(
+        req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+        'i'
+      );
+      query.$or = [
+        {
+          name: { $regex: regexp }
+        },
+        {
+          description: { $regex: regexp }
+        }
+      ];
+    }
     query.performerId = user._id;
     if (req.status) query.status = req.status;
     let sort = {};
@@ -280,11 +336,23 @@ export class GalleryService {
 
   public async userSearch(
     req: GallerySearchRequest,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    user?: UserDto
+    user: UserDto
   ): Promise<PageableData<GalleryDto>> {
     const query = {} as any;
-    if (req.q) query.name = { $regex: req.q };
+    if (req.q) {
+      const regexp = new RegExp(
+        req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+        'i'
+      );
+      query.$or = [
+        {
+          name: { $regex: regexp }
+        },
+        {
+          description: { $regex: regexp }
+        }
+      ];
+    }
     if (req.performerId) query.performerId = req.performerId;
     query.status = 'active';
     let sort = {};
@@ -308,7 +376,7 @@ export class GalleryService {
     const coverPhotoIds = data.map((d) => d.coverPhotoId);
     const galleryIds = data.map((d) => d._id);
 
-    const [performers, coverPhotos, bookmarks] = await Promise.all([
+    const [performers, coverPhotos, subscriptions, transactions] = await Promise.all([
       performerIds.length ? this.performerService.findByIds(performerIds) : [],
       coverPhotoIds.length
         ? this.photoModel
@@ -316,8 +384,17 @@ export class GalleryService {
           .lean()
           .exec()
         : [],
-      user && user._id ? this.reactionService.findByQuery({
-        objectType: REACTION_TYPE.GALLERY, objectId: { $in: galleryIds }, createdBy: user._id
+      // user && user._id ? this.reactionService.findByQuery({
+      //   objectType: REACTION_TYPE.GALLERY, objectId: { $in: galleryIds }, createdBy: user._id
+      // }) : [],
+      user && user._id ? this.subscriptionService.findSubscriptionList({
+        userId: user._id, performerId: { $in: performerIds }, expiredAt: { $gt: new Date() }
+      }) : [],
+      user && user._id ? this.purchasedItemSearchService.findByQuery({
+        sourceId: user._id,
+        targetId: { $in: galleryIds },
+        target: PURCHASE_ITEM_TARTGET_TYPE.GALLERY,
+        status: PURCHASE_ITEM_STATUS.SUCCESS
       }) : []
     ]);
     const fileIds = coverPhotos.map((c) => c.fileId);
@@ -325,15 +402,14 @@ export class GalleryService {
 
     galleries.forEach((g) => {
       // TODO - should get picture (thumbnail if have?)
-      const performer = performers.find(
-        (p) => p._id.toString() === g.performerId.toString()
-      );
-      if (performer) {
-        // eslint-disable-next-line no-param-reassign
-        g.performer = {
-          username: performer.username
-        };
-      }
+      const performer = performers.find((p) => p._id.toString() === g.performerId.toString());
+      g.performer = performer ? new UserDto(performer).toResponse() : null;
+      const subscribed = subscriptions.find((s) => `${s.performerId}` === `${g.performerId}`);
+      g.isSubscribed = !!subscribed;
+      const isBought = transactions.find((t) => `${t.targetId}` === `${g._id}`);
+      g.isBought = !!isBought;
+      // const bookmarked = bookmarks.find((l) => l.objectId.toString() === g._id.toString() && l.action === REACTION.BOOK_MARK);
+      // g.isBookMarked = !!bookmarked;
       if (g.coverPhotoId) {
         const coverPhoto = coverPhotos.find(
           (c) => c._id.toString() === g.coverPhotoId.toString()
@@ -351,13 +427,9 @@ export class GalleryService {
           }
         }
       }
-      if (!user || !user._id) {
-        // eslint-disable-next-line no-param-reassign
-        g.isBookMarked = false;
-      } else {
-        const bookmarked = bookmarks.find((l) => l.objectId.toString() === g._id.toString() && l.action === REACTION.BOOK_MARK);
-        // eslint-disable-next-line no-param-reassign
-        g.isBookMarked = !!bookmarked;
+      if (user && `${user._id}` === `${g.performerId}`) {
+        g.isSubscribed = true;
+        g.isBought = true;
       }
     });
 

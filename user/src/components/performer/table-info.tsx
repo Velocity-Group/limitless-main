@@ -27,7 +27,7 @@ export class PerformerInfo extends PureComponent<IProps> {
         </Descriptions>
         <Descriptions className="performer-info">
           {performer.gender && (
-          <Descriptions.Item label="Orientation">
+          <Descriptions.Item label="Gender">
             <Tag color="magenta">
               <img
                 height="15px"

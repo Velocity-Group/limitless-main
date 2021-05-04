@@ -4,11 +4,9 @@ import { ObjectId } from 'mongodb';
 export class GalleryModel extends Document {
   performerId: ObjectId;
 
-  galleryId: ObjectId;
-
   type: string;
 
-  name: string;
+  title: string;
 
   description: string;
 
@@ -17,6 +15,8 @@ export class GalleryModel extends Document {
   coverPhotoId: ObjectId;
 
   price: number;
+
+  isSale: boolean;
 
   numOfItems: number;
 

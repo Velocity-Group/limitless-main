@@ -21,14 +21,17 @@ import { IMulterUploadedFile } from '../lib/multer/multer.utils';
 import { FileDto } from '../dtos';
 import { IFileUploadOptions } from '../lib';
 import { ImageService } from './image.service';
-import { VideoService } from './video.service';
+import { VideoFileService } from './video.service';
+import { AudioFileService } from './audio.service';
 
 const VIDEO_QUEUE_CHANNEL = 'VIDEO_PROCESS';
+const AUDIO_QUEUE_CHANNEL = 'AUDIO_PROCESS';
 const PHOTO_QUEUE_CHANNEL = 'PHOTO_PROCESS';
 
 export const FILE_EVENT = {
   VIDEO_PROCESSED: 'VIDEO_PROCESSED',
-  PHOTO_PROCESSED: 'PHOTO_PROCESSED'
+  PHOTO_PROCESSED: 'PHOTO_PROCESSED',
+  AUDIO_PROCESSED: 'AUDIO_PROCESSED'
 };
 
 @Injectable()
@@ -38,13 +41,20 @@ export class FileService {
     @Inject(FILE_MODEL_PROVIDER)
     private readonly fileModel: Model<FileModel>,
     private readonly imageService: ImageService,
-    private readonly videoService: VideoService,
+    private readonly videoService: VideoFileService,
+    private readonly audioFileService: AudioFileService,
     private readonly queueEventService: QueueEventService
   ) {
     this.queueEventService.subscribe(
       VIDEO_QUEUE_CHANNEL,
       'PROCESS_VIDEO',
       this._processVideo.bind(this)
+    );
+
+    this.queueEventService.subscribe(
+      AUDIO_QUEUE_CHANNEL,
+      'PROCESS_AUDIO',
+      this._processAudio.bind(this)
     );
 
     this.queueEventService.subscribe(
@@ -92,7 +102,7 @@ export class FileService {
     // eslint-disable-next-line no-param-reassign
     options = options || {};
     const publicDir = this.config.get('file.publicDir');
-
+    const photoDir = this.config.get('file.photoDir');
     // replace new photo without exif, ignore video
     if (options.replaceWithoutExif) {
       const buffer = await this.imageService.replaceWithoutExif(multerData.path);
@@ -113,6 +123,26 @@ export class FileService {
       writeFileSync(multerData.path, buffer);
     }
 
+    const thumbnails = [];
+    if (
+      !options.replaceWithThumbail
+      && options.generateThumbnail
+      && options.thumbnailSize
+    ) {
+      // create thumbnails without replace
+      const buffer = await this.imageService.createThumbnail(
+        multerData.path,
+        options.thumbnailSize
+      );
+      const thumbName = `${StringHelper.randomString(5)}_thumb${StringHelper.getExt(multerData.path)}`;
+      writeFileSync(join(photoDir, thumbName), buffer);
+      thumbnails.push({
+        thumbnailSize: options.thumbnailSize,
+        path: join(photoDir, thumbName).replace(publicDir, ''),
+        absolutePath: join(photoDir, thumbName)
+      });
+    }
+
     const data = {
       type,
       name: multerData.filename,
@@ -122,6 +152,7 @@ export class FileService {
       // todo - get path from public
       path: multerData.path.replace(publicDir, ''),
       absolutePath: multerData.path,
+      thumbnails,
       // TODO - update file size
       size: multerData.size,
       createdAt: new Date(),
@@ -329,8 +360,8 @@ export class FileService {
   public async queueProcessVideo(
     fileId: string | ObjectId,
     options?: {
-      meta: Record<string, any>;
-      publishChannel: string;
+      meta?: Record<string, any>;
+      publishChannel?: string;
     }
   ) {
     // add queue and convert file to mp4 and generate thumbnail
@@ -342,6 +373,113 @@ export class FileService {
       new QueueEvent({
         channel: VIDEO_QUEUE_CHANNEL,
         eventName: 'processVideo',
+        data: {
+          file: new FileDto(file),
+          options
+        }
+      })
+    );
+    return true;
+  }
+
+  private async _processAudio(event: QueueEvent) {
+    if (event.eventName !== 'processAudio') {
+      return;
+    }
+    const fileData = event.data.file as FileDto;
+    const options = event.data.options || {};
+    try {
+      await this.fileModel.updateOne(
+        { _id: fileData._id },
+        {
+          $set: {
+            status: 'processing'
+          }
+        }
+      );
+
+      const publicDir = this.config.get('file.publicDir');
+      // eslint-disable-next-line no-nested-ternary
+      const audioPath = existsSync(fileData.absolutePath)
+        ? fileData.absolutePath
+        : existsSync(join(publicDir, fileData.path))
+          ? join(publicDir, fileData.path)
+          : null;
+
+      if (!audioPath) {
+        // eslint-disable-next-line no-throw-literal
+        throw 'No file file!';
+      }
+
+      const respAudio = await this.audioFileService.convert2Mp3(audioPath);
+      // delete old audio and replace with new one
+      const newAbsolutePath = respAudio.toPath;
+      const newPath = respAudio.toPath.replace(publicDir, '');
+
+      const duration = await this.videoService.getDuration(audioPath);
+      existsSync(audioPath) && unlinkSync(audioPath);
+      await this.fileModel.updateOne(
+        { _id: fileData._id },
+        {
+          $set: {
+            status: 'finished',
+            absolutePath: newAbsolutePath,
+            path: newPath,
+            duration,
+            mimeType: 'audio/mp3',
+            name: fileData.name.replace(`.${fileData.mimeType.split('audio/')[1]}`, '.mp3')
+          }
+        }
+      );
+    } catch (e) {
+      await this.fileModel.updateOne(
+        { _id: fileData._id },
+        {
+          $set: {
+            status: 'error'
+          }
+        }
+      );
+
+      throw e;
+    } finally {
+      // TODO - fire event to subscriber
+      if (options.publishChannel) {
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: options.publishChannel,
+            eventName: FILE_EVENT.AUDIO_PROCESSED,
+            data: {
+              meta: options.meta,
+              fileId: fileData._id
+            }
+          })
+        );
+      }
+    }
+  }
+
+  /**
+   * generate mp4 video & thumbnail
+   * @param fileId
+   * @param options
+   */
+  public async queueProcessAudio(
+    fileId: string | ObjectId,
+    options?: {
+      meta?: Record<string, any>;
+      publishChannel?: string;
+    }
+  ) {
+    // add queue and convert file to mp4 and generate thumbnail
+    const file = await this.fileModel.findOne({ _id: fileId });
+    if (!file || file.status === 'processing') {
+      return false;
+    }
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: AUDIO_QUEUE_CHANNEL,
+        eventName: 'processAudio',
         data: {
           file: new FileDto(file),
           options

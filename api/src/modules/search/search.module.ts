@@ -10,7 +10,6 @@ import { PerformerModule } from '../performer/performer.module';
 import { PerformerAssetsModule } from '../performer-assets/performer-assets.module';
 import { FeedModule } from '../feed/feed.module';
 import { PerformerStoryModule } from '../performer-story/story.module';
-import { PerformerBlogModule } from '../performer-blog/blog.module';
 
 @Module({
   imports: [
@@ -22,8 +21,7 @@ import { PerformerBlogModule } from '../performer-blog/blog.module';
     forwardRef(() => PerformerModule),
     forwardRef(() => PerformerAssetsModule),
     forwardRef(() => FeedModule),
-    forwardRef(() => PerformerStoryModule),
-    forwardRef(() => PerformerBlogModule)
+    forwardRef(() => PerformerStoryModule)
   ],
   controllers: [SearchController],
   providers: [

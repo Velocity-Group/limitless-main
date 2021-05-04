@@ -23,36 +23,30 @@ export class ReactionVideoListener {
   }
 
   public async handleReactVideo(event: QueueEvent) {
-    try {
-      if (![EVENT.CREATED, EVENT.DELETED].includes(event.eventName)) {
-        return;
-      }
-      const {
-        objectId: videoId, objectType, action, performerId
-      } = event.data;
-      if (objectType !== REACTION_TYPE.VIDEO) {
-        return;
-      }
+    if (![EVENT.CREATED, EVENT.DELETED].includes(event.eventName)) {
+      return;
+    }
+    const {
+      objectId: videoId, objectType, action
+    } = event.data;
+    if (objectType !== REACTION_TYPE.VIDEO) {
+      return;
+    }
 
-      switch (action) {
-        case REACTION.LIKE:
-          await this.videoService.increaseLike(
-            videoId,
-            event.eventName === EVENT.CREATED ? 1 : -1
-          );
-          await this.performerService.updateLikeStat(performerId, event.eventName === EVENT.CREATED ? 1 : -1);
-          break;
-        case REACTION.FAVOURITE:
-          await this.videoService.increaseFavourite(
-            videoId,
-            event.eventName === EVENT.CREATED ? 1 : -1
-          );
-          break;
-        default: break;
-      }
-    } catch (e) {
-      // TODO - log me
-      // console.log(e);
+    switch (action) {
+      case REACTION.LIKE:
+        await this.videoService.increaseLike(
+          videoId,
+          event.eventName === EVENT.CREATED ? 1 : -1
+        );
+        break;
+      case REACTION.FAVOURITE:
+        await this.videoService.increaseFavourite(
+          videoId,
+          event.eventName === EVENT.CREATED ? 1 : -1
+        );
+        break;
+      default: break;
     }
   }
 }

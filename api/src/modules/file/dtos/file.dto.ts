@@ -112,6 +112,10 @@ export class FileDto {
     return (this.mimeType || '').toLowerCase().includes('video');
   }
 
+  public isAudio() {
+    return (this.mimeType || '').toLowerCase().includes('audio');
+  }
+
   public isImage() {
     return (this.mimeType || '').toLowerCase().includes('image');
   }

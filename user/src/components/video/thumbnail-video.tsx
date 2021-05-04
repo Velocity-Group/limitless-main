@@ -15,12 +15,12 @@ export class ThumbnailVideo extends PureComponent<IProps> {
     const url = thumbnail
       || (video && video.thumbnails && video.thumbnails.length > 0
         ? video.thumbnails[0]
-        : '/video.png');
+        : '/placeholder-image.jpg');
     return (
       <div className="video-thumbs">
         {video.thumbnails && video.thumbnails.length > 0
           ? video.thumbnails.map((thumb) => <img alt="" key={thumb} src={thumb} style={style} />)
-          : <img alt="" src={url} style={style} />}
+          : <img alt="video" src={url} style={style} />}
       </div>
     );
   }

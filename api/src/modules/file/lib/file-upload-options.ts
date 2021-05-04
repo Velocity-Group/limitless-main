@@ -1,8 +1,8 @@
-import { UserDto } from 'src/modules/user/dtos';
 import { ObjectId } from 'mongodb';
+import { PerformerDto } from 'src/modules/performer/dtos';
 
 export interface IFileUploadOptions {
-  uploader?: UserDto;
+  uploader?: PerformerDto;
   convertMp4?: boolean;
   generateThumbnail?: boolean;
   thumbnailSize?: {

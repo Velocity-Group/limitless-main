@@ -4,13 +4,18 @@ import {
   PageableData,
   QueueEventService,
   EntityNotFoundException,
-  QueueEvent
+  QueueEvent,
+  StringHelper,
+  ForbiddenException
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
-import { UserService } from 'src/modules/user/services';
+import { UserService, UserSearchService } from 'src/modules/user/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { EVENT } from 'src/kernel/constants';
+import { UserSearchRequestPayload } from 'src/modules/user/payloads';
+import { USER_ROLES } from 'src/modules/user/constants';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { SubscriptionModel } from '../models/subscription.model';
 import { SUBSCRIPTION_MODEL_PROVIDER } from '../providers/subscription.provider';
 import {
@@ -27,6 +32,8 @@ import {
 @Injectable()
 export class SubscriptionService {
   constructor(
+    @Inject(forwardRef(() => UserSearchService))
+    private readonly userSearchService: UserSearchService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => UserService))
@@ -37,15 +44,13 @@ export class SubscriptionService {
   ) {}
 
   public async findSubscriptionList(query: any) {
-    return this.subscriptionModel.find(query).lean();
-  }
-
-  public async findAndSort(query: any, sort: any) {
-    return this.subscriptionModel.find(query).lean().sort(sort);
+    const data = await this.subscriptionModel.find(query);
+    return data;
   }
 
   public async countSubscriptions(query: any) {
-    return this.subscriptionModel.countDocuments(query);
+    const data = await this.subscriptionModel.countDocuments(query);
+    return data;
   }
 
   public async adminCreate(
@@ -53,7 +58,7 @@ export class SubscriptionService {
   ): Promise<SubscriptionDto> {
     const payload = { ...data } as any;
     const existSubscription = await this.subscriptionModel.findOne({
-      subscriptionType: SUBSCRIPTION_TYPE.SYSTEM,
+      subscriptionType: SUBSCRIPTION_TYPE.FREE,
       userId: payload.userId,
       performerId: payload.performerId,
       expiredAt: payload.expiredAt
@@ -98,9 +103,19 @@ export class SubscriptionService {
     if (req.subscriptionType) {
       query.subscriptionType = req.subscriptionType;
     }
-    const sort = {
-      createdAt: -1
-    };
+    if (req.q) {
+      const usersSearch = await this.userSearchService.searchByKeyword({ q: req.q } as UserSearchRequestPayload);
+      const Ids = usersSearch ? usersSearch.map((u) => u._id) : [];
+      query.userId = { $in: Ids };
+    }
+    let sort = {
+      updatedAt: -1
+    } as any;
+    if (req.sort && req.sortBy) {
+      sort = {
+        [req.sortBy]: req.sort
+      };
+    }
     const [data, total] = await Promise.all([
       this.subscriptionModel
         .find(query)
@@ -125,9 +140,9 @@ export class SubscriptionService {
         (u) => u._id.toString() === subscription.userId.toString()
       );
       // eslint-disable-next-line no-param-reassign
-      subscription.userInfo = user || null;
+      subscription.userInfo = (user && new UserDto(user).toResponse()) || null;
       // eslint-disable-next-line no-param-reassign
-      subscription.performerInfo = performer || null;
+      subscription.performerInfo = (performer && new PerformerDto(performer).toResponse()) || null;
     });
     return {
       data: subscriptions,
@@ -139,18 +154,36 @@ export class SubscriptionService {
     req: SubscriptionSearchRequestPayload,
     user: UserDto
   ): Promise<PageableData<SubscriptionDto>> {
-    const query = {
-      performerId: user._id
-    } as any;
+    const query = {} as any;
+    if (req.performerId) {
+      query.performerId = req.performerId;
+    } else {
+      query.performerId = user._id;
+    }
     if (req.userId) {
       query.userId = req.userId;
+    }
+    if (req.userIds) {
+      query.userId = { $in: req.userIds };
     }
     if (req.subscriptionType) {
       query.subscriptionType = req.subscriptionType;
     }
-    const sort = {
-      createdAt: -1
-    };
+
+    let sort = {
+      updatedAt: -1
+    } as any;
+    if (req.sort && req.sortBy) {
+      sort = {
+        [req.sortBy]: req.sort
+      };
+    }
+
+    if (req.q) {
+      const usersSearch = await this.userSearchService.searchByKeyword({ q: req.q } as UserSearchRequestPayload);
+      const Ids = usersSearch ? usersSearch.map((u) => u._id) : [];
+      query.userId = { $in: Ids };
+    }
     const [data, total] = await Promise.all([
       this.subscriptionModel
         .find(query)
@@ -160,18 +193,20 @@ export class SubscriptionService {
         .skip(parseInt(req.offset as string, 10)),
       this.subscriptionModel.countDocuments(query)
     ]);
+
     const subscriptions = data.map((d) => new SubscriptionDto(d));
     const UIds = data.map((d) => d.userId);
     const [users] = await Promise.all([
       UIds.length ? this.userService.findByIds(UIds) : []
       // UIds.length ? this.performerService.getBlockUserList({ performerId: user._id, userId: { $in: UIds } }) : []
     ]);
+
     subscriptions.forEach((subscription: SubscriptionDto) => {
-      const userSearch = users.find(
+      const userSubscription = users.find(
         (u) => u._id.toString() === subscription.userId.toString()
       );
       // eslint-disable-next-line no-param-reassign
-      subscription.userInfo = userSearch || null;
+      subscription.userInfo = new UserDto(userSubscription).toResponse() || null;
     });
     return {
       data: subscriptions,
@@ -192,9 +227,14 @@ export class SubscriptionService {
     if (req.subscriptionType) {
       query.subscriptionType = req.subscriptionType;
     }
-    const sort = {
-      createdAt: -1
-    };
+    let sort = {
+      updatedAt: -1
+    } as any;
+    if (req.sort && req.sortBy) {
+      sort = {
+        [req.sortBy]: req.sort
+      };
+    }
     const [data, total] = await Promise.all([
       this.subscriptionModel
         .find(query)
@@ -219,9 +259,9 @@ export class SubscriptionService {
         (u) => u._id.toString() === subscription.userId.toString()
       );
       // eslint-disable-next-line no-param-reassign
-      subscription.userInfo = userSubscription || null;
+      subscription.userInfo = (userSubscription && new UserDto(userSubscription).toResponse()) || null;
       // eslint-disable-next-line no-param-reassign
-      subscription.performerInfo = performer || null;
+      subscription.performerInfo = (performer && new PerformerDto(performer).toPublicDetailsResponse()) || null;
     });
     return {
       data: subscriptions,
@@ -256,7 +296,13 @@ export class SubscriptionService {
   }
 
   public async performerTotalSubscriptions(performerId: string | ObjectId) {
-    return this.subscriptionModel.countDocuments({ performerId, expiredAt: { $gt: new Date() } });
+    const data = await this.subscriptionModel.countDocuments({ performerId, expiredAt: { $gt: new Date() } });
+    return data;
+  }
+
+  public async findAllPerformerSubscriptions(performerId: string | ObjectId) {
+    const data = await this.subscriptionModel.find({ performerId });
+    return data;
   }
 
   public async findById(id: string | ObjectId): Promise<SubscriptionModel> {
@@ -264,27 +310,29 @@ export class SubscriptionService {
     return data;
   }
 
-  public async delete(id: string | ObjectId): Promise<boolean> {
+  public async cancelSubscription(id: string, user: UserDto): Promise<any> {
+    if (!StringHelper.isObjectId(id)) throw new EntityNotFoundException();
     const subscription = await this.findById(id);
     if (!subscription) {
       throw new EntityNotFoundException();
     }
-    await subscription.remove();
-    if (subscription.status === SUBSCRIPTION_STATUS.ACTIVE) {
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-          eventName: EVENT.DELETED,
-          data: new SubscriptionDto(subscription)
-        })
-      );
+    if (!user.roles.includes(USER_ROLES.ADMIN) && user._id.toString() !== subscription.userId.toString()) {
+      throw new ForbiddenException();
     }
-    return true;
-  }
-
-  public async findBySubscriptionId(subscriptionId: string) {
-    return this.subscriptionModel.findOne({
-      subscriptionId
-    });
+    if (subscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) return { success: true };
+    subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+    subscription.expiredAt = new Date();
+    subscription.updatedAt = new Date();
+    subscription.startRecurringDate = new Date();
+    subscription.nextRecurringDate = new Date();
+    await subscription.save();
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+        eventName: EVENT.DELETED,
+        data: new SubscriptionDto(subscription)
+      })
+    );
+    return { success: true };
   }
 }

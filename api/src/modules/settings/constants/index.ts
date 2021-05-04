@@ -15,22 +15,21 @@ export const SETTING_KEYS = {
   MONTHLY_SUBSCRIPTION_COMMISSION: 'monthlySubscriptionCommission',
   YEARLY_SUBSCRIPTION_COMMISSION: 'yearlySubscriptionCommission',
   VIDEO_SALE_COMMISSION: 'videoSaleCommission',
+  GALLERY_SALE_COMMISSION: 'gallerySaleCommission',
   PRODUCT_SALE_COMMISSION: 'productSaleCommission',
   FEED_SALE_COMMISSION: 'feedSaleCommission',
   TIP_COMMISSION: 'tipCommission',
-  PUBLIC_CHAT_COMMISSION: 'publicChatCommission',
-  PRIVATE_CHAT_COMMISSION: 'privateChatCommission',
+  STREAM_COMMISSION: 'streamCommission',
+  MESSAGE_COMMISSION: 'messageCommission',
   CCBILL_SUB_ACCOUNT_NUMBER: 'ccbillSubAccountNumber',
   CCBILL_FLEXFORM_ID: 'ccbillFlexformId',
   CCBILL_SALT: 'ccbillSalt',
   CCBILL_CURRENCY_CODE: 'ccbilCurrencyCode',
-  CCBILL_CLIENT_ACCOUNT_NUMBER: 'ccbillClientAccountNumber',
-  CCBILL_USERNAME: 'ccbillUsername',
-  CCBILL_PASSWORD: 'ccbillPassword',
   USE_SENDGRID_TRANSPORTER: 'useSengridTransporter',
   SMTP_TRANSPORTER: 'smtpTransporter',
   GOOGLE_ANALYTICS_CODE: 'gaCode',
   MAINTENANCE_MODE: 'maintenanceMode',
+  CCBILL_CLIENT_ACCOUNT_NUMBER: 'ccbillClientAccountNumber',
   PERFORMER_VERIFY_NUMBER: 'performerVerifyNumber',
   TWITTER_CLIENT_ID: 'twitterClientId',
   TWITTER_CLIENT_SECRET: 'twitterClientSecret',
@@ -51,7 +50,10 @@ export const SETTING_KEYS = {
   MODEL_BENEFIT: 'modelBenefit',
   GOOGLE_RECAPTCHA_SITE_KEY: 'googleReCaptchaSiteKey',
   GOOGLE_RECAPTCHA_SECRET_KEY: 'googleReCaptchaSecretKey',
-  ENABLE_GOOGLE_RECAPTCHA: 'enableGoogleReCaptcha'
+  ENABLE_GOOGLE_RECAPTCHA: 'enableGoogleReCaptcha',
+  BITPAY_PRODUCTION_MODE: 'bitpayProductionMode',
+  BITPAY_API_TOKEN: 'bitpayApiToken',
+  REFERRAL_COMMISSION: 'referralCommission'
 };
 
 export const MENU_SECTION = {

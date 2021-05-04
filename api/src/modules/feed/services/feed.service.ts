@@ -10,41 +10,39 @@ import {
 } from 'src/kernel';
 import { uniq, difference } from 'lodash';
 import { PerformerService } from 'src/modules/performer/services';
-import { FileService, FILE_EVENT } from 'src/modules/file/services';
+import { FileService } from 'src/modules/file/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
-import { OrderService } from 'src/modules/payment/services';
 import { FileDto } from 'src/modules/file';
-import { UserDto } from 'src/modules/user/dtos';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION } from 'src/modules/reaction/constants';
-import {
-  ORDER_STATUS, PAYMENT_STATUS, PRODUCT_TYPE
-} from 'src/modules/payment/constants';
+import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { SEARCH_CHANNEL } from 'src/modules/search/constants';
-import * as moment from 'moment';
+import { PurchasedItemSearchService, PaymentTokenService } from 'src/modules/purchased-item/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
   FEED_SOURCE, FEED_TYPES, POLL_TARGET_SOURCE,
-  PERFORMER_FEED_CHANNEL, VOTE_FEED_CHANNEL, FEED_VIDEO_CHANNEL
+  PERFORMER_FEED_CHANNEL, VOTE_FEED_CHANNEL, SCHEDULE_FEED_AGENDA
 } from '../constants';
 import { FeedCreatePayload, FeedSearchRequest, PollCreatePayload } from '../payloads';
 import { FeedModel, PollModel, VoteModel } from '../models';
 import { FEED_PROVIDER, POLL_PROVIDER, VOTE_PROVIDER } from '../providers';
 
 const CHECK_REF_REMOVE_FEED_FILE_AGENDA = 'CHECK_REF_REMOVE_FEED_FILE_AGENDA';
-const FEED_FILE_PROCESSED_TOPIC = 'FEED_FILE_PROCESSED_TOPIC';
 
 @Injectable()
 export class FeedService {
   constructor(
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
-    @Inject(forwardRef(() => OrderService))
-    private readonly orderService: OrderService,
+    @Inject(forwardRef(() => PurchasedItemSearchService))
+    private readonly purchasedItemSearchService: PurchasedItemSearchService,
+    @Inject(forwardRef(() => PaymentTokenService))
+    private readonly paymentTokenService: PaymentTokenService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
     @Inject(forwardRef(() => SubscriptionService))
@@ -60,33 +58,24 @@ export class FeedService {
     private readonly queueEventService: QueueEventService,
     private readonly agenda: AgendaService
   ) {
-    this.queueEventService.subscribe(
-      FEED_VIDEO_CHANNEL,
-      FEED_FILE_PROCESSED_TOPIC,
-      this.handleFileProcessed.bind(this)
-    );
-    this.defindJobs();
+    this.defineJobs();
   }
 
-  private async defindJobs() {
+  private async defineJobs() {
     const collection = (this.agenda as any)._collection;
     await collection.deleteMany({
       name: {
         $in: [
-          CHECK_REF_REMOVE_FEED_FILE_AGENDA
+          CHECK_REF_REMOVE_FEED_FILE_AGENDA,
+          SCHEDULE_FEED_AGENDA
         ]
       }
     });
     this.agenda.define(CHECK_REF_REMOVE_FEED_FILE_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
     this.agenda.every('24 hours', CHECK_REF_REMOVE_FEED_FILE_AGENDA, {});
-  }
-
-  private async handleFileProcessed(event: QueueEvent) {
-    const { eventName } = event;
-    if (eventName !== FILE_EVENT.VIDEO_PROCESSED) {
-      return false;
-    }
-    return false;
+    // schedule feed
+    this.agenda.define(SCHEDULE_FEED_AGENDA, {}, this.scheduleFeed.bind(this));
+    this.agenda.every('3600 seconds', SCHEDULE_FEED_AGENDA, {});
   }
 
   private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
@@ -99,13 +88,56 @@ export class FeedService {
         const Ids = videos.map((v) => v._id.toString());
         const difIds = difference(feedIds, Ids);
         const difFileIds = files.filter((file) => difIds.includes(file.refItems[0].itemId.toString()));
-        await Promise.all(difFileIds.map(async (fileId) => {
-          await this.fileService.remove(fileId);
-        }));
+        await Promise.all(
+          difFileIds.map(async (fileId) => {
+            await this.fileService.remove(fileId);
+          })
+        );
       }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('Check ref & remove files error', e);
+    } finally {
+      done();
+    }
+  }
+
+  private async scheduleFeed(job: any, done: any) {
+    try {
+      const feeds = await this.feedModel.find({
+        isSchedule: true,
+        scheduleAt: { $lte: new Date() },
+        status: STATUS.INACTIVE
+      }).lean();
+      await Promise.all([
+        feeds.forEach(async (feed) => {
+          const v = new FeedDto(feed);
+          await this.feedModel.updateOne(
+            {
+              _id: v._id
+            },
+            {
+              isSchedule: false,
+              status: STATUS.ACTIVE,
+              updatedAt: new Date()
+            }
+          );
+          const oldStatus = feed.status;
+          await this.queueEventService.publish(
+            new QueueEvent({
+              channel: PERFORMER_FEED_CHANNEL,
+              eventName: EVENT.UPDATED,
+              data: {
+                ...v,
+                oldStatus
+              }
+            })
+          );
+        })
+      ]);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('Schedule feed error', e);
     } finally {
       done();
     }
@@ -148,7 +180,7 @@ export class FeedService {
         pollIds = pollIds.concat(f.pollIds);
       }
     });
-    const [performers, files, actions, subscriptions, orders, polls] = await Promise.all([
+    const [performers, files, actions, subscriptions, transactions, polls] = await Promise.all([
       performerIds.length ? this.performerService.findByIds(performerIds) : [],
       fileIds.length ? this.fileService.findByIds(fileIds) : [],
       user && user._id ? this.reactionService.findByQuery({ objectId: { $in: feedIds }, createdBy: user._id }) : [],
@@ -158,12 +190,11 @@ export class FeedService {
         expiredAt: { $gt: new Date() },
         status: SUBSCRIPTION_STATUS.ACTIVE
       }) : [],
-      user && user._id ? this.orderService.findOderDetailsByQuery({
-        paymentStatus: PAYMENT_STATUS.SUCCESS,
-        status: ORDER_STATUS.PAID,
-        buyerId: user._id,
-        productType: PRODUCT_TYPE.SALE_POST,
-        productId: { $in: feedIds }
+      user && user._id ? this.purchasedItemSearchService.findByQuery({
+        sourceId: user._id,
+        targetId: { $in: feedIds },
+        target: PURCHASE_ITEM_TARTGET_TYPE.FEED,
+        status: PURCHASE_ITEM_STATUS.SUCCESS
       }) : [],
       pollIds.length ? this.PollVoteModel.find({ _id: { $in: pollIds } }) : []
     ]);
@@ -180,7 +211,7 @@ export class FeedService {
       feed.isBookMarked = !!bookmarked;
       const subscribed = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
       feed.isSubscribed = !!((subscribed || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))));
-      const bought = orders.find((order) => `${order.productId}` === `${f._id}`);
+      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
       feed.isBought = !!((bought || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))));
       const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
       const feedPollStringIds = (f.pollIds || []).map((pollId) => pollId.toString());
@@ -240,7 +271,7 @@ export class FeedService {
       fromSourceId
     } as any);
     if (feed.fileIds && feed.fileIds.length) {
-      await Promise.all([feed.fileIds.map(async (fileId) => {
+      await Promise.all([feed.fileIds.forEach(async (fileId) => {
         await this.fileService.addRef((fileId as any), {
           itemId: feed._id,
           itemType: REF_TYPE.FEED
@@ -255,13 +286,15 @@ export class FeedService {
       itemId: feed._id,
       itemType: REF_TYPE.FEED
     });
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: PERFORMER_FEED_CHANNEL,
-        eventName: EVENT.CREATED,
-        data: new FeedDto(feed)
-      })
-    );
+    if (feed.status === STATUS.ACTIVE) {
+      await this.queueEventService.publish(
+        new QueueEvent({
+          channel: PERFORMER_FEED_CHANNEL,
+          eventName: EVENT.CREATED,
+          data: new FeedDto(feed)
+        })
+      );
+    }
     return feed;
   }
 
@@ -280,8 +313,8 @@ export class FeedService {
 
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: moment(req.fromDate).startOf('date'),
-        $lte: moment(req.toDate).endOf('date')
+        $gte: new Date(req.fromDate),
+        $lte: new Date(req.toDate)
       };
     }
 
@@ -312,6 +345,7 @@ export class FeedService {
     const [data, total] = await Promise.all([
       this.feedModel
         .find(query)
+        .lean()
         .sort(sort)
         .limit(parseInt(req.limit as string, 10))
         .skip(parseInt(req.offset as string, 10)),
@@ -364,8 +398,8 @@ export class FeedService {
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: moment(req.fromDate).startOf('date'),
-        $lte: moment(req.toDate).endOf('date')
+        $gte: new Date(req.fromDate),
+        $lte: new Date(req.toDate)
       };
     }
     if (req.ids) {
@@ -377,6 +411,7 @@ export class FeedService {
     const [data, total] = await Promise.all([
       this.feedModel
         .find(query)
+        .lean()
         .sort(sort)
         .limit(parseInt(req.limit as string, 10))
         .skip(parseInt(req.offset as string, 10)),
@@ -396,7 +431,7 @@ export class FeedService {
     } as any;
 
     const [subscriptions] = await Promise.all([
-      user && !user.isPerformer ? this.subscriptionService.findSubscriptionList({
+      user ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
         expiredAt: { $gt: new Date() },
         status: SUBSCRIPTION_STATUS.ACTIVE
@@ -404,11 +439,14 @@ export class FeedService {
     ]);
     const performerIds = subscriptions.map((s) => s.performerId);
     query.fromSourceId = { $in: performerIds };
-    if (user && user.isPerformer) delete query.fromSourceId;
+    if (!user._id || (user && user?.roles.includes('admin'))) delete query.fromSourceId;
     if (req.q) {
       query.$or = [
         {
           text: { $regex: new RegExp(req.q, 'i') }
+        },
+        {
+          tagline: { $regex: new RegExp(req.q, 'i') }
         }
       ];
     }
@@ -420,8 +458,8 @@ export class FeedService {
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: moment(req.fromDate).startOf('date'),
-        $lte: moment(req.toDate).endOf('date')
+        $gte: new Date(req.fromDate),
+        $lte: new Date(req.toDate)
       };
     }
     const sort = {
@@ -430,6 +468,7 @@ export class FeedService {
     const [data, total] = await Promise.all([
       this.feedModel
         .find(query)
+        .lean()
         .sort(sort)
         .limit(parseInt(req.limit as string, 10))
         .skip(parseInt(req.offset as string, 10)),
@@ -451,17 +490,17 @@ export class FeedService {
     if (payload.fileIds && payload.fileIds.length) {
       const ids = feed.fileIds.map((_id) => _id.toString());
       const Ids = payload.fileIds.filter((_id) => !ids.includes(_id));
-      Ids.forEach((fileId) => {
-        this.fileService.addRef((fileId as any), {
+      await Promise.all(Ids.map(async (fileId) => {
+        await this.fileService.addRef((fileId as any), {
           itemId: feed._id,
           itemType: REF_TYPE.FEED
         });
-      });
+      }));
     }
     return { updated: true };
   }
 
-  public async deleteFeed(id, user) {
+  public async deleteFeed(id, user: UserDto) {
     const query = { _id: id, fromSourceId: user._id };
     if (user.roles && user.roles.includes('admin')) delete query.fromSourceId;
 
@@ -494,6 +533,8 @@ export class FeedService {
     if (user._id.toString() === feed.fromSourceId.toString()) {
       return true;
     }
+    const performer = await this.performerService.findById(feed.fromSourceId);
+    if (`${performer?.agentId}` === `${user._id}`) return true;
     if (!feed.isSale) {
       // check subscription
       const subscribed = await this.subscriptionService.checkSubscribed(
@@ -506,13 +547,7 @@ export class FeedService {
       return true;
     } if (feed.isSale) {
       // check bought
-      const bought = await this.orderService.findOneOderDetails({
-        paymentStatus: PAYMENT_STATUS.SUCCESS,
-        status: ORDER_STATUS.PAID,
-        buyerId: user._id,
-        productType: PRODUCT_TYPE.SALE_POST,
-        productId: feed._id
-      });
+      const bought = await this.paymentTokenService.checkBought(feed, PurchaseItemType.FEED, user);
       if (!bought) {
         throw new ForbiddenException();
       }

@@ -10,7 +10,6 @@ import { PHOTO_STATUS, VIDEO_STATUS, PRODUCT_STATUS } from 'src/modules/performe
 import { EVENT } from 'src/kernel/constants';
 import { FeedDto } from 'src/modules/feed/dtos';
 import { PERFORMER_FEED_CHANNEL } from 'src/modules/feed/constants';
-import { PERFORMER_BLOG_CHANNEL } from 'src/modules/performer-blog/constants';
 import { PERFORMER_STORY_CHANNEL } from 'src/modules/performer-story/constants';
 import { PerformerModel } from '../models';
 import { PERFORMER_MODEL_PROVIDER } from '../providers';
@@ -19,7 +18,6 @@ const HANDLE_PHOTO_COUNT_FOR_PERFORMER = 'HANDLE_PHOTO_COUNT_FOR_PERFORMER';
 const HANDLE_VIDEO_COUNT_FOR_PERFORMER = 'HANDLE_VIDEO_COUNT_FOR_PERFORMER';
 const HANDLE_PRODUCT_COUNT_FOR_PERFORMER = 'HANDLE_PRODUCT_COUNT_FOR_PERFORMER';
 const HANDLE_FEED_COUNT_FOR_PERFORMER = 'HANDLE_FEED_COUNT_FOR_PERFORMER';
-const HANDLE_BLOG_COUNT_FOR_PERFORMER = 'HANDLE_BLOG_COUNT_FOR_PERFORMER';
 const HANDLE_STORY_COUNT_FOR_PERFORMER = 'HANDLE_STORY_COUNT_FOR_PERFORMER';
 
 @Injectable()
@@ -51,12 +49,6 @@ export class PerformerAssetsListener {
       PERFORMER_FEED_CHANNEL,
       HANDLE_FEED_COUNT_FOR_PERFORMER,
       this.handleFeedCount.bind(this)
-    );
-
-    this.queueEventService.subscribe(
-      PERFORMER_BLOG_CHANNEL,
-      HANDLE_BLOG_COUNT_FOR_PERFORMER,
-      this.handleBlogCount.bind(this)
     );
 
     this.queueEventService.subscribe(
@@ -214,7 +206,9 @@ export class PerformerAssetsListener {
     if (![EVENT.CREATED, EVENT.DELETED].includes(eventName)) {
       return;
     }
-    const { fromSourceId, count } = event.data;
+    const {
+      fromSourceId, count, status, oldStatus
+    } = event.data;
     if (count) {
       await this.performerModel.updateOne(
         { _id: fromSourceId },
@@ -232,10 +226,20 @@ export class PerformerAssetsListener {
 
     switch (eventName) {
       case EVENT.CREATED:
-        increase = 1;
+        if (status === PRODUCT_STATUS.ACTIVE) increase = 1;
+        break;
+      case EVENT.UPDATED:
+        if (
+          oldStatus !== PRODUCT_STATUS.ACTIVE
+            && status === PRODUCT_STATUS.ACTIVE
+        ) increase = 1;
+        if (
+          oldStatus === PRODUCT_STATUS.ACTIVE
+            && status !== PRODUCT_STATUS.ACTIVE
+        ) increase = -1;
         break;
       case EVENT.DELETED:
-        increase = -1;
+        if (status === PRODUCT_STATUS.ACTIVE) increase = -1;
         break;
       default:
         break;
@@ -246,38 +250,6 @@ export class PerformerAssetsListener {
         {
           $inc: {
             'stats.totalFeeds': increase
-          }
-        }, {
-          upsert: true
-        }
-      );
-    }
-  }
-
-  public async handleBlogCount(event: QueueEvent) {
-    const { eventName } = event;
-    if (![EVENT.CREATED, EVENT.DELETED].includes(eventName)) {
-      return;
-    }
-    const { fromSourceId } = event.data as FeedDto;
-    let increase = 0;
-
-    switch (eventName) {
-      case EVENT.CREATED:
-        increase = 1;
-        break;
-      case EVENT.DELETED:
-        increase = -1;
-        break;
-      default:
-        break;
-    }
-    if (increase) {
-      await this.performerModel.updateOne(
-        { _id: fromSourceId },
-        {
-          $inc: {
-            'stats.totalBlogs': increase
           }
         }, {
           upsert: true

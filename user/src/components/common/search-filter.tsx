@@ -48,7 +48,6 @@ export class SearchFilter extends PureComponent<IProps> {
       <Row gutter={24} className="filter-block">
         {searchWithKeyword && (
           <Col lg={8} md={8} xs={14}>
-            {/* <label>Keyword</label> */}
             <Input
               placeholder="Enter keyword"
               onChange={(evt) => this.setState({ q: evt.target.value })}
@@ -57,7 +56,7 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         )}
         {statuses && statuses.length ? (
-          <Col lg={4} md={6} xs={10}>
+          <Col lg={6} md={6} xs={10}>
             <Select
               onChange={(val) => this.setState({ status: val })}
               style={{ width: '100%' }}
@@ -73,7 +72,7 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {type && type.length ? (
-          <Col lg={4} md={6} xs={10}>
+          <Col lg={6} md={6} xs={10}>
             <Select
               onChange={(val) => this.setState({ type: val })}
               style={{ width: '100%' }}

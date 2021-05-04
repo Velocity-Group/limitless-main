@@ -17,7 +17,7 @@ import {
 import { RoleGuard, AuthGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
-import { UserDto } from 'src/modules/user/dtos';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { CouponService, CouponSearchService } from '../services';
 import {
   CouponCreatePayload,
@@ -97,7 +97,7 @@ export class AdminCouponController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async checkApplyCoupon(
     @Param('code') code: string,
-    @CurrentUser() currentUser: UserDto
+    @CurrentUser() currentUser: PerformerDto
   ): Promise<DataResponse<ICouponResponse>> {
     const canApply = await this.couponService.applyCoupon(
       code,

@@ -10,18 +10,19 @@ import {
   ForbiddenException, AgendaService
 } from 'src/kernel';
 import { FileDto } from 'src/modules/file';
-import { UserDto } from 'src/modules/user/dtos';
 import { FileService, FILE_EVENT } from 'src/modules/file/services';
 import { merge, difference } from 'lodash';
 import { PerformerService } from 'src/modules/performer/services';
 import { EVENT } from 'src/kernel/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { REF_TYPE } from 'src/modules/file/constants';
+import { PaymentTokenService } from 'src/modules/purchased-item/services';
+import { PurchaseItemType } from 'src/modules/purchased-item/constants';
+import { UserDto } from 'src/modules/user/dtos';
 import { PHOTO_STATUS } from '../constants';
 import { PhotoDto, GalleryDto } from '../dtos';
 import { PhotoCreatePayload, PhotoUpdatePayload } from '../payloads';
 import { GalleryService } from './gallery.service';
-
 import { PhotoModel } from '../models';
 import { PERFORMER_PHOTO_MODEL_PROVIDER } from '../providers';
 
@@ -40,12 +41,14 @@ export class PhotoService {
     private readonly galleryService: GalleryService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
-    @Inject(forwardRef(() => FileService))
-    private readonly fileService: FileService,
+    @Inject(forwardRef(() => PaymentTokenService))
+    private readonly paymentTokenService: PaymentTokenService,
     @Inject(PERFORMER_PHOTO_MODEL_PROVIDER)
     private readonly photoModel: Model<PhotoModel>,
     private readonly queueEventService: QueueEventService,
+    private readonly fileService: FileService,
     private readonly agenda: AgendaService
+
   ) {
     this.queueEventService.subscribe(
       PERFORMER_PHOTO_CHANNEL,
@@ -58,10 +61,10 @@ export class PhotoService {
       UPDATE_DEFAULT_COVER_GALLERY,
       this.handleDefaultCoverGallery.bind(this)
     );
-    this.defindJobs();
+    this.defineJobs();
   }
 
-  private async defindJobs() {
+  private async defineJobs() {
     const collection = (this.agenda as any)._collection;
     await collection.deleteMany({
       name: {
@@ -70,7 +73,7 @@ export class PhotoService {
         ]
       }
     });
-    this.agenda.define(CHECK_REF_REMOVE_PHOTO_AGENDA, { }, this.checkRefAndRemoveFile.bind(this));
+    this.agenda.define(CHECK_REF_REMOVE_PHOTO_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
     this.agenda.every('24 hours', CHECK_REF_REMOVE_PHOTO_AGENDA, {});
   }
 
@@ -78,8 +81,10 @@ export class PhotoService {
     try {
       const total = await this.fileService.countByRefType(REF_TYPE.PHOTO);
       for (let i = 0; i <= total / 99; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
         const files = await this.fileService.findByRefType(REF_TYPE.PHOTO, 99, i);
         const photoIds = files.map((f) => f.refItems[0].itemId.toString());
+        // eslint-disable-next-line no-await-in-loop
         const photos = await this.photoModel.find({ _id: { $in: photoIds } });
         const Ids = photos.map((v) => v._id.toString());
         const difIds = difference(photoIds, Ids);
@@ -231,7 +236,7 @@ export class PhotoService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async details(id: string | ObjectId, userDto?: UserDto): Promise<PhotoDto> {
+  public async details(id: string | ObjectId, user?: UserDto): Promise<PhotoDto> {
     const photo = await this.photoModel.findOne({ _id: id });
     if (!photo) {
       throw new EntityNotFoundException();
@@ -314,13 +319,19 @@ export class PhotoService {
     if (user._id.toString() === photo.performerId.toString()) {
       return true;
     }
-
+    const gallery = await this.galleryService.findById(photo.galleryId);
     // check subscription
-    const checkSubscribed = await this.subscriptionService.checkSubscribed(
-      photo.performerId,
-      user._id
-    );
-    if (!checkSubscribed) {
+    if (!gallery.isSale) {
+      const checkSubscribed = await this.subscriptionService.checkSubscribed(
+        photo.performerId,
+        user._id
+      );
+      if (!checkSubscribed) {
+        throw new ForbiddenException();
+      }
+    }
+    const checkBought = await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
+    if (!checkBought) {
       throw new ForbiddenException();
     }
     return true;

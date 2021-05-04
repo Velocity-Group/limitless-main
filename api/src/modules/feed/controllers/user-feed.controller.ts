@@ -16,7 +16,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard, LoadUser } from 'src/modules/auth/guards';
 import { DataResponse, ForbiddenException } from 'src/kernel';
-import { CurrentUser, Roles } from 'src/modules/auth';
+import { CurrentUser } from 'src/modules/auth';
 import { AuthService } from 'src/modules/auth/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { FeedService } from '../services';
@@ -32,7 +32,7 @@ export class UserFeedController {
   ) {}
 
   @Get('')
-  @UseGuards(LoadUser)
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getPerformerFeeds(
@@ -47,12 +47,12 @@ export class UserFeedController {
   }
 
   @Get('/home-feeds')
-  @UseGuards(LoadUser)
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getSubscribedPerformerFeeds(
     @Query() query: FeedSearchRequest,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserDto,
     @Request() req: any
   ): Promise<DataResponse<any>> {
     const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
@@ -91,7 +91,6 @@ export class UserFeedController {
   }
 
   @Post('/vote/:pollId')
-  @Roles('user')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))

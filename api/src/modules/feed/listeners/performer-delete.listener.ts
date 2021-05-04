@@ -2,8 +2,8 @@ import { Injectable, Inject } from '@nestjs/common';
 import { QueueEvent, QueueEventService } from 'src/kernel';
 import { Model } from 'mongoose';
 import { EVENT, STATUS } from 'src/kernel/constants';
-import { UserDto } from 'src/modules/user/dtos';
 import { DELETE_PERFORMER_CHANNEL } from 'src/modules/performer/constants';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { FeedModel } from '../models';
 import { FEED_PROVIDER } from '../providers';
 import { PERFORMER_FEED_CHANNEL } from '../constants';
@@ -26,7 +26,7 @@ export class DeletePerformerFeedListener {
 
   private async handleDeleteData(event: QueueEvent): Promise<void> {
     if (event.eventName !== EVENT.DELETED) return;
-    const user = event.data as UserDto;
+    const user = event.data as PerformerDto;
     try {
       const count = await this.feedModel.countDocuments({
         fromSourceId: user._id,

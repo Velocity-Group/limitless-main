@@ -7,7 +7,7 @@ import Head from 'next/head';
 import { HomePerformers } from '@components/performer';
 import { Banner } from '@components/common';
 import { getBanners } from '@redux/banner/actions';
-import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/post/actions';
+import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
 import { performerService, feedService } from '@services/index';
 import { IFeed, IPerformer, IUser } from 'src/interfaces';
 import ScrollListFeed from '@components/post/scroll-list';

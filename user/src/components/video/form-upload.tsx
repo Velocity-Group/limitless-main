@@ -14,25 +14,25 @@ import {
   Row,
   Col
 } from 'antd';
-import { IVideoUpdate, IVideoCreate, IUser } from 'src/interfaces/index';
-import { CameraOutlined } from '@ant-design/icons';
+import { IVideoUpdate, IVideoCreate, IUser } from 'src/interfaces';
+import { CameraOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
 import { performerService } from '@services/index';
 import moment from 'moment';
 import './video.less';
 import { debounce } from 'lodash';
 
 interface IProps {
-  user?: IUser;
+  user: IUser;
   video?: IVideoUpdate;
-  submit?: Function;
+  submit: Function;
   beforeUpload?: Function;
   uploading?: boolean;
   uploadPercentage?: number;
 }
 
 const layout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 16 }
+  labelCol: { span: 24 },
+  wrapperCol: { span: 24 }
 };
 
 const { Option } = Select;
@@ -44,6 +44,7 @@ const validateMessages = {
 export class FormUploadVideo extends PureComponent<IProps> {
   state = {
     previewThumbnail: null,
+    previewTeaser: null,
     previewVideo: null,
     isSale: false,
     isSchedule: false,
@@ -51,22 +52,22 @@ export class FormUploadVideo extends PureComponent<IProps> {
     performers: []
   };
 
-  formRef: any;
-
   componentDidMount() {
-    const { video } = this.props;
+    const { video, user } = this.props;
     if (video) {
       this.setState(
         {
           previewThumbnail: video.thumbnail ? video.thumbnail : null,
           previewVideo: video.video && video.video.url ? video.video.url : null,
-          isSale: video.isSaleVideo,
+          previewTeaser: video.teaser ? video.teaser : null,
+          isSale: video.isSale,
           isSchedule: video.isSchedule,
           scheduledAt: video.scheduledAt ? moment(video.scheduledAt) : moment()
         }
       );
-      this.getPerformers('', [video.participantIds]);
     }
+
+    this.getPerformers('', video?.participantIds || [user._id]);
   }
 
   onSwitch(field: string, checked: boolean) {
@@ -90,7 +91,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   getPerformers = debounce(async (q, performerIds) => {
     try {
-      const resp = await (await performerService.search({ q, performerIds: performerIds || '' })).data;
+      const resp = await (await performerService.search({ q, performerIds: performerIds || '', limit: 99 })).data;
       const performers = resp.data || [];
       this.setState({ performers });
     } catch (e) {
@@ -110,6 +111,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
     } = this.props;
     const {
       previewThumbnail,
+      previewTeaser,
       previewVideo,
       performers,
       isSale,
@@ -137,7 +139,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
             price: 0,
             description: '',
             tags: [],
-            isSaleVideo: false,
+            isSale: false,
             participantIds: [user._id],
             isSchedule: false,
             status: 'active'
@@ -149,7 +151,6 @@ export class FormUploadVideo extends PureComponent<IProps> {
           <Col md={12} xs={24}>
             <Form.Item
               label="Title"
-              labelCol={{ span: 24 }}
               name="title"
               rules={[
                 { required: true, message: 'Please input title of video!' }
@@ -157,19 +158,18 @@ export class FormUploadVideo extends PureComponent<IProps> {
             >
               <Input placeholder="Enter video title" />
             </Form.Item>
-            <Form.Item label="Tag" labelCol={{ span: 24 }} name="tags">
+            <Form.Item label="Tag" name="tags">
               <Select
                 mode="tags"
                 style={{ width: '100%' }}
                 size="middle"
                 showArrow={false}
                 defaultActiveFirstOption={false}
-                placeholder="Add Tags here"
+                placeholder="Add Tags"
               />
             </Form.Item>
             <Form.Item
               label="Participants"
-              labelCol={{ span: 24 }}
               name="participantIds"
             >
               <Select
@@ -185,32 +185,30 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   && performers.length > 0
                   && performers.map((p) => (
                     <Option key={p._id} value={p._id}>
-                      {p.name}
-                      /
-                      {p.username}
+                      {p?.name || p?.username || 'N/A'}
                     </Option>
                   ))}
               </Select>
             </Form.Item>
             <Form.Item
-              name="isSaleVideo"
+              name="isSale"
               label="For Sale?"
-              labelCol={{ span: 24 }}
             >
               <Switch
+                checkedChildren="Sale"
+                unCheckedChildren="Free"
                 checked={isSale}
                 onChange={this.onSwitch.bind(this, 'saleVideo')}
               />
             </Form.Item>
             {isSale && (
-              <Form.Item name="price" label="Price $" labelCol={{ span: 24 }}>
+              <Form.Item name="price" label="Amount of Tokens">
                 <InputNumber min={1} />
               </Form.Item>
             )}
             <Form.Item
               name="isSchedule"
               label="Schedule activate time while status 'Inactive'"
-              labelCol={{ span: 24 }}
             >
               <Switch
                 checked={isSchedule}
@@ -226,18 +224,33 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 />
               </Form.Item>
             )}
+            <Form.Item
+              name="status"
+              label="Status"
+              rules={[{ required: true, message: 'Please select status!' }]}
+            >
+              <Select>
+                <Select.Option key="error" value="file-error" disabled>
+                  File Error
+                </Select.Option>
+                <Select.Option key="active" value="active">
+                  Active
+                </Select.Option>
+                <Select.Option key="inactive" value="inactive">
+                  Inactive
+                </Select.Option>
+              </Select>
+            </Form.Item>
           </Col>
           <Col md={12} xs={24}>
             <Form.Item
               name="description"
               label="Description"
-              labelCol={{ span: 24 }}
             >
               <Input.TextArea rows={3} />
             </Form.Item>
             {(!haveVideo || (haveVideo && video.thumbnail)) && (
-            <div key="thumbnail" className="ant-form-item">
-              <label>Thumbnail</label>
+            <Form.Item label="Thumbnail">
               <Upload
                 listType="picture-card"
                 className="avatar-uploader"
@@ -255,48 +268,48 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   />
                 ) : <CameraOutlined />}
               </Upload>
-            </div>
+            </Form.Item>
             )}
-            <Form.Item label="Video File" labelCol={{ span: 24 }}>
+            <Form.Item label="Teaser File">
+              {!previewTeaser && (
+              <Upload
+                listType="picture-card"
+                className="avatar-uploader"
+                accept="video/*"
+                multiple={false}
+                showUploadList
+                disabled={uploading || haveVideo}
+                beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
+              >
+                <VideoCameraAddOutlined />
+              </Upload>
+              )}
+              {previewTeaser && <a href={previewTeaser} target="_blank" rel="noreferrer">Click to view</a>}
+            </Form.Item>
+
+            <Form.Item label="Video File">
               {!previewVideo && (
               <Upload
                 listType="picture-card"
                 className="avatar-uploader"
-                accept="video/*,.mkv"
+                accept="video/*"
                 multiple={false}
                 showUploadList
                 disabled={uploading || haveVideo}
                 beforeUpload={(file) => this.beforeUpload(file, 'video')}
               >
-                <CameraOutlined />
+                <VideoCameraAddOutlined />
               </Upload>
               )}
-              {previewVideo && <a href={previewVideo} rel="noreferrer" target="_blank">Click to view</a>}
-              {uploadPercentage ? (
-                <Progress percent={Math.round(uploadPercentage)} />
-              ) : null}
-            </Form.Item>
-            <Form.Item
-              name="status"
-              label="Status"
-              labelCol={{ span: 24 }}
-              rules={[{ required: true, message: 'Please select status!' }]}
-            >
-              <Select>
-                <Select.Option key="error" value="file-error" disabled>
-                  File Error
-                </Select.Option>
-                <Select.Option key="active" value="active">
-                  Active
-                </Select.Option>
-                <Select.Option key="inactive" value="inactive">
-                  Inactive
-                </Select.Option>
-              </Select>
+              {previewVideo && <a href={previewVideo} target="_blank" rel="noreferrer">Click to view</a>}
             </Form.Item>
           </Col>
         </Row>
-
+        <div>
+          {uploadPercentage ? (
+            <Progress percent={Math.round(uploadPercentage)} />
+          ) : null}
+        </div>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button className="primary" htmlType="submit" loading={uploading} disabled={uploading}>
             {haveVideo ? 'Update' : 'Upload'}

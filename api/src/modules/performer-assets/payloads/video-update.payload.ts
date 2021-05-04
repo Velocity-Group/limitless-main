@@ -39,7 +39,7 @@ export class VideoUpdatePayload {
 
   @ApiProperty()
   @IsOptional()
-  isSaleVideo: boolean;
+  isSale: boolean;
 
   @ApiProperty()
   @IsOptional()

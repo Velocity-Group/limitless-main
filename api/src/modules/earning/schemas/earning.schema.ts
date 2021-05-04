@@ -17,6 +17,10 @@ export const EarningSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     index: true
   },
+  agentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    index: true
+  },
   // group of item and rename
   sourceType: {
     type: String,
@@ -35,9 +39,25 @@ export const EarningSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  commission: {
+  referralPrice: {
     type: Number,
-    default: 0.1
+    default: 0
+  },
+  agentPrice: {
+    type: Number,
+    default: 0
+  },
+  siteCommission: {
+    type: Number,
+    default: 0
+  },
+  referralCommission: {
+    type: Number,
+    default: 0
+  },
+  agentCommission: {
+    type: Number,
+    default: 0
   },
   isPaid: {
     type: Boolean,
@@ -54,5 +74,9 @@ export const EarningSchema = new mongoose.Schema({
   },
   paidAt: {
     type: Date
+  },
+  isToken: {
+    type: Boolean,
+    default: true
   }
 });

@@ -6,3 +6,4 @@ export * from './video-player';
 export * from './related-list';
 export * from './thumbnail-video';
 export * from './scroll-list-item';
+export * from './confirm-purchase';

@@ -2,34 +2,37 @@ import { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 export class OrderModel extends Document {
-  // buyer information
-  buyerId: ObjectId;
+  transactionId: ObjectId;
 
-  buyerSource: string;
+  performerId: ObjectId;
+
+  userId: ObjectId;
 
   orderNumber?: string;
 
-  type?: string;
+  shippingCode?: string;
 
-  status: string;
+  productIds?: ObjectId[];
+
+  productsInfo?: any[];
 
   quantity?: number;
 
   totalPrice?: number;
 
-  originalPrice?: number;
-
   deliveryAddress?: string;
+
+  deliveryStatus?: string;
 
   postalCode?: string;
 
-  sellerId?: ObjectId;
+  userNote?: string;
 
-  sellerSource?: string;
-
-  couponInfo?: any;
+  phoneNumber?: string;
 
   createdAt?: Date;
 
   updatedAt?: Date;
+
+  digitalPath?: string;
 }

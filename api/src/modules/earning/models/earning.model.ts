@@ -10,6 +10,8 @@ export class EarningModel extends Document {
 
   userId: ObjectId;
 
+  agentId: ObjectId;
+
   sourceType: string;
 
   type: string;
@@ -18,7 +20,15 @@ export class EarningModel extends Document {
 
   netPrice: number;
 
-  commission: number;
+  referralPrice: number;
+
+  agentPrice: number;
+
+  siteCommission: number;
+
+  referralCommission: number;
+
+  agentCommission: number;
 
   isPaid: boolean;
 
@@ -27,4 +37,6 @@ export class EarningModel extends Document {
   paidAt: Date;
 
   transactionStatus: string;
+
+  isToken: boolean;
 }

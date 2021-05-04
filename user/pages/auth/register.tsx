@@ -21,9 +21,7 @@ class Dashboard extends PureComponent<IProps> {
 
   static layout = 'blank';
 
-  state = {
-    loginAs: 'user'
-  };
+  state = { loginAs: 'user' };
 
   async componentDidMount() {
     const {
@@ -65,7 +63,7 @@ class Dashboard extends PureComponent<IProps> {
           <title>
             {ui?.siteName}
             {' '}
-            | Welcome
+            | Sign up
           </title>
         </Head>
         <div className="main-container">
@@ -78,7 +76,7 @@ class Dashboard extends PureComponent<IProps> {
                 lg={12}
               >
                 <div
-                  className="login-content left"
+                  className="login-content left fixed"
                   style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
                 />
               </Col>

@@ -1,7 +1,5 @@
 import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
-import { UserDto } from 'src/modules/user/dtos';
-import { PerformerDto } from 'src/modules/performer/dtos';
 
 export interface ISubscriptionResponse {
   _id?: string | ObjectId;
@@ -18,8 +16,8 @@ export interface ISubscriptionResponse {
   createdAt?: Date;
   updatedAt?: Date;
   expiredAt?: Date;
-  userInfo?: UserDto;
-  performerInfo?: PerformerDto;
+  userInfo?: any;
+  performerInfo?: any;
   blockedUser?: boolean;
 }
 
@@ -52,9 +50,9 @@ export class SubscriptionDto {
 
   expiredAt?: Date;
 
-  userInfo?: UserDto;
+  userInfo?: any;
 
-  performerInfo?: PerformerDto;
+  performerInfo?: any;
 
   blockedUser?: boolean;
 

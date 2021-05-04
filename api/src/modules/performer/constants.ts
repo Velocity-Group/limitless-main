@@ -14,3 +14,7 @@ export const TRENDING_TYPES = {
 };
 
 export const DELETE_PERFORMER_CHANNEL = 'DELETE_PERFORMER_CHANNEL';
+
+export const CHANGE_TOKEN_LOG_SOURCES = {
+  PERFORMER: 'performer'
+};

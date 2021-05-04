@@ -10,7 +10,6 @@ import {
   Query,
   Post,
   Body,
-  Delete,
   Param
 } from '@nestjs/common';
 import { RoleGuard, AuthGuard } from 'src/modules/auth/guards';
@@ -30,7 +29,7 @@ import { SubscriptionService } from '../services/subscription.service';
 @Injectable()
 @Controller('subscriptions')
 export class SubscriptionController {
-  constructor(private readonly subscriptionService: SubscriptionService) {}
+  constructor(private readonly subscriptionService: SubscriptionService) { }
 
   @Post()
   @HttpCode(HttpStatus.OK)
@@ -84,12 +83,15 @@ export class SubscriptionController {
     });
   }
 
-  @Delete('/:id')
+  @Post('/cancel/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'user')
   @UseGuards(RoleGuard)
-  async delete(@Param('id') id: string): Promise<any> {
-    const resp = await this.subscriptionService.delete(id);
+  async delete(
+    @Param('id') subscriptionId: string,
+    @CurrentUser() user: UserDto
+  ): Promise<any> {
+    const resp = await this.subscriptionService.cancelSubscription(subscriptionId, user);
     return DataResponse.ok(resp);
   }
 }

@@ -12,7 +12,7 @@ import { BreadcrumbComponent } from '@components/common';
 import { pick } from 'lodash';
 
 interface IEarningStatResponse {
-  totalCommission: number;
+  totalSiteCommission: number;
   totalGrossPrice: number;
   totalNetPrice: number;
 }
@@ -37,7 +37,7 @@ class Earning extends PureComponent<IProps> {
     sort: 'desc',
     stats: {
       totalGrossPrice: 0,
-      totalCommission: 0,
+      totalSiteCommission: 0,
       totalNetPrice: 0
     } as IEarningStatResponse
   };
@@ -192,7 +192,7 @@ class Earning extends PureComponent<IProps> {
               <Statistic title="Total price" prefix="$" value={stats?.totalGrossPrice || 0} precision={2} />
             </Col>
             <Col span={8}>
-              <Statistic title="Admin earned" prefix="$" value={stats?.totalCommission || 0} precision={2} />
+              <Statistic title="Admin earned" prefix="$" value={stats?.totalSiteCommission || 0} precision={2} />
             </Col>
             <Col span={8}>
               <Statistic title="Content creators earned" prefix="$" value={stats?.totalNetPrice || 0} precision={2} />

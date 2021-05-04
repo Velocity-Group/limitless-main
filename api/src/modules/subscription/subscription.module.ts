@@ -1,16 +1,13 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongoDBModule, QueueModule } from 'src/kernel';
 import { SubscriptionController } from './controllers/subscription.controller';
-import { CancelSubscriptionController } from './controllers/cancel-subscription.controller';
 import { SubscriptionService } from './services/subscription.service';
 import { subscriptionProviders } from './providers/subscription.provider';
+import { TransactionSubscriptionListener } from './listeners/transaction-update.listener';
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
-import { OrderSubscriptionListener, DeleteUserCommentListener } from './listeners';
-import { CancelSubscriptionService } from './services/cancel-subscription.service';
-import { SettingModule } from '../settings/setting.module';
-import { MailerModule } from '../mailer/mailer.module';
+// import { PaymentModule } from '../payment/payment.module';
 
 @Module({
   imports: [
@@ -18,16 +15,11 @@ import { MailerModule } from '../mailer/mailer.module';
     MongoDBModule,
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
-    forwardRef(() => PerformerModule),
-    forwardRef(() => SettingModule),
-    forwardRef(() => MailerModule)
+    forwardRef(() => PerformerModule)
+    // forwardRef(() => PaymentModule)
   ],
-  providers: [...subscriptionProviders,
-    SubscriptionService,
-    CancelSubscriptionService,
-    OrderSubscriptionListener,
-    DeleteUserCommentListener],
-  controllers: [SubscriptionController, CancelSubscriptionController],
-  exports: [...subscriptionProviders, SubscriptionService, CancelSubscriptionService]
+  providers: [...subscriptionProviders, SubscriptionService, TransactionSubscriptionListener],
+  controllers: [SubscriptionController],
+  exports: [...subscriptionProviders, SubscriptionService, TransactionSubscriptionListener]
 })
 export class SubscriptionModule {}

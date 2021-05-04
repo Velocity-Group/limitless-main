@@ -2,18 +2,16 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
-  EntityNotFoundException, QueueEventService, QueueEvent, ForbiddenException
+  EntityNotFoundException, QueueEventService, QueueEvent
 } from 'src/kernel';
 import { FileDto } from 'src/modules/file';
-import { UserDto } from 'src/modules/user/dtos';
 import { FileService } from 'src/modules/file/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
-import { CheckPaymentService } from 'src/modules/payment/services';
 import { merge, uniq } from 'lodash';
 import { EVENT } from 'src/kernel/constants';
 import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
-import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserDto } from 'src/modules/user/dtos';
 import { PRODUCT_TYPE } from '../constants';
 import { ProductDto } from '../dtos';
 import { ProductCreatePayload, ProductUpdatePayload } from '../payloads';
@@ -33,9 +31,7 @@ export class ProductService {
     @Inject(PERFORMER_PRODUCT_MODEL_PROVIDER)
     private readonly productModel: Model<ProductModel>,
     private readonly fileService: FileService,
-    private readonly queueEventService: QueueEventService,
-    @Inject(forwardRef(() => CheckPaymentService))
-    private readonly checkPaymentService: CheckPaymentService
+    private readonly queueEventService: QueueEventService
   ) {}
 
   public async findByIds(ids: any) {
@@ -50,6 +46,11 @@ export class ProductService {
       .lean()
       .exec();
     return products.map((p) => new ProductDto(p));
+  }
+
+  public async findById(id: string | ObjectId) {
+    const data = await this.productModel.findById(id);
+    return data;
   }
 
   public async create(
@@ -174,11 +175,13 @@ export class ProductService {
       // product.digitalFileId ? this.fileService.findById(product.digitalFileId) : null,
       product.imageId ? this.fileService.findById(product.imageId) : null
     ]);
-    const bookmark = user && await this.reactionService.checkExisting(product._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.PRODUCT);
+    const bookmark = await this.reactionService.checkExisting(product._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.PRODUCT);
     const dto = new ProductDto(product);
     dto.isBookMarked = !!bookmark;
     dto.image = image ? image.getUrl() : null;
-    dto.performer = new PerformerDto(performer).toResponse();
+    dto.performer = {
+      username: performer.username
+    };
 
     return dto;
   }
@@ -187,32 +190,32 @@ export class ProductService {
     return this.productModel.updateOne(
       { _id: id },
       { $inc: { stock: num } },
-      { upsert: true }
+      { new: true }
     );
   }
 
-  public async checkAuth(req: any, user: UserDto) {
-    const { query } = req;
-    if (!query.productId) {
-      throw new ForbiddenException();
-    }
-    if (user.roles && user.roles.indexOf('admin') > -1) {
-      return true;
-    }
-    // check type product
-    const product = await this.productModel.findById(query.productId);
-    if (!product) throw new EntityNotFoundException();
-    if (user._id.toString() === product.performerId.toString()) {
-      return true;
-    }
-    if (product.type === PRODUCT_TYPE.PHYSICAL) {
-      return true;
-    }
-    // check bought
-    const bought = await this.checkPaymentService.checkBoughtProduct(new ProductDto(product), user);
-    if (!bought) {
-      throw new ForbiddenException();
-    }
-    return true;
-  }
+  // public async checkAuth(req: any, user: UserDto) {
+  //   const { query } = req;
+  //   if (!query.productId) {
+  //     throw new ForbiddenException();
+  //   }
+  //   if (user.roles && user.roles.indexOf('admin') > -1) {
+  //     return true;
+  //   }
+  //   // check type product
+  //   const product = await this.productModel.findById(query.productId);
+  //   if (!product) throw new EntityNotFoundException();
+  //   if (user._id.toString() === product.performerId.toString()) {
+  //     return true;
+  //   }
+  //   if (product.type === PRODUCT_TYPE.PHYSICAL) {
+  //     return true;
+  //   }
+  //   // check bought
+  //   const bought = await this.checkPaymentService.checkBoughtProduct(new ProductDto(product), user);
+  //   if (!bought) {
+  //     throw new ForbiddenException();
+  //   }
+  //   return true;
+  // }
 }

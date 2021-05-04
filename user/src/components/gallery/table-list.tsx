@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 import { PureComponent } from 'react';
 import { Table, Tag, Button } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
@@ -32,24 +33,37 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Name',
-        dataIndex: 'name',
-        sorter: true
+        title: 'Title',
+        dataIndex: 'title'
+      },
+      {
+        title: 'For sale?',
+        dataIndex: 'isSale',
+        render(isSale: boolean) {
+          switch (isSale) {
+            case true:
+              return <Tag color="green">Y</Tag>;
+            case false:
+              return <Tag color="#FFCF00">N</Tag>;
+            default: return <Tag color="#FFCF00">{isSale}</Tag>;
+          }
+        }
+      },
+      {
+        title: 'Amount of Tokens',
+        dataIndex: 'price'
       },
       {
         title: 'Status',
         dataIndex: 'status',
-        sorter: true,
         render(status: string) {
           switch (status) {
             case 'active':
               return <Tag color="green">Active</Tag>;
             case 'inactive':
               return <Tag color="#FFCF00">Inactive</Tag>;
-            default:
-              break;
+            default: return <Tag color="#FFCF00">{status}</Tag>;
           }
-          return <Tag color="default">{status}</Tag>;
         }
       },
       {

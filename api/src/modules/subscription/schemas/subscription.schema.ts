@@ -1,17 +1,11 @@
 import * as mongoose from 'mongoose';
-import { SUBSCRIPTION_STATUS, SUBSCRIPTION_TYPE } from '../constants';
+import { SUBSCRIPTION_STATUS } from '../constants';
 
 const subscriptionSchema = new mongoose.Schema({
   subscriptionType: {
     type: String,
-    default: SUBSCRIPTION_TYPE.MONTHLY,
-    index: true,
-    enum: [
-      SUBSCRIPTION_TYPE.FREE,
-      SUBSCRIPTION_TYPE.MONTHLY,
-      SUBSCRIPTION_TYPE.YEARLY,
-      SUBSCRIPTION_TYPE.SYSTEM
-    ]
+    default: 'monthly',
+    index: true
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,

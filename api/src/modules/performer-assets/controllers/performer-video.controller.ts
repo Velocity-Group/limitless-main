@@ -34,8 +34,8 @@ export class PerformerVideosController {
 
   @Post('/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor(
@@ -85,8 +85,8 @@ export class PerformerVideosController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async details(
     @Param('id') id: string,
     @Request() req: any
@@ -98,8 +98,8 @@ export class PerformerVideosController {
 
   @Get('/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async search(
     @Query() req: VideoSearchRequest,
     @CurrentUser() uploader: UserDto
@@ -110,8 +110,8 @@ export class PerformerVideosController {
 
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async update(
     @Param('id') id: string,
     @Body() payload: VideoUpdatePayload,
@@ -123,8 +123,8 @@ export class PerformerVideosController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async remove(
     @Param('id') id: string
   ) {

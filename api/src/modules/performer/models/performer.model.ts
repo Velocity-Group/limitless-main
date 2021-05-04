@@ -1,6 +1,5 @@
 import { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { ISchedule } from '../dtos';
 import { BankingModel } from './banking.model';
 import { PaymentGatewaySettingModel } from './payment-gateway-setting.model';
 
@@ -55,13 +54,7 @@ export class PerformerModel extends Document {
 
   languages: string[];
 
-  schedule: ISchedule;
-
-  timezone: string;
-
-  noteForUser: string;
-
-  studioId: ObjectId;
+  agentId: ObjectId;
 
   height: string;
 
@@ -103,6 +96,9 @@ export class PerformerModel extends Document {
     totalBlogs: number;
     totalStories: number;
     totalStreamTime: number;
+    totalViewTime: number;
+    totalRating: number;
+    avgRating: number;
   };
 
   bankingInfomation: BankingModel;
@@ -134,7 +130,7 @@ export class PerformerModel extends Document {
 
   maxParticipantsAllowed: number;
 
-  live: boolean;
+  live: number;
 
   streamingStatus: string;
 
@@ -146,7 +142,25 @@ export class PerformerModel extends Document {
 
   googleConnected: boolean;
 
+  privateChatPrice: number;
+
   publicChatPrice: number;
 
-  privateChatPrice: number;
+  groupChatPrice: number;
+
+  roles: string[];
+
+  balance: number;
+
+  socialsLink: {
+    facebook: String;
+    twitter: String;
+    google: String;
+    instagram: String;
+    linkedIn: String;
+  };
+
+  invitationId: ObjectId;
+
+  referralId: ObjectId;
 }

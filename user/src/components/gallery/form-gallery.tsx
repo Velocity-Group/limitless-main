@@ -1,63 +1,77 @@
-/* eslint-disable react/require-default-props */
-/* eslint-disable react/jsx-no-bind */
-import React from 'react';
 import {
-  Form, Input, Button, Select
+  Form, Input, Button, Select, InputNumber, Switch
 } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { IGallery, IPhotos } from 'src/interfaces';
 import Router from 'next/router';
 import './gallery.less';
+import { useState } from 'react';
 
 interface IProps {
-  gallery?: IGallery;
+  gallery: IGallery;
   onFinish: Function;
-  submitting: boolean;
-  photosList?: IPhotos[];
-  removePhoto?: Function;
+  submiting: boolean;
+  photosList: IPhotos[];
+  removePhoto: Function;
 }
 
 const FormGallery = ({
   onFinish,
-  submitting,
-  gallery = null,
+  submiting,
+  gallery,
   photosList = [],
-  removePhoto = () => {}
+  removePhoto
 }: IProps) => {
   const [form] = Form.useForm();
+
+  const [isSale, setSale] = useState(gallery?.isSale || false);
 
   return (
     <>
       <Form
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
         form={form}
         name="galleryForm"
         onFinish={onFinish.bind(this)}
         initialValues={
-          gallery || { name: '', status: 'active', description: '' }
+          gallery || {
+            title: '', status: 'active', description: '', isSale: false, price: false
+          }
         }
-        labelCol={{ span: 4 }}
-        wrapperCol={{ span: 20 }}
         className="account-form"
       >
         <Form.Item
-          name="name"
-          rules={[{ required: true, message: 'Please input name of gallery!' }]}
-          label="Name"
-          labelCol={{ span: 24 }}
+          name="title"
+          rules={[{ required: true, message: 'Please input gallery title!' }]}
+          label="Title"
         >
-          <Input placeholder="Enter gallery's name" />
+          <Input placeholder="Enter gallery title" />
         </Form.Item>
         <Form.Item
           name="description"
           label="Description"
-          labelCol={{ span: 24 }}
         >
-          <Input.TextArea rows={3} />
+          <Input.TextArea placeholder="Enter description here" rows={3} />
         </Form.Item>
+        <Form.Item
+          name="isSale"
+          label="For sale?"
+        >
+          <Switch checkedChildren="Sale" unCheckedChildren="Free" checked={isSale} onChange={(val) => setSale(val)} />
+        </Form.Item>
+        {isSale && (
+        <Form.Item
+          name="price"
+          rules={[{ required: true, message: 'Please input amount of tokens' }]}
+          label="Amount of Tokens"
+        >
+          <InputNumber min={1} />
+        </Form.Item>
+        )}
         <Form.Item
           name="status"
           label="Status"
-          labelCol={{ span: 24 }}
           rules={[{ required: true, message: 'Please select status!' }]}
         >
           <Select>
@@ -69,12 +83,13 @@ const FormGallery = ({
             </Select.Option>
           </Select>
         </Form.Item>
+        <div style={{ margin: 5 }} />
         <Form.Item>
           <Button
             className="primary"
             htmlType="submit"
-            loading={submitting}
-            disabled={submitting}
+            loading={submiting}
+            disabled={submiting}
             style={{ marginRight: '20px' }}
           >
             Submit
@@ -97,7 +112,7 @@ const FormGallery = ({
                 src={photo.photo.url || photo.photo.thumbnails[0]}
               />
               <div className="remove-section">
-                <DeleteOutlined onClick={removePhoto.bind(this, photo._id)} />
+                <DeleteOutlined onClick={() => removePhoto(photo._id)} />
               </div>
             </div>
           ))}

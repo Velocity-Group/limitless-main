@@ -8,7 +8,9 @@ import {
   Param,
   Get,
   Query,
-  UseGuards
+  UseGuards,
+  Res,
+  Post
 } from '@nestjs/common';
 import { DataResponse } from 'src/kernel';
 import { AuthGuard, LoadUser } from 'src/modules/auth/guards';
@@ -34,7 +36,7 @@ export class UserGalleryController {
   }
 
   @Get('/:id/view')
-  @UseGuards(AuthGuard)
+  @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async view(
@@ -42,6 +44,19 @@ export class UserGalleryController {
     @CurrentUser() user: any
   ): Promise<any> {
     const resp = await this.galleryService.details(id, user);
+    return DataResponse.ok(resp);
+  }
+
+  @Post('/:id/download-zip')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async download(
+    @Res() res: any,
+    @Param('id') id: string,
+    @CurrentUser() user: any
+  ): Promise<any> {
+    const resp = await this.galleryService.downloadZipPhotos(id, user);
     return DataResponse.ok(resp);
   }
 }

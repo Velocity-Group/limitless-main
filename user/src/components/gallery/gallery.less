@@ -1,11 +1,12 @@
 @import '../../../style/vars.less';
 
 .gallery-card {
-  box-shadow: 0 4px 16px rgba(0,0,0,.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   position: relative;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
   .gallery-cover {
+    position: relative;
     img {
       border-top-left-radius: 0.5em;
       border-top-right-radius: 0.5em;
@@ -38,6 +39,7 @@
 .grid-photos {
   display: inline-block;
   width: 100%;
+  margin: 5px 0;
   .grid-item {
     position: relative;
     width: 10%;
@@ -63,5 +65,4 @@
       color: #000;
     }
   }
-
 }

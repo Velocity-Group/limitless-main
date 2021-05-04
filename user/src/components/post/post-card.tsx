@@ -405,7 +405,7 @@ class FeedCard extends Component<IProps> {
                 {!isHovered ? <LockOutlined /> : <UnlockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && performer && (
                   <p aria-hidden onClick={() => this.setState({ openSubscriptionModal: true })}>
-                    Subcribe to see creator post
+                    Subcribe to see model post
                   </p>
                 )}
                 {feed.isSale && !feed.isBought && performer && (
@@ -451,9 +451,9 @@ class FeedCard extends Component<IProps> {
           )}
           {polls && polls.length > 0 && polls.map((poll) => (
             <div aria-hidden className="feed-poll" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
-              <span>{poll.description}</span>
+              <span>{poll?.description}</span>
               {' '}
-              <span>{poll.totalVote}</span>
+              <span>{poll?.totalVote || 0}</span>
             </div>
           ))}
           {polls && polls.length > 0 && (
@@ -496,8 +496,8 @@ class FeedCard extends Component<IProps> {
               )}
             </div>
             <div className="action-item">
-              {/* <Twitter link={shareUrl} />
-              <Facebook link={shareUrl} /> */}
+              <Twitter link={shareUrl} />
+              <Facebook link={shareUrl} />
               <span aria-hidden className={isBookMarked ? 'action-ico active' : 'action-ico'} onClick={this.handleBookmark.bind(this)}>
                 <Tooltip title={!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}><BookOutlined /></Tooltip>
               </span>

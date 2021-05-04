@@ -243,9 +243,8 @@ const performerSchema = new mongoose.Schema({
     default: 1
   },
   live: {
-    type: Boolean,
-    index: true,
-    default: false
+    type: Number,
+    default: 0
   },
   streamingStatus: {
     type: String,

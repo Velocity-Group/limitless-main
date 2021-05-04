@@ -5,5 +5,7 @@ export const REF_TYPE = {
   PHOTO: 'photo',
   PRODUCT: 'product',
   FEED: 'feed',
-  MESSAGE: 'message'
+  MESSAGE: 'message',
+  GIFT: 'gift',
+  AGENT: 'agent'
 };

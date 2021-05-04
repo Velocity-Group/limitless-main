@@ -25,18 +25,17 @@ import {
   getConfig,
   ForbiddenException
 } from 'src/kernel';
-import { Roles } from 'src/modules/auth';
 import { AuthService } from 'src/modules/auth/services';
-import { RoleGuard, AuthGuard, LoadUser } from 'src/modules/auth/guards';
-import { CurrentUser } from 'src/modules/auth/decorators';
+import { AuthGuard, LoadUser, RoleGuard } from 'src/modules/auth/guards';
+import { CurrentUser, Roles } from 'src/modules/auth/decorators';
 import {
   FileUploadInterceptor, FileUploaded, FileDto
 } from 'src/modules/file';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
-import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { CountryService } from 'src/modules/utils/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { PERFORMER_STATUSES } from '../constants';
 import {
   PerformerDto,
@@ -70,8 +69,8 @@ export class PerformerController {
 
   @Get('/me')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async me(
     @Request() req: any
   ): Promise<DataResponse<IPerformerResponse>> {
@@ -95,6 +94,7 @@ export class PerformerController {
   }
 
   @Get('/search/random')
+  @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async randomSearch(
@@ -106,23 +106,10 @@ export class PerformerController {
     return DataResponse.ok(data);
   }
 
-  @Get('/top')
-  @HttpCode(HttpStatus.OK)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async topPerformers(
-    @Query() req: PerformerSearchPayload
-  ): Promise<DataResponse<PageableData<IPerformerResponse>>> {
-    const query = { ...req };
-    // only query activated performer, sort by online time
-    query.status = PERFORMER_STATUSES.ACTIVE;
-
-    const data = await this.performerSearchService.topPerformers(query);
-    return DataResponse.ok(data);
-  }
-
   @Put('/:id')
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
+  @HttpCode(HttpStatus.OK)
   async updateUser(
     @Body() payload: SelfUpdatePayload,
     @Param('id') performerId: string,
@@ -196,8 +183,8 @@ export class PerformerController {
   }
 
   @Post('/documents/upload')
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(
     FileUploadInterceptor('performer-document', 'file', {
@@ -205,7 +192,7 @@ export class PerformerController {
     })
   )
   async uploadPerformerDocument(
-    @CurrentUser() currentUser: UserDto,
+    @CurrentUser() currentUser: PerformerDto,
     @FileUploaded() file: FileDto,
     @Request() req: any
   ): Promise<any> {
@@ -246,8 +233,8 @@ export class PerformerController {
 
   @Post('/avatar/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @UseInterceptors(
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
@@ -258,7 +245,7 @@ export class PerformerController {
   )
   async uploadPerformerAvatar(
     @FileUploaded() file: FileDto,
-    @CurrentUser() performer: PerformerDto
+    @CurrentUser() performer: UserDto
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
     await this.performerService.updateAvatar(performer, file);
@@ -270,8 +257,8 @@ export class PerformerController {
 
   @Post('/cover/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @UseInterceptors(
     FileUploadInterceptor('cover', 'cover', {
       destination: getConfig('file').coverDir
@@ -279,7 +266,7 @@ export class PerformerController {
   )
   async uploadPerformerCover(
     @FileUploaded() file: FileDto,
-    @CurrentUser() performer: PerformerDto
+    @CurrentUser() performer: UserDto
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
     await this.performerService.updateCover(performer, file);
@@ -291,8 +278,8 @@ export class PerformerController {
 
   @Post('/welcome-video/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @UseInterceptors(
     FileUploadInterceptor('performer-welcome-video', 'welcome-video', {
       destination: getConfig('file').videoDir
@@ -300,7 +287,7 @@ export class PerformerController {
   )
   async uploadPerformerVideo(
     @FileUploaded() file: FileDto,
-    @CurrentUser() performer: PerformerDto
+    @CurrentUser() performer: UserDto
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
     await this.performerService.updateWelcomeVideo(performer, file);
@@ -312,8 +299,8 @@ export class PerformerController {
 
   @Put('/:id/banking-settings')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async updateBankingSetting(
     @Param('id') performerId: string,
     @Body() payload: BankingSettingPayload,
@@ -329,8 +316,8 @@ export class PerformerController {
 
   @Put('/:id/block-countries-settings')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async updateBlockCountriesSetting(
     @Param('id') performerId: string,
     @Body() payload: BlockCountriesSettingPayload,
@@ -346,8 +333,8 @@ export class PerformerController {
 
   @Post('/blocked-users')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async blockUser(
     @CurrentUser() performer: UserDto,
     @Body() payload: BlockedByPerformerPayload
@@ -358,8 +345,8 @@ export class PerformerController {
 
   @Delete('/blocked-users/:userId')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async unblockUser(
     @Param('userId') userId: string,
     @CurrentUser() performer: UserDto
@@ -370,8 +357,8 @@ export class PerformerController {
 
   @Get('/blocked-users')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @UsePipes(new ValidationPipe({ transform: true }))
   async search(
     @CurrentUser() performer: UserDto,

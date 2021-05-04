@@ -14,17 +14,17 @@ import {
   StringHelper
 } from 'src/kernel';
 import { FileDto } from 'src/modules/file';
-import { UserDto } from 'src/modules/user/dtos';
 import { FileService, FILE_EVENT } from 'src/modules/file/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
 import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
 import { PerformerService } from 'src/modules/performer/services';
 import { merge, difference } from 'lodash';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
-import { CheckPaymentService } from 'src/modules/payment/services';
+import { PaymentTokenService } from 'src/modules/purchased-item/services';
 import { EVENT } from 'src/kernel/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserDto } from 'src/modules/user/dtos';
 import { VideoUpdatePayload } from '../payloads';
 import { VideoDto, IVideoResponse } from '../dtos';
 import { VIDEO_STATUS, VIDEO_TEASER_STATUS } from '../constants';
@@ -42,19 +42,18 @@ const CHECK_REF_REMOVE_VIDEO_AGENDA = 'CHECK_REF_REMOVE_VIDEO_AGENDA';
 @Injectable()
 export class VideoService {
   constructor(
+    @Inject(PERFORMER_VIDEO_MODEL_PROVIDER)
+    private readonly PerformerVideoModel: Model<VideoModel>,
+    private readonly queueEventService: QueueEventService,
+    private readonly fileService: FileService,
+    private readonly subscriptionService: SubscriptionService,
+    private readonly agenda: AgendaService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
-    @Inject(forwardRef(() => CheckPaymentService))
-    private readonly checkPaymentService: CheckPaymentService,
-    @Inject(forwardRef(() => SubscriptionService))
-    private readonly subscriptionService: SubscriptionService,
-    @Inject(PERFORMER_VIDEO_MODEL_PROVIDER)
-    private readonly videoModel: Model<VideoModel>,
-    private readonly queueEventService: QueueEventService,
-    private readonly fileService: FileService,
-    private readonly agenda: AgendaService
+    @Inject(forwardRef(() => PaymentTokenService))
+    private readonly checkPaymentService: PaymentTokenService
   ) {
     this.queueEventService.subscribe(
       PERFORMER_VIDEO_TEASER_CHANNEL,
@@ -66,10 +65,10 @@ export class VideoService {
       FILE_PROCESSED_TOPIC,
       this.handleFileProcessed.bind(this)
     );
-    this.defindJobs();
+    this.defineJobs();
   }
 
-  private async defindJobs() {
+  private async defineJobs() {
     const collection = (this.agenda as any)._collection;
     await collection.deleteMany({
       name: {
@@ -79,8 +78,9 @@ export class VideoService {
         ]
       }
     });
+
     this.agenda.define(SCHEDULE_VIDEO_AGENDA, {}, this.scheduleVideo.bind(this));
-    this.agenda.every('24 hours', SCHEDULE_VIDEO_AGENDA, {});
+    this.agenda.every('3600 seconds', SCHEDULE_VIDEO_AGENDA, {});
 
     this.agenda.define(CHECK_REF_REMOVE_VIDEO_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
     this.agenda.every('24 hours', CHECK_REF_REMOVE_VIDEO_AGENDA, {});
@@ -92,7 +92,7 @@ export class VideoService {
       for (let i = 0; i <= total / 99; i += 1) {
         const files = await this.fileService.findByRefType(REF_TYPE.VIDEO, 99, i);
         const videoIds = files.map((f) => f.refItems[0].itemId.toString());
-        const videos = await this.videoModel.find({ _id: { $in: videoIds } });
+        const videos = await this.PerformerVideoModel.find({ _id: { $in: videoIds } });
         const Ids = videos.map((v) => v._id.toString());
         const difIds = difference(videoIds, Ids);
         const difFileIds = files.filter((file) => difIds.includes(file.refItems[0].itemId.toString()));
@@ -109,53 +109,55 @@ export class VideoService {
 
   private async scheduleVideo(job: any, done: any): Promise<void> {
     try {
-      const videos = await this.videoModel.find({
+      const videos = await this.PerformerVideoModel.find({
         isSchedule: true,
         scheduledAt: { $lte: new Date() },
         status: { $ne: VIDEO_STATUS.ACTIVE }
-      });
-      videos.forEach(async (video) => {
-        const v = new VideoDto(video);
-        await this.videoModel.updateOne(
-          {
-            _id: v._id
-          },
-          {
-            isSchedule: false,
-            status: VIDEO_STATUS.ACTIVE,
-            updatedAt: new Date()
-          }
-        );
-        const oldStatus = video.status;
-        await this.queueEventService.publish(
-          new QueueEvent({
-            channel: PERFORMER_COUNT_VIDEO_CHANNEL,
-            eventName: EVENT.UPDATED,
-            data: {
-              ...v,
-              oldStatus
+      }).lean();
+      await Promise.all([
+        videos.forEach(async (video) => {
+          const v = new VideoDto(video);
+          await this.PerformerVideoModel.updateOne(
+            {
+              _id: v._id
+            },
+            {
+              isSchedule: false,
+              status: VIDEO_STATUS.ACTIVE,
+              updatedAt: new Date()
             }
-          })
-        );
-      });
+          );
+          const oldStatus = video.status;
+          await this.queueEventService.publish(
+            new QueueEvent({
+              channel: PERFORMER_COUNT_VIDEO_CHANNEL,
+              eventName: EVENT.UPDATED,
+              data: {
+                ...v,
+                oldStatus
+              }
+            })
+          );
+        })
+      ]);
     } catch (e) {
-      console.log('Schedule error', e);
+      console.log('Schedule video error', e);
     } finally {
       done();
     }
   }
 
   public async findById(id: string | ObjectId) {
-    const video = await this.videoModel.findById(id);
+    const video = await this.PerformerVideoModel.findById(id);
     return new VideoDto(video);
   }
 
   public async findByIds(ids: string[] | ObjectId[]) {
-    const video = await this.videoModel.find({ _id: { $in: ids } });
-    return video;
+    const videos = await this.PerformerVideoModel.find({ _id: { $in: ids } });
+    return videos;
   }
 
-  private getVideoForView(fileDto: FileDto, video: VideoDto, jwToken: string) {
+  public getVideoForView(fileDto: FileDto, video: VideoDto, jwToken: string) {
     // get thumb, video link, thumbnails, etc...
     let file = fileDto.getUrl();
     if (video && jwToken) {
@@ -176,7 +178,7 @@ export class VideoService {
       }
       const { videoId } = event.data.meta;
       const [video, file] = await Promise.all([
-        this.videoModel.findById(videoId),
+        this.PerformerVideoModel.findById(videoId),
         this.fileService.findById(event.data.fileId)
       ]);
       if (!video) {
@@ -204,7 +206,7 @@ export class VideoService {
       }
       const { videoId } = event.data.meta;
       const [video, file] = await Promise.all([
-        this.videoModel.findById(videoId),
+        this.PerformerVideoModel.findById(videoId),
         this.fileService.findById(event.data.fileId)
       ]);
       if (!video) {
@@ -287,9 +289,7 @@ export class VideoService {
     if (!valid) {
       throw new HttpException('Invalid file format', 400);
     }
-    // TODO - check performer and other info?
-    // eslint-disable-next-line new-cap
-    const model = new this.videoModel(payload);
+    const model = new this.PerformerVideoModel(payload);
     model.fileId = video._id;
     if (!model.performerId && creator) {
       model.performerId = creator._id;
@@ -310,21 +310,22 @@ export class VideoService {
     model.teaserId
       && (await this.fileService.addRef(model.teaserId, {
         itemId: model._id,
-        itemType: 'performer-video-teaser'
+        itemType: REF_TYPE.VIDEO
       }));
     model.fileId
       && (await this.fileService.addRef(model.fileId, {
         itemType: REF_TYPE.VIDEO,
         itemId: model._id
       }));
-
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: PERFORMER_COUNT_VIDEO_CHANNEL,
-        eventName: EVENT.CREATED,
-        data: new VideoDto(model)
-      })
-    );
+    if (model.status === VIDEO_STATUS.ACTIVE) {
+      await this.queueEventService.publish(
+        new QueueEvent({
+          channel: PERFORMER_COUNT_VIDEO_CHANNEL,
+          eventName: EVENT.CREATED,
+          data: new VideoDto(model)
+        })
+      );
+    }
 
     await this.fileService.queueProcessVideo(model.fileId, {
       publishChannel: PERFORMER_VIDEO_CHANNEL,
@@ -345,7 +346,7 @@ export class VideoService {
   // TODO - add a service to query details from public user
   // this request is for admin or owner only?
   public async getDetails(videoId: string | ObjectId, jwToken: string): Promise<VideoDto> {
-    const video = await this.videoModel.findById(videoId);
+    const video = await this.PerformerVideoModel.findById(videoId);
     if (!video) throw new EntityNotFoundException();
     const participantIds = video.participantIds.filter((p) => StringHelper.isObjectId(p));
     const [performer, videoFile, thumbnailFile, teaserFile, participants] = await Promise.all([
@@ -367,7 +368,7 @@ export class VideoService {
   }
 
   public async userGetDetails(videoId: string | ObjectId, currentUser: UserDto, jwToken: string): Promise<VideoDto> {
-    const video = await this.videoModel.findById(videoId);
+    const video = await this.PerformerVideoModel.findById(videoId);
     if (!video) throw new EntityNotFoundException();
     const participantIds = video.participantIds.filter((p) => StringHelper.isObjectId(p));
     const [performer, videoFile, thumbnailFile, teaserFile, participants] = await Promise.all([
@@ -384,23 +385,22 @@ export class VideoService {
     dto.thumbnail = thumbnailFile ? thumbnailFile.getUrl() : null;
     dto.teaser = teaserFile ? teaserFile.getUrl() : null;
     // TODO check video for sale or subscriber
-    if (!dto.isSaleVideo) {
+    if (!dto.isSale) {
       const subscribed = currentUser && await this.subscriptionService.checkSubscribed(dto.performerId, currentUser._id);
-      dto.video = this.getVideoForView(videoFile, dto, jwToken);
       dto.isSubscribed = !!subscribed;
     }
-    if (dto.isSaleVideo) {
+    if (dto.isSale) {
       const bought = currentUser && await this.checkPaymentService.checkBoughtVideo(dto, currentUser);
-      dto.video = this.getVideoForView(videoFile, dto, jwToken);
       dto.isBought = !!bought;
     }
+    dto.video = this.getVideoForView(videoFile, dto, jwToken);
     dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     dto.participants = participants.map((p) => p.toSearchResponse());
     return dto;
   }
 
   public async updateInfo(id: string | ObjectId, payload: VideoUpdatePayload, updater?: UserDto): Promise<VideoDto> {
-    const video = await this.videoModel.findById(id);
+    const video = await this.PerformerVideoModel.findById(id);
     if (!video) {
       throw new EntityNotFoundException();
     }
@@ -438,7 +438,7 @@ export class VideoService {
   }
 
   public async delete(id: string | ObjectId) {
-    const video = await this.videoModel.findById(id);
+    const video = await this.PerformerVideoModel.findById(id);
     if (!video) {
       throw new EntityNotFoundException();
     }
@@ -457,42 +457,42 @@ export class VideoService {
   }
 
   public async increaseView(id: string | ObjectId) {
-    return this.videoModel.updateOne(
+    return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
         $inc: { 'stats.views': 1 }
       },
-      { upsert: true }
+      { new: true }
     );
   }
 
   public async increaseComment(id: string | ObjectId, num = 1) {
-    return this.videoModel.updateOne(
+    return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
         $inc: { 'stats.comments': num }
       },
-      { upsert: true }
+      { new: true }
     );
   }
 
   public async increaseLike(id: string | ObjectId, num = 1) {
-    return this.videoModel.updateOne(
+    return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
         $inc: { 'stats.likes': num }
       },
-      { upsert: true }
+      { new: true }
     );
   }
 
   public async increaseFavourite(id: string | ObjectId, num = 1) {
-    return this.videoModel.updateOne(
+    return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
         $inc: { 'stats.favourites': num }
       },
-      { upsert: true }
+      { new: true }
     );
   }
 
@@ -505,12 +505,12 @@ export class VideoService {
       return true;
     }
     // check type video
-    const video = await this.videoModel.findById(query.videoId);
+    const video = await this.PerformerVideoModel.findById(query.videoId);
     if (!video) throw new EntityNotFoundException();
     if (user._id.toString() === video.performerId.toString()) {
       return true;
     }
-    if (!video.isSaleVideo) {
+    if (!video.isSale) {
       // check subscription
       const subscribed = await this.subscriptionService.checkSubscribed(video.performerId, user._id);
       if (!subscribed) {
@@ -518,7 +518,7 @@ export class VideoService {
       }
       return true;
     }
-    if (video.isSaleVideo) {
+    if (video.isSale) {
       // check bought
       const bought = await this.checkPaymentService.checkBoughtVideo(new VideoDto(video), user);
       if (!bought) {

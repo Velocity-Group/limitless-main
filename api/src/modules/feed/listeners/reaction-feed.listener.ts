@@ -30,20 +30,20 @@ export class ReactionFeedListener {
       return;
     }
     const { objectId, objectType, action } = event.data;
-    if (![REACTION_TYPE.FEED_PHOTO, REACTION_TYPE.FEED_TEXT, REACTION_TYPE.FEED_VIDEO].includes(objectType) || action !== REACTION.LIKE) {
+    if (![REACTION_TYPE.FEED_PHOTO, REACTION_TYPE.FEED_TEXT, REACTION_TYPE.FEED_VIDEO, REACTION_TYPE.FEED_AUDIO].includes(objectType) || action !== REACTION.LIKE) {
       return;
     }
     if (REACTION.LIKE && event.eventName === EVENT.CREATED) {
       const feed = await this.feedModel.findById(objectId);
       if (feed) {
-        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: 1 } }, { upsert: true });
+        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: 1 } }, { new: true });
         await this.performerService.updateLikeStat(feed.fromSourceId, 1);
       }
     }
     if (REACTION.LIKE && event.eventName === EVENT.DELETED) {
       const feed = await this.feedModel.findById(objectId);
       if (feed) {
-        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: -1 } }, { upsert: true });
+        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: -1 } }, { new: true });
         await this.performerService.updateLikeStat(feed.fromSourceId, -1);
       }
     }

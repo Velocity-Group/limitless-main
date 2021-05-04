@@ -64,8 +64,6 @@ export class IPaymentResponse {
 export class PaymentDto {
   _id: ObjectId;
 
-  orderId?: ObjectId;
-
   paymentGateway?: string;
 
   sourceInfo?: any;

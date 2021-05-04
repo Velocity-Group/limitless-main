@@ -314,6 +314,10 @@ export class UserService {
     await this.userModel.updateOne({ _id: userId }, { ccbillCardToken: subscriptionId, authorisedCard: true }, { upsert: true });
   }
 
+  public async updateBalance(userId: string | ObjectId, tokens: number) {
+    await this.userModel.updateOne({ _id: userId }, { $inc: { balance: tokens } }, { upsert: true });
+  }
+
   public async delete(id: string) {
     if (!StringHelper.isObjectId(id)) throw new ForbiddenException();
     const user = await this.userModel.findById(id);

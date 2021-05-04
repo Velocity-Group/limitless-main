@@ -41,7 +41,7 @@ export class PerformerConnectedListener {
         updateData = {
           isOnline: 0,
           streamingStatus: OFFLINE,
-          live: false,
+          live: 0,
           onlineAt: null,
           offlineAt: new Date()
         };

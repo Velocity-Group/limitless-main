@@ -2,14 +2,17 @@ import {
   IsString,
   IsOptional,
   IsIn,
-  IsNotEmpty
+  IsNotEmpty,
+  IsNumber,
+  IsBoolean
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GalleryCreatePayload {
   @ApiProperty()
-  @IsOptional()
-  name: string;
+  @IsString()
+  @IsNotEmpty()
+  title: string;
 
   @ApiProperty()
   @IsString()
@@ -28,8 +31,14 @@ export class GalleryCreatePayload {
   status: string;
 
   @ApiProperty()
+  @IsNumber()
   @IsOptional()
   price: number;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  isSale: boolean;
 
   @ApiProperty()
   @IsString()

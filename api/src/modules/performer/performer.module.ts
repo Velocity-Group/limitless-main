@@ -9,15 +9,13 @@ import {
   CategoryService,
   CategorySearchService,
   PerformerService,
-  PerformerSearchService,
-  PerformerTrendingService
+  PerformerSearchService
 } from './services';
 import {
   CategoryController,
   AdminCategoryController,
   AdminPerformerController,
-  PerformerController,
-  PerformerTrendingController
+  PerformerController
 } from './controllers';
 import { UserModule } from '../user/user.module';
 import { FileModule } from '../file/file.module';
@@ -50,7 +48,6 @@ import {
     CategorySearchService,
     PerformerService,
     PerformerSearchService,
-    PerformerTrendingService,
     PerformerAssetsListener,
     PerformerConnectedListener,
     SubscriptionPerformerListener,
@@ -60,15 +57,13 @@ import {
     CategoryController,
     AdminCategoryController,
     AdminPerformerController,
-    PerformerController,
-    PerformerTrendingController
+    PerformerController
   ],
   exports: [
     ...performerProviders,
     PerformerService,
     CategoryService,
-    PerformerSearchService,
-    PerformerTrendingService
+    PerformerSearchService
   ]
 })
 export class PerformerModule {}

@@ -47,7 +47,7 @@ export class PollFeedListener {
     const { targetId } = event.data;
 
     if (event.eventName === EVENT.CREATED) {
-      await this.pollModel.updateOne({ _id: targetId }, { $inc: { totalVote: 1 } }, { upsert: true });
+      await this.pollModel.updateOne({ _id: targetId }, { $inc: { totalVote: 1 } }, { new: true });
     }
   }
 }

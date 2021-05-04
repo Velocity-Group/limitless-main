@@ -12,15 +12,13 @@ export class StreamModel extends Document {
 
   sessionId?: string;
 
-  isStreaming?: boolean;
-
-  totalViewer?: number;
+  isStreaming?: number;
 
   streamingTime?: number;
 
   lastStreamingTime?: Date;
 
-  price?: number
+  isFree?: boolean;
 
   createdAt?: Date;
 

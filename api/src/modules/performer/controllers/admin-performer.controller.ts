@@ -19,14 +19,16 @@ import {
   Delete
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
-import { DataResponse, PageableData, getConfig } from 'src/kernel';
+import {
+  DataResponse, PageableData, getConfig
+} from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { AuthService } from 'src/modules/auth/services';
-import { UserDto } from 'src/modules/user/dtos';
 import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { FileUploadInterceptor, FileUploaded, FileDto } from 'src/modules/file';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
+import { UserDto } from 'src/modules/user/dtos';
 import {
   PerformerCreatePayload,
   PerformerUpdatePayload,
@@ -34,7 +36,8 @@ import {
   PaymentGatewaySettingPayload,
   CommissionSettingPayload,
   BankingSettingPayload,
-  BlockCountriesSettingPayload
+  BlockCountriesSettingPayload,
+  ChangeTokenLogsSearchPayload
 } from '../payloads';
 import { PerformerDto, IPerformerResponse } from '../dtos';
 import { PerformerService, PerformerSearchService } from '../services';
@@ -60,10 +63,19 @@ export class AdminPerformerController {
     @Query() req: PerformerSearchPayload
   ): Promise<DataResponse<PageableData<IPerformerResponse>>> {
     const data = await this.performerSearchService.adminSearch(req);
-    return DataResponse.ok({
-      total: data.total,
-      data: data.data.map((p) => p.toResponse(true))
-    });
+    return DataResponse.ok(data);
+  }
+
+  @Get('/change-token/logs')
+  @Roles('admin')
+  @UseGuards(RoleGuard)
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async tokenLogs(
+    @Query() req: ChangeTokenLogsSearchPayload
+  ): Promise<DataResponse<any>> {
+    const data = await this.performerSearchService.tokenChangeLogs(req);
+    return DataResponse.ok(data);
   }
 
   @Post()
@@ -82,12 +94,21 @@ export class AdminPerformerController {
     const performer = await this.performerService.create(payload, currentUser);
 
     if (password) {
-      await this.authService.create(
+      performer.email && await this.authService.create(
         new AuthCreateDto({
           source: 'performer',
           sourceId: performer._id,
           type: 'email',
-          key: performer.email.toLowerCase(),
+          key: performer.email,
+          value: password
+        })
+      );
+      performer.username && await this.authService.create(
+        new AuthCreateDto({
+          source: 'performer',
+          sourceId: performer._id,
+          type: 'username',
+          key: performer.username,
           value: password
         })
       );

@@ -3,69 +3,72 @@ import { pick } from 'lodash';
 import { VideoModel } from '../models';
 
 export class VideoDto {
-  _id?: ObjectId;
+  _id: ObjectId;
 
-  performerId?: ObjectId;
+  performerId: ObjectId;
 
-  fileId?: ObjectId;
+  fileId: ObjectId;
 
-  type?: string;
+  type: string;
 
-  title?: string;
+  title: string;
 
-  description?: string;
+  description: string;
 
-  status?: string;
+  status: string;
 
-  tags?: string[];
+  tags: string[];
 
-  processing?: boolean;
+  processing: boolean;
 
-  thumbnailId?: ObjectId;
+  thumbnailId: ObjectId;
 
-  teaserId?: ObjectId;
+  teaserId: ObjectId;
 
-  isSaleVideo?: boolean;
+  isSale: boolean;
 
-  price?: number;
+  price: number;
 
-  thumbnail?: string;
+  thumbnail: string;
 
-  teaser?: any;
+  teaser: any;
 
-  teaserStatus?: string;
+  teaserStatus: string;
 
-  video?: any;
+  video: any;
 
-  performer?: any;
+  performer: any;
 
-  stats?: {
+  stats: {
     views: number;
     likes: number;
     comments: number;
+    favourites: number;
   };
 
-  userReaction?: {
-    liked?: boolean;
-    favourited?: boolean;
-    watchedLater?: boolean;
+  userReaction: {
+    liked: boolean;
+    favourited: boolean;
+    watchedLater: boolean;
   };
 
-  createdBy?: ObjectId;
+  createdBy: ObjectId;
 
-  updatedBy?: ObjectId;
+  updatedBy: ObjectId;
 
-  createdAt?: Date;
+  createdAt: Date;
 
-  updatedAt?: Date;
+  updatedAt: Date;
 
-  participantIds?: string[];
+  participantIds: string[];
 
-  participants?: any[];
+  participants: any[];
 
-  tagline?: string;
+  tagline: string;
 
-  constructor(init?: Partial<VideoDto>) {
+  isBought: boolean;
+
+  constructor(init: Partial<VideoDto>) {
     Object.assign(
       this,
       pick(init, [
@@ -80,7 +83,7 @@ export class VideoDto {
         'thumbnailId',
         'teaserId',
         'isSchedule',
-        'isSaleVideo',
+        'isSale',
         'price',
         'video',
         'thumbnail',
@@ -97,7 +100,8 @@ export class VideoDto {
         'updatedAt',
         'participantIds',
         'participants',
-        'tagline'
+        'tagline',
+        'isBought'
       ])
     );
   }
@@ -108,73 +112,74 @@ export class VideoDto {
 }
 
 export class IVideoResponse {
-  _id?: ObjectId;
+  _id: ObjectId;
 
-  performerId?: ObjectId;
+  performerId: ObjectId;
 
-  fileId?: ObjectId;
+  fileId: ObjectId;
 
-  type?: string;
+  type: string;
 
-  title?: string;
+  title: string;
 
-  description?: string;
+  description: string;
 
-  status?: string;
+  status: string;
 
-  tags?: string[];
+  tags: string[];
 
-  processing?: boolean;
+  processing: boolean;
 
-  thumbnailId?: ObjectId;
+  thumbnailId: ObjectId;
 
-  teaserId?: ObjectId;
+  teaserId: ObjectId;
 
-  isSaleVideo?: boolean;
+  isSale: boolean;
 
-  price?: number;
+  price: number;
 
-  thumbnail?: string;
+  thumbnail: string;
 
-  video?: any;
+  video: any;
 
-  teaser?: any;
+  teaser: any;
 
-  teaserStatus?: any;
+  teaserStatus: any;
 
-  performer?: any;
+  performer: any;
 
-  stats?: {
+  stats: {
     views: number;
     likes: number;
     comments: number;
+    favourites: number;
   };
 
-  userReaction?: {
-    liked?: boolean;
-    favourited?: boolean;
-    watchedLater?: boolean;
+  userReaction: {
+    liked: boolean;
+    favourited: boolean;
+    watchedLater: boolean;
   };
 
-  isBought?: boolean;
+  isBought: boolean;
 
-  isSubscribed?: boolean;
+  isSubscribed: boolean;
 
-  createdBy?: ObjectId;
+  createdBy: ObjectId;
 
-  updatedBy?: ObjectId;
+  updatedBy: ObjectId;
 
-  createdAt?: Date;
+  createdAt: Date;
 
-  updatedAt?: Date;
+  updatedAt: Date;
 
-  participantIds?: string[];
+  participantIds: string[];
 
-  participants?: any[];
+  participants: any[];
 
-  tagline?: string;
+  tagline: string;
 
-  constructor(init?: Partial<IVideoResponse>) {
+  constructor(init: Partial<IVideoResponse>) {
     Object.assign(
       this,
       pick(init, [
@@ -189,7 +194,7 @@ export class IVideoResponse {
         'thumbnailId',
         'teaserId',
         'isSchedule',
-        'isSaleVideo',
+        'isSale',
         'price',
         'video',
         'thumbnail',
@@ -207,8 +212,7 @@ export class IVideoResponse {
         'createdAt',
         'updatedAt',
         'participantIds',
-        'participants',
-        'tagline'
+        'participants'
       ])
     );
   }

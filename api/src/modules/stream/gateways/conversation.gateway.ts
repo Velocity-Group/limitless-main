@@ -5,10 +5,9 @@ import { RequestService } from 'src/modules/stream/services';
 import { AuthService } from 'src/modules/auth';
 import { ConversationService } from 'src/modules/message/services';
 import { Model } from 'mongoose';
-import { UserService } from 'src/modules/user/services';
-import { UserDto } from 'src/modules/user/dtos';
 import { MESSAGE_TYPE } from 'src/modules/message/constants';
 import { PerformerService } from 'src/modules/performer/services';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
 import { StreamModel } from '../models';
 import {
@@ -36,12 +35,10 @@ export class StreamConversationWsGateway {
     private readonly authService: AuthService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
-    @Inject(forwardRef(() => UserService))
-    private readonly userService: UserService,
-    private readonly requestService: RequestService,
     @Inject(STREAM_MODEL_PROVIDER)
     private readonly streamModel: Model<StreamModel>,
-    private readonly streamService: StreamService
+    private readonly streamService: StreamService,
+    private readonly requestService: RequestService
   ) {}
 
   @SubscribeMessage(JOIN_ROOM)
@@ -86,7 +83,7 @@ export class StreamConversationWsGateway {
         }
       );
 
-      if (user.isPerformer) {
+      if (`${user._id}` === `${stream.performerId}`) {
         await this.socketUserService.emitToRoom(
           roomName,
           MODEL_JOIN_ROOM,
@@ -96,20 +93,21 @@ export class StreamConversationWsGateway {
         await this.performerService.setStreamingStatus(user._id, type[1]);
         if (stream.type === PRIVATE_CHAT) {
           await this.socketUserService.emitToRoom(
-            stream.performerId.toString(), // Public room name
+            roomName,
             'message_created',
             {
-              text: 'The model is in private chat/C2C with another user',
+              text: 'Broadcaster is on private call with another user',
               type: MESSAGE_TYPE.NOTIFY
             }
           );
-        } else if (stream.type === GROUP_CHAT) {
+        }
+        if (stream.type === GROUP_CHAT) {
           await this.socketUserService.emitToRoom(
-            stream.performerId.toString(), // Public room name
+            roomName,
             'message_created',
             {
               text:
-                'The model is in a Group show and will be back after the show ends.',
+                'Broadcaster is on group chat and will be back later',
               type: MESSAGE_TYPE.NOTIFY
             }
           );
@@ -126,7 +124,7 @@ export class StreamConversationWsGateway {
           memberIds.push(id);
         }
       });
-      const members = await this.userService.findByIds(memberIds);
+      const members = await this.performerService.findByIds(memberIds);
       const streamId = `${stream.type}-${stream._id}-${user._id}`;
       const data = {
         ...defaultStreamValue,
@@ -147,7 +145,7 @@ export class StreamConversationWsGateway {
         total: client.adapter.rooms[roomName]
           ? client.adapter.rooms[roomName].length
           : 0,
-        members: members.map((m) => new UserDto(m).toResponse()),
+        members: members.map((m) => new PerformerDto(m).toResponse()),
         streamList: stream.streamIds
       });
     } catch (err) {
@@ -197,7 +195,7 @@ export class StreamConversationWsGateway {
         }
       );
 
-      if (user.isPerformer) {
+      if (`${user._id}` === `${stream.performerId}`) {
         await this.socketUserService.emitToRoom(roomName, MODEL_LEFT_ROOM, {
           date: new Date(),
           conversationId
@@ -208,7 +206,7 @@ export class StreamConversationWsGateway {
         stream.isStreaming
         && (!client.adapter.rooms[roomName] || stream.type === PRIVATE_CHAT)
       ) {
-        stream.isStreaming = false;
+        stream.isStreaming = 1;
         stream.lastStreamingTime = new Date();
         await stream.save();
       }

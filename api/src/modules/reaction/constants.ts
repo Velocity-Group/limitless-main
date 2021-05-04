@@ -11,6 +11,7 @@ export const REACTION_TYPE = {
   FEED_VIDEO: 'feed_video',
   FEED_PHOTO: 'feed_photo',
   FEED_TEXT: 'feed_text',
+  FEED_AUDIO: 'feed_audio',
   PERFORMER: 'performer',
   COMMENT: 'comment',
   PRODUCT: 'product',

@@ -26,7 +26,7 @@ export class VideoCreatePayload {
 
   @ApiProperty()
   @IsOptional()
-  isSaleVideo: boolean;
+  isSale: boolean;
 
   @ApiProperty()
   @IsOptional()

@@ -4,6 +4,7 @@ import {
   LikeOutlined,
   HourglassOutlined
 } from '@ant-design/icons';
+import { Tooltip } from 'antd';
 import Link from 'next/link';
 import { videoDuration } from '@lib/index';
 import { IVideo } from '../../interfaces';
@@ -18,40 +19,48 @@ export class VideoCard extends PureComponent<IProps> {
     const { video } = this.props;
     return (
       <div className="vid-card">
-        {video?.isSaleVideo && video?.price > 0 && (
+        {video.isSale && video.price > 0 && (
           <span className="vid-price">
             <div className="label-price">
               $
-              {(video?.price || 0).toFixed(2)}
+              {video.price.toFixed(2)}
             </div>
           </span>
         )}
         <div className="vid-thumb">
           <Link
-            href={{ pathname: '/video', query: { id: video?._id } }}
-            as={`/video/${video?._id}`}
+            href={{ pathname: '/video', query: { id: video._id } }}
+            as={`/video/${video._id}`}
           >
             <a>
               <img
                 alt={video.title}
-                src={video?.thumbnail || video?.video?.thumbnails[0] || '/placeholder-image.jpg'}
+                src={
+                    // eslint-disable-next-line no-nested-ternary
+                    video.thumbnail
+                      ? video.thumbnail
+                      : video.video.thumbnails
+                        && video.video.thumbnails.length > 0
+                        ? video.video.thumbnails[0]
+                        : '/placeholder-image.jpg'
+                  }
               />
             </a>
           </Link>
           <Link
-            href={{ pathname: '/video', query: { id: video?._id } }}
-            as={`/video/${video?._id}`}
+            href={{ pathname: '/video', query: { id: video._id } }}
+            as={`/video/${video._id}`}
           >
             <div className="vid-stats">
               <span>
                 <EyeOutlined />
                 {' '}
-                {video?.stats?.views || 0}
+                {video.stats && video.stats.views ? video.stats.views : 0}
               </span>
               <span>
                 <LikeOutlined />
                 {' '}
-                {video?.stats?.likes || 0}
+                {video.stats && video.stats.likes ? video.stats.likes : 0}
               </span>
               <span>
                 <HourglassOutlined />
@@ -62,12 +71,14 @@ export class VideoCard extends PureComponent<IProps> {
           </Link>
         </div>
         <div className="vid-info">
-          <Link
-            href={{ pathname: '/video', query: { id: video?._id } }}
-            as={`/video/${video?._id}`}
-          >
-            <span>{video?.title}</span>
-          </Link>
+          <Tooltip title={video.title}>
+            <Link
+              href={{ pathname: '/video', query: { id: video._id } }}
+              as={`/video/${video._id}`}
+            >
+              <span>{video.title}</span>
+            </Link>
+          </Tooltip>
         </div>
       </div>
     );

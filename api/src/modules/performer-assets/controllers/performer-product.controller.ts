@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
-import { Roles, CurrentUser } from 'src/modules/auth';
+import { CurrentUser, Roles } from 'src/modules/auth';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
 import { UserDto } from 'src/modules/user/dtos';
 import { ProductService } from '../services/product.service';
@@ -34,8 +34,8 @@ export class PerformerProductController {
 
   @Post('/')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor([
@@ -75,8 +75,8 @@ export class PerformerProductController {
 
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor([
@@ -118,16 +118,16 @@ export class PerformerProductController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   async delete(@Param('id') id: string): Promise<any> {
     const resp = await this.productService.delete(id);
     return DataResponse.ok(resp);
   }
 
   @Get('/search')
-  @Roles('performer')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @HttpCode(HttpStatus.OK)
   async search(
     @Query() req: ProductSearchRequest,
@@ -137,24 +137,15 @@ export class PerformerProductController {
     return DataResponse.ok(resp);
   }
 
-  @Get('/:id')
-  @Roles('performer')
+  @Get('/:id/view')
   @UseGuards(RoleGuard)
+  @Roles('performer')
   @HttpCode(HttpStatus.OK)
   async details(
     @Param('id') id: string,
     @CurrentUser() user: UserDto
   ): Promise<any> {
     const resp = await this.productService.getDetails(id, user);
-    return DataResponse.ok(resp);
-  }
-
-  @Get('/user-search')
-  @HttpCode(HttpStatus.OK)
-  async userSearch(
-    @Query() req: ProductSearchRequest
-  ): Promise<any> {
-    const resp = await this.productSearchService.userSearch(req);
     return DataResponse.ok(resp);
   }
 }

@@ -38,6 +38,10 @@ export class FeedModel extends Document {
 
   status: string;
 
+  isSchedule: boolean;
+
+  scheduleAt: Date;
+
   pinnedAt: Date;
 
   createdAt: Date;

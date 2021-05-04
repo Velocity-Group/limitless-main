@@ -23,11 +23,12 @@ import { SocketModule } from './modules/socket/socket.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { FeedModule } from './modules/feed/feed.module';
 import { PerformerStoryModule } from './modules/performer-story/story.module';
-import { PerformerBlogModule } from './modules/performer-blog/blog.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { StreamModule } from './modules/stream/stream.module';
 import { SearchModule } from './modules/search/search.module';
 import { StatisticsModule } from './modules/statistics/statistic.module';
+import { TokenPackageModule } from './modules/token-package/token-package.module';
+import { PayoutRequestModule } from './modules/payout-request/payout.module';
 
 @Module({
   imports: [
@@ -54,11 +55,12 @@ import { StatisticsModule } from './modules/statistics/statistic.module';
     CouponModule,
     FeedModule,
     PerformerStoryModule,
-    PerformerBlogModule,
     StreamModule,
     ContactModule,
     SearchModule,
-    StatisticsModule
+    StatisticsModule,
+    TokenPackageModule,
+    PayoutRequestModule
   ],
   controllers: [AppController],
   providers: [AppService]

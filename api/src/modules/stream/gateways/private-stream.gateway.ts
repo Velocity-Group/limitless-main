@@ -4,11 +4,10 @@ import { Inject, forwardRef } from '@nestjs/common';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { AuthService } from 'src/modules/auth/services';
 import { Model } from 'mongoose';
-import { UserService } from 'src/modules/user/services';
-// import { UserDto } from 'src/modules/user/dtos';
 import { PerformerService } from 'src/modules/performer/services';
 import * as moment from 'moment';
 import { ConversationService } from 'src/modules/message/services';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { BroadcastStatus } from '../constant';
 import { StreamModel } from '../models';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
@@ -16,15 +15,13 @@ import { StreamService, RequestService } from '../services';
 
 const STREAM_JOINED = 'private-stream/streamJoined';
 const STREAM_LEAVED = 'private-stream/streamLeaved';
-// const STREAM_INFORMATION_CHANGED = 'private-stream/streamInformationChanged';
+const STREAM_INFORMATION_CHANGED = 'private-stream/streamInformationChanged';
 
 @WebSocketGateway()
 export class PrivateStreamWsGateway {
   constructor(
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
-    @Inject(forwardRef(() => UserService))
-    private readonly userService: UserService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
     @Inject(forwardRef(() => SocketUserService))
@@ -76,11 +73,7 @@ export class PrivateStreamWsGateway {
         throw resp.error || resp.data;
       }
 
-      if (
-        [BroadcastStatus.CREATED, BroadcastStatus.BROADCASTING].includes(
-          resp.data.status
-        )
-      ) {
+      if ([BroadcastStatus.CREATED, BroadcastStatus.BROADCASTING].includes(resp.data.status)) {
         const roomName = this.streamService.getRoomName(
           conversationId,
           conversation.type
@@ -92,31 +85,31 @@ export class PrivateStreamWsGateway {
         await this.socketUserService.addConnectionToRoom(
           roomName,
           user._id,
-          user.isPerformer ? 'model' : 'member'
+          `${user._id}` === `${conversation.performerId}` ? 'model' : 'member'
         );
-        // const connections = await this.socketUserService.getRoomUserConnections(
-        //   roomName
-        // );
-        // const memberIds: string[] = [];
-        // Object.keys(connections).forEach((id) => {
-        //   const value = connections[id].split(',');
-        //   if (value[0] === 'member') {
-        //     memberIds.push(id);
-        //   }
-        // });
-        // if (memberIds.length) {
-        //   const members = await this.userService.findByIds(memberIds);
-        //   const data = {
-        //     conversationId,
-        //     total: members.length,
-        //     members: members.map((m) => new UserDto(m).toResponse())
-        //   };
-        //   this.socketUserService.emitToRoom(
-        //     roomName,
-        //     STREAM_INFORMATION_CHANGED,
-        //     data
-        //   );
-        // }
+        const connections = await this.socketUserService.getRoomUserConnections(
+          roomName
+        );
+        const memberIds: string[] = [];
+        Object.keys(connections).forEach((id) => {
+          // const value = connections[id].split(',');
+          // if (value[0] === 'member') {
+          memberIds.push(id);
+          // }
+        });
+        if (memberIds.length) {
+          const members = await this.performerService.findByIds(memberIds);
+          const data = {
+            conversationId,
+            total: members.length,
+            members: members.map((m) => new PerformerDto(m).toResponse())
+          };
+          this.socketUserService.emitToRoom(
+            roomName,
+            STREAM_INFORMATION_CHANGED,
+            data
+          );
+        }
       }
     } catch (e) {
       console.log(e);
@@ -149,7 +142,7 @@ export class PrivateStreamWsGateway {
       }
 
       await this.streamModel.updateOne(
-        { _id: conversation.streamId, isStreaming: false },
+        { _id: conversation.streamId },
         {
           $pull: {
             streamIds: streamId
@@ -161,15 +154,19 @@ export class PrivateStreamWsGateway {
         conversationId,
         conversation.type
       );
+
       await this.socketUserService.emitToRoom(roomName, STREAM_LEAVED, {
         conversationId,
-        streamId
+        streamId,
+        user
       });
-
-      const results = await this.socketUserService.getConnectionValue(
-        roomName,
-        user._id
-      );
+      const [stream, results] = await Promise.all([
+        conversation.streamId && this.streamService.findOne({ _id: conversation.streamId }),
+        this.socketUserService.getConnectionValue(
+          roomName,
+          user._id
+        )
+      ]);
       if (results) {
         const values = results.split(',');
         const timeJoined = values[1] ? parseInt(values[1], 10) : null;
@@ -179,12 +176,19 @@ export class PrivateStreamWsGateway {
             .toDate()
             .getTime() - timeJoined;
           if (role === 'model') {
-            await this.performerService.updateLastStreamingTime(
-              user._id,
-              streamTime
-            );
+            await Promise.all([
+              stream && stream.isStreaming && this.streamModel.updateOne({ _id: stream._id }, { $set: { lastStreamingTime: new Date(), isStreaming: 0, streamingTime: streamTime / 1000 } }),
+              this.performerService.updateLastStreamingTime(
+                user._id,
+                streamTime
+              ),
+              this.socketUserService.emitToRoom(roomName, 'model-left', {
+                performerId: user._id,
+                conversationId
+              })
+            ]);
           } else if (role === 'member') {
-            await this.userService.updateStats(user._id, {
+            await this.performerService.updateStats(user._id, {
               'stats.totalViewTime': streamTime
             });
           }
@@ -192,29 +196,29 @@ export class PrivateStreamWsGateway {
       }
 
       await this.socketUserService.removeConnectionFromRoom(roomName, user._id);
-      // const connections = await this.socketUserService.getRoomUserConnections(
-      //   roomName
-      // );
-      // const memberIds: string[] = [];
-      // Object.keys(connections).forEach((id) => {
-      //   const value = connections[id].split(',');
-      //   if (value[0] === 'member') {
-      //     memberIds.push(id);
-      //   }
-      // });
-      // if (memberIds.length) {
-      //   const members = await this.userService.findByIds(memberIds);
-      //   const data = {
-      //     conversationId,
-      //     total: members.length,
-      //     members: members.map((m) => new UserDto(m).toResponse())
-      //   };
-      //   this.socketUserService.emitToRoom(
-      //     roomName,
-      //     STREAM_INFORMATION_CHANGED,
-      //     data
-      //   );
-      // }
+      const connections = await this.socketUserService.getRoomUserConnections(
+        roomName
+      );
+      const memberIds: string[] = [];
+      Object.keys(connections).forEach((id) => {
+        const value = connections[id].split(',');
+        if (value[0] === 'member') {
+          memberIds.push(id);
+        }
+      });
+      if (memberIds.length) {
+        const members = await this.performerService.findByIds(memberIds);
+        const data = {
+          conversationId,
+          total: members.length,
+          members: members.map((m) => new PerformerDto(m).toResponse())
+        };
+        this.socketUserService.emitToRoom(
+          roomName,
+          STREAM_INFORMATION_CHANGED,
+          data
+        );
+      }
     } catch (e) {
       console.log(e);
     }

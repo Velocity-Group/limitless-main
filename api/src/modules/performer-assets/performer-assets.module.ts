@@ -2,7 +2,6 @@ import { Module, forwardRef } from '@nestjs/common';
 import { MongoDBModule, QueueModule, AgendaModule } from 'src/kernel';
 import { AuthModule } from '../auth/auth.module';
 import { assetsProviders } from './providers';
-import { UserModule } from '../user/user.module';
 import { FileModule } from '../file/file.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { ReactionModule } from '../reaction/reaction.module';
@@ -10,7 +9,7 @@ import { VideoService } from './services/video.service';
 import { AdminPerformerVideosController } from './controllers/admin-video.controller';
 import { PerformerModule } from '../performer/performer.module';
 import { MailerModule } from '../mailer/mailer.module';
-import { PaymentModule } from '../payment/payment.module';
+import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
 import { VideoSearchService } from './services/video-search.service';
 import { GalleryService } from './services/gallery.service';
 import { AdminPerformerGalleryController } from './controllers/admin-gallery.controller';
@@ -34,15 +33,13 @@ import { ReactionVideoListener, CommentVideoListener, StockProductListener } fro
   imports: [
     MongoDBModule,
     QueueModule.forRoot(),
-    // inject user module because we request guard from auth, need to check and fix dependencies if not needed later
     AgendaModule.register(),
-    forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => MailerModule),
     forwardRef(() => FileModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => ReactionModule),
-    forwardRef(() => PaymentModule),
+    forwardRef(() => PurchasedItemModule),
     forwardRef(() => SubscriptionModule)
   ],
   providers: [

@@ -1,5 +1,4 @@
 import {
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -11,7 +10,7 @@ export class PrivateCallRequestPayload {
   @ApiProperty()
   @IsNumber()
   @Min(1)
-  @IsNotEmpty()
+  @IsOptional()
   price: number;
 
   @ApiProperty()

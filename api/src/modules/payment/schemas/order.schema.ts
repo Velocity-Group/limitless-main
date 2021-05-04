@@ -1,33 +1,32 @@
 import { Schema } from 'mongoose';
 
 export const OrderSchema = new Schema({
-  // buyer ID
-  buyerId: {
+  transactionId: {
     type: Schema.Types.ObjectId,
     index: true
   },
-  buyerSource: {
-    // user, performer, etc...
-    type: String
-  },
-  sellerId: {
+  performerId: {
     type: Schema.Types.ObjectId,
     index: true
   },
-  sellerSource: {
-    // user, performer, etc...
-    type: String
-  },
-  type: {
-    type: String
+  userId: {
+    type: Schema.Types.ObjectId,
+    index: true
   },
   orderNumber: {
     type: String
   },
-  status: {
-    type: String,
-    index: true
+  shippingCode: {
+    type: String
   },
+  productIds: [{
+    type: Schema.Types.ObjectId,
+    index: true
+  }],
+  productsInfo: [{
+    type: Schema.Types.Mixed
+  }],
+  digitalPath: String,
   quantity: {
     type: Number,
     default: 1
@@ -36,18 +35,20 @@ export const OrderSchema = new Schema({
     type: Number,
     default: 1
   },
-  originalPrice: {
-    type: Number
-  },
-  couponInfo: {
-    type: Schema.Types.Mixed
-  },
   deliveryAddress: {
     type: String
   },
   postalCode: {
     type: String
   },
+  deliveryStatus: {
+    type: String,
+    index: true
+  },
+  userNote: {
+    type: String
+  },
+  phoneNumber: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

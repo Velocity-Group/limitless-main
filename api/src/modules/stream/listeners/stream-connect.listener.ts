@@ -7,11 +7,9 @@ import {
   MODEL_LIVE_STREAM_CHANNEL,
   LIVE_STREAM_EVENT_NAME
 } from 'src/modules/stream/constant';
-import { UserService } from 'src/modules/user/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
 import { StreamModel } from '../models';
-import { StreamService } from '../services';
 
 const USER_LIVE_STREAM_DISCONNECTED = 'USER_LIVE_STREAM_CONNECTED';
 const MODEL_LIVE_STREAM_DISCONNECTED = 'MODEL_LIVE_STREAM_CONNECTED';
@@ -20,10 +18,8 @@ const MODEL_LIVE_STREAM_DISCONNECTED = 'MODEL_LIVE_STREAM_CONNECTED';
 export class StreamConnectListener {
   constructor(
     private readonly queueEventService: QueueEventService,
-    private readonly userService: UserService,
     private readonly performerService: PerformerService,
     private readonly socketUserService: SocketUserService,
-    private readonly streamService: StreamService,
     @Inject(STREAM_MODEL_PROVIDER)
     private readonly streamModel: Model<StreamModel>
   ) {
@@ -45,7 +41,7 @@ export class StreamConnectListener {
     }
 
     const sourceId = event.data;
-    const user = await this.userService.findById(sourceId);
+    const user = await this.performerService.findById(sourceId);
     if (!user) {
       return;
     }
@@ -70,7 +66,7 @@ export class StreamConnectListener {
             id,
             `message_created_conversation_${conversationIds[index]}`,
             {
-              text: `${user.username} has left this conversation`,
+              text: `${user?.name || user?.username || 'N/A'} has left this conversation`,
               _id: conversationIds[index],
               conversationId: conversationIds[index],
               isSystem: true
@@ -107,8 +103,8 @@ export class StreamConnectListener {
      * Update status
      */
     await this.streamModel.updateMany(
-      { isStreaming: true },
-      { $set: { isStreaming: false, lastStreamingTime: new Date() } }
+      { isStreaming: 1 },
+      { $set: { isStreaming: 0, lastStreamingTime: new Date() } }
     );
   }
 

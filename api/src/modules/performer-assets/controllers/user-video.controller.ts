@@ -10,14 +10,12 @@ import {
   UseGuards,
   ValidationPipe,
   UsePipes,
-  Request,
-  Inject,
-  forwardRef
+  Request
 } from '@nestjs/common';
 import { DataResponse, ForbiddenException } from 'src/kernel';
 import { CurrentUser } from 'src/modules/auth';
-import { UserDto } from 'src/modules/user/dtos';
 import { LoadUser } from 'src/modules/auth/guards';
+import { UserDto } from 'src/modules/user/dtos';
 import { VideoService } from '../services/video.service';
 import { VideoSearchRequest } from '../payloads';
 import { VideoSearchService } from '../services/video-search.service';
@@ -29,14 +27,17 @@ export class UserVideosController {
   constructor(
     private readonly videoService: VideoService,
     private readonly videoSearchService: VideoSearchService,
-    @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService
   ) { }
 
   @Get('/search')
+  @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)
-  async search(@Query() req: VideoSearchRequest) {
-    const resp = await this.videoSearchService.userSearch(req);
+  async search(
+    @Query() req: VideoSearchRequest,
+    @CurrentUser() user: UserDto
+  ) {
+    const resp = await this.videoSearchService.userSearch(req, user);
     return DataResponse.ok(resp);
   }
 

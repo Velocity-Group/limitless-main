@@ -1,132 +1,143 @@
+/* eslint-disable new-cap */
+/* eslint-disable no-nested-ternary */
 import {
-  Injectable,
-  Inject,
-  forwardRef,
-  BadRequestException
+  Injectable, Inject, forwardRef, BadRequestException, HttpException
 } from '@nestjs/common';
-import { PerformerService } from 'src/modules/performer/services';
+import { CouponDto } from 'src/modules/coupon/dtos';
 import {
+  EntityNotFoundException,
   QueueEventService,
   QueueEvent
 } from 'src/kernel';
 import { EVENT } from 'src/kernel/constants';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import { CouponService } from 'src/modules/coupon/services';
 import { SettingService } from 'src/modules/settings';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
-import { UserDto } from 'src/modules/user/dtos';
+import axios from 'axios';
+import { SubscriptionDto } from 'src/modules/subscription/dtos/subscription.dto';
+import {
+  UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+  SUBSCRIPTION_STATUS
+} from 'src/modules/subscription/constants';
+
+import { TokenPackageService } from 'src/modules/token-package/services';
+import { PaymentDto } from 'src/modules/purchased-item/dtos';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
-import { OrderModel, PaymentTransactionModel } from '../models';
+import { PaymentTransactionModel } from '../models';
+import {
+  PurchaseTokenPayload
+} from '../payloads';
 import {
   PAYMENT_STATUS,
   PAYMENT_TYPE,
+  PAYMENT_TARGET_TYPE,
   TRANSACTION_SUCCESS_CHANNEL
 } from '../constants';
+import {
+  MissingConfigPaymentException
+} from '../exceptions';
 import { SubscriptionService } from '../../subscription/services/subscription.service';
 import { CCBillService } from './ccbill.service';
-import { OrderService } from './order.service';
-import { MissingConfigPaymentException } from '../exceptions';
+import { BitpayService } from './bitpay.service';
+
+const ccbillCancelUrl = 'https://datalink.ccbill.com/utils/subscriptionManagement.cgi';
 
 @Injectable()
 export class PaymentService {
   constructor(
-    @Inject(forwardRef(() => PerformerService))
-    private readonly performerService: PerformerService,
-    @Inject(forwardRef(() => SubscriptionService))
-    private readonly subscriptionService: SubscriptionService,
-    @Inject(forwardRef(() => SettingService))
-    private readonly settingService: SettingService,
+    @Inject(forwardRef(() => CouponService))
+    private readonly couponService: CouponService,
+    @Inject(forwardRef(() => TokenPackageService))
+    private readonly tokenPackageService: TokenPackageService,
     @Inject(PAYMENT_TRANSACTION_MODEL_PROVIDER)
     private readonly paymentTransactionModel: Model<PaymentTransactionModel>,
     private readonly ccbillService: CCBillService,
+    private readonly bitpayService: BitpayService,
     private readonly queueEventService: QueueEventService,
-    private readonly orderService: OrderService
+    private readonly subscriptionService: SubscriptionService,
+    private readonly settingService: SettingService
   ) { }
 
   public async findById(id: string | ObjectId) {
-    return this.paymentTransactionModel.findById(id);
+    const data = await this.paymentTransactionModel.findById(id);
+    return data;
   }
 
-  private async getPerformerSinglePaymentGatewaySetting(performerId, paymentGateway = 'ccbill') {
-    // get performer information and do transaction
-    const performerPaymentSetting = await this.performerService.getPaymentSetting(
-      performerId,
-      paymentGateway
+  public async createTokenPaymentTransaction(
+    products: any[],
+    gateway,
+    totalPrice: number,
+    user: PerformerDto,
+    couponInfo?: CouponDto
+  ) {
+    const paymentTransaction = new this.paymentTransactionModel();
+    paymentTransaction.originalPrice = totalPrice;
+    paymentTransaction.paymentGateway = gateway || 'ccbill';
+    paymentTransaction.source = 'performer';
+    paymentTransaction.sourceId = user._id;
+    paymentTransaction.target = PAYMENT_TARGET_TYPE.TOKEN_PACKAGE;
+    paymentTransaction.targetId = null;
+    paymentTransaction.performerId = null;
+    paymentTransaction.type = PAYMENT_TYPE.TOKEN_PACKAGE;
+    paymentTransaction.totalPrice = couponInfo ? totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2)) : totalPrice;
+    paymentTransaction.products = products;
+    paymentTransaction.paymentResponseInfo = {};
+    paymentTransaction.status = PAYMENT_STATUS.SUCCESS;
+    paymentTransaction.couponInfo = couponInfo;
+    await paymentTransaction.save();
+    return paymentTransaction;
+  }
+
+  public async buyTokens(tokenId: string | ObjectId, payload: PurchaseTokenPayload, user: PerformerDto) {
+    const { gateway, couponCode, currency } = payload;
+
+    let totalPrice = 0;
+    const tokenPackage = await this.tokenPackageService.findById(tokenId);
+    if (!tokenPackage) {
+      throw new EntityNotFoundException('Token package not found');
+    }
+    totalPrice = parseFloat(tokenPackage.price.toFixed(2)) || 0;
+    const products = [{
+      price: totalPrice,
+      quantity: 1,
+      name: tokenPackage.name,
+      description: tokenPackage.description,
+      productId: tokenPackage._id,
+      productType: PAYMENT_TARGET_TYPE.TOKEN_PACKAGE,
+      performerId: null,
+      tokens: tokenPackage.tokens
+    }];
+
+    let coupon = null;
+    if (couponCode) {
+      coupon = await this.couponService.applyCoupon(couponCode, user._id);
+    }
+
+    const transaction = await this.createTokenPaymentTransaction(
+      products,
+      gateway,
+      totalPrice,
+      user,
+      coupon
     );
-    if (!performerPaymentSetting) {
-      throw new MissingConfigPaymentException();
-    }
-    const ccbillClientAccNo = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER);
-    const username = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_USERNAME);
-    const password = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_PASSWORD);
-    const subAccountNumber = performerPaymentSetting?.value?.singlePurchaseSubAccountNumber;
-    if (!ccbillClientAccNo || !username || !subAccountNumber || !password) {
-      throw new MissingConfigPaymentException();
-    }
 
-    return {
-      ccbillClientAccNo,
-      username,
-      subAccountNumber,
-      password
-    };
-  }
+    if (gateway === 'ccbill') {
+      // const [
+      //   flexformId,
+      //   subAccountNumber,
+      //   salt
+      // ] = await Promise.all([
+      //   this.settingService.getKeyValue(SETTING_KEYS.CCBILL_FLEXFORM_ID),
+      //   this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SUB_ACCOUNT_NUMBER),
+      //   this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SALT)
+      // ]);
 
-  private async getPerformerSubscriptionPaymentGatewaySetting(performerId, paymentGateway = 'ccbill') {
-    // get performer information and do transaction
-    const performerPaymentSetting = await this.performerService.getPaymentSetting(
-      performerId,
-      paymentGateway
-    );
-    if (!performerPaymentSetting) {
-      throw new MissingConfigPaymentException();
-    }
-    const ccbillClientAccNo = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER);
-    const username = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_USERNAME);
-    const password = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_PASSWORD);
-    const subAccountNumber = performerPaymentSetting?.value?.subscriptionSubAccountNumber;
-    if (!ccbillClientAccNo || !username || !subAccountNumber || !password) {
-      throw new MissingConfigPaymentException();
-    }
-
-    return {
-      ccbillClientAccNo,
-      username,
-      subAccountNumber,
-      password
-    };
-  }
-
-  private async getCCbillPaymentGatewaySettings() {
-    const flexformId = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_FLEXFORM_ID);
-    const subAccountNumber = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SUB_ACCOUNT_NUMBER);
-    const salt = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SALT);
-    // const currencyCode = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CURRENCY_CODE);
-    if (!flexformId || !subAccountNumber || !salt) {
-      throw new MissingConfigPaymentException();
-    }
-
-    return {
-      flexformId,
-      subAccountNumber,
-      salt
-      // currencyCode
-    };
-  }
-
-  public async subscribePerformer(order: OrderModel, user: UserDto, paymentGateway = 'ccbill') {
-    const transaction = await this.paymentTransactionModel.create({
-      paymentGateway,
-      orderId: order._id,
-      source: order.buyerSource,
-      sourceId: order.buyerId,
-      type: order.type,
-      totalPrice: order.totalPrice,
-      products: [],
-      status: order.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.PENDING,
-      paymentResponseInfo: null
-    });
-    if (order.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+      // if (!flexformId || !subAccountNumber || !salt) {
+      //   throw new MissingConfigPaymentException();
+      // }
       await this.queueEventService.publish(
         new QueueEvent({
           channel: TRANSACTION_SUCCESS_CHANNEL,
@@ -135,291 +146,39 @@ export class PaymentService {
         })
       );
       return { success: true };
+      // return this.ccbillService.singlePurchase({
+      //   salt,
+      //   flexformId,
+      //   subAccountNumber,
+      //   price: coupon ? totalPrice - parseFloat((totalPrice * coupon.value).toFixed(2)) : totalPrice,
+      //   transactionId: transaction._id
+      // });
     }
-    const {
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber
-    } = await this.getPerformerSubscriptionPaymentGatewaySetting(order.sellerId);
-    if (!user.authorisedCard || !user.ccbillCardToken) {
-      throw new MissingConfigPaymentException();
-    }
-    const resp = await this.ccbillService.subscription({
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber,
-      price: parseFloat(order.totalPrice.toFixed(2)),
-      subscriptionType: order.type,
-      subscriptionId: user.ccbillCardToken,
-      transactionId: transaction._id
-    });
-    if (resp) {
-      // transaction.status = PAYMENT_STATUS.SUCCESS;
-      // await transaction.save();
-      // await this.queueEventService.publish(
-      //   new QueueEvent({
-      //     channel: TRANSACTION_SUCCESS_CHANNEL,
-      //     eventName: EVENT.CREATED,
-      //     data: transaction
-      //   })
-      // );
-      return { success: true };
-    }
-    return { success: false };
-  }
-
-  public async purchasePerformerProducts(order: OrderModel, user: UserDto, paymentGateway = 'ccbill') {
-    const {
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber
-    } = await this.getPerformerSinglePaymentGatewaySetting(order.sellerId);
-    if (!user.authorisedCard || !user.ccbillCardToken) {
-      throw new MissingConfigPaymentException();
+    if (gateway === 'bitpay') {
+      const [bitpayApiToken, bitpayProductionMode] = await Promise.all([
+        this.settingService.getKeyValue(SETTING_KEYS.BITPAY_API_TOKEN),
+        this.settingService.getKeyValue(SETTING_KEYS.BITPAY_PRODUCTION_MODE)
+      ]);
+      if (!bitpayApiToken) {
+        throw new MissingConfigPaymentException();
+      }
+      try {
+        const resp = await this.bitpayService.createInvoice({
+          bitpayApiToken,
+          bitpayProductionMode,
+          transaction: new PaymentDto(transaction),
+          currency
+        }) as any;
+        if (resp.data && resp.data.data && resp.data.data.url) {
+          return { paymentUrl: resp.data.data.url };
+        }
+        return { paymentUrl: process.env.USER_URL };
+      } catch (e) {
+        throw new MissingConfigPaymentException();
+      }
     }
 
-    const transaction = await this.paymentTransactionModel.create({
-      paymentGateway,
-      orderId: order._id,
-      source: order.buyerSource,
-      sourceId: order.buyerId,
-      type: PAYMENT_TYPE.PERFORMER_PRODUCT,
-      totalPrice: order.totalPrice,
-      status: PAYMENT_STATUS.PENDING,
-      products: []
-    });
-
-    const resp = await this.ccbillService.singlePurchase({
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber,
-      price: parseFloat(order.totalPrice.toFixed(2)),
-      subscriptionId: user.ccbillCardToken,
-      transactionId: transaction._id
-    });
-    if (resp) {
-      // transaction.status = PAYMENT_STATUS.SUCCESS;
-      // await transaction.save();
-      // await this.queueEventService.publish(
-      //   new QueueEvent({
-      //     channel: TRANSACTION_SUCCESS_CHANNEL,
-      //     eventName: EVENT.CREATED,
-      //     data: transaction
-      //   })
-      // );
-      return { success: true };
-    }
-    return { success: false };
-  }
-
-  public async purchasePerformerVOD(order: OrderModel, user: UserDto, paymentGateway = 'ccbill') {
-    const {
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber
-    } = await this.getPerformerSinglePaymentGatewaySetting(order.sellerId);
-    if (!user.authorisedCard || !user.ccbillCardToken) {
-      throw new MissingConfigPaymentException();
-    }
-
-    const transaction = await this.paymentTransactionModel.create({
-      paymentGateway,
-      orderId: order._id,
-      source: order.buyerSource,
-      sourceId: order.buyerId,
-      type: PAYMENT_TYPE.PERFORMER_VIDEO,
-      totalPrice: order.totalPrice,
-      status: PAYMENT_STATUS.PENDING,
-      products: []
-    });
-    const resp = await this.ccbillService.singlePurchase({
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber,
-      price: parseFloat(order.totalPrice.toFixed(2)),
-      subscriptionId: user.ccbillCardToken,
-      transactionId: transaction._id
-    });
-    if (resp) {
-      // transaction.status = PAYMENT_STATUS.SUCCESS;
-      // await transaction.save();
-      // await this.queueEventService.publish(
-      //   new QueueEvent({
-      //     channel: TRANSACTION_SUCCESS_CHANNEL,
-      //     eventName: EVENT.CREATED,
-      //     data: transaction
-      //   })
-      // );
-      return { success: true };
-    }
-    return { success: false };
-  }
-
-  public async purchasePerformerPost(order: OrderModel, user: UserDto, paymentGateway = 'ccbill') {
-    const {
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber
-    } = await this.getPerformerSinglePaymentGatewaySetting(order.sellerId);
-    if (!user.authorisedCard || !user.ccbillCardToken) {
-      throw new MissingConfigPaymentException();
-    }
-
-    const transaction = await this.paymentTransactionModel.create({
-      paymentGateway,
-      orderId: order._id,
-      source: order.buyerSource,
-      sourceId: order.buyerId,
-      type: PAYMENT_TYPE.PERFORMER_POST,
-      totalPrice: order.totalPrice,
-      status: PAYMENT_STATUS.PENDING,
-      products: []
-    });
-    const resp = await this.ccbillService.singlePurchase({
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber,
-      price: parseFloat(order.totalPrice.toFixed(2)),
-      subscriptionId: user.ccbillCardToken,
-      transactionId: transaction._id
-    });
-    if (resp) {
-      // transaction.status = PAYMENT_STATUS.SUCCESS;
-      // await transaction.save();
-      // await this.queueEventService.publish(
-      //   new QueueEvent({
-      //     channel: TRANSACTION_SUCCESS_CHANNEL,
-      //     eventName: EVENT.CREATED,
-      //     data: transaction
-      //   })
-      // );
-      return { success: true };
-    }
-    return { success: false };
-  }
-
-  public async purchasePerformerStream(order: OrderModel, user: UserDto, paymentGateway = 'ccbill') {
-    const {
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber
-    } = await this.getPerformerSinglePaymentGatewaySetting(order.sellerId);
-    if (!user.authorisedCard || !user.ccbillCardToken) {
-      throw new MissingConfigPaymentException();
-    }
-
-    const transaction = await this.paymentTransactionModel.create({
-      paymentGateway,
-      orderId: order._id,
-      source: order.buyerSource,
-      sourceId: order.buyerId,
-      type: order.type,
-      totalPrice: order.totalPrice,
-      status: PAYMENT_STATUS.PENDING,
-      products: []
-    });
-    const resp = await this.ccbillService.singlePurchase({
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber,
-      price: parseFloat(order.totalPrice.toFixed(2)),
-      subscriptionId: user.ccbillCardToken,
-      transactionId: transaction._id
-    });
-    if (resp) {
-      // transaction.status = PAYMENT_STATUS.SUCCESS;
-      // await transaction.save();
-      // await this.queueEventService.publish(
-      //   new QueueEvent({
-      //     channel: TRANSACTION_SUCCESS_CHANNEL,
-      //     eventName: EVENT.CREATED,
-      //     data: transaction
-      //   })
-      // );
-      return { success: true };
-    }
-    return { success: false };
-  }
-
-  public async tipPerformer(order: OrderModel, user: UserDto, paymentGateway = 'ccbill') {
-    const {
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber
-    } = await this.getPerformerSinglePaymentGatewaySetting(order.sellerId);
-    if (!user.authorisedCard || !user.ccbillCardToken) {
-      throw new MissingConfigPaymentException();
-    }
-
-    const transaction = await this.paymentTransactionModel.create({
-      paymentGateway,
-      orderId: order._id,
-      source: order.buyerSource,
-      sourceId: order.buyerId,
-      type: PAYMENT_TYPE.TIP_PERFORMER,
-      totalPrice: order.totalPrice,
-      status: PAYMENT_STATUS.SUCCESS,
-      products: []
-    });
-    const resp = await this.ccbillService.singlePurchase({
-      username,
-      password,
-      ccbillClientAccNo,
-      subAccountNumber,
-      price: parseFloat(order.totalPrice.toFixed(2)),
-      subscriptionId: user.ccbillCardToken,
-      transactionId: transaction._id
-    });
-    if (resp) {
-      // transaction.status = PAYMENT_STATUS.SUCCESS;
-      // await transaction.save();
-      // await this.queueEventService.publish(
-      //   new QueueEvent({
-      //     channel: TRANSACTION_SUCCESS_CHANNEL,
-      //     eventName: EVENT.CREATED,
-      //     data: transaction
-      //   })
-      // );
-      return { success: true };
-    }
-    return { success: false };
-  }
-
-  public async authoriseCard(order: OrderModel, paymentGateway = 'ccbill') {
-    const {
-      flexformId,
-      subAccountNumber,
-      salt
-    } = await this.getCCbillPaymentGatewaySettings();
-
-    const transaction = await this.paymentTransactionModel.create({
-      paymentGateway,
-      orderId: order._id,
-      source: order.buyerSource,
-      sourceId: order.buyerId,
-      type: PAYMENT_TYPE.AUTHORISE_CARD,
-      totalPrice: order.totalPrice,
-      status: PAYMENT_STATUS.PENDING,
-      products: []
-    });
-    return this.ccbillService.authoriseCard({
-      salt,
-      flexformId,
-      subAccountNumber,
-      price: order.totalPrice,
-      transactionId: transaction._id
-    });
+    throw new MissingConfigPaymentException();
   }
 
   public async ccbillSinglePaymentSuccessWebhook(payload: Record<string, any>) {
@@ -429,17 +188,14 @@ export class PaymentService {
     }
     const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
     if (!checkForHexRegExp.test(transactionId)) {
-      return { success: false };
+      return { ok: false };
     }
-    const transaction = await this.paymentTransactionModel.findById(
-      transactionId
-    );
-    if (!transaction || transaction.status !== PAYMENT_STATUS.PENDING) {
-      return { success: false };
+    const transaction = await this.paymentTransactionModel.findById(transactionId);
+    if (!transaction) {
+      return { ok: false };
     }
     transaction.status = PAYMENT_STATUS.SUCCESS;
     transaction.paymentResponseInfo = payload;
-    transaction.updatedAt = new Date();
     await transaction.save();
     await this.queueEventService.publish(
       new QueueEvent({
@@ -448,7 +204,7 @@ export class PaymentService {
         data: transaction
       })
     );
-    return { success: true };
+    return { ok: true };
   }
 
   public async ccbillRenewalSuccessWebhook(payload: any) {
@@ -456,37 +212,42 @@ export class PaymentService {
     if (!subscriptionId) {
       throw new BadRequestException();
     }
-
-    const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
-    if (!subscription) {
-      // TODO - should check in case admin delete subscription??
-      // TODO - log me
-      return { success: false };
+    const transaction = await this.paymentTransactionModel.findOne({
+      'paymentResponseInfo.subscriptionId': subscriptionId
+    });
+    if (!transaction) {
+      return { ok: false };
     }
+    // const newTransaction = await this.createRenewalPaymentTransaction(transaction, payload);
+    // await this.queueEventService.publish(
+    //   new QueueEvent({
+    //     channel: TRANSACTION_SUCCESS_CHANNEL,
+    //     eventName: EVENT.CREATED,
+    //     data: newTransaction
+    //   })
+    // );
+    return { ok: true };
+  }
 
-    // create user order and transaction for this order
-    const price = payload.billedAmount || payload.accountingAmount;
-    const { userId } = subscription;
-    const { performerId } = subscription;
-    const order = await this.orderService.createForPerformerSubscriptionRenewal({
-      userId,
-      performerId,
-      price,
-      type: subscription.subscriptionType
-    });
-
-    const transaction = await this.paymentTransactionModel.create({
-      paymentGateway: 'ccbill',
-      orderId: order._id,
-      source: order.buyerSource,
-      sourceId: order.buyerId,
-      type: order.type,
-      totalPrice: order.totalPrice,
-      status: PAYMENT_STATUS.SUCCESS,
-      paymentResponseInfo: payload,
-      products: []
-    });
-
+  public async bitpaySuccessWebhook(payload: Record<string, any>) {
+    const body = payload.data;
+    const { event } = payload;
+    const transactionId = body.orderId || body.posData;
+    const { status } = body;
+    if (event.name !== 'invoice_completed' || !transactionId || status !== 'complete') {
+      return { ok: false };
+    }
+    const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
+    if (!checkForHexRegExp.test(transactionId)) {
+      return { ok: false };
+    }
+    const transaction = await this.paymentTransactionModel.findById(transactionId);
+    if (!transaction) {
+      return { ok: false };
+    }
+    transaction.status = PAYMENT_STATUS.SUCCESS;
+    transaction.paymentResponseInfo = payload;
+    await transaction.save();
     await this.queueEventService.publish(
       new QueueEvent({
         channel: TRANSACTION_SUCCESS_CHANNEL,
@@ -494,6 +255,108 @@ export class PaymentService {
         data: transaction
       })
     );
-    return { success: true };
+    return { ok: true };
+  }
+
+  public async cancelSubscription(performerId: any, user: PerformerDto) {
+    const subscription = await this.subscriptionService.findOneSubscription(performerId, user._id);
+    if (!subscription || !subscription.transactionId) {
+      throw new EntityNotFoundException();
+    }
+    const transaction = await this.findById(subscription.transactionId);
+    if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+      await this.queueEventService.publish(
+        new QueueEvent({
+          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+          eventName: EVENT.DELETED,
+          data: new SubscriptionDto(subscription)
+        })
+      );
+      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+      await subscription.save();
+      transaction.status = PAYMENT_STATUS.CANCELLED;
+      await transaction.save();
+      return { success: true };
+    } if ([PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
+      if (!transaction || !transaction.paymentResponseInfo || !transaction.paymentResponseInfo.subscriptionId) {
+        throw new EntityNotFoundException();
+      }
+      const { subscriptionId } = transaction.paymentResponseInfo;
+      const ccbillClientAccNo = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER);
+      if (!subscriptionId || !ccbillClientAccNo) {
+        throw new EntityNotFoundException();
+      }
+      try {
+        const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
+        if (resp.data && resp.data.includes('"results"\n"1"\n')) {
+          await this.queueEventService.publish(
+            new QueueEvent({
+              channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+              eventName: EVENT.DELETED,
+              data: new SubscriptionDto(subscription)
+            })
+          );
+          subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+          await subscription.save();
+          transaction.status = PAYMENT_STATUS.CANCELLED;
+          await transaction.save();
+          return { success: true };
+        }
+        return { success: false };
+      } catch (e) {
+        throw new Error('Cancel subscription got an error');
+      }
+    } else {
+      return { success: false };
+    }
+  }
+
+  public async adminCancelSubscription(id: string) {
+    const subscription = await this.subscriptionService.findById(id);
+    if (!subscription) {
+      throw new EntityNotFoundException();
+    }
+    if (subscription && !subscription.transactionId) {
+      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+      subscription.updatedAt = new Date();
+      await subscription.save();
+      return { success: true };
+    }
+    const transaction = await this.findById(subscription.transactionId);
+    if (!transaction || !transaction.paymentResponseInfo || !transaction.paymentResponseInfo.subscriptionId) {
+      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+      subscription.updatedAt = new Date();
+      await subscription.save();
+      return { success: true };
+    }
+    // const performerCCbill = await this.performerService.getPaymentSetting(subscription.performerId);
+    const { subscriptionId } = transaction.paymentResponseInfo;
+    const ccbillClientAccNo = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER);
+    if (!ccbillClientAccNo) {
+      throw new EntityNotFoundException();
+    }
+    try {
+      const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
+      if (resp.data && resp.data.includes('"results"\n"1"\n')) {
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+            eventName: EVENT.DELETED,
+            data: new SubscriptionDto(subscription)
+          })
+        );
+        subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+        subscription.updatedAt = new Date();
+        await subscription.save();
+
+        transaction.status = PAYMENT_STATUS.CANCELLED;
+        transaction.updatedAt = new Date();
+        await transaction.save();
+        return { success: true };
+      }
+      return { success: false };
+    } catch (e) {
+      throw new HttpException(e, 400);
+    }
   }
 }

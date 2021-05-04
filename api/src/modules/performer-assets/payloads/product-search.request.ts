@@ -21,15 +21,5 @@ export class ProductSearchRequest extends SearchRequest {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  fromDate: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  toDate: string;
-
-  @ApiProperty()
-  @IsOptional()
   includedIds: string[] | ObjectId[];
 }

@@ -62,22 +62,22 @@ export class ProductDto {
   }
 
   toPublic() {
-    return pick(this, [
-      '_id',
-      'performerId',
-      'image',
-      'type',
-      'name',
-      'description',
-      'status',
-      'price',
-      'stock',
-      'performer',
-      'createdBy',
-      'updatedBy',
-      'createdAt',
-      'updatedAt',
-      'isBookMarked'
-    ]);
+    return {
+      _id: this._id,
+      performerId: this.performerId,
+      image: this.image,
+      type: this.type,
+      name: this.name,
+      description: this.description,
+      status: this.status,
+      price: this.price,
+      stock: this.stock,
+      performer: this.performer,
+      createdBy: this.createdBy,
+      updatedBy: this.updatedBy,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      isBookMarked: this.isBookMarked
+    };
   }
 }

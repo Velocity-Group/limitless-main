@@ -8,137 +8,96 @@ import {
   UseGuards,
   Post,
   Body,
+  Query,
   Param
 } from '@nestjs/common';
-import { RoleGuard } from 'src/modules/auth/guards';
+import { RoleGuard, AuthGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import {
-  SubscribePerformerPayload,
-  PurchaseProductsPayload,
-  PurchaseVideoPayload,
-  SendTipPayload,
-  PurchaseFeedPayload,
-  PurchaseStreamPayload
+  PurchaseTokenPayload
 } from '../payloads';
-import { UserDto } from '../../user/dtos';
 import { PaymentService } from '../services/payment.service';
-import { OrderService } from '../services';
 
 @Injectable()
 @Controller('payment')
 export class PaymentController {
-  constructor(
-    private readonly orderService: OrderService,
-    private readonly paymentService: PaymentService
-  ) {}
+  constructor(private readonly paymentService: PaymentService) {}
 
-  @Post('/subscribe/performers')
+  @Post('/purchase-tokens/:tokenId')
   @HttpCode(HttpStatus.OK)
-  @Roles('user')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async create(
-    @CurrentUser() user: UserDto,
-    @Body() payload: SubscribePerformerPayload
+  async purchaseTokens(
+    @CurrentUser() user: PerformerDto,
+    @Param('tokenId') tokenId: string,
+    @Body() payload: PurchaseTokenPayload
   ): Promise<DataResponse<any>> {
-    // TODO - check business logic like user is subscribe a model
-    const order = await this.orderService.createForPerformerSubscription(payload, user);
-    const info = await this.paymentService.subscribePerformer(order, user);
+    const info = await this.paymentService.buyTokens(tokenId, payload, user);
     return DataResponse.ok(info);
   }
 
-  /**
-   * purchase a performer video
-   * @param user current login user
-   * @param videoId performer video
-   * @param payload
-   */
-  @Post('/purchase-video/:id')
+  @Post('/ccbill/callhook')
   @HttpCode(HttpStatus.OK)
-  @Roles('user')
-  @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async purchaseVideo(
-    @CurrentUser() user: UserDto,
-    @Param('id') videoId: string,
-    @Body() payload: PurchaseVideoPayload
+  async ccbillCallhook(
+    @Body() payload: Record<string, string>,
+    @Query() req: Record<string, string>
   ): Promise<DataResponse<any>> {
-    // to purchase product, create new order then do the payment
-    // eslint-disable-next-line no-param-reassign
-    payload.videoId = videoId;
-    const order = await this.orderService.createForPerformerVOD(payload, user);
-    const info = await this.paymentService.purchasePerformerVOD(order, user);
+    if (!['NewSaleSuccess', 'RenewalSuccess'].includes(req.eventType)) {
+      return DataResponse.ok(false);
+    }
+
+    let info;
+    const data = {
+      ...payload,
+      ...req
+    };
+    switch (req.eventType) {
+      case 'RenewalSuccess':
+        info = await this.paymentService.ccbillRenewalSuccessWebhook(data);
+        break;
+      default:
+        info = await this.paymentService.ccbillSinglePaymentSuccessWebhook(
+          data
+        );
+        break;
+    }
     return DataResponse.ok(info);
   }
 
-  @Post('/purchase-products')
+  @Post('/bitpay/callhook')
   @HttpCode(HttpStatus.OK)
-  @Roles('user')
-  @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async purchaseProducts(
-    @CurrentUser() user: UserDto,
-    @Body() payload: PurchaseProductsPayload
+  async bitpayCallhook(
+    @Body() payload: Record<string, any>
   ): Promise<DataResponse<any>> {
-    // to purchase product, create new order then do the payment
-    const order = await this.orderService.createForPerformerProducts(payload, user);
-    const info = await this.paymentService.purchasePerformerProducts(order, user);
+    const info = await this.paymentService.bitpaySuccessWebhook(payload);
     return DataResponse.ok(info);
   }
 
-  @Post('/send-tip')
+  @Post('/ccbill/cancel-subscription/:performerId')
   @HttpCode(HttpStatus.OK)
-  @Roles('user')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async sendTip(
-    @CurrentUser() user: UserDto,
-    @Body() payload: SendTipPayload
+  async ccbillCancel(
+    @Param('performerId') performerId: string,
+    @CurrentUser() user: PerformerDto
   ): Promise<DataResponse<any>> {
-    const order = await this.orderService.createForTipPerformer(payload, user);
-    const info = await this.paymentService.tipPerformer(order, user);
-    return DataResponse.ok(info);
+    const data = await this.paymentService.cancelSubscription(performerId, user);
+    return DataResponse.ok(data);
   }
 
-  @Post('/purchase-feed')
+  @Post('/ccbill/admin/cancel-subscription/:subscriptionId')
   @HttpCode(HttpStatus.OK)
-  @Roles('user')
+  @Roles('admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async purchaseFeed(
-    @CurrentUser() user: UserDto,
-    @Body() payload: PurchaseFeedPayload
+  async adminCancelCCbill(
+    @Param('subscriptionId') subscriptionId: string
   ): Promise<DataResponse<any>> {
-    const order = await this.orderService.createForPerformerPost(payload, user);
-    const info = await this.paymentService.purchasePerformerPost(order, user);
-    return DataResponse.ok(info);
-  }
-
-  @Post('/purchase-stream')
-  @HttpCode(HttpStatus.OK)
-  @Roles('user')
-  @UseGuards(RoleGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async purchaseStream(
-    @CurrentUser() user: UserDto,
-    @Body() payload: PurchaseStreamPayload
-  ): Promise<DataResponse<any>> {
-    const order = await this.orderService.createForPerformerStream(payload, user);
-    const info = await this.paymentService.purchasePerformerStream(order, user);
-    return DataResponse.ok(info);
-  }
-
-  @Post('/authorise-card')
-  @HttpCode(HttpStatus.OK)
-  @Roles('user')
-  @UseGuards(RoleGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async authoriseCard(
-    @CurrentUser() user: UserDto
-  ): Promise<DataResponse<any>> {
-    const order = await this.orderService.createAuthorizationCard(user);
-    const info = await this.paymentService.authoriseCard(order);
-    return DataResponse.ok(info);
+    const data = await this.paymentService.adminCancelSubscription(subscriptionId);
+    return DataResponse.ok(data);
   }
 }

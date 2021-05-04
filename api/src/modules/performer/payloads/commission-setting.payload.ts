@@ -29,6 +29,18 @@ export class CommissionSettingPayload {
   @Min(0.01)
   @Max(0.99)
   @IsOptional()
+  gallerySaleCommission: number;
+
+  @IsNumber()
+  @Min(0.01)
+  @Max(0.99)
+  @IsOptional()
+  streamCommission: number;
+
+  @IsNumber()
+  @Min(0.01)
+  @Max(0.99)
+  @IsOptional()
   productSaleCommission: number;
 
   @IsNumber()

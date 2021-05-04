@@ -9,9 +9,8 @@ import {
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
-import { CurrentUser, Roles } from 'src/modules/auth';
-import { UserDto } from 'src/modules/user/dtos';
 import { FileDto, FileUploaded, FileUploadInterceptor } from 'src/modules/file';
+import { Roles } from 'src/modules/auth';
 import { FeedFileService } from '../services';
 
 @Injectable()
@@ -23,8 +22,8 @@ export class FeedFileController {
 
   @Post('photo/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @UseInterceptors(
     FileUploadInterceptor('feed-photo', 'file', {
       destination: getConfig('file').feedProtectedDir,
@@ -45,8 +44,8 @@ export class FeedFileController {
 
   @Post('video/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @UseInterceptors(
     FileUploadInterceptor('feed-video', 'file', {
       destination: getConfig('file').feedProtectedDir,
@@ -54,7 +53,6 @@ export class FeedFileController {
     })
   )
   async uploadVideo(
-    @CurrentUser() user: UserDto,
     @FileUploaded() file: FileDto
   ): Promise<any> {
     await this.feedFileService.validateVideo(file);
@@ -66,10 +64,31 @@ export class FeedFileController {
     });
   }
 
+  @Post('audio/upload')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
+  @UseInterceptors(
+    FileUploadInterceptor('feed-audio', 'file', {
+      destination: getConfig('file').feedProtectedDir
+    })
+  )
+  async uploadAudio(
+    @FileUploaded() file: FileDto
+  ): Promise<any> {
+    await this.feedFileService.validateAudio(file);
+
+    return DataResponse.ok({
+      success: true,
+      ...file.toResponse(),
+      url: file.getUrl()
+    });
+  }
+
   @Post('thumbnail/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @UseInterceptors(
     FileUploadInterceptor('feed-photo', 'file', {
       destination: getConfig('file').feedDir,
@@ -90,8 +109,8 @@ export class FeedFileController {
 
   @Post('teaser/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @UseInterceptors(
     FileUploadInterceptor('feed-video', 'file', {
       destination: getConfig('file').feedDir,

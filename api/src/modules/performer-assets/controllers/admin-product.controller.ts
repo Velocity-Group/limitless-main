@@ -130,10 +130,9 @@ export class AdminPerformerProductsController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   async details(
-    @Param('id') id: string,
-    @CurrentUser() updater: UserDto
+    @Param('id') id: string
   ): Promise<any> {
-    const resp = await this.productService.getDetails(id, updater);
+    const resp = await this.productService.getDetails(id, null);
     return DataResponse.ok(resp);
   }
 

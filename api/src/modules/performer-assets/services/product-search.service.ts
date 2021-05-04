@@ -1,15 +1,12 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { PageableData, QueueEvent, QueueEventService } from 'src/kernel';
+import { PageableData } from 'src/kernel';
 import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
-import { EVENT, STATUS } from 'src/kernel/constants';
-import { SEARCH_CHANNEL } from 'src/modules/search/constants';
-import * as moment from 'moment';
+import { UserDto } from 'src/modules/user/dtos';
 import { PERFORMER_PRODUCT_MODEL_PROVIDER } from '../providers';
 import { ProductModel } from '../models';
 import { ProductDto } from '../dtos';
-import { UserDto } from '../../user/dtos';
 import { ProductSearchRequest } from '../payloads';
 
 @Injectable()
@@ -19,23 +16,30 @@ export class ProductSearchService {
     private readonly performerService: PerformerService,
     @Inject(PERFORMER_PRODUCT_MODEL_PROVIDER)
     private readonly productModel: Model<ProductModel>,
-    private readonly fileService: FileService,
-    private readonly queueEventService: QueueEventService
+    private readonly fileService: FileService
   ) {}
 
   public async adminSearch(
     req: ProductSearchRequest
   ): Promise<PageableData<ProductDto>> {
     const query = {} as any;
-    if (req.q) query.name = { $regex: req.q };
+    if (req.q) {
+      const regexp = new RegExp(
+        req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+        'i'
+      );
+      query.$or = [
+        {
+          name: { $regex: regexp }
+        },
+        {
+          description: { $regex: regexp }
+        }
+      ];
+    }
     if (req.performerId) query.performerId = req.performerId;
     if (req.status) query.status = req.status;
-    if (req.fromDate && req.toDate) {
-      query.createdAt = {
-        $gte: moment(req.fromDate).startOf('date'),
-        $lte: moment(req.toDate).endOf('date')
-      };
-    }
+
     let sort = {};
     if (req.sort && req.sortBy) {
       sort = {
@@ -91,15 +95,22 @@ export class ProductSearchService {
     user: UserDto
   ): Promise<PageableData<ProductDto>> {
     const query = {} as any;
-    if (req.q) query.name = { $regex: req.q };
+    if (req.q) {
+      const regexp = new RegExp(
+        req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+        'i'
+      );
+      query.$or = [
+        {
+          name: { $regex: regexp }
+        },
+        {
+          description: { $regex: regexp }
+        }
+      ];
+    }
     query.performerId = user._id;
     if (req.status) query.status = req.status;
-    if (req.fromDate && req.toDate) {
-      query.createdAt = {
-        $gte: moment(req.fromDate).startOf('date'),
-        $lte: moment(req.toDate).endOf('date')
-      };
-    }
     let sort = {};
     if (req.sort && req.sortBy) {
       sort = {
@@ -152,41 +163,27 @@ export class ProductSearchService {
   }
 
   public async userSearch(
-    req: ProductSearchRequest,
-    user?: UserDto
+    req: ProductSearchRequest
   ): Promise<PageableData<ProductDto>> {
-    const query = { status: STATUS.ACTIVE } as any;
+    const query = {} as any;
     if (req.q) {
       const regexp = new RegExp(
         req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
         'i'
       );
-      const searchValue = { $regex: regexp };
       query.$or = [
-        { name: searchValue },
-        { description: searchValue }
+        {
+          name: { $regex: regexp }
+        },
+        {
+          description: { $regex: regexp }
+        }
       ];
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: SEARCH_CHANNEL,
-          eventName: EVENT.CREATED,
-          data: {
-            keyword: req.q,
-            fromSource: 'user',
-            fromSourceId: user?._id || null
-          }
-        })
-      );
-    }
-    if (req.fromDate && req.toDate) {
-      query.createdAt = {
-        $gte: moment(req.fromDate).startOf('date'),
-        $lte: moment(req.toDate).endOf('date')
-      };
     }
     if (req.performerId) query.performerId = req.performerId;
     if (req.excludedId) query._id = { $ne: req.excludedId };
     if (req.includedIds) query._id = { $in: req.includedIds };
+    query.status = 'active';
     let sort = {};
     if (req.sort && req.sortBy) {
       sort = {
@@ -217,9 +214,7 @@ export class ProductSearchService {
       );
       if (performer) {
         // eslint-disable-next-line no-param-reassign
-        v.performer = {
-          username: performer.username
-        };
+        v.performer = new UserDto(performer).toResponse(false);
       }
       // TODO - check user or performer
       const file = images.length > 0 && v.imageId

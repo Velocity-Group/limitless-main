@@ -13,11 +13,9 @@ import {
   IsBoolean
 } from 'class-validator';
 import { Username } from 'src/modules/user/validators/username.validator';
-import { GENDERS } from 'src/modules/user/constants';
 import { ApiProperty } from '@nestjs/swagger';
 import { ObjectId } from 'mongodb';
 import { PERFORMER_STATUSES } from '../constants';
-import { ISchedule } from '../dtos';
 
 export class PerformerCreatePayload {
   @ApiProperty()
@@ -45,7 +43,7 @@ export class PerformerCreatePayload {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
+  @MinLength(6)
   password?: string;
 
   @ApiProperty()
@@ -102,7 +100,6 @@ export class PerformerCreatePayload {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @IsIn(GENDERS)
   gender?: string;
 
   @ApiProperty()
@@ -139,28 +136,13 @@ export class PerformerCreatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  studioId?: string;
+  agentId?: ObjectId | string;
 
   @ApiProperty()
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   categoryIds?: string[];
-
-  @ApiProperty()
-  @IsOptional()
-  @IsObject()
-  schedule?: ISchedule;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  timezone?: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  noteForUser?: string;
 
   @ApiProperty()
   @IsString()
@@ -244,6 +226,16 @@ export class PerformerCreatePayload {
   @IsNotEmpty()
   @IsString()
   dateOfBirth: string
+
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  roles: string[]
+
+  @ApiProperty()
+  @IsOptional()
+  @IsObject()
+  socialsLink: any
 }
 
 export class PerformerRegisterPayload {
@@ -272,7 +264,7 @@ export class PerformerRegisterPayload {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
+  @MinLength(6)
   password?: string;
 
   @ApiProperty()
@@ -323,12 +315,21 @@ export class PerformerRegisterPayload {
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @IsIn(GENDERS)
+  @IsOptional()
   gender?: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  dateOfBirth: string
+  dateOfBirth: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  invitationId: string | ObjectId;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  referralId: string | ObjectId;
 }

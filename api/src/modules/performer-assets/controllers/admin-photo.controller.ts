@@ -89,7 +89,6 @@ export class AdminPerformerPhotoController {
   @UseGuards(RoleGuard)
   async search(
     @Query() query: PhotoSearchRequest,
-    @CurrentUser() user: UserDto,
     @Request() req: any
   ) {
     const { jwToken } = req;

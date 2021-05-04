@@ -7,11 +7,10 @@ import { PerformerModule } from '../performer/performer.module';
 import { AuthModule } from '../auth/auth.module';
 import { StreamService, RequestService } from './services';
 import { StreamController } from './controllers';
-import { UserModule } from '../user/user.module';
 import { MessageModule } from '../message/message.module';
 import { SocketModule } from '../socket/socket.module';
 import { StreamConversationWsGateway, PrivateStreamWsGateway, PublicStreamWsGateway } from './gateways';
-import { StreamMessageListener, StreamConnectListener, PrivateChatPaymentListener } from './listeners';
+import { StreamConnectListener } from './listeners';
 import { SettingModule } from '../settings/setting.module';
 import { PaymentModule } from '../payment/payment.module';
 
@@ -28,7 +27,6 @@ const agent = new https.Agent({
       httpsAgent: agent
     }),
     QueueModule.forRoot(),
-    forwardRef(() => UserModule),
     forwardRef(() => SubscriptionModule),
     forwardRef(() => MessageModule),
     forwardRef(() => SocketModule),
@@ -42,9 +40,7 @@ const agent = new https.Agent({
     ...assetsProviders,
     StreamService,
     RequestService,
-    StreamMessageListener,
     StreamConnectListener,
-    PrivateChatPaymentListener,
     StreamConversationWsGateway,
     PrivateStreamWsGateway,
     PublicStreamWsGateway

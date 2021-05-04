@@ -5,16 +5,17 @@ import * as moment from 'moment';
 import { QueueEvent, QueueEventService } from 'src/kernel';
 import { EVENT } from 'src/kernel/constants';
 import { SEARCH_CHANNEL } from 'src/modules/search/constants';
-import { UserDto } from 'src/modules/user/dtos';
-import { PerformerModel } from '../models';
-import { PERFORMER_MODEL_PROVIDER } from '../providers';
+import { PerformerModel, AdminChangeTokenModel } from '../models';
+import { ADMIN_CHANGE_TOKEN_BALANCE_LOGS, PERFORMER_MODEL_PROVIDER } from '../providers';
 import { PerformerDto, IPerformerResponse } from '../dtos';
-import { PerformerSearchPayload } from '../payloads';
+import { ChangeTokenLogsSearchPayload, PerformerSearchPayload } from '../payloads';
 import { PERFORMER_STATUSES } from '../constants';
 
 @Injectable()
 export class PerformerSearchService {
   constructor(
+    @Inject(ADMIN_CHANGE_TOKEN_BALANCE_LOGS)
+    private readonly changeTokenLogModel: Model<AdminChangeTokenModel>,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>,
     private readonly queueEventService: QueueEventService
@@ -31,12 +32,11 @@ export class PerformerSearchService {
       );
       const searchValue = { $regex: regexp };
       query.$or = [
+        { firstName: searchValue },
+        { lastName: searchValue },
         { name: searchValue },
         { username: searchValue },
-        { email: searchValue },
-        { bodyType: searchValue },
-        { gender: searchValue },
-        { ethnicity: searchValue }
+        { email: searchValue }
       ];
     }
     if (req.performerIds) {
@@ -93,8 +93,9 @@ export class PerformerSearchService {
         .skip(parseInt(req.offset as string, 10)),
       this.performerModel.countDocuments(query)
     ]);
+    const performers = data.map((d) => new PerformerDto(d));
     return {
-      data: data.map((item) => new PerformerDto(item)),
+      data: performers,
       total
     };
   }
@@ -102,12 +103,11 @@ export class PerformerSearchService {
   // TODO - should create new search service?
   public async search(
     req: PerformerSearchPayload,
-    user?: UserDto
+    user?: PerformerDto
   ): Promise<PageableData<PerformerDto>> {
     const query = {
       status: PERFORMER_STATUSES.ACTIVE,
-      verifiedDocument: true,
-      username: { $ne: null }
+      verifiedDocument: true
     } as any;
     if (req.q) {
       const regexp = new RegExp(
@@ -164,12 +164,19 @@ export class PerformerSearchService {
       };
     }
     let sort = {
-      isOnline: -1
+      isOnline: -1,
+      createdAt: -1
     } as any;
     if (req.sort && req.sortBy) {
       sort = {
         [req.sortBy]: req.sort
       };
+    }
+    if (req.sort === 'online') {
+      sort = '-isOnline';
+    }
+    if (req.sort === 'live') {
+      sort = '-live';
     }
     if (req.sort === 'latest') {
       sort = '-createdAt';
@@ -178,7 +185,7 @@ export class PerformerSearchService {
       sort = 'createdAt';
     }
     if (req.sort === 'popular') {
-      sort = '-stats.views';
+      sort = '-score';
     }
     const [data, total] = await Promise.all([
       this.performerModel
@@ -189,8 +196,10 @@ export class PerformerSearchService {
         .skip(parseInt(req.offset as string, 10)),
       this.performerModel.countDocuments(query)
     ]);
+    const performers = data.map((d) => new PerformerDto(d));
+
     return {
-      data: data.map((item) => new PerformerDto(item)),
+      data: performers,
       total
     };
   }
@@ -273,49 +282,34 @@ export class PerformerSearchService {
       status: PERFORMER_STATUSES.ACTIVE,
       verifiedDocument: true
     } as any;
-    if (req.q) {
-      query.$or = [
-        {
-          name: { $regex: new RegExp(req.q, 'i') }
-        },
-        {
-          email: { $regex: new RegExp(req.q, 'i') }
-        },
-        {
-          username: { $regex: new RegExp(req.q, 'i') }
-        }
-      ];
-    }
-    if (req.fromAge && req.toAge) {
-      query.dateOfBirth = {
-        $gte: new Date(req.fromAge),
-        $lte: new Date(req.toAge)
-      };
-    }
-    if (req.isFreeSubscription) {
-      query.isFreeSubscription = true;
-    }
     if (req.gender) {
       query.gender = req.gender;
     }
     if (req.country) {
       query.country = { $regex: req.country };
     }
-    if (req.height) {
-      query.height = { $regex: req.height };
-    }
-    if (req.eyes) {
-      query.eyes = { $regex: req.eyes };
-    }
-    if (req.sexualPreference) {
-      query.sexualPreference = { $regex: req.sexualPreference };
-    }
     const data = await this.performerModel.aggregate([
       { $match: query },
-      { $sample: { size: 30 } }
+      { $sample: { size: 90 } }
     ]);
     return {
       data: data.map((item) => new PerformerDto(item).toSearchResponse())
     };
+  }
+
+  public async tokenChangeLogs(req: ChangeTokenLogsSearchPayload):Promise<any> {
+    const query = {
+      source: req.source,
+      sourceId: req.sourceId
+    } as any;
+    const [data] = await Promise.all([
+      this.changeTokenLogModel
+        .find(query)
+        .lean()
+        .sort('-createdAt')
+        .limit(req.limit ? parseInt(req.limit as string, 10) : 10)
+        .skip(parseInt(req.offset as string, 10))
+    ]);
+    return data;
   }
 }

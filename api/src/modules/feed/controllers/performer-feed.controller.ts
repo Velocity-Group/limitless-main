@@ -20,8 +20,8 @@ import {
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
-import { UserDto } from 'src/modules/user/dtos';
 import { AuthService } from 'src/modules/auth/services';
+import { UserDto } from 'src/modules/user/dtos';
 import {
   FeedCreatePayload, FeedSearchRequest,
   PollCreatePayload
@@ -40,8 +40,8 @@ export class PerformerFeedController {
   ) {}
 
   @Post('/')
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async create(
@@ -56,8 +56,8 @@ export class PerformerFeedController {
   }
 
   @Get('/')
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getMyFeeds(
@@ -72,8 +72,8 @@ export class PerformerFeedController {
   }
 
   @Get('/:id')
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getPerformerFeed(
@@ -82,14 +82,14 @@ export class PerformerFeedController {
     @Request() req: any
   ): Promise<DataResponse<FeedDto>> {
     const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = await this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
+    const jwToken = this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
     const data = await this.feedService.findOne(id, user, jwToken);
     return DataResponse.ok(data);
   }
 
   @Put('/:id')
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateFeed(
@@ -102,8 +102,8 @@ export class PerformerFeedController {
   }
 
   @Delete('/:id')
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async deletePerformerFeed(
@@ -115,8 +115,8 @@ export class PerformerFeedController {
   }
 
   @Post('/polls')
-  @Roles('performer', 'admin')
   @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async createPollFeed(

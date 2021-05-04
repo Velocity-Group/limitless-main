@@ -78,7 +78,7 @@ export class CouponService {
       expiredDate: new Date(payload.expiredDate),
       updatedAt: new Date()
     } as any;
-    await this.couponModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.couponModel.updateOne({ _id: id }, data, { new: true });
     return { updated: true };
   }
 
