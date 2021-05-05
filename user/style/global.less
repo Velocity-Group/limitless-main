@@ -186,11 +186,38 @@
 }
 
 .ant-row {
-  margin-left: -12px;
-  margin-right: -12px;
+  margin-left: -10px;
+  margin-right: -10px;
   .ant-col {
     padding: 5px;
   }
+  &.ant-form-item {
+    margin-left: unset;
+    margin-right: unset;
+  }
+}
+.ant-table {
+  border-radius: 0;
+  table {
+    border: 1px solid @border-color-split;
+    border-radius: 0;
+  }
+}
+.ant-table-tbody > tr > td, .ant-table-thead > tr > th {
+  padding: 10px 5px;
+  border: 1px solid @border-color-split;
+}
+
+.ant-table-container table > thead > tr:first-child th:first-child {
+  border-top-left-radius: 0
+}
+
+.ant-table-container table > thead > tr:last-child th:last-child {
+  border-top-right-radius: 0
+}
+
+.ant-table tfoot > tr > th, .ant-table tfoot > tr > td{
+  padding: 10px 5px;
 }
 
 .table-responsive {

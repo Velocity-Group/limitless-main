@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { PureComponent } from 'react';
 import {
   Form,
@@ -14,12 +13,13 @@ import {
   Row,
   Col
 } from 'antd';
-import { IVideoUpdate, IVideoCreate, IUser } from 'src/interfaces';
+import { IVideoUpdate, IVideoCreate, IUser } from 'src/interfaces/index';
 import { CameraOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
 import { performerService } from '@services/index';
 import moment from 'moment';
 import './video.less';
 import { debounce } from 'lodash';
+import Router from 'next/router';
 
 interface IProps {
   user: IUser;
@@ -136,7 +136,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
           video
           || ({
             title: '',
-            price: 0,
+            price: 9.99,
             description: '',
             tags: [],
             isSale: false,
@@ -156,7 +156,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 { required: true, message: 'Please input title of video!' }
               ]}
             >
-              <Input placeholder="Enter video title" />
+              <Input />
             </Form.Item>
             <Form.Item label="Tag" name="tags">
               <Select
@@ -165,7 +165,6 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 size="middle"
                 showArrow={false}
                 defaultActiveFirstOption={false}
-                placeholder="Add Tags"
               />
             </Form.Item>
             <Form.Item
@@ -191,40 +190,6 @@ export class FormUploadVideo extends PureComponent<IProps> {
               </Select>
             </Form.Item>
             <Form.Item
-              name="isSale"
-              label="For Sale?"
-            >
-              <Switch
-                checkedChildren="Sale"
-                unCheckedChildren="Free"
-                checked={isSale}
-                onChange={this.onSwitch.bind(this, 'saleVideo')}
-              />
-            </Form.Item>
-            {isSale && (
-              <Form.Item name="price" label="Amount of Tokens">
-                <InputNumber min={1} />
-              </Form.Item>
-            )}
-            <Form.Item
-              name="isSchedule"
-              label="Schedule activate time while status 'Inactive'"
-            >
-              <Switch
-                checked={isSchedule}
-                onChange={this.onSwitch.bind(this, 'scheduling')}
-              />
-            </Form.Item>
-            {isSchedule && (
-              <Form.Item label="Schedule at">
-                <DatePicker
-                  disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
-                  defaultValue={scheduledAt}
-                  onChange={this.onSchedule.bind(this)}
-                />
-              </Form.Item>
-            )}
-            <Form.Item
               name="status"
               label="Status"
               rules={[{ required: true, message: 'Please select status!' }]}
@@ -249,7 +214,46 @@ export class FormUploadVideo extends PureComponent<IProps> {
             >
               <Input.TextArea rows={3} />
             </Form.Item>
-            {(!haveVideo || (haveVideo && video.thumbnail)) && (
+
+            <Form.Item
+              name="isSale"
+              label="For Sale?"
+            >
+              <Switch
+                checkedChildren="Sale"
+                unCheckedChildren="Free"
+                checked={isSale}
+                onChange={this.onSwitch.bind(this, 'saleVideo')}
+              />
+            </Form.Item>
+            {isSale && (
+              <Form.Item name="price" label="Amount of Tokens">
+                <InputNumber min={1} />
+              </Form.Item>
+            )}
+            <Form.Item
+              name="isSchedule"
+              label="Schedule activate time while status 'Inactive'"
+            >
+              <Switch
+                checkedChildren="Scheduling"
+                unCheckedChildren="Un-scheduled"
+                checked={isSchedule}
+                onChange={this.onSwitch.bind(this, 'scheduling')}
+              />
+            </Form.Item>
+            {isSchedule && (
+              <Form.Item label="Schedule at">
+                <DatePicker
+                  disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
+                  defaultValue={scheduledAt}
+                  onChange={this.onSchedule.bind(this)}
+                />
+              </Form.Item>
+            )}
+          </Col>
+          {(!haveVideo || (haveVideo && video.thumbnail)) && (
+          <Col xs={24} md={8}>
             <Form.Item label="Thumbnail">
               <Upload
                 listType="picture-card"
@@ -269,7 +273,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 ) : <CameraOutlined />}
               </Upload>
             </Form.Item>
-            )}
+          </Col>
+          )}
+          <Col xs={24} md={8}>
             <Form.Item label="Teaser File">
               {!previewTeaser && (
               <Upload
@@ -286,8 +292,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
               )}
               {previewTeaser && <a href={previewTeaser} target="_blank" rel="noreferrer">Click to view</a>}
             </Form.Item>
-
-            <Form.Item label="Video File">
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item label="Main video File">
               {!previewVideo && (
               <Upload
                 listType="picture-card"
@@ -313,6 +320,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button className="primary" htmlType="submit" loading={uploading} disabled={uploading}>
             {haveVideo ? 'Update' : 'Upload'}
+          </Button>
+          <Button className="secondary" onClick={() => Router.back()} loading={uploading} disabled={uploading}>
+            Back
           </Button>
         </Form.Item>
       </Form>

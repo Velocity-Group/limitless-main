@@ -55,11 +55,11 @@ class Forgot extends PureComponent<IProps, IState> {
   }
 
   handleReset = async (data: IForgot) => {
-    const { ui } = this.props;
-    if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
-      message.error('Are you a robot?');
-      return;
-    }
+    // const { ui } = this.props;
+    // if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
+    //   message.error('Are you a robot?');
+    //   return;
+    // }
     await this.setState({ submiting: true });
     try {
       await authService.resetPassword({
@@ -121,7 +121,7 @@ class Forgot extends PureComponent<IProps, IState> {
                   md={6}
                   lg={12}
                   className="login-content left fixed"
-                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
+                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui?.loginPlaceholderImage})` } : null}
                 />
                 <Col
                   xs={24}

@@ -27,7 +27,6 @@ import { isEmail } from '@lib/string';
 // import { GoogleReCaptcha } from '@components/common';
 
 interface IProps {
-  loginAuth: any;
   login: Function;
   updateCurrentUser: Function;
   loginSuccess: Function;
@@ -201,7 +200,6 @@ class Login extends PureComponent<IProps> {
                       <button type="button" className={loginAs === 'user' ? 'active' : ''} onClick={() => this.setState({ loginAs: 'user' })} style={{ marginRight: '20px' }}>Fan Login</button>
                       <button type="button" className={loginAs === 'performer' ? 'active' : ''} onClick={() => this.setState({ loginAs: 'performer' })}>Model Login</button>
                     </div>
-
                     <div className="social-login">
                       <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
                         <TwitterOutlined />
@@ -226,7 +224,6 @@ class Login extends PureComponent<IProps> {
                         onFinish={this.handleLogin.bind(this)}
                       >
                         <Form.Item
-                          name="email"
                           hasFeedback
                           validateTrigger={['onChange', 'onBlur']}
                           rules={[

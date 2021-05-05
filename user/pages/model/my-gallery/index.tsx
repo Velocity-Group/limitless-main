@@ -7,17 +7,17 @@ import { PlusOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import { TableListGallery } from '@components/gallery/table-list';
 import Page from '@components/common/layout/page';
-import { SearchFilter } from '@components/common/base/search-filter';
+import { SearchFilter } from '@components/common/search-filter';
 import Link from 'next/link';
 import { galleryService } from '@services/gallery.service';
 import { connect } from 'react-redux';
 import { IUIConfig } from 'src/interfaces';
 
-interface GalleryListingPageIProps {
+interface IProps {
   ui: IUIConfig;
 }
 
-interface GalleryListingPageIStates {
+interface IStates {
   galleries: [];
   loading: boolean;
   filters: {};
@@ -30,15 +30,12 @@ interface GalleryListingPageIStates {
   };
 }
 
-class GalleryListingPage extends PureComponent<
-  GalleryListingPageIProps,
-  GalleryListingPageIStates
-  > {
+class GalleryListingPage extends PureComponent<IProps, IStates> {
   static authenticate = true;
 
   static onlyPerformer = true;
 
-  constructor(props: GalleryListingPageIProps) {
+  constructor(props: IProps) {
     super(props);
     this.state = {
       galleries: [],
@@ -138,10 +135,10 @@ class GalleryListingPage extends PureComponent<
             </div>
             <div>
               <Row>
-                <Col lg={16}>
-                  <SearchFilter onSubmit={this.handleFilter.bind(this)} />
+                <Col lg={18} xs={18}>
+                  <SearchFilter searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
                 </Col>
-                <Col lg={8} style={{ display: 'flex', alignItems: 'center' }}>
+                <Col lg={6} xs={6} style={{ display: 'flex', alignItems: 'center' }}>
                   <Button className="secondary">
                     <Link href="/model/my-gallery/create">
                       <a>

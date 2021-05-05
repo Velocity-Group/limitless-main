@@ -60,8 +60,8 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
     } catch (e) {
       message.error(getResponseError(e));
     } finally {
-      await this.setState({ submiting: false });
-      Router.push('/model/my-gallery/listing');
+      this.setState({ submiting: false });
+      Router.push('/model/my-gallery');
     }
   }
 

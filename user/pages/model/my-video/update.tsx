@@ -37,6 +37,7 @@ class VideoUpdate extends PureComponent<IProps> {
       this.setState({ video: resp.data });
     } catch (e) {
       message.error('Video not found!');
+      Router.back();
     } finally {
       this.setState({ fetching: false });
     }
@@ -45,30 +46,32 @@ class VideoUpdate extends PureComponent<IProps> {
   async submit(data: any) {
     try {
       const { id } = this.props;
+      const submitData = { ...data };
       if (
         (data.isSale && !data.price)
         || (data.isSale && data.price < 1)
       ) {
-        return message.error('Invalid price');
+        message.error('Invalid amount of tokens');
+        return;
       }
       if (data.isSchedule && !data.scheduledAt) {
-        return message.error('Invalid schedule date');
+        message.error('Invalid schedule date');
+        return;
       }
-      this.setState({ submiting: true });
-      const submitData = {
-        ...data
-      };
-
+      if (data.isSchedule && data.scheduledAt) {
+        submitData.status = 'inactive';
+      }
+      await this.setState({ submiting: true });
       await videoService.update(id, submitData);
-      this.setState({ submiting: false });
       message.success('Changes saved.');
-      return Router.push('/model/my-video');
+      Router.push('/model/my-video');
     } catch (e) {
       // TODO - check and show error here
       message.error(
         getResponseError(e) || 'Something went wrong, please try again!'
       );
-      return this.setState({ submiting: false });
+    } finally {
+      this.setState({ submiting: false });
     }
   }
 

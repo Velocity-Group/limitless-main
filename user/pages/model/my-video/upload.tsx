@@ -2,7 +2,6 @@ import { PureComponent } from 'react';
 import Head from 'next/head';
 import { connect } from 'react-redux';
 import { message, Layout } from 'antd';
-import Page from '@components/common/layout/page';
 import { videoService } from '@services/video.service';
 import { FormUploadVideo } from '@components/video/form-upload';
 import Router from 'next/router';
@@ -29,15 +28,16 @@ class UploadVideo extends PureComponent<IProps> {
 
   state = {
     uploading: false,
-    // preview: null,
     uploadPercentage: 0
   };
 
   _files: {
     thumbnail: File;
+    teaser: File;
     video: File;
   } = {
     thumbnail: null,
+    teaser: null,
     video: null
   };
 
@@ -51,19 +51,23 @@ class UploadVideo extends PureComponent<IProps> {
 
   async submit(data: any) {
     if (!this._files.video) {
-      return message.error('Please select video!');
+      message.error('Please select video!');
+      return;
     }
-
-    if (
-      (data.isSale && !data.price)
-      || (data.isSale && data.price < 1)
-    ) {
-      return message.error('Invalid price');
+    const submitData = { ...data };
+    if ((data.isSale && !data.price) || (data.isSale && data.price < 1)) {
+      message.error('Invalid amount of tokens');
+      return;
     }
-    // eslint-disable-next-line no-param-reassign
-    data.tags = [...[], ...data.tags];
-    // eslint-disable-next-line no-param-reassign
-    data.participantIds = [...[], ...data.participantIds];
+    if (data.isSchedule && !data.scheduledAt) {
+      message.error('Invalid schedule date');
+      return;
+    }
+    if (data.isSchedule && data.scheduledAt) {
+      submitData.status = 'inactive';
+    }
+    submitData.tags = [...[], ...data.tags];
+    submitData.participantIds = [...[], ...data.participantIds];
     const files = Object.keys(this._files).reduce((f, key) => {
       if (this._files[key]) {
         f.push({
@@ -84,18 +88,13 @@ class UploadVideo extends PureComponent<IProps> {
         this.onUploading.bind(this)
       )) as IResponse;
       message.success('Video has been uploaded');
-      // TODO - process for response data?
-      Router.push('/model/my-video');
-      return this.setState({
-        uploading: false
-      });
+      Router.replace('/model/my-video');
     } catch (error) {
       message.error(
         getResponseError(error) || 'An error occurred, please try again!'
       );
-      return this.setState({
-        uploading: false
-      });
+    } finally {
+      this.setState({ uploading: false });
     }
   }
 
@@ -108,22 +107,20 @@ class UploadVideo extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Upload video
+            | Upload new video
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <div className="page-heading">
-              <span>Video Upload</span>
-            </div>
-            <FormUploadVideo
-              user={user}
-              submit={this.submit.bind(this)}
-              beforeUpload={this.beforeUpload.bind(this)}
-              uploading={uploading}
-              uploadPercentage={uploadPercentage}
-            />
-          </Page>
+          <div className="page-heading">
+            <span>Upload new video</span>
+          </div>
+          <FormUploadVideo
+            user={user}
+            submit={this.submit.bind(this)}
+            beforeUpload={this.beforeUpload.bind(this)}
+            uploading={uploading}
+            uploadPercentage={uploadPercentage}
+          />
         </div>
       </Layout>
     );

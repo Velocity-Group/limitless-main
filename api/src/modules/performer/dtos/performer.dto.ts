@@ -351,7 +351,8 @@ export class PerformerDto {
       lastStreamingTime: this.lastStreamingTime,
       live: this.live,
       streamingStatus: this.streamingStatus,
-      dateOfBirth: this.dateOfBirth
+      dateOfBirth: this.dateOfBirth,
+      isPerformer: true
     };
     const privateInfo = {
       balance: this.balance,
@@ -493,7 +494,8 @@ export class PerformerDto {
       streamingStatus: this.streamingStatus,
       dateOfBirth: this.dateOfBirth,
       bodyType: this.bodyType,
-      socialsLink: this.socialsLink
+      socialsLink: this.socialsLink,
+      isPerformer: true
     };
   }
 }

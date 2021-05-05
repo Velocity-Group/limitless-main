@@ -124,7 +124,6 @@ export class LoginController {
     if (authPerformer && !this.authService.verifyPassword(req.password, authPerformer)) {
       throw new UsernameOrPasswordIncorrectException();
     }
-
     let token = null;
     // auth token expired in 30d
     if (authUser) {

@@ -439,7 +439,7 @@ export class FeedService {
     ]);
     const performerIds = subscriptions.map((s) => s.performerId);
     query.fromSourceId = { $in: performerIds };
-    if (!user._id || (user && user?.roles.includes('admin'))) delete query.fromSourceId;
+    if (!user || (user && user.roles && user.roles.includes('admin'))) delete query.fromSourceId;
     if (req.q) {
       query.$or = [
         {
@@ -468,7 +468,6 @@ export class FeedService {
     const [data, total] = await Promise.all([
       this.feedModel
         .find(query)
-        .lean()
         .sort(sort)
         .limit(parseInt(req.limit as string, 10))
         .skip(parseInt(req.offset as string, 10)),
@@ -476,7 +475,7 @@ export class FeedService {
     ]);
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data as any, user, jwtToken),
+      data: await this.populateFeedData(data, user, jwtToken),
       total
     };
   }

@@ -318,8 +318,8 @@ class Header extends PureComponent<IProps> {
                     Videos
                   </div>
                 </Link>
-                <Link href="/model/my-gallery/listing" as="/model/my-gallery/listing">
-                  <div className={router.pathname === '/model/my-gallery/listing' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/model/my-gallery" as="/model/my-gallery">
+                  <div className={router.pathname === '/model/my-gallery' ? 'menu-item active' : 'menu-item'}>
                     <PictureOutlined />
                     {' '}
                     Galleries

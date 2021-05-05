@@ -1,7 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable react/no-access-state-in-setstate */
-/* eslint-disable react/destructuring-assignment */
 import { PureComponent } from 'react';
 import {
   PictureOutlined,
@@ -21,29 +17,31 @@ export default class UploadList extends PureComponent<IProps> {
   };
 
   renderPreview(file) {
+    const { previews } = this.state;
     if (file.status === 'uploading') {
       return <LoadingOutlined />;
     }
-    if (this.state.previews[file.uid]) {
-      return <img alt="" src={this.state.previews[file.uid]} />;
+    if (previews[file.uid]) {
+      return <img alt="" src={previews[file.uid]} />;
     }
 
     const reader = new FileReader();
     reader.addEventListener('load', () => {
-      const previews = {
-        ...this.state.previews,
+      const newpreviews = {
+        ...previews,
         [file.uid]: reader.result
       };
-      this.setState({ previews });
+      this.setState({ previews: newpreviews });
     });
     reader.readAsDataURL(file);
     return <PictureOutlined />;
   }
 
   render() {
+    const { files, remove } = this.props;
     return (
       <div className="ant-upload-list ant-upload-list-picture">
-        {this.props.files.map((file) => (
+        {files.length > 0 && files.map((file) => (
           <div
             className="ant-upload-list-item ant-upload-list-item-uploading ant-upload-list-item-list-type-picture"
             key={file.uid}
@@ -53,9 +51,6 @@ export default class UploadList extends PureComponent<IProps> {
               <div>
                 <span className="ant-upload-list-item-thumbnail ant-upload-list-item-file">
                   {this.renderPreview(file)}
-                </span>
-                <span className="ant-upload-list-item-name ant-upload-list-item-name-icon-count-1">
-                  <span>{file.name}</span>
                 </span>
                 <span className="ant-upload-list-item-name ant-upload-list-item-name-icon-count-1">
                   <span>
@@ -72,12 +67,11 @@ export default class UploadList extends PureComponent<IProps> {
                 </span>
                 {file.percent !== 100 && (
                   <span className="ant-upload-list-item-card-actions picture">
-                    <a onClick={this.props.remove.bind(this, file)}>
+                    <a aria-hidden onClick={remove.bind(this, file)}>
                       <DeleteOutlined />
                     </a>
                   </span>
                 )}
-
                 {file.percent && (
                   <Progress percent={Math.round(file.percent)} />
                 )}

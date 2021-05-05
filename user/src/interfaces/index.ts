@@ -15,3 +15,7 @@ export * from './story';
 export * from './blog';
 export * from './stream';
 export * from './product';
+export * from './video';
+export * from './payout-request';
+export * from './photo';
+export * from './gallery';

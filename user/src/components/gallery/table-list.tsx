@@ -51,7 +51,15 @@ export class TableListGallery extends PureComponent<IProps> {
       },
       {
         title: 'Amount of Tokens',
-        dataIndex: 'price'
+        dataIndex: 'price',
+        render(price: number) {
+          return (
+            <span>
+              <img src="/static/coin-ico.png" alt="coin" width="20px" />
+              {(price || 0).toFixed(2)}
+            </span>
+          );
+        }
       },
       {
         title: 'Status',
@@ -61,7 +69,7 @@ export class TableListGallery extends PureComponent<IProps> {
             case 'active':
               return <Tag color="green">Active</Tag>;
             case 'inactive':
-              return <Tag color="#FFCF00">Inactive</Tag>;
+              return <Tag color="orange">Inactive</Tag>;
             default: return <Tag color="#FFCF00">{status}</Tag>;
           }
         }
@@ -90,8 +98,6 @@ export class TableListGallery extends PureComponent<IProps> {
               >
                 <a>
                   <PlusOutlined />
-                  {' '}
-                  Add photos
                 </a>
               </Link>
             </Button>
@@ -104,8 +110,6 @@ export class TableListGallery extends PureComponent<IProps> {
               >
                 <a>
                   <EditOutlined />
-                  {' '}
-                  Edit
                 </a>
               </Link>
             </Button>

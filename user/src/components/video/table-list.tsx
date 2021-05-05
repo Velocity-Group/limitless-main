@@ -48,7 +48,7 @@ export class TableListVideo extends PureComponent<IProps> {
         render(price: number) {
           return (
             <span>
-              <img src="/coin-ico.png" alt="coin" width="20px" />
+              <img src="/static/coin-ico.png" alt="coin" width="20px" />
               {(price || 0).toFixed(2)}
             </span>
           );
@@ -60,9 +60,9 @@ export class TableListVideo extends PureComponent<IProps> {
         render(status: string) {
           switch (status) {
             case 'active':
-              return <Tag color="green">Active</Tag>;
+              return <Tag color="success">Active</Tag>;
             case 'inactive':
-              return <Tag color="default">Inactive</Tag>;
+              return <Tag color="orange">Inactive</Tag>;
             default:
               return <Tag color="red">{status}</Tag>;
           }
