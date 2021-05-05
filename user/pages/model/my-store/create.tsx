@@ -5,7 +5,7 @@ import Page from '@components/common/layout/page';
 import { productService } from '@services/product.service';
 import Router from 'next/router';
 import { FormProduct } from '@components/product/form-product';
-import { IPerformer, IUIConfig } from 'src/interfaces';
+import { IUIConfig } from 'src/interfaces';
 import { connect } from 'react-redux';
 import { getResponseError } from '@lib/utils';
 
@@ -19,7 +19,6 @@ interface IResponse {
 }
 interface IProps {
   ui: IUIConfig;
-  user: IPerformer;
 }
 class CreateProduct extends PureComponent<IProps> {
   static authenticate = true;
@@ -28,7 +27,6 @@ class CreateProduct extends PureComponent<IProps> {
 
   state = {
     uploading: false,
-    // preview: null,
     uploadPercentage: 0
   };
 
@@ -40,14 +38,6 @@ class CreateProduct extends PureComponent<IProps> {
     digitalFile: null
   };
 
-  componentDidMount() {
-    const { user } = this.props;
-    if (!user || !user.verifiedDocument) {
-      message.warning('Your ID documents are not verified yet! You could not post any content right now. Please upload your ID documents to get approval then start making money.');
-      Router.back();
-    }
-  }
-
   onUploading(resp: any) {
     this.setState({ uploadPercentage: resp.percentage });
   }
@@ -57,6 +47,9 @@ class CreateProduct extends PureComponent<IProps> {
   }
 
   async submit(data: any) {
+    if (!this._files.image) {
+      return message.error('Please upload product image!');
+    }
     if (data.type === 'digital' && !this._files.digitalFile) {
       return message.error('Please select digital file!');
     }
@@ -83,14 +76,19 @@ class CreateProduct extends PureComponent<IProps> {
         data,
         this.onUploading.bind(this)
       )) as IResponse;
-      message.success('Product created');
-      Router.push('/model/my-store');
+      message.success('Product has been created');
+      // TODO - process for response data?
+      await this.setState(
+        {
+          uploading: false
+        },
+        () => Router.push('/model/my-store')
+      );
     } catch (error) {
       message.error(
         getResponseError(error) || 'Something went wrong, please try again!'
       );
-    } finally {
-      this.setState({
+      await this.setState({
         uploading: false
       });
     }
@@ -125,7 +123,6 @@ class CreateProduct extends PureComponent<IProps> {
   }
 }
 const mapStates = (state: any) => ({
-  ui: { ...state.ui },
-  user: { ...state.user.current }
+  ui: state.ui
 });
 export default connect(mapStates)(CreateProduct);

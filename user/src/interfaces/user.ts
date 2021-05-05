@@ -16,7 +16,7 @@ export interface IUser {
   cover: string;
   dateOfBirth: Date;
   verifiedDocument: boolean;
-  authorisedCard: boolean;
+  balance: number;
 }
 
 export interface IUserFormData {

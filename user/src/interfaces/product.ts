@@ -1,6 +1,7 @@
 export interface IProduct {
   _id?: string;
   performerId?: string;
+  digitalFileId?: string;
   imageId?: string;
   image?: any;
   type?: string;
@@ -23,15 +24,4 @@ export interface IProductCreate {
   type: string;
   price: number;
   stock: number;
-}
-
-export interface IProductUpdate {
-  _id: string;
-  name?: string;
-  price?: number;
-  status?: string;
-  description?: string;
-  stock?: number;
-  type?: string;
-  image?: string;
 }

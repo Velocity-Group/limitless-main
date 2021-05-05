@@ -1,9 +1,5 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable default-case */
 import { PureComponent } from 'react';
-import {
-  Table, Button, Tag
-} from 'antd';
+import { Table, Button, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
@@ -20,6 +16,14 @@ interface IProps {
 
 export class TableListProduct extends PureComponent<IProps> {
   render() {
+    const {
+      dataSource,
+      rowKey,
+      loading,
+      pagination,
+      onChange,
+      deleteProduct
+    } = this.props;
     const columns = [
       {
         title: '',
@@ -30,18 +34,17 @@ export class TableListProduct extends PureComponent<IProps> {
       },
       {
         title: 'Name',
-        dataIndex: 'name',
-        sorter: true
+        dataIndex: 'name'
       },
       {
-        title: 'Price',
+        title: 'Amount of Tokens',
         dataIndex: 'price',
-        sorter: true,
         render(price: number) {
           return (
             <span>
-              $
-              {price.toFixed(2)}
+              <img alt="token" src="/static/coin-ico.png" height="20px" />
+              {' '}
+              {(price && price.toFixed(2)) || 0}
             </span>
           );
         }
@@ -49,46 +52,40 @@ export class TableListProduct extends PureComponent<IProps> {
       {
         title: 'Stock',
         dataIndex: 'stock',
-        sorter: true,
-        render(stock: number) {
-          return <span>{stock || 0}</span>;
+        render(stock: number, record) {
+          return <span>{(record.type === 'physical' && stock) || ''}</span>;
         }
       },
       {
         title: 'Type',
         dataIndex: 'type',
-        sorter: true,
         render(type: string) {
           switch (type) {
             case 'physical':
-              return <Tag color="#7b5cbd">Physical</Tag>;
+              return <Tag color="#007bff">Physical</Tag>;
             case 'digital':
-              return <Tag color="#00dcff">Digital</Tag>;
+              return <Tag color="#ff0066">Digital</Tag>;
+            default:
+              break;
           }
-          return <Tag color="">{type}</Tag>;
+          return <Tag color="orange">{type}</Tag>;
         }
       },
       {
         title: 'Status',
         dataIndex: 'status',
-        sorter: true,
         render(status: string) {
           switch (status) {
             case 'active':
-              return <Tag color="#00c12c">Active</Tag>;
+              return <Tag color="success">Active</Tag>;
             case 'inactive':
-              return <Tag color="#FFCF00">Inactive</Tag>;
+              return <Tag color="orange">Inactive</Tag>;
+            default:
+              break;
           }
           return <Tag color="default">{status}</Tag>;
         }
       },
-      // {
-      //   title: 'Performer',
-      //   dataIndex: 'performer',
-      //   render(data, record) {
-      //     return <span>{record.performer && record.performer.username}</span>;
-      //   }
-      // },
       {
         title: 'Last update',
         dataIndex: 'updatedAt',
@@ -117,7 +114,7 @@ export class TableListProduct extends PureComponent<IProps> {
             </Button>
             <Button
               className="danger"
-              onClick={() => this.props.deleteProduct(id)}
+              onClick={() => deleteProduct(id)}
             >
               <DeleteOutlined />
             </Button>
@@ -125,9 +122,6 @@ export class TableListProduct extends PureComponent<IProps> {
         )
       }
     ];
-    const {
-      dataSource, rowKey, loading, pagination, onChange
-    } = this.props;
     return (
       <div className="table-responsive">
         <Table

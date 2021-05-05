@@ -1,7 +1,4 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/destructuring-assignment */
-import { PureComponent, createRef, Fragment } from 'react';
+import { PureComponent, createRef } from 'react';
 import {
   Form,
   Input,
@@ -14,13 +11,12 @@ import {
   Row,
   Col
 } from 'antd';
-import { IProductCreate, IProductUpdate } from 'src/interfaces';
+import { IProduct, IProductCreate } from 'src/interfaces';
 import { FileOutlined, CameraOutlined } from '@ant-design/icons';
 import { FormInstance } from 'antd/lib/form';
-import { ImageProduct } from '@components/product/image-product';
 
 interface IProps {
-  product?: IProductUpdate;
+  product?: IProduct;
   submit?: Function;
   beforeUpload?: Function;
   uploading?: boolean;
@@ -28,8 +24,8 @@ interface IProps {
 }
 
 const layout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 16 }
+  labelCol: { span: 24 },
+  wrapperCol: { span: 24 }
 };
 
 const validateMessages = {
@@ -39,8 +35,7 @@ const validateMessages = {
 export class FormProduct extends PureComponent<IProps> {
   state = {
     previewImageProduct: null,
-    isDigitalProduct: false,
-    digitalProductName: ''
+    isDigitalProduct: false
   };
 
   formRef: any;
@@ -48,16 +43,11 @@ export class FormProduct extends PureComponent<IProps> {
   componentDidMount() {
     if (!this.formRef) this.formRef = createRef();
     const { product } = this.props;
-    if (product && product.type === 'digital') {
+    if (product) {
       this.setState({
-        isDigitalProduct: true
+        isDigitalProduct: product.type === 'digital',
+        previewImageProduct: product?.image || '/static/placeholder-image.jpg'
       });
-    }
-  }
-
-  onChangeNumber(field: string, val: number) {
-    if (val < 1) {
-      message.error(`${field} must be greater than or equal 1`);
     }
   }
 
@@ -71,19 +61,14 @@ export class FormProduct extends PureComponent<IProps> {
     }
   }
 
-  beforeUpload(file, field) {
+  beforeUpload(field, file) {
+    const { beforeUpload } = this.props;
     if (field === 'image') {
       const reader = new FileReader();
       reader.addEventListener('load', () => this.setState({ previewImageProduct: reader.result }));
       reader.readAsDataURL(file);
     }
-    if (field === 'digitalFile') {
-      this.setState({
-        digitalProductName: file.name
-      });
-    }
-    this.props.beforeUpload(file, field);
-    return false;
+    beforeUpload && beforeUpload(file, field);
   }
 
   render() {
@@ -93,8 +78,7 @@ export class FormProduct extends PureComponent<IProps> {
     } = this.props;
     const {
       previewImageProduct,
-      isDigitalProduct,
-      digitalProductName
+      isDigitalProduct
     } = this.state;
     const haveProduct = !!product;
     return (
@@ -124,23 +108,22 @@ export class FormProduct extends PureComponent<IProps> {
               name="name"
               rules={[{ required: true, message: 'Please input name of product!' }]}
               label="Name"
-              labelCol={{ span: 24 }}
             >
-              <Input placeholder="Enter product name" />
+              <Input />
             </Form.Item>
             <Form.Item
               name="price"
-              label="Price"
-              labelCol={{ span: 24 }}
-              rules={[{ required: true, message: 'Price is required!' }]}
+              label="Amount of tokens"
+              rules={[{ required: true, message: 'Amount of tokens is required!' }]}
             >
-              <InputNumber min={1} onChange={this.onChangeNumber.bind(this, 'Price')} />
+              <InputNumber style={{ width: '100%' }} min={1} />
             </Form.Item>
-            <Form.Item name="stock" labelCol={{ span: 24 }} label="Stock" rules={[{ required: true, message: 'Stock is required!' }]}>
-              <InputNumber min={1} onChange={this.onChangeNumber.bind(this, 'Stock')} />
+            {!isDigitalProduct && (
+            <Form.Item name="stock" label="Stock" rules={[{ required: true, message: 'Stock is required!' }]}>
+              <InputNumber style={{ width: '100%' }} min={1} />
             </Form.Item>
+            )}
             <Form.Item
-              labelCol={{ span: 24 }}
               name="type"
               label="Type"
               rules={[{ required: true, message: 'Please select type!' }]}
@@ -155,7 +138,6 @@ export class FormProduct extends PureComponent<IProps> {
               </Select>
             </Form.Item>
             <Form.Item
-              labelCol={{ span: 24 }}
               name="status"
               label="Status"
               rules={[{ required: true, message: 'Please select status!' }]}
@@ -171,12 +153,11 @@ export class FormProduct extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col md={12} xs={24}>
-            <Form.Item name="description" labelCol={{ span: 24 }} label="Description">
+            <Form.Item name="description" label="Description">
               <Input.TextArea rows={3} />
             </Form.Item>
-            <>
-              <div key="image" className="ant-form-item">
-                <label>Image</label>
+            <Form.Item label="Image">
+              <div>
                 <Upload
                   accept="image/*"
                   listType="picture-card"
@@ -184,66 +165,42 @@ export class FormProduct extends PureComponent<IProps> {
                   multiple={false}
                   showUploadList={false}
                   disabled={uploading}
-                  beforeUpload={(file) => this.beforeUpload(file, 'image')}
+                  beforeUpload={this.beforeUpload.bind(this, 'image')}
                 >
-                  {previewImageProduct ? (
+                  {previewImageProduct && (
                     <img
                       src={previewImageProduct}
                       alt="file"
                       style={{ width: '100px' }}
                     />
-                  ) : product ? (
-                    <ImageProduct
-                      product={product}
-                      style={{ width: '100px' }}
-                    />
-                  ) : null}
+                  )}
                   <CameraOutlined />
                 </Upload>
               </div>
-              {isDigitalProduct && (
-                <div key="digital-product" className="ant-form-item">
-                  <label>Add digital product delivery file</label>
+            </Form.Item>
+            {isDigitalProduct && (
+              <Form.Item label="Digital file">
+                <div>
                   <Upload
                     listType="picture-card"
                     className="avatar-uploader"
                     multiple={false}
-                    showUploadList={false}
-                    disabled={uploading}
-                    beforeUpload={(file) => this.beforeUpload(file, 'digitalFile')}
+                    showUploadList
+                    disabled={uploading || !!product.digitalFileId}
+                    beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
                   >
-                    {digitalProductName && (
-                      <div
-                        className="ant-upload-list ant-upload-list-picture"
-                        style={{ marginBottom: 10 }}
-                      >
-                        <div className="ant-upload-list-item ant-upload-list-item-done ant-upload-list-item-list-type-picture">
-                          <div className="ant-upload-list-item-info">
-                            <span>
-                              <a className="ant-upload-list-item-thumbnail">
-                                <FileOutlined />
-                              </a>
-                              <a className="ant-upload-list-item-name ant-upload-list-item-name-icon-count-1">
-                                {digitalProductName}
-                              </a>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    <CameraOutlined />
+                    <FileOutlined />
+                    {' '}
+                    {product.digitalFileId && 'File existed'}
                   </Upload>
                   {uploadPercentage ? (
                     <Progress percent={Math.round(uploadPercentage)} />
                   ) : null}
                 </div>
-              )}
-            </>
+              </Form.Item>
+            )}
           </Col>
         </Row>
-        {/* <Form.Item name="free" label="Free">
-          <Switch checked={false} />
-        </Form.Item> */}
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button
             className="primary"

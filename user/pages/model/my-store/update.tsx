@@ -30,7 +30,7 @@ class ProductUpdate extends PureComponent<IProps> {
   }
 
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     product: {} as IProductUpdate,
     uploadPercentage: 0
@@ -50,7 +50,8 @@ class ProductUpdate extends PureComponent<IProps> {
       const resp = await productService.findById(id);
       this.setState({ product: resp.data });
     } catch (e) {
-      message.error('Product not found!');
+      const err = await Promise.resolve(e);
+      message.error(getResponseError(err) || 'Product not found!');
     } finally {
       this.setState({ fetching: false });
     }
@@ -79,7 +80,7 @@ class ProductUpdate extends PureComponent<IProps> {
         return tmpFiles;
       }, [] as IFiles[]) as [IFiles];
 
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data
@@ -91,19 +92,19 @@ class ProductUpdate extends PureComponent<IProps> {
         this.onUploading.bind(this)
       );
       message.success('Changes saved.');
-      this.setState({ submitting: false }, () => Router.push('/model/my-store'));
+      this.setState({ submiting: false }, () => Router.push('/model/my-store'));
     } catch (e) {
       // TODO - check and show error here
       message.error(
         getResponseError(e) || 'Something went wrong, please try again!'
       );
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
     const {
-      product, submitting, fetching, uploadPercentage
+      product, submiting, fetching, uploadPercentage
     } = this.state;
     const { ui } = this.props;
     return (
@@ -125,7 +126,7 @@ class ProductUpdate extends PureComponent<IProps> {
                 <FormProduct
                   product={product}
                   submit={this.submit.bind(this)}
-                  uploading={submitting}
+                  uploading={submiting}
                   beforeUpload={this.beforeUpload.bind(this)}
                   uploadPercentage={uploadPercentage}
                 />

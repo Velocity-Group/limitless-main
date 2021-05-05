@@ -42,7 +42,7 @@ export class ProductService extends APIRequest {
   }
 
   findById(id: string) {
-    return this.get(`/performer/performer-assets/products/${id}`);
+    return this.get(`/performer/performer-assets/products/${id}/view`);
   }
 
   delete(id: string) {

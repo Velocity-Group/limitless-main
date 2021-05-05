@@ -65,6 +65,7 @@ export class ProductDto {
     return {
       _id: this._id,
       performerId: this.performerId,
+      digitalFileId: this.digitalFileId,
       image: this.image,
       type: this.type,
       name: this.name,

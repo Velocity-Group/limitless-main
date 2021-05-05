@@ -12,6 +12,7 @@ import { merge, uniq } from 'lodash';
 import { EVENT } from 'src/kernel/constants';
 import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
 import { UserDto } from 'src/modules/user/dtos';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { PRODUCT_TYPE } from '../constants';
 import { ProductDto } from '../dtos';
 import { ProductCreatePayload, ProductUpdatePayload } from '../payloads';
@@ -179,10 +180,7 @@ export class ProductService {
     const dto = new ProductDto(product);
     dto.isBookMarked = !!bookmark;
     dto.image = image ? image.getUrl() : null;
-    dto.performer = {
-      username: performer.username
-    };
-
+    dto.performer = new PerformerDto(performer).toPublicDetailsResponse();
     return dto;
   }
 

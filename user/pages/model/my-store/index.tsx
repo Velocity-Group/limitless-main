@@ -31,7 +31,7 @@ class Products extends PureComponent<IProps> {
     list: [] as any,
     limit: 10,
     filter: {} as any,
-    sortBy: 'createdAt',
+    sortBy: 'updatedAt',
     sort: 'desc'
   };
 
@@ -45,7 +45,7 @@ class Products extends PureComponent<IProps> {
     pager.current = pagination.current;
     this.setState({
       pagination: pager,
-      sortBy: sorter.field || 'createdAt',
+      sortBy: sorter.field || 'updatedAt',
       // eslint-disable-next-line no-nested-ternary
       sort: sorter.order
         ? sorter.order === 'descend'
