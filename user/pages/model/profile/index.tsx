@@ -9,50 +9,31 @@ import { getVideos, moreVideo } from '@redux/video/actions';
 import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
 import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
+import { updateBalance } from '@redux/user/actions';
 import {
-  performerService,
-  paymentService,
-  feedService,
-  reactionService,
-  authService
+  performerService, paymentService, feedService, reactionService, authService
 } from 'src/services';
 import Head from 'next/head';
-import '@components/performer/performer.less';
 import {
-  CheckCircleOutlined,
-  ArrowDownOutlined,
-  ArrowLeftOutlined,
-  FireOutlined,
-  UsergroupAddOutlined,
-  VideoCameraOutlined,
-  PictureOutlined,
-  ShopOutlined,
-  HeartOutlined,
-  DollarOutlined,
-  MessageOutlined,
-  EditOutlined,
-  BookOutlined
+  CheckCircleOutlined, ArrowDownOutlined, ArrowLeftOutlined, FireOutlined,
+  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined,
+  HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, BookOutlined
 } from '@ant-design/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
+import { ScrollListVideo } from '@components/video/scroll-list-item';
+import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
 import { PerformerInfo } from '@components/performer/table-info';
 import Link from 'next/link';
 import Router from 'next/router';
 import { redirectToErrorPage } from '@redux/system/actions';
 import { TipPerformerForm } from '@components/performer/tip-form';
-import Loader from '@components/common/base/loader';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
-import { AvatarUpload, CoverUpload } from '@components/user';
-import { updateCurrentUserAvatar, updateCurrentUserCover } from 'src/redux/user/actions';
 import SearchPostBar from '@components/post/search-bar';
 import {
-  IPerformer,
-  // IGallery,
-  IUser,
-  IUIConfig,
-  IFeed,
-  StreamSettings
+  IPerformer, IUser, IUIConfig, IFeed, StreamSettings
 } from '../../../src/interfaces';
+import '@components/performer/performer.less';
 
 interface IProps {
   ui: IUIConfig;
@@ -74,8 +55,7 @@ interface IProps {
   getFeeds: Function;
   moreFeeds: Function;
   removeFeedSuccess: Function;
-  updateCurrentUserAvatar: Function;
-  updateCurrentUserCover: Function;
+  updateBalance: Function;
   settings: StreamSettings;
 }
 
@@ -261,55 +241,43 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async subscribe() {
-    const { performer, currentUser } = this.props;
-    // if (!currentUser.authorisedCard) {
-    //   this.authorisedCard();
-    //   return;
-    // }
+    const { performer, currentUser, updateBalance: handleUpdateBalance } = this.props;
+    const price = this.subscriptionType === 'monthly' ? performer.monthlyPrice : performer.yearlyPrice;
+    if (currentUser.balance < price) {
+      message.error('Your balance token is not enough');
+      Router.push('/token-package');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribe({ type: this.subscriptionType, performerId: performer._id })).data;
-      if (resp && resp.success) {
-        message.success('Subscribed!');
-        window.location.reload();
-      }
+      await paymentService.subscribe({ type: this.subscriptionType, performerId: performer._id });
+      this.setState({ isSubscribed: true, openSubscriptionModal: false });
+      handleUpdateBalance({ token: -price });
     } catch (e) {
-      this.setState({ submiting: false });
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
+    } finally {
+      this.setState({ submiting: false });
     }
   }
 
-  async sendTip(price) {
-    const { performer } = this.props;
+  async sendTip(price: number) {
+    const { performer, currentUser, updateBalance: handleUpdateBalance } = this.props;
+    if (currentUser.balance < price) {
+      message.error('Your balance token is not enough');
+      Router.push('/token-package');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (
-        await paymentService.tipPerformer({ performerId: performer?._id, price })
-      ).data;
-      if (resp.success) {
-        message.info('Thank you for the tip');
-      }
+      await paymentService.tipPerformer({ performerId: performer?._id, price });
+      message.info('Thank you for the tip');
+      handleUpdateBalance({ token: -price });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
       await this.setState({ submiting: false });
-    }
-  }
-
-  async authorisedCard() {
-    try {
-      if (!window.confirm('By agree to add payment card, you will be charge a minimum price.')) return;
-      await this.setState({ submiting: true });
-      const resp = await (await paymentService.authoriseCard()).data;
-      if (resp && resp.paymentUrl) {
-        window.location.href = resp.paymentUrl;
-      }
-    } catch (e) {
-      this.setState({ submiting: false });
-      const err = await e;
-      message.error(err.message || 'error occured, please try again later');
     }
   }
 
@@ -422,9 +390,6 @@ class PerformerProfile extends PureComponent<IProps> {
       tab,
       isGrid
     } = this.state;
-    const uploadHeaders = { authorization: authService.getToken() };
-    const avatarUploadUrl = performerService.getAvatarUploadUrl();
-    const coverUploadUrl = performerService.getCoverUploadUrl();
     return (
       <Layout>
         <Head>
@@ -456,63 +421,61 @@ class PerformerProfile extends PureComponent<IProps> {
           className="top-profile"
           style={{ backgroundImage: (currentUser._id === performer._id && `url('${currentUser?.cover || '/static/banner-image.jpg'}')`) || `url('${performer?.cover || '/static/banner-image.jpg'}')` || "url('/static/banner-image.jpg')" }}
         >
-          <div className="bg-2nd">
-            <div className="main-container">
-              <div className="top-banner">
-                <a aria-hidden className="arrow-back" onClick={() => Router.back()}>
-                  <ArrowLeftOutlined />
-                </a>
-                <div className="stats-row">
-                  <div className="t-user-name">
-                    {performer?.name || ''}
-                    {' '}
-                    {performer?.verifiedAccount && (
-                      <CheckCircleOutlined className="theme-color" />
-                    )}
+          <div className="main-container bg-2nd">
+            <div className="top-banner">
+              <a aria-hidden className="arrow-back" onClick={() => Router.back()}>
+                <ArrowLeftOutlined />
+              </a>
+              <div className="stats-row">
+                <div className="t-user-name">
+                  {performer?.name || ''}
+                  {' '}
+                  {performer?.verifiedAccount && (
+                  <CheckCircleOutlined className="theme-color" />
+                  )}
+                </div>
+                <div className="tab-stat">
+                  <div className="tab-item">
+                    <span>
+                      {performer?.stats?.totalFeeds || 0}
+                      {' '}
+                      <FireOutlined />
+                    </span>
                   </div>
-                  <div className="tab-stat">
-                    <div className="tab-item">
-                      <span>
-                        {performer?.stats?.totalFeeds || 0}
-                        {' '}
-                        <FireOutlined />
-                      </span>
-                    </div>
-                    <div className="tab-item">
-                      <span>
-                        {performer?.stats?.totalVideos || 0}
-                        {' '}
-                        <VideoCameraOutlined />
-                      </span>
-                    </div>
-                    <div className="tab-item">
-                      <span>
-                        {performer?.stats?.totalPhotos || 0}
-                        {' '}
-                        <PictureOutlined />
-                      </span>
-                    </div>
-                    <div className="tab-item">
-                      <span>
-                        {performer?.stats?.totalProducts || 0}
-                        {' '}
-                        <ShopOutlined />
-                      </span>
-                    </div>
-                    <div className="tab-item">
-                      <span>
-                        {performer?.stats?.likes || 0}
-                        {' '}
-                        <HeartOutlined />
-                      </span>
-                    </div>
-                    <div className="tab-item">
-                      <span>
-                        {performer?.stats?.subscribers || 0}
-                        {' '}
-                        <UsergroupAddOutlined />
-                      </span>
-                    </div>
+                  <div className="tab-item">
+                    <span>
+                      {performer?.stats?.totalVideos || 0}
+                      {' '}
+                      <VideoCameraOutlined />
+                    </span>
+                  </div>
+                  <div className="tab-item">
+                    <span>
+                      {performer?.stats?.totalPhotos || 0}
+                      {' '}
+                      <PictureOutlined />
+                    </span>
+                  </div>
+                  <div className="tab-item">
+                    <span>
+                      {performer?.stats?.totalProducts || 0}
+                      {' '}
+                      <ShopOutlined />
+                    </span>
+                  </div>
+                  <div className="tab-item">
+                    <span>
+                      {performer?.stats?.likes || 0}
+                      {' '}
+                      <HeartOutlined />
+                    </span>
+                  </div>
+                  <div className="tab-item">
+                    <span>
+                      {performer?.stats?.subscribers || 0}
+                      {' '}
+                      <UsergroupAddOutlined />
+                    </span>
                   </div>
                 </div>
               </div>
@@ -522,34 +485,14 @@ class PerformerProfile extends PureComponent<IProps> {
         <div className="main-profile">
           <div className="main-container">
             <div className="fl-col">
-              {currentUser._id === performer._id ? [
-                <div key="avatar-upload" className="avatar-upload">
-                  <AvatarUpload
-                    headers={uploadHeaders}
-                    uploadUrl={avatarUploadUrl}
-                    onUploaded={this.onAvatarUploaded.bind(this)}
-                    image={currentUser.avatar || '/static/no-avatar.png'}
-                  />
-                </div>,
-                <div key="cover-upload" className="cover-upload">
-                  <CoverUpload
-                    headers={uploadHeaders}
-                    uploadUrl={coverUploadUrl}
-                    onUploaded={this.onCoverUploaded.bind(this)}
-                    image={currentUser?.cover || '/static/banner-image.jpg'}
-                    options={{ fieldName: 'cover' }}
-                  />
-                </div>
-              ] : (
-                <img
-                  alt="main-avt"
-                  src={
+              <img
+                alt="main-avt"
+                src={
                     performer && performer?.avatar
                       ? performer?.avatar
                       : '/static/no-avatar.png'
                   }
-                />
-              )}
+              />
               {currentUser?._id !== performer._id && <span className={performer.isOnline ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
                 <h4>
@@ -630,7 +573,8 @@ class PerformerProfile extends PureComponent<IProps> {
                 </div>
             )}
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
-              <div className="flex-row show-more">
+              <div className="show-more">
+                {performer.bio && <p>{performer.bio}</p>}
                 <Collapse
                   expandIconPosition="right"
                   bordered={false}
@@ -641,7 +585,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   className="site-collapse-custom-collapse"
                 >
                   <Panel
-                    header="About me"
+                    header="More info"
                     key="1"
                     className="site-collapse-custom-panel"
                   >
@@ -678,7 +622,9 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR $
+                  SUBSCRIBE FOR
+                  {' '}
+                  <img alt="coin" src="/static/coin-ico.png" width="20px" />
                   {performer?.yearlyPrice.toFixed(2)}
                 </button>
               </div>
@@ -695,7 +641,9 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR $
+                  SUBSCRIBE FOR
+                  {' '}
+                  <img alt="coin" src="/static/coin-ico.png" width="20px" />
                   {performer && performer?.monthlyPrice.toFixed(2)}
                 </button>
               </div>
@@ -712,8 +660,15 @@ class PerformerProfile extends PureComponent<IProps> {
                 this.setState({ tab: t, filter: initialFilter, isGrid: false }, () => this.loadItems());
               }}
             >
-              <TabPane tab={<Tooltip title="All Posts"><FireOutlined /></Tooltip>} key="post">
-                <SearchPostBar searching={loadingFeed} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+              <TabPane tab={<Tooltip title="Feeds"><FireOutlined /></Tooltip>} key="post">
+                <div className="heading-tab">
+                  <h4>
+                    {totalFeed}
+                    {' '}
+                    POST
+                  </h4>
+                  <SearchPostBar searching={loadingFeed} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+                </div>
                 <div className={isGrid ? 'main-container' : 'main-container custom'}>
                   <ScrollListFeed
                     items={feeds}
@@ -725,29 +680,25 @@ class PerformerProfile extends PureComponent<IProps> {
                   />
                 </div>
               </TabPane>
-              <TabPane tab={<Tooltip title="Video Posts"><VideoCameraOutlined /></Tooltip>} key="video">
+              <TabPane tab={<Tooltip title="Videos"><VideoCameraOutlined /></Tooltip>} key="video">
                 <SearchPostBar searching={loadingVideo} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
-                <div className={isGrid ? 'main-container' : 'main-container custom'}>
-                  <ScrollListFeed
+                <div className="main-container">
+                  <ScrollListVideo
                     items={videos}
                     loading={loadingVideo}
                     canLoadmore={videos && videos.length < totalVideos}
                     loadMore={this.loadMoreItem.bind(this)}
-                    isGrid={isGrid}
-                    onDelete={this.handleDeleteFeed.bind(this)}
                   />
                 </div>
               </TabPane>
-              <TabPane tab={<Tooltip title="Photo Posts"><PictureOutlined /></Tooltip>} key="photo">
+              <TabPane tab={<Tooltip title="Galleries"><PictureOutlined /></Tooltip>} key="photo">
                 <SearchPostBar searching={loadingGallery} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
-                <div className={isGrid ? 'main-container' : 'main-container custom'}>
-                  <ScrollListFeed
+                <div className="main-container">
+                  <ScrollListGallery
                     items={galleries}
                     loading={loadingGallery}
                     canLoadmore={galleries && galleries.length < totalGalleries}
                     loadMore={this.loadMoreItem.bind(this)}
-                    onDelete={this.handleDeleteFeed.bind(this)}
-                    isGrid={isGrid}
                   />
                 </div>
               </TabPane>
@@ -825,7 +776,6 @@ class PerformerProfile extends PureComponent<IProps> {
             onFinish={this.subscribe.bind(this)}
           />
         </Modal>
-        {submiting && <Loader />}
       </Layout>
     );
   }
@@ -836,7 +786,7 @@ const mapStates = (state: any) => ({
   videoState: { ...state.video.videos },
   feedState: { ...state.feed.feeds },
   productState: { ...state.product.products },
-  galleryState: { ...state.gallery.listGalleries },
+  galleryState: { ...state.gallery.galleries },
   currentUser: { ...state.user.current },
   ...state.streaming
 });
@@ -852,7 +802,6 @@ const mapDispatch = {
   moreGalleries,
   redirectToErrorPage,
   removeFeedSuccess,
-  updateCurrentUserAvatar,
-  updateCurrentUserCover
+  updateBalance
 };
 export default connect(mapStates, mapDispatch)(PerformerProfile);

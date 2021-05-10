@@ -6,32 +6,30 @@
   transition: all 0.3s ease-in-out;
   cursor: pointer;
   .vid-thumb {
-    height: 150px;
+    height: 200px;
     position: relative;
-    img {
-      border-top-left-radius: 0.5em;
-      border-top-right-radius: 0.5em;
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    @media screen and (max-width: @mobile-screen) {
+      height: 150px;
     }
   }
   .vid-stats {
     display: flex;
     width: 100%;
     align-items: center;
+    justify-content: space-between;
     color: @white;
-    font-size: 13px;
+    font-size: 10px;
     padding: 4em 1em 1em 1em;
     font-weight: 600;
     position: absolute;
     bottom: 0;
     background-image: linear-gradient(to bottom, #04040e00 0%, rgba(33,108,161, .5) 100%);
-    span {
-      padding: 0 5px;
-    }
-    @media screen and (max-width: @mobile-screen) {
-      font-size: 10px;
+    a {
+      color: @white;
+      padding-right: 10px;
     }
   }
   &:hover .vid-info {
@@ -43,7 +41,7 @@
   }
   .vid-info {
     font-family: @primary-font-bold;
-    color: #323232;
+    color: @black;
     background-color: @light-card;
     padding: 1em;
     text-align: center;
@@ -64,7 +62,7 @@
     top: 10px;
     z-index: 99;
     .label-price {
-      color: #2d2529!important;
+      color: @white;
       line-height: 2em;
       background-color: @secondary-color;;
       width: auto;

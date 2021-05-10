@@ -10,7 +10,7 @@ import {
 import './performer.less';
 
 interface IProps {
-  user: IUser;
+  user?: IUser;
   type: string;
   performer: IPerformer;
   onFinish: Function;
@@ -20,7 +20,7 @@ interface IProps {
 export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
   render() {
     const {
-      onFinish, submiting = false, performer, type, user
+      onFinish, submiting = false, performer, type
     } = this.props;
     return (
       <div className="confirm-subscription-form">
@@ -66,27 +66,23 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
             </li>
           </ul>
         </div>
-        {user.authorisedCard ? (
-          <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()}>
-            Confirm
-            {' '}
-            {type}
-            {' '}
-            subscription
-            {' '}
-            {type !== 'free' ? (
-              <>
-                by $
-                {' '}
-                {type === 'monthly' ? performer.monthlyPrice.toFixed(2) : type === 'monthly' ? performer.yearlyPrice.toFixed(2) : ''}
-              </>
-            ) : null}
-          </Button>
-        ) : (
-          <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()}>
-            PLEASE ADD A PAYMENT CARD
-          </Button>
-        )}
+        <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()}>
+          Confirm
+          {' '}
+          {type}
+          {' '}
+          subscription
+          {' '}
+          {type !== 'free' ? (
+            <>
+              by
+              {' '}
+              <img alt="coin" src="/static/coin-ico.png" width="20px" />
+              {' '}
+              {type === 'monthly' ? performer.monthlyPrice.toFixed(2) : type === 'monthly' ? performer.yearlyPrice.toFixed(2) : ''}
+            </>
+          ) : null}
+        </Button>
       </div>
     );
   }

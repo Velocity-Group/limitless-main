@@ -15,7 +15,6 @@ export class PerformerInfo extends PureComponent<IProps> {
     const country = countries.length && countries.find((c) => c.code === performer.country);
     return (
       <>
-        <p>{performer?.bio}</p>
         <Descriptions className="performer-country">
           {performer?.country && (
             <Descriptions.Item key="country">

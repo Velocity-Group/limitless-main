@@ -220,8 +220,8 @@
   }
 
   img {
-    width: 130px;
-    height: 130px;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
     padding: 2px;
     border: 2px solid @primary-color;
@@ -409,6 +409,15 @@
 }
 
 .model-content {
+  .heading-tab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    h4 {
+      white-space: nowrap;
+      font-size: 20px;
+    }
+  }
   .ant-tabs {
     .ant-tabs-tab.ant-tabs-tab-active {
       border-right: 1px solid;
@@ -475,7 +484,6 @@
       }
     }
   }
-
 
   .ant-col {
     padding: 10px 12px;

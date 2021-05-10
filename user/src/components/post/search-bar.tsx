@@ -80,12 +80,11 @@ export default class SearchFeedBar extends PureComponent<IProps> {
           enterButton
         />
         )}
-
         <div className="grid-btns">
           <a aria-hidden className={showSearch ? 'active' : ''} onClick={() => this.setState({ showSearch: !showSearch, showCalendar: false })}><SearchOutlined /></a>
           <a aria-hidden className={showCalendar ? 'active' : ''} onClick={() => this.setState({ showCalendar: !showCalendar, showSearch: false })}><CalendarOutlined /></a>
-          {!['store', 'blog', 'story'].includes(tab) && <a aria-hidden className={isGrid ? 'active' : ''} onClick={this.handleViewGrid.bind(this, true)}><AppstoreOutlined /></a>}
-          {!['store', 'blog', 'story'].includes(tab) && <a aria-hidden className={!isGrid ? 'active' : ''} onClick={this.handleViewGrid.bind(this, false)}><MenuOutlined /></a>}
+          {tab === 'post' && <a aria-hidden className={isGrid ? 'active' : ''} onClick={this.handleViewGrid.bind(this, true)}><AppstoreOutlined /></a>}
+          {tab === 'post' && <a aria-hidden className={!isGrid ? 'active' : ''} onClick={this.handleViewGrid.bind(this, false)}><MenuOutlined /></a>}
         </div>
       </div>
     );

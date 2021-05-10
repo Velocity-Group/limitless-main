@@ -18,69 +18,52 @@ export class VideoCard extends PureComponent<IProps> {
   render() {
     const { video } = this.props;
     return (
-      <div className="vid-card">
-        {video.isSale && video.price > 0 && (
+      <Link
+        href={{ pathname: '/video', query: { id: video._id } }}
+        as={`/video/${video._id}`}
+      >
+        <div className="vid-card">
+          {video.isSale && video.price > 0 && (
           <span className="vid-price">
             <div className="label-price">
-              $
+              <img alt="coin" src="/static/coin-ico.png" width="15px" />
               {video.price.toFixed(2)}
             </div>
           </span>
-        )}
-        <div className="vid-thumb">
-          <Link
-            href={{ pathname: '/video', query: { id: video._id } }}
-            as={`/video/${video._id}`}
-          >
-            <a>
-              <img
-                alt={video.title}
-                src={
-                    // eslint-disable-next-line no-nested-ternary
-                    video.thumbnail
-                      ? video.thumbnail
-                      : video.video.thumbnails
-                        && video.video.thumbnails.length > 0
-                        ? video.video.thumbnails[0]
-                        : '/placeholder-image.jpg'
-                  }
-              />
-            </a>
-          </Link>
-          <Link
-            href={{ pathname: '/video', query: { id: video._id } }}
-            as={`/video/${video._id}`}
-          >
+          )}
+          <div className="vid-thumb" style={{ backgroundImage: `url(${video?.thumbnail || video?.video?.thumbnails[0] || '/static/placeholder-image.jpg'})` }}>
             <div className="vid-stats">
               <span>
-                <EyeOutlined />
-                {' '}
-                {video.stats && video.stats.views ? video.stats.views : 0}
+                <a>
+                  <EyeOutlined />
+                  {' '}
+                  {video?.stats?.views || 0}
+                </a>
+                <a>
+                  <LikeOutlined />
+                  {' '}
+                  {video?.stats?.likes || 0}
+                </a>
               </span>
-              <span>
-                <LikeOutlined />
-                {' '}
-                {video.stats && video.stats.likes ? video.stats.likes : 0}
-              </span>
-              <span>
+              <a>
                 <HourglassOutlined />
                 {' '}
                 {videoDuration(video?.video?.duration || 0)}
-              </span>
+              </a>
             </div>
-          </Link>
+          </div>
+          <div className="vid-info">
+            <Tooltip title={video.title}>
+              <Link
+                href={{ pathname: '/video', query: { id: video._id } }}
+                as={`/video/${video._id}`}
+              >
+                <span>{video.title}</span>
+              </Link>
+            </Tooltip>
+          </div>
         </div>
-        <div className="vid-info">
-          <Tooltip title={video.title}>
-            <Link
-              href={{ pathname: '/video', query: { id: video._id } }}
-              as={`/video/${video._id}`}
-            >
-              <span>{video.title}</span>
-            </Link>
-          </Tooltip>
-        </div>
-      </div>
+      </Link>
     );
   }
 }

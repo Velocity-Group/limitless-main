@@ -30,7 +30,7 @@ export class PurchaseVideoForm extends PureComponent<IProps> {
           {' '}
           {video.price.toFixed(2)}
           {' '}
-          <img alt="token" src="/coin-ico.png" height="25px" />
+          <img alt="token" src="/static/coin-ico.png" height="25px" />
         </Button>
       </div>
     );

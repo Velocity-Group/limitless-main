@@ -1,20 +1,7 @@
 /* eslint-disable no-prototype-builtins */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable no-restricted-globals */
-/* eslint-disable react/no-did-update-set-state */
 import {
-  Layout,
-  Tabs,
-  Button,
-  Tag,
-  message,
-  Space,
-  Row,
-  Col,
-  Alert,
-  Modal,
-  Spin
+  Layout, Tabs, Button, Tag, message, Space, Row,
+  Col, Alert, Modal, Spin
 } from 'antd';
 import {
   LikeOutlined,
@@ -158,6 +145,7 @@ class VideoViewPage extends PureComponent<IProps> {
       || (prevProps.commentMapping[video._id]
         && totalComment !== commentMapping[video._id].total)
     ) {
+      // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ totalComment: commentMapping[video._id].total });
     }
   }
@@ -285,7 +273,7 @@ class VideoViewPage extends PureComponent<IProps> {
 
   async deleteComment(item) {
     const { deleteComment: handleDeleteComment } = this.props;
-    if (!confirm('Are you sure to remove this comment?')) return;
+    if (!window.confirm('Are you sure to remove this comment?')) return;
     handleDeleteComment(item._id);
   }
 
@@ -458,7 +446,7 @@ class VideoViewPage extends PureComponent<IProps> {
                       <span
                         className="initialPrice"
                       >
-                        <img alt="coin" src="/coin-ico.png" height="25px" />
+                        <img alt="coin" src="/static/coin-ico.png" height="25px" />
                         {(video.price).toFixed(2)}
                       </span>
                     </Space>
@@ -488,7 +476,7 @@ class VideoViewPage extends PureComponent<IProps> {
                       >
                         Subscribe Monthly
                         {' '}
-                        <img alt="coin" src="/coin-ico.png" style={{ height: 20, margin: '0 5px' }} />
+                        <img alt="coin" src="/static/coin-ico.png" style={{ height: 20, margin: '0 5px' }} />
                         {video.performer.monthlyPrice.toFixed(2)}
                       </Button>
                     )}
@@ -502,7 +490,7 @@ class VideoViewPage extends PureComponent<IProps> {
                       >
                         Subscribe Yearly
                         {' '}
-                        <img alt="coin" src="/coin-ico.png" style={{ height: 20, margin: '0 5px' }} />
+                        <img alt="coin" src="/static/coin-ico.png" style={{ height: 20, margin: '0 5px' }} />
                         {video.performer.yearlyPrice.toFixed(2)}
                       </Button>
                     )}
@@ -543,7 +531,6 @@ class VideoViewPage extends PureComponent<IProps> {
                   {' '}
                   <LikeOutlined />
                 </button>
-                {!user?.isPerformer && (
                 <button
                   type="button"
                   className={
@@ -562,7 +549,6 @@ class VideoViewPage extends PureComponent<IProps> {
                   {' '}
                   <HeartOutlined />
                 </button>
-                )}
                 {/* <button
                       type="button"
                       className={
@@ -586,19 +572,24 @@ class VideoViewPage extends PureComponent<IProps> {
                 <Link
                   href={{
                     pathname: '/model/profile',
-                    query: { username: video?.performer?.username || video?.performer?._id }
+                    query: { username: video.performer?.username }
                   }}
-                  as={`/model/${video?.performer?.username || video?.performer?._id}`}
+                  as={`/model/${video.performer?.username}`}
                 >
-                  <a>
+                  <>
                     <img
-                      alt="performer-avt"
-                      src={video?.performer?.avatar || '/user.png'}
+                      alt="performer avatar"
+                      src={video.performer?.avatar || '/user.png'}
                     />
                     {' '}
-                    @
-                    {video?.performer?.username}
-                  </a>
+                    <div className="owner-name">
+                      <div>{video?.performer?.name || 'N/A'}</div>
+                      <small>
+                        @
+                        {video?.performer?.username || 'n/a'}
+                      </small>
+                    </div>
+                  </>
                 </Link>
               </div>
             </div>
@@ -682,8 +673,8 @@ class VideoViewPage extends PureComponent<IProps> {
 
                 {comments.length < totalComments && (
                   <p className="text-center">
-                    <a onClick={this.loadMoreComment.bind(this)}>
-                      more comments...
+                    <a aria-hidden onClick={this.loadMoreComment.bind(this)}>
+                      More comments
                     </a>
                   </p>
                 )}
@@ -695,11 +686,11 @@ class VideoViewPage extends PureComponent<IProps> {
           <div className="related-vid">
             <h4 className="ttl-1">You may also like</h4>
             {relatedVideos.requesting && <div className="text-center"><Spin /></div>}
-            {relatedVideos.items > 0 && !relatedVideos.requesting && (
+            {relatedVideos.items.length > 0 && !relatedVideos.requesting && (
               <RelatedListVideo videos={relatedVideos.items} />
             )}
             {!relatedVideos.items.length && !relatedVideos.requesting && (
-              <div>No data was found</div>
+              <p>No data was found</p>
             )}
           </div>
         </div>

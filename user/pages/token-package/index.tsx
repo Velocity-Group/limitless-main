@@ -131,7 +131,7 @@ class TokenPackages extends PureComponent<IProps> {
                       {' '}
                       /
                       {' '}
-                      <img alt="token" src="/coin-ico.png" height="20px" />
+                      <img alt="token" src="/static/coin-ico.png" height="20px" />
                       {' '}
                       {item.tokens}
                     </p>
@@ -207,7 +207,7 @@ class TokenPackages extends PureComponent<IProps> {
                 {coupon ? (selectedPackage?.price - coupon.value * selectedPackage?.price).toFixed(2) : selectedPackage?.price.toFixed(2)}
                 {' '}
                 /
-                <img alt="token" src="/coin-ico.png" height="15px" style={{ margin: '0 3px' }} />
+                <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 3px' }} />
                 {selectedPackage?.tokens}
               </Button>
             </div>

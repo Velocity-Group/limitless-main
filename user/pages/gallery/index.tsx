@@ -213,7 +213,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                   >
                     <h3>To view full content, subscribe me!</h3>
                     <div style={{ marginBottom: '25px' }}>
-                      {gallery.performer && gallery.performer.monthlyPrice && (
+                      {gallery?.performer?.monthlyPrice && (
                       <Button
                         className="primary"
                         style={{ marginRight: '15px' }}
@@ -223,11 +223,14 @@ class GalleryViewPage extends PureComponent<IProps> {
                           this.setState({ openSubscriptionModal: true });
                         }}
                       >
-                        Subscribe Monthly $
-                        {gallery.performer.monthlyPrice.toFixed(2)}
+                        Subscribe Monthly
+                        {' '}
+                        <img alt="coin" src="/static/coin-ico.png" width="20px" />
+                        {' '}
+                        {gallery?.performer?.monthlyPrice.toFixed(2)}
                       </Button>
                       )}
-                      {gallery.performer && gallery.performer.yearlyPrice && (
+                      {gallery?.performer.yearlyPrice && (
                       <Button
                         className="btn btn-yellow"
                         disabled={submiting && this.subscriptionType === 'yearly'}
@@ -236,7 +239,10 @@ class GalleryViewPage extends PureComponent<IProps> {
                           this.setState({ openSubscriptionModal: true });
                         }}
                       >
-                        Subscribe Yearly $
+                        Subscribe Yearly
+                        {' '}
+                        <img alt="coin" src="/static/coin-ico.png" width="20px" />
+                        {' '}
                         {gallery?.performer?.yearlyPrice.toFixed(2)}
                       </Button>
                       )}
