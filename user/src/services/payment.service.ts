@@ -18,6 +18,10 @@ export class PaymentService extends APIRequest {
     return this.post('/payment/purchase-video', payload);
   }
 
+  purchaseTokenPackage(id: string, payload: any) {
+    return this.post(`/payment/purchase-tokens/${id}`, payload);
+  }
+
   purchaseProducts(products: any) {
     return this.post('/payment/purchase-products', products);
   }

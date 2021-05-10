@@ -165,24 +165,20 @@ class TokenPackages extends PureComponent<IProps> {
           >
             <div className="text-center">
               <div className="tip-performer">
-                <img alt="p-avt" src={user?.avatar || '/no-avatar.png'} style={{ width: '100px', borderRadius: '50%' }} />
+                <img alt="p-avt" src={user?.avatar || '/static/no-avatar.png'} style={{ width: '100px', borderRadius: '50%' }} />
                 <div>
-                  {user?.name }
-                  <small>
-                    @
-                    {user?.username}
-                  </small>
+                  {user?.name || user?.username || 'N/A'}
                 </div>
               </div>
               <div style={{ margin: '20px 0' }}>
-                <p className="text-center">Please select payment gateway</p>
+                {/* <p className="text-center">Please select payment gateway</p> */}
                 <div className="payment-gateway">
                   <div aria-hidden onClick={() => this.onChangeGateway('ccbill')} className={gateway === 'ccbill' ? 'gateway-item active' : 'gateway-item'}>
-                    <a><img src="/ccbill-ico.png" alt="ccbill" width="65px" /></a>
+                    <a><img src="/static/ccbill-ico.png" alt="ccbill" width="100%" /></a>
                   </div>
-                  <div aria-hidden onClick={() => this.onChangeGateway('bitpay')} className={gateway === 'bitpay' ? 'gateway-item active' : 'gateway-item'}>
-                    <a><img src="/bitpay-ico.png" alt="bitpay" width="65px" /></a>
-                  </div>
+                  {/* <div aria-hidden onClick={() => this.onChangeGateway('bitpay')} className={gateway === 'bitpay' ? 'gateway-item active' : 'gateway-item'}>
+                    <a><img src="/static/bitpay-ico.png" alt="bitpay" width="65px" /></a>
+                  </div> */}
                 </div>
                 <Row>
                   <Col span={18}>
