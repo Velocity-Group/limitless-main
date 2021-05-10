@@ -32,8 +32,9 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
   async onFinish(data: IGalleryCreate) {
     try {
       await this.setState({ submiting: true });
-      await galleryService.create(data);
+      const resp = await galleryService.create(data);
       message.success('Created success!');
+      Router.replace(`/model/my-gallery/update?id=${resp.data._id}`);
     } catch (e) {
       message.error(getResponseError(e) || 'An error occurred, please try again!');
     } finally {
@@ -63,9 +64,6 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
             <FormGallery
               submiting={submiting}
               onFinish={this.onFinish.bind(this)}
-              gallery={null}
-              photosList={[]}
-              removePhoto={null}
             />
           </Page>
         </div>

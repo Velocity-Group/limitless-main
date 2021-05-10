@@ -15,9 +15,13 @@ export default class UploadList extends PureComponent<IProps> {
     previews: {} as any
   }
 
+  componentDidMount() {
+    this.renderPreviews();
+  }
+
   componentDidUpdate(prevProps) {
     const { files } = this.props;
-    if (prevProps?.files.length !== files.length) {
+    if (prevProps?.files && prevProps.files.length !== files.length) {
       this.renderPreviews();
     }
   }

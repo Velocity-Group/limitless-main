@@ -1,247 +1,242 @@
-import {
-  Layout, Button, message, Spin, Modal
-} from 'antd';
-import { BookOutlined, DollarOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
+import {
+  Layout, message, Row, Col, Spin, Tabs
+} from 'antd';
+import {
+  HeartOutlined, BookOutlined
+} from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { productService, reactionService } from '@services/index';
-import { PerformerListProduct } from '@components/product/performer-list-product';
-import { addCart, removeCart } from '@redux/cart/actions';
-import { PurchaseProductForm } from '@components/product/confirm-purchase';
-import { IProduct, IUser, IUIConfig } from '../../src/interfaces';
-import './store.less';
+import { galleryService, photoService } from '@services/index';
+import { getRelatedGalleries } from '@redux/gallery/actions';
+import {
+  IGallery,
+  IUser,
+  IUIConfig
+} from 'src/interfaces';
+import GalleryCard from '@components/gallery/gallery-card';
+import { Carousel } from 'react-responsive-carousel';
+import Router from 'next/router';
+import Link from 'next/link';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import './index.less';
 
 interface IProps {
+  gallery: IGallery;
+  query: any;
   user: IUser;
   ui: IUIConfig;
-  id: string;
+  getRelatedGalleries: Function;
+  relatedGalleries: any;
 }
 
-interface IStates {
-  isAlreadyBookMarked: boolean;
-  product: IProduct;
-  relatedProducts: IProduct[];
-  loading: boolean;
-  submiting: boolean;
-  openPurchaseModal: boolean;
-}
-
-class GalleryDetails extends PureComponent<IProps, IStates> {
+class GalleryViewPage extends PureComponent<IProps> {
   static authenticate: boolean = true;
 
+  subscriptionType = 'monthly';
+
   static async getInitialProps({ ctx }) {
-    return ctx.query;
+    const { query } = ctx;
+    try {
+      const gallery = (await (
+        await galleryService.userViewDetails(query.id, {
+          Authorization: ctx.token
+        })
+      ).data) as IGallery;
+      if (gallery) {
+        return {
+          gallery
+        };
+      }
+    } catch (e) {
+      return { };
+    }
+    return { };
   }
 
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      product: null,
-      relatedProducts: [],
-      loading: false,
-      submiting: false,
-      isAlreadyBookMarked: false,
-      openPurchaseModal: false
-    };
-  }
+  state = {
+    fetching: false,
+    photos: []
+  };
 
   async componentDidMount() {
-    await this.getProduct();
-  }
-
-  async componentDidUpdate(prevProps) {
-    const { id } = this.props;
-    if (prevProps.id !== id) {
-      this.getProduct();
-    }
-  }
-
-  async handleBookmark(item: IProduct) {
-    const { isAlreadyBookMarked } = this.state;
-    try {
-      await this.setState({ loading: true });
-      if (!isAlreadyBookMarked) {
-        await reactionService.create({
-          objectId: item._id,
-          action: 'book_mark',
-          objectType: 'product'
-        });
-        this.setState({ isAlreadyBookMarked: true });
-      } else {
-        await reactionService.delete({
-          objectId: item._id,
-          action: 'book_mark',
-          objectType: 'product'
-        });
-        this.setState({ isAlreadyBookMarked: false });
-      }
-    } catch (e) {
-      const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
-    } finally {
-      await this.setState({ loading: false });
-    }
-  }
-
-  async getProduct() {
-    const { id } = this.props;
-    try {
-      await this.setState({ loading: true });
-      const product = (await (await productService.userView(id))
-        .data) as IProduct;
-      if (product) {
-        await this.setState({ product });
-        if (product.isBookMarked) {
-          await this.setState({ isAlreadyBookMarked: true });
-        }
-        const relatedProducts = await (await productService.userSearch({
-          limit: 24,
-          excludedId: product._id,
-          performerId: product.performerId
-        })
-        ).data;
-        this.setState({
-          relatedProducts: relatedProducts.data
-        });
-      }
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
-    } finally {
-      this.setState({ loading: false });
-    }
-  }
-
-  async purchaseProduct() {
-    const { user } = this.props;
-    const { product } = this.state;
-    if (user.balance < product.price) {
-      message.error('Your token balance is not enough');
+    const { gallery, getRelatedGalleries: getRelatedHandler } = this.props;
+    if (!gallery || !gallery._id) {
+      Router.back();
       return;
     }
+    this.getPhotos();
+    getRelatedHandler({
+      performerId: gallery.performerId,
+      excludedId: gallery._id,
+      status: 'active',
+      limit: 24
+    });
+  }
+
+  componentDidUpdate(prevProps) {
+    const { gallery, getRelatedGalleries: getRelatedHandler } = this.props;
+    if (prevProps?.gallery?._id !== gallery?._id) {
+      getRelatedHandler({
+        performerId: gallery.performerId,
+        excludedId: gallery._id,
+        status: 'active',
+        limit: 24
+      });
+    }
+  }
+
+  async getPhotos() {
+    const { gallery } = this.props;
     try {
-      await this.setState({ submiting: true });
-      // const resp = await
+      await this.setState({ fetching: true });
+      const resp = await (await photoService.searchPhotosInGallery({ galleryId: gallery._id, limit: 999 })).data;
+      this.setState({ photos: resp.data });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
+      message.error(err?.message || 'Error on getting photos, please try again later');
     } finally {
-      this.setState({ submiting: false });
+      this.setState({ fetching: false });
     }
   }
 
   render() {
-    const { ui } = this.props;
     const {
-      product,
-      relatedProducts,
-      isAlreadyBookMarked,
-      loading,
-      openPurchaseModal,
-      submiting
-    } = this.state;
+      ui,
+      gallery,
+      relatedGalleries = {
+        requesting: false,
+        error: null,
+        success: false,
+        items: []
+      }
+    } = this.props;
+    const { fetching, photos } = this.state;
+
     return (
-      <Layout>
+      <>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
             |
             {' '}
-            {product && product.name}
+            {gallery?.title || 'Gallery'}
           </title>
+          <meta name="keywords" content={gallery?.description} />
+          <meta name="description" content={gallery?.description} />
+          {/* OG tags */}
+          <meta
+            property="og:title"
+            content={
+              ui
+              && `${ui.siteName} | ${gallery?.title || 'Gallery'}`
+            }
+            key="title"
+          />
+          <meta property="og:image" content={gallery?.coverPhoto?.thumbnails[0] || gallery?.coverPhoto?.url} />
+          <meta property="og:keywords" content={gallery?.description} />
+          <meta
+            property="og:description"
+            content={gallery?.description}
+          />
         </Head>
-        <div className="prod-main">
+        <Layout>
           <div className="main-container">
-            <div className="prod-card">
-              {product && !loading ? (
-                <div className="prod-img">
-                  <img
-                    alt="product-img"
-                    src={product?.image || '/static/empty_product.svg'}
-                  />
-                  {product.stock && product.type === 'physical' && (
-                  <span className="prod-stock">
-                    {product.stock}
-                    {' '}
-                    in stock
-                  </span>
-                  )}
-                  {!product.stock && product.type === 'physical' && (
-                  <span className="prod-stock">Out of stock!</span>
-                  )}
-                  <span className="prod-digital">{product.type}</span>
-                </div>
-              ) : <div><Spin /></div>}
-              {product && (
-              <div className="prod-info">
-                <div className="prod-name">{product?.name}</div>
-                <p className="prod-desc">{product?.description}</p>
-                <div className="add-cart">
-                  <p className="prod-price">
-                    <img alt="coin" src="/static/coin-ico.png" width="20px" />
-                    &nbsp;
-                    {product.price.toFixed(2)}
-                  </p>
-                  <div>
-                    <Button
-                      className="primary"
-                      disabled={loading}
-                      onClick={() => this.setState({ openPurchaseModal: true })}
-                    >
-                      <DollarOutlined />
-                      Buy now!
-                    </Button>
-                    <Button
-                      className={isAlreadyBookMarked ? 'primary' : 'secondary'}
-                      disabled={loading}
-                      onClick={this.handleBookmark.bind(this, product)}
-                    >
-                      <BookOutlined />
-                      {isAlreadyBookMarked
-                        ? 'Remove from Bookmark'
-                        : 'Add to Bookmark'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              )}
+            <div className="page-heading">{gallery?.title}</div>
+            <p>{gallery?.description}</p>
+            <div className="photo-carousel">
+              <Carousel>
+                {photos.length > 0 && photos.map((photo) => (
+                  <img alt="img" src={gallery?.isSubscribed ? photo?.photo?.url : '/static/no-subscribe-img.jpg'} key={photo._id} />
+                ))}
+              </Carousel>
+              {!fetching && !photos.length && <p className="text-center">No photo was found.</p>}
+              {fetching && <div className="text-center"><Spin /></div>}
             </div>
           </div>
-        </div>
-        <div className="main-container">
-          <div className="related-prod">
-            <h4 className="ttl-1">You may also like</h4>
-            {!loading && relatedProducts.length > 0 && (
-            <PerformerListProduct products={relatedProducts} />
-            )}
-            {!loading && !relatedProducts.length && <p>No data was found</p>}
-            {loading && <div style={{ margin: 10, textAlign: 'center' }}><Spin /></div>}
+          <div className="vid-split">
+            <div className="main-container">
+              <div className="vid-act">
+                <div className="act-btns">
+                  <button
+                    type="button"
+                    className="react-btn"
+                  >
+                    <HeartOutlined />
+                  </button>
+                  <button
+                    type="button"
+                    className="react-btn"
+                  >
+                    <BookOutlined />
+                  </button>
+                </div>
+                <div className="o-w-ner">
+                  <Link
+                    href={{
+                      pathname: '/model/profile',
+                      query: { username: gallery.performer?.username }
+                    }}
+                    as={`/model/${gallery.performer?.username}`}
+                  >
+                    <>
+                      <img
+                        alt="performer avatar"
+                        src={gallery.performer?.avatar || '/user.png'}
+                      />
+                      {' '}
+                      <div className="owner-name">
+                        <div>{gallery?.performer?.name || 'N/A'}</div>
+                        <small>
+                          @
+                          {gallery?.performer?.username || 'n/a'}
+                        </small>
+                      </div>
+                    </>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <Modal
-          key="tip_performer"
-          title={`Confirm purchase ${product?.name}`}
-          visible={openPurchaseModal}
-          onOk={() => this.setState({ openPurchaseModal: false })}
-          footer={null}
-          onCancel={() => this.setState({ openPurchaseModal: false })}
-        >
-          <PurchaseProductForm
-            product={product}
-            submiting={submiting}
-            onFinish={this.purchaseProduct.bind(this)}
-          />
-        </Modal>
-      </Layout>
+          <div className="vid-info">
+            <div className="main-container">
+              <Tabs
+                defaultActiveKey="Description"
+              >
+                <Tabs.TabPane tab="Description" key="description">
+                  <p>{gallery.description || 'No description...'}</p>
+                </Tabs.TabPane>
+              </Tabs>
+            </div>
+          </div>
+          <div className="main-container">
+            <div className="related-items">
+              <h4 className="ttl-1">You may also like</h4>
+              {relatedGalleries.requesting && <div className="text-center"><Spin /></div>}
+              <Row>
+                {!relatedGalleries.requesting && relatedGalleries.items.length > 0
+                  && relatedGalleries.items.map((item: IGallery) => (
+                    <Col xs={12} sm={12} md={6} lg={6} key={item._id}>
+                      <GalleryCard gallery={item} />
+                    </Col>
+                  ))}
+              </Row>
+            </div>
+          </div>
+        </Layout>
+      </>
     );
   }
 }
+
 const mapStates = (state: any) => ({
-  user: state.user.current,
-  ui: { ...state.ui }
+  user: { ...state.user.current },
+  ui: { ...state.ui },
+  relatedGalleries: { ...state.gallery.relatedGalleries }
 });
 
-const mapDispatch = { addCart, removeCart };
-export default connect(mapStates, mapDispatch)(GalleryDetails);
+const mapDispatch = {
+  getRelatedGalleries
+};
+export default connect(mapStates, mapDispatch)(GalleryViewPage);

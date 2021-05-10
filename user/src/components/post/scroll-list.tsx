@@ -26,11 +26,7 @@ export default class ScrollListFeed extends PureComponent<IProps> {
         hasMore={canLoadmore}
         loader={null}
         next={loadMore}
-        endMessage={(
-          <p style={{ textAlign: 'center' }}>
-            {/* <b>Yay! No more video.</b> */}
-          </p>
-          )}
+        endMessage={null}
         scrollThreshold={0.9}
       >
         <div className={isGrid ? 'grid-view' : ''}>
@@ -43,7 +39,7 @@ export default class ScrollListFeed extends PureComponent<IProps> {
         </div>
         {!items.length && !loading && (
         <div className="main-container custom">
-          <Alert className="text-center" message="No data was found" type="info" />
+          <Alert className="text-center" message="No post was found" type="info" />
         </div>
         )}
         {loading && <div className="text-center"><Spin /></div>}

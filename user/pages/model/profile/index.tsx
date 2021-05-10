@@ -11,7 +11,6 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import {
   performerService,
-  // photoService,
   paymentService,
   feedService,
   reactionService,
@@ -37,7 +36,6 @@ import {
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
 import { PerformerInfo } from '@components/performer/table-info';
-// import PhotosSlider from '@components/photo/photo-slider';
 import Link from 'next/link';
 import Router from 'next/router';
 import { redirectToErrorPage } from '@redux/system/actions';
@@ -264,10 +262,10 @@ class PerformerProfile extends PureComponent<IProps> {
 
   async subscribe() {
     const { performer, currentUser } = this.props;
-    if (!currentUser.authorisedCard) {
-      this.authorisedCard();
-      return;
-    }
+    // if (!currentUser.authorisedCard) {
+    //   this.authorisedCard();
+    //   return;
+    // }
     try {
       await this.setState({ submiting: true });
       const resp = await (await paymentService.subscribe({ type: this.subscriptionType, performerId: performer._id })).data;
@@ -283,11 +281,7 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async sendTip(price) {
-    const { performer, currentUser } = this.props;
-    if (!currentUser.authorisedCard) {
-      this.authorisedCard();
-      return;
-    }
+    const { performer } = this.props;
     try {
       await this.setState({ submiting: true });
       const resp = await (
@@ -411,8 +405,7 @@ class PerformerProfile extends PureComponent<IProps> {
       feedState,
       videoState,
       productState,
-      galleryState,
-      settings
+      galleryState
     } = this.props;
     const { items: feeds = [], total: totalFeed = 0, requesting: loadingFeed } = feedState;
     const { items: videos = [], total: totalVideos = 0, requesting: loadingVideo } = videoState;

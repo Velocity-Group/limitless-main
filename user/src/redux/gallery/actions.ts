@@ -7,7 +7,9 @@ export const {
 } = createAsyncAction('getGalleries', 'GET_GALLERIES');
 
 export const {
-  moreGalleries,
-  moreGalleriesSuccess,
-  moreGalleriesFail
+  moreGalleries, moreGalleriesSuccess, moreGalleriesFail
 } = createAsyncAction('moreGalleries', 'MORE_GALLERIES');
+
+export const {
+  getRelatedGalleries, getRelatedGalleriesSuccess, getRelatedGalleriesFail
+} = createAsyncAction('getRelatedGalleries', 'GET_RELATED_GALLERIES');

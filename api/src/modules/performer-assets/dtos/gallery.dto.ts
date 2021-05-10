@@ -41,8 +41,6 @@ export class GalleryDto {
 
   isBought: boolean;
 
-  isGallery = true;
-
   constructor(init: Partial<GalleryDto>) {
     Object.assign(
       this,
@@ -64,8 +62,7 @@ export class GalleryDto {
         'updatedAt',
         'isBookMarked',
         'isSubscribed',
-        'isBought',
-        'isGallery'
+        'isBought'
       ])
     );
   }

@@ -1,18 +1,25 @@
 import { createReducers } from '@lib/redux';
 import { merge } from 'lodash';
 import {
-  getGalleries,
-  getGalleriesSuccess,
-  getGalleriesFail, moreGalleries, moreGalleriesFail, moreGalleriesSuccess
+  getGalleries, getGalleriesSuccess, getGalleriesFail,
+  moreGalleries, moreGalleriesFail, moreGalleriesSuccess,
+  getRelatedGalleries, getRelatedGalleriesFail, getRelatedGalleriesSuccess
 } from './actions';
 
 const initialState = {
-  listGalleries: {
+  galleries: {
     requesting: false,
     items: [],
     total: 0,
     error: null,
     success: false
+  },
+  relatedGalleries: {
+    requesting: false,
+    error: null,
+    success: false,
+    items: [],
+    total: 0
   }
 };
 
@@ -22,12 +29,9 @@ const galleryReducer = [
     reducer(state: any) {
       return {
         ...state,
-        listGalleries: {
-          items: { ...state.listGalleries.items },
-          total: { ...state.listGalleries.total },
-          requesting: true,
-          error: null,
-          success: false
+        galleries: {
+          ...state.galleries,
+          requesting: true
         }
       };
     }
@@ -37,11 +41,10 @@ const galleryReducer = [
     reducer(state: any, data: any) {
       return {
         ...state,
-        listGalleries: {
+        galleries: {
           requesting: false,
           items: data.payload.data,
           total: data.payload.total,
-          error: null,
           success: true
         }
       };
@@ -52,12 +55,10 @@ const galleryReducer = [
     reducer(state: any, data: any) {
       return {
         ...state,
-        listGalleries: {
-          items: { ...state.listGalleries.items },
-          total: { ...state.listGalleries.total },
+        galleries: {
+          ...state.galleries,
           requesting: false,
-          error: data.payload,
-          success: false
+          error: data.payload
         }
       };
     }
@@ -67,8 +68,8 @@ const galleryReducer = [
     reducer(state: any) {
       return {
         ...state,
-        listGalleries: {
-          ...state.listGalleries,
+        galleries: {
+          ...state.galleries,
           requesting: true,
           error: null,
           success: false
@@ -81,10 +82,10 @@ const galleryReducer = [
     reducer(state: any, data: any) {
       return {
         ...state,
-        listGalleries: {
+        galleries: {
           requesting: false,
           total: data.payload.total,
-          items: [...state.listGalleries.items, ...data.payload.data],
+          items: [...state.galleries.items, ...data.payload.data],
           success: true
         }
       };
@@ -95,11 +96,50 @@ const galleryReducer = [
     reducer(state: any, data: any) {
       return {
         ...state,
-        listGalleries: {
-          ...state.listGalleries,
+        galleries: {
+          ...state.galleries,
           requesting: false,
           error: data.payload,
           success: false
+        }
+      };
+    }
+  },
+  {
+    on: getRelatedGalleries,
+    reducer(state: any) {
+      return {
+        ...state,
+        related: {
+          ...state.videos,
+          requesting: true
+        }
+      };
+    }
+  },
+  {
+    on: getRelatedGalleriesSuccess,
+    reducer(state: any, data: any) {
+      return {
+        ...state,
+        relatedGalleries: {
+          requesting: false,
+          items: data.payload.data,
+          total: data.payload.total,
+          success: true
+        }
+      };
+    }
+  },
+  {
+    on: getRelatedGalleriesFail,
+    reducer(state: any, data: any) {
+      return {
+        ...state,
+        relatedGalleries: {
+          ...state.galleries,
+          requesting: false,
+          error: data.payload
         }
       };
     }

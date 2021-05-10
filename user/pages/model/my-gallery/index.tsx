@@ -118,6 +118,20 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
   render() {
     const { ui } = this.props;
     const { galleries, pagination, loading } = this.state;
+    const statuses = [
+      {
+        key: '',
+        text: 'Status'
+      },
+      {
+        key: 'active',
+        text: 'Active'
+      },
+      {
+        key: 'inactive',
+        text: 'Inactive'
+      }
+    ];
     return (
       <Layout>
         <Head>
@@ -135,10 +149,10 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
             </div>
             <div>
               <Row>
-                <Col lg={18} xs={18}>
-                  <SearchFilter searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
+                <Col lg={20} xs={24}>
+                  <SearchFilter statuses={statuses} searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
                 </Col>
-                <Col lg={6} xs={6} style={{ display: 'flex', alignItems: 'center' }}>
+                <Col lg={4} xs={24} style={{ display: 'flex', alignItems: 'center' }}>
                   <Button className="secondary">
                     <Link href="/model/my-gallery/create">
                       <a>
@@ -151,7 +165,6 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
                 </Col>
               </Row>
             </div>
-
             <div className="table-responsive">
               <TableListGallery
                 dataSource={galleries}

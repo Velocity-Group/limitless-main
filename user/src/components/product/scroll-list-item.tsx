@@ -33,7 +33,7 @@ export class ScrollListProduct extends PureComponent<IProps> {
           <PerformerListProduct products={items} />
           {!loading && !items.length && (
           <div className="main-container custom">
-            <Alert className="text-center" type="info" message="No data was found" />
+            <Alert className="text-center" type="info" message="No product was found" />
           </div>
           )}
           {loading && <div className="text-center"><Spin /></div>}

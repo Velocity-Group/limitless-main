@@ -17,6 +17,7 @@ import { SubscriptionService } from 'src/modules/subscription/services/subscript
 import { PaymentTokenService, PurchasedItemSearchService } from 'src/modules/purchased-item/services';
 import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
 import { UserDto } from 'src/modules/user/dtos';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { GalleryUpdatePayload } from '../payloads/gallery-update.payload';
 import { GalleryDto } from '../dtos';
 import { GalleryCreatePayload, GallerySearchRequest } from '../payloads';
@@ -127,14 +128,13 @@ export class GalleryService {
       const performer = await this.performerService.findById(
         gallery.performerId
       );
-      if (performer) {
-        dto.performer = {
-          username: performer.username
-        };
-      }
+      dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     }
     const bookmark = await this.reactionService.checkExisting(dto._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.GALLERY);
     dto.isBookMarked = !!bookmark;
+    const subscribed = user && await this.subscriptionService.checkSubscribed(dto.performerId, user._id);
+    dto.isSubscribed = !!subscribed;
+    // todo check bought
     return dto;
   }
 
@@ -303,12 +303,7 @@ export class GalleryService {
       const performer = performers.find(
         (p) => p._id.toString() === g.performerId.toString()
       );
-      if (performer) {
-        // eslint-disable-next-line no-param-reassign
-        g.performer = {
-          username: performer.username
-        };
-      }
+      g.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
       if (g.coverPhotoId) {
         const coverPhoto = coverPhotos.find(
           (c) => c._id.toString() === g.coverPhotoId.toString()
@@ -403,7 +398,7 @@ export class GalleryService {
     galleries.forEach((g) => {
       // TODO - should get picture (thumbnail if have?)
       const performer = performers.find((p) => p._id.toString() === g.performerId.toString());
-      g.performer = performer ? new UserDto(performer).toResponse() : null;
+      g.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
       const subscribed = subscriptions.find((s) => `${s.performerId}` === `${g.performerId}`);
       g.isSubscribed = !!subscribed;
       const isBought = transactions.find((t) => `${t.targetId}` === `${g._id}`);

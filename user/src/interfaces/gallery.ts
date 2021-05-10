@@ -8,6 +8,7 @@ export interface IGallery {
   status: string;
   price: number;
   performerId: string;
+  performer?: any;
   coverPhoto: { thumbnails: string[]; url: string };
   isBookMarked: boolean;
   tagline: string;

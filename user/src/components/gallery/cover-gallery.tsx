@@ -10,10 +10,8 @@ interface IProps {
 export class CoverGallery extends PureComponent<IProps> {
   render() {
     const { gallery, style } = this.props;
-    const { coverPhoto } = gallery;
-    const url = coverPhoto && coverPhoto.thumbnails && coverPhoto.thumbnails.length > 0
-      ? coverPhoto.thumbnails[0]
-      : '/placeholder-image.jpg';
+    const url = gallery?.coverPhoto?.thumbnails ? gallery?.coverPhoto?.thumbnails[0]
+      : '/static/placeholder-image.jpg';
     return (
       <img
         alt="Cover"

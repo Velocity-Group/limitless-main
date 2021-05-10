@@ -1,26 +1,21 @@
 import { PureComponent } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import {
-  Row, Col, Spin, Alert
-} from 'antd';
-import GalleryCard from '@components/gallery/gallery-card';
-import { IGallery } from '../../interfaces';
+import { Spin, Row, Col } from 'antd';
+import { IGallery } from '@interfaces/gallery';
+import GalleryCard from './gallery-card';
 
 interface IProps {
   items: IGallery[];
-  total?: number;
   canLoadmore: boolean;
   loadMore(): Function;
   loading: boolean;
-  handleShowPhotos: Function;
 }
 
 export class ScrollListGallery extends PureComponent<IProps> {
   render() {
     const {
-      items, loadMore, loading, canLoadmore, handleShowPhotos
+      items = [], loadMore, canLoadmore = false, loading = false
     } = this.props;
-
     return (
       <>
         <InfiniteScroll
@@ -34,14 +29,21 @@ export class ScrollListGallery extends PureComponent<IProps> {
           <Row>
             {items.length > 0
               && items.map((gallery: IGallery) => (
-                <Col xs={12} sm={12} md={6} lg={6} key={gallery._id}>
-                  <GalleryCard onShow={handleShowPhotos} gallery={gallery} />
+                <Col
+                  xs={12}
+                  sm={12}
+                  md={8}
+                  lg={6}
+                  xl={6}
+                  key={gallery._id}
+                >
+                  <GalleryCard gallery={gallery} />
                 </Col>
               ))}
           </Row>
-          {!items.length && !loading && <div className="main-container custom"><Alert className="text-center" message="No data was found" type="info" /></div>}
-          {loading && <div className="text-center"><Spin /></div>}
         </InfiniteScroll>
+        {!loading && !items.length && <div className="text-center">No gallery was found</div>}
+        {loading && <div className="text-center"><Spin /></div>}
       </>
     );
   }

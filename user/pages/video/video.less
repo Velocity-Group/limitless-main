@@ -1,0 +1,178 @@
+@import '../../style/default.less';
+
+.vid-title {
+  margin: 15px 0 0;
+  margin-top: 30px;
+  font-size: 22px;
+  font-weight: 600;
+  font-family: @primary-font-bold;
+}
+.vid-duration {
+  display: flex;
+  align-items: center;
+  a {
+    color: @dark-grey;
+    margin-right: 15px;
+  }
+}
+.vid-player {
+  padding: 15px 5px;
+}
+.related-vid {
+  margin: 30px 0;
+  .ttl-1 {
+    font-size: 1.5em;
+    font-weight: 800;
+    font-family: @primary-font-bold;
+  }
+  .ant-col {
+    padding: 10px 12px;
+    @media screen and (max-width: @tablet-screen) {
+      padding: 5px
+    }
+  }
+}
+.discount-price {
+  -webkit-text-decoration-line: line-through; /* Safari */
+  text-decoration-line: line-through;
+}
+.subscription {
+  h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+  }
+  .btn.btn-default {
+    background: @primary-color;
+    color: @white;
+    font-weight: 600;
+    margin-right: 15px;
+    box-shadow: 0 5px 10px rgba(50,50,50,0.2);
+    padding: 0.7em 2em;
+    font-size: 0.9em;
+    font-weight: 600;
+    border-radius: 0.5em;
+    height: 40px;
+  }
+  .btn.btn-yellow {
+    background: @secondary-color;
+    color: @white;
+    font-weight: 600;
+    box-shadow: 0 5px 10px rgba(50,50,50,0.2);
+    padding: 0.7em 2em;
+    font-size: 0.9em;
+    font-weight: 600;
+    border-radius: 0.5em;
+    height: 40px;
+    @media screen and (max-width: @mobile-screen) {
+      width: 100%;
+    }
+  }
+}
+
+.vid-split {
+  background-color: @gray;
+  padding: 20px 5px;
+}
+
+.vid-act {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row-reverse;
+  .o-w-ner {
+    font-weight: 600;
+    img {
+      width: 50px;
+      border: 1px solid @primary-color;
+      border-radius: 50%;
+    }
+  }
+  .act-btns {
+    .react-btn {
+      color: @dark-grey;
+      background: @white;
+      border: none;
+      margin-left: 5px;
+      border-radius: 3px;
+      padding: 5px 13px;
+      outline: none;
+      &.favourited {
+        color: @white;
+        background: @highlight-color;
+      }
+      &.liked {
+        color: @white;
+        background: @processing-color;
+      }
+      &.watch-later {
+        color: @white;
+        background: @primary-color;
+      }
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+}
+.vid-info {
+  padding: 20px 5px;
+  .ant-tabs-tab {
+    font-weight: 600;
+    font-size: 16px;
+    color: @black;
+    padding: 5px 15px;
+    font-family: @primary-font-bold;
+  }
+  .ant-tabs-tab-active {
+    color: @primary-color;
+  }
+}
+.participant-card {
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+  margin-bottom: 10px;
+  img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid @primary-color
+  }
+  .participant-info {
+    padding: 10px;
+    h5 {
+      font-weight: 600;
+      color: @black;
+      margin: 0;
+    }
+    p {
+      color: @dark-grey;
+      margin: 0;
+    }
+  }
+}
+.main-player {
+  .video-js {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+.coupon-form {
+  margin: 20px 0;
+  .ant-input {
+    height: 40px;
+  }
+  .ant-btn.primary {
+    height: 40px;
+    background-image: linear-gradient(0deg,@primary-color,@theme-color);
+    color: @white;
+    font-weight: 600;
+  }
+  .ant-btn.normal {
+    height: 40px;
+    background-color: @secondary-color;
+    color: @black;
+    font-weight: 600;
+  }
+}

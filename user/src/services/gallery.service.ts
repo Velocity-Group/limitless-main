@@ -22,6 +22,10 @@ class GalleryService extends APIRequest {
     return this.get(`/performer/performer-assets/galleries/${id}/view`);
   }
 
+  userViewDetails(id: string, headers?: any) {
+    return this.get(`/user/performer-assets/galleries/${id}/view`, headers);
+  }
+
   delete(id: string) {
     return this.del(`/performer/performer-assets/galleries/${id}`);
   }

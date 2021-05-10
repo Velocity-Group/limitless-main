@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import { Table, Tag, Button } from 'antd';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
 import { CoverGallery } from '@components/gallery/cover-gallery';
@@ -49,11 +49,11 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Amount of Tokens',
+        title: 'Tokens',
         dataIndex: 'price',
         render(price: number) {
           return (
-            <span>
+            <span style={{ whiteSpace: 'nowrap' }}>
               <img src="/static/coin-ico.png" alt="coin" width="20px" />
               {(price || 0).toFixed(2)}
             </span>
@@ -85,7 +85,20 @@ export class TableListGallery extends PureComponent<IProps> {
         title: 'Actions',
         dataIndex: '_id',
         render: (data, record) => (
-          <div>
+          <div style={{ whiteSpace: 'nowrap' }}>
+            <Button className="info">
+              <Link
+                href={{
+                  pathname: `/gallery/${record._id}`,
+                  query: { id: record._id }
+                }}
+                as={`/gallery/${record._id}`}
+              >
+                <a>
+                  <EyeOutlined />
+                </a>
+              </Link>
+            </Button>
             <Button className="info">
               <Link
                 href={{
