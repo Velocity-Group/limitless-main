@@ -18,6 +18,8 @@ export class PhotoModel extends Document {
 
   processing: boolean;
 
+  isGalleryCover: boolean;
+
   price: number;
 
   createdBy: ObjectId;

@@ -18,7 +18,7 @@ export class CoverGallery extends PureComponent<IProps> {
       <img
         alt="Cover"
         src={url}
-        style={style || { width: 60 }}
+        style={style || { width: 60, borderRadius: '3px' }}
       />
     );
   }

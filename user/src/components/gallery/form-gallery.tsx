@@ -1,9 +1,10 @@
 import {
   Form, Input, Button, Select, InputNumber, Switch
 } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
-import { IGallery, IPhotos } from 'src/interfaces';
+import { InboxOutlined } from '@ant-design/icons';
+import { IGallery } from 'src/interfaces';
 import Router from 'next/router';
+import UploadList from '@components/file/upload-list';
 import './gallery.less';
 import { useState } from 'react';
 
@@ -14,6 +15,8 @@ interface IProps {
   photosList: IPhotos[];
   removePhoto: Function;
 }
+
+const { Dragger } = Upload;
 
 const FormGallery = ({
   onFinish,

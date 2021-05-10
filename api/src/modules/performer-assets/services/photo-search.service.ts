@@ -73,6 +73,7 @@ export class PhotoSearchService {
         const url = file.getUrl();
         // eslint-disable-next-line no-param-reassign
         v.photo = {
+          size: file.size,
           thumbnails: file.getThumbnails(),
           url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
           width: file.width,
@@ -134,6 +135,7 @@ export class PhotoSearchService {
         const url = file.getUrl();
         // eslint-disable-next-line no-param-reassign
         v.photo = {
+          size: file.size,
           thumbnails: file.getThumbnails(),
           url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
           width: file.width,
@@ -203,6 +205,7 @@ export class PhotoSearchService {
           const url = file.getUrl();
           // eslint-disable-next-line no-param-reassign
           v.photo = {
+            size: file.size,
             thumbnails: file.getThumbnails(),
             url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
             width: file.width,

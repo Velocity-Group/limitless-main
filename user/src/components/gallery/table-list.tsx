@@ -1,7 +1,6 @@
-/* eslint-disable default-case */
 import { PureComponent } from 'react';
 import { Table, Tag, Button } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
 import { CoverGallery } from '@components/gallery/cover-gallery';
@@ -87,20 +86,6 @@ export class TableListGallery extends PureComponent<IProps> {
         dataIndex: '_id',
         render: (data, record) => (
           <div>
-            <Button className="secondary-custom">
-              <Link
-                href={{
-                  pathname: '/model/my-photo/upload',
-                  query: {
-                    galleryId: record._id
-                  }
-                }}
-              >
-                <a>
-                  <PlusOutlined />
-                </a>
-              </Link>
-            </Button>
             <Button className="info">
               <Link
                 href={{

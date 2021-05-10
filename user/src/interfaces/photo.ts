@@ -19,7 +19,7 @@ export interface IPhotos {
   type?: string;
   title?: string;
   description?: string;
-  status?: 'active' | 'inactive';
+  status?: string;
   processing?: boolean;
   price?: number;
   createdBy?: string;

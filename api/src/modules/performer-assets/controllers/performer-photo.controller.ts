@@ -76,6 +76,18 @@ export class PerformerPhotoController {
     return DataResponse.ok(details);
   }
 
+  @Post('/set-cover/:id')
+  @HttpCode(HttpStatus.OK)
+  @Roles('performer')
+  @UseGuards(RoleGuard)
+  async setCoverGallery(
+    @Param('id') id: string,
+    @CurrentUser() updater: UserDto
+  ) {
+    const data = await this.photoService.setCoverGallery(id, updater);
+    return DataResponse.ok(data);
+  }
+
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)

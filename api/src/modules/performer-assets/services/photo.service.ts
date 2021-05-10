@@ -163,7 +163,6 @@ export class PhotoService {
     // eslint-disable-next-line new-cap
     const photo = new this.photoModel(payload);
     if (!photo.title) photo.title = file.name;
-
     photo.fileId = file._id;
     photo.createdAt = new Date();
     photo.updatedAt = new Date();
@@ -233,6 +232,25 @@ export class PhotoService {
     );
 
     return dto;
+  }
+
+  public async setCoverGallery(id: string | ObjectId, updater: UserDto): Promise<PhotoDto> {
+    const photo = await this.photoModel.findById(id);
+    if (!photo) {
+      throw new EntityNotFoundException();
+    }
+    if (updater.roles && !updater.roles.includes('admin') && `${updater._id}` !== `${photo.performerId}`) {
+      throw new ForbiddenException();
+    }
+    await this.photoModel.updateMany({
+      galleryId: photo.galleryId
+    }, {
+      isGalleryCover: false
+    }, { upsert: true });
+    photo.isGalleryCover = true;
+    await photo.save();
+    photo.galleryId && await this.galleryService.updateCover(photo.galleryId, photo._id);
+    return new PhotoDto(photo);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
