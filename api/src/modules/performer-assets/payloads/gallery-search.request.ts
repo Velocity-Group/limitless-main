@@ -12,6 +12,11 @@ export class GallerySearchRequest extends SearchRequest {
   @ApiProperty()
   @IsString()
   @IsOptional()
+  excludedId: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
   status: string;
 
   ids?: string[] | ObjectId[];

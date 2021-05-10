@@ -1,5 +1,8 @@
 /* eslint-disable no-prototype-builtins */
-import { PureComponent } from 'react';
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable no-restricted-globals */
+/* eslint-disable react/no-did-update-set-state */
 import {
   Layout,
   Tabs,
@@ -9,7 +12,7 @@ import {
   Space,
   Row,
   Col,
-  Input,
+  Alert,
   Modal,
   Spin
 } from 'antd';
@@ -17,34 +20,39 @@ import {
   LikeOutlined,
   EyeOutlined,
   HourglassOutlined,
-  HeartOutlined,
-  ClockCircleOutlined
+  HeartOutlined
 } from '@ant-design/icons';
+import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { videoService, reactionService, paymentService } from '@services/index';
+import {
+  videoService, reactionService, purchaseTokenService
+} from '@services/index';
 import {
   RelatedListVideo,
   VideoPlayer,
-  ThumbnailVideo
+  ThumbnailVideo,
+  PurchaseVideoForm
 } from '@components/video';
-import {
-  getComments, moreComment, createComment, deleteComment
-} from '@redux/comment/actions';
 import { ListComments, CommentForm } from '@components/comment';
 import Link from 'next/link';
 import './video.less';
 import Router from 'next/router';
-import { ConfirmSubscriptionPerformerForm } from '@components/performer';
-import Loader from '@components/common/base/loader';
 import { videoDuration } from '@lib/index';
+import { updateBalance } from '@redux/user/actions';
+import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import {
   IVideoResponse,
   IUser,
   IUIConfig,
-  ICoupon,
   IPerformer
 } from '../../src/interfaces';
+import {
+  getComments,
+  moreComment,
+  createComment,
+  deleteComment
+} from '../../src/redux/comment/actions';
 import { getRelated } from '../../src/redux/video/actions';
 
 const { TabPane } = Tabs;
@@ -53,21 +61,22 @@ interface IProps {
   query: any;
   user: IUser;
   relatedVideos: any;
+  commentMapping: any;
+  comment: any;
   getRelated: Function;
-  ui: IUIConfig;
-  video: IVideoResponse;
   getComments: Function;
   moreComment: Function;
   createComment: Function;
+  ui: IUIConfig;
+  video: IVideoResponse;
   deleteComment: Function;
-  commentMapping: any;
-  comment: any;
+  updateBalance: Function;
 }
 
 class VideoViewPage extends PureComponent<IProps> {
   static authenticate: boolean = true;
 
-  static noredirect: boolean = false;
+  static noredirect = true;
 
   subscriptionType = 'monthly';
 
@@ -84,34 +93,34 @@ class VideoViewPage extends PureComponent<IProps> {
           video
         };
       }
+      return { ctx };
     } catch (e) {
       return {
         query
       };
     }
-    return {};
   }
 
   state = {
-    videoStats: { likes: 0, comments: 0, views: 0 },
+    videoStats: {
+      likes: 0, comments: 0, views: 0, favourites: 0
+    },
     userReaction: { liked: false, favourited: false, watchedLater: false },
     itemPerPage: 24,
     commentPage: 0,
     isFirstLoadComment: true,
     isBought: false,
     isSubscribed: false,
-    couponCode: '',
-    isApplyCoupon: false,
-    coupon: null as ICoupon,
+    totalComment: 0,
+    submiting: false,
     openSubscriptionModal: false,
-    submiting: false
+    openPurchaseModal: false
   };
 
-  async componentDidMount() {
-    const { video, getRelated: getRelatedHandler } = this.props;
+  componentDidMount() {
+    const { video, getRelated: handleGetRelated } = this.props;
     if (!video || !video._id) {
-      Router.back();
-      return;
+      return Router.back();
     }
     this.setState({
       videoStats: video.stats,
@@ -119,8 +128,8 @@ class VideoViewPage extends PureComponent<IProps> {
       isBought: video.isBought,
       isSubscribed: video.isSubscribed
     });
-    this.onUpdateStats();
-    getRelatedHandler({
+    videoService.increaseView(video._id);
+    return handleGetRelated({
       performerId: video.performerId,
       excludedId: video._id,
       status: 'active',
@@ -129,48 +138,45 @@ class VideoViewPage extends PureComponent<IProps> {
   }
 
   componentDidUpdate(prevProps) {
-    const { video, getRelated: getRelatedHandler } = this.props;
+    const {
+      video, commentMapping, comment, getRelated: handleGetRelated
+    } = this.props;
+    const { totalComment } = this.state;
     if (prevProps.video._id !== video._id) {
-      this.onUpdateStats();
-      getRelatedHandler({
+      videoService.increaseView(video._id);
+      handleGetRelated({
         performerId: video.performerId,
         excludedId: video._id,
         status: 'active',
         limit: 24
       });
     }
-  }
-
-  onUpdateStats() {
-    const { video } = this.props;
-    if (!video) return;
-    this.setState({
-      videoStats: video.stats,
-      userReaction: video.userReaction,
-      isBought: video.isBought,
-      isSubscribed: video.isSubscribed
-    });
-    try {
-      videoService.increaseView(video._id);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
+    if (
+      (!prevProps.comment.data
+        && comment.data
+        && comment.data.objectId === video._id)
+      || (prevProps.commentMapping[video._id]
+        && totalComment !== commentMapping[video._id].total)
+    ) {
+      this.setState({ totalComment: commentMapping[video._id].total });
     }
   }
 
-  onChangeTab(videoId: string, tab: string) {
-    const { isFirstLoadComment, itemPerPage, commentPage } = this.state;
-    const { getComments: getCommentsHandler } = this.props;
+  onChangeTab(tab: string) {
+    const { isFirstLoadComment, itemPerPage } = this.state;
+    const { getComments: handleGetComments, video } = this.props;
     if (tab === 'comment' && isFirstLoadComment) {
       this.setState(
         {
-          isFirstLoadComment: false
+          isFirstLoadComment: false,
+          commentPage: 0
         },
         () => {
-          getCommentsHandler({
-            objectId: videoId,
+          handleGetComments({
+            objectId: video._id,
+            objectType: 'video',
             limit: itemPerPage,
-            offset: commentPage
+            offset: 0
           });
         }
       );
@@ -182,9 +188,7 @@ class VideoViewPage extends PureComponent<IProps> {
     action: string,
     isCreated: boolean = false
   ) {
-    const { user } = this.props;
     const { userReaction, videoStats } = this.state;
-    if (user && user.isPerformer) return;
     try {
       if (!isCreated) {
         const react = await (
@@ -206,17 +210,21 @@ class VideoViewPage extends PureComponent<IProps> {
             message.success('Liked');
           }
           if (action === 'favourite') {
-            message.success("Added to 'My Favourite'");
+            message.success("Added to 'Favourite Vids'");
             this.setState({
-              userReaction: { ...userReaction, favourited: true }
+              userReaction: { ...userReaction, favourited: true },
+              videoStats: {
+                ...videoStats,
+                favourites: videoStats.favourites + 1
+              }
             });
           }
-          if (action === 'watch_later') {
-            message.success('Added to "My Wishlist"');
-            this.setState({
-              userReaction: { ...userReaction, watchedLater: true }
-            });
-          }
+          // if (action === 'book_mark') {
+          //   message.success('Added to Bookmarks');
+          //   this.setState({
+          //     userReaction: { ...userReaction, watchedLater: true }
+          //   });
+          // }
         }
       }
       if (isCreated) {
@@ -237,110 +245,79 @@ class VideoViewPage extends PureComponent<IProps> {
             message.success('Unliked');
           }
           if (action === 'favourite') {
-            message.success("Removed from 'My Favourite'");
+            message.success("Removed from 'Favourite Vids'");
             this.setState({
               userReaction: { ...userReaction, favourited: false }
             });
           }
-          if (action === 'watch_later') {
-            message.success('Removed from "My Wishlist"');
-            this.setState({
-              userReaction: { ...userReaction, watchedLater: false }
-            });
-          }
+          // if (action === 'book_mark') {
+          //   message.success('Removed from Bookmarks');
+          //   this.setState({
+          //     userReaction: { ...userReaction, watchedLater: false }
+          //   });
+          // }
         }
       }
     } catch (e) {
-      message.error(e.message || 'Error occured, please try again later');
+      const error = await e;
+      message.error(error.message || 'Error occured, please try again later');
     }
   }
 
-  async onOpenComment() {
-    const { video, getComments: handleGetComment } = this.props;
-    const {
-      isFirstLoadComment, itemPerPage, commentPage
-    } = this.state;
-    if (isFirstLoadComment) {
-      await this.setState({ isFirstLoadComment: false });
-      handleGetComment({
-        objectId: video._id,
-        limit: itemPerPage,
-        offset: commentPage
-      });
-    }
+  async onSubmitComment(values: any) {
+    const { createComment: handleComment } = this.props;
+    handleComment(values);
   }
 
-  async moreComment() {
-    const { video, moreComment: handleLoadMore } = this.props;
-    const { commentPage, itemPerPage } = this.state;
+  loadMoreComment = async (videoId: string) => {
+    const { moreComment: handleMoreComment } = this.props;
+    const { itemPerPage, commentPage } = this.state;
     await this.setState({
       commentPage: commentPage + 1
     });
-    handleLoadMore({
+    handleMoreComment({
       limit: itemPerPage,
+      objectType: 'video',
       offset: (commentPage + 1) * itemPerPage,
-      objectId: video._id
+      objectId: videoId
     });
-  }
+  };
 
   async deleteComment(item) {
-    const { deleteComment: handleDelete } = this.props;
-    if (!window.confirm('Are you sure to remove this comment?')) return;
-    handleDelete(item._id);
+    const { deleteComment: handleDeleteComment } = this.props;
+    if (!confirm('Are you sure to remove this comment?')) return;
+    handleDeleteComment(item._id);
   }
 
-  async buyVideo() {
+  async purchaseVideo() {
+    const { video, user, updateBalance: handleUpdateBalance } = this.props;
+    if (!user._id || user.isPerformer) {
+      message.error('Forbiden');
+      return;
+    }
     try {
-      const { video } = this.props;
-      const { isApplyCoupon, couponCode } = this.state;
-      const data = isApplyCoupon && couponCode ? { couponCode, videoId: video._id } : { videoId: video._id };
-      const pay = await (await paymentService.purchaseVideo(data)).data;
-      // TOTO update logic here
-      if (pay) {
-        message.success('Redirecting to payment gateway');
-        window.location.href = pay.paymentUrl;
-      }
+      await (await purchaseTokenService.purchaseVideo(video._id, {})).data;
+      message.success('Video is unlocked!');
+      handleUpdateBalance({ token: video.price });
+      this.setState({ isBought: true, openPurchaseModal: false });
     } catch (e) {
-      // console.log(e);
+      const error = await e;
+      message.error(error.message || 'Error occured, please try again later');
     }
   }
 
   async subscribe() {
-    const { video } = this.props;
     try {
+      const { updateBalance: handleUpdateBalance, video } = this.props;
       await this.setState({ submiting: true });
-      const subscription = await (
-        await paymentService.subscribe({ type: this.subscriptionType, performerId: video.performerId })
-      ).data;
-      // throw success now
-      if (subscription) {
-        message.success('Redirecting to payment gateway');
-        window.location.href = subscription.paymentUrl;
-      }
+      await purchaseTokenService.subscribePerformer({ type: 'monthly', performerId: video.performer._id });
+      await this.setState({ isSubscribed: true, openSubscriptionModal: false });
+      handleUpdateBalance({ token: this.subscriptionType === 'monthly' ? -video.performer.monthlyPrice : -video.performer.yearlyPrice });
+      message.success('Subscribed!');
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, pleasey try again later');
-    } finally {
-      this.setState({ submiting: false });
+      alert((err && err.message) || 'error occured, please try again later');
     }
-  }
-
-  async applyCoupon() {
-    try {
-      const { couponCode } = this.state;
-      const resp = await paymentService.applyCoupon(couponCode);
-      this.setState({ isApplyCoupon: true, coupon: resp.data });
-      message.success('Coupon is applied');
-    } catch (error) {
-      const e = await error;
-      message.error(
-        e && e.message ? e.message : 'Error occured, please try again later'
-      );
-    }
-  }
-
-  async unApplyCoupon() {
-    this.setState({ isApplyCoupon: false, coupon: null });
   }
 
   render() {
@@ -354,28 +331,35 @@ class VideoViewPage extends PureComponent<IProps> {
         success: false,
         items: []
       },
-      commentMapping, comment, createComment: handleCreateComment
+      commentMapping,
+      comment
     } = this.props;
+    const { performer } = video;
     const { requesting: commenting } = comment;
-    const fetchingComment = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].requesting : false;
-    const comments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].items : [];
-    const totalComments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].total : video?.stats.comments;
-    const { performer, video: videoSource } = video;
+    const fetchingComment = commentMapping.hasOwnProperty(video._id)
+      ? commentMapping[video._id].requesting
+      : false;
+    const comments = commentMapping.hasOwnProperty(video._id)
+      ? commentMapping[video._id].items
+      : [];
+    const totalComments = commentMapping.hasOwnProperty(video._id)
+      ? commentMapping[video._id].total
+      : 0;
     const {
       videoStats,
       userReaction,
       isSubscribed,
       isBought,
-      isApplyCoupon,
-      coupon,
-      couponCode,
+      totalComment,
       openSubscriptionModal,
+      openPurchaseModal,
       submiting
     } = this.state;
 
     const playSource = {
-      file: videoSource && videoSource.url ? videoSource.url : '',
-      image: video && video.thumbnail ? video.thumbnail : '/no-image.jpg'
+      file: video && video.video && video.video.url ? video.video.url : '',
+      image: video && video.thumbnail ? video.thumbnail : '',
+      teaser: video && video.teaser ? video.teaser : ''
     };
     const videoJsOptions = {
       autoplay: false,
@@ -388,137 +372,105 @@ class VideoViewPage extends PureComponent<IProps> {
         }
       ]
     };
-
-    const calTotal = (v: IVideoResponse, couponValue?: number) => {
-      let total = v.price;
-      if (couponValue) {
-        total -= total * couponValue;
-      }
-      return total.toFixed(2) || 0;
+    const teaserOptions = {
+      autoplay: false,
+      controls: true,
+      playsinline: true,
+      sources: [
+        {
+          src: playSource.teaser,
+          type: 'video/mp4'
+        }
+      ]
     };
 
     return (
-      <>
+      <Layout>
         <Head>
           <title>
-            {ui && ui.siteName}
+            {ui?.siteName}
             {' '}
             |
             {' '}
-            {video && video.title ? video.title : 'Video'}
+            {video?.title || 'Video'}
           </title>
-          <meta name="keywords" content={video && video.description} />
-          <meta name="description" content={video && video.description} />
+          <meta name="keywords" content={video?.description} />
+          <meta name="description" content={video?.description} />
           {/* OG tags */}
           <meta
             property="og:title"
             content={
               ui
-              && `${ui.siteName} | ${video && video.title ? video.title : 'Video'}`
+              && `${ui.siteName} | ${video?.title || 'Video'}`
             }
             key="title"
           />
-          <meta property="og:image" content={video && video.thumbnail} />
-          <meta property="og:keywords" content={video && video.description} />
+          <meta property="og:image" content={video?.thumbnail} />
+          <meta property="og:keywords" content={video?.description} />
           <meta
             property="og:description"
             content={video && video.description}
           />
         </Head>
-        <Layout>
-          <div className="main-container">
-            <div className="vid-title">{video.title}</div>
-            <div className="vid-duration">
-              <a>
-                <HourglassOutlined />
-                &nbsp;
-                {videoDuration(video?.video?.duration || 0)}
-              </a>
-              <a>
-                <EyeOutlined />
-                &nbsp;
-                {videoStats && videoStats.views ? videoStats.views : 0}
-              </a>
-            </div>
-            <div className="vid-player">
-              {((!video.isSale && isSubscribed)
-                  || (video.isSale && isBought)) && (
-                    <div className="main-player">
-                      {playSource.file ? (
-                        <VideoPlayer {...videoJsOptions} key={playSource.file} />
-                      ) : (
-                        <h3>No source found.</h3>
-                      )}
-                    </div>
+        <div className="main-container">
+          <div className="vid-title">{video.title}</div>
+          <div className="vid-duration">
+            <a>
+              <HourglassOutlined />
+              &nbsp;
+              {videoDuration(video.video.duration)}
+            </a>
+            <a>
+              <EyeOutlined />
+              &nbsp;
+              {videoStats && videoStats.views ? videoStats.views : 0}
+            </a>
+          </div>
+          <div className="vid-player">
+            <div className="main-player">
+              {(((video.isSale && !isBought) || (!video.isSale && !isSubscribed))) && video.teaser && (
+                <>
+                  <VideoPlayer {...teaserOptions} />
+                  <Alert type="error" message="You've watching the teaser video, let's subscribe model or purchase it to access full content." />
+                </>
               )}
-              <div className="text-center">
-                {video.isSale && !isBought && (
+            </div>
+            {((!video.isSale && isSubscribed)
+              || (video.isSale && isBought)) && (
+                <div className="main-player">
+                  {video && video.video && video.video.url ? (
+                    <VideoPlayer {...videoJsOptions} />
+                  ) : (
+                    <h3>No source found.</h3>
+                  )}
+                  {video.processing && <Alert type="error" message="Video file is currently on processing..." />}
+                </div>
+            )}
+            <div className="text-center">
+              {video.isSale && !isBought && (
                 <div className="coupon-form">
-                  <Row>
-                    <Col xs={24} md={12} sm={10}>
-                      <Input
-                        placeholder="Enter a coupon code"
-                        onChange={(value) => this.setState({
-                          couponCode: value.currentTarget.value
-                        })}
-                        disabled={isApplyCoupon}
-                      />
-                    </Col>
-                    <Col xs={12} md={4} sm={6}>
-                      {!isApplyCoupon ? (
-                        <Button
-                          className="primary"
-                          disabled={!couponCode}
-                          block
-                          onClick={() => this.applyCoupon()}
-                        >
-                          <strong>Apply coupon</strong>
-                        </Button>
-                      ) : (
-                        <Button
-                          className="primary"
-                          block
-                          onClick={() => this.unApplyCoupon()}
-                        >
-                          <strong>Use later</strong>
-                        </Button>
-                      )}
-                    </Col>
-                    <Col xs={12} md={8} sm={8}>
-                      <Button
-                        className="normal"
-                        onClick={this.buyVideo.bind(this, video._id)}
-                        block
+                  <Button
+                    className="normal"
+                    onClick={() => this.setState({ openPurchaseModal: true })}
+                  >
+                    <Space>
+                      Unlock video by
+                      <span
+                        className="initialPrice"
                       >
-                        <Space>
-                          BUY ME
-                          <span
-                            className={
-                                  isApplyCoupon
-                                    ? 'discount-price'
-                                    : 'initialPrice'
-                                }
-                          >
-                            $
-                            {calTotal(video)}
-                          </span>
-                          {isApplyCoupon && coupon && (
-                          <span>
-                            $
-                            {calTotal(video, coupon.value)}
-                          </span>
-                          )}
-                        </Space>
-                      </Button>
-                    </Col>
-                  </Row>
+                        <img alt="coin" src="/coin-ico.png" height="25px" />
+                        {(video.price).toFixed(2)}
+                      </span>
+                    </Space>
+                  </Button>
                   <div style={{ marginBottom: '10px' }} />
                   <ThumbnailVideo
                     video={video}
                   />
+                  {video.processing === true && (<Alert type="success" message="Video converting, please wait" />)}
                 </div>
-                )}
-                {!video.isSale && !isSubscribed && (
+              )}
+              {!video.isSale && !isSubscribed && (
                 <div
                   style={{ padding: '25px 5px' }}
                   className="subscription"
@@ -526,231 +478,268 @@ class VideoViewPage extends PureComponent<IProps> {
                   <h3>To view full content, subscribe me!</h3>
                   <div style={{ marginBottom: '25px' }}>
                     {video.performer && video.performer.monthlyPrice && (
-                    <Button
-                      className="primary"
-                      style={{ marginRight: '15px' }}
-                      disabled={submiting && this.subscriptionType === 'monthly'}
-                      onClick={() => {
-                        this.subscriptionType = 'monthly';
-                        this.setState({ openSubscriptionModal: true });
-                      }}
-                    >
-                      Subscribe Monthly $
-                      {video.performer.monthlyPrice.toFixed(2)}
-                    </Button>
+                      <Button
+                        className="primary"
+                        style={{ marginRight: '15px' }}
+                        onClick={() => {
+                          this.subscriptionType = 'monthly';
+                          this.setState({ openSubscriptionModal: true });
+                        }}
+                      >
+                        Subscribe Monthly
+                        {' '}
+                        <img alt="coin" src="/coin-ico.png" style={{ height: 20, margin: '0 5px' }} />
+                        {video.performer.monthlyPrice.toFixed(2)}
+                      </Button>
                     )}
                     {video.performer && video.performer.yearlyPrice && (
-                    <Button
-                      className="btn btn-yellow"
-                      disabled={submiting && this.subscriptionType === 'yearly'}
-                      onClick={() => {
-                        this.subscriptionType = 'yearly';
-                        this.setState({ openSubscriptionModal: true });
-                      }}
-                    >
-                      Subscribe Yearly $
-                      {video.performer.yearlyPrice.toFixed(2)}
-                    </Button>
+                      <Button
+                        className="btn btn-yellow"
+                        onClick={() => {
+                          this.subscriptionType = 'yearly';
+                          this.setState({ openSubscriptionModal: true });
+                        }}
+                      >
+                        Subscribe Yearly
+                        {' '}
+                        <img alt="coin" src="/coin-ico.png" style={{ height: 20, margin: '0 5px' }} />
+                        {video.performer.yearlyPrice.toFixed(2)}
+                      </Button>
                     )}
                   </div>
                   <ThumbnailVideo
                     video={video}
+                    style={{
+                      width: '320px',
+                      height: 'auto',
+                      borderRadius: '5px'
+                    }}
                   />
+                  {video.processing === true && (<Alert type="success" message="Video is on progressing, please wait" />)}
                 </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
-          <div className="vid-split">
-            <div className="main-container">
-              <div className="vid-act">
-                <div className="act-btns">
-                  <button
-                    type="button"
-                    className={
-                        userReaction && userReaction.liked
-                          ? 'react-btn liked'
-                          : 'react-btn'
-                      }
-                    onClick={this.onReaction.bind(
-                      this,
-                      video._id,
-                      'like',
-                      userReaction.liked
-                    )}
-                  >
-                    {videoStats?.likes || 0}
-                    {' '}
-                    <LikeOutlined />
-                  </button>
-                  <button
-                    type="button"
-                    className={
-                        userReaction && userReaction.favourited
-                          ? 'react-btn favourited'
-                          : 'react-btn'
-                      }
-                    onClick={this.onReaction.bind(
-                      this,
-                      video._id,
-                      'favourite',
-                      userReaction.favourited
-                    )}
-                  >
-                    <HeartOutlined />
-                  </button>
-                  <button
-                    type="button"
-                    className={
+        </div>
+        <div className="vid-split">
+          <div className="main-container">
+            <div className="vid-act">
+              <div className="act-btns">
+                <button
+                  type="button"
+                  className={
+                    userReaction && userReaction.liked
+                      ? 'react-btn liked'
+                      : 'react-btn'
+                  }
+                  onClick={this.onReaction.bind(
+                    this,
+                    video._id,
+                    'like',
+                    userReaction.liked
+                  )}
+                >
+                  {videoStats?.likes > 0 && videoStats?.likes}
+                  {' '}
+                  <LikeOutlined />
+                </button>
+                {!user?.isPerformer && (
+                <button
+                  type="button"
+                  className={
+                    userReaction && userReaction.favourited
+                      ? 'react-btn favourited'
+                      : 'react-btn'
+                  }
+                  onClick={this.onReaction.bind(
+                    this,
+                    video._id,
+                    'favourite',
+                    userReaction.favourited
+                  )}
+                >
+                  {videoStats?.favourites > 0 && videoStats?.favourites}
+                  {' '}
+                  <HeartOutlined />
+                </button>
+                )}
+                {/* <button
+                      type="button"
+                      className={
                         userReaction && userReaction.watchedLater
                           ? 'react-btn watch-later'
                           : 'react-btn'
                       }
-                    onClick={this.onReaction.bind(
-                      this,
-                      video._id,
-                      'watch_later',
-                      userReaction.watchedLater
-                    )}
-                  >
-                    <ClockCircleOutlined />
-                  </button>
-                </div>
-                <div className="o-w-ner">
-                  <Link
-                    href={{
-                      pathname: '/model/profile',
-                      query: { username: video.performer.username }
-                    }}
-                    as={`/model/${video.performer.username}`}
-                  >
-                    <a>
-                      <img
-                        alt="performer avatar"
-                        src={video.performer.avatar || '/user.png'}
-                      />
-                      {' '}
-                      @
-                      {video.performer.username}
-                    </a>
-                  </Link>
-                </div>
+                      onClick={this.onReaction.bind(
+                        this,
+                        video._id,
+                        'book_mark',
+                        userReaction.watchedLater
+                      )}
+                    >
+                      <Tooltip title={!userReaction.watchedLater ? 'Add to Bookmarks' : 'Remove from Bookmarks'}>
+                        <BookOutlined />
+                      </Tooltip>
+                    </button> */}
               </div>
-            </div>
-          </div>
-          <div className="vid-info">
-            <div className="main-container">
-              <div style={{ marginBottom: '15px' }}>
-                {video.tags.length > 0
-                    && video.tags.map((tag) => (
-                      <Tag color="magenta" key={tag}>
-                        {tag || 'tag'}
-                      </Tag>
-                    ))}
-              </div>
-
-              <Tabs
-                defaultActiveKey="Video"
-                onChange={this.onChangeTab.bind(this, video._id)}
-              >
-                <TabPane tab="Description" key="description">
-                  <p>{video.description || 'No description...'}</p>
-                </TabPane>
-                <TabPane tab="Participants" key="participants">
-                  <Row>
-                    {video.participants && video.participants.length > 0 ? (
-                      video.participants.map((per: IPerformer) => (
-                        <Col xs={12} sm={12} md={6} lg={6} key={per._id}>
-                          <Link
-                            href={{
-                              pathname: '/model/profile',
-                              query: { username: per.username }
-                            }}
-                            as={`/model/${per.username}`}
-                          >
-                            <div key={per._id} className="participant-card">
-                              <img
-                                alt="avatar"
-                                src={per.avatar || '/no-avatar.png'}
-                              />
-                              <div className="participant-info">
-                                <h5>{per?.name || per?.username || 'N/A'}</h5>
-                                <p>{per?.bio}</p>
-                              </div>
-                            </div>
-                          </Link>
-                        </Col>
-                      ))
-                    ) : (
-                      <p>No info found.</p>
-                    )}
-                  </Row>
-                </TabPane>
-                <TabPane
-                  tab={`Comment (${totalComments})`}
-                  key="comment"
+              <div className="o-w-ner">
+                <Link
+                  href={{
+                    pathname: '/model/profile',
+                    query: { username: video?.performer?.username || video?.performer?._id }
+                  }}
+                  as={`/model/${video?.performer?.username || video?.performer?._id}`}
                 >
-                  <CommentForm
-                    creator={user}
-                    onSubmit={handleCreateComment.bind(this)}
-                    objectId={video._id}
-                    objectType="video"
-                    requesting={commenting}
-                  />
-                  <ListComments
-                    key={`list_comments_${video._id}_${comments.length}`}
-                    requesting={fetchingComment}
-                    comments={comments}
-                    total={totalComments}
-                    onDelete={this.deleteComment.bind(this)}
-                    user={user}
-                    canReply
-                  />
-                  {comments.length < totalComments && <p className="text-center"><a aria-hidden onClick={this.moreComment.bind(this)}>More comments...</a></p>}
-                </TabPane>
-              </Tabs>
+                  <a>
+                    <img
+                      alt="performer-avt"
+                      src={video?.performer?.avatar || '/user.png'}
+                    />
+                    {' '}
+                    @
+                    {video?.performer?.username}
+                  </a>
+                </Link>
+              </div>
             </div>
           </div>
+        </div>
+        <div className="vid-info">
           <div className="main-container">
-            <div className="related-vid">
-              <h4 className="ttl-1">You may also like</h4>
-              {relatedVideos.requesting && <div className="text-center"><Spin /></div>}
-              {!relatedVideos.requesting && (
-              <RelatedListVideo videos={relatedVideos.items} />
-              )}
+            <div style={{ marginBottom: '15px' }}>
+              {video.tags && video.tags.length > 0
+                && video.tags.map((tag) => (
+                  <Tag color="magenta" key={tag}>
+                    <Link href={{ pathname: '/search', query: { type: 'video', q: tag } }} as={`/search?q=${tag}&type=video`}>
+                      <a>{tag}</a>
+                    </Link>
+                  </Tag>
+                ))}
             </div>
+
+            <Tabs
+              defaultActiveKey="Video"
+              onChange={this.onChangeTab.bind(this)}
+            >
+              <TabPane tab="Description" key="description">
+                <p>{video.description || 'No description...'}</p>
+              </TabPane>
+              <TabPane tab="Participants" key="participants">
+                <Row>
+                  {video.participants && video.participants.length > 0 ? (
+                    video.participants.map((per: IPerformer) => (
+                      <Col xs={12} sm={12} md={6} lg={6} key={per._id}>
+                        <Link
+                          href={{
+                            pathname: '/model/profile',
+                            query: { username: per?.username || per?._id }
+                          }}
+                          as={`/model/${per?.username || per?._id}`}
+                        >
+                          <div key={per._id} className="participant-card">
+                            <img
+                              alt="per_atv"
+                              src={per?.avatar || '/no-avatar.png'}
+                            />
+                            <div className="participant-info">
+                              <h5>{per?.name || per?.username}</h5>
+                              <p>{per?.bio}</p>
+                            </div>
+                          </div>
+                        </Link>
+                      </Col>
+                    ))
+                  ) : (
+                    <p>No info found.</p>
+                  )}
+                </Row>
+              </TabPane>
+              <TabPane
+                tab={`Comment (${totalComment
+                  || (videoStats && videoStats.comments
+                    ? videoStats.comments
+                    : 0)
+                })`}
+                key="comment"
+              >
+                <CommentForm
+                  creator={user}
+                  onSubmit={this.onSubmitComment.bind(this)}
+                  objectId={video._id}
+                  requesting={commenting}
+                  objectType="video"
+                />
+
+                <ListComments
+                  key={`list_comments_${comments.length}`}
+                  requesting={fetchingComment}
+                  comments={comments}
+                  total={totalComments}
+                  onDelete={this.deleteComment.bind(this)}
+                  user={user}
+                  canReply
+                />
+
+                {comments.length < totalComments && (
+                  <p className="text-center">
+                    <a onClick={this.loadMoreComment.bind(this)}>
+                      more comments...
+                    </a>
+                  </p>
+                )}
+              </TabPane>
+            </Tabs>
           </div>
-          <Modal
-            key="subscribe_performer"
-            title={`Confirm ${this.subscriptionType} subscription ${performer.name}`}
-            visible={openSubscriptionModal}
-            confirmLoading={submiting}
-            footer={null}
-            onCancel={() => this.setState({ openSubscriptionModal: false })}
-          >
-            <ConfirmSubscriptionPerformerForm
-              type={this.subscriptionType || 'monthly'}
-              user={user}
-              performer={performer}
-              submiting={submiting}
-              onFinish={this.subscribe.bind(this)}
-            />
-          </Modal>
-          {submiting && <Loader />}
-        </Layout>
-      </>
+        </div>
+        <div className="main-container">
+          <div className="related-vid">
+            <h4 className="ttl-1">You may also like</h4>
+            {relatedVideos.requesting && <div className="text-center"><Spin /></div>}
+            {relatedVideos.items > 0 && !relatedVideos.requesting && (
+              <RelatedListVideo videos={relatedVideos.items} />
+            )}
+            {!relatedVideos.items.length && !relatedVideos.requesting && (
+              <div>No data was found</div>
+            )}
+          </div>
+        </div>
+        <Modal
+          key="subscribe_performer"
+          title={`Confirm ${this.subscriptionType} subscription ${performer?.name || performer?.username}`}
+          visible={openSubscriptionModal}
+          confirmLoading={submiting}
+          footer={null}
+          onCancel={() => this.setState({ openSubscriptionModal: false })}
+        >
+          <ConfirmSubscriptionPerformerForm
+            user={user}
+            type={this.subscriptionType || 'monthly'}
+            performer={performer}
+            submiting={submiting}
+            onFinish={this.subscribe.bind(this)}
+          />
+        </Modal>
+        <Modal
+          key="purchase_post"
+          title={`Unlock ${performer.name} post`}
+          visible={openPurchaseModal}
+          footer={null}
+          onCancel={() => this.setState({ openPurchaseModal: false })}
+        >
+          <PurchaseVideoForm video={video} submiting={submiting} onFinish={this.purchaseVideo.bind(this)} />
+        </Modal>
+      </Layout>
     );
   }
 }
-
 const mapStates = (state: any) => {
   const { commentMapping, comment } = state.comment;
   return {
-    user: { ...state.user.current },
-    ui: { ...state.ui },
     relatedVideos: { ...state.video.relatedVideos },
     commentMapping,
-    comment
+    comment,
+    user: { ...state.user.current },
+    ui: { ...state.ui }
   };
 };
 
@@ -759,6 +748,7 @@ const mapDispatch = {
   getComments,
   moreComment,
   createComment,
-  deleteComment
+  deleteComment,
+  updateBalance
 };
 export default connect(mapStates, mapDispatch)(VideoViewPage);

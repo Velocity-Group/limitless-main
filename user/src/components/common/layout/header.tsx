@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Layout, Avatar, Badge, message,
+  Layout, Badge, message,
   Tooltip, Modal, Drawer, Divider, Switch
 } from 'antd';
 import { connect } from 'react-redux';
@@ -11,9 +11,8 @@ import {
   ShoppingCartOutlined, UserOutlined,
   MessageOutlined, VideoCameraOutlined, FireOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined,
-  HomeOutlined, LogoutOutlined, SearchOutlined,
-  UsergroupAddOutlined, VideoCameraAddOutlined,
-  HeartOutlined, PlusSquareOutlined, BulbOutlined
+  HomeOutlined, LogoutOutlined, UsergroupAddOutlined, VideoCameraAddOutlined,
+  HeartOutlined, PlusSquareOutlined, BulbOutlined, WalletOutlined
 } from '@ant-design/icons';
 import './header.less';
 import { withRouter, Router as RouterEvent } from 'next/router';
@@ -24,9 +23,10 @@ import { Event, SocketContext } from 'src/socket';
 import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/actions';
 // import { PrivateCallCard } from '@components/streaming/private-call-request-card';
 import { updateUIValue } from 'src/redux/ui/actions';
-// import SearchBar from './search-bar';
+import { updateBalance } from '@redux/user/actions';
 
 interface IProps {
+  updateBalance: Function;
   updateUIValue: Function;
   currentUser?: IUser;
   logout: Function;
@@ -94,6 +94,13 @@ class Header extends PureComponent<IProps> {
     }
   }
 
+  async handleUpdateBalance(event) {
+    const { currentUser, updateBalance: handleUpdateBalance } = this.props;
+    if (currentUser.isPerformer) {
+      handleUpdateBalance({ token: event.token });
+    }
+  }
+
   onThemeChange = (theme: string) => {
     const { updateUIValue: handleUpdateUI } = this.props;
     handleUpdateUI({ theme });
@@ -127,6 +134,10 @@ class Header extends PureComponent<IProps> {
         <Event
           event="private-chat-request"
           handler={this.handlePrivateChat.bind(this)}
+        />
+        <Event
+          event="update_balance"
+          handler={this.handleUpdateBalance.bind(this)}
         />
         <div className="main-container">
           <Layout.Header className="header" id="layoutHeader">
@@ -269,6 +280,10 @@ class Header extends PureComponent<IProps> {
                       @
                       {currentUser?.username || 'n/a'}
                     </span>
+                    <span className="user-balance">
+                      <img src="/static/coin-ico.png" alt="gem" />
+                      {(currentUser?.balance || 0).toFixed(2)}
+                    </span>
                   </a>
                 </div>
               </>
@@ -364,14 +379,21 @@ class Header extends PureComponent<IProps> {
                     Edit Profile
                   </div>
                 </Link>
+                <Link href="/token-package" as="/token-package">
+                  <div className={router.pathname === '/token-package' ? 'menu-item active' : 'menu-item'}>
+                    <WalletOutlined />
+                    {' '}
+                    Add Tokens
+                  </div>
+                </Link>
                 <Divider />
-                {/* <Link href="/user/bookmarks" as="/user/bookmarks">
+                <Link href="/user/bookmarks" as="/user/bookmarks">
                   <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
                     <StarOutlined />
                     {' '}
                     Bookmarks
                   </div>
-                </Link> */}
+                </Link>
                 <Link href="/user/my-subscription" as="/user/my-subscription">
                   <div className={router.pathname === '/user/my-subscription' ? 'menu-item active' : 'menu-item'}>
                     <HeartOutlined />
@@ -427,6 +449,6 @@ const mapState = (state: any) => ({
   ...state.streaming
 });
 const mapDispatch = {
-  logout, addPrivateRequest, accessPrivateRequest, updateUIValue
+  logout, addPrivateRequest, accessPrivateRequest, updateUIValue, updateBalance
 };
 export default withRouter(connect(mapState, mapDispatch)(Header)) as any;

@@ -21,3 +21,4 @@ export * from './video.service';
 export * from './gallery.service';
 export * from './token-package.service';
 export * from './photo.service';
+export * from './purchase-token.service';

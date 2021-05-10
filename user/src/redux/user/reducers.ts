@@ -15,7 +15,8 @@ import {
   updateBankingSuccess,
   updateBankingFail,
   updateCurrentUserCover,
-  updateBlockCountries
+  updateBlockCountries,
+  updateBalance
 } from './actions';
 
 const initialState = {
@@ -171,6 +172,17 @@ const userReducers = [
       return {
         ...state,
         current: { ...state.current, ...{ blockCountries: data.payload } }
+      };
+    }
+  },
+  {
+    on: updateBalance,
+    reducer(state: any, data: any) {
+      const nextState = { ...state };
+      const { token } = data.payload;
+      nextState.current.balance += token;
+      return {
+        ...nextState
       };
     }
   },

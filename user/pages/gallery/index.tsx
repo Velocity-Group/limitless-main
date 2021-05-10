@@ -1,19 +1,20 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Row, Col, Spin, Tabs
+  Layout, message, Row, Col, Spin, Tabs, Button, Modal
 } from 'antd';
 import {
   HeartOutlined, BookOutlined
 } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { galleryService, photoService } from '@services/index';
+import { galleryService, photoService, purchaseTokenService } from '@services/index';
 import { getRelatedGalleries } from '@redux/gallery/actions';
+import { updateBalance } from '@redux/user/actions';
 import {
-  IGallery,
-  IUser,
-  IUIConfig
+  IGallery, IUser, IUIConfig
 } from 'src/interfaces';
+import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import { PurchaseGalleryForm } from '@components/gallery/confirm-purchase';
 import GalleryCard from '@components/gallery/gallery-card';
 import { Carousel } from 'react-responsive-carousel';
 import Router from 'next/router';
@@ -27,6 +28,7 @@ interface IProps {
   user: IUser;
   ui: IUIConfig;
   getRelatedGalleries: Function;
+  updateBalance: Function;
   relatedGalleries: any;
 }
 
@@ -56,7 +58,12 @@ class GalleryViewPage extends PureComponent<IProps> {
 
   state = {
     fetching: false,
-    photos: []
+    photos: [],
+    isBought: false,
+    isSubscribed: false,
+    submiting: false,
+    openPurchaseModal: false,
+    openSubscriptionModal: false
   };
 
   async componentDidMount() {
@@ -65,6 +72,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       Router.back();
       return;
     }
+    this.setState({ isBought: gallery.isBought, isSubscribed: gallery.isSubscribed });
     this.getPhotos();
     getRelatedHandler({
       performerId: gallery.performerId,
@@ -100,6 +108,40 @@ class GalleryViewPage extends PureComponent<IProps> {
     }
   }
 
+  async purchaseGallery() {
+    const { gallery, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user?.balance < gallery.price) {
+      message.error('Your balance token is not enough');
+      Router.push('/token-package');
+      return;
+    }
+    try {
+      await (await purchaseTokenService.purchaseGallery(gallery._id, { })).data;
+      message.success('Gallery is unlocked!');
+      handleUpdateBalance({ token: gallery.price });
+      this.setState({ isBought: true, openPurchaseModal: false });
+    } catch (e) {
+      const error = await e;
+      message.error(error.message || 'Error occured, please try again later');
+    }
+  }
+
+  async subscribe() {
+    try {
+      const { gallery, updateBalance: handleUpdateBalance } = this.props;
+      await this.setState({ submiting: true });
+      await purchaseTokenService.subscribePerformer({ type: 'monthly', performerId: gallery.performer._id });
+      await this.setState({ isSubscribed: true, openSubscriptionModal: false });
+      handleUpdateBalance({ token: this.subscriptionType === 'monthly' ? -gallery.performer.monthlyPrice : -gallery.performer.yearlyPrice });
+      message.success('Subscribed!');
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later');
+    } finally {
+      this.setState({ submiting: false });
+    }
+  }
+
   render() {
     const {
       ui,
@@ -109,10 +151,13 @@ class GalleryViewPage extends PureComponent<IProps> {
         error: null,
         success: false,
         items: []
-      }
+      },
+      user
     } = this.props;
-    const { fetching, photos } = this.state;
-
+    const {
+      fetching, photos, isBought, isSubscribed, submiting, openPurchaseModal, openSubscriptionModal
+    } = this.state;
+    const canview = (gallery.isSale && isBought) || (!gallery.isSale && isSubscribed);
     return (
       <>
         <Head>
@@ -144,13 +189,62 @@ class GalleryViewPage extends PureComponent<IProps> {
         <Layout>
           <div className="main-container">
             <div className="page-heading">{gallery?.title}</div>
-            <p>{gallery?.description}</p>
             <div className="photo-carousel">
               <Carousel>
                 {photos.length > 0 && photos.map((photo) => (
-                  <img alt="img" src={gallery?.isSubscribed ? photo?.photo?.url : '/static/no-subscribe-img.jpg'} key={photo._id} />
+                  <img alt="img" src={canview ? photo?.photo?.url : '/static/no-subscribe-img.jpg'} key={photo._id} />
                 ))}
               </Carousel>
+              {!canview && (
+                <div className="text-center">
+                  {gallery.isSale && !isBought && (
+                  <Button className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
+                    UNLOCK CONTENT BY
+                    {' '}
+                    <img alt="coin" src="/static/coin-ico.png" width="20px" />
+                    {' '}
+                    {gallery.price.toFixed(2)}
+                  </Button>
+                  )}
+                  {!gallery.isSale && !isSubscribed && (
+                  <div
+                    style={{ padding: '25px 5px' }}
+                    className="subscription"
+                  >
+                    <h3>To view full content, subscribe me!</h3>
+                    <div style={{ marginBottom: '25px' }}>
+                      {gallery.performer && gallery.performer.monthlyPrice && (
+                      <Button
+                        className="primary"
+                        style={{ marginRight: '15px' }}
+                        disabled={submiting && this.subscriptionType === 'monthly'}
+                        onClick={() => {
+                          this.subscriptionType = 'monthly';
+                          this.setState({ openSubscriptionModal: true });
+                        }}
+                      >
+                        Subscribe Monthly $
+                        {gallery.performer.monthlyPrice.toFixed(2)}
+                      </Button>
+                      )}
+                      {gallery.performer && gallery.performer.yearlyPrice && (
+                      <Button
+                        className="btn btn-yellow"
+                        disabled={submiting && this.subscriptionType === 'yearly'}
+                        onClick={() => {
+                          this.subscriptionType = 'yearly';
+                          this.setState({ openSubscriptionModal: true });
+                        }}
+                      >
+                        Subscribe Yearly $
+                        {gallery?.performer?.yearlyPrice.toFixed(2)}
+                      </Button>
+                      )}
+                    </div>
+                  </div>
+                  )}
+                </div>
+              )}
               {!fetching && !photos.length && <p className="text-center">No photo was found.</p>}
               {fetching && <div className="text-center"><Spin /></div>}
             </div>
@@ -214,6 +308,7 @@ class GalleryViewPage extends PureComponent<IProps> {
             <div className="related-items">
               <h4 className="ttl-1">You may also like</h4>
               {relatedGalleries.requesting && <div className="text-center"><Spin /></div>}
+              {!relatedGalleries.requesting && !relatedGalleries.items.length && <p>No gallery was found</p>}
               <Row>
                 {!relatedGalleries.requesting && relatedGalleries.items.length > 0
                   && relatedGalleries.items.map((item: IGallery) => (
@@ -224,6 +319,32 @@ class GalleryViewPage extends PureComponent<IProps> {
               </Row>
             </div>
           </div>
+          <Modal
+            key="subscribe_performer"
+            className="subscription-modal"
+            width={350}
+            title={null}
+            visible={openSubscriptionModal}
+            footer={null}
+            onCancel={() => this.setState({ openSubscriptionModal: false })}
+          >
+            <ConfirmSubscriptionPerformerForm
+              user={user}
+              type={this.subscriptionType || 'monthly'}
+              performer={gallery?.performer}
+              submiting={submiting}
+              onFinish={this.subscribe.bind(this)}
+            />
+          </Modal>
+          <Modal
+            key="purchase_post"
+            title={`Unlock gallery ${gallery.title}`}
+            visible={openPurchaseModal}
+            footer={null}
+            onCancel={() => this.setState({ openPurchaseModal: false })}
+          >
+            <PurchaseGalleryForm gallery={gallery} submiting={submiting} onFinish={this.purchaseGallery.bind(this)} />
+          </Modal>
         </Layout>
       </>
     );
@@ -237,6 +358,7 @@ const mapStates = (state: any) => ({
 });
 
 const mapDispatch = {
-  getRelatedGalleries
+  getRelatedGalleries,
+  updateBalance
 };
 export default connect(mapStates, mapDispatch)(GalleryViewPage);

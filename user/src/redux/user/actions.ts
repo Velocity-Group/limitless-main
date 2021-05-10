@@ -32,3 +32,5 @@ export const {
 export const setUpdatingBanking = createAction('updatingBanking');
 
 export const updateBlockCountries = createAction('updateBlockCountries');
+
+export const updateBalance = createAction('updateBalance');

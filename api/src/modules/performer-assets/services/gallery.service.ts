@@ -18,6 +18,7 @@ import { PaymentTokenService, PurchasedItemSearchService } from 'src/modules/pur
 import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { STATUS } from 'src/kernel/constants';
 import { GalleryUpdatePayload } from '../payloads/gallery-update.payload';
 import { GalleryDto } from '../dtos';
 import { GalleryCreatePayload, GallerySearchRequest } from '../payloads';
@@ -134,7 +135,8 @@ export class GalleryService {
     dto.isBookMarked = !!bookmark;
     const subscribed = user && await this.subscriptionService.checkSubscribed(dto.performerId, user._id);
     dto.isSubscribed = !!subscribed;
-    // todo check bought
+    const isBought = await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
+    dto.isBought = !!isBought;
     return dto;
   }
 
@@ -333,7 +335,9 @@ export class GalleryService {
     req: GallerySearchRequest,
     user: UserDto
   ): Promise<PageableData<GalleryDto>> {
-    const query = {} as any;
+    const query = {
+      status: STATUS.ACTIVE
+    } as any;
     if (req.q) {
       const regexp = new RegExp(
         req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
@@ -349,7 +353,9 @@ export class GalleryService {
       ];
     }
     if (req.performerId) query.performerId = req.performerId;
-    query.status = 'active';
+    if (req.excludedId) {
+      query._id = { $ne: req.excludedId };
+    }
     let sort = {};
     if (req.sort && req.sortBy) {
       sort = {
