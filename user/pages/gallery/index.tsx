@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import Head from 'next/head';
 import { productService, reactionService } from '@services/index';
 import { PerformerListProduct } from '@components/product/performer-list-product';
+import { addCart, removeCart } from '@redux/cart/actions';
 import { PurchaseProductForm } from '@components/product/confirm-purchase';
 import { IProduct, IUser, IUIConfig } from '../../src/interfaces';
 import './store.less';
@@ -26,7 +27,7 @@ interface IStates {
   openPurchaseModal: boolean;
 }
 
-class ProductViewPage extends PureComponent<IProps, IStates> {
+class GalleryDetails extends PureComponent<IProps, IStates> {
   static authenticate: boolean = true;
 
   static async getInitialProps({ ctx }) {
@@ -242,5 +243,5 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui }
 });
 
-const mapDispatch = { };
-export default connect(mapStates, mapDispatch)(ProductViewPage);
+const mapDispatch = { addCart, removeCart };
+export default connect(mapStates, mapDispatch)(GalleryDetails);

@@ -93,10 +93,8 @@ export class AdminUserController {
     @Body() payload: UserAuthUpdatePayload,
     @Param('id') userId: string
   ): Promise<DataResponse<any>> {
-    await this.userService.adminUpdate(userId, payload);
-
-    const user = await this.userService.findById(userId);
-    return DataResponse.ok(new UserDto(user).toResponse(true));
+    const data = await this.userService.adminUpdate(userId, payload);
+    return DataResponse.ok(new UserDto(data).toResponse(true));
   }
 
   @Get('/:id/view')

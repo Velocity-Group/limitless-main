@@ -10,7 +10,6 @@ import {
 } from 'src/kernel';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { AuthService } from 'src/modules/auth/services';
-import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { PerformerService } from 'src/modules/performer/services';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserModel } from '../models';
@@ -159,46 +158,23 @@ export class UserService {
       data.verifiedEmail = false;
     }
     await this.userModel.updateOne({ _id: id }, data, { upsert: true });
-    const newUser = await this.userModel.findById(id);
-    if (eUser.twitterConnected && !eUser.email && newUser.email) {
-      await this.authService.create(new AuthCreateDto({
-        sourceId: newUser._id,
+    if (data.email && data.email.toLowerCase() !== user.email) {
+      await this.authService.sendVerificationEmail(user);
+      await this.authService.updateKey({
         source: 'user',
-        key: 'email',
-        value: newUser.email
-      }));
-    }
-
-    if (eUser.googleConnected && !eUser.username && newUser.username) {
-      await this.authService.create(new AuthCreateDto({
-        sourceId: newUser._id,
-        source: 'user',
-        key: 'username',
-        value: newUser.username
-      }));
-    }
-
-    if (data.email && data.email !== eUser.email) {
-      await this.authService.sendVerificationEmail(newUser);
-      const auth = await this.authService.findOne({
-        source: 'user',
-        sourceId: id,
+        sourceId: user._id,
         type: 'email'
       });
-      auth.key = newUser.email;
-      await auth.save();
     }
     // update auth key if username or email has changed
-    if (data.username && data.username !== eUser.username) {
-      const auth = await this.authService.findOne({
+    if (data.username && data.username.trim() !== user.username) {
+      await this.authService.updateKey({
         source: 'user',
-        sourceId: id,
+        sourceId: user._id,
         type: 'username'
       });
-      auth.key = newUser.username;
-      await auth.save();
     }
-    return newUser;
+    return user;
   }
 
   public async updateAvatar(user: UserDto, file: FileDto) {
@@ -209,13 +185,12 @@ export class UserService {
         avatarPath: file.path
       }
     );
-
     // resend user info?
     // TODO - check others config for other storage
     return file;
   }
 
-  public async adminUpdate(id: string | ObjectId, payload: UserAuthUpdatePayload): Promise<boolean> {
+  public async adminUpdate(id: string | ObjectId, payload: UserAuthUpdatePayload): Promise<any> {
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new EntityNotFoundException();
@@ -249,48 +224,24 @@ export class UserService {
       data.email = data.email.toLowerCase();
       data.verifiedEmail = false;
     }
-
     await this.userModel.updateOne({ _id: id }, data, { upsert: true });
-    // update auth key if username or email has changed
-    const newUser = await this.userModel.findById(id);
-    if (user.twitterConnected && !user.email && newUser.email) {
-      await this.authService.create(new AuthCreateDto({
-        sourceId: newUser._id,
-        source: 'user',
-        key: 'email',
-        value: newUser.email
-      }));
-    }
-
-    if (user.googleConnected && !user.username && newUser.username) {
-      await this.authService.create(new AuthCreateDto({
-        sourceId: newUser._id,
-        source: 'user',
-        key: 'username',
-        value: newUser.username
-      }));
-    }
     if (data.email && data.email.toLowerCase() !== user.email) {
-      await this.authService.sendVerificationEmail(newUser);
-      const auth = await this.authService.findOne({
+      await this.authService.sendVerificationEmail(user);
+      await this.authService.updateKey({
         source: 'user',
-        sourceId: id,
+        sourceId: user._id,
         type: 'email'
       });
-      auth.key = newUser.email;
-      await auth.save();
     }
     // update auth key if username or email has changed
     if (data.username && data.username.trim() !== user.username) {
-      const auth = await this.authService.findOne({
+      await this.authService.updateKey({
         source: 'user',
-        sourceId: id,
+        sourceId: user._id,
         type: 'username'
       });
-      auth.key = newUser.username;
-      await auth.save();
     }
-    return true;
+    return user;
   }
 
   public async updateVerificationStatus(userId: string | ObjectId): Promise<any> {

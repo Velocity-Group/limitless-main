@@ -26,7 +26,7 @@ export class TableListProduct extends PureComponent<IProps> {
     } = this.props;
     const columns = [
       {
-        title: '',
+        title: '#',
         dataIndex: 'image',
         render(data, record) {
           return <ImageProduct product={record} />;
@@ -37,11 +37,11 @@ export class TableListProduct extends PureComponent<IProps> {
         dataIndex: 'name'
       },
       {
-        title: 'Amount of Tokens',
+        title: 'Tokens',
         dataIndex: 'price',
         render(price: number) {
           return (
-            <span>
+            <span style={{ whiteSpace: 'nowrap' }}>
               <img alt="token" src="/static/coin-ico.png" height="20px" />
               {' '}
               {(price && price.toFixed(2)) || 0}
@@ -98,7 +98,7 @@ export class TableListProduct extends PureComponent<IProps> {
         title: 'Actions',
         dataIndex: '_id',
         render: (id: string) => (
-          <>
+          <div style={{ whiteSpace: 'nowrap' }}>
             <Button className="info">
               <Link
                 href={{
@@ -118,7 +118,7 @@ export class TableListProduct extends PureComponent<IProps> {
             >
               <DeleteOutlined />
             </Button>
-          </>
+          </div>
         )
       }
     ];

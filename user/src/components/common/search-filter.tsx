@@ -47,7 +47,7 @@ export class SearchFilter extends PureComponent<IProps> {
     return (
       <Row gutter={24} className="filter-block">
         {searchWithKeyword && (
-          <Col lg={8} md={8} xs={14}>
+          <Col lg={8} md={8} xs={10}>
             <Input
               placeholder="Enter keyword"
               onChange={(evt) => this.setState({ q: evt.target.value })}
@@ -56,7 +56,7 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         )}
         {statuses && statuses.length ? (
-          <Col lg={6} md={6} xs={10}>
+          <Col lg={6} md={6} xs={8}>
             <Select
               onChange={(val) => this.setState({ status: val })}
               style={{ width: '100%' }}
@@ -72,7 +72,7 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {type && type.length ? (
-          <Col lg={6} md={6} xs={10}>
+          <Col lg={6} md={6} xs={8}>
             <Select
               onChange={(val) => this.setState({ type: val })}
               style={{ width: '100%' }}
@@ -88,7 +88,7 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {searchWithPerformer && (
-          <Col lg={6} md={6} xs={24}>
+          <Col lg={6} md={6} xs={8}>
             <SelectPerformerDropdown
               placeholder="Search model here"
               style={{ width: '100%' }}
@@ -97,7 +97,7 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         )}
         {dateRange && (
-          <Col lg={6} md={6} xs={18}>
+          <Col lg={6} md={6} xs={16}>
             <RangePicker
               onChange={(dates: [any, any], dateStrings: [string, string]) => this.setState({
                 fromDate: dateStrings[0],

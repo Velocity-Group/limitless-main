@@ -15,12 +15,12 @@ import {
 import UploadList from '@components/file/list-media';
 import { IFeed } from 'src/interfaces';
 import { feedService } from '@services/index';
-import './index.less';
 import Router from 'next/router';
 import moment from 'moment';
 import { formatDate } from '@lib/date';
 import { Emotions } from '@components/messages/emotions';
 import AddPollDurationForm from './add-poll-duration';
+import './index.less';
 
 const { TextArea } = Input;
 const layout = {

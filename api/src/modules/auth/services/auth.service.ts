@@ -100,49 +100,28 @@ export class AuthService {
   }
 
   public async update(data: AuthUpdateDto) {
-    const auths = await this.authModel.find({
-      source: data.source,
-      sourceId: data.sourceId
-    });
-
     const user = data.source === 'user'
       ? await this.userService.findById(data.sourceId)
       : await this.performerService.findById(data.sourceId);
     if (!user) {
       throw new EntityNotFoundException();
     }
-    if (!auths.length) {
-      await Promise.all([
-        this.create({
-          source: data.source,
-          sourceId: data.sourceId,
-          type: 'email',
-          key: user.email,
-          value: data.value
-        }),
-        this.create({
-          source: data.source,
-          sourceId: user._id,
-          type: 'username',
-          key: user.username,
-          value: data.value
-        })
-      ]);
-      return true;
-    }
-    await Promise.all(auths.map(async (auth) => {
-      let newVal = data.value;
-      const salt = this.generateSalt();
-      newVal = this.encryptPassword(data.value, salt);
-      // eslint-disable-next-line no-param-reassign
-      auth.salt = salt;
-      // eslint-disable-next-line no-param-reassign
-      auth.value = newVal;
-      // eslint-disable-next-line no-param-reassign
-      auth.key = auth.type === 'email' ? user.email : user.username;
-      return auth.save();
-    }));
-    return true;
+    await Promise.all([
+      user.email && this.create({
+        source: data.source,
+        sourceId: data.sourceId,
+        type: 'email',
+        key: user.email,
+        value: data.value
+      }),
+      user.username && this.create({
+        source: data.source,
+        sourceId: user._id,
+        type: 'username',
+        key: user.username,
+        value: data.value
+      })
+    ]);
   }
 
   public async updateKey(data: AuthUpdateDto) {
@@ -154,9 +133,7 @@ export class AuthService {
     const user = data.source === 'user'
       ? await this.userService.findById(data.sourceId)
       : await this.performerService.findById(data.sourceId);
-    if (!user) {
-      throw new EntityNotFoundException();
-    }
+    if (!user) return;
 
     await Promise.all(
       auths.map((auth) => {
