@@ -139,7 +139,7 @@ class ConversationList extends PureComponent<IProps> {
         <div className="user-bl">
           <img alt="avatar" src={user.avatar || '/static/no-avatar.png'} />
           {' '}
-          {user.username}
+          {user?.name || user.username || 'N/A'}
         </div>
         <ConversationSearch
           onSearch={(e) => {

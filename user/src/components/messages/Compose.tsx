@@ -1,12 +1,8 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/no-autofocus */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/no-did-update-set-state */
 import { PureComponent, createRef } from 'react';
 import { connect } from 'react-redux';
 import { sendMessage, sentFileSuccess } from '@redux/message/actions';
-import { SmileOutlined, SendOutlined } from '@ant-design/icons';
+import { SmileFilled, SendOutlined } from '@ant-design/icons';
 import { ImageMessageUpload } from '@components/messages/uploadPhoto';
 import { authService, messageService } from '@services/index';
 import { Emotions } from './emotions';
@@ -31,7 +27,8 @@ class Compose extends PureComponent<IProps> {
 
   componentDidUpdate(previousProps) {
     const { sendMessageStatus } = this.props;
-    if (previousProps.sendMessageStatus.success !== sendMessageStatus.success) {
+    if (previousProps?.sendMessageStatus?.success !== sendMessageStatus?.success && sendMessageStatus?.success) {
+      // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ text: '' });
       this._input && this._input.focus();
     }
@@ -53,21 +50,22 @@ class Compose extends PureComponent<IProps> {
   }
 
   onPhotoUploaded = (data: any) => {
+    const { sentFileSuccess: handleSendFile } = this.props;
     if (!data || !data.response) {
       return;
     }
     const imageUrl = (data.response.data && data.response.data.imageUrl) || data.base64;
-    this.props.sentFileSuccess({ ...data.response.data, ...{ imageUrl } });
+    handleSendFile({ ...data.response.data, ...{ imageUrl } });
   }
 
   send() {
-    if (!this.state.text) return;
+    const { text } = this.state;
+    const { sendMessage: handleSendMessage } = this.props;
+    if (!text) return;
     const { conversation } = this.props;
-    this.props.sendMessage({
+    handleSendMessage({
       conversationId: conversation._id,
-      data: {
-        text: this.state.text
-      }
+      data: { text }
     });
   }
 
@@ -92,7 +90,7 @@ class Compose extends PureComponent<IProps> {
         />
         <div className="grp-icons">
           <div className="grp-emotions">
-            <SmileOutlined />
+            <SmileFilled />
             <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
           </div>
         </div>
@@ -114,7 +112,7 @@ class Compose extends PureComponent<IProps> {
           </div>
         </div>
         <div className="grp-icons" style={{ paddingRight: 0 }}>
-          <div className="grp-send" onClick={this.send.bind(this)}>
+          <div aria-hidden className="grp-send" onClick={this.send.bind(this)}>
             <SendOutlined />
           </div>
         </div>

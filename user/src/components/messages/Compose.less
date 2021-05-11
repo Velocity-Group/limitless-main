@@ -3,18 +3,21 @@
 .compose {
   display: flex;
   align-items: center;
-  background-color: @white;
   position: absolute;
-  width: 100%;
-  top: 100%;
-  left: 0;
+  width: calc(100% + 2px);
+  bottom: -1px;
+  left: -1px;
+  border: 1px solid @light-card;
+
   .toolbar-button {
     color: @grey-color;
     margin-left: 15px;
   }
+
   .toolbar-button:hover {
     color: @grey-color;
   }
+
   &.custom {
     width: 96%;
     top: unset;
@@ -42,12 +45,10 @@
   padding: 0 10px;
   cursor: pointer;
   position: relative;
-  .anticon-send {
-    font-size: 22px;
-    color: @theme-color;
-  }
+
   &.custom {
     display: flex;
+
     .anticon-send {
       margin-left: 15px;
     }
@@ -55,16 +56,18 @@
 }
 
 .grp-emotions {
-  .anticon-smile {
+  .anticon {
     font-size: 22px;
-    color: @theme-color;
+    color: #a2afbd;
   }
+
   aside.emoji-picker-react {
     display: none;
     position: absolute;
     right: 0;
     bottom: 50%
   }
+
   &:hover aside.emoji-picker-react {
     display: flex;
   }
@@ -73,6 +76,7 @@
 .grp-file-icon {
   height: 25px;
   width: 28px;
+
   .avatar-uploader {
     .ant-upload {
       width: auto;
@@ -80,21 +84,24 @@
       background: transparent;
       border: none;
       margin: 0;
+
       img {
-        width: 20px!important;
+        width: 20px !important;
         height: 20px;
         object-fit: cover;
       }
     }
+
     .ant-upload-text {
       display: none;
     }
   }
+
   .ant-upload-select.ant-upload-select-picture-card .anticon {
     position: unset;
     top: unset;
     left: unset;
-    color: @theme-color;
+    color: #a2afbd;
     font-size: 24px;
     padding: 0;
     background: transparent;
@@ -105,11 +112,13 @@
   height: 48px;
   background: @theme-color;
   padding: 12px 15px;
-  .anticon-send {
+
+  .anticon {
     font-size: 18px;
     color: @white;
     transform: rotate(-45deg);
   }
+
   &:hover {
     background: @primary-color;
   }

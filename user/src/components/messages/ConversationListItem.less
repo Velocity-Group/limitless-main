@@ -4,7 +4,11 @@
   align-items: center;
   padding: 10px;
   position: relative;
-  color: @white
+  color: @white;
+  &.active {
+    background: @background-conversation;
+    pointer-events: none;
+  }
 }
 
 .conversation-left-corner {
@@ -26,7 +30,6 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid @gray;
   background-color: @success-color;
 }
 .offline {
@@ -36,17 +39,11 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid @gray;
   background-color: @gray;
 }
 .conversation-list-item:hover {
   background: @primary-color;
   cursor: pointer;
-}
-
-.conversation-list-item.active {
-  background: @primary-color;
-  pointer-events: none;
 }
 
 .conversation-photo {
@@ -60,12 +57,12 @@
   font-weight: 600;
   text-transform: capitalize;
   margin: 0;
-  color: @white
+  color: @grey-color
 }
 
 .conversation-snippet {
   font-size: 12px;
-  color: @white;
+  color: @gray;
   margin: 0;
   white-space: nowrap;
   text-overflow: ellipsis;

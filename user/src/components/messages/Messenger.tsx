@@ -1,10 +1,11 @@
 import { PureComponent } from 'react';
-import './Messenger.less';
 import { connect } from 'react-redux';
 import { deactiveConversation } from '@redux/message/actions';
 import { Button } from 'antd';
+import { CloseSquareOutlined } from '@ant-design/icons';
 import ConversationList from './ConversationList';
 import MessageList from './MessageList';
+import './Messenger.less';
 
 interface IProps {
   toSource?: string;
@@ -33,7 +34,7 @@ class Messenger extends PureComponent<IProps> {
           <ConversationList toSource={toSource} toId={toId} />
         </div>
         <div className={!activeConversation._id ? 'chat-content' : 'chat-content active'}>
-          <Button onClick={this.onClose.bind(this)} className="close-btn">Back</Button>
+          <Button type="link" onClick={this.onClose.bind(this)} className="close-btn"><CloseSquareOutlined /></Button>
           <MessageList />
         </div>
       </div>

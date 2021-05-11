@@ -5,23 +5,26 @@
   height: calc(100% + 50px);
   width: 100%;
   overflow: auto;
-  padding: 20px 0;
-  background-color: @theme-color;
+  padding: 0 0 20px;
 }
 .user-bl {
-  color: @white;
+  color: @dark-grey;
   font-size: 15px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  padding: 0 25px;
-  margin-bottom: 20px;
+  padding: 5px 25px;
+  margin-bottom: 10px;
   font-weight: 600;
+  border-bottom: 1px solid @light-card;
+  text-transform: capitalize;
   img {
-    width: 50px;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
     border-radius: 50%;
     padding: 3px;
-    border: 2px solid @success-color;
+    border: 2px solid @primary-color;
     height: auto;
     float: left;
     cursor: pointer;

@@ -141,7 +141,7 @@ class MessageList extends PureComponent<IProps> {
                <div className="mess-recipient">
                  <img alt="" src={conversation?.recipientInfo?.avatar || '/static/no-avatar.png'} />
                  {' '}
-                 {conversation?.recipientInfo?.username}
+                 {conversation?.recipientInfo?.name || conversation?.recipientInfo?.username || 'N/A'}
                </div>
                {fetching && <div className="text-center"><Spin /></div>}
                {this.renderMessages()}
