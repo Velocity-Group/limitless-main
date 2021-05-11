@@ -4,7 +4,7 @@ import {
 } from 'antd';
 import { connect } from 'react-redux';
 import { getList } from '@redux/performer/actions';
-import PerformerCard from '@components/performer/card';
+import PerformerGridCard from '@components/performer/grid-card';
 import Head from 'next/head';
 import { PerformerAdvancedFilter } from '@components/common/base/performer-advanced-filter';
 import { IUIConfig } from 'src/interfaces/';
@@ -130,8 +130,8 @@ class Performers extends PureComponent<IProps> {
                 {performers && performers.length > 0
                     && !isLoading
                     && performers.map((p: any) => (
-                      <Col xs={12} sm={12} md={8} lg={8} key={p._id}>
-                        <PerformerCard performer={p} />
+                      <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
+                        <PerformerGridCard performer={p} />
                       </Col>
                     ))}
 

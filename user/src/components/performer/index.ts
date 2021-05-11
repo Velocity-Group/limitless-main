@@ -9,3 +9,4 @@ export * from './verificationForm';
 export * from './confirm-subscription';
 export * from './trending-profile';
 export * from './scroll-list';
+export * from './grid-card';

@@ -342,7 +342,7 @@ export default class FeedForm extends PureComponent<IProps> {
           validateMessages={validateMessages}
           initialValues={feed || ({
             text: '',
-            price: 0,
+            price: 4.99,
             isSale: false
           } as IFeed)}
         >
@@ -409,10 +409,10 @@ export default class FeedForm extends PureComponent<IProps> {
             uploading={uploading}
           />
           <Form.Item>
-            <Switch checkedChildren="Sale" unCheckedChildren="Free" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
+            <Switch checkedChildren="PPV Content" unCheckedChildren="Free Content" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
           </Form.Item>
           {isSale && (
-            <Form.Item label="Set price here" name="price" rules={[{ required: isSale, message: 'Please add price' }]}>
+            <Form.Item label="Amount of Tokens" name="price" rules={[{ required: isSale, message: 'Please add tokens' }]}>
               <InputNumber min={1} />
             </Form.Item>
           )}

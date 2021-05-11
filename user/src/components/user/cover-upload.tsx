@@ -74,7 +74,7 @@ export class CoverUpload extends PureComponent<IProps, IState> {
     const { loading } = this.state;
     const { headers, uploadUrl, options } = this.props;
     return (
-      <ImgCrop aspect={7.5 / 1} shape="rect" quality={1} modalTitle="Edit cover image (size dimension 7/1)" modalWidth={768}>
+      <ImgCrop aspect={5 / 1} shape="rect" quality={1} modalTitle="Edit cover image (size dimension 7/1)" modalWidth={768}>
         <Upload
           accept="image/*"
           name={options.fieldName || 'file'}

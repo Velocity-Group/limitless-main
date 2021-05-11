@@ -535,7 +535,7 @@ class FeedCard extends Component<IProps> {
           footer={null}
           onCancel={() => this.setState({ openTipModal: false })}
         >
-          <TipPerformerForm user={user} performer={performer} submiting={submiting} onFinish={this.sendTip.bind(this)} />
+          <TipPerformerForm performer={performer} submiting={submiting} onFinish={this.sendTip.bind(this)} />
         </Modal>
         <Modal
           key="purchase_post"
@@ -558,7 +558,6 @@ class FeedCard extends Component<IProps> {
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm
-            user={user}
             type={this.subscriptionType || 'monthly'}
             performer={performer}
             submiting={submiting}

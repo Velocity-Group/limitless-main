@@ -98,7 +98,7 @@ class HomePage extends PureComponent<IProps> {
 
   getBanners() {
     const { getBanners: handleGetBanners } = this.props;
-    handleGetBanners({ status: 'active' });
+    handleGetBanners({ status: 'active', limit: 99 });
   }
 
   async getPerformers() {
@@ -185,6 +185,21 @@ class HomePage extends PureComponent<IProps> {
               <div className="home-container">
                 <div className="left-container">
                   {user._id && !user.verifiedEmail && ui.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
+                  <div className="visit-history">
+                    <div className="top-story">
+                      <a>Story</a>
+                      <a href="/model"><small>View all</small></a>
+                    </div>
+                    <div className="story-list">
+                      {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
+                        <div className="story-per-card">
+                          <img alt="avatr" src={per?.avatar || '/static/no-avatar.png'} />
+                          <p>{per?.name || per?.username || 'N/A'}</p>
+                        </div>
+                      ))}
+                      {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No visited profile was found.</p>}
+                    </div>
+                  </div>
                   {/* <div className="filter-feed">
                     <FilterOutlined />
                     <Button disabled={loadingFeed} className={orientation === '' ? 'active' : ''} onClick={() => this.onFilterFeed('')}>All</Button>

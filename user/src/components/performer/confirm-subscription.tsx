@@ -3,14 +3,13 @@ import { PureComponent } from 'react';
 import {
   Button
 } from 'antd';
-import { IPerformer, IUser } from 'src/interfaces';
+import { IPerformer } from 'src/interfaces';
 import {
   CheckCircleOutlined, CheckSquareOutlined
 } from '@ant-design/icons';
 import './performer.less';
 
 interface IProps {
-  user?: IUser;
   type: string;
   performer: IPerformer;
   onFinish: Function;

@@ -167,6 +167,9 @@
   font-weight: 600;
   color: @black;
   font-family: @primary-font-bold;
+  span {
+    text-transform: capitalize;
+  }
 }
 
 .paging {
@@ -234,22 +237,6 @@
 .ant-form-item {
   margin-bottom: 5px;
 
-  .ant-input-affix-wrapper {
-    padding: 0 11px;
-  }
-
-  .ant-input {
-    height: 42px;
-    padding: 5px 10px;
-    font-weight: 500;
-    font-size: 12px;
-    border-radius: 5px;
-
-    &::placeholder {
-      color: @dark-grey;
-    }
-  }
-
   textarea.ant-input {
     min-height: 65px;
   }
@@ -262,48 +249,6 @@
       height: auto;
     }
   }
-
-  .ant-picker {
-    width: 100%;
-
-    input {
-      height: 30px;
-      font-size: 12px;
-      padding: 0
-    }
-  }
-}
-
-.ant-select-selector {
-  border-radius: 0.5em;
-  height: 40px;
-  padding: 5px 12px;
-
-  .ant-select-selection-item {
-    font-size: 12px;
-    color: @grey-color;
-  }
-}
-
-.ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
-  height: 40px;
-}
-
-.ant-input-number-input-wrap {
-  input {
-    border-radius: 5px;
-    height: 40px;
-    padding: 5px 12px;
-
-    &::placeholder {
-      color: @grey-color
-    }
-  }
-}
-
-.ant-picker-input>input {
-  height: 34px;
-  padding: 0 5px;
 }
 
 .user-verification {

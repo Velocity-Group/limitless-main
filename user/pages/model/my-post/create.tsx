@@ -52,7 +52,7 @@ class CreatePost extends PureComponent<IProps> {
             <div className="page-heading">
               <a onClick={() => Router.back()}><ArrowLeftOutlined /></a>
               &nbsp;
-              <span>New Post</span>
+              <span>{`New ${type} Post`}</span>
             </div>
             <div>
               {!chosenType ? (

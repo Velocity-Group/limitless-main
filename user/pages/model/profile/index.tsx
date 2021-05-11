@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import {
-  Layout, Collapse, Tabs, Button,
-  message, Modal, Tooltip
+  Layout, Collapse, Tabs, Button, Menu,
+  message, Modal, Tooltip, Dropdown
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -16,8 +16,8 @@ import {
 import Head from 'next/head';
 import {
   CheckCircleOutlined, ArrowDownOutlined, ArrowLeftOutlined, FireOutlined,
-  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined,
-  HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, BookOutlined
+  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined,
+  HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, ShareAltOutlined, BookOutlined
 } from '@ant-design/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
@@ -407,7 +407,7 @@ class PerformerProfile extends PureComponent<IProps> {
         </Head>
         <div
           className="top-profile"
-          style={{ backgroundImage: (currentUser._id === performer._id && `url('${currentUser?.cover || '/static/banner-image.jpg'}')`) || `url('${performer?.cover || '/static/banner-image.jpg'}')` || "url('/static/banner-image.jpg')" }}
+          style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}
         >
           <div className="main-container bg-2nd">
             <div className="top-banner">
@@ -419,7 +419,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   {performer?.name || ''}
                   {' '}
                   {performer?.verifiedAccount && (
-                  <CheckCircleOutlined className="theme-color" />
+                    <CheckCircleOutlined className="theme-color" />
                   )}
                 </div>
                 <div className="tab-stat">
@@ -468,6 +468,24 @@ class PerformerProfile extends PureComponent<IProps> {
                 </div>
               </div>
             </div>
+            <div className="drop-actions">
+              <Dropdown overlay={(
+                <Menu key="menu_actions">
+                  <Menu.Item key="book_mark">
+                    <a aria-hidden onClick={this.handleBookmark.bind(this)}>
+                      <BookOutlined />
+                      {' '}
+                      {!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}
+                    </a>
+                  </Menu.Item>
+                </Menu>
+              )}
+              >
+                <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
+                  <MoreOutlined />
+                </a>
+              </Dropdown>
+            </div>
           </div>
         </div>
         <div className="main-profile">
@@ -476,10 +494,10 @@ class PerformerProfile extends PureComponent<IProps> {
               <img
                 alt="main-avt"
                 src={
-                    performer && performer?.avatar
-                      ? performer?.avatar
-                      : '/static/no-avatar.png'
-                  }
+                  performer && performer?.avatar
+                    ? performer?.avatar
+                    : '/static/no-avatar.png'
+                }
               />
               {currentUser?._id !== performer._id && <span className={performer.isOnline ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
@@ -505,21 +523,14 @@ class PerformerProfile extends PureComponent<IProps> {
               && currentUser._id !== ((performer?._id) || '') && (
                 <div className="btn-grp">
                   <div style={{ marginBottom: '4px' }}>
-                    {/* <button disabled={requesting} type="button" className={isBookMarked ? 'primary' : 'normal custom'} onClick={this.handleBookmark.bind(this)}>
-                      <BookOutlined />
-                      {' '}
-                      {isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
-                    </button> */}
                     <button
                       type="button"
                       className="normal"
                       onClick={() => this.setState({ openTipModal: true })}
                     >
-                      <span>
+                      <a title="Send Tip">
                         <DollarOutlined />
-                        {' '}
-                        Send Tip
-                      </span>
+                      </a>
                     </button>
                     <button type="button" className="normal">
                       <Link
@@ -531,12 +542,18 @@ class PerformerProfile extends PureComponent<IProps> {
                           }
                         }}
                       >
-                        <span>
+                        <a title="Message">
                           <MessageOutlined />
-                          {' '}
-                          Message
-                        </span>
+                        </a>
                       </Link>
+                    </button>
+                    <button
+                      type="button"
+                      className="normal"
+                    >
+                      <a title="Share to social media">
+                        <ShareAltOutlined />
+                      </a>
                     </button>
                   </div>
                   {/* {isSubscribed && (
@@ -762,7 +779,6 @@ class PerformerProfile extends PureComponent<IProps> {
           onCancel={() => this.setState({ openTipModal: false })}
         >
           <TipPerformerForm
-            user={currentUser}
             performer={performer}
             submiting={submiting}
             onFinish={this.sendTip.bind(this)}
@@ -778,7 +794,6 @@ class PerformerProfile extends PureComponent<IProps> {
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm
-            user={currentUser}
             type={this.subscriptionType || 'monthly'}
             performer={performer}
             submiting={submiting}

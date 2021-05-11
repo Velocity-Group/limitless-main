@@ -185,16 +185,26 @@
 .bg-2nd {
   width: 100%;
   height: 100%;
+  position: relative;
   background: linear-gradient(180deg,
-      rgba(105, 34, 195, 0.25) 20%,
+      rgba(66, 66, 66, 0.25) 20%,
       rgba(255, 255, 255, 0.1) 80%);
+  .drop-actions {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    .ant-dropdown-trigger.dropdown-options {
+      color: @white;
+      font-size: 22px;
+    }
+  }
 }
 
 .main-profile {
-  margin-top: -60px;
+  margin-top: -40px;
 
   @media screen and (max-width: @mobile-screen) {
-    margin-top: -55px;
+    margin-top: -20px;
   }
 }
 
@@ -211,7 +221,7 @@
     border-radius: 50%;
     position: absolute;
     bottom: 25px;
-    left: 112px;
+    left: 89px;
     opacity: 0.8;
 
     &.off {
@@ -296,7 +306,7 @@
 .btn-grp {
   display: flex;
   flex-direction: column;
-  margin-top: -60px;
+  margin-top: -45px;
   padding: 0 5px;
   position: relative;
   float: right;
@@ -304,34 +314,31 @@
   align-items: center;
 
   button {
+    color: @primary-color;
+    font-weight: 500;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px rgba(138,150,163,0.25);
+    border: 1px solid @light-grey;
+    transition: color .15s,background-color .15s,box-shadow .15s;
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    padding: 0;
+    display: inline-flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
     margin: 0 5px;
-    border: none;
-    color: @white;
-    padding: 10px 30px;
-    transition: all 0.3s ease-in-out;
-    background: linear-gradient(0deg, @primary-color, @theme-color);
-    -webkit-box-shadow: 0 5px 10px rgba(50, 50, 50, 0.2);
-    box-shadow: 0 5px 10px rgba(50, 50, 50, 0.2);
-    padding: 0.7em 2em;
-    font-size: 0.9em;
-    font-weight: 600;
-    border-radius: 0.5em;
+    outline: none;
+    border-radius: 50%;
+    font-size: 25px;
     cursor: pointer;
-    border-radius: 5px;
-    // &:hover {
-    //   background: @theme-color;
-    // }
-  }
-
-  .normal {
-    background: @light-blue;
-    color: @black;
-
     &:hover {
-      border-color: #dae0e5;
-      background-color: #f3f7f8;
-      transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      background: @theme-color;
+      .anticon {
+        color: @white;
+      }
     }
   }
 
@@ -342,23 +349,11 @@
   }
 
   @media screen and (max-width: @mobile-screen) {
-    margin-top: 10px;
-    display: flex;
-    width: 100%;
-
     button {
-      width: 100%;
-      margin: 2px 0;
-    }
-
-    .normal,
-    .secondary {
-      width: calc(50% - 10px);
-      margin: 2px 5px;
-    }
-
-    .normal.custom {
-      width: 100%;
+      width: 35px;
+      height: 35px;
+      flex: 0 0 35px;
+      font-size: 18px;
     }
   }
 }
@@ -687,6 +682,85 @@
     }
   }
 }
+
+.grid-card {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: all 0.3s ease-in-out;
+
+  .hovering {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background: rgba(94, 94, 94, 0.5);
+
+    a {
+      font-size: 25px;
+      padding: 5px 15px;
+      border: 1px solid;
+      border-radius: 15px;
+    }
+  }
+
+  &:hover .model-name {
+    color: @white;
+    background-color: @primary-color;
+  }
+
+  .card-img {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    position: relative;
+
+    img {
+      border-top-left-radius: 0.5em;
+      border-top-right-radius: 0.5em;
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    @media screen and (max-width: @tablet-screen) {
+      height: 160px;
+    }
+  }
+
+  .card-stat {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    color: @white;
+    font-size: 13px;
+    padding: 4em 1em 1em 1em;
+    font-weight: 600;
+    position: absolute;
+    bottom: 51px;
+    background-image: linear-gradient(to bottom,
+        #04040e00 0%,
+        @theme-color 100%);
+  }
+
+  .model-name {
+    color: @black;
+    background-color: @light-card;
+    padding: 1em;
+    text-align: center;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+    font-weight: 600;
+    text-transform: capitalize;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    font-family: @primary-font-bold;
+  }
+}
+
 
 .grid-table {
   .ant-col {
