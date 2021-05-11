@@ -278,9 +278,9 @@ export class PerformerAccountForm extends PureComponent<IProps> {
           <Col lg={12} md={12} xs={24}>
             <Form.Item
               name="gender"
-              label="Orientation"
+              label="Gender"
               rules={[
-                { required: true, message: 'Please select your orientation!' }]}
+                { required: true, message: 'Please select your gender!' }]}
             >
               <Select>
                 <Select.Option value="male" key="male">
@@ -288,9 +288,6 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 </Select.Option>
                 <Select.Option value="female" key="female">
                   Female
-                </Select.Option>
-                <Select.Option value="couple" key="couple">
-                  Couple
                 </Select.Option>
                 <Select.Option value="transgender" key="transgender">
                   Trans
@@ -334,6 +331,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
               ]}
             >
               <DatePicker
+                style={{ width: '100%' }}
                 placeholder="DD/MM/YYYY"
                 format="DD/MM/YYYY"
                 disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(14, 'year').endOf('day')}
@@ -341,7 +339,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
-            <Form.Item name="state" label="State (County)">
+            <Form.Item name="state" label="State/County/Province">
               <Input />
             </Form.Item>
           </Col>
@@ -380,9 +378,6 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 </Option>
                 <Option key="white" value="white">
                   White
-                </Option>
-                <Option key="" value="">
-                  Ethnicity
                 </Option>
               </Select>
             </Form.Item>
@@ -459,9 +454,6 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 <Option key="red" value="red">
                   Red
                 </Option>
-                <Option key="" value="">
-                  Eyes color
-                </Option>
               </Select>
             </Form.Item>
           </Col>
@@ -483,9 +475,6 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 <Option key="white" value="white">
                   White
                 </Option>
-                <Option key="" value="">
-                  Hair color
-                </Option>
               </Select>
             </Form.Item>
           </Col>
@@ -501,9 +490,6 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 <Option key="small" value="small">
                   Small
                 </Option>
-                <Option key="" value="">
-                  Butt size
-                </Option>
               </Select>
             </Form.Item>
           </Col>
@@ -516,26 +502,6 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             <Form.Item name="bio" label="Bio">
               <TextArea rows={3} placeholder="Tell user something about you..." />
             </Form.Item>
-          </Col>
-          <Col lg={12} md={12} xs={24}>
-            {user.twitterConnected && (
-              <Form.Item>
-                <p>
-                  <TwitterOutlined style={{ color: '#1ea2f1', fontSize: '30px' }} />
-                  {' '}
-                  Signup/login via Twitter
-                </p>
-              </Form.Item>
-            )}
-            {user.googleConnected && (
-              <Form.Item>
-                <p>
-                  <GoogleOutlined style={{ color: '#d64b40', fontSize: '30px' }} />
-                  {' '}
-                  Signup/login via Google
-                </p>
-              </Form.Item>
-            )}
           </Col>
           <Col lg={12} md={12} xs={24}>
             <Form.Item label="Welcome Video">
@@ -578,6 +544,26 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             <Form.Item name="activateWelcomeVideo" valuePropName="checked">
               <Checkbox>Activate welcome video</Checkbox>
             </Form.Item>
+          </Col>
+          <Col lg={12} md={12} xs={24}>
+            {user.twitterConnected && (
+              <Form.Item>
+                <p>
+                  <TwitterOutlined style={{ color: '#1ea2f1', fontSize: '30px' }} />
+                  {' '}
+                  Signup/login via Twitter
+                </p>
+              </Form.Item>
+            )}
+            {user.googleConnected && (
+              <Form.Item>
+                <p>
+                  <GoogleOutlined style={{ color: '#d64b40', fontSize: '30px' }} />
+                  {' '}
+                  Signup/login via Google
+                </p>
+              </Form.Item>
+            )}
           </Col>
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>

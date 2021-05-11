@@ -126,7 +126,7 @@ export interface IBanking {
 
 export interface IPerformerStats {
   totalGrossPrice: number;
-  totalCommission: number;
+  totalSiteCommission: number;
   totalNetPrice: number;
 }
 

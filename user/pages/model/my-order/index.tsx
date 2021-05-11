@@ -64,7 +64,7 @@ class ModelOrderPage extends PureComponent<IProps> {
         filter, limit, sort, sortBy, pagination
       } = this.state;
       await this.setState({ searching: true });
-      const resp = await orderService.search({
+      const resp = await orderService.performerSearch({
         ...filter,
         limit,
         offset: (page - 1) * limit,

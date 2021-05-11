@@ -4,7 +4,6 @@ import {
 import Head from 'next/head';
 import { PureComponent } from 'react';
 import Loader from '@components/common/base/loader';
-import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import {
   IPerformer,
@@ -32,7 +31,7 @@ interface IStates {
   stats: IPerformerStats;
   sortBy: string;
   sort: string;
-  sourceType: string;
+  type: string;
   dateRange: any;
 }
 
@@ -49,12 +48,12 @@ class EarningPage extends PureComponent<IProps, IStates> {
       pagination: { total: 0, current: 1, pageSize: 10 },
       stats: {
         totalGrossPrice: 0,
-        totalCommission: 0,
+        totalSiteCommission: 0,
         totalNetPrice: 0
       },
       sortBy: 'createdAt',
       sort: 'desc',
-      sourceType: '',
+      type: '',
       dateRange: null
     };
   }
@@ -67,7 +66,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
   async handleFilter(data) {
     const { dateRange } = this.state;
     await this.setState({
-      sourceType: data.type,
+      type: data.type,
       dateRange: {
         ...dateRange,
         fromDate: data.fromDate,
@@ -88,7 +87,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
 
   async getData() {
     const {
-      pagination, sort, sortBy, sourceType, dateRange
+      pagination, sort, sortBy, type, dateRange
     } = this.state;
     try {
       const { current, pageSize } = pagination;
@@ -97,7 +96,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
         offset: (current - 1) * pageSize,
         sort,
         sortBy,
-        sourceType,
+        type,
         ...dateRange
       });
       await this.setState({
@@ -112,9 +111,9 @@ class EarningPage extends PureComponent<IProps, IStates> {
   }
 
   async getPerformerStats() {
-    const { dateRange, sourceType } = this.state;
+    const { dateRange, type } = this.state;
     const resp = await earningService.performerStarts({
-      sourceType,
+      type,
       ...dateRange
     });
     await this.setState({ stats: resp.data });
@@ -137,70 +136,68 @@ class EarningPage extends PureComponent<IProps, IStates> {
         </Head>
         <div className="main-container">
           <div className="page-heading">Earning Report</div>
-          <Page>
-            <SearchFilter
-              type={[
-                { key: '', text: 'All' },
-                { key: 'monthly_subscription', text: 'Monthly Subscription' },
-                { key: 'yearly_subscription', text: 'Yearly Subscription' },
-                { key: 'private_chat', text: 'Private Chat' },
-                { key: 'public_chat', text: 'Public Chat' },
-                { key: 'group_chat', text: 'Group Chat' },
-                { key: 'feed', text: 'Feed Post' },
-                { key: 'product', text: 'Product' },
-                { key: 'video', text: 'Video' },
-                { key: 'tip', text: 'Tip' }
-              ]}
-              onSubmit={this.handleFilter.bind(this)}
-              dateRange
-            />
-            {loading ? (
-              <Loader />
-            ) : (
-              <div>
-                {earning && earning.length > 0 ? (
-                  <div>
-                    <Row gutter={16} style={{ marginBottom: '10px' }}>
-                      <Col span={8}>
-                        <Statistic
-                          title="Total Price"
-                          prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                          value={stats.totalGrossPrice || 0}
-                          precision={2}
-                        />
-                      </Col>
-                      <Col span={8}>
-                        <Statistic
-                          title="Admin earned"
-                          prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                          value={stats.totalCommission || 0}
-                          precision={2}
-                        />
-                      </Col>
-                      <Col span={8}>
-                        <Statistic
-                          title="You earned"
-                          prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                          value={stats.totalNetPrice || 0}
-                          precision={2}
-                        />
-                      </Col>
-                    </Row>
-                    <div className="table-responsive">
-                      <TableListEarning
-                        dataSource={earning}
-                        rowKey="_id"
-                        pagination={pagination}
-                        onChange={this.handleTabsChange.bind(this)}
+          <SearchFilter
+            type={[
+              { key: '', text: 'All' },
+              { key: 'monthly_subscription', text: 'Monthly Subscription' },
+              { key: 'yearly_subscription', text: 'Yearly Subscription' },
+              { key: 'private_chat', text: 'Private Chat' },
+              { key: 'public_chat', text: 'Public Chat' },
+              { key: 'group_chat', text: 'Group Chat' },
+              { key: 'feed', text: 'Feed Post' },
+              { key: 'product', text: 'Product' },
+              { key: 'video', text: 'Video' },
+              { key: 'tip', text: 'Tip' }
+            ]}
+            onSubmit={this.handleFilter.bind(this)}
+            dateRange
+          />
+          {loading ? (
+            <Loader />
+          ) : (
+            <div>
+              {earning && earning.length > 0 ? (
+                <div>
+                  <Row gutter={16} style={{ marginBottom: '10px' }}>
+                    <Col span={8}>
+                      <Statistic
+                        title="Total Earned"
+                        prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
+                        value={stats.totalGrossPrice || 0}
+                        precision={2}
                       />
-                    </div>
+                    </Col>
+                    <Col span={8}>
+                      <Statistic
+                        title="Site Commission"
+                        prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
+                        value={stats.totalSiteCommission || 0}
+                        precision={2}
+                      />
+                    </Col>
+                    <Col span={8}>
+                      <Statistic
+                        title="You Earned"
+                        prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
+                        value={stats.totalNetPrice || 0}
+                        precision={2}
+                      />
+                    </Col>
+                  </Row>
+                  <div className="table-responsive">
+                    <TableListEarning
+                      dataSource={earning}
+                      rowKey="_id"
+                      pagination={pagination}
+                      onChange={this.handleTabsChange.bind(this)}
+                    />
                   </div>
-                ) : (
-                  <span>No data found.</span>
-                )}
-              </div>
-            )}
-          </Page>
+                </div>
+              ) : (
+                <span>No data found.</span>
+              )}
+            </div>
+          )}
         </div>
       </Layout>
     );

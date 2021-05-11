@@ -47,37 +47,40 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Gross Price',
+        title: 'GROSS',
+        dataIndex: 'grossPrice',
+        render(grossPrice: number) {
+          return (
+            <span>
+              <img src="/static/coin-ico.png" alt="coin" width="15px" />
+              {grossPrice.toFixed(2)}
+            </span>
+          );
+        }
+      },
+      {
+        title: 'NET',
         dataIndex: 'netPrice',
         render(netPrice: number) {
           return (
             <span>
-              $
+              <img src="/static/coin-ico.png" alt="coin" width="15px" />
               {netPrice.toFixed(2)}
             </span>
           );
         }
       },
       {
-        title: 'Commission',
-        dataIndex: 'commission',
-        render(commission: number) {
+        title: 'Site_Commission',
+        dataIndex: 'siteCommission',
+        render(commission: number, record) {
           return (
             <span>
-              {commission * 100}
-              %
-            </span>
-          );
-        }
-      },
-      {
-        title: 'Net Price',
-        dataIndex: 'grossPrice',
-        render(grossPrice: number) {
-          return (
-            <span>
-              $
-              {grossPrice.toFixed(2)}
+              {(commission || 0) * 100}
+              % -
+              {' '}
+              <img src="/static/coin-ico.png" alt="coin" width="15px" />
+              {((commission || 0) * record.grossPrice).toFixed(2)}
             </span>
           );
         }
@@ -104,8 +107,8 @@ export class TableListEarning extends PureComponent<IProps> {
       //   }
       // },
       {
-        title: 'Last update',
-        dataIndex: 'updatedAt',
+        title: 'Date',
+        dataIndex: 'createdAt',
         sorter: true,
         render(date: Date) {
           return <span>{formatDate(date)}</span>;

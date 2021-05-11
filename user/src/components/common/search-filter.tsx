@@ -93,7 +93,7 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         )}
         {dateRange && (
-          <Col lg={6} md={8} xs={12}>
+          <Col lg={8} md={8} xs={12}>
             <RangePicker
               onChange={(dates: [any, any], dateStrings: [string, string]) => this.setState({
                 fromDate: dateStrings[0],

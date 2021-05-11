@@ -5,7 +5,6 @@ import {
 } from 'antd';
 import Head from 'next/head';
 import { IOrder, IUIConfig } from 'src/interfaces';
-import { BreadcrumbComponent } from '@components/common/breadcrumb';
 import Page from '@components/common/layout/page';
 import { orderService } from 'src/services';
 import { connect } from 'react-redux';
@@ -24,30 +23,6 @@ interface IStates {
   shippingCode: string;
   deliveryStatus: string;
 }
-
-const productType = (type: string) => {
-  switch (type) {
-    case 'video':
-      return <Tag color="green">Video</Tag>;
-    case 'feed':
-      return <Tag color="green">Feed Post</Tag>;
-    case 'product':
-      return <Tag color="red">Product</Tag>;
-    case 'tip':
-      return <Tag color="orange">Tip</Tag>;
-    case 'private_chat':
-      return <Tag color="violet">Private Chat</Tag>;
-    case 'group_chat':
-      return <Tag color="violet">Group Chat</Tag>;
-    case 'public_chat':
-      return <Tag color="violet">Public Chat</Tag>;
-    case 'monthly_subscription':
-      return <Tag color="blue">Monthly Subscription</Tag>;
-    case 'yearly_subscription':
-      return <Tag color="blue">Yearly Subscription</Tag>;
-    default: return <Tag color="#FFCF00">{type}</Tag>;
-  }
-};
 
 class OrderDetailPage extends PureComponent<IProps, IStates> {
   static authenticate = true;
@@ -80,14 +55,14 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       return;
     }
     try {
-      this.setState({ submitting: true });
+      await this.setState({ submitting: true });
       await orderService.update(id, { deliveryStatus, shippingCode });
       message.success('Changes saved.');
       Router.back();
     } catch (e) {
       message.error(getResponseError(e));
     } finally {
-      await this.setState({ submitting: false });
+      this.setState({ submitting: false });
     }
   }
 
@@ -121,17 +96,6 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <BreadcrumbComponent
-            breadcrumbs={[
-              { title: 'My orders', href: '/model/my-order' },
-              {
-                title:
-                    order && order.orderNumber
-                      ? `#${order.orderNumber}`
-                      : 'Order Detail'
-              }
-            ]}
-          />
           <Page>
             {order && (
             <div className="main-container">
@@ -141,42 +105,28 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 {order?.orderNumber || 'N/A'}
               </div>
               <Descriptions>
-                <Item key="seller" label="Model">
-                  {order?.seller?.name || order?.seller?.username || 'N/A'}
-                </Item>
                 <Item key="name" label="Product">
-                  {order?.name || 'N/A'}
+                  {order?.productInfo?.name || 'N/A'}
                 </Item>
                 <Item key="description" label="Description">
-                  {order?.description || 'N/A'}
+                  {order?.productInfo?.name || 'N/A'}
                 </Item>
                 <Item key="productType" label="Product type">
-                  {productType(order.productType)}
+                  <Tag color="orange" style={{ textTransform: 'capitalize' }}>{order?.productInfo?.type || 'N/A'}</Tag>
                 </Item>
                 <Item key="unitPrice" label="Unit price">
-                  {`$${order?.unitPrice}` || '0'}
+                  <img src="/static/coin-ico.png" width="20px" alt="coin" />
+                  {order?.unitPrice}
                 </Item>
                 <Item key="quantiy" label="Quantity">
                   {order?.quantity || '0'}
                 </Item>
-                <Item key="originalPrice" label="Original Price">
-                  {`$${order?.originalPrice}` || '0'}
-                </Item>
-                {order.couponInfo && (
-                  <Item key="discount" label="Discount">
-                    {order?.couponInfo?.value * (order?.originalPrice || 0) || ''}
-                  </Item>
-                )}
-                <Item key="totalPrice" label="Total Price">
-                  {order?.payBy === 'money' && '$'}
-                  {(order?.totalPrice || 0).toFixed(2)}
-                  {order?.payBy === 'token' && 'Tokens'}
-                </Item>
-                <Item key="status" label="Status">
-                  <Tag color="red">{order?.status.toUpperCase()}</Tag>
+                <Item key="originalPrice" label="Total Price">
+                  <img src="/static/coin-ico.png" width="20px" alt="coin" />
+                  {order?.totalPrice}
                 </Item>
               </Descriptions>
-              {order?.productType === 'physical_product'
+              {order?.productInfo?.type === 'physical'
                 ? (
                   <>
                     <div style={{ marginBottom: '10px' }}>
@@ -198,16 +148,12 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                       {' '}
                       <Select
                         onChange={(e) => {
-                          if (order.productType !== 'physical') return;
                           this.setState({ deliveryStatus: e });
                         }}
                         defaultValue={order.deliveryStatus}
                         disabled={submitting}
                         style={{ minWidth: '120px' }}
                       >
-                        <Select.Option key="created" value="created">
-                          Created
-                        </Select.Option>
                         <Select.Option key="processing" value="processing">
                           Processing
                         </Select.Option>
@@ -223,8 +169,11 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                       </Select>
                     </div>
                     <div style={{ marginBottom: '10px' }}>
-                      <Button danger onClick={this.onUpdate.bind(this)} disabled={submitting}>
+                      <Button className="primary" onClick={this.onUpdate.bind(this)} disabled={submitting}>
                         Update
+                      </Button>
+                      <Button className="secondary" onClick={() => Router.back()} disabled={submitting}>
+                        Back
                       </Button>
                     </div>
                   </>
