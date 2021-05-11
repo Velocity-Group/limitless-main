@@ -1,18 +1,15 @@
-/* eslint-disable default-case */
-/* eslint-disable consistent-return */
-/* eslint-disable react/require-default-props */
 import { Table, Tag, Button } from 'antd';
 import { ISubscription } from 'src/interfaces';
-import { formatDate } from '@lib/date';
+import { formatDateNoTime } from '@lib/date';
 
 interface IProps {
   dataSource: ISubscription[];
-  pagination?: {};
-  rowKey?: string;
-  onChange(): Function;
+  pagination: any;
+  rowKey: string;
+  onChange: any;
   loading: boolean;
-  blockUser?: Function;
-  unblockUser?: Function;
+  blockUser: Function;
+  unblockUser: Function;
 }
 
 export const TableListSubscription = ({
@@ -29,7 +26,7 @@ export const TableListSubscription = ({
       title: 'User',
       dataIndex: 'userInfo',
       render(data, records) {
-        return <span>{records?.userInfo?.username || 'N/A'}</span>;
+        return <span>{records?.userInfo.username || 'N/A'}</span>;
       }
     },
     {
@@ -43,6 +40,10 @@ export const TableListSubscription = ({
             return <Tag color="#00dcff">Yearly Subscription</Tag>;
           case 'free':
             return <Tag color="#FFCF00">Free Subscription</Tag>;
+          case 'system':
+            return <Tag color="#FFCF00">System</Tag>;
+          default:
+            return null;
         }
       }
     },
@@ -50,15 +51,29 @@ export const TableListSubscription = ({
       title: 'Expired Date',
       dataIndex: 'expiredAt',
       render(date: Date) {
-        return <span>{formatDate(date)}</span>;
+        return <span>{formatDateNoTime(date)}</span>;
       }
     },
     {
-      title: 'Updated Date',
+      title: 'Start Recurring Date',
+      dataIndex: 'startRecurringDate',
+      render(date: Date) {
+        return <span>{formatDateNoTime(date)}</span>;
+      }
+    },
+    {
+      title: 'Next Recurring Date',
+      dataIndex: 'nextRecurringDate',
+      render(date: Date) {
+        return <span>{formatDateNoTime(date)}</span>;
+      }
+    },
+    {
+      title: 'Last updated at',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
-        return <span>{formatDate(date)}</span>;
+        return <span>{formatDateNoTime(date)}</span>;
       }
     },
     {
@@ -69,7 +84,7 @@ export const TableListSubscription = ({
           case 'active':
             return <Tag color="#00c12c">Active</Tag>;
           case 'deactivated':
-            return <Tag color="#FFCF00">Inactive</Tag>;
+            return <Tag color="#FFCF00">Deactivated</Tag>;
           default:
             return <Tag color="pink">{status}</Tag>;
         }
@@ -79,11 +94,19 @@ export const TableListSubscription = ({
       title: 'Actions',
       dataIndex: '_id',
       render: (data, record) => (!record.blockedUser ? (
-        <Button className="primary" onClick={() => blockUser({ userId: record.userId })}>
+        <Button
+          className="primary"
+          onClick={() => blockUser({ userId: record.userId })}
+        >
           Block
         </Button>
       ) : (
-        <Button className="secondary" onClick={() => unblockUser(record.userId)}>Unblock</Button>
+        <Button
+          className="secondary"
+          onClick={() => unblockUser(record.userId)}
+        >
+          Unblock
+        </Button>
       ))
     }
   ];

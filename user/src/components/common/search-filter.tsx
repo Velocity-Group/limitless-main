@@ -1,7 +1,6 @@
-/* eslint-disable react/no-array-index-key */
 import { PureComponent } from 'react';
 import {
-  Input, Row, Col, Button, Select, DatePicker
+  Input, Row, Col, Select, DatePicker
 } from 'antd';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 
@@ -22,11 +21,8 @@ interface IProps {
 }
 
 export class SearchFilter extends PureComponent<IProps> {
-  performerRef: any;
-
   constructor(props) {
     super(props);
-
     this.state = {
       q: '',
       performerId: '',
@@ -45,9 +41,9 @@ export class SearchFilter extends PureComponent<IProps> {
       onSubmit
     } = this.props;
     return (
-      <Row gutter={24} className="filter-block">
+      <Row>
         {searchWithKeyword && (
-          <Col lg={8} md={8} xs={10}>
+          <Col lg={8} md={8} xs={12}>
             <Input
               placeholder="Enter keyword"
               onChange={(evt) => this.setState({ q: evt.target.value })}
@@ -56,15 +52,15 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         )}
         {statuses && statuses.length ? (
-          <Col lg={6} md={6} xs={8}>
+          <Col lg={6} md={8} xs={12}>
             <Select
-              onChange={(val) => this.setState({ status: val })}
+              onChange={(val) => this.setState({ status: val }, () => onSubmit(this.state))}
               style={{ width: '100%' }}
               placeholder="Select status"
               defaultValue=""
             >
-              {statuses.map((s, index) => (
-                <Select.Option key={index} value={s.key}>
+              {statuses.map((s) => (
+                <Select.Option key={s.key} value={s.key}>
                   {s.text || s.key}
                 </Select.Option>
               ))}
@@ -72,15 +68,15 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {type && type.length ? (
-          <Col lg={6} md={6} xs={8}>
+          <Col lg={6} md={8} xs={12}>
             <Select
-              onChange={(val) => this.setState({ type: val })}
+              onChange={(val) => this.setState({ type: val }, () => onSubmit(this.state))}
               style={{ width: '100%' }}
               placeholder="Select type"
               defaultValue=""
             >
-              {type.map((s, index) => (
-                <Select.Option key={index} value={s.key}>
+              {type.map((s) => (
+                <Select.Option key={s.key} value={s.key}>
                   {s.text || s.key}
                 </Select.Option>
               ))}
@@ -88,30 +84,24 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {searchWithPerformer && (
-          <Col lg={6} md={6} xs={8}>
+          <Col lg={6} md={8} xs={12}>
             <SelectPerformerDropdown
               placeholder="Search model here"
               style={{ width: '100%' }}
-              onSelect={(val) => this.setState({ performerId: val || '' })}
+              onSelect={(val) => this.setState({ performerId: val || '' }, () => onSubmit(this.state))}
             />
           </Col>
         )}
         {dateRange && (
-          <Col lg={6} md={6} xs={16}>
+          <Col lg={6} md={8} xs={12}>
             <RangePicker
               onChange={(dates: [any, any], dateStrings: [string, string]) => this.setState({
                 fromDate: dateStrings[0],
                 toDate: dateStrings[1]
-              })}
+              }, () => onSubmit(this.state))}
             />
           </Col>
         )}
-        <Col lg={4} md={4} xs={6}>
-          {/* <label htmlFor=""></label> */}
-          <Button type="primary" onClick={() => onSubmit(this.state)}>
-            Search
-          </Button>
-        </Col>
       </Row>
     );
   }

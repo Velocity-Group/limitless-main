@@ -8,5 +8,9 @@ class SubscriptionService extends APIRequest {
   userSearch(query?: { [key: string]: any }) {
     return this.get(this.buildUrl('/subscriptions/user/search', query));
   }
+
+  cancelSubscription(id: string) {
+    return this.post(`/subscriptions/cancel/${id}`);
+  }
 }
 export const subscriptionService = new SubscriptionService();

@@ -7,7 +7,6 @@ import { TransactionSubscriptionListener } from './listeners/transaction-update.
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
-// import { PaymentModule } from '../payment/payment.module';
 
 @Module({
   imports: [
@@ -16,7 +15,6 @@ import { PerformerModule } from '../performer/performer.module';
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule)
-    // forwardRef(() => PaymentModule)
   ],
   providers: [...subscriptionProviders, SubscriptionService, TransactionSubscriptionListener],
   controllers: [SubscriptionController],

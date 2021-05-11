@@ -21,7 +21,7 @@ const PaymentTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Transaction ID',
+      title: 'Transaction_ID',
       dataIndex: '_id',
       key: 'id',
       render(data, record) {
@@ -92,7 +92,7 @@ const PaymentTableList = ({
       key: 'performer',
       render(data) {
         return (
-          <span>
+          <span style={{ whiteSpace: 'nowrap' }}>
             {data?.name || data?.username || 'N/A'}
           </span>
         );
@@ -128,7 +128,7 @@ const PaymentTableList = ({
           case 'gallery':
             return <Tag color="violet">Gallery</Tag>;
           case 'message':
-            return <Tag color="#46b545">Message</Tag>;
+            return <Tag color="red">Message</Tag>;
           default: return <Tag color="default">{type}</Tag>;
         }
       }
@@ -139,7 +139,7 @@ const PaymentTableList = ({
       key: 'tokens',
       render(totalPrice) {
         return (
-          <span>
+          <span style={{ whiteSpace: 'nowrap' }}>
             <img alt="token-img" src="/static/coin-ico.png" height="15px" />
             {(totalPrice || 0).toFixed(2)}
           </span>

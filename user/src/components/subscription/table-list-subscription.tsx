@@ -1,5 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/require-default-props */
 import { Table, Tag, Button } from 'antd';
 import { ISubscription } from 'src/interfaces';
 import { formatDate, formatDateNoTime } from '@lib/date';
@@ -7,11 +5,14 @@ import Link from 'next/link';
 
 interface IProps {
   dataSource: ISubscription[];
-  pagination?: {};
+  // eslint-disable-next-line react/require-default-props
+  pagination?: any;
+  // eslint-disable-next-line react/require-default-props
   rowKey?: string;
-  onChange(): Function;
+  onChange: any;
   loading: boolean;
   cancelSubscription: Function;
+  activeSubscription: Function;
 }
 
 export const TableListSubscription = ({
@@ -20,10 +21,15 @@ export const TableListSubscription = ({
   rowKey,
   onChange,
   loading,
-  cancelSubscription
+  cancelSubscription,
+  activeSubscription
 }: IProps) => {
   const onCancel = (value) => {
-    if (!window.confirm('By aggree to cancel subscription, your will not able to access to this model posts immediately ')) {
+    if (
+      !window.confirm(
+        'By aggree to cancel this model subscription, your will not able to access his content immediately '
+      )
+    ) {
       return;
     }
     cancelSubscription(value);
@@ -32,17 +38,17 @@ export const TableListSubscription = ({
     {
       title: 'Model',
       dataIndex: 'performerInfo',
-      render(performerInfo) {
+      render(data, records) {
         return (
           <Link
             href={{
               pathname: '/model/profile',
-              query: { username: performerInfo?.username }
+              query: { username: records?.performerInfo?.username || records?.performerInfo?._id }
             }}
-            as={`/${performerInfo?.username}`}
+            as={`/model/${records?.performerInfo?.username || records?.performerInfo?._id}`}
           >
             <a>
-              {`${performerInfo?.name || performerInfo?.username}`}
+              {records?.performerInfo?.username || 'N/A'}
             </a>
           </Link>
         );
@@ -59,19 +65,23 @@ export const TableListSubscription = ({
             return <Tag color="orange">Yearly Subscription</Tag>;
           case 'free':
             return <Tag color="orange">Free Subscription</Tag>;
-          default: return (
-            <Tag color="orange">
-              {subscriptionType}
-              {' '}
-              Subscription
-            </Tag>
-          );
+          case 'system':
+            return <Tag color="orange">System</Tag>;
+          default:
+            return null;
         }
       }
     },
     {
       title: 'Expired Date',
       dataIndex: 'expiredAt',
+      render(date: Date) {
+        return <span>{formatDateNoTime(date)}</span>;
+      }
+    },
+    {
+      title: 'Start Recurring Date',
+      dataIndex: 'startRecurringDate',
       render(date: Date) {
         return <span>{formatDateNoTime(date)}</span>;
       }
@@ -99,7 +109,7 @@ export const TableListSubscription = ({
           case 'active':
             return <Tag color="success">Active</Tag>;
           case 'deactivated':
-            return <Tag color="red">De-activated</Tag>;
+            return <Tag color="red">Cancelled</Tag>;
           default:
             return <Tag color="default">{status}</Tag>;
         }
@@ -109,8 +119,24 @@ export const TableListSubscription = ({
       title: 'Actions',
       dataIndex: '_id',
       sorter: false,
-      render(_id: string, record: any) {
-        return <>{record.status === 'active' && <Button danger onClick={() => onCancel(_id)}>Cancel subscription</Button>}</>;
+      render(_id, record) {
+        return (
+          <>
+            {!['free', 'system'].includes(record.subscriptionType) && (
+              <>
+                {record.status !== 'deactivated' ? (
+                  <Button danger onClick={() => onCancel(record._id)}>
+                    Cancel subscription
+                  </Button>
+                ) : (
+                  <Button type="primary" onClick={() => activeSubscription(record)}>
+                    Re-active subscription
+                  </Button>
+                )}
+              </>
+            )}
+          </>
+        );
       }
     }
   ];

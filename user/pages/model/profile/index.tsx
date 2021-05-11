@@ -11,7 +11,7 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, paymentService, feedService, reactionService
+  performerService, purchaseTokenService, feedService, reactionService
 } from 'src/services';
 import Head from 'next/head';
 import {
@@ -229,8 +229,8 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async subscribe() {
-    const { performer, currentUser, updateBalance: handleUpdateBalance } = this.props;
-    const price = this.subscriptionType === 'monthly' ? performer.monthlyPrice : performer.yearlyPrice;
+    const { performer, currentUser } = this.props;
+    const price = this.subscriptionType === 'monthly' ? performer.monthlyPrice : this.subscriptionType === 'yearly' ? performer.yearlyPrice : 0;
     if (currentUser.balance < price) {
       message.error('Your balance token is not enough');
       Router.push('/token-package');
@@ -238,9 +238,9 @@ class PerformerProfile extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      await paymentService.subscribe({ type: this.subscriptionType, performerId: performer._id });
-      this.setState({ isSubscribed: true, openSubscriptionModal: false });
-      handleUpdateBalance({ token: -price });
+      await purchaseTokenService.subscribePerformer({ type: this.subscriptionType, performerId: performer._id });
+      message.success('Subscribed success!');
+      window.location.reload();
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -258,8 +258,8 @@ class PerformerProfile extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      await paymentService.tipPerformer({ performerId: performer?._id, price });
-      message.info('Thank you for the tip');
+      await purchaseTokenService.sendTip(performer?._id, { performerId: performer?._id, price });
+      message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
     } catch (e) {
       const err = await e;

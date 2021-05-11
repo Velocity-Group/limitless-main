@@ -77,8 +77,8 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Updated_at',
-      dataIndex: 'updatedAt',
+      title: 'Date',
+      dataIndex: 'createdAt',
       sorter: true,
       render(date: Date) {
         return <span>{formatDate(date)}</span>;

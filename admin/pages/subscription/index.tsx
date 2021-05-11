@@ -34,7 +34,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
         current: 1,
         total: 0
       },
-      sort: 'decs',
+      sort: 'desc',
       sortBy: 'updatedAt',
       filter: {}
     };

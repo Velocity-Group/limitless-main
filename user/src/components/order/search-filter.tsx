@@ -1,15 +1,11 @@
 import { PureComponent } from 'react';
 import {
-  Row, Col, Button, Select, DatePicker
+  Row, Col, Select, DatePicker
 } from 'antd';
 
 const { RangePicker } = DatePicker;
 
 const deliveryStatuses = [
-  {
-    key: '',
-    text: 'Delivery Status'
-  },
   {
     key: 'processing',
     text: 'Processing'
@@ -25,25 +21,6 @@ const deliveryStatuses = [
   {
     key: 'refunded',
     text: 'Refunded'
-  }
-];
-
-const statuses = [
-  {
-    key: '',
-    text: 'Payment Status'
-  },
-  {
-    key: 'refunded',
-    text: 'Refunded'
-  },
-  {
-    key: 'created',
-    text: 'Created'
-  },
-  {
-    key: 'paid',
-    text: 'Paid'
   }
 ];
 
@@ -63,13 +40,16 @@ export class OrderSearchFilter extends PureComponent<IProps> {
     const { onSubmit } = this.props;
     return (
       <Row gutter={24}>
-        <Col lg={4} md={8} xs={12}>
+        <Col lg={6} md={8} xs={12}>
           <Select
-            onChange={(val) => this.setState({ deliveryStatus: val })}
+            onChange={(val) => this.setState({ deliveryStatus: val }, () => onSubmit(this.state))}
             style={{ width: '100%' }}
             placeholder="Select delivery status"
             defaultValue=""
           >
+            <Select.Option key="all" value="">
+              All
+            </Select.Option>
             {deliveryStatuses.map((s) => (
               <Select.Option key={s.key} value={s.key}>
                 {s.text || s.key}
@@ -77,18 +57,13 @@ export class OrderSearchFilter extends PureComponent<IProps> {
             ))}
           </Select>
         </Col>
-        <Col lg={6} md={10} xs={12}>
+        <Col lg={8} md={10} xs={12}>
           <RangePicker
             onChange={(dates: [any, any], dateStrings: [string, string]) => this.setState({
               fromDate: dateStrings[0],
               toDate: dateStrings[1]
-            })}
+            }, () => onSubmit(this.state))}
           />
-        </Col>
-        <Col lg={4} md={6} xs={24}>
-          <Button type="primary" onClick={() => onSubmit(this.state)}>
-            Search
-          </Button>
         </Col>
       </Row>
     );

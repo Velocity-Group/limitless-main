@@ -12,7 +12,7 @@ import {
   Body,
   Param
 } from '@nestjs/common';
-import { RoleGuard, AuthGuard } from 'src/modules/auth/guards';
+import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
@@ -70,7 +70,8 @@ export class SubscriptionController {
 
   @Get('/user/search')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @Roles('user')
+  @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async userSearch(
     @Query() req: SubscriptionSearchRequestPayload,

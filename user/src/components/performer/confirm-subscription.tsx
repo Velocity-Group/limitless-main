@@ -52,12 +52,12 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
             <li>
               <CheckSquareOutlined />
               {' '}
-              Full access to this creator&apos;s content
+              Full access to this model&apos;s content
             </li>
             <li>
               <CheckSquareOutlined />
               {' '}
-              Direct message with this creator
+              Direct message with this model
             </li>
             <li>
               <CheckSquareOutlined />
