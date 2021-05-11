@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { IUser, StreamSettings } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
-  ShoppingCartOutlined, UserOutlined,
+  ShoppingCartOutlined, UserOutlined, HistoryOutlined,
   MessageOutlined, VideoCameraOutlined, FireOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined,
   HomeOutlined, LogoutOutlined, UsergroupAddOutlined, VideoCameraAddOutlined,
@@ -408,11 +408,18 @@ class Header extends PureComponent<IProps> {
                     Orders
                   </div>
                 </Link>
-                <Link href="/user/payment-history" as="/user/payment-history">
-                  <div className={router.pathname === '/user/payment-history' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/user/token-transaction" as="/user/token-transaction">
+                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
                     <DollarOutlined />
                     {' '}
-                    Transactions
+                    Token Transactions
+                  </div>
+                </Link>
+                <Link href="/user/payment-history" as="/user/payment-history">
+                  <div className={router.pathname === '/user/payment-history' ? 'menu-item active' : 'menu-item'}>
+                    <HistoryOutlined />
+                    {' '}
+                    Payment History
                   </div>
                 </Link>
                 <Divider />

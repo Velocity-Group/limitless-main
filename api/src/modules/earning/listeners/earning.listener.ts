@@ -46,6 +46,8 @@ export class TransactionEarningListener {
       if (!transaction || transaction.status !== PURCHASE_ITEM_STATUS.SUCCESS || !transaction.totalPrice) {
         return;
       }
+      if ([PURCHASE_ITEM_TYPE.FREE_SUBSCRIPTION].includes(transaction.type)) return;
+
       const [
         performerCommissions,
         settingFeedCommission,

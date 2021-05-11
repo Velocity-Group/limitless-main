@@ -23,6 +23,7 @@ import { SocketModule } from '../socket/socket.module';
 import { PaymentTokenListener } from './listeners';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { StreamModule } from '../stream/stream.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { StreamModule } from '../stream/stream.module';
     QueueModule.forRoot(),
     AgendaModule.register(),
     forwardRef(() => AuthModule),
+    forwardRef(() => UserModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => SettingModule),
     forwardRef(() => PerformerAssetsModule),

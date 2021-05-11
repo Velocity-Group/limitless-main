@@ -19,14 +19,18 @@ export const OrderSchema = new Schema({
   shippingCode: {
     type: String
   },
-  productIds: [{
+  productId: {
     type: Schema.Types.ObjectId,
     index: true
-  }],
-  productsInfo: [{
+  },
+  productInfo: {
     type: Schema.Types.Mixed
-  }],
+  },
   digitalPath: String,
+  unitPrice: {
+    type: Number,
+    default: 1
+  },
   quantity: {
     type: Number,
     default: 1

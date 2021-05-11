@@ -63,21 +63,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
     const { onSubmit } = this.props;
     return (
       <Row gutter={24}>
-        <Col xl={4} md={6} xs={12}>
-          <Select
-            onChange={(val) => this.setState({ status: val })}
-            style={{ width: '100%' }}
-            placeholder="Select payment status"
-            defaultValue=""
-          >
-            {statuses.map((s) => (
-              <Select.Option key={s.key} value={s.key}>
-                {s.text || s.key}
-              </Select.Option>
-            ))}
-          </Select>
-        </Col>
-        <Col xl={4} md={6} xs={12}>
+        <Col lg={4} md={8} xs={12}>
           <Select
             onChange={(val) => this.setState({ deliveryStatus: val })}
             style={{ width: '100%' }}
@@ -91,7 +77,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
             ))}
           </Select>
         </Col>
-        <Col xl={6} md={6} xs={18}>
+        <Col lg={6} md={10} xs={12}>
           <RangePicker
             onChange={(dates: [any, any], dateStrings: [string, string]) => this.setState({
               fromDate: dateStrings[0],
@@ -99,7 +85,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
             })}
           />
         </Col>
-        <Col xl={4} md={6} xs={6}>
+        <Col lg={4} md={6} xs={24}>
           <Button type="primary" onClick={() => onSubmit(this.state)}>
             Search
           </Button>

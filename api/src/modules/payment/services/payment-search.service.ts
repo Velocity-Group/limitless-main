@@ -19,7 +19,6 @@ export class PaymentSearchService {
 
   public async getUserTransactions(req: PaymentSearchPayload, user: PerformerDto) {
     const query = {
-      source: 'user',
       sourceId: user._id
     } as any;
     if (req.type) query.type = req.type;

@@ -579,7 +579,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   <>
                     <img
                       alt="performer avatar"
-                      src={video.performer?.avatar || '/user.png'}
+                      src={video.performer?.avatar || '/static/no-avatar.png'}
                     />
                     {' '}
                     <div className="owner-name">

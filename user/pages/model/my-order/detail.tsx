@@ -27,24 +27,24 @@ interface IStates {
 
 const productType = (type: string) => {
   switch (type) {
-    case 'sale_post':
-      return <Tag color="green">Post</Tag>;
-    case 'digital_product':
-      return <Tag color="red">Digital Product</Tag>;
-    case 'physical_product':
-      return <Tag color="red">Physical Product</Tag>;
-    case 'tip_performer':
+    case 'video':
+      return <Tag color="green">Video</Tag>;
+    case 'feed':
+      return <Tag color="green">Feed Post</Tag>;
+    case 'product':
+      return <Tag color="red">Product</Tag>;
+    case 'tip':
       return <Tag color="orange">Tip</Tag>;
     case 'private_chat':
       return <Tag color="violet">Private Chat</Tag>;
+    case 'group_chat':
+      return <Tag color="violet">Group Chat</Tag>;
     case 'public_chat':
       return <Tag color="violet">Public Chat</Tag>;
     case 'monthly_subscription':
       return <Tag color="blue">Monthly Subscription</Tag>;
     case 'yearly_subscription':
       return <Tag color="blue">Yearly Subscription</Tag>;
-    case 'free_subscription':
-      return <Tag color="blue">Free Subscription</Tag>;
     default: return <Tag color="#FFCF00">{type}</Tag>;
   }
 };

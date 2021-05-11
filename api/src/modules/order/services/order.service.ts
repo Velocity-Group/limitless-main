@@ -18,6 +18,8 @@ import { PerformerDto } from 'src/modules/performer/dtos';
 import { MailerService } from 'src/modules/mailer';
 import { uniq } from 'lodash';
 import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
+import { UserService } from 'src/modules/user/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { ORDER_MODEL_PROVIDER } from '../providers';
 import { OrderModel } from '../models';
 import {
@@ -31,6 +33,8 @@ import { OrderDto } from '../dtos';
 @Injectable()
 export class OrderService {
   constructor(
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => ProductService))
@@ -53,14 +57,17 @@ export class OrderService {
     return data;
   }
 
-  public async search(req: OrderSearchPayload) {
-    const query = { } as any;
+  public async search(req: OrderSearchPayload, user: UserDto) {
+    const query = {
+      performerId: user._id
+    } as any;
+    if (user.roles && user.roles.includes('admin')) delete query.performerId;
     if (req.performerId) query.performerId = req.performerId;
     if (req.deliveryStatus) query.deliveryStatus = req.deliveryStatus;
     if (req.phoneNumber) query.phoneNumber = { $regex: req.phoneNumber };
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: moment(req.fromDate).endOf('day'),
+        $gte: moment(req.fromDate).startOf('day'),
         $lte: moment(req.toDate).endOf('day')
       };
     }
@@ -77,11 +84,11 @@ export class OrderService {
     ]);
     const PIds = uniq(data.map((d) => d.performerId));
     const UIds = uniq(data.map((d) => d.userId));
-    const productIds = uniq(data.map((d) => d.productIds[0]));
+    const productIds = uniq(data.map((d) => d.productId));
 
     const [performers, users, products] = await Promise.all([
       PIds.length ? this.performerService.findByIds(PIds) : [],
-      UIds.length ? this.performerService.findByIds(UIds) : [],
+      UIds.length ? this.userService.findByIds(UIds) : [],
       productIds.length ? this.productService.findByIds(productIds) : []
     ]);
 
@@ -103,11 +110,9 @@ export class OrderService {
           order.userInfo = userInfo.toResponse();
         }
       }
-      if (order.productIds) {
-        const productsInfo = products.filter((p) => order.productIds[0].toString() === p._id.toString());
-        if (productsInfo.length) {
-          order.productsInfo = productsInfo;
-        }
+      if (order.productId) {
+        const productInfo = products.find((p) => order.productId.toString() === p._id.toString());
+        order.productInfo = productInfo || null;
       }
     });
     return {
@@ -122,10 +127,10 @@ export class OrderService {
       throw new EntityNotFoundException();
     }
 
-    const [user, performer, products] = await Promise.all([
-      this.performerService.findById(order.userId),
+    const [user, performer, product] = await Promise.all([
+      this.userService.findById(order.userId),
       this.performerService.findById(order.performerId),
-      this.productService.findByIds(order.productIds)
+      this.productService.findById(order.productId)
     ]);
     const newOrder = new OrderDto(order);
     if (user) {
@@ -134,11 +139,11 @@ export class OrderService {
     if (performer) {
       newOrder.performerInfo = new PerformerDto(performer).toResponse();
     }
-    if (products.length) {
-      newOrder.productsInfo = products;
+    if (product) {
+      newOrder.productInfo = product;
     }
-    if (newOrder.digitalPath && jwToken && products[0].type === PRODUCT_TYPE.DIGITAL) {
-      newOrder.digitalPath = `${newOrder.digitalPath}?productId=${products[0]._id}&token=${jwToken}`;
+    if (newOrder.digitalPath && jwToken && product.type === PRODUCT_TYPE.DIGITAL) {
+      newOrder.digitalPath = `${newOrder.digitalPath}?productId=${product._id}&token=${jwToken}`;
     }
     return newOrder;
   }
@@ -193,7 +198,7 @@ export class OrderService {
       this.orderModel.countDocuments(query)
     ]);
     const PIds = uniq(data.map((d) => d.performerId));
-    const productIds = uniq(data.map((d) => d.productIds[0]));
+    const productIds = uniq(data.map((d) => d.productId));
     const [performers, products] = await Promise.all([
       this.performerService.findByIds(PIds),
       this.productService.findByIds(productIds)
@@ -207,11 +212,9 @@ export class OrderService {
         if (performerInfo) {
           order.performerInfo = performerInfo.toResponse();
         }
-        if (order.productIds) {
-          const productsInfo = products.filter((p) => order.productIds[0].toString() === p._id.toString());
-          if (productsInfo.length) {
-            order.productsInfo = productsInfo;
-          }
+        if (order.productId) {
+          const productInfo = products.find((p) => order.productId.toString() === p._id.toString());
+          order.productInfo = productInfo || null;
         }
       }
     });

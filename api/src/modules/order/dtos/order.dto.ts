@@ -18,11 +18,13 @@ export class OrderDto {
 
   shippingCode: string;
 
-  productIds: ObjectId[];
+  productId: ObjectId;
 
-  productsInfo: any[];
+  productInfo: any;
 
   quantity: number;
+
+  unitPrice: number;
 
   totalPrice: number;
 
@@ -55,9 +57,10 @@ export class OrderDto {
           'userInfo',
           'orderNumber',
           'shippingCode',
-          'productIds',
-          'productsInfo',
+          'productId',
+          'productInfo',
           'quantity',
+          'unitPrice',
           'totalPrice',
           'deliveryAddress',
           'deliveryStatus',

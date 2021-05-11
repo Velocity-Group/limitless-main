@@ -1,13 +1,12 @@
-/* eslint-disable no-param-reassign */
 import { PureComponent } from 'react';
 import { Layout, message } from 'antd';
 import Head from 'next/head';
 import Loader from '@components/common/base/loader';
 import Page from '@components/common/layout/page';
-import { paymentService } from 'src/services';
-import { IOrder, IUIConfig } from 'src/interfaces';
+import { purchaseTokenService } from 'src/services';
+import { ITransaction, IUIConfig } from 'src/interfaces';
 import { SearchFilter } from '@components/common/search-filter';
-import PaymentTableList from '@components/payment/table-list';
+import PaymentTableList from '@components/user/payment-token-history-table';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
 
@@ -16,7 +15,7 @@ interface IProps {
 }
 interface IStates {
   loading: boolean;
-  paymentList: IOrder[];
+  paymentList: ITransaction[];
   searching: boolean;
   pagination: {
     total: number;
@@ -28,7 +27,9 @@ interface IStates {
   filter: {};
 }
 
-class PaymentHistoryPage extends PureComponent<IProps, IStates> {
+class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
+  static authenticate = true;
+
   state = {
     loading: true,
     searching: false,
@@ -63,13 +64,6 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
   };
 
   async handleFilter(filter) {
-    if (filter.performerId) {
-      filter.sellerId = filter.performerId;
-      delete filter.performerId;
-    } else {
-      delete filter.performerId;
-      delete filter.sellerId;
-    }
     this.setState({ filter }, () => this.userSearchTransactions());
   }
 
@@ -78,7 +72,7 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
       const {
         filter, sort, sortBy, pagination
       } = this.state;
-      const resp = await paymentService.userSearch({
+      const resp = await purchaseTokenService.userSearch({
         ...filter,
         sort,
         sortBy,
@@ -104,23 +98,35 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
       loading, paymentList, searching, pagination
     } = this.state;
     const { ui } = this.props;
-    const statuses = [
+    const type = [
       {
         key: '',
-        text: 'Payment Status'
+        text: 'All'
       },
       {
-        key: 'success',
-        text: 'Success'
+        key: 'product',
+        text: 'Product'
       },
       {
-        key: 'pending',
-        text: 'Pending'
+        key: 'video',
+        text: 'Video'
       },
       {
-        key: 'Refunded',
-        text: 'refunded'
+        key: 'monthly_subscription',
+        text: 'Monthly Subscription'
+      },
+      {
+        key: 'yearly_subscription',
+        text: 'Yearly Subscription'
+      },
+      {
+        key: 'feed',
+        text: 'Feed Post'
       }
+      // {
+      //   key: 'message',
+      //   text: 'Message'
+      // }
     ];
     return (
       <Layout>
@@ -129,8 +135,7 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
             {' '}
             {ui && ui.siteName}
             {' '}
-            | Payment History
-            {' '}
+            | Token Transactions History
           </title>
         </Head>
         <div className="main-container">
@@ -138,13 +143,13 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
             <Loader />
           ) : (
             <Page>
-              <div className="page-heading">Payment History</div>
+              <div className="page-heading">Token Transactions History</div>
               <SearchFilter
-                statuses={statuses}
+                type={type}
                 onSubmit={this.handleFilter.bind(this)}
-                searchWithPerformer
                 dateRange
               />
+
               <PaymentTableList
                 dataSource={paymentList}
                 pagination={pagination}
@@ -162,4 +167,4 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
 const mapStates = (state: any) => ({
   ui: state.ui
 });
-export default connect(mapStates)(PaymentHistoryPage);
+export default connect(mapStates)(PurchasedItemHistoryPage);

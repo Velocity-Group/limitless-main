@@ -42,32 +42,36 @@ export class PurchaseProductForm extends PureComponent<IProps> {
           }}
           className="account-form"
         >
-          <Form.Item
-            name="quantity"
-            rules={[{ required: true, message: 'Please input quantity' }]}
-            label="Quantity"
-          >
-            <InputNumber min={1} style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item
-            name="deliveryAddress"
-            rules={[{ required: true, message: 'Please input delivery address' }]}
-            label="Delivery address"
-          >
-            <Input.TextArea rows={1} />
-          </Form.Item>
-          <Form.Item
-            name="phoneNumber"
-            label="Phone number"
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="userNote"
-            label="Note something"
-          >
-            <Input.TextArea rows={2} />
-          </Form.Item>
+          {product.type === 'physical' && (
+          <div>
+            <Form.Item
+              name="quantity"
+              rules={[{ required: true, message: 'Please input quantity' }]}
+              label="Quantity"
+            >
+              <InputNumber min={1} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              name="deliveryAddress"
+              rules={[{ required: true, message: 'Please input delivery address' }]}
+              label="Delivery address"
+            >
+              <Input.TextArea rows={1} />
+            </Form.Item>
+            <Form.Item
+              name="phoneNumber"
+              label="Phone number"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="userNote"
+              label="Note something"
+            >
+              <Input.TextArea rows={2} />
+            </Form.Item>
+          </div>
+          )}
           <div className="text-center">
             <Button
               htmlType="submit"

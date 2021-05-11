@@ -17,6 +17,7 @@ import { AuthGuard, RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { AuthService } from 'src/modules/auth/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { OrderService } from '../services';
 import { OrderDto } from '../dtos';
 import { OrderSearchPayload, OrderUpdatePayload } from '../payloads';
@@ -31,12 +32,13 @@ export class OrderController {
   @Get('/search')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin')
+  @Roles('admin', 'performer')
   @UsePipes(new ValidationPipe({ transform: true }))
   async orders(
-    @Query() req: OrderSearchPayload
+    @Query() req: OrderSearchPayload,
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<PageableData<OrderDto>>> {
-    const data = await this.orderService.search(req);
+    const data = await this.orderService.search(req, user);
     return DataResponse.ok(data);
   }
 

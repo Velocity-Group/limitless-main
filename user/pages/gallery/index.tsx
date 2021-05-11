@@ -283,7 +283,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                     <>
                       <img
                         alt="performer avatar"
-                        src={gallery.performer?.avatar || '/user.png'}
+                        src={gallery.performer?.avatar || '/static/no-avatar.png'}
                       />
                       {' '}
                       <div className="owner-name">

@@ -1,10 +1,9 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Button, Descriptions, Tag
+  Layout, message, Button, Descriptions, Tag, Spin
 } from 'antd';
 import Head from 'next/head';
 import { IOrder, IUIConfig } from 'src/interfaces';
-import { BreadcrumbComponent } from '@components/common/breadcrumb';
 import Page from '@components/common/layout/page';
 import { orderService } from 'src/services';
 import { connect } from 'react-redux';
@@ -20,31 +19,8 @@ interface IProps {
 
 interface IStates {
   order: IOrder;
+  loading: boolean;
 }
-
-const productType = (type: string) => {
-  switch (type) {
-    case 'sale_post':
-      return <Tag color="green">Post</Tag>;
-    case 'digital_product':
-      return <Tag color="red">Digital Product</Tag>;
-    case 'physical_product':
-      return <Tag color="red">Physical Product</Tag>;
-    case 'tip_performer':
-      return <Tag color="orange">Tip</Tag>;
-    case 'monthly_subscription':
-      return <Tag color="blue">Monthly Subscription</Tag>;
-    case 'yearly_subscription':
-      return <Tag color="blue">Yearly Subscription</Tag>;
-    case 'free_subscription':
-      return <Tag color="blue">Free Subscription</Tag>;
-    case 'private_chat':
-      return <Tag color="violet">Private Chat</Tag>;
-    case 'public_chat':
-      return <Tag color="violet">Public Chat</Tag>;
-    default: return <Tag color="#FFCF00">{type}</Tag>;
-  }
-};
 
 class OrderDetailPage extends PureComponent<IProps, IStates> {
   static authenticate = true;
@@ -56,6 +32,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
     this.state = {
+      loading: false,
       order: null
     };
   }
@@ -67,6 +44,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
   async getData() {
     try {
       const { id } = this.props;
+      await this.setState({ loading: true });
       const order = await orderService.findById(id);
       await this.setState({
         order: order?.data
@@ -74,6 +52,8 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
     } catch (e) {
       message.error('Can not find order!');
       Router.back();
+    } finally {
+      this.setState({ loading: false });
     }
   }
 
@@ -84,7 +64,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
 
   render() {
     const { ui } = this.props;
-    const { order } = this.state;
+    const { order, loading } = this.state;
     return (
       <Layout>
         <Head>
@@ -93,63 +73,34 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <BreadcrumbComponent
-            breadcrumbs={[
-              { title: 'My orders', href: '/user/orders' },
-              {
-                title:
-                    order && order?.orderNumber
-                      ? `#${order?.orderNumber}`
-                      : 'Order Detail'
-              }
-            ]}
-          />
           <Page>
-            {order && (
+            {!loading && order && (
             <div className="main-container">
               <div style={{ marginBottom: '10px' }}>
                 Order ID:
                 {' '}
                 {order?.orderNumber || 'N/A'}
-                {' '}
-                {order?.deliveryAddress || 'N/A'}
               </div>
               <Descriptions>
                 <Item key="seller" label="Model">
-                  {order?.seller?.name || order?.seller?.username || 'N/A'}
+                  {order?.performerInfo?.name || order?.performerInfo?.username || 'N/A'}
                 </Item>
                 <Item key="name" label="Product">
-                  {order?.name || 'N/A'}
+                  {order?.productInfo?.name || 'N/A'}
                 </Item>
                 <Item key="description" label="Description">
-                  {order?.description || 'N/A'}
-                </Item>
-                <Item key="productType" label="Product type">
-                  {productType(order?.productType)}
+                  {order?.productInfo?.description || 'N/A'}
                 </Item>
                 <Item key="unitPrice" label="Unit price">
-                  {`$${order?.unitPrice}` || '0'}
+                  <img alt="coin" src="/static/coin-ico.png" width="20px" />
+                  {(order?.unitPrice || 0).toFixed(2)}
                 </Item>
                 <Item key="quantiy" label="Quantity">
                   {order?.quantity || '0'}
                 </Item>
-                <Item key="originalPrice" label="Original Price">
-                  {`$${order?.originalPrice}` || '0'}
-                </Item>
-                {order.couponInfo && (
-                  <Item key="discount" label="Discount">
-                    {`${(order?.couponInfo?.value || 0) * 100}%`}
-                    {' '}
-                    - $
-                    {((order?.originalPrice || 0) * order?.couponInfo.value).toFixed(2)}
-                  </Item>
-                )}
                 <Item key="totalPrice" label="Total Price">
-                  {order?.payBy === 'money' && '$'}
+                  <img alt="coin" src="/static/coin-ico.png" width="20px" />
                   {(order?.totalPrice || 0).toFixed(2)}
-                </Item>
-                <Item key="status" label="Status">
-                  <Tag color="red">{order?.status.toUpperCase()}</Tag>
                 </Item>
               </Descriptions>
               <div style={{ marginBottom: '10px' }}>
@@ -158,9 +109,9 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 {order?.deliveryAddress || 'N/A'}
               </div>
               <div style={{ marginBottom: '10px' }}>
-                Delivery Postal Code:
+                Phone Number:
                 {' '}
-                {order?.postalCode || 'N/A'}
+                {order?.phoneNumber || 'N/A'}
               </div>
               <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
                 Shipping Code:
@@ -170,20 +121,13 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
               <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
                 Delivery Status:
                 {' '}
-                <Tag color="magenta">{order?.deliveryStatus || 'N/A'}</Tag>
+                <Tag color="green">{order?.deliveryStatus || 'N/A'}</Tag>
               </div>
-              {order?.productType === 'digital' && (
+              {order?.productInfo?.type === 'digital' && (
               <div style={{ marginBottom: '10px' }}>
                 Download Link:
                 {' '}
                 <a href="#" onClick={this.downloadFile.bind(this, order)}>Click to download</a>
-              </div>
-              )}
-              {order?.productType === 'sale_post' && order?.status === 'paid' && order?.productInfo && (
-              <div style={{ marginBottom: '10px' }}>
-                Post Link:
-                {' '}
-                <Link href={{ pathname: '/post', query: { id: order?.productInfo?._id } }} as={`/post/${order?.productInfo?._id}`}><a target="_blank">Click to view</a></Link>
               </div>
               )}
               <div style={{ marginBottom: '10px' }}>
@@ -193,6 +137,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
               </div>
             </div>
             )}
+            {loading && <div><Spin /></div>}
           </Page>
         </div>
       </Layout>

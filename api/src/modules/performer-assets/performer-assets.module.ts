@@ -28,12 +28,14 @@ import { UserPhotosController } from './controllers/user-photo.controller';
 import { UserProductsController } from './controllers/user-product.controller';
 import { UserGalleryController } from './controllers/user-gallery.controller';
 import { ReactionVideoListener, CommentVideoListener, StockProductListener } from './listeners';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     MongoDBModule,
     QueueModule.forRoot(),
     AgendaModule.register(),
+    forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => MailerModule),
     forwardRef(() => FileModule),

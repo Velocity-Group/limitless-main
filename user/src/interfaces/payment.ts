@@ -41,57 +41,43 @@ export interface ICoupon {
 export interface IOrder {
   _id: string;
 
-  orderId: string;
+  transactionId: string;
+
+  performerId: string;
+
+  performerInfo?: any;
+
+  userId: string;
+
+  userInfo?: any;
 
   orderNumber: string;
 
-  buyerId: string;
-
-  buyerSource: string;
-
-  sellerId: string;
-
-  sellerSource: string;
-
-  productType: string;
+  shippingCode: string;
 
   productId: string;
 
   productInfo: any;
 
-  name: string;
-
-  description: string;
+  quantity: number;
 
   unitPrice: number;
 
-  originalPrice: number;
-
-  status: string;
-
-  payBy: string;
-
-  quantity: number;
-
   totalPrice: number;
+
+  deliveryAddress?: string;
 
   deliveryStatus: string;
 
-  deliveryAddress: string;
+  postalCode?: string;
 
-  shippingCode: string;
+  userNote?: string;
 
-  paymentStatus: string;
-
-  postalCode: string;
-
-  couponInfo: any;
-
-  seller: any;
-
-  buyer: any;
+  phoneNumber?: string;
 
   createdAt: Date;
 
   updatedAt: Date;
+
+  digitalPath: string;
 }

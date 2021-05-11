@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 import { QueueEvent, QueueEventService } from 'src/kernel';
-import { Injectable } from '@nestjs/common';
+import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import {
   PerformerService
 } from 'src/modules/performer/services';
 import { EVENT } from 'src/kernel/constants';
 import { MailerService } from 'src/modules/mailer';
 import { SettingService } from 'src/modules/settings/services';
+import { UserService } from 'src/modules/user/services';
 import {
   PURCHASED_ITEM_SUCCESS_CHANNEL,
   PURCHASE_ITEM_STATUS,
@@ -18,8 +19,11 @@ const HANDLE_MAILER_TOPIC = 'HANDLE_MAILER_TOPIC';
 @Injectable()
 export class PaymentTokenListener {
   constructor(
-    private readonly mailService: MailerService,
+    @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    private readonly mailService: MailerService,
     private readonly queueEventService: QueueEventService
   ) {
     this.queueEventService.subscribe(
@@ -43,10 +47,7 @@ export class PaymentTokenListener {
     }
     const adminEmail = await SettingService.getByKey('adminEmail').value || process.env.ADMIN_EMAIL;
     const performer = await this.performerService.findById(transaction.performerId);
-    const user = await this.performerService.findById(transaction.sourceId);
-    if (!performer || !user) {
-      return;
-    }
+    const user = await this.userService.findById(transaction.sourceId);
     // mail to performer
     if (performer && performer.email) {
       if ([PURCHASE_ITEM_TYPE.FREE_SUBSCRIPTION, PURCHASE_ITEM_TYPE.MONTHLY_SUBSCRIPTION, PURCHASE_ITEM_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
@@ -90,7 +91,7 @@ export class PaymentTokenListener {
       });
     }
     // mail to user
-    if (user.email) {
+    if (user && user.email) {
       await this.mailService.send({
         subject: 'New payment success',
         to: user.email,

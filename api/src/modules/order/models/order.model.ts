@@ -12,11 +12,13 @@ export class OrderModel extends Document {
 
   shippingCode?: string;
 
-  productIds?: ObjectId[];
+  productId?: ObjectId;
 
-  productsInfo?: any[];
+  productInfo?: any;
 
   quantity?: number;
+
+  unitPrice?: number;
 
   totalPrice?: number;
 

@@ -63,7 +63,7 @@ export class PaymentService {
     const paymentTransaction = new this.TransactionModel();
     paymentTransaction.originalPrice = totalPrice;
     paymentTransaction.paymentGateway = gateway || 'ccbill';
-    paymentTransaction.source = 'performer';
+    paymentTransaction.source = 'user';
     paymentTransaction.sourceId = user._id;
     paymentTransaction.target = PAYMENT_TARGET_TYPE.TOKEN_PACKAGE;
     paymentTransaction.targetId = null;

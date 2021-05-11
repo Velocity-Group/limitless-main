@@ -143,13 +143,13 @@ class EarningPage extends PureComponent<IProps, IStates> {
                 { key: '', text: 'All' },
                 { key: 'monthly_subscription', text: 'Monthly Subscription' },
                 { key: 'yearly_subscription', text: 'Yearly Subscription' },
-                { key: 'free_subscription', text: 'Free Subscription' },
                 { key: 'private_chat', text: 'Private Chat' },
                 { key: 'public_chat', text: 'Public Chat' },
-                { key: 'digital_product', text: 'Digital Product' },
-                { key: 'physical_product', text: 'Physical Product' },
-                { key: 'sale_post', text: 'Post' },
-                { key: 'tip_performer', text: 'Tip' }
+                { key: 'group_chat', text: 'Group Chat' },
+                { key: 'feed', text: 'Feed Post' },
+                { key: 'product', text: 'Product' },
+                { key: 'video', text: 'Video' },
+                { key: 'tip', text: 'Tip' }
               ]}
               onSubmit={this.handleFilter.bind(this)}
               dateRange
@@ -164,7 +164,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
                       <Col span={8}>
                         <Statistic
                           title="Total Price"
-                          prefix="$"
+                          prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
                           value={stats.totalGrossPrice || 0}
                           precision={2}
                         />
@@ -172,7 +172,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
                       <Col span={8}>
                         <Statistic
                           title="Admin earned"
-                          prefix="$"
+                          prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
                           value={stats.totalCommission || 0}
                           precision={2}
                         />
@@ -180,7 +180,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
                       <Col span={8}>
                         <Statistic
                           title="You earned"
-                          prefix="$"
+                          prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
                           value={stats.totalNetPrice || 0}
                           precision={2}
                         />

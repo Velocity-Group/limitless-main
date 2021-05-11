@@ -8,6 +8,7 @@ import { MailerService } from 'src/modules/mailer/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { AuthService } from 'src/modules/auth/services';
 import { pick } from 'lodash';
+import { UserService } from 'src/modules/user/services';
 import { ProductService } from '../services';
 import { PRODUCT_TYPE } from '../constants';
 
@@ -22,7 +23,9 @@ export class StockProductListener {
     private readonly mailService: MailerService,
     private readonly fileService: FileService,
     @Inject(forwardRef(() => PerformerService))
-    private readonly performerService: PerformerService
+    private readonly performerService: PerformerService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService
   ) {
     this.queueEventService.subscribe(
       PURCHASED_ITEM_SUCCESS_CHANNEL,
@@ -41,15 +44,14 @@ export class StockProductListener {
     }
     const prodIds = transaction.products.map((p) => p.productId);
     const performer = await this.performerService.findById(transaction.performerId);
-    const user = await this.performerService.findById(transaction.sourceId);
+    const user = await this.userService.findById(transaction.sourceId);
     const products = await this.productService.findByIds(prodIds);
     products.forEach(async (prod) => {
       if (prod.type === PRODUCT_TYPE.PHYSICAL) {
         await this.productService.updateStock(prod._id, -1);
       }
-
       if (prod.type === PRODUCT_TYPE.DIGITAL && prod.digitalFileId) {
-        this.sendDigitalProductLink(
+        await this.sendDigitalProductLink(
           transaction,
           performer,
           user,
@@ -66,7 +68,7 @@ export class StockProductListener {
     const file = await this.fileService.findById(fileId);
     if (file) {
       const digitalLink = jwToken ? `${new FileDto(file).getUrl()}?productId=${transaction.targetId}&token=${jwToken}` : new FileDto(file).getUrl();
-      user.email && await this.mailService.send({
+      user && user.email && await this.mailService.send({
         subject: 'Digital file',
         to: user.email,
         data: {

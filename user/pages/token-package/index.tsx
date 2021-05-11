@@ -66,17 +66,22 @@ class TokenPackages extends PureComponent<IProps> {
     } = this.state;
     if (user.isPerformer) return;
     try {
+      await this.setState({ submiting: true });
       const pay = await (await paymentService.purchaseTokenPackage(selectedPackage._id, {
         gateway, couponCode: isApliedCode ? couponCode : null
       })).data;
       // TOTO update logic here
-      if (pay.paymentUrl) {
-        message.success('Redirecting to payment method');
-        window.location.href = pay.paymentUrl;
-      }
+      // if (pay.paymentUrl) {
+      //   message.success('Redirecting to payment method');
+      //   window.location.href = pay.paymentUrl;
+      // }
+      message.success('Redirecting to payment method');
+      window.location.reload();
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
+    } finally {
+      this.setState({ openPurchaseModal: false, submiting: false });
     }
   }
 
@@ -159,9 +164,9 @@ class TokenPackages extends PureComponent<IProps> {
             key={`token_package_${selectedPackage?._id}`}
             title={`Purchase Token Package ${selectedPackage?.name}`}
             visible={openPurchaseModal}
-            confirmLoading={submiting}
             footer={null}
             onCancel={() => this.setState({ openPurchaseModal: false })}
+            destroyOnClose
           >
             <div className="text-center">
               <div className="tip-performer">
@@ -198,7 +203,7 @@ class TokenPackages extends PureComponent<IProps> {
                   </Col>
                 </Row>
               </div>
-              <Button type="primary" loading={submiting} onClick={() => this.purchaseTokenPackage()}>
+              <Button type="primary" disabled={submiting} loading={submiting} onClick={() => this.purchaseTokenPackage()}>
                 Confirm purchase $
                 {coupon ? (selectedPackage?.price - coupon.value * selectedPackage?.price).toFixed(2) : selectedPackage?.price.toFixed(2)}
                 {' '}

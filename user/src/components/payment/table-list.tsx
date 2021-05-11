@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 import React from 'react';
 import { Table, Tag } from 'antd';
 import { ITransaction } from 'src/interfaces';
@@ -20,25 +21,13 @@ const PaymentTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Order ID',
-      dataIndex: 'orderNumber',
-      key: 'orderNumber',
-      render(orderNumber) {
+      title: 'Order_ID',
+      dataIndex: '_id',
+      key: '_id',
+      render(id) {
         return (
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {orderNumber}
-          </span>
-        );
-      }
-    },
-    {
-      title: 'Model',
-      dataIndex: 'seller',
-      key: 'seller',
-      render(seller) {
-        return (
-          <span>
-            {seller?.name || seller?.username || 'N/A'}
+          <span style={{ whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+            {id.slice(16, 24)}
           </span>
         );
       }
@@ -49,20 +38,13 @@ const PaymentTableList = ({
       key: 'type',
       render(type: string) {
         switch (type) {
-          case 'free_subscription': return <Tag color="blue">Free Subscription</Tag>;
-          case 'monthly_subscription': return <Tag color="blue">Monthly Subscription</Tag>;
-          case 'yearly_subscription': return <Tag color="blue">Yearly Subscription</Tag>;
-          case 'private_chat': return <Tag color="pink">Private Chat</Tag>;
-          case 'public_chat': return <Tag color="pink">Public Chat</Tag>;
-          case 'performer_post': return <Tag color="red">Post</Tag>;
-          case 'tip_performer': return <Tag color="orange">Tip</Tag>;
-          case 'performer_product': return <Tag color="green">Product</Tag>;
+          case 'token_package': return <Tag color="blue">Token Package</Tag>;
           default: return <Tag>{type}</Tag>;
         }
       }
     },
     {
-      title: 'Original price',
+      title: 'Original_price',
       dataIndex: 'originalPrice',
       key: 'originalPrice',
       render(originalPrice) {
@@ -91,7 +73,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Total Price',
+      title: 'End_price',
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
@@ -107,23 +89,19 @@ const PaymentTableList = ({
       dataIndex: 'status',
       render(status: string) {
         switch (status) {
-          case 'paid':
-            return <Tag color="success">Paid</Tag>;
+          case 'success':
+            return <Tag color="success">Success</Tag>;
           case 'pending':
             return <Tag color="warning">Pending</Tag>;
-          case 'created':
-            return <Tag color="gray">Created</Tag>;
           case 'refunded':
             return <Tag color="danger">Refunded</Tag>;
-          case 'deliveried':
-            return <Tag color="orange">Deliveried</Tag>;
           default: break;
         }
         return <Tag color="default">{status}</Tag>;
       }
     },
     {
-      title: 'Purchased at',
+      title: 'Date',
       dataIndex: 'createdAt',
       sorter: true,
       render(date: Date) {

@@ -236,7 +236,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   <>
                     <img
                       alt="performer avatar"
-                      src={product?.performer?.avatar || '/user.png'}
+                      src={product?.performer?.avatar || '/static/no-avatar.png'}
                     />
                     {' '}
                     <div className="owner-name">
@@ -269,6 +269,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           onOk={() => this.setState({ openPurchaseModal: false })}
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}
+          destroyOnClose
         >
           <PurchaseProductForm
             product={product}

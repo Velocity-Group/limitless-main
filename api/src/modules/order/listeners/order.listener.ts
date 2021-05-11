@@ -42,7 +42,6 @@ export class OrderListener {
       return;
     }
     const transaction = event.data as any;
-    console.log(11, transaction);
     if (!transaction || transaction.status !== PURCHASE_ITEM_STATUS.SUCCESS || (transaction && transaction.type !== PURCHASE_ITEM_TYPE.PRODUCT)) {
       return;
     }
@@ -65,22 +64,22 @@ export class OrderListener {
       const file = await this.fileService.findById(products[0].digitalFileId);
       digitalPath = (file && new FileDto(file).getUrl()) || '';
     }
-    const address = shippingInfo.deliveryAddress || '';
     await this.orderModel.create({
       transactionId: transaction._id,
       performerId: transaction.performerId,
       userId: transaction.sourceId,
       orderNumber: transaction._id.toString().slice(16, 24).toUpperCase(),
       shippingCode: '',
-      postalCode: shippingInfo.postalCode || transaction?.paymentResponseInfo?.postalCode || '',
-      productIds: newProds.map((p) => p.productId),
+      postalCode: shippingInfo?.postalCode || transaction?.paymentResponseInfo?.postalCode || '',
+      productId: newProds[0].productId,
       digitalPath,
+      unitPrice: products[0].price,
       quantity,
       totalPrice,
-      deliveryAddress: address || 'N/A',
+      deliveryAddress: shippingInfo.deliveryAddress || '',
       deliveryStatus: newProds[0].productType === PRODUCT_TYPE.DIGITAL ? ORDER_STATUS.DELIVERED : ORDER_STATUS.PROCESSING,
-      phoneNumber: shippingInfo.phoneNumber,
-      userNote: shippingInfo.userNote,
+      phoneNumber: shippingInfo?.phoneNumber,
+      userNote: shippingInfo?.userNote,
       createdAt: new Date(),
       updatedAt: new Date()
     });
