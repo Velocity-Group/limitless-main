@@ -13,6 +13,7 @@ import { SubscriptionModule } from '../subscription/subscription.module';
 import { EarningModule } from '../earning/earning.module';
 import { PaymentModule } from '../payment/payment.module';
 import { FeedModule } from '../feed/feed.module';
+import { OrderModule } from '../order/order.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { FeedModule } from '../feed/feed.module';
     forwardRef(() => SubscriptionModule),
     forwardRef(() => EarningModule),
     forwardRef(() => PaymentModule),
-    forwardRef(() => FeedModule)
+    forwardRef(() => FeedModule),
+    forwardRef(() => OrderModule)
   ],
   controllers: [
     StatisticController

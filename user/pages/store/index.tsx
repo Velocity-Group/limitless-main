@@ -1,24 +1,28 @@
 import {
-  Layout, Button, message, Spin, Modal
+  Layout, Button, message, Spin, Modal, Tooltip
 } from 'antd';
-import { BookOutlined, DollarOutlined } from '@ant-design/icons';
+import { BookOutlined, DollarOutlined, HeartOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { productService, reactionService } from '@services/index';
+import Link from 'next/link';
+import { productService, purchaseTokenService, reactionService } from '@services/index';
 import { PerformerListProduct } from '@components/product/performer-list-product';
 import { PurchaseProductForm } from '@components/product/confirm-purchase';
+import { updateBalance } from '@redux/user/actions';
 import { IProduct, IUser, IUIConfig } from '../../src/interfaces';
 import './store.less';
+import '../video/video.less';
 
 interface IProps {
   user: IUser;
   ui: IUIConfig;
   id: string;
+  updateBalance: Function;
 }
 
 interface IStates {
-  isAlreadyBookMarked: boolean;
+  isBookmarked: boolean;
   product: IProduct;
   relatedProducts: IProduct[];
   loading: boolean;
@@ -40,7 +44,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       relatedProducts: [],
       loading: false,
       submiting: false,
-      isAlreadyBookMarked: false,
+      isBookmarked: false,
       openPurchaseModal: false
     };
   }
@@ -56,30 +60,30 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async handleBookmark(item: IProduct) {
-    const { isAlreadyBookMarked } = this.state;
+  async handleBookmark() {
+    const { isBookmarked, product } = this.state;
     try {
-      await this.setState({ loading: true });
-      if (!isAlreadyBookMarked) {
+      await this.setState({ submiting: true });
+      if (!isBookmarked) {
         await reactionService.create({
-          objectId: item._id,
+          objectId: product._id,
           action: 'book_mark',
           objectType: 'product'
         });
-        this.setState({ isAlreadyBookMarked: true });
+        this.setState({ isBookmarked: true });
       } else {
         await reactionService.delete({
-          objectId: item._id,
+          objectId: product._id,
           action: 'book_mark',
           objectType: 'product'
         });
-        this.setState({ isAlreadyBookMarked: false });
+        this.setState({ isBookmarked: false });
       }
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
     } finally {
-      await this.setState({ loading: false });
+      await this.setState({ submiting: false });
     }
   }
 
@@ -92,7 +96,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       if (product) {
         await this.setState({ product });
         if (product.isBookMarked) {
-          await this.setState({ isAlreadyBookMarked: true });
+          await this.setState({ isBookmarked: true });
         }
         const relatedProducts = await (await productService.userSearch({
           limit: 24,
@@ -112,8 +116,8 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async purchaseProduct() {
-    const { user } = this.props;
+  async purchaseProduct(payload: any) {
+    const { user, updateBalance: handleUpdateBalance } = this.props;
     const { product } = this.state;
     if (user.balance < product.price) {
       message.error('Your token balance is not enough');
@@ -121,12 +125,14 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     }
     try {
       await this.setState({ submiting: true });
-      // const resp = await
+      await purchaseTokenService.purchaseProduct(product._id, payload);
+      message.success('Payment success, please check on Order page for newest product status');
+      handleUpdateBalance({ token: -product.price });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
     } finally {
-      this.setState({ submiting: false });
+      this.setState({ submiting: false, openPurchaseModal: false });
     }
   }
 
@@ -135,7 +141,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     const {
       product,
       relatedProducts,
-      isAlreadyBookMarked,
+      isBookmarked,
       loading,
       openPurchaseModal,
       submiting
@@ -179,8 +185,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 <p className="prod-desc">{product?.description}</p>
                 <div className="add-cart">
                   <p className="prod-price">
-                    <img alt="coin" src="/static/coin-ico.png" width="20px" />
-                    &nbsp;
+                    <img alt="coin" src="/static/coin-ico.png" width="25px" />
                     {product.price.toFixed(2)}
                   </p>
                   <div>
@@ -190,22 +195,60 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                       onClick={() => this.setState({ openPurchaseModal: true })}
                     >
                       <DollarOutlined />
-                      Buy now!
-                    </Button>
-                    <Button
-                      className={isAlreadyBookMarked ? 'primary' : 'secondary'}
-                      disabled={loading}
-                      onClick={this.handleBookmark.bind(this, product)}
-                    >
-                      <BookOutlined />
-                      {isAlreadyBookMarked
-                        ? 'Remove from Bookmark'
-                        : 'Add to Bookmark'}
+                      Get it now!
                     </Button>
                   </div>
                 </div>
               </div>
               )}
+            </div>
+          </div>
+        </div>
+        <div className="vid-split">
+          <div className="main-container">
+            <div className="vid-act">
+              <div className="act-btns">
+                <button
+                  type="button"
+                  className="react-btn"
+                >
+                  <HeartOutlined />
+                </button>
+                <Tooltip title={isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                  <button
+                    type="button"
+                    className={isBookmarked ? 'react-btn active' : 'react-btn'}
+                    disabled={submiting}
+                    onClick={this.handleBookmark.bind(this)}
+                  >
+                    <BookOutlined />
+                  </button>
+                </Tooltip>
+              </div>
+              <div className="o-w-ner">
+                <Link
+                  href={{
+                    pathname: '/model/profile',
+                    query: { username: product?.performer?.username }
+                  }}
+                  as={`/model/${product?.performer?.username}`}
+                >
+                  <>
+                    <img
+                      alt="performer avatar"
+                      src={product?.performer?.avatar || '/user.png'}
+                    />
+                    {' '}
+                    <div className="owner-name">
+                      <div>{product?.performer?.name || 'N/A'}</div>
+                      <small>
+                        @
+                        {product?.performer?.username || 'n/a'}
+                      </small>
+                    </div>
+                  </>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -242,5 +285,5 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui }
 });
 
-const mapDispatch = { };
+const mapDispatch = { updateBalance };
 export default connect(mapStates, mapDispatch)(ProductViewPage);

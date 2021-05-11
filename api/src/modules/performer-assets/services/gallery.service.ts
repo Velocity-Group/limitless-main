@@ -136,7 +136,7 @@ export class GalleryService {
     const subscribed = user && await this.subscriptionService.checkSubscribed(dto.performerId, user._id);
     dto.isSubscribed = !!subscribed;
     const isBought = await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
-    dto.isBought = !!isBought;
+    dto.isBought = isBought;
     return dto;
   }
 
@@ -377,7 +377,7 @@ export class GalleryService {
     const coverPhotoIds = data.map((d) => d.coverPhotoId);
     const galleryIds = data.map((d) => d._id);
 
-    const [performers, coverPhotos, subscriptions, transactions] = await Promise.all([
+    const [performers, coverPhotos, reactions, subscriptions, transactions] = await Promise.all([
       performerIds.length ? this.performerService.findByIds(performerIds) : [],
       coverPhotoIds.length
         ? this.photoModel
@@ -385,9 +385,9 @@ export class GalleryService {
           .lean()
           .exec()
         : [],
-      // user && user._id ? this.reactionService.findByQuery({
-      //   objectType: REACTION_TYPE.GALLERY, objectId: { $in: galleryIds }, createdBy: user._id
-      // }) : [],
+      user && user._id ? this.reactionService.findByQuery({
+        objectType: REACTION_TYPE.GALLERY, objectId: { $in: galleryIds }, createdBy: user._id
+      }) : [],
       user && user._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id, performerId: { $in: performerIds }, expiredAt: { $gt: new Date() }
       }) : [],
@@ -409,8 +409,8 @@ export class GalleryService {
       g.isSubscribed = !!subscribed;
       const isBought = transactions.find((t) => `${t.targetId}` === `${g._id}`);
       g.isBought = !!isBought;
-      // const bookmarked = bookmarks.find((l) => l.objectId.toString() === g._id.toString() && l.action === REACTION.BOOK_MARK);
-      // g.isBookMarked = !!bookmarked;
+      const bookmarked = reactions.find((l) => l.objectId.toString() === g._id.toString() && l.action === REACTION.BOOK_MARK);
+      g.isBookMarked = !!bookmarked;
       if (g.coverPhotoId) {
         const coverPhoto = coverPhotos.find(
           (c) => c._id.toString() === g.coverPhotoId.toString()

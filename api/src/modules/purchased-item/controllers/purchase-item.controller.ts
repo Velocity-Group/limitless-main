@@ -14,10 +14,9 @@ import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { ObjectId } from 'mongodb';
-import { SubscribePerformerPayload } from 'src/modules/payment/payloads';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserDto } from 'src/modules/user/dtos';
-import { PurchaseProductsPayload, SendTipsPayload } from '../payloads';
+import { PurchaseProductsPayload, SendTipsPayload, SubscribePerformerPayload } from '../payloads';
 import { PurchaseItemService } from '../services/purchase-item.service';
 
 @Injectable()

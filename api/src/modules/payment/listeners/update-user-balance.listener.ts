@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { QueueEventService, QueueEvent } from 'src/kernel';
 import { PAYMENT_TYPE, TRANSACTION_SUCCESS_CHANNEL } from 'src/modules/payment/constants';
 import { EVENT } from 'src/kernel/constants';
-import { PerformerService } from 'src/modules/performer/services';
+import { UserService } from 'src/modules/user/services';
 import { PAYMENT_STATUS } from '../constants';
 
 const UPDATE_USER_BALANCE_TOPIC = 'UPDATE_USER_BALANCE_TOPIC';
@@ -11,7 +11,7 @@ const UPDATE_USER_BALANCE_TOPIC = 'UPDATE_USER_BALANCE_TOPIC';
 export class UpdateUserBalanceListener {
   constructor(
     private readonly queueEventService: QueueEventService,
-    private readonly performerService: PerformerService
+    private readonly userService: UserService
   ) {
     this.queueEventService.subscribe(
       TRANSACTION_SUCCESS_CHANNEL,
@@ -31,7 +31,7 @@ export class UpdateUserBalanceListener {
         return false;
       }
       if (transaction.type === PAYMENT_TYPE.TOKEN_PACKAGE) {
-        await this.performerService.updatePerformerBalance(transaction.sourceId, transaction.products[0].tokens);
+        await this.userService.updateBalance(transaction.sourceId, transaction.products[0].tokens);
       }
       return true;
     } catch (e) {

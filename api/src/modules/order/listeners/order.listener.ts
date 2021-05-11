@@ -2,7 +2,8 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { QueueEventService, QueueEvent } from 'src/kernel';
 import {
-  PURCHASED_ITEM_SUCCESS_CHANNEL, PURCHASE_ITEM_TYPE
+  PURCHASED_ITEM_SUCCESS_CHANNEL, PURCHASE_ITEM_TYPE,
+  PURCHASE_ITEM_STATUS
 } from 'src/modules/purchased-item/constants';
 import { EVENT } from 'src/kernel/constants';
 import { ProductService } from 'src/modules/performer-assets/services';
@@ -12,9 +13,9 @@ import { FileDto } from 'src/modules/file';
 import { OrderDto } from '../dtos';
 import { ORDER_MODEL_PROVIDER } from '../providers';
 import { OrderModel } from '../models';
-import { ORDER_STATUS, PAYMENT_STATUS } from '../constants';
+import { ORDER_STATUS } from '../constants';
 
-const ORDER_CHANNEL = 'ORDER_CHANNEL';
+const ORDER_TOPIC = 'ORDER_TOPIC';
 
 @Injectable()
 export class OrderListener {
@@ -29,20 +30,20 @@ export class OrderListener {
   ) {
     this.queueEventService.subscribe(
       PURCHASED_ITEM_SUCCESS_CHANNEL,
-      ORDER_CHANNEL,
+      ORDER_TOPIC,
       this.handleListen.bind(this)
     );
   }
 
   public async handleListen(
     event: QueueEvent
-    // transactionPayload: any, eventType?: string
   ): Promise<OrderDto> {
     if (event.eventName !== EVENT.CREATED) {
       return;
     }
     const transaction = event.data as any;
-    if (!transaction || transaction.status !== PAYMENT_STATUS.SUCCESS || (transaction && transaction.type !== PURCHASE_ITEM_TYPE.PRODUCT)) {
+    console.log(11, transaction);
+    if (!transaction || transaction.status !== PURCHASE_ITEM_STATUS.SUCCESS || (transaction && transaction.type !== PURCHASE_ITEM_TYPE.PRODUCT)) {
       return;
     }
     const { shippingInfo } = transaction;

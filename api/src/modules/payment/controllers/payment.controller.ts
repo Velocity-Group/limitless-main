@@ -11,13 +11,11 @@ import {
   Query,
   Param
 } from '@nestjs/common';
-import { RoleGuard, AuthGuard } from 'src/modules/auth/guards';
+import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import {
-  PurchaseTokenPayload
-} from '../payloads';
+import { PurchaseTokenPayload } from '../payloads';
 import { PaymentService } from '../services/payment.service';
 
 @Injectable()
@@ -27,7 +25,8 @@ export class PaymentController {
 
   @Post('/purchase-tokens/:tokenId')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('user')
   @UsePipes(new ValidationPipe({ transform: true }))
   async purchaseTokens(
     @CurrentUser() user: PerformerDto,
@@ -75,29 +74,5 @@ export class PaymentController {
   ): Promise<DataResponse<any>> {
     const info = await this.paymentService.bitpaySuccessWebhook(payload);
     return DataResponse.ok(info);
-  }
-
-  @Post('/ccbill/cancel-subscription/:performerId')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async ccbillCancel(
-    @Param('performerId') performerId: string,
-    @CurrentUser() user: PerformerDto
-  ): Promise<DataResponse<any>> {
-    const data = await this.paymentService.cancelSubscription(performerId, user);
-    return DataResponse.ok(data);
-  }
-
-  @Post('/ccbill/admin/cancel-subscription/:subscriptionId')
-  @HttpCode(HttpStatus.OK)
-  @Roles('admin')
-  @UseGuards(RoleGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async adminCancelCCbill(
-    @Param('subscriptionId') subscriptionId: string
-  ): Promise<DataResponse<any>> {
-    const data = await this.paymentService.adminCancelSubscription(subscriptionId);
-    return DataResponse.ok(data);
   }
 }

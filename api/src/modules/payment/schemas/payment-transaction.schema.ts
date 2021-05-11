@@ -44,9 +44,6 @@ export const PaymentTransactionSchema = new Schema({
       extraInfo: Schema.Types.Mixed
     }
   ],
-  deliveryAddress: {
-    type: String
-  },
   totalPrice: {
     type: Number,
     default: 0

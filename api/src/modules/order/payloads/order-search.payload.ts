@@ -19,6 +19,11 @@ export class OrderSearchPayload extends SearchRequest {
   deliveryStatus: string;
 
   @ApiProperty()
+  @IsString()
+  @IsOptional()
+  phoneNumber: string;
+
+  @ApiProperty()
   @IsOptional()
   fromDate: Date;
 

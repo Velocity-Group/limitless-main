@@ -7,22 +7,22 @@ import { FeedModel } from 'src/modules/feed/models';
 import {
   PERFORMER_GALLERY_MODEL_PROVIDER, PERFORMER_PHOTO_MODEL_PROVIDER,
   PERFORMER_PRODUCT_MODEL_PROVIDER, PERFORMER_VIDEO_MODEL_PROVIDER
-} from '../../performer-assets/providers';
+} from 'src/modules/performer-assets/providers';
 import {
   GalleryModel, PhotoModel, ProductModel, VideoModel
-} from '../../performer-assets/models';
-import { USER_MODEL_PROVIDER } from '../../user/providers';
-import { UserModel } from '../../user/models';
-import { PERFORMER_MODEL_PROVIDER } from '../../performer/providers';
-import { PerformerModel } from '../../performer/models';
-import { SUBSCRIPTION_MODEL_PROVIDER } from '../../subscription/providers/subscription.provider';
-import { SubscriptionModel } from '../../subscription/models/subscription.model';
-import { ORDER_MODEL_PROVIDER } from '../../payment/providers';
-import { OrderModel } from '../../payment/models';
-import { EARNING_MODEL_PROVIDER } from '../../earning/providers/earning.provider';
-import { EarningModel } from '../../earning/models/earning.model';
-import { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING_EMAIL_CONFIRMATION } from '../../user/constants';
-import { ORDER_STATUS } from '../../payment/constants';
+} from 'src/modules/performer-assets/models';
+import { USER_MODEL_PROVIDER } from 'src/modules/user/providers';
+import { UserModel } from 'src/modules/user/models';
+import { PERFORMER_MODEL_PROVIDER } from 'src/modules/performer/providers';
+import { PerformerModel } from 'src/modules/performer/models';
+import { SUBSCRIPTION_MODEL_PROVIDER } from 'src/modules/subscription/providers/subscription.provider';
+import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
+import { ORDER_MODEL_PROVIDER } from 'src/modules/order/providers';
+import { OrderModel } from 'src/modules/order/models';
+import { EARNING_MODEL_PROVIDER } from 'src/modules/earning/providers/earning.provider';
+import { EarningModel } from 'src/modules/earning/models/earning.model';
+import { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING_EMAIL_CONFIRMATION } from 'src/modules/user/constants';
+import { ORDER_STATUS } from 'src/modules/order/constants';
 
 @Injectable()
 export class StatisticService {

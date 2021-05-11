@@ -57,6 +57,7 @@ export class OrderService {
     const query = { } as any;
     if (req.performerId) query.performerId = req.performerId;
     if (req.deliveryStatus) query.deliveryStatus = req.deliveryStatus;
+    if (req.phoneNumber) query.phoneNumber = { $regex: req.phoneNumber };
     if (req.fromDate && req.toDate) {
       query.createdAt = {
         $gte: moment(req.fromDate).endOf('day'),
@@ -172,6 +173,7 @@ export class OrderService {
       userId: user._id
     } as any;
     if (req.deliveryStatus) query.deliveryStatus = req.deliveryStatus;
+    if (req.phoneNumber) query.phoneNumber = { $regex: req.phoneNumber };
     if (req.fromDate && req.toDate) {
       query.createdAt = {
         $gt: moment(req.fromDate),

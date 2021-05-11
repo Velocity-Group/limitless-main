@@ -1,8 +1,8 @@
 /* eslint-disable no-shadow */
 export const PURCHASE_ITEM_TYPE = {
-  SALE_VIDEO: 'sale_video',
-  PRODUCT: 'sale_product',
-  GALLERY: 'sale_gallery',
+  VIDEO: 'video',
+  PRODUCT: 'product',
+  GALLERY: 'gallery',
   TIP: 'tip',
   FEED: 'feed',
   MESSAGE: 'message',
@@ -17,9 +17,9 @@ export const PURCHASE_ITEM_TYPE = {
 };
 
 export enum PurchaseItemType {
-  SALE_VIDEO = 'sale_video',
-  PRODUCT = 'sale_product',
-  GALLERY = 'sale_gallery',
+  VIDEO = 'video',
+  PRODUCT = 'product',
+  GALLERY = 'gallery',
   TIP = 'tip',
   FEED = 'feed',
   MESSAGE = 'message',

@@ -85,7 +85,7 @@ export class TransactionEarningListener {
         case PURCHASE_ITEM_TYPE.TIP:
           commission = performerCommissions?.tipCommission || settingTipCommission || 0.2;
           break;
-        case PURCHASE_ITEM_TYPE.SALE_VIDEO:
+        case PURCHASE_ITEM_TYPE.VIDEO:
           commission = performerCommissions?.videoSaleCommission || settingVideoCommission || 0.2;
           break;
         case PURCHASE_ITEM_TYPE.GALLERY:

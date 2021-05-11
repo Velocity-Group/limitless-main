@@ -13,6 +13,7 @@ import { StreamConversationWsGateway, PrivateStreamWsGateway, PublicStreamWsGate
 import { StreamConnectListener } from './listeners';
 import { SettingModule } from '../settings/setting.module';
 import { PaymentModule } from '../payment/payment.module';
+import { OrderModule } from '../order/order.module';
 
 const agent = new https.Agent({
   rejectUnauthorized: process.env.REJECT_UNAUTHORIZED !== 'false'
@@ -34,7 +35,8 @@ const agent = new https.Agent({
     forwardRef(() => PerformerModule),
     forwardRef(() => MessageModule),
     forwardRef(() => SettingModule),
-    forwardRef(() => PaymentModule)
+    forwardRef(() => PaymentModule),
+    forwardRef(() => OrderModule)
   ],
   providers: [
     ...assetsProviders,

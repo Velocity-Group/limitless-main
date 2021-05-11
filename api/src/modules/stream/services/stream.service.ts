@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ConversationService } from 'src/modules/message/services';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { OrderService } from 'src/modules/payment/services';
+import { OrderService } from 'src/modules/order/services';
 import * as moment from 'moment';
 import { uniq } from 'lodash';
 import { RequestService } from './request.service';

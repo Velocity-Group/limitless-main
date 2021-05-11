@@ -1,7 +1,5 @@
-/* eslint-disable new-cap */
-/* eslint-disable no-nested-ternary */
 import {
-  Injectable, Inject, forwardRef, BadRequestException, HttpException
+  Injectable, Inject, forwardRef, BadRequestException
 } from '@nestjs/common';
 import { CouponDto } from 'src/modules/coupon/dtos';
 import {
@@ -15,13 +13,6 @@ import { ObjectId } from 'mongodb';
 import { CouponService } from 'src/modules/coupon/services';
 import { SettingService } from 'src/modules/settings';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
-import axios from 'axios';
-import { SubscriptionDto } from 'src/modules/subscription/dtos/subscription.dto';
-import {
-  UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-  SUBSCRIPTION_STATUS
-} from 'src/modules/subscription/constants';
-
 import { TokenPackageService } from 'src/modules/token-package/services';
 import { PaymentDto } from 'src/modules/purchased-item/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
@@ -39,11 +30,8 @@ import {
 import {
   MissingConfigPaymentException
 } from '../exceptions';
-import { SubscriptionService } from '../../subscription/services/subscription.service';
 import { CCBillService } from './ccbill.service';
 import { BitpayService } from './bitpay.service';
-
-const ccbillCancelUrl = 'https://datalink.ccbill.com/utils/subscriptionManagement.cgi';
 
 @Injectable()
 export class PaymentService {
@@ -53,16 +41,15 @@ export class PaymentService {
     @Inject(forwardRef(() => TokenPackageService))
     private readonly tokenPackageService: TokenPackageService,
     @Inject(PAYMENT_TRANSACTION_MODEL_PROVIDER)
-    private readonly paymentTransactionModel: Model<PaymentTransactionModel>,
+    private readonly TransactionModel: Model<PaymentTransactionModel>,
     private readonly ccbillService: CCBillService,
     private readonly bitpayService: BitpayService,
     private readonly queueEventService: QueueEventService,
-    private readonly subscriptionService: SubscriptionService,
     private readonly settingService: SettingService
   ) { }
 
   public async findById(id: string | ObjectId) {
-    const data = await this.paymentTransactionModel.findById(id);
+    const data = await this.TransactionModel.findById(id);
     return data;
   }
 
@@ -73,7 +60,7 @@ export class PaymentService {
     user: PerformerDto,
     couponInfo?: CouponDto
   ) {
-    const paymentTransaction = new this.paymentTransactionModel();
+    const paymentTransaction = new this.TransactionModel();
     paymentTransaction.originalPrice = totalPrice;
     paymentTransaction.paymentGateway = gateway || 'ccbill';
     paymentTransaction.source = 'performer';
@@ -190,7 +177,7 @@ export class PaymentService {
     if (!checkForHexRegExp.test(transactionId)) {
       return { ok: false };
     }
-    const transaction = await this.paymentTransactionModel.findById(transactionId);
+    const transaction = await this.TransactionModel.findById(transactionId);
     if (!transaction) {
       return { ok: false };
     }
@@ -212,7 +199,7 @@ export class PaymentService {
     if (!subscriptionId) {
       throw new BadRequestException();
     }
-    const transaction = await this.paymentTransactionModel.findOne({
+    const transaction = await this.TransactionModel.findOne({
       'paymentResponseInfo.subscriptionId': subscriptionId
     });
     if (!transaction) {
@@ -241,7 +228,7 @@ export class PaymentService {
     if (!checkForHexRegExp.test(transactionId)) {
       return { ok: false };
     }
-    const transaction = await this.paymentTransactionModel.findById(transactionId);
+    const transaction = await this.TransactionModel.findById(transactionId);
     if (!transaction) {
       return { ok: false };
     }
@@ -256,107 +243,5 @@ export class PaymentService {
       })
     );
     return { ok: true };
-  }
-
-  public async cancelSubscription(performerId: any, user: PerformerDto) {
-    const subscription = await this.subscriptionService.findOneSubscription(performerId, user._id);
-    if (!subscription || !subscription.transactionId) {
-      throw new EntityNotFoundException();
-    }
-    const transaction = await this.findById(subscription.transactionId);
-    if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-          eventName: EVENT.DELETED,
-          data: new SubscriptionDto(subscription)
-        })
-      );
-      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-      await subscription.save();
-      transaction.status = PAYMENT_STATUS.CANCELLED;
-      await transaction.save();
-      return { success: true };
-    } if ([PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
-      if (!transaction || !transaction.paymentResponseInfo || !transaction.paymentResponseInfo.subscriptionId) {
-        throw new EntityNotFoundException();
-      }
-      const { subscriptionId } = transaction.paymentResponseInfo;
-      const ccbillClientAccNo = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER);
-      if (!subscriptionId || !ccbillClientAccNo) {
-        throw new EntityNotFoundException();
-      }
-      try {
-        const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
-        if (resp.data && resp.data.includes('"results"\n"1"\n')) {
-          await this.queueEventService.publish(
-            new QueueEvent({
-              channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-              eventName: EVENT.DELETED,
-              data: new SubscriptionDto(subscription)
-            })
-          );
-          subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-          await subscription.save();
-          transaction.status = PAYMENT_STATUS.CANCELLED;
-          await transaction.save();
-          return { success: true };
-        }
-        return { success: false };
-      } catch (e) {
-        throw new Error('Cancel subscription got an error');
-      }
-    } else {
-      return { success: false };
-    }
-  }
-
-  public async adminCancelSubscription(id: string) {
-    const subscription = await this.subscriptionService.findById(id);
-    if (!subscription) {
-      throw new EntityNotFoundException();
-    }
-    if (subscription && !subscription.transactionId) {
-      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-      subscription.updatedAt = new Date();
-      await subscription.save();
-      return { success: true };
-    }
-    const transaction = await this.findById(subscription.transactionId);
-    if (!transaction || !transaction.paymentResponseInfo || !transaction.paymentResponseInfo.subscriptionId) {
-      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-      subscription.updatedAt = new Date();
-      await subscription.save();
-      return { success: true };
-    }
-    // const performerCCbill = await this.performerService.getPaymentSetting(subscription.performerId);
-    const { subscriptionId } = transaction.paymentResponseInfo;
-    const ccbillClientAccNo = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER);
-    if (!ccbillClientAccNo) {
-      throw new EntityNotFoundException();
-    }
-    try {
-      const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
-      if (resp.data && resp.data.includes('"results"\n"1"\n')) {
-        await this.queueEventService.publish(
-          new QueueEvent({
-            channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-            eventName: EVENT.DELETED,
-            data: new SubscriptionDto(subscription)
-          })
-        );
-        subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-        subscription.updatedAt = new Date();
-        await subscription.save();
-
-        transaction.status = PAYMENT_STATUS.CANCELLED;
-        transaction.updatedAt = new Date();
-        await transaction.save();
-        return { success: true };
-      }
-      return { success: false };
-    } catch (e) {
-      throw new HttpException(e, 400);
-    }
   }
 }

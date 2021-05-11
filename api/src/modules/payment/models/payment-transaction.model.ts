@@ -52,6 +52,4 @@ export class PaymentTransactionModel extends Document {
   createdAt: Date;
 
   updatedAt: Date;
-
-  deliveryAddress: string;
 }

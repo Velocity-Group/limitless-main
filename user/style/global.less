@@ -188,6 +188,7 @@
 .ant-row {
   margin-left: -10px;
   margin-right: -10px;
+  width: 100%;
   .ant-col {
     padding: 5px;
   }
@@ -250,7 +251,7 @@
   }
 
   textarea.ant-input {
-    min-height: 100px;
+    min-height: 65px;
   }
 
   .ant-form-item-label {
@@ -375,10 +376,25 @@
 }
 
 .filter-block {
-  margin-left: unset !important;
-  margin-right: unset !important;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
+  margin-bottom: 5px;
+  .filter-item {
+    width: 100%;
+    padding-right: 5px
+  }
+  &.hide {
+    display: none;
+  }
+  &.custom {
+    flex-wrap: wrap;
+    .filter-item {
+      width: 33.33%;
+      padding: 0 5px 5px 0
+    }
+  }
 
   input {
     height: 40px;
@@ -402,6 +418,15 @@
 
   button {
     height: 40px;
+  }
+
+  @media screen and (max-width: @tablet-screen) {
+    &.custom {
+      flex-wrap: wrap;
+      .filter-item {
+        width: 50%;
+      }
+    }
   }
 }
 
@@ -683,4 +708,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.tip-performer {
+  h4 {
+    text-transform: capitalize;
+    font-weight: 600;
+  }
 }

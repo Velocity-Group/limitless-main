@@ -84,7 +84,7 @@ export class FormProduct extends PureComponent<IProps> {
     return (
       <Form
         {...layout}
-        onFinish={submit && submit.bind(this)}
+        onFinish={submit.bind(this)}
         onFinishFailed={() => message.error('Please complete the required fields')}
         name="form-upload"
         ref={this.formRef}

@@ -1,5 +1,4 @@
 import { MongoDBModule, QueueModule } from 'src/kernel';
-import { FeedModule } from 'src/modules/feed/feed.module';
 import {
   Module, forwardRef, NestModule, MiddlewareConsumer
 } from '@nestjs/common';
@@ -8,60 +7,43 @@ import { RequestLoggerMiddleware } from 'src/kernel/logger/request-log.middlewar
 import { TokenPackageModule } from 'src/modules/token-package/token-package.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
-import { SubscriptionModule } from '../subscription/subscription.module';
-import { PerformerAssetsModule } from '../performer-assets/performer-assets.module';
-import { paymentProviders, orderProviders } from './providers';
+import { paymentProviders } from './providers';
 import { SettingModule } from '../settings/setting.module';
-import { EarningModule } from '../earning/earning.module';
-import { MessageModule } from '../message/message.module';
-import { FileModule } from '../file/file.module';
 import { MailerModule } from '../mailer/mailer.module';
 import {
-  CCBillService, PaymentService, PaymentSearchService, CheckPaymentService,
-  OrderService, BitpayService
+  CCBillService, PaymentService, PaymentSearchService,
+  BitpayService
 } from './services';
-import { PaymentController, PaymentSearchController, OrderController } from './controllers';
-import { OrderListener, TransactionMailerListener, UpdateUserBalanceListener } from './listeners';
+import { PaymentController, PaymentSearchController } from './controllers';
+import { TransactionMailerListener, UpdateUserBalanceListener } from './listeners';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     MongoDBModule,
     QueueModule.forRoot(),
+    forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => SettingModule),
-    forwardRef(() => SubscriptionModule),
-    forwardRef(() => EarningModule),
-    forwardRef(() => PerformerAssetsModule),
     forwardRef(() => CouponModule),
-    forwardRef(() => FileModule),
     forwardRef(() => MailerModule),
-    forwardRef(() => FeedModule),
-    forwardRef(() => MessageModule),
     forwardRef(() => TokenPackageModule)
   ],
   providers: [
     ...paymentProviders,
-    ...orderProviders,
     PaymentService,
     CCBillService,
     BitpayService,
     PaymentSearchService,
-    CheckPaymentService,
-    OrderService,
-    OrderListener,
     TransactionMailerListener,
     UpdateUserBalanceListener
   ],
-  controllers: [PaymentController, PaymentSearchController, OrderController],
+  controllers: [PaymentController, PaymentSearchController],
   exports: [
     ...paymentProviders,
-    ...orderProviders,
     PaymentService,
-    PaymentSearchService,
-    CheckPaymentService,
-    OrderService,
-    OrderListener
+    PaymentSearchService
   ]
 })
 export class PaymentModule implements NestModule {

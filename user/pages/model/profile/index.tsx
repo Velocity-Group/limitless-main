@@ -11,7 +11,7 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, paymentService, feedService, reactionService, authService
+  performerService, paymentService, feedService, reactionService
 } from 'src/services';
 import Head from 'next/head';
 import {
@@ -173,18 +173,6 @@ class PerformerProfile extends PureComponent<IProps> {
   async handleFilterSearch(filter) {
     await this.setState({ filter });
     this.loadItems();
-  }
-
-  onAvatarUploaded(data: any) {
-    const { updateCurrentUserAvatar: handleUpdateAvt } = this.props;
-    message.success('Avatar updated');
-    handleUpdateAvt(data.response.data.url);
-  }
-
-  onCoverUploaded(data: any) {
-    const { updateCurrentUserCover: handleUpdateCover } = this.props;
-    message.success('Cover image updated');
-    handleUpdateCover(data.response.data.url);
   }
 
   async loadItems() {
@@ -496,7 +484,7 @@ class PerformerProfile extends PureComponent<IProps> {
               {currentUser?._id !== performer._id && <span className={performer.isOnline ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
                 <h4>
-                  {currentUser._id === performer._id ? currentUser.name : performer?.name}
+                  {performer?.name}
                     &nbsp;
                   {currentUser._id === performer._id ? <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link> : (
                     <>
@@ -508,7 +496,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </h4>
                 <h5 style={{ textTransform: 'none' }}>
                   @
-                  {currentUser._id === performer._id ? currentUser.username : performer?.username}
+                  {performer?.username}
                 </h5>
               </div>
             </div>
@@ -517,11 +505,11 @@ class PerformerProfile extends PureComponent<IProps> {
               && currentUser._id !== ((performer?._id) || '') && (
                 <div className="btn-grp">
                   <div style={{ marginBottom: '4px' }}>
-                    <button disabled={requesting} type="button" className={isBookMarked ? 'primary' : 'normal custom'} onClick={this.handleBookmark.bind(this)}>
+                    {/* <button disabled={requesting} type="button" className={isBookMarked ? 'primary' : 'normal custom'} onClick={this.handleBookmark.bind(this)}>
                       <BookOutlined />
                       {' '}
                       {isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
-                    </button>
+                    </button> */}
                     <button
                       type="button"
                       className="normal"
@@ -681,7 +669,14 @@ class PerformerProfile extends PureComponent<IProps> {
                 </div>
               </TabPane>
               <TabPane tab={<Tooltip title="Videos"><VideoCameraOutlined /></Tooltip>} key="video">
-                <SearchPostBar searching={loadingVideo} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+                <div className="heading-tab">
+                  <h4>
+                    {totalVideos}
+                    {' '}
+                    VIDEO
+                  </h4>
+                  <SearchPostBar searching={loadingVideo} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+                </div>
                 <div className="main-container">
                   <ScrollListVideo
                     items={videos}
@@ -692,7 +687,14 @@ class PerformerProfile extends PureComponent<IProps> {
                 </div>
               </TabPane>
               <TabPane tab={<Tooltip title="Galleries"><PictureOutlined /></Tooltip>} key="photo">
-                <SearchPostBar searching={loadingGallery} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+                <div className="heading-tab">
+                  <h4>
+                    {totalGalleries}
+                    {' '}
+                    GALLERY
+                  </h4>
+                  <SearchPostBar searching={loadingGallery} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+                </div>
                 <div className="main-container">
                   <ScrollListGallery
                     items={galleries}
@@ -703,7 +705,14 @@ class PerformerProfile extends PureComponent<IProps> {
                 </div>
               </TabPane>
               <TabPane tab={<Tooltip title="Shop"><ShopOutlined /></Tooltip>} key="store">
-                <SearchPostBar searching={loadingPrd} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} />
+                <div className="heading-tab">
+                  <h4>
+                    {totalProducts}
+                    {' '}
+                    PRODUCT
+                  </h4>
+                  <SearchPostBar searching={loadingPrd} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} />
+                </div>
                 <ScrollListProduct
                   items={products}
                   loading={loadingPrd}

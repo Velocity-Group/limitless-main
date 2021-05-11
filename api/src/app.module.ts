@@ -29,6 +29,7 @@ import { SearchModule } from './modules/search/search.module';
 import { StatisticsModule } from './modules/statistics/statistic.module';
 import { TokenPackageModule } from './modules/token-package/token-package.module';
 import { PayoutRequestModule } from './modules/payout-request/payout.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -60,7 +61,8 @@ import { PayoutRequestModule } from './modules/payout-request/payout.module';
     SearchModule,
     StatisticsModule,
     TokenPackageModule,
-    PayoutRequestModule
+    PayoutRequestModule,
+    OrderModule
   ],
   controllers: [AppController],
   providers: [AppService]

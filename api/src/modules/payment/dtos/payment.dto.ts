@@ -13,12 +13,6 @@ export interface PaymentProduct {
   quantity?: number;
 }
 
-export interface DigitalProductResponse {
-  digitalFileUrl?: any;
-  digitalFileId?: any;
-  _id?: string | ObjectId;
-}
-
 export class IPaymentResponse {
   _id: ObjectId;
 
@@ -55,10 +49,6 @@ export class IPaymentResponse {
   createdAt: Date;
 
   updatedAt: Date;
-
-  digitalProducts?: DigitalProductResponse[];
-
-  deliveryAddress?: string;
 }
 
 export class PaymentDto {
@@ -98,10 +88,6 @@ export class PaymentDto {
 
   updatedAt: Date;
 
-  digitalProducts?: DigitalProductResponse[];
-
-  deliveryAddress?: string;
-
   constructor(data?: Partial<PaymentDto>) {
     data
       && Object.assign(
@@ -124,9 +110,7 @@ export class PaymentDto {
           'originalPrice',
           'couponInfo',
           'createdAt',
-          'updatedAt',
-          'digitalProducts',
-          'deliveryAddress'
+          'updatedAt'
         ])
       );
   }
@@ -149,8 +133,7 @@ export class PaymentDto {
       couponInfo: this.couponInfo,
       status: this.status,
       createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      deliveryAddress: this.deliveryAddress
+      updatedAt: this.updatedAt
     };
 
     const privateInfo = {

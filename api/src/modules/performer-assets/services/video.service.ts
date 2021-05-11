@@ -25,6 +25,7 @@ import { EVENT } from 'src/kernel/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserDto } from 'src/modules/user/dtos';
+import { PurchaseItemType } from 'src/modules/purchased-item/constants';
 import { VideoUpdatePayload } from '../payloads';
 import { VideoDto, IVideoResponse } from '../dtos';
 import { VIDEO_STATUS, VIDEO_TEASER_STATUS } from '../constants';
@@ -390,8 +391,8 @@ export class VideoService {
       dto.isSubscribed = !!subscribed;
     }
     if (dto.isSale) {
-      const bought = currentUser && await this.checkPaymentService.checkBoughtVideo(dto, currentUser);
-      dto.isBought = !!bought;
+      const bought = currentUser && await this.checkPaymentService.checkBought(dto, PurchaseItemType.VIDEO, currentUser);
+      dto.isBought = bought;
     }
     dto.video = this.getVideoForView(videoFile, dto, jwToken);
     dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
@@ -520,7 +521,7 @@ export class VideoService {
     }
     if (video.isSale) {
       // check bought
-      const bought = await this.checkPaymentService.checkBoughtVideo(new VideoDto(video), user);
+      const bought = await this.checkPaymentService.checkBought(new VideoDto(video), PurchaseItemType.VIDEO, user);
       if (!bought) {
         throw new ForbiddenException();
       }

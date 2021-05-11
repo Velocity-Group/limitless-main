@@ -1,9 +1,9 @@
 import { PureComponent } from 'react';
 import {
-  Input, Row, Col, Button, Select
+  Input, Button, Select
 } from 'antd';
 import { omit } from 'lodash';
-import { } from '@ant-design/icons';
+import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { ICountry } from '@interfaces/index';
 import { utilsService } from '@services/index';
 
@@ -124,212 +124,203 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
     const { countries } = this.props;
     const { showMore, heights, weights } = this.state;
     return (
-      <Row gutter={24} className="filter-block">
-        <Col md={{ span: 20 }} xs={{ span: 24 }} style={{ padding: 0 }}>
-          <Row>
-            <Col md={{ span: 12 }} xs={{ span: 24 }}>
-              <Input
-                placeholder="Enter keyword"
-                onChange={(evt) => this.setState({ q: evt.target.value })}
-                onPressEnter={this.handleSubmit.bind(this)}
-              />
-            </Col>
-            {genders && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ gender: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Orientation"
-                  defaultValue=""
-                >
-                  {genders.map((gen) => (
-                    <Select.Option key={gen.key} value={gen.key}>
-                      {gen.text || gen.key}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-            )}
-            <Row style={{ width: '100%', display: !showMore ? 'none' : 'flex' }}>
-              {countries && countries.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ country: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Countries"
-                  defaultValue=""
-                  showSearch
-                  optionFilterProp="label"
-                >
-                  <Select.Option key="All" label="" value="">
-                    All countries
-                  </Select.Option>
-                  {countries.map((c) => (
-                    <Select.Option key={c.code} label={c.name} value={c.code}>
-                      <img alt="flag" src={c.flag} width="25px" />
-                      &nbsp;
-                      {c.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-              {ages.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ age: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Ages"
-                  defaultValue=""
-                >
-                  {ages.map((i) => (
-                    <Select.Option key={i.key} value={i.key}>
-                      {i.text || i.key}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-              {eyeColors.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ eyes: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Eyes color"
-                  defaultValue=""
-                >
-                  {eyeColors.map((i) => (
-                    <Select.Option key={i.key} value={i.key}>
-                      {i.text || i.key}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-              {hairColors.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ hair: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Hair color"
-                  defaultValue=""
-                >
-                  {hairColors.map((i) => (
-                    <Select.Option key={i.key} value={i.key}>
-                      {i.text || i.key}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-              {buttSizes.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ bust: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Select butt size"
-                  defaultValue=""
-                >
-                  {buttSizes.map((i) => (
-                    <Select.Option key={i.key} value={i.key}>
-                      {i.text || i.key}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-              {heights.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ height: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Select height"
-                  defaultValue=""
-                >
-                  <Select.Option key="all" value="">
-                    All heights
-                  </Select.Option>
-                  {heights.map((i) => (
-                    <Select.Option key={i.text} value={i.text}>
-                      {i.text}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-              {weights.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ weight: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Select weight"
-                  defaultValue=""
-                >
-                  <Select.Option key="all" value="">
-                    All weights
-                  </Select.Option>
-                  {weights.map((i) => (
-                    <Select.Option key={i.text} value={i.text}>
-                      {i.text}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-              {ethnicities.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ ethnicity: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Select ethnicity"
-                  defaultValue=""
-                >
-                  {ethnicities.map((i) => (
-                    <Select.Option key={i.key} value={i.key}>
-                      {i.text || i.key}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-              {bodyTypes.length > 0 && (
-              <Col md={{ span: 12 }} xs={{ span: 24 }}>
-                <Select
-                  onChange={(val) => this.setState({ bodyType: val })}
-                  style={{ width: '100%' }}
-                  placeholder="Select body type"
-                  defaultValue=""
-                >
-                  {bodyTypes.map((i) => (
-                    <Select.Option key={i.key} value={i.key}>
-                      {i.text || i.key}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-              )}
-
-            </Row>
-          </Row>
-        </Col>
-        <Col md={{ span: 4 }} xs={{ span: 24 }} style={{ padding: 0 }}>
-          <Button
-            type="primary"
-            className="primary"
-            style={{ width: '100%' }}
-            onClick={this.handleSubmit.bind(this)}
-          >
-            Search
-          </Button>
-          {/* <span className={showMore ? 'btn-show-more active' : 'btn-show-more'}>
-            <a aria-hidden onClick={() => this.setState({ showMore: !showMore })}>
+      <div style={{ width: '100%' }}>
+        <div className="filter-block">
+          <div className="filter-item">
+            <Input
+              placeholder="Enter keyword"
+              onChange={(evt) => this.setState({ q: evt.target.value })}
+              onPressEnter={this.handleSubmit.bind(this)}
+            />
+          </div>
+          <div>
+            <Button
+              type="primary"
+              className="primary"
+              style={{ width: '100%' }}
+              onClick={() => this.setState({ showMore: !showMore })}
+            >
               Advanced search
               {' '}
               {showMore ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-            </a>
-          </span> */}
-        </Col>
-      </Row>
+            </Button>
+          </div>
+        </div>
+        <div className={!showMore ? 'filter-block hide' : 'filter-block custom'}>
+          {countries && countries.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ country: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Countries"
+              defaultValue=""
+              showSearch
+              optionFilterProp="label"
+            >
+              <Select.Option key="All" label="" value="">
+                All countries
+              </Select.Option>
+              {countries.map((c) => (
+                <Select.Option key={c.code} label={c.name} value={c.code}>
+                  <img alt="flag" src={c.flag} width="25px" />
+                      &nbsp;
+                  {c.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )}
+          {genders && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ gender: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              defaultValue=""
+            >
+              {genders.map((gen) => (
+                <Select.Option key={gen.key} value={gen.key}>
+                  {gen.text || gen.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )}
+          {/* {ages.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ age: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Ages"
+              defaultValue=""
+            >
+              {ages.map((i) => (
+                <Select.Option key={i.key} value={i.key}>
+                  {i.text || i.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )} */}
+          {eyeColors.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ eyes: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Eyes color"
+              defaultValue=""
+            >
+              {eyeColors.map((i) => (
+                <Select.Option key={i.key} value={i.key}>
+                  {i.text || i.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )}
+          {hairColors.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ hair: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Hair color"
+              defaultValue=""
+            >
+              {hairColors.map((i) => (
+                <Select.Option key={i.key} value={i.key}>
+                  {i.text || i.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )}
+          {buttSizes.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ bust: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Select butt size"
+              defaultValue=""
+            >
+              {buttSizes.map((i) => (
+                <Select.Option key={i.key} value={i.key}>
+                  {i.text || i.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )}
+          {heights.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ height: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Select height"
+              defaultValue=""
+            >
+              <Select.Option key="all" value="">
+                All heights
+              </Select.Option>
+              {heights.map((i) => (
+                <Select.Option key={i.text} value={i.text}>
+                  {i.text}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )}
+          {weights.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ weight: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Select weight"
+              defaultValue=""
+            >
+              <Select.Option key="all" value="">
+                All weights
+              </Select.Option>
+              {weights.map((i) => (
+                <Select.Option key={i.text} value={i.text}>
+                  {i.text}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )}
+          {ethnicities.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ ethnicity: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Select ethnicity"
+              defaultValue=""
+            >
+              {ethnicities.map((i) => (
+                <Select.Option key={i.key} value={i.key}>
+                  {i.text || i.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )}
+          {/* {bodyTypes.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ bodyType: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              placeholder="Select body type"
+              defaultValue=""
+            >
+              {bodyTypes.map((i) => (
+                <Select.Option key={i.key} value={i.key}>
+                  {i.text || i.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          )} */}
+        </div>
+      </div>
     );
   }
 }

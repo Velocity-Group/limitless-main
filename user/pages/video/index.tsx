@@ -517,7 +517,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   type="button"
                   className={
                     userReaction && userReaction.liked
-                      ? 'react-btn liked'
+                      ? 'react-btn active'
                       : 'react-btn'
                   }
                   onClick={this.onReaction.bind(
@@ -535,7 +535,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   type="button"
                   className={
                     userReaction && userReaction.favourited
-                      ? 'react-btn favourited'
+                      ? 'react-btn active'
                       : 'react-btn'
                   }
                   onClick={this.onReaction.bind(
@@ -553,7 +553,7 @@ class VideoViewPage extends PureComponent<IProps> {
                       type="button"
                       className={
                         userReaction && userReaction.watchedLater
-                          ? 'react-btn watch-later'
+                          ? 'react-btn active'
                           : 'react-btn'
                       }
                       onClick={this.onReaction.bind(

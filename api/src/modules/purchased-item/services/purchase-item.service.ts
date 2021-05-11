@@ -20,18 +20,17 @@ import { PerformerService } from 'src/modules/performer/services';
 import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
 import { FeedService } from 'src/modules/feed/services';
 import { FeedDto } from 'src/modules/feed/dtos';
-import { SubscribePerformerPayload } from 'src/modules/payment/payloads';
 import { SUBSCRIPTION_TYPE, SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { uniq } from 'lodash';
 import { toObjectId, generateUuid } from 'src/kernel/helpers/string.helper';
-import { ConversationService } from 'src/modules/message/services';
+// import { ConversationService } from 'src/modules/message/services';
 import { StreamService } from 'src/modules/stream/services';
 import { StreamModel } from 'src/modules/stream/models';
 import { GROUP_CHAT, PRIVATE_CHAT, PUBLIC_CHAT } from 'src/modules/stream/constant';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
-import { FileService } from 'src/modules/file/services';
+// import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { PAYMENT_TOKEN_MODEL_PROVIDER } from '../providers';
 import { PaymentTokenModel } from '../models';
@@ -48,8 +47,10 @@ import {
 } from '../exceptions';
 import {
   PurchaseProductsPayload,
-  SendTipsPayload
+  SendTipsPayload,
+  SubscribePerformerPayload
 } from '../payloads';
+import { PaymentDto } from '../dtos';
 
 const RECURRING_SUBSCRIPTION_AGENDA_CHECK = 'RECURRING_SUBSCRIPTION_AGENDA_CHECK';
 
@@ -73,14 +74,14 @@ export class PurchaseItemService {
     private readonly feedService: FeedService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
-    @Inject(forwardRef(() => ConversationService))
-    private readonly conversationService: ConversationService,
+    @Inject(forwardRef(() => StreamService))
+    private readonly streamService: StreamService
+    // @Inject(forwardRef(() => ConversationService))
+    // private readonly conversationService: ConversationService,
     // @Inject(forwardRef(() => MessageService))
     // private readonly messageService: MessageService,
-    @Inject(forwardRef(() => StreamService))
-    private readonly streamService: StreamService,
-    @Inject(forwardRef(() => FileService))
-    private readonly fileService: FileService
+    // @Inject(forwardRef(() => FileService))
+    // private readonly fileService: FileService
   ) {
     this.defindJobs();
   }
@@ -159,7 +160,7 @@ export class PurchaseItemService {
       new QueueEvent({
         channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
         eventName: EVENT.CREATED,
-        data: transaction
+        data: new PaymentDto(transaction)
       })
     );
     return transaction;
@@ -217,7 +218,7 @@ export class PurchaseItemService {
     const product = await this.productService.findById(id);
     if (!product) throw new EntityNotFoundException();
     if (user.balance < product.price) throw new NotEnoughMoneyException();
-    const quantity = payload.quantity ? payload.quantity : 1;
+    const quantity = payload.quantity || 1;
     if (product.type === PRODUCT_TYPE.PHYSICAL && quantity > product.stock) {
       throw new OverProductStockException();
     }
@@ -243,7 +244,7 @@ export class PurchaseItemService {
       new QueueEvent({
         channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
         eventName: EVENT.CREATED,
-        data: Object.assign(transaction.toObject(), { shippingInfo: payload })
+        data: { ...new PaymentDto(transaction), ...{ shippingInfo: payload } }
       })
     );
     return transaction;
@@ -302,7 +303,7 @@ export class PurchaseItemService {
       new QueueEvent({
         channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
         eventName: EVENT.CREATED,
-        data: transaction
+        data: new PaymentDto(transaction)
       })
     );
     return transaction;
@@ -345,7 +346,7 @@ export class PurchaseItemService {
       new QueueEvent({
         channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
         eventName: EVENT.CREATED,
-        data: transaction
+        data: new PaymentDto(transaction)
       })
     );
     return transaction;
@@ -359,7 +360,7 @@ export class PurchaseItemService {
     paymentTransaction.target = PURCHASE_ITEM_TARTGET_TYPE.VIDEO;
     paymentTransaction.targetId = video._id;
     paymentTransaction.performerId = video.performerId;
-    paymentTransaction.type = PURCHASE_ITEM_TYPE.SALE_VIDEO;
+    paymentTransaction.type = PURCHASE_ITEM_TYPE.VIDEO;
     paymentTransaction.totalPrice = video.price;
     paymentTransaction.products = [
       {
@@ -391,7 +392,7 @@ export class PurchaseItemService {
       new QueueEvent({
         channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
         eventName: EVENT.CREATED,
-        data: transaction
+        data: new PaymentDto(transaction)
       })
     );
     return transaction;
@@ -462,7 +463,7 @@ export class PurchaseItemService {
       new QueueEvent({
         channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
         eventName: EVENT.CREATED,
-        data: paymentTransaction
+        data: new PaymentDto(paymentTransaction)
       })
     );
     if (conversationId && streamType) {
@@ -522,7 +523,7 @@ export class PurchaseItemService {
   //     new QueueEvent({
   //       channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
   //       eventName: EVENT.CREATED,
-  //       data: paymentTransaction
+  //       data: new PaymentDto(paymentTransaction)
   //     })
   //   );
   //   if (conversationId) {
@@ -576,7 +577,7 @@ export class PurchaseItemService {
       new QueueEvent({
         channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
         eventName: EVENT.CREATED,
-        data: transaction
+        data: new PaymentDto(transaction)
       })
     );
     return transaction;
@@ -625,7 +626,7 @@ export class PurchaseItemService {
   //     new QueueEvent({
   //       channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
   //       eventName: EVENT.CREATED,
-  //       data: transaction
+  //       data: new PaymentDto(transaction)
   //     })
   //   );
   //   return transaction;
