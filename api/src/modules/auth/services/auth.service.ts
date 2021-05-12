@@ -550,9 +550,6 @@ export class AuthService {
     if (!user) {
       throw new EntityNotFoundException();
     }
-    // if (await SettingService.getValueByKey(SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION) && !user.verifiedEmail) {
-    //   throw new HttpException('Please verify your email address!', 403);
-    // }
     const userAuths = await this.authModel.find({
       sourceId: user._id
     });
