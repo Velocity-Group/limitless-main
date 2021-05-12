@@ -53,7 +53,8 @@ const SETTING_KEYS = {
   GOOGLE_RECAPTCHA_SECRET_KEY: 'googleReCaptchaSecretKey',
   ENABLE_GOOGLE_RECAPTCHA: 'enableGoogleReCaptcha',
   BITPAY_PRODUCTION_MODE: 'bitpayProductionMode',
-  BITPAY_API_TOKEN: 'bitpayApiToken'
+  BITPAY_API_TOKEN: 'bitpayApiToken',
+  TOKEN_CONVERSION_RATE: 'tokenConversionRate'
 };
 
 const settings = [
@@ -115,27 +116,27 @@ const settings = [
     editable: true,
     type: 'text-editor'
   },
-  {
-    key: SETTING_KEYS.USER_BENEFIT,
-    // eslint-disable-next-line quotes
-    value: `<ul><li>View exclusive content</li><li>Monthly and Yearly subscriptions</li><li>Fast and reliable buffering and viewing</li><li>Multiple solution options to choose from</li><li>Chat with model</li><li>Access model's personal store</li><li>Search and filter capabilities</li><li>Favorite your video for future viewing</li></ul>`,
-    name: 'User Benefit',
-    description: 'Add User benefit content here',
-    public: true,
-    group: 'general',
-    editable: true,
-    type: 'text-editor'
-  },
-  {
-    key: SETTING_KEYS.MODEL_BENEFIT,
-    value: '<ul><li>Lightning fast uploading</li><li>Multi-video uploading</li><li>Chat with fans</li><li>Cross-over-content between models</li><li>Individual model store</li><li>Affiliate program for blogs to promote your content</li><li>80% Standard commission rate</li><li>Deduct 5% when gained from affiliate</li></ul>',
-    name: 'Model Benefit',
-    description: 'Add Model benefit content here',
-    public: true,
-    group: 'general',
-    editable: true,
-    type: 'text-editor'
-  },
+  // {
+  //   key: SETTING_KEYS.USER_BENEFIT,
+  //   // eslint-disable-next-line quotes
+  //   value: `<ul><li>View exclusive content</li><li>Monthly and Yearly subscriptions</li><li>Fast and reliable buffering and viewing</li><li>Multiple solution options to choose from</li><li>Chat with model</li><li>Access model's personal store</li><li>Search and filter capabilities</li><li>Favorite your video for future viewing</li></ul>`,
+  //   name: 'User Benefit',
+  //   description: 'Add User benefit content here',
+  //   public: true,
+  //   group: 'general',
+  //   editable: true,
+  //   type: 'text-editor'
+  // },
+  // {
+  //   key: SETTING_KEYS.MODEL_BENEFIT,
+  //   value: '<ul><li>Lightning fast uploading</li><li>Multi-video uploading</li><li>Chat with fans</li><li>Cross-over-content between models</li><li>Individual model store</li><li>Affiliate program for blogs to promote your content</li><li>80% Standard commission rate</li><li>Deduct 5% when gained from affiliate</li></ul>',
+  //   name: 'Model Benefit',
+  //   description: 'Add Model benefit content here',
+  //   public: true,
+  //   group: 'general',
+  //   editable: true,
+  //   type: 'text-editor'
+  // },
   {
     key: SETTING_KEYS.MAINTENANCE_MODE,
     value: false,
@@ -153,6 +154,17 @@ const settings = [
     name: 'Verification model account',
     description:
       'Minimum number of subscribers to verify model\'s account',
+    type: 'number',
+    public: true,
+    group: 'general',
+    editable: true
+  },
+  {
+    key: SETTING_KEYS.TOKEN_CONVERSION_RATE,
+    value: 1,
+    name: 'Token conversion rate',
+    description:
+      'Token conversion rate eg: 1token = $1',
     type: 'number',
     public: true,
     group: 'general',
