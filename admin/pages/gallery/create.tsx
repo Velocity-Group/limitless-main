@@ -14,30 +14,16 @@ class GalleryCreate extends PureComponent {
 
   async submit(data: any) {
     try {
-      this.setState({ submitting: true });
-
+      await this.setState({ submitting: true });
       const submitData = {
         ...data
       };
       await galleryService.create(submitData);
       message.success('Created successfully');
-      // TODO - redirect
-      await this.setState(
-        {
-          submitting: false
-        },
-        () => window.setTimeout(() => {
-          Router.push(
-            {
-              pathname: '/gallery'
-            },
-            '/gallery'
-          );
-        }, 500)
-      );
+      Router.push('/gallery');
     } catch (e) {
-      // TODO - check and show error here
-      message.error('Something went wrong, please try again!');
+      const err = await e;
+      message.error(err?.message || 'Something went wrong, please try again!');
       this.setState({ submitting: false });
     }
   }
@@ -47,10 +33,10 @@ class GalleryCreate extends PureComponent {
     return (
       <>
         <Head>
-          <title>Create new gallery</title>
+          <title>New gallery</title>
         </Head>
         <BreadcrumbComponent
-          breadcrumbs={[{ title: 'Galleries', href: '/gallery' }, { title: 'Create new gallery' }]}
+          breadcrumbs={[{ title: 'Galleries', href: '/gallery' }, { title: 'New gallery' }]}
         />
         <Page>
           <FormGallery onFinish={this.submit.bind(this)} submitting={submitting} />

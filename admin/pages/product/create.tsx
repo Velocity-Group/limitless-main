@@ -98,12 +98,12 @@ class CreateProduct extends PureComponent {
     return (
       <>
         <Head>
-          <title>Create product</title>
+          <title>New product</title>
         </Head>
         <BreadcrumbComponent
           breadcrumbs={[
             { title: 'Product', href: '/product' },
-            { title: 'Create new product' }
+            { title: 'New product' }
           ]}
         />
         <Page>

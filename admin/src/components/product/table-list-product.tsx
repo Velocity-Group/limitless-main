@@ -29,16 +29,23 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Model',
+        dataIndex: 'performer',
+        render(data) {
+          return <span>{data?.name || data?.username || 'N/A'}</span>;
+        }
+      },
+      {
         title: 'Name',
         dataIndex: 'name'
       },
       {
-        title: 'Price',
+        title: 'Tokens',
         dataIndex: 'price',
         render(price: number) {
           return (
             <span>
-              $
+              <img alt="coin" src="/coin-ico.png" width="15px" />
               {(price || 0).toFixed(2)}
             </span>
           );
@@ -54,8 +61,14 @@ export class TableListProduct extends PureComponent<IProps> {
       {
         title: 'Type',
         dataIndex: 'type',
-        render(type: number) {
-          return <span>{type}</span>;
+        render(type: string) {
+          switch (type) {
+            case 'physical':
+              return <Tag color="blue">Physical</Tag>;
+            case 'digital':
+              return <Tag color="pink">Digital</Tag>;
+            default: return <Tag color="default">{type}</Tag>;
+          }
         }
       },
       {
@@ -69,13 +82,6 @@ export class TableListProduct extends PureComponent<IProps> {
               return <Tag color="red">Inactive</Tag>;
             default: return <Tag color="default">{status}</Tag>;
           }
-        }
-      },
-      {
-        title: 'Model',
-        dataIndex: 'performer',
-        render(data) {
-          return <span>{data?.name || data?.username || 'N/A'}</span>;
         }
       },
       {
@@ -139,7 +145,6 @@ export class TableListProduct extends PureComponent<IProps> {
         loading={loading}
         pagination={pagination}
         onChange={onChange.bind(this)}
-        scroll={{ x: '120vw', y: '100vh' }}
       />
     );
   }

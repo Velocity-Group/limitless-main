@@ -15,7 +15,7 @@ export interface IVideoCreate {
   price: number;
   status: string;
   description: string;
-  isSaleVideo: boolean;
+  isSale: boolean;
   isSchedule: boolean;
   scheduledAt: any;
   tagline: string;
@@ -31,7 +31,7 @@ export interface IVideoUpdate {
   description?: string;
   thumbnail?: string;
   teaser?: string;
-  isSaleVideo: boolean;
+  isSale: boolean;
   participantIds: string[];
   video?: { url: string; thumbnails: string[] };
   performer?: { username: string };

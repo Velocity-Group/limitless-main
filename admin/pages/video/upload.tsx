@@ -8,6 +8,7 @@ import { videoService } from '@services/video.service';
 import Router from 'next/router';
 import { BreadcrumbComponent } from '@components/common';
 import { FormUploadVideo } from '@components/video/form-upload-video';
+import { IVideoUpdate } from 'src/interfaces';
 
 interface IFiles {
   fieldname: string;
@@ -41,16 +42,17 @@ class UploadVideo extends PureComponent {
     this._files[field] = file;
   }
 
-  async submit(data: any) {
+  async submit(data: IVideoUpdate) {
     if (!this._files.video) {
       return message.error('Please select video!');
     }
-
     if (
-      (data.isSaleVideo && !data.price)
-      || (data.isSaleVideo && data.price < 1)
+      (data.isSale && !data.price) || (data.isSale && data.price < 1)
     ) {
-      return message.error('Invalid price');
+      return message.error('Invalid amount of tokens');
+    }
+    if (data.isSchedule) {
+      data.status = 'inactive';
     }
     data.tags = [...[], ...data.tags];
     const files = Object.keys(this._files).reduce((f, key) => {

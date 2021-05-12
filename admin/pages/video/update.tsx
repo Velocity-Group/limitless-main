@@ -38,11 +38,13 @@ class VideoUpdate extends PureComponent<IProps> {
   async submit(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ submitting: true });
-
+      await this.setState({ submitting: true });
       const submitData = {
         ...data
       };
+      if (submitData.isSchedule) {
+        submitData.status = 'inactive';
+      }
       await videoService.update(id, submitData);
       message.success('Updated successfully');
       Router.back();

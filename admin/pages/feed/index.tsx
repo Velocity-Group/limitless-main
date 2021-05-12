@@ -112,7 +112,7 @@ class Feeds extends PureComponent<IProps> {
     try {
       await feedService.delete(id);
       message.success('Deleted successfully');
-      await this.search(pagination.current);
+      this.search(pagination.current);
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');

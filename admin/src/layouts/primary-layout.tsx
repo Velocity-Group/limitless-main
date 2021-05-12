@@ -237,16 +237,16 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
             name: 'All Posts',
             route: '/feed'
           },
-          {
-            id: 'video_posts',
-            name: 'Video Posts',
-            route: '/feed?type=video'
-          },
-          {
-            id: 'photo_posts',
-            name: 'Photo Posts',
-            route: '/feed?type=photo'
-          },
+          // {
+          //   id: 'video_posts',
+          //   name: 'Video Posts',
+          //   route: '/feed?type=video'
+          // },
+          // {
+          //   id: 'photo_posts',
+          //   name: 'Photo Posts',
+          //   route: '/feed?type=photo'
+          // },
           {
             id: 'create_post',
             name: 'Create New',
@@ -282,29 +282,29 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         icon: <CameraOutlined />,
         children: [
           {
+            id: 'gallery-listing',
+            name: 'Galleries',
+            route: '/gallery'
+          },
+          {
+            name: 'New Gallery',
+            id: 'create-galleries',
+            route: '/gallery/create'
+          },
+          {
             id: 'photo-listing',
             name: 'Photos',
             route: '/photos'
           },
           {
-            name: 'Upload',
+            name: 'Upload Photo',
             id: 'upload-photo',
             route: '/photos/upload'
           },
           {
-            name: 'Bulk Upload',
+            name: 'Bulk Upload Photos',
             id: 'bulk-upload-photo',
             route: '/photos/bulk-upload'
-          },
-          {
-            id: 'gallery-listing',
-            name: 'Albums',
-            route: '/gallery'
-          },
-          {
-            name: 'Create album',
-            id: 'create-galleries',
-            route: '/gallery/create'
           }
         ]
       },

@@ -16,13 +16,7 @@ import VideoUploadList from '@components/file/video-upload-list';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 
 const { Dragger } = Upload;
-// interface IFiles {
-//   fieldname: string;
-//   file: File;
-// }
-// interface IResponse {
-//   data: { _id: string };
-// }
+
 const validateMessages = {
   required: 'This field is required!'
 };
@@ -47,7 +41,6 @@ class BulkUploadVideo extends PureComponent<IProps> {
   }
 
   onUploading(file, resp: any) {
-    // this.setState({ uploadPercentage: resp.percentage });
     const a = file;
     a.percent = resp.percentage;
     if (file.percent === 100) a.status = 'done';
@@ -63,7 +56,6 @@ class BulkUploadVideo extends PureComponent<IProps> {
 
   beforeUpload(file, fileList) {
     this.setState({ fileList });
-    return false;
   }
 
   remove(file) {
@@ -73,22 +65,20 @@ class BulkUploadVideo extends PureComponent<IProps> {
       1
     );
     this.setState({ fileList });
-    this.forceUpdate();
   }
 
   async submit(formValues: any) {
     const { fileList } = this.state;
-    if (!fileList.length) {
-      return message.error('Please select video!');
-    }
-
     const uploadFiles = fileList.filter((f) => !['uploading', 'done'].includes(f.status));
-    if (!uploadFiles.length) return message.error('Please select new video!');
+    if (!uploadFiles.length) {
+      message.error('Please select new video!');
+      return;
+    }
 
     await this.setState({ uploading: true });
     for (const file of uploadFiles) {
       try {
-        if (['uploading', 'done'].includes(file.status)) continue;
+        if (['uploading', 'done'].includes(file.status)) return;
         file.status = 'uploading';
         await videoService.uploadVideo(
           [
@@ -102,7 +92,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
             price: 0,
             description: '',
             tags: [],
-            isSaleVideo: false,
+            isSale: false,
             isSchedule: false,
             status: 'inactive',
             performerId: formValues.performerId
@@ -115,7 +105,6 @@ class BulkUploadVideo extends PureComponent<IProps> {
     }
     message.success('Files has been uploaded!');
     Router.push('/video');
-    return undefined;
   }
 
   render() {
@@ -139,19 +128,13 @@ class BulkUploadVideo extends PureComponent<IProps> {
               performerId: performerId || ''
             }}
           >
-            {/* <Row className="ant-form-item"> */}
-            <Form.Item name="performerId" label="Performer" rules={[{ required: true }]}>
+            <Form.Item name="performerId" label="Model" rules={[{ required: true }]}>
               <SelectPerformerDropdown
                 onSelect={(val) => this.setFormVal('performerId', val)}
                 disabled={uploading}
                 defaultValue={performerId || ''}
               />
             </Form.Item>
-            {/* <Col span={24}>
-                <div>
-
-                </div>
-              </Col> */}
             <Form.Item wrapperCol={{ span: 24 }}>
               <Dragger
                 accept="video/*"
@@ -170,11 +153,9 @@ class BulkUploadVideo extends PureComponent<IProps> {
 
               <VideoUploadList files={fileList} remove={this.remove.bind(this)} />
             </Form.Item>
-            {/* </Row> */}
-
-            <Form.Item wrapperCol={{ ...layout.wrapperCol }}>
+            <Form.Item style={{ textAlign: 'center' }}>
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading || !fileList.length}>
-                Upload
+                UPLOAD
               </Button>
             </Form.Item>
           </Form>

@@ -2,10 +2,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Input, InputNumber, Select, Upload, Button, message, Progress, Switch, DatePicker
+  Form, Input, InputNumber, Select, Upload, Button,
+  message, Progress, Switch, DatePicker
 } from 'antd';
 import { IVideoCreate, IVideoUpdate } from 'src/interfaces';
-import { CameraOutlined } from '@ant-design/icons';
+import { CameraOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { FormInstance } from 'antd/lib/form';
 import { ThumbnailVideo } from '@components/video/thumbnail-video';
@@ -51,19 +52,8 @@ export class FormUploadVideo extends PureComponent<IProps> {
           previewTeaserVideo: video.teaser ? video.teaser : null,
           previewVideo: video.video && video.video.url ? video.video.url : null,
           isSchedule: video.isSchedule,
-          isSale: video.isSaleVideo,
+          isSale: video.isSale,
           scheduledAt: video.scheduledAt ? moment(video.scheduledAt) : moment()
-        },
-        () => {
-          const { previewVideo, previewTeaserVideo } = this.state;
-          if (previewVideo) {
-            const vid = document.getElementById('video') as HTMLVideoElement;
-            vid.setAttribute('src', previewVideo);
-          }
-          if (previewTeaserVideo) {
-            const vid = document.getElementById('teaser') as HTMLVideoElement;
-            vid.setAttribute('src', previewTeaserVideo);
-          }
         }
       );
     }
@@ -117,8 +107,8 @@ export class FormUploadVideo extends PureComponent<IProps> {
           if (a.isSchedule) {
             a.scheduledAt = scheduledAt;
           }
-          a.isSaleVideo = isSale;
-          if (!a.isSaleVideo) {
+          a.isSale = isSale;
+          if (!a.isSale) {
             a.price = 0;
           }
           return submit && submit(values);
@@ -134,11 +124,11 @@ export class FormUploadVideo extends PureComponent<IProps> {
             description: '',
             status: 'active',
             performerId: '',
-            isSaleVideo: false,
+            isSale: false,
             participantIds: [],
             isSchedule: false,
             scheduledAt: null,
-            tagline: ''
+            tags: []
           } as IVideoCreate)
         }
       >
@@ -152,29 +142,6 @@ export class FormUploadVideo extends PureComponent<IProps> {
         <Form.Item name="title" rules={[{ required: true, message: 'Please input title of video!' }]} label="Title">
           <Input placeholder="Enter video title" />
         </Form.Item>
-
-        <Form.Item name="isSaleVideo" label="For Sale" valuePropName="checked">
-          <Switch onChange={this.onSwitch.bind(this, 'isSale')} />
-        </Form.Item>
-        {isSale && (
-          <Form.Item name="price" label="Price">
-            <InputNumber min={1} />
-          </Form.Item>
-        )}
-        <Form.Item name="isSchedule" label="Scheduling?" valuePropName="checked">
-          <Switch
-            onChange={this.onSwitch.bind(this, 'scheduling')}
-          />
-        </Form.Item>
-        {isSchedule && (
-          <Form.Item label="Schedule at">
-            <DatePicker
-              disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
-              defaultValue={scheduledAt}
-              onChange={this.onSchedule.bind(this)}
-            />
-          </Form.Item>
-        )}
         <Form.Item label="Tag" name="tags">
           <Select
             mode="tags"
@@ -188,6 +155,26 @@ export class FormUploadVideo extends PureComponent<IProps> {
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
         </Form.Item>
+        <Form.Item name="isSale" label="PPV" valuePropName="checked">
+          <Switch unCheckedChildren="Free Content" checkedChildren="PPV Content" onChange={this.onSwitch.bind(this, 'isSale')} />
+        </Form.Item>
+        {isSale && (
+        <Form.Item name="price" label="Amount of Tokens">
+          <InputNumber min={1} />
+        </Form.Item>
+        )}
+        <Form.Item name="isSchedule" label="Scheduling?" valuePropName="checked">
+          <Switch unCheckedChildren="Unscheduled" checkedChildren="Scheduling" onChange={this.onSwitch.bind(this, 'scheduling')} />
+        </Form.Item>
+        {isSchedule && (
+        <Form.Item label="Schedule at">
+          <DatePicker
+            disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
+            defaultValue={scheduledAt}
+            onChange={this.onSchedule.bind(this)}
+          />
+        </Form.Item>
+        )}
         <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status!' }]}>
           <Select>
             <Select.Option key="active" value="active">
@@ -249,10 +236,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
               disabled={uploading || haveVideo}
               beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
             >
-              <CameraOutlined />
+              <VideoCameraAddOutlined />
             </Upload>
             )}
-            {previewTeaserVideo && <video controls id="teaser" style={{ width: '250px' }} />}
+            {previewTeaserVideo && <p><a href={previewTeaserVideo} target="_blank" rel="noreferrer">Click to view</a></p>}
           </div>
         </div>
         <div key="video" className="ant-row ant-form-item">
@@ -270,10 +257,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 disabled={uploading || haveVideo}
                 beforeUpload={(file) => this.beforeUpload(file, 'video')}
               >
-                <CameraOutlined />
+                <VideoCameraAddOutlined />
               </Upload>
             )}
-            {previewVideo && <video controls id="video" style={{ width: '250px' }} />}
+            {previewVideo && <p><a href={previewVideo} target="_blank" rel="noreferrer">Click to view</a></p>}
             <div className="ant-form-item-explain">
               <div>
                 Video must smaller than

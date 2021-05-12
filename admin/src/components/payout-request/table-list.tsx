@@ -91,7 +91,6 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         loading={loading}
         pagination={pagination}
         onChange={onChange.bind(this)}
-        scroll={{ x: 1660, y: 768 }}
       />
     );
   }

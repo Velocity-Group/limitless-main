@@ -1,6 +1,6 @@
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Input, Button, Select
+  Form, Input, Button, Select, InputNumber, Switch
 } from 'antd';
 import { IGalleryCreate, IGalleryUpdate } from 'src/interfaces';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
@@ -15,8 +15,13 @@ interface IProps {
 export class FormGallery extends PureComponent<IProps> {
   formRef: any;
 
+  state = {
+    isSale: false
+  }
+
   componentDidMount() {
-    if (!this.formRef) this.formRef = createRef();
+    const { gallery } = this.props;
+    gallery && this.setState({ isSale: gallery.isSale });
   }
 
   setFormVal(field: string, val: any) {
@@ -29,38 +34,41 @@ export class FormGallery extends PureComponent<IProps> {
   render() {
     if (!this.formRef) this.formRef = createRef();
     const { gallery, onFinish, submitting } = this.props;
+    const { isSale } = this.state;
     return (
       <Form
         ref={this.formRef}
         onFinish={onFinish.bind(this)}
         initialValues={
           gallery || ({
-            name: '',
+            title: '',
             description: '',
-            // token: 0,
-            status: 'draft',
+            price: 9.99,
+            status: 'active',
             performerId: ''
           } as IGalleryCreate)
         }
-        labelCol={{ span: 4 }}
-        wrapperCol={{ span: 20 }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
       >
-        <Form.Item name="performerId" label="Performer" rules={[{ required: true }]}>
+        <Form.Item name="performerId" label="Model" rules={[{ required: true }]}>
           <SelectPerformerDropdown
             disabled={!!(gallery && gallery.performerId)}
             defaultValue={gallery && gallery.performerId}
             onSelect={(val) => this.setFormVal('performerId', val)}
           />
         </Form.Item>
-        <Form.Item name="name" rules={[{ required: true, message: 'Please input title of gallery!' }]} label="Name">
-          <Input placeholder="Enter gallery name" />
+        <Form.Item name="title" rules={[{ required: true, message: 'Please input title of gallery!' }]} label="Gallery Title">
+          <Input />
         </Form.Item>
-        {/* <Form.Item name="token" label="Token">
-          <InputNumber />
-        </Form.Item> */}
-        <Form.Item name="tagline" label="Taglines">
-          <Input placeholder="Enter gallery taglines" />
+        <Form.Item name="isSale" label="PPV" valuePropName="checked">
+          <Switch unCheckedChildren="Free Content" checkedChildren="PPV Content" checked={isSale} onChange={(val) => this.setState({ isSale: val })} />
         </Form.Item>
+        {isSale && (
+        <Form.Item name="price" label="Amount of Tokens">
+          <InputNumber min={1} />
+        </Form.Item>
+        )}
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
         </Form.Item>
@@ -74,9 +82,11 @@ export class FormGallery extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Form.Item>
-        <Button type="primary" htmlType="submit" style={{ float: 'right' }} loading={submitting}>
-          Submit
-        </Button>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" disabled={submitting} loading={submitting}>
+            Submit
+          </Button>
+        </Form.Item>
       </Form>
     );
   }

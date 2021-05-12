@@ -350,7 +350,7 @@ export default class FormFeed extends PureComponent<IProps> {
           initialValues={feed || ({
             type: 'text',
             text: '',
-            price: 0,
+            price: 4.99,
             isSale: false
           } as IFeed)}
         >
@@ -375,6 +375,7 @@ export default class FormFeed extends PureComponent<IProps> {
           <Form.Item label="Add description" name="text" rules={[{ required: true, message: 'Please add a description' }]}>
             <TextArea className="feed-input" rows={3} placeholder="Add a description" allowClear />
           </Form.Item>
+          {['photo', 'video'].includes(type) && (
           <Form.Item label={type === 'video' ? 'Video file' : 'Photo files'}>
             {fileList.length ? (
               <UploadList
@@ -393,13 +394,9 @@ export default class FormFeed extends PureComponent<IProps> {
               </p>
             )}
           </Form.Item>
-          {['video', 'photo'].includes(feed?.type || type) && (
-            <Form.Item name="tagline" label="Tagline">
-              <Input className="feed-input" placeholder="Add a tagline here" />
-            </Form.Item>
           )}
           <Form.Item>
-            <Switch checkedChildren="Sale" unCheckedChildren="Free" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
+            <Switch checkedChildren="PPV Content" unCheckedChildren="Free Content" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
           </Form.Item>
           {isSale && (
             <Form.Item label="Set price here" name="price" rules={[{ required: isSale, message: 'Please add price' }]}>

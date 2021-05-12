@@ -20,17 +20,15 @@ export class TableListFeed extends PureComponent<IProps> {
     const { deleteFeed } = this.props;
     const columns = [
       {
-        title: 'Performer',
+        title: 'Model',
         dataIndex: 'name',
         render(data, record) {
-          return <span>{record.performer && record.performer.name}</span>;
+          return <span>{record?.performer?.name || record?.performer?.username || 'N/A'}</span>;
         }
-
       },
       {
         title: 'Description',
         dataIndex: 'text',
-        sorter: true,
         render(data, record) {
           return (
             <div style={{
@@ -46,36 +44,48 @@ export class TableListFeed extends PureComponent<IProps> {
       {
         title: 'Type',
         dataIndex: 'type',
-        sorter: true,
         render(type) {
           switch (type) {
             case 'video':
-              return <Tag color="#dc3545">Video</Tag>;
+              return <Tag color="blue">Video</Tag>;
             case 'photo':
               return <Tag color="orange">Photo</Tag>;
             case 'text':
-              return <Tag color="#FFCF00">Text</Tag>;
+              return <Tag color="pink">Text</Tag>;
             default: return <Tag color="#936dc9">{type}</Tag>;
           }
         }
       },
       {
-        title: 'For Sale?',
+        title: 'PPV',
         dataIndex: 'isSale',
-        sorter: true,
         render(data, record) {
           if (!record.isSale) {
-            return <Tag color="red">No</Tag>;
+            return <Tag color="red">N</Tag>;
           }
-          return <Tag color="green">Yes</Tag>;
+          return <Tag color="green">Y</Tag>;
         }
       },
       {
-        title: 'Price',
+        title: 'Tokens',
         dataIndex: 'price',
-        sorter: true,
         render(price: number) {
-          return <span>{price || null}</span>;
+          return (
+            <span>
+              <img src="/coin-ico.png" alt="coin" width="15px" />
+              {price.toFixed(2)}
+            </span>
+          );
+        }
+      },
+      {
+        title: 'Status',
+        dataIndex: 'status',
+        render(status) {
+          if (status === 'inactive') {
+            return <Tag color="red">Deleted</Tag>;
+          }
+          return <Tag color="green">Active</Tag>;
         }
       },
       {
@@ -139,7 +149,6 @@ export class TableListFeed extends PureComponent<IProps> {
         loading={loading}
         pagination={pagination}
         onChange={onChange.bind(this)}
-        scroll={{ x: '120vw', y: '100vh' }}
       />
     );
   }

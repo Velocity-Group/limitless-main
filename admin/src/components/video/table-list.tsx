@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import { Table, Tag } from 'antd';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
 import { ThumbnailVideo } from '@components/video/thumbnail-video';
@@ -17,6 +17,10 @@ interface IProps {
 
 export class TableListVideo extends PureComponent<IProps> {
   render() {
+    const {
+      dataSource, rowKey, loading, pagination, onChange, deleteVideo
+    } = this.props;
+
     const columns = [
       {
         title: '',
@@ -26,35 +30,40 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Title',
-        dataIndex: 'title',
-        sorter: true
+        title: 'Model',
+        dataIndex: 'performer',
+        render(data, record) {
+          return <span>{record?.performer?.name || record?.performer?.username || 'N/A'}</span>;
+        }
       },
       {
-        title: 'For sale?',
-        dataIndex: 'isSaleVideo',
-        sorter: true,
-        render(isSaleVideo: boolean) {
-          switch (isSaleVideo) {
+        title: 'Title',
+        dataIndex: 'title'
+      },
+      {
+        title: 'PPV?',
+        dataIndex: 'isSale',
+        render(isSale: boolean) {
+          switch (isSale) {
             case true:
               return <Tag color="green">Y</Tag>;
             case false:
               return <Tag color="red">N</Tag>;
-            default: return <Tag color="default">{isSaleVideo}</Tag>;
+            default: return <Tag color="default">{isSale}</Tag>;
           }
         }
       },
       {
-        title: 'Price',
-        dataIndex: 'price',
-        sorter: true,
-        render(price: number) {
-          return (
-            <span>
-              $
-              {price}
-            </span>
-          );
+        title: 'Scheduling?',
+        dataIndex: 'isSchedule',
+        render(isSchedule: boolean) {
+          switch (isSchedule) {
+            case true:
+              return <Tag color="green">Y</Tag>;
+            case false:
+              return <Tag color="red">N</Tag>;
+            default: return <Tag color="default">{isSchedule}</Tag>;
+          }
         }
       },
       {
@@ -69,13 +78,6 @@ export class TableListVideo extends PureComponent<IProps> {
               return <Tag color="red">Inactive</Tag>;
             default: return <Tag color="default">{status}</Tag>;
           }
-        }
-      },
-      {
-        title: 'Performer',
-        dataIndex: 'performer',
-        render(data, record) {
-          return <span>{record.performer && record.performer.username}</span>;
         }
       },
       {
@@ -110,26 +112,24 @@ export class TableListVideo extends PureComponent<IProps> {
                     </a>
                   </Link>
                 )
+              },
+              {
+                key: 'delete',
+                name: 'Delete',
+                children: (
+                  <span>
+                    <DeleteOutlined />
+                    {' '}
+                    Delete
+                  </span>
+                ),
+                onClick: () => deleteVideo && deleteVideo(id)
               }
-              // {
-              //   key: 'delete',
-              //   name: 'Delete',
-              //   children: (
-              //     <span>
-              //       <DeleteOutlined /> Delete
-              //     </span>
-              //   ),
-              //   onClick: () =>
-              //     this.props.deleteVideo && this.props.deleteVideo(id)
-              // }
             ]}
           />
         )
       }
     ];
-    const {
-      dataSource, rowKey, loading, pagination, onChange
-    } = this.props;
     return (
       <Table
         dataSource={dataSource}
@@ -138,7 +138,6 @@ export class TableListVideo extends PureComponent<IProps> {
         loading={loading}
         pagination={pagination}
         onChange={onChange.bind(this)}
-        scroll={{ x: '120vw', y: '100vh' }}
       />
     );
   }

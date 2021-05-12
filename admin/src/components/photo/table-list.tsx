@@ -121,7 +121,6 @@ export class TableListPhoto extends PureComponent<IProps> {
         loading={loading}
         pagination={pagination}
         onChange={onChange.bind(this)}
-        scroll={{ x: '120vw', y: '100vh' }}
       />
     );
   }

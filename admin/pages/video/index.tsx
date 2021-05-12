@@ -93,7 +93,7 @@ class Videos extends PureComponent<IProps> {
   async deleteVideo(id: string) {
     const { pagination } = this.state;
     if (!window.confirm('Are you sure you want to delete this video?')) {
-      return false;
+      return;
     }
     try {
       await videoService.delete(id);
@@ -103,7 +103,6 @@ class Videos extends PureComponent<IProps> {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
     }
-    return undefined;
   }
 
   render() {

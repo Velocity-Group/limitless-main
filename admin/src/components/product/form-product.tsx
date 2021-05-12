@@ -90,11 +90,11 @@ export class FormProduct extends PureComponent<IProps> {
         initialValues={
           product || ({
             name: '',
-            price: 0,
+            price: 9.99,
             description: '',
             status: 'active',
             performerId: '',
-            stock: 0,
+            stock: 99,
             type: 'physical'
           } as IProductCreate)
         }
@@ -119,7 +119,7 @@ export class FormProduct extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item name="price" label="Price">
+        <Form.Item name="price" label="Amount of Tokens">
           <InputNumber min={1} />
         </Form.Item>
         {!isDigitalProduct && (

@@ -10,9 +10,7 @@ export class CoverGallery extends PureComponent<IProps> {
   render() {
     const { gallery, style } = this.props;
     const { coverPhoto } = gallery;
-    const url = coverPhoto && coverPhoto.thumbnails && coverPhoto.thumbnails.length > 0
-      ? coverPhoto.thumbnails[0]
-      : '/gallery.png';
-    return <img src={url} style={style || { width: 130 }} alt="style" />;
+    const url = coverPhoto?.thumbnails[0] || '/gallery.png';
+    return <img src={url} style={style || { width: 65 }} alt="style" />;
   }
 }

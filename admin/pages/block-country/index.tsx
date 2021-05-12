@@ -108,7 +108,6 @@ class BlockCountries extends PureComponent<IProps> {
                     return d;
                   })}
                   columns={columns}
-                  scroll={{ x: '90vw', y: '100vh' }}
                 />
               </div>
               )}

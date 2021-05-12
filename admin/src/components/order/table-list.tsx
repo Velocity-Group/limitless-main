@@ -188,7 +188,6 @@ const OrderTableList = ({
       rowKey={rowKey}
       loading={loading}
       onChange={onChange.bind(this)}
-      scroll={{ x: '120vw', y: '100vh' }}
     />
   );
 };

@@ -19,7 +19,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
 
   loadPerformers = debounce(async (q) => {
     try {
-      this.setState({ loading: true });
+      await this.setState({ loading: true });
       const resp = await (await performerService.search({ q, limit: 99 })).data;
       this.setState({
         data: resp.data
@@ -27,6 +27,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured');
+    } finally {
       this.setState({ loading: false });
     }
   }, 500);

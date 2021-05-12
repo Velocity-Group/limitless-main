@@ -2,29 +2,32 @@ import { ISearch } from './utils';
 
 export interface IGallery {
   _id: string;
-  name: string;
+  title: string;
   description: string;
   status: string;
-  token: number;
+  price: number;
+  isSale: boolean;
   performerId: string;
   coverPhoto?: { thumbnails: string[]; url: string };
   tagline: string;
 }
 
 export interface IGalleryCreate {
-  name: string;
+  title: string;
   description: string;
   status: string;
-  token: number;
+  price: number;
+  isSale: boolean;
   performerId: string;
   tagline: string;
 }
 
 export interface IGalleryUpdate {
-  name: string;
+  title: string;
   description: string;
   status: string;
-  token: number;
+  price: number;
+  isSale: boolean;
   performerId: string;
   tagline: string;
 }

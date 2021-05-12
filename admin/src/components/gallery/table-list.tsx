@@ -28,22 +28,31 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Name',
-        dataIndex: 'name',
-        sorter: true
+        title: 'Model',
+        dataIndex: 'performer',
+        render(data, record) {
+          return <span>{record?.performer?.name || record?.performer?.username || 'N/A'}</span>;
+        }
       },
-      // {
-      //   title: 'Token',
-      //   dataIndex: 'token',
-      //   sorter: true,
-      //   render(token: number) {
-      //     return <span>{token}</span>;
-      //   }
-      // },
+      {
+        title: 'Title',
+        dataIndex: 'title'
+      },
+      {
+        title: 'Tokens',
+        dataIndex: 'price',
+        render(token: number) {
+          return (
+            <span>
+              <img src="/coin-ico.png" width="15px" alt="coin" />
+              {token.toFixed(2)}
+            </span>
+          );
+        }
+      },
       {
         title: 'Status',
         dataIndex: 'status',
-        sorter: true,
         render(status: string) {
           switch (status) {
             case 'active':
@@ -52,13 +61,6 @@ export class TableListGallery extends PureComponent<IProps> {
               return <Tag color="red">Inactive</Tag>;
             default: return <Tag color="default">{status}</Tag>;
           }
-        }
-      },
-      {
-        title: 'Performer',
-        dataIndex: 'performer',
-        render(data, record) {
-          return <span>{record.performer && record.performer.username}</span>;
         }
       },
       {
@@ -92,36 +94,14 @@ export class TableListGallery extends PureComponent<IProps> {
                     <a>
                       <EyeOutlined />
                       {' '}
-                      View photo
-                    </a>
-                  </Link>
-                )
-              },
-              {
-                key: 'add-photo',
-                name: 'Add photo',
-                children: (
-                  <Link
-                    href={{
-                      pathname: '/photos/upload',
-                      query: {
-                        galleryId: record._id,
-                        performerId: record.performerId
-                      }
-                    }}
-                    as={`/photos/upload?galleryId=${record._id}&performerId=${record.performerId}`}
-                  >
-                    <a>
-                      <PlusOutlined />
-                      {' '}
-                      Add photo
+                      View photos
                     </a>
                   </Link>
                 )
               },
               {
                 key: 'add-more-photo',
-                name: 'Add more photo',
+                name: 'Add Photos',
                 children: (
                   <Link
                     href={{
@@ -136,7 +116,7 @@ export class TableListGallery extends PureComponent<IProps> {
                     <a>
                       <PlusOutlined />
                       {' '}
-                      Add more photo
+                      Add Photos
                     </a>
                   </Link>
                 )
@@ -188,7 +168,6 @@ export class TableListGallery extends PureComponent<IProps> {
         loading={loading}
         pagination={pagination}
         onChange={onChange.bind(this)}
-        scroll={{ x: '120vw', y: '100vh' }}
       />
     );
   }

@@ -117,10 +117,6 @@ class Galleries extends PureComponent<IProps> {
         text: 'All'
       },
       {
-        key: 'draft',
-        text: 'Draft'
-      },
-      {
         key: 'active',
         text: 'Active'
       },
@@ -133,7 +129,7 @@ class Galleries extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Gallerys</title>
+          <title>Galleries</title>
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Galleries' }]} />
         <Page>

@@ -135,7 +135,6 @@ export class TableListCoupon extends PureComponent<IProps> {
     } = this.props;
     return (
       <Table
-        scroll={{ x: '120vw', y: '100vh' }}
         dataSource={dataSource}
         columns={columns}
         rowKey={rowKey}

@@ -124,7 +124,6 @@ export const TableListSubscription = ({
       pagination={pagination}
       onChange={onChange}
       loading={loading}
-      scroll={{ x: '120vw', y: '100vh' }}
     />
   );
 };

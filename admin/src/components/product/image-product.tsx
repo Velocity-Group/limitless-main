@@ -11,6 +11,6 @@ export class ImageProduct extends PureComponent<IProps> {
     const { product, style } = this.props;
     const { image } = product;
     const url = image || '/product.png';
-    return <img src={url} style={style || { width: 130 }} alt="url" />;
+    return <img src={url} style={style || { width: 50 }} alt="thumb-prod" />;
   }
 }

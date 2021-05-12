@@ -202,7 +202,6 @@ class Categories extends PureComponent<IProps> {
               loading={searching}
               pagination={pagination}
               onChange={this.handleTableChange.bind(this)}
-              scroll={{ x: '120vw', y: '100vh' }}
             />
           </div>
         </Page>
