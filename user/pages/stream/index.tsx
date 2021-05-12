@@ -35,7 +35,7 @@ import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
 import { TipPerformerForm } from '@components/performer';
 // import { ReviewPerformerForm } from '@components/reviews';
 // import ListReviews from '@components/reviews/list-reviews';
-import '../live/index.less';
+import '../model/live/index.less';
 
 // eslint-disable-next-line no-shadow
 enum STREAM_EVENT {

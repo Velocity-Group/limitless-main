@@ -25,7 +25,7 @@ import PrivatePublisher from 'src/components/streaming/webrtc/privatechat/publis
 import PrivateSubscriber from 'src/components/streaming/webrtc/privatechat/subscriber';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
 import { TipPerformerForm } from '@components/performer/tip-form';
-import '../../live/index.less';
+import '../../model/live/index.less';
 // eslint-disable-next-line no-shadow
 enum EVENT {
   JOINED_THE_ROOM = 'JOINED_THE_ROOM',

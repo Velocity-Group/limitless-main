@@ -24,7 +24,7 @@ import GroupPublisher from '@components/streaming/webrtc/groupchat/publisher';
 import GroupSubscriber from '@components/streaming/webrtc/groupchat/subscriber';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
 import { TipPerformerForm } from '@components/performer/tip-form';
-import '../../live/index.less';
+import '../../model/live/index.less';
 
 // eslint-disable-next-line no-shadow
 enum EVENT {

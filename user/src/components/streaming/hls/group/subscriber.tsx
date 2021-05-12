@@ -49,7 +49,7 @@ class AntVideoPlayer extends PureComponent<Props> {
   createPlaybackideo() {
     const { classNames, streamId, containerClassName } = this.props;
     const container = document.getElementsByClassName(containerClassName)[0];
-    const video = document.createElement('video');
+    const video = document.createElement('video') as any;
     video.setAttribute('id', this.id);
     video.setAttribute('class', classnames(classNames, 'subscriber video-js'));
     video.autoplay = true;

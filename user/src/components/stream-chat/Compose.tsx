@@ -5,9 +5,9 @@ import { Input, message } from 'antd';
 import {
   SendOutlined, SmileOutlined
 } from '@ant-design/icons';
-import { IPerformer } from '@interface/performer';
+import { IPerformer } from '@interfaces/performer';
 import { Emotions } from '@components/messages/emotions';
-import GiftsStreamBox from '@components/gift/gift-box';
+// import GiftsStreamBox from '@components/gift/gift-box';
 import '@components/messages/Compose.less';
 
 const { TextArea } = Input;
@@ -98,11 +98,11 @@ class StreamChatCompose extends PureComponent<IProps> {
             <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
           </div>
         </div>
-        <div className="grp-icons" style={{ padding: 0 }}>
+        {/* <div className="grp-icons" style={{ padding: 0 }}>
           <div className="grp-emotions">
             <GiftsStreamBox conversation={conversation} performerId={conversation.performerId} />
           </div>
-        </div>
+        </div> */}
         <div className="grp-icons" style={{ paddingRight: 0 }}>
           <div aria-hidden className="grp-send" onClick={this.send.bind(this)}>
             <SendOutlined />

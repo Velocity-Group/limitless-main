@@ -47,5 +47,7 @@ export enum WEBRTC_ADAPTOR_INFORMATIONS {
   STREAM_LEAVED = 'streamLeaved',
 
   // leavedFromRoom: Called when this client is leaved from the room.
-  LEAVED_FROM_ROOM = 'leavedFromRoom'
+  LEAVED_FROM_ROOM = 'leavedFromRoom',
+
+  STREAM_INFORMATION = 'streamInformation'
 }

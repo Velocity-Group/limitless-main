@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import {
   Switch, Button, Form, Input
 } from 'antd';
-import { IPerformer } from '@interface/performer';
+import { IPerformer } from 'src/interfaces/performer';
 
 const layout = {
   labelCol: { span: 24 },
@@ -38,7 +38,7 @@ export default class StreamPriceForm extends PureComponent<IProps> {
         case 'public': return (performer?.publicChatPrice || 0).toFixed(2);
         case 'group': return (performer?.groupChatPrice || 0).toFixed(2);
         case 'private': return (performer?.privateChatPrice || 0).toFixed(2);
-        default: break;
+        default: return 0;
       }
     };
     return (

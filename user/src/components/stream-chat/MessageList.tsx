@@ -9,7 +9,7 @@ import {
   deleteMessageSuccess
 } from '@redux/stream-chat/actions';
 import { Event } from 'src/socket';
-import { IPerformer } from 'src/interfaces';
+import { IUser } from 'src/interfaces';
 import '@components/messages/MessageList.less';
 import StreamChatCompose from './Compose';
 import Message from './Message';
@@ -19,7 +19,7 @@ interface IProps {
   receiveStreamMessageSuccess: Function;
   message: any;
   conversation: any;
-  user: IPerformer;
+  user: IUser;
   deleteMessage: Function;
   deleteMessageSuccess: Function;
 }

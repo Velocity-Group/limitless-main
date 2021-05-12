@@ -25,7 +25,7 @@ import PrivateHlsPublisher from '@components/streaming/hls/private/publisher';
 import PrivateHlsSubscriber from '@components/streaming/hls/private/subscriber';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
 import { TipPerformerForm } from '@components/performer/tip-form';
-import '../live/index.less';
+import '../model/live/index.less';
 // eslint-disable-next-line no-shadow
 enum EVENT {
   JOIN_ROOM = 'JOIN_ROOM',
