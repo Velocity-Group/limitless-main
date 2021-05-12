@@ -4,7 +4,7 @@ import Head from 'next/head';
 import {
   Layout, Row, Col, message, Button, Alert, Modal, Rate
 } from 'antd';
-import { ClockCircleOutlined, CommentOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined } from '@ant-design/icons';
 import { IResponse } from 'src/services/api-request';
 import {
   IPerformer,
@@ -16,7 +16,7 @@ import {
 } from 'src/interfaces';
 import { connect } from 'react-redux';
 import {
-  streamService, performerService, messageService, purchaseTokenService, reviewService
+  streamService, performerService, messageService, purchaseTokenService
 } from 'src/services';
 import { SocketContext, Event } from 'src/socket';
 import nextCookie from 'next-cookies';
@@ -32,9 +32,9 @@ import {
 } from '@redux/stream-chat/actions';
 import { getResponseError, videoDuration } from '@lib/index';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
-import { TipPerformerForm } from '@components/performer/index';
-import { ReviewPerformerForm } from '@components/reviews';
-import ListReviews from '@components/reviews/list-reviews';
+import { TipPerformerForm } from '@components/performer';
+// import { ReviewPerformerForm } from '@components/reviews';
+// import ListReviews from '@components/reviews/list-reviews';
 import '../live/index.less';
 
 // eslint-disable-next-line no-shadow
@@ -133,7 +133,7 @@ class LivePage extends PureComponent<IProps> {
     this.updatePerformerInfo();
     this.interval = setInterval(this.updatePerformerInfo.bind(this), 30 * 1000);
     this.initProfilePage();
-    this.subscribe({ performerId: performer._id });
+    this.subscribeStream({ performerId: performer._id });
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -184,21 +184,21 @@ class LivePage extends PureComponent<IProps> {
     }
   }
 
-  async handleReview({ rating, comment }) {
-    const { performer, user } = this.props;
-    if (!performer || !this.sessionId) return;
-    try {
-      const resp = await reviewService.create({
-        objectId: this.sessionId, performerId: performer._id, rating, comment
-      });
-      this.setState({ newReview: { ...resp.data, creator: user } });
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
-    } finally {
-      this.setState({ openReviewModal: false });
-    }
-  }
+  // async handleReview({ rating, comment }) {
+  //   const { performer, user } = this.props;
+  //   if (!performer || !this.sessionId) return;
+  //   try {
+  //     const resp = await reviewService.create({
+  //       objectId: this.sessionId, performerId: performer._id, rating, comment
+  //     });
+  //     this.setState({ newReview: { ...resp.data, creator: user } });
+  //   } catch (e) {
+  //     const err = await e;
+  //     message.error(err?.message || 'Error occured, please try again later');
+  //   } finally {
+  //     this.setState({ openReviewModal: false });
+  //   }
+  // }
 
   onbeforeunload = () => {
     this.interval && clearInterval(this.interval);
@@ -285,7 +285,7 @@ class LivePage extends PureComponent<IProps> {
     this.setState({ openPurchaseModal: false });
   }
 
-  async subscribe({ performerId }) {
+  async subscribeStream({ performerId }) {
     try {
       const resp = await streamService.joinPublicChat(performerId);
       const {
@@ -379,9 +379,9 @@ class LivePage extends PureComponent<IProps> {
     this.setState({ sessionDuration: 0 });
     this.streamDurationInterval && clearInterval(this.streamDurationInterval);
     message.info('Streaming session has ended!');
-    setTimeout(() => {
-      this.setState({ openReviewModal: true });
-    }, 2000);
+    // setTimeout(() => {
+    //   this.setState({ openReviewModal: true });
+    // }, 2000);
   }
 
   async sendTip(token) {
@@ -422,7 +422,7 @@ class LivePage extends PureComponent<IProps> {
         </Head>
         <Event
           event={STREAM_EVENT.JOIN_BROADCASTER}
-          handler={this.subscribe.bind(this)}
+          handler={this.subscribeStream.bind(this)}
         />
         <Event
           event={STREAM_EVENT.CHANGE_STREAM_INFO}
@@ -474,7 +474,7 @@ class LivePage extends PureComponent<IProps> {
                 </span>
               </div>
               <div style={{ margin: 10, display: 'flex' }}>
-                <Button
+                {/* <Button
                   block
                   className="secondary"
                   disabled={!performer?.isOnline}
@@ -493,7 +493,7 @@ class LivePage extends PureComponent<IProps> {
                   )}
                 >
                   Group Chat
-                </Button>
+                </Button> */}
                 <Button
                   block
                   className="secondary"
@@ -534,7 +534,7 @@ class LivePage extends PureComponent<IProps> {
               />
             </Col>
           </Row>
-          {this.sessionId && (
+          {/* {this.sessionId && (
           <div>
             <h4 className="page-heading">
               <CommentOutlined />
@@ -543,8 +543,8 @@ class LivePage extends PureComponent<IProps> {
             </h4>
             <ListReviews newReview={newReview} objectId={this.sessionId} objectType="stream" />
           </div>
-          )}
-          <Modal
+          )} */}
+          {/* <Modal
             key="reviews"
             title={null}
             visible={openReviewModal}
@@ -554,7 +554,7 @@ class LivePage extends PureComponent<IProps> {
             destroyOnClose
           >
             <ReviewPerformerForm type="public_chat" performer={performer} submiting={submiting} onFinish={this.handleReview.bind(this)} />
-          </Modal>
+          </Modal> */}
           <Modal
             key="tip"
             title={null}

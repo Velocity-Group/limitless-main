@@ -42,9 +42,10 @@ export interface IPerformer {
     totalFeeds: number;
     totalStories: number;
     totalBlogs: number;
+    totalRating: number;
+    avgRating: number;
   };
   score: number;
-  isPerformer: boolean;
   bankingInformation: IBanking;
   blockCountries: IBlockCountries;
   createdBy: string;
@@ -72,7 +73,16 @@ export interface IPerformer {
   bodyType: string;
   dateOfBirth: Date;
   publicChatPrice: number;
+  groupChatPrice: number;
   privateChatPrice: number;
+  balance: number;
+  socialsLink: {
+    facebook: string;
+    google: string;
+    instagram: string;
+    twitter: string;
+    linkedIn: string;
+  };
 }
 
 export interface IUpdatePerformer {
@@ -107,6 +117,13 @@ export interface IUpdatePerformer {
   activateWelcomeVideo: boolean;
   publicChatPrice: number;
   privateChatPrice: number;
+  socialsLink: {
+    facebook: string;
+    google: string;
+    instagram: string;
+    twitter: string;
+    linkedIn: string;
+  }
 }
 
 export interface IBanking {

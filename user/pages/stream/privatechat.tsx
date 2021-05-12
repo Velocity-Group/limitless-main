@@ -228,7 +228,6 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
     this.socket.on(STREAM_JOINED, ({ streamId, conversationId }) => {
       const { activeConversation } = this.props;
       if (conversationId !== activeConversation.data._id) return;
-      console.log(this.streamId, streamId);
       if (this.streamId !== streamId) {
         this.setState({ subscriberStreamId: streamId });
         this._intervalCountdown && clearInterval(this._intervalCountdown);

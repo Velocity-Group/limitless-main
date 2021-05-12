@@ -36,6 +36,7 @@ export interface StreamSettings {
   publisherURL: string;
   optionForBroadcast: 'hls' | 'webrtc';
   optionForPrivate: 'hls' | 'webrtc';
+  optionForGroup: 'hls' | 'webrtc';
   secureOption: boolean;
   AntMediaAppname: string;
 }

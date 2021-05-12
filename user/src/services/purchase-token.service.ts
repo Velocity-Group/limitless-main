@@ -21,6 +21,14 @@ export class PurchaseTokenService extends APIRequest {
     return this.post(`/purchase-items/gallery/${id}`, payload);
   }
 
+  purchaseMessage(id, payload) {
+    return this.post(`/purchase-items/message/${id}`, payload);
+  }
+
+  purchaseStream(id) {
+    return this.post(`/purchase-items/stream/${id}`);
+  }
+
   subscribePerformer(payload: { performerId: string, type: string }) {
     return this.post('/purchase-items/subscribe/performers', payload);
   }
@@ -28,10 +36,6 @@ export class PurchaseTokenService extends APIRequest {
   userSearch(query?: { [key: string]: any }) {
     return this.get(this.buildUrl('/purchased-items/user/search', query));
   }
-
-  //   purchaseMessage(id, payload) {
-  //     return this.post(`/payment/purchase-message/${id}`, payload);
-  //   }
 }
 
 export const purchaseTokenService = new PurchaseTokenService();
