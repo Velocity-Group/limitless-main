@@ -1,49 +1,38 @@
+/* eslint-disable no-nested-ternary */
 import Head from 'next/head';
 import Link from 'next/link';
 import { PureComponent } from 'react';
-import { connect } from 'react-redux';
 import {
-  Table, message, Dropdown, Button, Menu, Tag
+  Table, message, Tag, Modal
 } from 'antd';
 import Page from '@components/common/layout/page';
-import { IUser } from 'src/interfaces';
-import { userService } from '@services/user.service';
-import { SearchFilter } from '@components/user/search-filter';
-import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchFilter } from '@components/performer/search-filter';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  HistoryOutlined
+} from '@ant-design/icons';
 import { formatDate } from '@lib/date';
-import { enquireScreen, unenquireScreen } from 'enquire-js';
+import { BreadcrumbComponent, DropdownAction } from '@components/common';
+import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
+import { userService } from '@services/user.service';
 
-interface IProps {
-  currentUser: IUser;
-}
-class Users extends PureComponent<IProps> {
-  enquireHandler: any;
+export default class Performers extends PureComponent<any> {
+  _selectedUser: any;
 
   state = {
     pagination: {} as any,
     searching: false,
+    openChangeTokenLogModal: false,
     list: [],
     limit: 10,
     filter: {} as any,
     sortBy: 'updatedAt',
-    sort: 'desc',
-    isMobile: false
+    sort: 'desc'
   };
 
   componentDidMount() {
-    this.enquireHandler = enquireScreen((mobile) => {
-      const { isMobile } = this.state;
-      if (isMobile !== mobile) {
-        this.setState({
-          isMobile: mobile
-        });
-      }
-    });
     this.search();
-  }
-
-  componentWillUnmount() {
-    unenquireScreen(this.enquireHandler);
   }
 
   async handleTableChange(pagination, filters, sorter) {
@@ -52,7 +41,6 @@ class Users extends PureComponent<IProps> {
     await this.setState({
       pagination: pager,
       sortBy: sorter.field || '',
-      // eslint-disable-next-line no-nested-ternary
       sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : ''
     });
     this.search(pager.current);
@@ -75,11 +63,14 @@ class Users extends PureComponent<IProps> {
     }
   }
 
+  async handleOpenChangeTokenLog(user) {
+    this._selectedUser = user;
+    this.setState({ openChangeTokenLogModal: true });
+  }
+
   async search(page = 1) {
     const {
-      limit, filter,
-      sort,
-      sortBy, pagination
+      limit, sort, filter, sortBy, pagination
     } = this.state;
     try {
       await this.setState({ searching: true });
@@ -107,21 +98,18 @@ class Users extends PureComponent<IProps> {
 
   render() {
     const {
-      list, searching, pagination, isMobile
+      list, searching, pagination, openChangeTokenLogModal
     } = this.state;
     const onDelete = this.handleDelete.bind(this);
-
-    const columns = !isMobile ? [
+    const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
+    const columns = [
       {
-        title: 'First name',
-        dataIndex: 'firstName'
+        title: 'Real_Name',
+        dataIndex: 'firstName',
+        render: (firstName, record) => <span>{`${record?.firstName || ''} ${record?.lastName || ''}`}</span>
       },
       {
-        title: 'Last name',
-        dataIndex: 'lastName'
-      },
-      {
-        title: 'Display name',
+        title: 'Display_Name',
         dataIndex: 'name'
       },
       {
@@ -142,40 +130,26 @@ class Users extends PureComponent<IProps> {
             case 'inactive':
               return <Tag color="red">Inactive</Tag>;
             case 'pending-email-confirmation':
-              return <Tag color="default">Pending</Tag>;
+              return <Tag color="default">Pending verify email</Tag>;
             default: return <Tag color="default">{status}</Tag>;
           }
         }
       },
       {
-        title: 'Verified Email',
+        title: 'Verified_Email',
         dataIndex: 'verifiedEmail',
-        render(status) {
-          switch (status) {
+        render(verifiedEmail) {
+          switch (verifiedEmail) {
             case true:
               return <Tag color="green">Y</Tag>;
             case false:
               return <Tag color="red">N</Tag>;
-            default: return <Tag color="default">{status}</Tag>;
+            default: return <Tag color="default">{verifiedEmail}</Tag>;
           }
         }
       },
-      // {
-      //   title: 'Amount spent',
-      //   dataIndex: '_id',
-      //   render() {
-      //     return <span>Not implement yet!</span>;
-      //   }
-      // },
-      // {
-      //   title: 'Watching time',
-      //   dataIndex: '_id',
-      //   render() {
-      //     return <span>Not implement yet!</span>;
-      //   }
-      // },
       {
-        title: 'CreatedAt',
+        title: 'Created_At',
         dataIndex: 'createdAt',
         sorter: true,
         render(date: Date) {
@@ -187,10 +161,12 @@ class Users extends PureComponent<IProps> {
         dataIndex: '_id',
         render(id: string, record) {
           return (
-            <Dropdown
-              overlay={(
-                <Menu>
-                  <Menu.Item key="edit">
+            <DropdownAction
+              menuOptions={[
+                {
+                  key: 'update',
+                  name: 'Update',
+                  children: (
                     <Link
                       href={{
                         pathname: '/users/update',
@@ -204,102 +180,32 @@ class Users extends PureComponent<IProps> {
                         Update
                       </a>
                     </Link>
-                  </Menu.Item>
-                  <Menu.Item key="delete">
+                  )
+                },
+                {
+                  key: 'delete',
+                  name: 'Delete',
+                  children: (
                     <a aria-hidden onClick={() => onDelete(record)}>
                       <DeleteOutlined />
                       {' '}
                       Delete
                     </a>
-                  </Menu.Item>
-                </Menu>
-              )}
-            >
-              <Button>
-                Actions
-                {' '}
-                <DownOutlined />
-              </Button>
-            </Dropdown>
-          );
-        }
-      }
-    ] : [
-      {
-        title: 'Display name',
-        fixed: 'left' as 'left',
-        dataIndex: 'name'
-      },
-      {
-        title: 'Username',
-        dataIndex: 'username'
-      },
-      {
-        title: 'Email',
-        dataIndex: 'email'
-      },
-      {
-        title: 'Status',
-        dataIndex: 'status',
-        render(status) {
-          switch (status) {
-            case 'active':
-              return <Tag color="green">Active</Tag>;
-            case 'inactive':
-              return <Tag color="red">Inactive</Tag>;
-            case 'pending-email-confirmation':
-              return <Tag color="default">Pending</Tag>;
-            default: return <Tag color="default">{status}</Tag>;
-          }
-        }
-      },
-      {
-        title: 'CreatedAt',
-        dataIndex: 'createdAt',
-        sorter: true,
-        render(date: Date) {
-          return <span>{formatDate(date)}</span>;
-        }
-      },
-      {
-        title: '#',
-        dataIndex: '_id',
-        render(id: string, record) {
-          return (
-            <Dropdown
-              overlay={(
-                <Menu>
-                  <Menu.Item key="edit">
-                    <Link
-                      href={{
-                        pathname: '/users/update',
-                        query: { id }
-                      }}
-                      as={`/users/update?id=${id}`}
-                    >
-                      <a>
-                        <EditOutlined />
-                        {' '}
-                        Update
-                      </a>
-                    </Link>
-                  </Menu.Item>
-                  <Menu.Item key="delete">
-                    <a aria-hidden onClick={() => onDelete(record)}>
-                      <DeleteOutlined />
+                  )
+                },
+                {
+                  key: 'change-token-logs',
+                  name: 'Token balance change logs',
+                  children: (
+                    <a aria-hidden onClick={() => openChangeTokenLog(record)}>
+                      <HistoryOutlined />
                       {' '}
-                      Delete
+                      Token Change Logs
                     </a>
-                  </Menu.Item>
-                </Menu>
-              )}
-            >
-              <Button>
-                Actions
-                {' '}
-                <DownOutlined />
-              </Button>
-            </Dropdown>
+                  )
+                }
+              ]}
+            />
           );
         }
       }
@@ -309,6 +215,7 @@ class Users extends PureComponent<IProps> {
         <Head>
           <title>Users</title>
         </Head>
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Users' }]} />
         <Page>
           <SearchFilter onSubmit={this.handleFilter.bind(this)} />
           <div style={{ marginBottom: '20px' }} />
@@ -322,13 +229,17 @@ class Users extends PureComponent<IProps> {
               onChange={this.handleTableChange.bind(this)}
             />
           </div>
+          <Modal
+            title={`Token balance change logs of ${this._selectedUser?.name || this._selectedUser?.username || 'N/A'}`}
+            destroyOnClose
+            onCancel={() => this.setState({ openChangeTokenLogModal: false })}
+            visible={openChangeTokenLogModal}
+            footer={null}
+          >
+            <TableTokenChangeLogs sourceId={this._selectedUser?._id} source="user" />
+          </Modal>
         </Page>
       </>
     );
   }
 }
-
-const mapStates = (state: any) => ({
-  currentUser: state.user.current
-});
-export default connect(mapStates)(Users);

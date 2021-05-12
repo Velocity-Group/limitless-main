@@ -66,18 +66,6 @@ export class AdminPerformerController {
     return DataResponse.ok(data);
   }
 
-  @Get('/change-token/logs')
-  @Roles('admin')
-  @UseGuards(RoleGuard)
-  @HttpCode(HttpStatus.OK)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async tokenLogs(
-    @Query() req: ChangeTokenLogsSearchPayload
-  ): Promise<DataResponse<any>> {
-    const data = await this.performerSearchService.tokenChangeLogs(req);
-    return DataResponse.ok(data);
-  }
-
   @Post()
   @Roles('admin')
   @UseGuards(RoleGuard)

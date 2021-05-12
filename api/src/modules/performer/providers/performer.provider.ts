@@ -6,8 +6,7 @@ import {
   CommissionSettingSchema,
   BankingSettingSchema,
   BlockCountriesSettingSchema,
-  BlockedByPerformerSchema,
-  AdminChangeTokenBalanceLogSchema
+  BlockedByPerformerSchema
 } from '../schemas';
 import { PaymentGatewaySettingSchema } from '../schemas/payment-gateway-setting.schema';
 
@@ -18,7 +17,6 @@ export const PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER = 'PERFORMER_COMMISSION
 export const PERFORMER_BANKING_SETTING_MODEL_PROVIDER = 'PERFORMER_BANKING_SETTING_MODEL_PROVIDER';
 export const PERFORMER_BLOCK_COUNTRIES_SETTING_MODEL_PROVIDER = 'PERFORMER_BLOCK_COUNTRIES_SETTING_MODEL_PROVIDER';
 export const BLOCKED_BY_PERFORMER_PROVIDER = 'BLOCKED_BY_PERFORMER_PROVIDER';
-export const ADMIN_CHANGE_TOKEN_BALANCE_LOGS = 'ADMIN_CHANGE_TOKEN_BALANCE_LOGS';
 
 export const performerProviders = [
   {
@@ -60,11 +58,6 @@ export const performerProviders = [
   {
     provide: BLOCKED_BY_PERFORMER_PROVIDER,
     useFactory: (connection: Connection) => connection.model('BlockedByPerformer', BlockedByPerformerSchema),
-    inject: [MONGO_DB_PROVIDER]
-  },
-  {
-    provide: ADMIN_CHANGE_TOKEN_BALANCE_LOGS,
-    useFactory: (connection: Connection) => connection.model('AdminChangeTokenBalanceLogs', AdminChangeTokenBalanceLogSchema),
     inject: [MONGO_DB_PROVIDER]
   }
 ];

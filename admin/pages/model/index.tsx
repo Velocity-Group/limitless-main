@@ -3,21 +3,25 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { PureComponent } from 'react';
 import {
-  Table, message, Tag
+  Table, message, Tag, Modal
 } from 'antd';
 import Page from '@components/common/layout/page';
 import { performerService } from '@services/performer.service';
 import { SearchFilter } from '@components/performer/search-filter';
 import {
   EditOutlined, FireOutlined, DeleteOutlined, SkinOutlined,
-  VideoCameraOutlined, PictureOutlined
+  VideoCameraOutlined, PictureOutlined, HistoryOutlined
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import { BreadcrumbComponent, DropdownAction } from '@components/common';
 import { enquireScreen, unenquireScreen } from 'enquire-js';
+import { IPerformer } from 'src/interfaces';
+import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
 
 export default class Performers extends PureComponent<any> {
   enquireHandler: any;
+
+  _selectedUser: IPerformer;
 
   state = {
     pagination: {} as any,
@@ -27,7 +31,8 @@ export default class Performers extends PureComponent<any> {
     filter: {} as any,
     sortBy: 'updatedAt',
     sort: 'desc',
-    isMobile: false
+    isMobile: false,
+    openChangeTokenLogModal: false
   };
 
   componentDidMount() {
@@ -74,6 +79,11 @@ export default class Performers extends PureComponent<any> {
     }
   }
 
+  async handleOpenChangeTokenLog(performer) {
+    this._selectedUser = performer;
+    this.setState({ openChangeTokenLogModal: true });
+  }
+
   async search(page = 1) {
     const {
       limit, sort, filter, sortBy, pagination
@@ -104,9 +114,10 @@ export default class Performers extends PureComponent<any> {
 
   render() {
     const {
-      list, searching, pagination, isMobile
+      list, searching, pagination, isMobile, openChangeTokenLogModal
     } = this.state;
     const onDelete = this.handleDelete.bind(this);
+    const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = !isMobile ? [
       {
         title: 'Display name',
@@ -316,6 +327,18 @@ export default class Performers extends PureComponent<any> {
                       </a>
                     </Link>
                   )
+                },
+
+                {
+                  key: 'change-token-logs',
+                  name: 'Token balance change logs',
+                  children: (
+                    <a aria-hidden onClick={() => openChangeTokenLog(record)}>
+                      <HistoryOutlined />
+                      {' '}
+                      Token Change Logs
+                    </a>
+                  )
                 }
               ]}
             />
@@ -450,6 +473,15 @@ export default class Performers extends PureComponent<any> {
               onChange={this.handleTableChange.bind(this)}
             />
           </div>
+          <Modal
+            title={`Token balance change logs of ${this._selectedUser?.name || this._selectedUser?.username || 'N/A'}`}
+            destroyOnClose
+            onCancel={() => this.setState({ openChangeTokenLogModal: false })}
+            visible={openChangeTokenLogModal}
+            footer={null}
+          >
+            <TableTokenChangeLogs sourceId={this._selectedUser?._id} source="performer" />
+          </Modal>
         </Page>
       </>
     );

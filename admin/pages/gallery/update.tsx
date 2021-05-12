@@ -7,6 +7,7 @@ import { IGalleryUpdate } from 'src/interfaces';
 import Loader from '@components/common/base/loader';
 import { BreadcrumbComponent } from '@components/common';
 import { FormGallery } from '@components/gallery/form-gallery';
+import Router from 'next/router';
 
 interface IProps {
   id: string;
@@ -28,7 +29,7 @@ class GalleryUpdate extends PureComponent<IProps> {
       const resp = await galleryService.findById(id);
       this.setState({ gallery: resp.data });
     } catch (e) {
-      message.error('Gallery not found!');
+      message.error('Gallery is not found!');
     } finally {
       this.setState({ fetching: false });
     }
@@ -44,10 +45,11 @@ class GalleryUpdate extends PureComponent<IProps> {
       };
       await galleryService.update(id, submitData);
       message.success('Updated successfully');
-      this.setState({ submitting: false });
+      Router.back();
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
+    } finally {
       this.setState({ submitting: false });
     }
   }
@@ -61,8 +63,8 @@ class GalleryUpdate extends PureComponent<IProps> {
         </Head>
         <BreadcrumbComponent
           breadcrumbs={[
-            { title: 'Gallery', href: '/gallery' },
-            { title: gallery.name ? gallery.name : 'Detail gallery' }
+            { title: 'Galleries', href: '/gallery' },
+            { title: gallery.title ? gallery.title : 'Update Gallery' }
           ]}
         />
         <Page>

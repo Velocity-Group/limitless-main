@@ -3,12 +3,11 @@ import {
   Form, Input, Button, Select, message, Switch, Row, Col, DatePicker
 } from 'antd';
 import {
-  IPerformerUpdate,
+  IPerformer,
   ICountry,
   ILangguges,
   IPhoneCodes,
   IPerformerCategory,
-  IPerformerCreate,
   IHeight,
   IWeight
 } from 'src/interfaces';
@@ -41,7 +40,7 @@ const { Option } = Select;
 interface IProps {
   onFinish: Function;
   onUploaded: Function;
-  performer?: IPerformerUpdate;
+  performer?: IPerformer;
   submiting?: boolean;
   countries: ICountry[];
   languages: ILangguges[];
@@ -81,7 +80,7 @@ export class AccountForm extends PureComponent<IProps> {
             verifiedEmail: false,
             verifiedAccount: false,
             verifiedDocument: false
-          } as IPerformerCreate)
+          })
         }
       >
         <Row>

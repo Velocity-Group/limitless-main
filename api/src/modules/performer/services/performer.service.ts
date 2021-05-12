@@ -24,13 +24,15 @@ import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import {
-  PERFORMER_UPDATE_STATUS_CHANNEL, PERFORMER_UPDATE_GENDER_CHANNEL, DELETE_PERFORMER_CHANNEL, CHANGE_TOKEN_LOG_SOURCES
+  PERFORMER_UPDATE_STATUS_CHANNEL, PERFORMER_UPDATE_GENDER_CHANNEL, DELETE_PERFORMER_CHANNEL
 } from 'src/modules/performer/constants';
 import { difference } from 'lodash';
 import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { MailerService } from 'src/modules/mailer';
 import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';
+import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
+import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException,
@@ -44,8 +46,7 @@ import {
   CommissionSettingModel,
   BankingModel,
   BlockCountriesSettingModel,
-  BlockedByPerformerModel,
-  AdminChangeTokenModel
+  BlockedByPerformerModel
 } from '../models';
 import {
   PerformerCreatePayload,
@@ -65,8 +66,7 @@ import {
   PERFORMER_BLOCK_COUNTRIES_SETTING_MODEL_PROVIDER,
   PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER,
   PERFORMER_MODEL_PROVIDER,
-  PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER,
-  ADMIN_CHANGE_TOKEN_BALANCE_LOGS
+  PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER
 } from '../providers';
 
 const CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA = 'CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA';
@@ -74,6 +74,8 @@ const CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA = 'CHECK_REF_REMOVE_PERFORMER_FILE_
 @Injectable()
 export class PerformerService {
   constructor(
+    @Inject(forwardRef(() => ChangeTokenLogService))
+    private readonly changeTokenLogService: ChangeTokenLogService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     @Inject(forwardRef(() => AuthService))
@@ -100,9 +102,7 @@ export class PerformerService {
     @Inject(PERFORMER_BLOCK_COUNTRIES_SETTING_MODEL_PROVIDER)
     private readonly blockCountriesSettingModel: Model<BlockCountriesSettingModel>,
     @Inject(BLOCKED_BY_PERFORMER_PROVIDER)
-    private readonly blockedByPerformerModel: Model<BlockedByPerformerModel>,
-    @Inject(ADMIN_CHANGE_TOKEN_BALANCE_LOGS)
-    private readonly changeTokenLogModel: Model<AdminChangeTokenModel>
+    private readonly blockedByPerformerModel: Model<BlockedByPerformerModel>
   ) {
     this.defineJobs();
   }
@@ -565,11 +565,10 @@ export class PerformerService {
     const oldBalance = performer.balance;
     // logs change token
     if (oldBalance !== newPerformer.balance) {
-      await this.changeTokenLogModel.create({
+      await this.changeTokenLogService.changeTokenLog({
         source: CHANGE_TOKEN_LOG_SOURCES.PERFORMER,
         sourceId: newPerformer._id,
-        token: newPerformer.balance - oldBalance,
-        createdAt: new Date()
+        token: newPerformer.balance - oldBalance
       });
     }
     // fire event that updated performer status

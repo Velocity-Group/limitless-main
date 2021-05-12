@@ -43,6 +43,10 @@ export class UserService extends APIRequest {
   delete(id: string) {
     return this.del(`/admin/users/${id}/delete`);
   }
+
+  changeTokenLogs(query?: { [key: string]: any }) {
+    return this.get(this.buildUrl('/admin/users/change-token/logs', query));
+  }
 }
 
 export const userService = new UserService();

@@ -6,13 +6,12 @@ import { AccountForm } from '@components/performer/AccountForm';
 import { PerformerDocument } from '@components/performer/Document';
 import { SubscriptionForm } from '@components/performer/Subcription';
 import { BankingForm } from '@components/performer/BankingForm';
-import { CCbillSettingForm } from '@components/performer/ccbill-setting';
 import { CommissionSettingForm } from '@components/performer/commission-setting';
 import {
   ICountry,
   ILangguges,
   IPhoneCodes,
-  IPerformerUpdate,
+  IPerformer,
   IPerformerCategory,
   IHeight,
   IWeight
@@ -64,7 +63,7 @@ class PerformerUpdate extends PureComponent<IProps> {
     pwUpdating: false,
     updating: false,
     fetching: false,
-    performer: {} as IPerformerUpdate,
+    performer: {} as IPerformer,
     settingUpdating: false,
     avatarUrl: '',
     coverUrl: ''
@@ -76,7 +75,7 @@ class PerformerUpdate extends PureComponent<IProps> {
     const { id } = this.props;
     try {
       this.setState({ fetching: true });
-      const resp = await (await performerService.findById(id)).data as IPerformerUpdate;
+      const resp = await (await performerService.findById(id)).data as IPerformer;
       this.setState({ performer: resp });
       resp.avatar && this.setState({ avatarUrl: resp.avatar });
       resp.cover && this.setState({ coverUrl: resp.cover });
@@ -238,13 +237,6 @@ class PerformerUpdate extends PureComponent<IProps> {
                   onFinish={this.updateBankingSetting.bind(this)}
                   bankingInformation={performer.bankingInformation || null}
                   countries={countries}
-                />
-              </Tabs.TabPane>
-              <Tabs.TabPane tab={<span>CCbill Settings</span>} key="ccbill">
-                <CCbillSettingForm
-                  submiting={settingUpdating}
-                  onFinish={this.updatePaymentGatewaySetting.bind(this)}
-                  ccbillSetting={performer.ccbillSetting}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<span>Commission Settings</span>} key="commission">

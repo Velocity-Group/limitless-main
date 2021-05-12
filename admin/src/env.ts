@@ -1,7 +1,7 @@
 export default {
-  apiEndpoint: 'http://localhost:9000',
-  // apiEndpoint: 'https://myle-api.xscripts.info',
-  siteUrl: 'https://myle.xscripts.info',
+  // apiEndpoint: 'http://localhost:9000',
+  apiEndpoint: 'https://fanso-api.xscripts.info',
+  siteUrl: 'https://fanso.xscripts.info',
   // imageAccept: '',
   // videoAccept: '',
   maximumSizeUploadImage: 5,

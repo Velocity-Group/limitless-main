@@ -13,6 +13,7 @@ import { AuthModule } from '../auth/auth.module';
 import { FileModule } from '../file/file.module';
 import { UserConnectedListener } from './listeners/user-connected.listener';
 import { PerformerModule } from '../performer/performer.module';
+import { ChangeTokenLogModule } from '../change-token-logs/change-token-log.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { PerformerModule } from '../performer/performer.module';
     QueueModule.forRoot(),
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule),
-    forwardRef(() => FileModule)
+    forwardRef(() => FileModule),
+    forwardRef(() => ChangeTokenLogModule)
   ],
   providers: [
     ...userProviders,

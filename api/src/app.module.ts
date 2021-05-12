@@ -30,6 +30,7 @@ import { StatisticsModule } from './modules/statistics/statistic.module';
 import { TokenPackageModule } from './modules/token-package/token-package.module';
 import { PayoutRequestModule } from './modules/payout-request/payout.module';
 import { OrderModule } from './modules/order/order.module';
+import { ChangeTokenLogModule } from './modules/change-token-logs/change-token-log.module';
 
 @Module({
   imports: [
@@ -62,7 +63,8 @@ import { OrderModule } from './modules/order/order.module';
     StatisticsModule,
     TokenPackageModule,
     PayoutRequestModule,
-    OrderModule
+    OrderModule,
+    ChangeTokenLogModule
   ],
   controllers: [AppController],
   providers: [AppService]

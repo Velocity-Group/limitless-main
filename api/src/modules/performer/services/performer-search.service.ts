@@ -5,17 +5,15 @@ import * as moment from 'moment';
 import { QueueEvent, QueueEventService } from 'src/kernel';
 import { EVENT } from 'src/kernel/constants';
 import { SEARCH_CHANNEL } from 'src/modules/search/constants';
-import { PerformerModel, AdminChangeTokenModel } from '../models';
-import { ADMIN_CHANGE_TOKEN_BALANCE_LOGS, PERFORMER_MODEL_PROVIDER } from '../providers';
+import { PerformerModel } from '../models';
+import { PERFORMER_MODEL_PROVIDER } from '../providers';
 import { PerformerDto, IPerformerResponse } from '../dtos';
-import { ChangeTokenLogsSearchPayload, PerformerSearchPayload } from '../payloads';
+import { PerformerSearchPayload } from '../payloads';
 import { PERFORMER_STATUSES } from '../constants';
 
 @Injectable()
 export class PerformerSearchService {
   constructor(
-    @Inject(ADMIN_CHANGE_TOKEN_BALANCE_LOGS)
-    private readonly changeTokenLogModel: Model<AdminChangeTokenModel>,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>,
     private readonly queueEventService: QueueEventService
@@ -295,21 +293,5 @@ export class PerformerSearchService {
     return {
       data: data.map((item) => new PerformerDto(item).toSearchResponse())
     };
-  }
-
-  public async tokenChangeLogs(req: ChangeTokenLogsSearchPayload):Promise<any> {
-    const query = {
-      source: req.source,
-      sourceId: req.sourceId
-    } as any;
-    const [data] = await Promise.all([
-      this.changeTokenLogModel
-        .find(query)
-        .lean()
-        .sort('-createdAt')
-        .limit(req.limit ? parseInt(req.limit as string, 10) : 10)
-        .skip(parseInt(req.offset as string, 10))
-    ]);
-    return data;
   }
 }

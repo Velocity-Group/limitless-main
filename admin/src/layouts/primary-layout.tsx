@@ -9,7 +9,7 @@ import {
   PieChartOutlined, ContainerOutlined, UserOutlined, WomanOutlined,
   VideoCameraOutlined, CameraOutlined, BlockOutlined, FileImageOutlined,
   SkinOutlined, DollarOutlined, HeartOutlined, MenuOutlined,
-  FireOutlined, MailOutlined
+  FireOutlined, MailOutlined, LinkOutlined
 } from '@ant-design/icons';
 import Header from '@components/common/layout/header';
 import { Router } from 'next/router';
@@ -322,6 +322,18 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
             name: 'Create',
             id: 'create-product',
             route: '/product/create'
+          }
+        ]
+      },
+      {
+        id: 'token-package',
+        name: 'Token Packages',
+        icon: <LinkOutlined />,
+        children: [
+          {
+            id: 'token-package',
+            name: 'Listing',
+            route: '/token-package'
           }
         ]
       },

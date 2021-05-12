@@ -12,6 +12,8 @@ import { EVENT, STATUS } from 'src/kernel/constants';
 import { AuthService } from 'src/modules/auth/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
+import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { UserModel } from '../models';
 import { USER_MODEL_PROVIDER } from '../providers';
 import {
@@ -25,6 +27,8 @@ import { UsernameExistedException } from '../exceptions/username-existed.excepti
 @Injectable()
 export class UserService {
   constructor(
+    @Inject(forwardRef(() => ChangeTokenLogService))
+    private readonly changeTokenLogService: ChangeTokenLogService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
     @Inject(forwardRef(() => PerformerService))
@@ -225,6 +229,16 @@ export class UserService {
       data.verifiedEmail = false;
     }
     await this.userModel.updateOne({ _id: id }, data, { upsert: true });
+    const newUser = await this.userModel.findById(id);
+    const oldBalance = user.balance;
+    // logs change token
+    if (oldBalance !== newUser.balance) {
+      await this.changeTokenLogService.changeTokenLog({
+        source: CHANGE_TOKEN_LOG_SOURCES.USER,
+        sourceId: newUser._id,
+        token: newUser.balance - oldBalance
+      });
+    }
     if (data.email && data.email.toLowerCase() !== user.email) {
       await this.authService.sendVerificationEmail(user);
       await this.authService.updateKey({

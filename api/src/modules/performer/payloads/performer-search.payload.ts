@@ -105,15 +105,3 @@ export class PerformerSearchPayload extends SearchRequest {
 
   ids: ObjectId[] | string[];
 }
-
-export class ChangeTokenLogsSearchPayload extends SearchRequest {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  source: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  sourceId: string;
-}
