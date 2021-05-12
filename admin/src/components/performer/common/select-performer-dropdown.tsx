@@ -44,7 +44,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
       <Select
         showSearch
         defaultValue={defaultValue}
-        placeholder="Type to search content creator here"
+        placeholder="Type to search model here"
         style={style}
         onSearch={this.loadPerformers.bind(this)}
         onChange={(val) => onSelect(val)}
@@ -53,7 +53,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
         disabled={disabled}
       >
         <Select.Option value="" key="default">
-          All content creators
+          All models
         </Select.Option>
         {data && data.length > 0 && data.map((u) => (
           <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>

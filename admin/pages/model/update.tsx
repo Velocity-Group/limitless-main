@@ -195,11 +195,11 @@ class PerformerUpdate extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Content creator update</title>
+          <title>Model update</title>
         </Head>
         <BreadcrumbComponent
           breadcrumbs={[
-            { title: 'Content Creators', href: '/content-creator' },
+            { title: 'Models', href: '/model' },
             { title: performer.username },
             { title: 'Update' }
           ]}

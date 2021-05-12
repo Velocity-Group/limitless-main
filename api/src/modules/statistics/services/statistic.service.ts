@@ -35,6 +35,8 @@ export class StatisticService {
     private readonly productModel: Model<ProductModel>,
     @Inject(PERFORMER_VIDEO_MODEL_PROVIDER)
     private readonly videoModel: Model<VideoModel>,
+    @Inject(FEED_PROVIDER)
+    private readonly feedModel: Model<FeedModel>,
     @Inject(USER_MODEL_PROVIDER)
     private readonly userModel: Model<UserModel>,
     @Inject(PERFORMER_MODEL_PROVIDER)
@@ -44,9 +46,7 @@ export class StatisticService {
     @Inject(ORDER_MODEL_PROVIDER)
     private readonly orderModel: Model<OrderModel>,
     @Inject(EARNING_MODEL_PROVIDER)
-    private readonly earningModel: Model<EarningModel>,
-    @Inject(FEED_PROVIDER)
-    private readonly feedModel: Model<FeedModel>
+    private readonly earningModel: Model<EarningModel>
   ) { }
 
   public async stats(): Promise<any> {
@@ -110,7 +110,8 @@ export class StatisticService {
       totalShippingdOrders,
       totalRefundedOrders,
       totalGrossPrice: (totalGrossPrice && totalGrossPrice.length && totalGrossPrice[0].total) || 0,
-      totalNetPrice: (totalGrossPrice && totalGrossPrice.length && totalNetPrice[0].total) || 0
+      totalNetPrice: (totalGrossPrice && totalGrossPrice.length && totalNetPrice[0].total) || 0,
+      totalCommission: (totalGrossPrice[0]?.total - totalNetPrice[0]?.total) || 0
     };
   }
 }

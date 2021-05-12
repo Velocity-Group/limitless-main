@@ -64,6 +64,18 @@ export default class Performers extends PureComponent<any> {
     this.search();
   }
 
+  async handleDelete(performer) {
+    const { pagination } = this.state;
+    if (!window.confirm(`Are you sure to delete ${performer?.name || performer?.username || 'this model'}`)) return;
+    try {
+      await performerService.delete(performer._id);
+      this.search(pagination.current);
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later');
+    }
+  }
+
   async search(page = 1) {
     const {
       limit, sort, filter, sortBy, pagination
@@ -89,18 +101,6 @@ export default class Performers extends PureComponent<any> {
     } catch (e) {
       message.error('An error occurred, please try again!');
       this.setState({ searching: false });
-    }
-  }
-
-  async handleDelete(performer) {
-    const { pagination } = this.state;
-    if (!window.confirm(`Are you sure to delete ${performer?.name || performer?.username || 'this content creator'}`)) return;
-    try {
-      await performerService.delete(performer._id);
-      this.search(pagination.current);
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
     }
   }
 
@@ -200,10 +200,10 @@ export default class Performers extends PureComponent<any> {
                   children: (
                     <Link
                       href={{
-                        pathname: '/content-creator/update',
+                        pathname: '/model/update',
                         query: { id }
                       }}
-                      as={`/content-creator/update?id=${id}`}
+                      as={`/model/update?id=${id}`}
                     >
                       <a>
                         <EditOutlined />
@@ -308,10 +308,10 @@ export default class Performers extends PureComponent<any> {
                   children: (
                     <Link
                       href={{
-                        pathname: '/content-creator/update',
+                        pathname: '/model/update',
                         query: { id }
                       }}
-                      as={`/content-creator/update?id=${id}`}
+                      as={`/model/update?id=${id}`}
                     >
                       <a>
                         <EditOutlined />
@@ -379,9 +379,9 @@ export default class Performers extends PureComponent<any> {
     return (
       <>
         <Head>
-          <title>Content creators</title>
+          <title>Models</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Content Creators' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Models' }]} />
         <Page>
           <SearchFilter onSubmit={this.handleFilter.bind(this)} />
           <div style={{ marginBottom: '20px' }} />

@@ -1,35 +1,172 @@
-interface document {
-  _id?: string;
-  url?: string;
-  mimeType?: string;
-}
-
-export interface ValueSchedule {
-  start?: string;
-  end?: string;
-  closed?: boolean;
-}
-
-export interface ISchedule {
-  mon?: ValueSchedule;
-  tue?: ValueSchedule;
-  wed?: ValueSchedule;
-  thu?: ValueSchedule;
-  fri?: ValueSchedule;
-  sat?: ValueSchedule;
-  sun?: ValueSchedule;
-}
-
 export interface IPerformer {
-  _id?: string;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  username?: string;
+  _id: string;
+  performerId: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  phone: string;
+  phoneCode: string;
+  avatarPath: string;
+  avatar: any;
+  coverPath: string;
+  cover: any;
+  gender: string;
+  country: string;
+  city: string;
+  state: string;
+  zipcode: string;
+  address: string;
+  languages: string[];
+  studioId: string;
+  categoryIds: string[];
+  timezone: string;
+  noteForUser: string;
+  height: string;
+  weight: string;
+  bio: string;
+  eyes: string;
+  sexualPreference: string;
+  isFreeSubscription: boolean;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  stats: {
+    likes?: number;
+    subscribers?: number;
+    views?: number;
+    totalVideos?: number;
+    totalPhotos?: number;
+    totalGalleries?: number;
+    totalProducts?: number;
+    totalBlogs?: number;
+    totalStories?: number;
+    totalStreamTime?: number;
+    totalViewTime?: number;
+    totalRating?: number;
+    avgRating?: number;
+  };
+  score: number;
+  isPerformer: boolean;
+  bankingInformation: IBankingSetting;
+  blockCountries: IBlockCountries;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  isOnline: boolean;
+  verifiedAccount: boolean;
+  verifiedEmail: boolean;
+  verifiedDocument: boolean;
+  twitterConnected: boolean;
+  googleConnected: boolean;
+  welcomeVideoId: string;
+  welcomeVideoPath: string;
+  activateWelcomeVideo: boolean;
+  isBookMarked: boolean;
+  isSubscribed: boolean;
+  live: boolean;
+  streamingStatus: string;
+  ethnicity: string;
+  bust: string;
+  hair: string;
+  pubicHair: string;
+  idVerification: any;
+  documentVerification: any;
+  bodyType: string;
+  dateOfBirth: Date;
+  publicChatPrice: number;
+  groupChatPrice: number;
+  privateChatPrice: number;
+  balance: number;
+  socialsLink: {
+    facebook: string;
+    google: string;
+    instagram: string;
+    twitter: string;
+    linkedIn: string;
+  }
+  commissionSetting: any;
+  ccbillSetting: any
+}
+
+export interface IUpdatePerformer {
+  _id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  phoneCode: string;
+  gender: string;
+  country: string;
+  city: string;
+  state: string;
+  zipcode: string;
+  address: string;
+  languages: string[];
+  studioId: string;
+  categoryIds: string[];
+  timezone: string;
+  noteForUser: string;
+  height: string;
+  weight: string;
+  bio: string;
+  eyes: string;
+  sexualPreference: string;
+  isFreeSubscription: boolean;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  bankingInformation: IBankingSetting;
+  welcomeVideoId: string;
+  welcomeVideoPath: string;
+  activateWelcomeVideo: boolean;
+  publicChatPrice: number;
+  groupChatPrice: number;
+  privateChatPrice: number;
+  socialsLink: {
+    facebook: string;
+    google: string;
+    instagram: string;
+    twitter: string;
+    linkedIn: string;
+  }
+  idVerification: any;
+  documentVerification: any
+}
+
+export interface IBankingSetting {
+  firstName: string;
+  lastName: string;
+  SSN: string;
+  bankName: string;
+  bankAccount: string;
+  bankRouting: string;
+  bankSwiftCode: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  performerId: string;
+}
+
+export interface IPerformerStats {
+  totalGrossPrice: number;
+  totalCommission: number;
+  totalNetPrice: number;
+}
+
+export interface IBlockCountries {
+  performerId: string;
+  countries: string[];
+}
+
+export interface IBlockedByPerformer {
+  userId: string;
+  description: string;
 }
 
 export interface ITrendingPerformer {
   _id?: string;
+
   name: string;
 
   firstName: string;
@@ -44,9 +181,13 @@ export interface ITrendingPerformer {
 
   avatarPath: string;
 
+  avatar: string;
+
   coverId: string;
 
   coverPath: string;
+
+  cover: string;
 
   welcomeVideoId: string;
 
@@ -75,113 +216,4 @@ export interface ITrendingPerformer {
   isProtected: boolean;
 
   ordering: number;
-}
-
-export interface IBanking {
-  firstName?: string;
-  lastName?: string;
-  SSN?: string;
-  bankName?: string;
-  bankAccount?: string;
-  bankRouting?: string;
-  bankSwiftCode?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-}
-
-export interface IPerformerCreate {
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  username?: string;
-  email?: string;
-  country?: string;
-  status?: string;
-  gender?: string;
-  languages?: string[];
-  phone?: string;
-  phoneCode?: string;
-  city?: string;
-  state?: string;
-  address?: string;
-  zipcode?: string;
-  schedule?: ISchedule;
-  bankingInformation?: IBankingSetting;
-  monthyPrice?: number;
-  yearlyPrice?: number;
-  verifiedEmail?: boolean;
-  verifiedAccount?: boolean;
-}
-
-export interface IPerformerUpdate {
-  _id?: string;
-  isFreeSubscription?: boolean;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  username?: string;
-  email?: string;
-  country?: string;
-  status?: string;
-  gender?: string;
-  languages?: string[];
-  phone?: string;
-  phoneCode?: string;
-  city?: string;
-  state?: string;
-  address?: string;
-  zipcode?: string;
-  avatar?: string;
-  cover?: string;
-  idVerification?: document;
-  documentVerification?: document;
-  bankingInformation?: IBankingSetting;
-  schedule?: ISchedule;
-  monthyPrice?: number;
-  yearlyPrice?: number;
-  ccbillSetting?: ICCbillSetting;
-  commissionSetting?: ICommissionSetting;
-  verifiedEmail?: boolean;
-  verifiedAccount?: boolean;
-  verifiedDocument?: boolean;
-  bodyType: string;
-  dateOfBirth: Date;
-}
-
-export interface CCBillPaymentGateway {
-  subAccountNumber?: string;
-  flexformId?: string;
-  salt?: string;
-}
-
-export interface ICCbillSetting {
-  performerId?: string;
-  key?: string;
-  status?: string;
-  value?: CCBillPaymentGateway;
-}
-
-export interface ICommissionSetting {
-  performerId?: string;
-  monthlySubscriptionCommission?: number;
-  yearlySubscriptionCommission?: number;
-  videoSaleCommission?: number;
-  productSaleCommission?: number;
-}
-
-export interface IBankingSetting {
-  firstName?: string;
-  lastName?: string;
-  SSN?: string;
-  bankName?: string;
-  bankAccount?: string;
-  bankRouting?: string;
-  bankSwiftCode?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  performerId?: string;
 }

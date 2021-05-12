@@ -33,9 +33,9 @@ class CategoryCreate extends PureComponent<any> {
       // TODO - redirect
       Router.push(
         {
-          pathname: '/content-creator/category'
+          pathname: '/model/category'
         },
-        '/content-creator/category'
+        '/model/category'
       );
     } catch (e) {
       // TODO - check and show error here
@@ -60,7 +60,7 @@ class CategoryCreate extends PureComponent<any> {
               <HomeOutlined />
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <Link href="/content-creator/category" as="/content-creator/category">
+              <Link href="/model/category" as="/model/category">
                 <a>Categories</a>
               </Link>
             </Breadcrumb.Item>

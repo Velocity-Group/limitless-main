@@ -14,7 +14,7 @@ export class TableListEarning extends PureComponent<IProps> {
   render() {
     const columns = [
       {
-        title: 'Content Creator',
+        title: 'Model',
         dataIndex: 'performerInfo',
         key: 'performer',
         render(performerInfo) {

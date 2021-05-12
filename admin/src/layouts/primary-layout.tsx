@@ -33,8 +33,6 @@ export async function getStaticProps() {
 class PrimaryLayout extends React.PureComponent<DefaultProps> {
   state = {
     isMobile: false,
-    // security request for primary layout
-    // checkingUser: false,
     routerChange: false
   };
 
@@ -59,6 +57,11 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
     unenquireScreen(this.enquireHandler);
   }
 
+  handleStateChange() {
+    Router.events.on('routeChangeStart', async () => this.setState({ routerChange: true }));
+    Router.events.on('routeChangeComplete', async () => this.setState({ routerChange: false }));
+  }
+
   onCollapseChange = (collapsed) => {
     const { updateUIValue: handleUpdateUI } = this.props;
     handleUpdateUI({ collapsed });
@@ -68,11 +71,6 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
     const { updateUIValue: handleUpdateUI } = this.props;
     handleUpdateUI({ theme });
   };
-
-  handleStateChange() {
-    Router.events.on('routeChangeStart', async () => this.setState({ routerChange: true }));
-    Router.events.on('routeChangeComplete', async () => this.setState({ routerChange: false }));
-  }
 
   render() {
     const {
@@ -93,8 +91,8 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         children: [
           {
             id: 'statistic',
-            name: 'Statistic',
-            route: '/dashboard'
+            name: 'Statistics',
+            route: '/'
           }
         ]
       },
@@ -107,6 +105,18 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
             id: 'blockCountry',
             name: 'Listing',
             route: '/block-country'
+          }
+        ]
+      },
+      {
+        id: 'email-template',
+        name: 'Email templates',
+        icon: <MailOutlined />,
+        children: [
+          {
+            id: 'email-templates-listing',
+            name: 'List',
+            route: '/email-templates'
           }
         ]
       },
@@ -179,18 +189,6 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         ]
       },
       {
-        id: 'email-template',
-        name: 'Email templates',
-        icon: <MailOutlined />,
-        children: [
-          {
-            id: 'email-templates-listing',
-            name: 'List',
-            route: '/email-templates'
-          }
-        ]
-      },
-      {
         id: 'accounts',
         name: 'Users',
         icon: <UserOutlined />,
@@ -209,23 +207,23 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
       },
       {
         id: 'performers',
-        name: 'Content Creators',
+        name: 'Models',
         icon: <WomanOutlined />,
         children: [
           // {
           //   name: 'Categories',
           //   id: 'performer-categories',
-          //   route: '/content-creator/category'
+          //   route: '/model/category'
           // },
           {
             name: 'Listing',
             id: 'performers',
-            route: '/content-creator'
+            route: '/model'
           },
           {
             name: 'Create new',
             id: 'create-performers',
-            route: '/content-creator/create'
+            route: '/model/create'
           }
         ]
       },
@@ -328,18 +326,6 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         ]
       },
       {
-        id: 'payments',
-        name: 'Transactions',
-        icon: <DollarOutlined />,
-        children: [
-          {
-            id: 'payment',
-            name: 'Listing',
-            route: '/payment'
-          }
-        ]
-      },
-      {
         id: 'order',
         name: 'Orders',
         icon: <ContainerOutlined />,
@@ -377,6 +363,30 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
             name: 'Create new',
             id: 'create-subscription',
             route: '/subscription/create'
+          }
+        ]
+      },
+      {
+        id: 'payments',
+        name: 'Payment History',
+        icon: <DollarOutlined />,
+        children: [
+          {
+            id: 'payment',
+            name: 'Listing',
+            route: '/payment-history'
+          }
+        ]
+      },
+      {
+        id: 'transactions',
+        name: 'Token Transactions',
+        icon: <DollarOutlined />,
+        children: [
+          {
+            id: 'payment',
+            name: 'Listing',
+            route: '/token-transactions'
           }
         ]
       },

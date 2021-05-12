@@ -84,10 +84,10 @@ class PerformerCreate extends PureComponent<IProps> {
       message.success('Created successfully');
       Router.push(
         {
-          pathname: '/content-creator',
+          pathname: '/model',
           query: { id: resp.data._id }
         },
-        '/content-creator'
+        '/model'
       );
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
@@ -106,10 +106,10 @@ class PerformerCreate extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>New Content Creator</title>
+          <title>New Model</title>
         </Head>
         <BreadcrumbComponent
-          breadcrumbs={[{ title: 'Content Creators', href: '/content-creator' }, { title: 'New content creator' }]}
+          breadcrumbs={[{ title: 'Models', href: '/model' }, { title: 'New model' }]}
         />
         <Page>
           <Tabs defaultActiveKey="basic" tabPosition="top">

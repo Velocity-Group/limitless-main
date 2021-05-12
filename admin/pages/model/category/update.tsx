@@ -70,7 +70,7 @@ class CategoryUpdate extends PureComponent<any> {
               <HomeOutlined />
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <Link href="/content-creator/category" as="/content-creator/category">
+              <Link href="/model/category" as="/model/category">
                 <a>Categories</a>
               </Link>
               {/* <span>Categories</span> */}

@@ -106,7 +106,7 @@ class Categories extends PureComponent<IProps> {
             <>
               <Link
                 href={{
-                  pathname: '/content-creator/category/update',
+                  pathname: '/model/category/update',
                   query: {
                     id: record._id
                   }
@@ -144,10 +144,10 @@ class Categories extends PureComponent<IProps> {
                 <Menu.Item key="edit">
                   <Link
                     href={{
-                      pathname: '/content-creator/category/update',
+                      pathname: '/model/category/update',
                       query: { id }
                     }}
-                    as={`/content-creator/category/update?id=${id}`}
+                    as={`/model/category/update?id=${id}`}
                   >
                     <a>
                       <EditOutlined />

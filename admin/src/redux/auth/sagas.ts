@@ -28,7 +28,7 @@ const authSagas = [
         }
         yield put(updateCurrentUser(userResp));
         yield put(loginSuccess());
-        Router.push('/dashboard');
+        Router.push('/');
       } catch (e) {
         const error = yield Promise.resolve(e);
         yield put(loginFail(error));

@@ -99,7 +99,7 @@ export class FormProduct extends PureComponent<IProps> {
           } as IProductCreate)
         }
       >
-        <Form.Item name="performerId" label="Content creator" rules={[{ required: true }]}>
+        <Form.Item name="performerId" label="Model" rules={[{ required: true }]}>
           <SelectPerformerDropdown
             disabled={haveProduct}
             defaultValue={product && product.performerId}

@@ -6,7 +6,7 @@ import Page from '@components/common/layout/page';
 import { SearchFilter } from '@components/common/search-filter';
 import { TableListPaymentTransaction } from '@components/payment/table-list-payment';
 import { BreadcrumbComponent } from '@components/common';
-import { orderService } from '@services/order.service';
+import { paymentService } from '@services/payment.service';
 
 interface IProps {
   sourceId: string;
@@ -53,7 +53,7 @@ class PaymentTransaction extends PureComponent<IProps> {
     } = this.state;
     try {
       await this.setState({ searching: true });
-      const resp = await orderService.search({
+      const resp = await paymentService.search({
         ...filter,
         limit,
         offset: (page - 1) * limit,
@@ -83,25 +83,25 @@ class PaymentTransaction extends PureComponent<IProps> {
         text: 'All'
       },
       {
-        key: 'created',
+        key: 'pending',
         text: 'Pending'
       },
       {
-        key: 'paid',
+        key: 'success',
         text: 'Success'
       },
       {
-        key: 'cancelled',
-        text: 'Cancelled'
+        key: 'refunded',
+        text: 'Refunded'
       }
     ];
 
     return (
       <>
         <Head>
-          <title>Payment Transaction</title>
+          <title>Payment History</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Payment transaction' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Payment history' }]} />
         <Page>
           <SearchFilter dateRange statuses={statuses} onSubmit={this.handleFilter.bind(this)} />
           <div style={{ marginBottom: '20px' }} />

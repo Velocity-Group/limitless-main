@@ -189,35 +189,20 @@ class Earning extends PureComponent<IProps> {
         <Page>
           <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={8}>
-              <Statistic title="Total price" prefix="$" value={stats?.totalGrossPrice || 0} precision={2} />
+              <Statistic title="Total price" prefix={<img alt="coin" src="/coin-ico.png" width="20px" />} value={stats?.totalGrossPrice || 0} precision={2} />
             </Col>
             <Col span={8}>
-              <Statistic title="Admin earned" prefix="$" value={stats?.totalSiteCommission || 0} precision={2} />
+              <Statistic title="Admin earned" prefix={<img alt="coin" src="/coin-ico.png" width="20px" />} value={stats?.totalSiteCommission || 0} precision={2} />
             </Col>
             <Col span={8}>
-              <Statistic title="Content creators earned" prefix="$" value={stats?.totalNetPrice || 0} precision={2} />
+              <Statistic title="Model earned" prefix={<img alt="coin" src="/coin-ico.png" width="20px" />} value={stats?.totalNetPrice || 0} precision={2} />
             </Col>
-            {/* <Col span={8}>
-              <Statistic title="Paid" prefix={'$'} value={stats.paidPrice} precision={2} />
-            </Col> */}
-            {/* <Col span={8}>
-              <Statistic title="Remaining" prefix={'$'} value={stats.remainingPrice} precision={2} />
-              <Button
-                disabled={stats.remainingPrice <= 0}
-                type="primary"
-                onClick={() => stats.remainingPrice > 0 && this.updatePaidStatus()}>
-                Update Paid Status
-              </Button>
-            </Col> */}
           </Row>
           <SearchFilter
-            // statuses={statuses}
             type={type}
             onSubmit={this.handleFilter.bind(this)}
             searchWithPerformer
             dateRange
-          // keyFilter={'isPaid'}
-          // dateRange={true}
           />
           <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">

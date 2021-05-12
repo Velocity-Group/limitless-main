@@ -72,7 +72,7 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Content Creator',
+        title: 'Model',
         dataIndex: 'performer',
         render(data) {
           return <span>{data?.name || data?.username || 'N/A'}</span>;

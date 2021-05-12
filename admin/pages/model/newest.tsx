@@ -100,7 +100,7 @@ export default class TrendingProfiles extends PureComponent<any> {
   async createNew() {
     const { newProfileId, dataSource } = this.state;
     if (!newProfileId) {
-      message.error('Please select content creator you want to add!');
+      message.error('Please select model you want to add!');
       return;
     }
     if (dataSource.findIndex((d) => d.performerId === newProfileId) > -1) {
@@ -202,7 +202,7 @@ export default class TrendingProfiles extends PureComponent<any> {
           onOk={() => this.setState({ addNew: false })}
           onCancel={() => this.setState({ addNew: false })}
         >
-          <h5>Select content creator</h5>
+          <h5>Select model</h5>
           <SelectPerformerDropdown style={{ width: '100%' }} onSelect={(val) => this.setState({ newProfileId: val })} />
           <div style={{ margin: 20 }}><Button type="primary" onClick={this.createNew.bind(this)}>Submit</Button></div>
         </Modal>

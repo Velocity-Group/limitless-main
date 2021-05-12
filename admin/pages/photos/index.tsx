@@ -102,7 +102,7 @@ class Photos extends PureComponent<IProps> {
   async deletePhoto(id: string) {
     const { pagination } = this.state;
     if (!window.confirm('Are you sure you want to delete this photo?')) {
-      return false;
+      return;
     }
     try {
       await photoService.delete(id);
@@ -112,7 +112,6 @@ class Photos extends PureComponent<IProps> {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
     }
-    return undefined;
   }
 
   render() {

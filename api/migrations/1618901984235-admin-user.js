@@ -37,10 +37,10 @@ module.exports.up = async function up(next) {
   ];
 
   const emails = users.map((user) => user.email.toLowerCase());
+  const usernames = users.map((user) => user.username);
   const sources = await DB.collection(COLLECTION.USER).find({
-    email: {
-      $in: emails
-    }
+    email: { $in: emails },
+    s: { $in: usernames }
   }).toArray();
   const existedEmails = sources.map((source) => source.email);
   const newUsers = users.filter(
@@ -49,23 +49,28 @@ module.exports.up = async function up(next) {
 
   // eslint-disable-next-line no-restricted-syntax
   for (const newUser of newUsers) {
-    // eslint-disable-next-line no-console
-    console.log(`Seeding ${newUser.username}`);
-    // eslint-disable-next-line no-await-in-loop
-    const userId = await DB.collection(COLLECTION.USER).insertOne({
-      ...newUser,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-    // eslint-disable-next-line no-await-in-loop
-    await createAuth(newUser, userId.insertedId, 'email');
-    // eslint-disable-next-line no-await-in-loop
-    await createAuth(newUser, userId.insertedId, 'username');
+    try {
+      // eslint-disable-next-line no-console
+      console.log(`Seeding ${newUser.username}`);
+      // eslint-disable-next-line no-await-in-loop
+      const userId = await DB.collection(COLLECTION.USER).insertOne({
+        ...newUser,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      // eslint-disable-next-line no-await-in-loop
+      await createAuth(newUser, userId.insertedId, 'email');
+      // eslint-disable-next-line no-await-in-loop
+      await createAuth(newUser, userId.insertedId, 'username');
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }
   }
-
-  existedEmails.forEach((email) =>
+  existedEmails.forEach((email) => {
     // eslint-disable-next-line no-console
-    console.log(`Email ${email} have been existed`));
+    console.log(`Email ${email} have been existed`);
+  });
   next();
 };
 

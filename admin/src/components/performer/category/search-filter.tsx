@@ -33,7 +33,7 @@ export class SearchFilter extends PureComponent<IProps> {
           </Button>
         </Col>
         <Col flex={1}>
-          <Link href="/content-creator/category/create">
+          <Link href="/model/category/create">
             <a className="ant-btn ant-btn-primary" style={{ float: 'right' }}>Create</a>
           </Link>
         </Col>

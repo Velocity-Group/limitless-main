@@ -356,9 +356,9 @@ export default class FormFeed extends PureComponent<IProps> {
         >
           <Form.Item
             name="fromSourceId"
-            label="Select content creator"
+            label="Select model"
             rules={[
-              { required: true, message: 'Please select a content creator!' }]}
+              { required: true, message: 'Please select a model!' }]}
           >
             <SelectPerformerDropdown
               defaultValue={feed && (feed?.fromSourceId || '')}
