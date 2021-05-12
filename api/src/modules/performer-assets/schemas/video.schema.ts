@@ -51,7 +51,7 @@ export const VideoSchema = new Schema({
       type: Number,
       default: 0
     },
-    favourites: {
+    bookmarks: {
       type: Number,
       default: 0
     },

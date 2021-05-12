@@ -192,28 +192,33 @@ export class ProductService {
     );
   }
 
-  // public async checkAuth(req: any, user: UserDto) {
-  //   const { query } = req;
-  //   if (!query.productId) {
-  //     throw new ForbiddenException();
-  //   }
-  //   if (user.roles && user.roles.indexOf('admin') > -1) {
-  //     return true;
-  //   }
-  //   // check type product
-  //   const product = await this.productModel.findById(query.productId);
-  //   if (!product) throw new EntityNotFoundException();
-  //   if (user._id.toString() === product.performerId.toString()) {
-  //     return true;
-  //   }
-  //   if (product.type === PRODUCT_TYPE.PHYSICAL) {
-  //     return true;
-  //   }
-  //   // check bought
-  //   const bought = await this.checkPaymentService.checkBoughtProduct(new ProductDto(product), user);
-  //   if (!bought) {
-  //     throw new ForbiddenException();
-  //   }
-  //   return true;
-  // }
+  public async updateCommentStats(id: string | ObjectId, num = 1) {
+    return this.productModel.updateOne(
+      { _id: id },
+      {
+        $inc: { 'stats.comments': num }
+      },
+      { upsert: true }
+    );
+  }
+
+  public async updateLikeStats(id: string | ObjectId, num = 1) {
+    return this.productModel.updateOne(
+      { _id: id },
+      {
+        $inc: { 'stats.likes': num }
+      },
+      { upsert: true }
+    );
+  }
+
+  public async updateBookmarkStats(id: string | ObjectId, num = 1) {
+    return this.productModel.updateOne(
+      { _id: id },
+      {
+        $inc: { 'stats.bookmarks': num }
+      },
+      { upsert: true }
+    );
+  }
 }

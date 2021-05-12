@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
-import { VideoModel } from '../models';
 
 export class VideoDto {
   _id: ObjectId;
@@ -43,13 +42,12 @@ export class VideoDto {
     views: number;
     likes: number;
     comments: number;
-    favourites: number;
+    bookmarks: number;
   };
 
   userReaction: {
     liked: boolean;
-    favourited: boolean;
-    watchedLater: boolean;
+    bookmarked: boolean;
   };
 
   createdBy: ObjectId;
@@ -105,10 +103,6 @@ export class VideoDto {
       ])
     );
   }
-
-  static fromModel(file: VideoModel) {
-    return new VideoDto(file);
-  }
 }
 
 export class IVideoResponse {
@@ -152,13 +146,12 @@ export class IVideoResponse {
     views: number;
     likes: number;
     comments: number;
-    favourites: number;
+    bookmarks: number;
   };
 
   userReaction: {
     liked: boolean;
-    favourited: boolean;
-    watchedLater: boolean;
+    bookmarked: boolean;
   };
 
   isBought: boolean;
@@ -215,9 +208,5 @@ export class IVideoResponse {
         'participants'
       ])
     );
-  }
-
-  static fromModel(file: VideoModel) {
-    return new VideoDto(file);
   }
 }

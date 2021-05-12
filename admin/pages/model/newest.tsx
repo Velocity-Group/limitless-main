@@ -188,7 +188,6 @@ export default class TrendingProfiles extends PureComponent<any> {
                 row: this.DraggableBodyRow
               }
             }}
-            scroll={{ x: '120vw', y: '100vh' }}
           />
         </div>
         <div style={{ textAlign: 'center', margin: 20 }}>

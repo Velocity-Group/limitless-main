@@ -10,12 +10,16 @@ import { connect } from 'react-redux';
 import {
   feedService,
   productService,
+  galleryService,
+  videoService,
   performerService
 } from 'src/services';
 import Head from 'next/head';
-import UserFeedBookmarks from '@components/user/bookmarks/post-bookmarks';
 import UserPerformerBookmarks from '@components/user/bookmarks/performer-bookmarks';
-import UserProductBookmarks from '@components/user/bookmarks/product-bookmarks';
+import { ScrollListProduct } from '@components/product/scroll-list-item';
+import ScrollListFeed from '@components/post/scroll-list';
+import { ScrollListVideo } from '@components/video/scroll-list-item';
+import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
 
 interface IProps {
   ui: IUIConfig;
@@ -126,7 +130,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   }
 
   async getBookmarkedPosts() {
-    const { currentPage, limit } = this.state;
+    const { currentPage, limit, feeds } = this.state;
     try {
       await this.setState({ loading: true });
       const resp = await feedService.getBookmark({
@@ -134,7 +138,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         offset: currentPage.feed * limit
       });
       this.setState({
-        feeds: resp.data.data,
+        feeds: [...feeds, resp.data.data],
         totalFeeds: resp.data.total
       });
     } catch (error) {
@@ -145,16 +149,15 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   }
 
   async getBookmarkedVideos() {
-    const { currentPage, limit } = this.state;
+    const { currentPage, limit, videos } = this.state;
     try {
       await this.setState({ loading: true });
-      const resp = await feedService.getBookmark({
-        type: 'video',
+      const resp = await videoService.getBookmarks({
         limit,
         offset: currentPage.video * limit
       });
       this.setState({
-        videos: resp.data.data,
+        videos: [...videos, resp.data.data],
         totalVideos: resp.data.total
       });
     } catch (error) {
@@ -165,16 +168,15 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   }
 
   async getBookmarkedGalleries() {
-    const { currentPage, limit } = this.state;
+    const { currentPage, limit, galleries } = this.state;
     try {
       await this.setState({ loading: true });
-      const resp = await feedService.getBookmark({
-        type: 'photo',
+      const resp = await galleryService.getBookmarks({
         limit,
         offset: currentPage.gallery * limit
       });
       this.setState({
-        galleries: resp.data.data,
+        galleries: [...galleries, resp.data.data],
         totalGalleries: resp.data.total
       });
     } catch (error) {
@@ -185,7 +187,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   }
 
   async getBookmarkedProducts() {
-    const { currentPage, limit } = this.state;
+    const { currentPage, limit, products } = this.state;
     try {
       await this.setState({ loading: true });
       const resp = await productService.getBookmarked({
@@ -193,7 +195,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         offset: currentPage.product * limit
       });
       this.setState({
-        products: resp.data.data,
+        products: [...products, resp.data.data],
         totalProducts: resp.data.total
       });
     } catch (error) {
@@ -204,7 +206,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   }
 
   async getBookmarkedPerformers() {
-    const { currentPage, limit } = this.state;
+    const { currentPage, limit, performers } = this.state;
     try {
       await this.setState({ loading: true });
       const resp = await performerService.getBookmarked({
@@ -213,7 +215,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
       });
 
       this.setState({
-        performers: resp.data.data,
+        performers: [...performers, resp.data.data],
         totalPerformers: resp.data.total
       });
     } catch (error) {
@@ -276,44 +278,42 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                 size="large"
                 onChange={this.onTabsChange.bind(this)}
               >
-                <Tabs.TabPane tab="All Posts" key="feeds">
+                <Tabs.TabPane tab="Posts" key="feeds">
                   <div className="main-container custom">
-                    <UserFeedBookmarks
-                      items={feeds.map((f) => f.objectInfo)}
-                      total={totalFeeds}
+                    <ScrollListFeed
+                      items={feeds.filter((f) => f.objectInfo)}
                       loading={loading}
-                      onDeleteFeed={this.onDeleteFeed.bind(this)}
+                      canLoadmore={totalFeeds > feeds.length}
+                      onDelete={this.onDeleteFeed.bind(this)}
                       loadMore={this.handlePagechange.bind(this, 'feeds')}
                     />
                   </div>
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Video Posts" key="videos">
+                <Tabs.TabPane tab="Videos" key="videos">
                   <div className="main-container custom">
-                    <UserFeedBookmarks
-                      items={videos.map((f) => f.objectInfo)}
-                      total={totalVideos}
+                    <ScrollListVideo
+                      items={videos.filter((f) => f.objectInfo)}
                       loading={loading}
-                      onDeleteFeed={this.onDeleteFeed.bind(this)}
+                      canLoadmore={totalVideos > videos.length}
                       loadMore={this.handlePagechange.bind(this, 'videos')}
                     />
                   </div>
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Photo Posts" key="galleries">
+                <Tabs.TabPane tab="Galleries" key="galleries">
                   <div className="main-container custom">
-                    <UserFeedBookmarks
-                      items={galleries.map((f) => f.objectInfo)}
-                      total={totalGalleries}
+                    <ScrollListGallery
+                      items={galleries.filter((f) => f.objectInfo)}
                       loading={loading}
-                      onDeleteFeed={this.onDeleteFeed.bind(this)}
+                      canLoadmore={totalGalleries > galleries.length}
                       loadMore={this.handlePagechange.bind(this, 'galleries')}
                     />
                   </div>
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Products" key="products">
-                  <UserProductBookmarks
+                  <ScrollListProduct
                     loading={loading}
-                    products={products.map((p) => p.objectInfo)}
-                    total={totalProducts}
+                    items={products.filter((p) => p.objectInfo)}
+                    canLoadmore={totalProducts > products.length}
                     loadMore={this.handlePagechange.bind(
                       this,
                       'products'
@@ -323,7 +323,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                 <Tabs.TabPane tab="Models" key="performers">
                   <UserPerformerBookmarks
                     loading={loading}
-                    performers={performers.map((p) => p.objectInfo)}
+                    performers={performers.filter((p) => p.objectInfo)}
                     total={totalPerformers}
                     loadMore={this.handlePagechange.bind(
                       this,

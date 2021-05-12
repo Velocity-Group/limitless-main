@@ -241,16 +241,14 @@ export class VideoService {
   }
 
   private async checkReaction(video: VideoDto, user: UserDto) {
-    const [liked, favourited, watchedLater] = await Promise.all([
+    const [liked, bookmarked] = await Promise.all([
       user ? this.reactionService.checkExisting(video._id, user._id, REACTION.LIKE, REACTION_TYPE.VIDEO) : null,
-      user ? this.reactionService.checkExisting(video._id, user._id, REACTION.FAVOURITE, REACTION_TYPE.VIDEO) : null,
-      user ? this.reactionService.checkExisting(video._id, user._id, REACTION.WATCH_LATER, REACTION_TYPE.VIDEO) : null
+      user ? this.reactionService.checkExisting(video._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.VIDEO) : null
     ]);
     // eslint-disable-next-line no-param-reassign
     video.userReaction = {
       liked: !!liked,
-      favourited: !!favourited,
-      watchedLater: !!watchedLater
+      bookmarked: !!bookmarked
     };
     return video.userReaction;
   }
@@ -491,9 +489,9 @@ export class VideoService {
     return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
-        $inc: { 'stats.favourites': num }
+        $inc: { 'stats.bookmarks': num }
       },
-      { new: true }
+      { upsert: true }
     );
   }
 

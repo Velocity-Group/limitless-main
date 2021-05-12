@@ -63,6 +63,18 @@ class Users extends PureComponent<IProps> {
     this.search();
   }
 
+  async handleDelete(user) {
+    const { pagination } = this.state;
+    if (!window.confirm(`Are you sure to delete ${user?.name || user?.username || 'this user'}`)) return;
+    try {
+      await userService.delete(user._id);
+      this.search(pagination.current);
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later');
+    }
+  }
+
   async search(page = 1) {
     const {
       limit, filter,
@@ -90,18 +102,6 @@ class Users extends PureComponent<IProps> {
     } catch (e) {
       message.error('An error occurred, please try again!');
       this.setState({ searching: false });
-    }
-  }
-
-  async handleDelete(user) {
-    const { pagination } = this.state;
-    if (!window.confirm(`Are you sure to delete ${user?.name || user?.username || 'this user'}`)) return;
-    try {
-      await userService.delete(user._id);
-      this.search(pagination.current);
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
     }
   }
 
@@ -320,7 +320,6 @@ class Users extends PureComponent<IProps> {
               loading={searching}
               pagination={pagination}
               onChange={this.handleTableChange.bind(this)}
-              scroll={isMobile ? { x: '150vw', y: '100vh' } : { x: '100vw', y: '90vh' }}
             />
           </div>
         </Page>

@@ -36,6 +36,13 @@ export class ProductDto {
 
   isBookMarked?: boolean;
 
+  stats: {
+    likes: number;
+    bookmarks: number;
+    comments: number;
+    views: number;
+  };
+
   constructor(init?: Partial<ProductDto>) {
     Object.assign(
       this,
@@ -56,7 +63,8 @@ export class ProductDto {
         'updatedBy',
         'createdAt',
         'updatedAt',
-        'isBookMarked'
+        'isBookMarked',
+        'stats'
       ])
     );
   }
@@ -78,7 +86,8 @@ export class ProductDto {
       updatedBy: this.updatedBy,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      isBookMarked: this.isBookMarked
+      isBookMarked: this.isBookMarked,
+      stats: this.stats
     };
   }
 }

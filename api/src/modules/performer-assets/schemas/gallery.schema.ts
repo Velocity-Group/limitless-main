@@ -29,6 +29,24 @@ export const GallerySchema = new Schema({
     type: Number,
     default: 0
   },
+  stats: {
+    likes: {
+      type: Number,
+      default: 0
+    },
+    bookmarks: {
+      type: Number,
+      default: 0
+    },
+    comments: {
+      type: Number,
+      default: 0
+    },
+    views: {
+      type: Number,
+      default: 0
+    }
+  },
   tagline: String,
   coverPhotoId: ObjectId,
   createdBy: ObjectId,

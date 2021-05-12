@@ -170,7 +170,80 @@ export class ReactionService {
       const product = products.find((p) => `${p._id}` === `${item.objectId}`);
       if (product) {
         const p = new ProductDto(product);
-        p.image = images.find((f) => f._id.toString() === p.imageId.toString());
+        const image = images.find((f) => f._id.toString() === p.imageId.toString());
+        p.image = image ? image.getUrl() : null;
+        item.objectInfo = p;
+      }
+    });
+
+    return {
+      data: reactions,
+      total
+    };
+  }
+
+  public async getListVideo(req: ReactionSearchRequestPayload) {
+    const query = {} as any;
+    if (req.createdBy) query.createdBy = req.createdBy;
+    if (req.action) query.action = req.action;
+    query.objectType = REACTION_TYPE.VIDEO;
+
+    const sort = {
+      [req.sortBy || 'createdAt']: req.sort === 'desc' ? -1 : 1
+    };
+    const [items, total] = await Promise.all([
+      this.reactionModel
+        .find(query)
+        .sort(sort)
+        .lean()
+        .limit(parseInt(req.limit as string, 10))
+        .skip(parseInt(req.offset as string, 10)),
+      this.reactionModel.countDocuments(query)
+    ]);
+
+    const videoIds = uniq(items.map((i) => i.objectId));
+    const videos = videoIds.length > 0 ? await this.videoService.findByIds(videoIds) : [];
+    const reactions = items.map((v) => new ReactionDto(v));
+    reactions.forEach((item) => {
+      const video = videos.find((p) => `${p._id}` === `${item.objectId}`);
+      if (video) {
+        const p = new VideoDto(video);
+        item.objectInfo = p;
+      }
+    });
+
+    return {
+      data: reactions,
+      total
+    };
+  }
+
+  public async getListGallery(req: ReactionSearchRequestPayload) {
+    const query = {} as any;
+    if (req.createdBy) query.createdBy = req.createdBy;
+    if (req.action) query.action = req.action;
+    query.objectType = REACTION_TYPE.GALLERY;
+
+    const sort = {
+      [req.sortBy || 'createdAt']: req.sort === 'desc' ? -1 : 1
+    };
+    const [items, total] = await Promise.all([
+      this.reactionModel
+        .find(query)
+        .sort(sort)
+        .lean()
+        .limit(parseInt(req.limit as string, 10))
+        .skip(parseInt(req.offset as string, 10)),
+      this.reactionModel.countDocuments(query)
+    ]);
+
+    const galleryIds = uniq(items.map((i) => i.objectId));
+    const galleries = galleryIds.length > 0 ? await this.galleryService.findByIds(galleryIds) : [];
+    const reactions = items.map((v) => new ReactionDto(v));
+    reactions.forEach((item) => {
+      const gallery = galleries.find((p) => `${p._id}` === `${item.objectId}`);
+      if (gallery) {
+        const p = new GalleryDto(gallery);
         item.objectInfo = p;
       }
     });

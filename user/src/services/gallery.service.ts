@@ -29,6 +29,10 @@ class GalleryService extends APIRequest {
   delete(id: string) {
     return this.del(`/performer/performer-assets/galleries/${id}`);
   }
+
+  getBookmarks(payload) {
+    return this.get(this.buildUrl('/reactions/galleries/bookmarks', payload));
+  }
 }
 
 export const galleryService = new GalleryService();

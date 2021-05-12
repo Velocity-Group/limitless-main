@@ -44,12 +44,8 @@ export class VideoService extends APIRequest {
     });
   }
 
-  getFavouriteVideos(payload) {
-    return this.get(this.buildUrl('/reactions/videos/favourites', payload));
-  }
-
-  getWatchLateVideos(payload) {
-    return this.get(this.buildUrl('/reactions/videos/watch-later', payload));
+  getBookmarks(payload) {
+    return this.get(this.buildUrl('/reactions/videos/bookmarks', payload));
   }
 }
 

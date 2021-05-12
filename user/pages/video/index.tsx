@@ -1,13 +1,10 @@
 /* eslint-disable no-prototype-builtins */
 import {
   Layout, Tabs, Button, Tag, message, Space, Row,
-  Col, Alert, Modal, Spin
+  Col, Alert, Modal, Spin, Tooltip
 } from 'antd';
 import {
-  LikeOutlined,
-  EyeOutlined,
-  HourglassOutlined,
-  HeartOutlined
+  BookOutlined, EyeOutlined, HourglassOutlined, HeartOutlined
 } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -90,9 +87,9 @@ class VideoViewPage extends PureComponent<IProps> {
 
   state = {
     videoStats: {
-      likes: 0, comments: 0, views: 0, favourites: 0
+      likes: 0, comments: 0, views: 0, bookmarks: 0
     },
-    userReaction: { liked: false, favourited: false, watchedLater: false },
+    userReaction: { liked: false, bookmarked: false },
     itemPerPage: 24,
     commentPage: 0,
     isFirstLoadComment: true,
@@ -197,22 +194,16 @@ class VideoViewPage extends PureComponent<IProps> {
             });
             message.success('Liked');
           }
-          if (action === 'favourite') {
-            message.success("Added to 'Favourite Vids'");
+          if (action === 'book_mark') {
+            message.success('Added to Bookmarks');
             this.setState({
-              userReaction: { ...userReaction, favourited: true },
+              userReaction: { ...userReaction, bookmarked: true },
               videoStats: {
                 ...videoStats,
-                favourites: videoStats.favourites + 1
+                bookmarks: videoStats.bookmarks + 1
               }
             });
           }
-          // if (action === 'book_mark') {
-          //   message.success('Added to Bookmarks');
-          //   this.setState({
-          //     userReaction: { ...userReaction, watchedLater: true }
-          //   });
-          // }
         }
       }
       if (isCreated) {
@@ -232,18 +223,16 @@ class VideoViewPage extends PureComponent<IProps> {
             });
             message.success('Unliked');
           }
-          if (action === 'favourite') {
-            message.success("Removed from 'Favourite Vids'");
+          if (action === 'book_mark') {
+            message.success('Removed from Bookmarks');
             this.setState({
-              userReaction: { ...userReaction, favourited: false }
+              userReaction: { ...userReaction, bookmarked: false },
+              videoStats: {
+                ...videoStats,
+                bookmarks: videoStats.bookmarks - 1
+              }
             });
           }
-          // if (action === 'book_mark') {
-          //   message.success('Removed from Bookmarks');
-          //   this.setState({
-          //     userReaction: { ...userReaction, watchedLater: false }
-          //   });
-          // }
         }
       }
     } catch (e) {
@@ -438,17 +427,14 @@ class VideoViewPage extends PureComponent<IProps> {
               {video.isSale && !isBought && (
                 <div className="coupon-form">
                   <Button
-                    className="normal"
+                    className="primary"
                     onClick={() => this.setState({ openPurchaseModal: true })}
                   >
                     <Space>
                       Unlock video by
-                      <span
-                        className="initialPrice"
-                      >
-                        <img alt="coin" src="/static/coin-ico.png" height="25px" />
-                        {(video.price).toFixed(2)}
-                      </span>
+                      {' '}
+                      <img alt="coin" src="/static/coin-ico.png" height="20px" />
+                      {(video.price || 0).toFixed(2)}
                     </Space>
                   </Button>
                   <div style={{ marginBottom: '10px' }} />
@@ -495,14 +481,7 @@ class VideoViewPage extends PureComponent<IProps> {
                       </Button>
                     )}
                   </div>
-                  <ThumbnailVideo
-                    video={video}
-                    style={{
-                      width: '320px',
-                      height: 'auto',
-                      borderRadius: '5px'
-                    }}
-                  />
+                  <ThumbnailVideo video={video} />
                   {video.processing === true && (<Alert type="success" message="Video is on progressing, please wait" />)}
                 </div>
               )}
@@ -529,57 +508,41 @@ class VideoViewPage extends PureComponent<IProps> {
                 >
                   {videoStats?.likes > 0 && videoStats?.likes}
                   {' '}
-                  <LikeOutlined />
+                  <HeartOutlined />
                 </button>
                 <button
                   type="button"
                   className={
-                    userReaction && userReaction.favourited
+                    userReaction && userReaction.bookmarked
                       ? 'react-btn active'
                       : 'react-btn'
                   }
                   onClick={this.onReaction.bind(
                     this,
                     video._id,
-                    'favourite',
-                    userReaction.favourited
+                    'book_mark',
+                    userReaction.bookmarked
                   )}
                 >
-                  {videoStats?.favourites > 0 && videoStats?.favourites}
-                  {' '}
-                  <HeartOutlined />
+                  <Tooltip title={!userReaction.bookmarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}>
+                    {videoStats?.bookmarks > 0 && videoStats?.bookmarks}
+                    {' '}
+                    <BookOutlined />
+                  </Tooltip>
                 </button>
-                {/* <button
-                      type="button"
-                      className={
-                        userReaction && userReaction.watchedLater
-                          ? 'react-btn active'
-                          : 'react-btn'
-                      }
-                      onClick={this.onReaction.bind(
-                        this,
-                        video._id,
-                        'book_mark',
-                        userReaction.watchedLater
-                      )}
-                    >
-                      <Tooltip title={!userReaction.watchedLater ? 'Add to Bookmarks' : 'Remove from Bookmarks'}>
-                        <BookOutlined />
-                      </Tooltip>
-                    </button> */}
               </div>
               <div className="o-w-ner">
                 <Link
                   href={{
                     pathname: '/model/profile',
-                    query: { username: video.performer?.username }
+                    query: { username: video?.performer?.username }
                   }}
-                  as={`/model/${video.performer?.username}`}
+                  as={`/model/${video?.performer?.username}`}
                 >
                   <>
                     <img
                       alt="performer avatar"
-                      src={video.performer?.avatar || '/static/no-avatar.png'}
+                      src={video?.performer?.avatar || '/static/no-avatar.png'}
                     />
                     {' '}
                     <div className="owner-name">
@@ -602,7 +565,10 @@ class VideoViewPage extends PureComponent<IProps> {
                 && video.tags.map((tag) => (
                   <Tag color="magenta" key={tag}>
                     <Link href={{ pathname: '/search', query: { type: 'video', q: tag } }} as={`/search?q=${tag}&type=video`}>
-                      <a>{tag}</a>
+                      <a>
+                        #
+                        {tag}
+                      </a>
                     </Link>
                   </Tag>
                 ))}

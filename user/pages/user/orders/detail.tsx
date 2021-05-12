@@ -8,7 +8,6 @@ import Page from '@components/common/layout/page';
 import { orderService } from 'src/services';
 import { connect } from 'react-redux';
 import Router from 'next/router';
-import Link from 'next/link';
 
 const { Item } = Descriptions;
 

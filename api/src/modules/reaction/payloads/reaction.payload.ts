@@ -14,8 +14,7 @@ export class ReactionCreatePayload {
     REACTION_TYPE.FEED_VIDEO,
     REACTION_TYPE.COMMENT,
     REACTION_TYPE.GALLERY,
-    REACTION_TYPE.PRODUCT,
-    REACTION_TYPE.STORY
+    REACTION_TYPE.PRODUCT
   ])
   objectType = REACTION_TYPE.VIDEO;
 
@@ -24,7 +23,6 @@ export class ReactionCreatePayload {
   @IsIn([
     REACTION.LIKE,
     REACTION.FAVOURITE,
-    REACTION.WATCH_LATER,
     REACTION.BOOK_MARK
   ])
   action: string;

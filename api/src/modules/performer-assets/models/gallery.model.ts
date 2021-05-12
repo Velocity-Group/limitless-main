@@ -20,6 +20,13 @@ export class GalleryModel extends Document {
 
   numOfItems: number;
 
+  stats: {
+    likes: number;
+    bookmarks: number;
+    comments: number;
+    views: number;
+  };
+
   createdBy: ObjectId;
 
   updatedBy: ObjectId;

@@ -98,7 +98,7 @@ class GalleryViewPage extends PureComponent<IProps> {
     const { gallery } = this.props;
     try {
       await this.setState({ fetching: true });
-      const resp = await (await photoService.searchPhotosInGallery({ galleryId: gallery._id, limit: 999 })).data;
+      const resp = await (await photoService.userSearch(gallery.performerId, { galleryId: gallery._id, limit: 999 })).data;
       this.setState({ photos: resp.data });
     } catch (e) {
       const err = await e;
@@ -195,7 +195,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                 ))}
               </Carousel>
               {!canview && (
-                <div className="text-center">
+                <div className="text-center" style={{ margin: '20px 0' }}>
                   {gallery.isSale && !isBought && (
                   <Button className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
                     UNLOCK CONTENT BY

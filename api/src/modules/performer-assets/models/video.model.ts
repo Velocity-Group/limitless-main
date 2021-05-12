@@ -32,7 +32,7 @@ export class VideoModel extends Document {
 
   stats: {
     likes: number,
-    favourites: number,
+    bookmarks: number,
     views: number,
     comments: number
   };

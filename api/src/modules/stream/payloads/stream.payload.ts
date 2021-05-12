@@ -1,7 +1,6 @@
 import {
   IsString,
   IsIn,
-  IsBoolean,
   IsOptional,
   IsNumber
 } from 'class-validator';

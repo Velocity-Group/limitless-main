@@ -5,8 +5,8 @@ import {
   Row, Col, Button, message, Modal, Alert, Layout
 } from 'antd';
 import {
-  EditOutlined, ClockCircleOutlined, VideoCameraOutlined, PlayCircleOutlined,
-  CommentOutlined
+  EditOutlined, ClockCircleOutlined, VideoCameraOutlined, PlayCircleOutlined
+  // CommentOutlined
 } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import {
@@ -366,7 +366,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
               onFinish={this.updateStreamInfo.bind(this)}
             />
           </Modal>
-          {this.streamId && (
+          {/* {this.streamId && (
           <Col span={24}>
             <h4 className="page-heading">
               <CommentOutlined />
@@ -375,7 +375,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
             </h4>
             <ListStreamReviews newReview={null} objectId={this.streamId} objectType="stream" />
           </Col>
-          )}
+          )} */}
         </Row>
       </Layout>
     );

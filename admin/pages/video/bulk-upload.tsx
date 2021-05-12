@@ -20,10 +20,7 @@ const { Dragger } = Upload;
 const validateMessages = {
   required: 'This field is required!'
 };
-const layout = {
-  labelCol: { span: 24 },
-  wrapperCol: { span: 24 }
-};
+
 interface IProps {
   performerId: string;
 }

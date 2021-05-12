@@ -448,7 +448,6 @@ export default class Performers extends PureComponent<any> {
               loading={searching}
               pagination={pagination}
               onChange={this.handleTableChange.bind(this)}
-              scroll={isMobile ? { x: '150vw', y: '90vh' } : { x: '100vw', y: '90vh' }}
             />
           </div>
         </Page>

@@ -90,6 +90,34 @@ export class ReactionController {
     return DataResponse.ok(data);
   }
 
+  @Get('/videos/bookmark')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async bookmarkVideo(
+    @Query() query: ReactionSearchRequestPayload,
+    @CurrentUser() user: UserDto
+  ): Promise<DataResponse<PageableData<ReactionDto>>> {
+    query.action = REACTION.BOOK_MARK;
+    query.createdBy = user._id;
+    const data = await this.reactionService.getListVideo(query);
+    return DataResponse.ok(data);
+  }
+
+  @Get('/galleries/bookmark')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async bookmarkGalleries(
+    @Query() query: ReactionSearchRequestPayload,
+    @CurrentUser() user: UserDto
+  ): Promise<DataResponse<PageableData<ReactionDto>>> {
+    query.action = REACTION.BOOK_MARK;
+    query.createdBy = user._id;
+    const data = await this.reactionService.getListGallery(query);
+    return DataResponse.ok(data);
+  }
+
   @Get('/performers/bookmark')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)

@@ -18,7 +18,7 @@ export interface IVideo {
     views?: number;
     likes?: number;
     comments?: number;
-    favourites?: number;
+    bookmarks?: number;
   };
   performer?: {
     username: string;
@@ -29,8 +29,7 @@ export interface IVideo {
   };
   userReaction?: {
     liked?: boolean;
-    favourited?: boolean;
-    watchedLater?: boolean;
+    bookmarked?: boolean;
   };
 }
 
@@ -53,12 +52,12 @@ export interface IVideoResponse {
     views?: number;
     likes?: number;
     comments?: number;
+    bookmarks?: number;
   };
   performer?: IPerformer;
   userReaction?: {
     liked?: boolean;
-    favourited?: boolean;
-    watchedLater?: boolean;
+    bookmarked?: boolean;
   };
   isBought: boolean;
   isSubscribed: boolean;

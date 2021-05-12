@@ -462,4 +462,34 @@ export class GalleryService {
     await this.photoService.deleteByGallery(gallery._id);
     return true;
   }
+
+  public async updateCommentStats(id: string | ObjectId, num = 1) {
+    return this.galleryModel.updateOne(
+      { _id: id },
+      {
+        $inc: { 'stats.comments': num }
+      },
+      { upsert: true }
+    );
+  }
+
+  public async updateLikeStats(id: string | ObjectId, num = 1) {
+    return this.galleryModel.updateOne(
+      { _id: id },
+      {
+        $inc: { 'stats.likes': num }
+      },
+      { upsert: true }
+    );
+  }
+
+  public async updateBookmarkStats(id: string | ObjectId, num = 1) {
+    return this.galleryModel.updateOne(
+      { _id: id },
+      {
+        $inc: { 'stats.bookmarks': num }
+      },
+      { upsert: true }
+    );
+  }
 }

@@ -1,7 +1,6 @@
 export const REACTION = {
   LIKE: 'like',
   FAVOURITE: 'favourite',
-  WATCH_LATER: 'watch_later',
   BOOK_MARK: 'book_mark'
 };
 
@@ -15,8 +14,7 @@ export const REACTION_TYPE = {
   PERFORMER: 'performer',
   COMMENT: 'comment',
   PRODUCT: 'product',
-  STORY: 'story',
-  BLOG: 'blog'
+  STORY: 'story'
 };
 
 export const REACTION_CHANNEL = 'REACTION_CHANNEL';

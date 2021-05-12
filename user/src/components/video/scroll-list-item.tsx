@@ -6,7 +6,6 @@ import { IVideo } from '../../interfaces/video';
 
 interface IProps {
   items: IVideo[];
-  total?: number;
   canLoadmore: boolean;
   loadMore(): Function;
   loading: boolean;
