@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-import React, { PureComponent } from 'react';
+import { PureComponent, createRef } from 'react';
 import Header from 'next/head';
 import {
   Row, Col, message, Button
@@ -27,7 +26,8 @@ enum STREAM_EVENT {
   JOIN_ROOM = 'JOIN_ROOM',
   LEAVE_ROOM = 'LEAVE_ROOM',
   PRIVATE_CHAT_PAYMENT_SUCCESS = 'private-chat-payment-success',
-  PRIVATE_CHAT_DECLINE = 'private-chat-decline'
+  PRIVATE_CHAT_DECLINE = 'private-chat-decline',
+  ADMIN_END_SESSION_STREAM = 'admin-end-session-stream'
 }
 
 const STREAM_JOINED = 'private-stream/streamJoined';
@@ -59,8 +59,6 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
 
   static authenticate = true;
 
-  static onlyPerformer = true;
-
   private publisherRef;
 
   private subscriberRef;
@@ -69,7 +67,7 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
 
   private socket: any;
 
-  private _intervalCallTime: NodeJS.Timeout;
+  private _intervalCallTime;
 
   private requestSession: any;
 
@@ -104,8 +102,8 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
     }
     window.addEventListener('beforeunload', this.onbeforeunload.bind(this));
     RouterEvent.events.on('routeChangeStart', this.onbeforeunload.bind(this));
-    this.publisherRef = React.createRef();
-    this.subscriberRef = React.createRef();
+    this.publisherRef = createRef();
+    this.subscriberRef = createRef();
     this.acceptRequest();
     this.initSocketEvent();
   }
@@ -119,34 +117,41 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
     this.leaveSession();
   }
 
+  adminEndStream({ streamId, conversationId }) {
+    const { activeConversation } = this.props;
+    if (streamId !== this.streamId || conversationId !== activeConversation.data._id) return;
+    message.warning('Administrator has ended your current stream session. If you have any questions, please contact us.');
+    setTimeout(() => { Router.back(); }, 5000);
+  }
+
   initSocketEvent() {
     this.socket = this.context;
     this.socket.on(
       JOINED_THE_ROOM,
       ({ streamId, conversationId, streamList }) => {
         const { activeConversation } = this.props;
-        if (conversationId !== activeConversation.data._id) return;
+        if (conversationId !== activeConversation?.data?._id) return;
+        this.streamId = streamId;
         const subscriberStreamId = streamList && streamList.find((id) => id !== streamId);
         subscriberStreamId && this.subscriberRef.current && this.subscriberRef.current.play(subscriberStreamId);
-        this.streamId = streamId;
-        this.publisherRef.current && this.publisherRef.current.start(conversationId);
-        this.streamId && this.publisherRef.current && this.publisherRef.current.publish(streamId);
+        conversationId && this.publisherRef.current && this.publisherRef.current.start(conversationId);
+        streamId && this.publisherRef.current && this.publisherRef.current.publish(streamId);
       }
     );
     this.socket.on(STREAM_JOINED, ({ streamId, conversationId }) => {
       const { activeConversation } = this.props;
-      if (conversationId !== activeConversation.data._id) return;
+      if (conversationId !== activeConversation?.data?._id) return;
       if (this.streamId !== streamId) {
         this.subscriberRef.current && this.subscriberRef.current.play(streamId);
       }
     });
     this.socket.on(STREAM_LEAVED, ({ conversationId }) => {
       const { activeConversation } = this.props;
-      if (conversationId !== activeConversation.data._id) return;
-      message.info('Call ended!', 10);
-      window.setTimeout(() => {
+      if (conversationId !== activeConversation?.data?._id) return;
+      message.success('Call ended!', 10);
+      setTimeout(() => {
         Router.back();
-      }, 5000);
+      }, 5 * 1000);
     });
   }
 
@@ -171,13 +176,14 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
       callTime: 0,
       total: 0
     });
+    this.streamId = null;
   }
 
   async acceptRequest() {
     const { id, accessPrivateRequest: handleAcceptRequest, getStreamConversationSuccess: dispatchGetStreamConversationSuccess } = this.props;
     if (!id) return;
     try {
-      this.setState({ processing: true });
+      await this.setState({ processing: true });
       const resp = await (await streamService.acceptPrivateChat(id)).data;
       if (id !== resp.conversation._id || !resp.isStreaming) {
         message.error('Private call session ended!');
@@ -193,38 +199,31 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
         data: resp.conversation
       });
       handleAcceptRequest(id);
+      this._intervalCallTime = setInterval(() => {
+        const { callTime } = this.state;
+        this.setState({ callTime: callTime + 1 });
+      }, 1000);
+      this.setState({ roomJoined: true });
     } catch (e) {
       const error = await Promise.resolve(e);
       message.error(getResponseError(error));
       Router.back();
+    } finally {
+      this.setState({ processing: false });
     }
   }
 
-  paymentSuccess({ conversation }) {
-    const { conversation: requestConversation } = this.requestSession;
-    if (!conversation || !conversation._id || conversation?.type !== 'stream_private' || requestConversation?._id !== conversation?._id) return;
-    this._intervalCallTime = setInterval(() => {
-      const { callTime } = this.state;
-      this.setState({ callTime: callTime + 1 });
-    }, 1000);
-    this.setState({ processing: false, roomJoined: true });
-  }
-
-  leave() {
-    this.publisherRef.current && this.publisherRef.current.stop();
-    this.subscriberRef.current && this.subscriberRef.current.stop();
-    Router.back();
-  }
-
   async declineRequest(data) {
-    const { activeConversation } = this.props;
+    const { activeConversation, accessPrivateRequest: handleAcceptRequest, id } = this.props;
     const { conversationId } = data;
     if (activeConversation.data && activeConversation.data._id !== conversationId) return;
-    message.error(`${this.requestSession?.user?.name || this.requestSession?.user?.username || ''} canceled call request`);
+    message.error(`${this.requestSession?.user?.name || this.requestSession?.user?.username || ''} has canceled call request`);
+    handleAcceptRequest(id);
     Router.back();
   }
 
   render() {
+    const { user } = this.props;
     const {
       processing, total, roomJoined, callTime
     } = this.state;
@@ -235,48 +234,19 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
           <title>{`Private call with ${this.requestSession?.user?.name || this.requestSession?.user?.username || ''}`}</title>
         </Header>
         <Event
-          event={STREAM_EVENT.PRIVATE_CHAT_PAYMENT_SUCCESS}
-          handler={this.paymentSuccess.bind(this)}
-        />
-        <Event
           event={STREAM_EVENT.PRIVATE_CHAT_DECLINE}
           handler={this.declineRequest.bind(this)}
+        />
+        <Event
+          event={STREAM_EVENT.ADMIN_END_SESSION_STREAM}
+          handler={this.adminEndStream.bind(this)}
         />
         <div className="container">
           <Row>
             <Col md={14} xs={24}>
-              {!roomJoined
-                ? (
-                  <Button
-                    type="primary"
-                    onClick={this.acceptRequest.bind(this)}
-                    loading={processing}
-                    disabled={processing}
-                    block
-                  >
-                    {`Waiting for ${this.requestSession?.user?.name || this.requestSession?.user?.username || ''} payment $${(this.requestSession?.price || 0).toFixed(2)}`}
-                  </Button>
-                )
-                : (
-                  <Button
-                    type="primary"
-                    onClick={this.leave.bind(this)}
-                    block
-                    disabled={processing}
-                    loading={processing}
-                  >
-                    End Call
-                  </Button>
-                )}
-              <p className="stream-duration">
-                <ClockCircleOutlined />
-                {' '}
-                {videoDuration(callTime)}
-              </p>
               <div className={!roomJoined ? 'hide private-streaming-container' : 'private-streaming-container'}>
                 <PrivatePublisher
                   {...this.props}
-                  containerClassName="private-streaming-container"
                   ref={this.publisherRef}
                   configs={{
                     localVideoId: 'private-publisher'
@@ -284,13 +254,35 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
                 />
                 <PrivateSubscriber
                   {...this.props}
-                  containerClassName="private-streaming-container"
                   ref={this.subscriberRef}
                   configs={{
                     isPlayMode: true
                   }}
                 />
               </div>
+              <p className="stream-duration">
+                <span>
+                  <ClockCircleOutlined />
+                  {' '}
+                  {videoDuration(callTime)}
+                </span>
+                <span>
+                  <img src="/static/gem-ico.png" alt="gem" width="20px" />
+                  {' '}
+                  {(user?.balance || 0).toFixed(2)}
+                </span>
+              </p>
+              {roomJoined && (
+              <Button
+                type="primary"
+                onClick={() => Router.back()}
+                block
+                disabled={processing}
+                loading={processing}
+              >
+                End Call
+              </Button>
+              )}
             </Col>
             <Col xs={24} md={10}>
               <ChatBox
@@ -310,8 +302,8 @@ class ModelPrivateChat extends PureComponent<IProps, IStates> {
 ModelPrivateChat.contextType = SocketContext;
 
 const mapStateToProps = (state) => ({
-  user: state.user.current,
-  activeConversation: state.streamMessage.activeConversation,
+  user: { ...state.user.current },
+  activeConversation: { ...state.streamMessage.activeConversation },
   ...state.streaming
 });
 

@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import withAntmedia from 'src/antmedia';
 import { WEBRTC_ADAPTOR_INFORMATIONS } from 'src/antmedia/constants';
 import { SocketContext } from 'src/socket';
-import './index.less';
+import '../../index.less';
 
 const EVENTS = {
   JOIN_STREAM: 'private-stream/join',
@@ -30,7 +30,7 @@ interface States {
   streamId?: string;
 }
 
-class Publisher extends PureComponent<IProps, States> {
+class PrivateWebrtcPublisher extends PureComponent<IProps, States> {
   private socket;
 
   constructor(props) {
@@ -115,5 +115,5 @@ class Publisher extends PureComponent<IProps, States> {
   }
 }
 
-Publisher.contextType = SocketContext;
-export default withAntmedia(Publisher);
+PrivateWebrtcPublisher.contextType = SocketContext;
+export default withAntmedia(PrivateWebrtcPublisher);

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-danger */
 import React from 'react';
 import moment from 'moment';
 import { EllipsisOutlined } from '@ant-design/icons';
@@ -12,7 +13,6 @@ interface IProps {
   endsSequence: boolean,
   showTimestamp: boolean,
   isOwner: boolean,
-  canDelete: boolean,
   onDelete: Function,
 }
 
@@ -24,7 +24,6 @@ export default function Message(props: IProps) {
     endsSequence,
     showTimestamp,
     isOwner,
-    canDelete,
     onDelete
   } = props;
   const friendlyTimestamp = moment(data.createdAt).format('LLLL');
@@ -45,42 +44,41 @@ export default function Message(props: IProps) {
         `${endsSequence ? 'end' : ''}`
       ].join(' ')}
     >
-      {data.text && !data.isSystem && (
+      {data.text && !data.isSystem && !data.isTip && !data.isGift && (
         <div className={isOwner ? 'bubble-container owner' : 'bubble-container'}>
+          <span className="sender-info">
+            <img alt="" src={data?.senderInfo?.avatar || '/static/no-avatar.png'} className="avatar" />
+            <a>{data?.senderInfo?.name || data?.senderInfo?.username || 'N/A'}</a>
+          </span>
           <div className="bubble" title={friendlyTimestamp}>
-            {canDelete && (
-              <Dropdown overlay={menu} placement="topRight">
-                <span>
-                  <EllipsisOutlined />
-                  {' '}
-                </span>
-              </Dropdown>
-            )}
-            {data?.senderInfo && (
-              <span className="u-name">
-                {data?.senderInfo?.name || data?.senderInfo?.username || 'N/A'}
-                {data.type !== 'tip' ? ': ' : ' '}
-              </span>
-            )}
-            {!data.imageUrl && data.text}
-            {' '}
-            {data.imageUrl && (
-              <a
-                title="Click to view full content"
-                href={
-                  data.imageUrl.indexOf('http') === -1 ? '#' : data.imageUrl
-                }
-                target="_blank"
-                rel="noreferrer"
-              >
-                <img src={data.imageUrl} width="180px" alt="" />
-              </a>
-            )}
+            {data.text}
           </div>
+          {isMine && !data.isDeleted && (
+          <Dropdown overlay={menu} placement="topRight">
+            <span>
+              <EllipsisOutlined />
+              {' '}
+            </span>
+          </Dropdown>
+          )}
         </div>
       )}
       {data.text && data.isSystem && (
         <p style={{ textAlign: 'center', fontSize: '10px' }}>{data.text}</p>
+      )}
+      {data.text && data.isTip && (
+      <div className="tip-box">
+        <span>
+          {data.text}
+          {' '}
+          <img src="/static/gem-ico.png" width="20px" alt="" />
+        </span>
+      </div>
+      )}
+      {data.text && data.isGift && (
+      <div className="tip-box">
+        <span dangerouslySetInnerHTML={{ __html: data.text }} />
+      </div>
       )}
       {showTimestamp && !data.isSystem && (
         <div className="timestamp">{friendlyTimestamp}</div>

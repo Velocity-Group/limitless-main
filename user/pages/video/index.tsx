@@ -703,7 +703,6 @@ class VideoViewPage extends PureComponent<IProps> {
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm
-            user={user}
             type={this.subscriptionType || 'monthly'}
             performer={performer}
             submiting={submiting}

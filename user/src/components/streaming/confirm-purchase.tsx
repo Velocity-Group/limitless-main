@@ -1,79 +1,64 @@
+/* eslint-disable no-nested-ternary */
 import { PureComponent } from 'react';
-import {
-  message, Button, Input, Row, Col
-} from 'antd';
+import { Button, Form, Input } from 'antd';
 import { } from '@ant-design/icons';
-import { IPerformer } from '@interfaces/index';
-import { paymentService } from '@services/index';
+import { IPerformer } from 'src/interfaces/index';
 import '../post/index.less';
 
 interface IProps {
-  price: number;
+  streamType: string;
   performer: IPerformer;
   onFinish: Function;
   submiting: boolean;
 }
 
+const layout = {
+  labelCol: { span: 24 },
+  wrapperCol: { span: 24 }
+};
+
 export class PurchaseStreamForm extends PureComponent<IProps> {
-  state = {
-    couponCode: '',
-    coupon: null,
-    isApliedCode: false
-  }
-
-  onChangeValue(e) {
-    this.setState({ couponCode: e.target.value });
-  }
-
-  async applyCoupon() {
-    const { couponCode } = this.state;
-    if (!couponCode) return;
-    try {
-      const resp = await paymentService.applyCoupon(couponCode);
-      this.setState({ coupon: resp.data, isApliedCode: true });
-      message.success('Coupon is applied');
-    } catch (error) {
-      const e = await error;
-      message.error(
-        e && e.message ? e.message : 'Error occured, please try again later'
-      );
-    }
-  }
-
   render() {
     const {
-      onFinish, submiting = false, price, performer
+      onFinish, performer, streamType, submiting
     } = this.props;
-    const { coupon, isApliedCode, couponCode } = this.state;
-    const endPrice = !coupon ? price : (price - price * coupon.value).toFixed(2);
     return (
       <div className="text-center">
         <div className="tip-performer">
           <img alt="p-avt" src={(performer?.avatar) || '/static/no-avatar.png'} style={{ width: '100px', borderRadius: '50%' }} />
           <div>
             {performer?.name || 'N/A'}
+            <br />
             <small>
               @
               {performer?.username || 'n/a'}
             </small>
           </div>
         </div>
-        <div style={{ margin: '20px 0' }}>
-          <Row>
-            <Col span={18}>
-              <Input disabled={isApliedCode} placeholder="Enter coupon code here" onChange={this.onChangeValue.bind(this)} />
-            </Col>
-            <Col span={6}>
-              {!isApliedCode ? <Button onClick={this.applyCoupon.bind(this)}>Apply Code!</Button>
-                : <Button onClick={() => this.setState({ isApliedCode: false, couponCode: '', coupon: null })}>Use Code Later!</Button>}
-            </Col>
-          </Row>
-
-        </div>
-        <Button type="primary" loading={submiting} onClick={() => onFinish(couponCode)}>
-          Confirm to join this session by $
-          {endPrice}
-        </Button>
+        <Form
+          {...layout}
+          name="nest-messages"
+          onFinish={onFinish.bind(this)}
+          initialValues={{
+            userNote: ''
+          }}
+        >
+          {streamType === 'private' && (
+          <Form.Item name="userNote">
+            <Input.TextArea rows={3} maxLength={100} placeholder="Note something..." />
+          </Form.Item>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Button className="primary" htmlType="submit" loading={submiting} disabled={submiting} block>
+              Confirm to join this session by
+              &nbsp;
+              <img src="/static/gem-ico.png" alt="gem" width="20px" />
+              {streamType === 'public' ? (performer?.publicChatPrice || 0).toFixed(2) : streamType === 'group' ? (performer?.groupChatPrice || 0).toFixed(2) : (performer?.privateChatPrice || 0).toFixed(2)}
+              {' '}
+              per minute
+            </Button>
+          </div>
+        </Form>
       </div>
     );
   }

@@ -5,19 +5,21 @@ import { Input, message } from 'antd';
 import {
   SendOutlined, SmileOutlined
 } from '@ant-design/icons';
+import { IPerformer } from '@interface/performer';
 import { Emotions } from '@components/messages/emotions';
+import GiftsStreamBox from '@components/gift/gift-box';
 import '@components/messages/Compose.less';
 
 const { TextArea } = Input;
 interface IProps {
-  loggedIn: boolean;
+  user: IPerformer;
   sendStreamMessage: Function;
-  sentFileSuccess: Function;
+  sentFileSuccess?: Function;
   sendMessageStatus: any;
   conversation: any;
 }
 
-class Compose extends PureComponent<IProps> {
+class StreamChatCompose extends PureComponent<IProps> {
   _input: any;
 
   state = { text: '' };
@@ -29,7 +31,7 @@ class Compose extends PureComponent<IProps> {
   componentDidUpdate(previousProps: IProps) {
     const { sendMessageStatus } = this.props;
     if (sendMessageStatus.success && previousProps.sendMessageStatus.success !== sendMessageStatus.success) {
-      this.updateMessage('');
+      this.updateMessage();
       this._input && this._input.focus();
     }
   }
@@ -44,19 +46,19 @@ class Compose extends PureComponent<IProps> {
     this.setState({ text: evt.target.value });
   };
 
-  onEmojiClick = (emojiObject) => {
+  onEmojiClick = (e, emojiObject) => {
     const { text } = this.state;
-    this.updateMessage(text + emojiObject.emoji);
+    this.setState({ text: `${text} ${emojiObject.emoji}` });
   }
 
-  updateMessage(text: string) {
-    this.setState({ text });
+  updateMessage() {
+    this.setState({ text: '' });
   }
 
   send() {
-    const { loggedIn, sendStreamMessage: _sendStreamMessage, conversation } = this.props;
+    const { sendStreamMessage: _sendStreamMessage, conversation, user } = this.props;
     const { text } = this.state;
-    if (!loggedIn) {
+    if (!user._id) {
       message.error('Please login');
       return;
     }
@@ -74,30 +76,37 @@ class Compose extends PureComponent<IProps> {
   }
 
   render() {
-    const { loggedIn } = this.props;
     const { text } = this.state;
-    const { sendMessageStatus: status } = this.props;
+    const { sendMessageStatus: status, conversation } = this.props;
     if (!this._input) this._input = createRef();
     return (
-      <div className="compose custom">
+      <div className="compose stream">
         <TextArea
           value={text}
           className="compose-input"
           placeholder="Enter message here."
           onKeyDown={this.onKeyDown}
           onChange={this.onChange}
-          disabled={!loggedIn || status.sending}
-          autoFocus
+          disabled={status.sending}
           // eslint-disable-next-line no-return-assign
           ref={(ref) => (this._input = ref)}
           rows={1}
         />
-        <div className="grp-icons custom">
+        <div className="grp-icons">
           <div className="grp-emotions">
             <SmileOutlined />
             <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
           </div>
-          <SendOutlined onClick={this.send.bind(this)} />
+        </div>
+        <div className="grp-icons" style={{ padding: 0 }}>
+          <div className="grp-emotions">
+            <GiftsStreamBox conversation={conversation} performerId={conversation.performerId} />
+          </div>
+        </div>
+        <div className="grp-icons" style={{ paddingRight: 0 }}>
+          <div aria-hidden className="grp-send" onClick={this.send.bind(this)}>
+            <SendOutlined />
+          </div>
         </div>
       </div>
     );
@@ -106,9 +115,8 @@ class Compose extends PureComponent<IProps> {
 
 const mapStates = (state: any) => ({
   user: state.user.current,
-  performer: state.performer.current,
   sendMessageStatus: state.streamMessage.sendMessage
 });
 
 const mapDispatch = { sendStreamMessage };
-export default connect(mapStates, mapDispatch)(Compose);
+export default connect(mapStates, mapDispatch)(StreamChatCompose);

@@ -6,12 +6,8 @@ import { message } from 'antd';
 import { APIRequest } from './api-request';
 
 class StreamService extends APIRequest {
-  getSessionId(id: string, type: string) {
-    return this.get(`/streaming/session/${id}/${type}`);
-  }
-
-  updateStreamPrice(payload) {
-    return this.put('/streaming/set-price', payload);
+  updateStreamInfo(payload) {
+    return this.put('/streaming/update', payload);
   }
 
   updateStreamDuration(payload) {

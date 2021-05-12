@@ -16,7 +16,8 @@ import {
   sendStreamMessage,
   sendStreamMessageSuccess,
   deleteMessage,
-  deleteMessageSuccess
+  deleteMessageSuccess,
+  deleteMessageFail
 } from './actions';
 
 const streamMessageSagas = [
@@ -55,18 +56,13 @@ const streamMessageSagas = [
     * worker(data: IReduxAction<Record<string, any>>) {
       try {
         const {
-          conversationId, offset, limit, type
+          conversationId, offset, limit
         } = data.payload;
         yield put(fetchingStreamMessage({ conversationId }));
-        const resp = type === 'stream_public'
-          ? yield messageService.getPublicMessages(conversationId, {
-            offset,
-            limit
-          })
-          : yield messageService.getMessages(conversationId, {
-            offset,
-            limit
-          });
+        const resp = yield messageService.getPublicMessages(conversationId, {
+          offset,
+          limit
+        });
         yield put(
           loadStreamMessagesSuccess({
             conversationId,
@@ -88,22 +84,17 @@ const streamMessageSagas = [
           (state) => state.streamMessage.messages
         ) as any;
         const {
-          conversationId, offset, limit, type
+          conversationId, offset, limit
         } = data.payload;
         if (messageMap && messageMap.fetching) {
           return;
         }
 
         yield put(fetchingStreamMessage({ conversationId }));
-        const resp = type === 'stream_public'
-          ? yield messageService.getPublicMessages(conversationId, {
-            offset,
-            limit
-          })
-          : yield messageService.getMessages(conversationId, {
-            offset,
-            limit
-          });
+        const resp = yield messageService.getPublicMessages(conversationId, {
+          offset,
+          limit
+        });
         yield put(
           loadMoreStreamMessagesSuccess({
             conversationId,
@@ -122,10 +113,8 @@ const streamMessageSagas = [
     on: sendStreamMessage,
     * worker(req: IReduxAction<any>) {
       try {
-        const { conversationId, data, type } = req.payload;
-        const resp = type === 'stream_public'
-          ? yield messageService.sendPublicStreamMessage(conversationId, data)
-          : yield messageService.sendStreamMessage(conversationId, data);
+        const { conversationId, data } = req.payload;
+        const resp = yield messageService.sendStreamMessage(conversationId, data);
 
         yield put(sendStreamMessageSuccess(resp.data));
       } catch (e) {
@@ -138,10 +127,10 @@ const streamMessageSagas = [
     * worker(req: IReduxAction<any>) {
       try {
         const { messageId } = req.payload;
-        const resp = yield messageService.deleteMessage(messageId);
+        const resp = yield messageService.deleteStreamMessage(messageId);
         yield put(deleteMessageSuccess(resp.data));
       } catch (e) {
-        yield put(deleteMessageSuccess(e));
+        yield put(deleteMessageFail(e));
       }
     }
   }

@@ -4,10 +4,12 @@ import { SocketUserService } from 'src/modules/socket/services/socket-user.servi
 import { RequestService } from 'src/modules/stream/services';
 import { AuthService } from 'src/modules/auth';
 import { ConversationService } from 'src/modules/message/services';
+import { Socket } from 'socket.io';
 import { Model } from 'mongoose';
 import { MESSAGE_TYPE } from 'src/modules/message/constants';
 import { PerformerService } from 'src/modules/performer/services';
-import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserService } from 'src/modules/user/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
 import { StreamModel } from '../models';
 import {
@@ -35,6 +37,8 @@ export class StreamConversationWsGateway {
     private readonly authService: AuthService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(STREAM_MODEL_PROVIDER)
     private readonly streamModel: Model<StreamModel>,
     private readonly streamService: StreamService,
@@ -43,7 +47,7 @@ export class StreamConversationWsGateway {
 
   @SubscribeMessage(JOIN_ROOM)
   async handleJoinPrivateRoom(
-    client: any,
+    client: Socket,
     payload: { conversationId: string }
   ) {
     try {
@@ -76,7 +80,7 @@ export class StreamConversationWsGateway {
         roomName,
         `message_created_conversation_${conversation._id}`,
         {
-          text: `${user.username} has joined this conversation`,
+          text: `${user.username} joined`,
           _id: conversation._id,
           conversationId,
           isSystem: true
@@ -113,7 +117,6 @@ export class StreamConversationWsGateway {
           );
         }
       }
-
       const connections = await this.socketUserService.getRoomUserConnections(
         roomName
       );
@@ -124,7 +127,7 @@ export class StreamConversationWsGateway {
           memberIds.push(id);
         }
       });
-      const members = await this.performerService.findByIds(memberIds);
+      const members = await this.userService.findByIds(memberIds);
       const streamId = `${stream.type}-${stream._id}-${user._id}`;
       const data = {
         ...defaultStreamValue,
@@ -145,7 +148,7 @@ export class StreamConversationWsGateway {
         total: client.adapter.rooms[roomName]
           ? client.adapter.rooms[roomName].length
           : 0,
-        members: members.map((m) => new PerformerDto(m).toResponse()),
+        members: members.map((m) => new UserDto(m).toResponse()),
         streamList: stream.streamIds
       });
     } catch (err) {
@@ -156,7 +159,7 @@ export class StreamConversationWsGateway {
 
   @SubscribeMessage(LEAVE_ROOM)
   async handleLeavePrivateRoom(
-    client: any,
+    client: Socket,
     payload: { conversationId: string }
   ) {
     try {

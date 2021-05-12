@@ -1,39 +1,38 @@
 import { PureComponent, createRef } from 'react';
 import Header from 'next/head';
 import {
-  Row, Col, message, Button, Modal, Spin
+  Row, Col, message, Button, Modal, Spin, Layout
 } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import Router, { Router as RouterEvent } from 'next/router';
 import {
   IPerformer, IUIConfig, IUser, StreamSettings
 } from 'src/interfaces';
-import { paymentService, performerService, streamService } from 'src/services';
+import {
+  performerService, purchaseTokenService, streamService
+} from 'src/services';
 import { connect } from 'react-redux';
 import {
   getStreamConversationSuccess,
   resetStreamMessage
 } from '@redux/stream-chat/actions';
+import { updateBalance } from '@redux/user/actions';
 import { SocketContext, Event } from 'src/socket';
 import nextCookie from 'next-cookies';
 import ChatBox from '@components/stream-chat/chat-box';
 import { getResponseError, videoDuration } from '@lib/index';
 import PrivateHlsPublisher from '@components/streaming/hls/private/publisher';
-import PrivateHlsSubscriber from 'src/components/streaming/hls/private/subscriber';
-import StreamPriceForm from '@components/streaming/set-price-session';
+import PrivateHlsSubscriber from '@components/streaming/hls/private/subscriber';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
-import '../model/live/index.less';
-import Layout from 'antd/lib/layout/layout';
-// import { PaymentIframeForm } from '@components/payment/form-iframe';
+import { TipPerformerForm } from '@components/performer/tip-form';
+import '../live/index.less';
 // eslint-disable-next-line no-shadow
 enum EVENT {
-  JOINED_THE_ROOM = 'JOINED_THE_ROOM',
   JOIN_ROOM = 'JOIN_ROOM',
   LEAVE_ROOM = 'LEAVE_ROOM',
   STREAM_INFORMATION_CHANGED = 'private-stream/streamInformationChanged',
   PRIVATE_CHAT_DECLINE = 'private-chat-decline',
-  PRIVATE_CHAT_ACCEPT = 'private-chat-accept',
-  PRIVATE_CHAT_PAYMENT_SUCCESS = 'private-chat-payment-success'
+  PRIVATE_CHAT_ACCEPT = 'private-chat-accept'
 }
 
 const STREAM_JOINED = 'private-stream/streamJoined';
@@ -53,16 +52,15 @@ interface IProps {
 }
 
 interface IStates {
+  subscriberStreamId: string;
   roomJoined: boolean;
   processing: boolean;
   total: number;
   members: IUser[];
   callTime: number;
-  sessionPrice: number;
   openPriceModal: boolean;
   countTime: number;
-  openPaymentModal: boolean;
-  subscriberStreamId: string;
+  openTipModal: boolean;
 }
 
 class UserPrivateChat extends PureComponent<IProps, IStates> {
@@ -78,9 +76,11 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
 
   private socket;
 
-  private _intervalCallTime: NodeJS.Timeout;
+  private _intervalCallTime;
 
-  private _intervalCountdown: NodeJS.Timeout;
+  private _intervalCountdown;
+
+  private intervalCharge;
 
   private requestSession: any;
 
@@ -114,16 +114,15 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
     this.state = {
+      subscriberStreamId: '',
       openPriceModal: false,
+      openTipModal: false,
       processing: false,
       roomJoined: false,
-      openPaymentModal: false,
       total: 0,
       callTime: 0,
       members: [],
-      sessionPrice: 0,
-      countTime: 300,
-      subscriberStreamId: ''
+      countTime: 300
     };
   }
 
@@ -134,7 +133,12 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
       Router.back();
       return;
     }
-    this.setState({ sessionPrice: performer.privateChatPrice });
+    if (!this.publisherRef) {
+      this.publisherRef = createRef();
+    }
+    if (!this.subscriberRef) {
+      this.subscriberRef = createRef();
+    }
     window.addEventListener('beforeunload', this.onbeforeunload.bind(this));
     RouterEvent.events.on('routeChangeStart', this.onbeforeunload.bind(this));
   }
@@ -154,23 +158,6 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.onbeforeunload.bind(this));
     RouterEvent.events.off('routeChangeStart', this.onbeforeunload.bind(this));
-  }
-
-  async handlePurchase(couponCode: string) {
-    const { streamId } = this.requestSession;
-    if (!streamId) return;
-    try {
-      await this.setState({ processing: true });
-      const resp = await (await paymentService.purchaseStream({ streamId, couponCode, type: 'private_chat' })).data;
-      if (resp && !resp.success) {
-        message.error('Error occured, please try again later');
-      }
-    } catch (e) {
-      const error = await Promise.resolve(e);
-      message.error(error?.message || 'Error occured, please try again later');
-    } finally {
-      this.setState({ processing: false });
-    }
   }
 
   onbeforeunload = () => {
@@ -201,59 +188,81 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
     this._intervalCountdown = setInterval(this.countdown.bind(this), 1000);
   }
 
-  leave() {
-    this.publisherRef.current && this.publisherRef.current.stop();
-    this.subscriberRef.current && this.subscriberRef.current.stop();
-    Router.back();
+  async purchaseStream() {
+    const {
+      performer, user, updateBalance: handleUpdateBalance, activeConversation
+    } = this.props;
+    if (!activeConversation?.data?.streamId) return;
+    if (user.balance < performer.privateChatPrice) {
+      message.error('Your token balance is not enough!', 15);
+      Router.push('/token-package');
+      return;
+    }
+    try {
+      await this.setState({ processing: true });
+      await purchaseTokenService.purchaseStream(activeConversation?.data?.streamId);
+      handleUpdateBalance({ token: -performer.privateChatPrice });
+    } catch (e) {
+      const error = await e;
+      message.error(error?.message || 'Error occured, please try again later');
+      Router.back();
+    } finally {
+      this.setState({ processing: false });
+    }
   }
 
   initSocketEvent() {
     this.socket = this.context;
     this.socket.on(
       JOINED_THE_ROOM,
-      ({ streamId, conversationId }) => {
+      ({ streamId, conversationId, streamList }) => {
+        this.streamId = streamId;
         const { activeConversation } = this.props;
         if (conversationId !== activeConversation.data._id) return;
-        this.streamId = streamId;
+        const subscriberStreamId = streamList && streamList.find((id) => id !== streamId);
+        subscriberStreamId && this.setState({ subscriberStreamId: streamId });
+        conversationId && this.publisherRef.current && this.publisherRef.current.start(conversationId);
+        streamId && this.publisherRef.current && this.publisherRef.current.publish(streamId);
       }
     );
     this.socket.on(STREAM_JOINED, ({ streamId, conversationId }) => {
       const { activeConversation } = this.props;
       if (conversationId !== activeConversation.data._id) return;
+      console.log(this.streamId, streamId);
       if (this.streamId !== streamId) {
         this.setState({ subscriberStreamId: streamId });
+        this._intervalCountdown && clearInterval(this._intervalCountdown);
+        this._intervalCallTime = setInterval(() => {
+          const { callTime } = this.state;
+          this.setState({ callTime: callTime + 1 });
+        }, 1000);
+        this.purchaseStream();
+        this.intervalCharge = setInterval(this.purchaseStream.bind(this), 60 * 1000);
       }
     });
     this.socket.on(STREAM_LEAVED, ({ conversationId }) => {
-      const { activeConversation } = this.props;
+      const { performer, activeConversation } = this.props;
       if (conversationId !== activeConversation.data._id) return;
-      message.info('Call ended!', 10);
-      setTimeout(() => {
-        Router.back();
-      }, 5 * 1000);
+      message.info(`Call ended, redirecting to ${performer?.name || performer?.username || 'N/A'} profile`, 10);
+      setTimeout(() => { Router.replace({ pathname: '/profile', query: { performer: JSON.stringify(performer), username: performer?.username } }, `/${performer?.username}`); }, 5000);
     });
   }
 
-  async sendRequest(payload) {
+  async sendRequest(payload: any) {
     const { performer, getStreamConversationSuccess: dispatchGetStreamConversationSuccess } = this.props;
-    if (payload.price < performer.privateChatPrice) {
-      message.error(`${performer?.name || performer?.username} require minimum $${performer.privateChatPrice} to accept call!`);
-      return;
-    }
     try {
-      this.setState({ processing: true });
-      const resp = await (await streamService.requestPrivateChat(performer._id, { price: payload.price, userNote: payload.userNote || '' })).data;
+      await this.setState({ processing: true });
+      const resp = await (await streamService.requestPrivateChat(performer._id, { userNote: payload.userNote || '' })).data;
       message.success(`Requested a Private call to ${performer?.name || performer?.username}!`);
-      this.handleCountdown();
-      this.requestSession = resp;
       const socket = this.context;
-      socket.emit(EVENT.JOIN_ROOM, {
+      socket && resp.conversation && socket.emit(EVENT.JOIN_ROOM, {
         conversationId: resp.conversation._id
       });
+      this.handleCountdown();
+      this.requestSession = resp;
       dispatchGetStreamConversationSuccess({
         data: resp.conversation
       });
-      this.setState({ sessionPrice: resp.price });
     } catch (e) {
       const error = await Promise.resolve(e);
       message.error(getResponseError(error));
@@ -279,23 +288,20 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
     }
     this._intervalCallTime && clearInterval(this._intervalCallTime);
     this._intervalCountdown && clearInterval(this._intervalCountdown);
-
-    this.setState({
-      processing: false,
-      roomJoined: false,
-      callTime: 0,
-      total: 0,
-      members: []
-    });
+    this.intervalCharge && clearInterval(this.intervalCharge);
   }
 
   async acceptRequest(data) {
     const { performer } = this.props;
-    const { conversation: { _id } } = data;
-    message.success(`${performer?.name || performer?.username} accepted your call request!`);
-    const { conversation } = this.requestSession;
-    if (!conversation || _id !== conversation._id) return;
-    this.setState({ openPaymentModal: true });
+    const { conversation } = data;
+    const { conversation: requestConversation } = this.requestSession;
+    if (!conversation || !conversation._id || conversation?.type !== 'stream_private' || requestConversation?._id !== conversation?._id) {
+      message.error('An error occured, please try again later');
+      Router.back();
+      return;
+    }
+    message.success(`${performer?.name || performer?.username} accepted your call request, start calling right now`);
+    this.setState({ countTime: 300, roomJoined: true });
   }
 
   countdown() {
@@ -312,19 +318,27 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
     this.setState({ countTime: 300 });
   }
 
-  paymentSuccess({ conversation }) {
-    const { performer } = this.props;
-    const { conversation: requestConversation } = this.requestSession;
-    if (!conversation || !conversation._id || conversation?.type !== 'stream_private' || requestConversation?._id !== conversation?._id) return;
-    message.success(`Payment success, calling ${performer?.name || performer?.username} right now`, 10);
-    this.publisherRef.current && this.publisherRef.current.start(conversation._id);
-    this.streamId && this.publisherRef.current && this.publisherRef.current.publish(this.streamId);
-    this._intervalCountdown && clearInterval(this._intervalCountdown);
-    this._intervalCallTime = setInterval(() => {
-      const { callTime } = this.state;
-      this.setState({ callTime: callTime + 1 });
-    }, 1000);
-    this.setState({ openPaymentModal: false, roomJoined: true, countTime: 300 });
+  async sendTip(token) {
+    const {
+      performer, user, updateBalance: handleUpdateBalance, activeConversation
+    } = this.props;
+    if (!activeConversation || !activeConversation.data || !activeConversation.data._id) return;
+    if (user.balance < token) {
+      message.error('Your token balance is not enough!');
+      Router.push('/token-package');
+      return;
+    }
+    try {
+      await this.setState({ processing: true });
+      await purchaseTokenService.sendTip(performer?._id, { token, conversationId: activeConversation.data._id, streamType: 'stream_private' });
+      message.success('Thank you for the tip!');
+      handleUpdateBalance({ token: -token });
+    } catch (e) {
+      const err = await e;
+      message.error(err.message || 'error occured, please try again later');
+    } finally {
+      this.setState({ processing: false, openTipModal: false });
+    }
   }
 
   render() {
@@ -332,13 +346,13 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
     if (!this.subscriberRef) this.subscriberRef = createRef();
     const {
       processing, total, members, roomJoined, callTime, openPriceModal,
-      sessionPrice, countTime, openPaymentModal, subscriberStreamId
+      countTime, openTipModal, subscriberStreamId
     } = this.state;
     const { ui, performer, user } = this.props;
     return (
       <Layout>
         <Header>
-          <title>{`${ui?.siteName} | Private Call ${performer?.name || performer?.username}`}</title>
+          <title>{`${ui?.siteName} | Private call with ${performer?.name || performer?.username || 'N/A'}`}</title>
         </Header>
         <Event
           event={EVENT.PRIVATE_CHAT_DECLINE}
@@ -348,13 +362,46 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
           event={EVENT.PRIVATE_CHAT_ACCEPT}
           handler={this.acceptRequest.bind(this)}
         />
-        <Event
-          event={EVENT.PRIVATE_CHAT_PAYMENT_SUCCESS}
-          handler={this.paymentSuccess.bind(this)}
-        />
         <div className="container">
           <Row>
             <Col md={14} xs={24}>
+              <div className={!roomJoined ? 'hide private-streaming-container' : 'private-streaming-container'}>
+                <PrivateHlsPublisher
+                  {...this.props}
+                  // eslint-disable-next-line no-return-assign
+                  ref={this.publisherRef}
+                  configs={{
+                    localVideoId: 'private-publisher'
+                  }}
+                />
+                {subscriberStreamId && (
+                <PrivateHlsSubscriber
+                  containerClassName="private-streaming-container"
+                  {...this.props}
+                  streamId={subscriberStreamId}
+                  ref={this.subscriberRef}
+                  configs={{
+                    isPlayMode: true
+                  }}
+                />
+                )}
+              </div>
+              {!roomJoined && <img alt="img" src="/static/offline.jpg" width="100%" style={{ margin: '5px 0' }} />}
+              <p className="stream-duration">
+                <span>
+                  <ClockCircleOutlined />
+                  {' '}
+                  {videoDuration(callTime)}
+                </span>
+                <span>
+                  <img src="/static/gem-ico.png" alt="gem" width="20px" />
+                  {' '}
+                  {(user?.balance || 0).toFixed(2)}
+                </span>
+              </p>
+              {!roomJoined && (countTime < 300) && [
+                <h4 key="text_1" className="text-center">{`Your request has been sent, please waiting for ${performer?.name || performer?.username || 'N/A'} accept!`}</h4>,
+                <div key="text_2" className="text-center"><Spin size="large" /></div>]}
               {!roomJoined ? (
                 <Button
                   type="primary"
@@ -365,49 +412,40 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
                 >
                   {countTime < 300 ? `Re-send in ${videoDuration(countTime)}` : (
                     <a>
-                      {`Request a Private Call to ${performer?.name || performer?.username} by $${sessionPrice.toFixed(2)}`}
+                      Request a Private Call to
+                      {' '}
+                      {performer?.name || performer?.username || 'N/A'}
+                      {' '}
+                      by
+                      {' '}
+                      <img src="/static/gem-ico.png" width="20px" alt="gem" />
+                      {' '}
+                      {(performer?.privateChatPrice || 0).toFixed(2)}
+                      {' '}
+                      per minute
                     </a>
                   )}
                 </Button>
               ) : (
-                <Button
-                  type="primary"
-                  onClick={this.leave.bind(this)}
-                  block
-                  disabled={processing}
-                >
-                  End Call
-                </Button>
+                <div style={{ display: 'flex' }}>
+                  <Button
+                    className="error"
+                    onClick={() => Router.back()}
+                    block
+                    disabled={processing}
+                  >
+                    End Call
+                  </Button>
+                  <Button
+                    className="secondary"
+                    onClick={() => this.setState({ openTipModal: true })}
+                    block
+                    disabled={processing}
+                  >
+                    Send Tip
+                  </Button>
+                </div>
               )}
-              <p className="stream-duration">
-                <ClockCircleOutlined />
-                {' '}
-                {videoDuration(callTime)}
-              </p>
-              {(!roomJoined && countTime < 300) && [
-                <h4 key="text_1" className="text-center">{`Your request has been sent, please waiting for ${performer?.name || performer?.username} accept!`}</h4>,
-                <div key="text_2" className="text-center"><Spin size="large" /></div>]}
-              <div className={!roomJoined ? 'hide private-streaming-container' : 'private-streaming-container'}>
-                <PrivateHlsPublisher
-                  containerClassName="private-streaming-container"
-                  {...this.props}
-                  ref={this.publisherRef}
-                  configs={{
-                    localVideoId: 'private-publisher'
-                  }}
-                />
-                {subscriberStreamId && (
-                <PrivateHlsSubscriber
-                  containerClassName="private-streaming-container"
-                  streamId={subscriberStreamId}
-                  {...this.props}
-                  ref={this.subscriberRef}
-                  configs={{
-                    isPlayMode: true
-                  }}
-                />
-                )}
-              </div>
             </Col>
             <Col xs={24} md={10}>
               <ChatBox
@@ -423,19 +461,21 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
             title="Send Private Call Request"
             visible={openPriceModal}
             footer={null}
-            onCancel={() => sessionPrice && this.setState({ openPriceModal: false })}
+            onCancel={() => this.setState({ openPriceModal: false })}
           >
-            <StreamPriceForm price={sessionPrice} streamType="private" submiting={processing} performer={performer} user={user} onFinish={this.sendRequest.bind(this)} />
+            <PurchaseStreamForm streamType="private" submiting={processing} performer={performer} onFinish={this.sendRequest.bind(this)} />
           </Modal>
           <Modal
-            key="payment-form"
-            title="CCbill Payment"
-            visible={openPaymentModal}
-            width={650}
+            key="tip"
+            title={null}
+            visible={openTipModal}
+            onOk={() => this.setState({ openTipModal: false })}
+            confirmLoading={processing}
             footer={null}
-            onCancel={this.onCancelRequest.bind(this)}
+            onCancel={() => this.setState({ openTipModal: false })}
+            destroyOnClose
           >
-            <PurchaseStreamForm performer={performer} price={sessionPrice} onFinish={this.handlePurchase.bind(this)} submiting={processing} />
+            <TipPerformerForm performer={performer} submiting={processing} onFinish={this.sendTip.bind(this)} />
           </Modal>
         </div>
       </Layout>
@@ -446,14 +486,15 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
 UserPrivateChat.contextType = SocketContext;
 
 const mapStateToProps = (state) => ({
-  ui: state.ui,
+  ui: { ...state.ui },
   ...state.streaming,
-  user: state.user.current,
-  activeConversation: state.streamMessage.activeConversation
+  user: { ...state.user.current },
+  activeConversation: { ...state.streamMessage.activeConversation }
 });
 const mapDispatchs = {
   getStreamConversationSuccess,
-  resetStreamMessage
+  resetStreamMessage,
+  updateBalance
 };
 export default connect(
   mapStateToProps,

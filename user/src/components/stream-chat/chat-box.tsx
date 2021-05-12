@@ -13,15 +13,13 @@ interface IProps {
   activeConversation?: any;
   totalParticipant?: number;
   members?: IUser[];
-  loggedIn?: boolean;
-  hideMember: boolean;
+  hideMember?: boolean;
 }
 
-const checkPermission = (performer, conversation) => {
-  if (performer && conversation && conversation.data && performer._id === conversation.data.performerId) {
+const checkPermission = (user, conversation) => {
+  if (user?._id === conversation?.data?.performerId || user?.roles?.includes('admin')) {
     return true;
   }
-
   return false;
 };
 
@@ -31,7 +29,6 @@ const ChatBox = ({
   activeConversation,
   totalParticipant,
   members,
-  loggedIn,
   hideMember = false
 }: IProps) => {
   const [removing, setRemoving] = useState(false);
@@ -43,12 +40,13 @@ const ChatBox = ({
 
   const removeAllMessage = async () => {
     if (!canReset) {
+      message.error('You don\'t have permission!');
       return;
     }
 
     try {
       setRemoving(true);
-      if (!window.confirm('Are you sure you want to remove chat history?')) {
+      if (!window.confirm('Are you sure you want to clear all chat history?')) {
         return;
       }
       await messageService.deleteAllMessageInConversation(
@@ -71,15 +69,11 @@ const ChatBox = ({
             {activeConversation
             && activeConversation.data
             && activeConversation.data.streamId ? (
-              <StreamMessenger
-                streamId={activeConversation.data.streamId}
-                activeConversation={activeConversation.data}
-                loggedIn={loggedIn}
-              />
+              <StreamMessenger streamId={activeConversation.data.streamId} />
               ) : <p className="text-center">Let start a converstion</p>}
           </Tabs.TabPane>
           {!hideMember && (
-          <Tabs.TabPane tab={`USER (${totalParticipant || 0})`} key="chat_user">
+          <Tabs.TabPane tab={`USERS (${totalParticipant || 0})`} key="chat_user">
             <StreamingChatUsers members={members} />
           </Tabs.TabPane>
           )}
@@ -92,7 +86,7 @@ const ChatBox = ({
           loading={removing}
           onClick={() => removeAllMessage()}
         >
-          Clear all message history
+          Clear chat history
         </Button>
       </div>
       )}
@@ -103,10 +97,10 @@ const ChatBox = ({
 ChatBox.defaultProps = {
   totalParticipant: 0,
   members: [],
-  loggedIn: false,
   activeConversation: null,
   user: null,
-  resetAllStreamMessage: null
+  resetAllStreamMessage: null,
+  hideMember: false
 };
 
 export default ChatBox;

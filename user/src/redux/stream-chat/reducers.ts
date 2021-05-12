@@ -181,8 +181,8 @@ const streamMessageReducer = [
     reducer(state: any, data: IReduxAction<any>) {
       const nextState = { ...state };
       const { conversationId, _id } = data.payload;
-      const i = findIndex(nextState.conversationMap[conversationId].items, (item: any) => item && item._id === _id);
-      if (nextState.conversationMap[conversationId].items && nextState.conversationMap[conversationId].items[i]) {
+      if (nextState.conversationMap[conversationId] && nextState.conversationMap[conversationId].items) {
+        const i = findIndex(nextState.conversationMap[conversationId].items, (item: any) => item && item._id === _id);
         nextState.conversationMap[conversationId].items[i].text = 'Message deleted';
         nextState.conversationMap[conversationId].items[i].isDeleted = true;
       }

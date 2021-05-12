@@ -14,7 +14,7 @@ const StreamingChatUsers = ({
           && members.map((member) => (
             <div className="user" key={member._id}>
               <img alt="avt" src={member?.avatar || '/static/no-avatar.png'} />
-              <span className="username">{member.name}</span>
+              <span className="username">{member?.name || member?.username || 'N/A'}</span>
             </div>
           ))}
     </div>

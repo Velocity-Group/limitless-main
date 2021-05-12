@@ -19,9 +19,10 @@ import { DataResponse, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserInterceptor } from 'src/modules/auth/interceptors';
+import { UserDto } from 'src/modules/user/dtos';
 import { StreamService } from '../services/stream.service';
 import {
-  StreamPayload, TokenCreatePayload, SetFreePayload, SetDurationPayload, PrivateCallRequestPayload, SearchStreamPayload
+  TokenCreatePayload, SetFreePayload, SetDurationPayload, PrivateCallRequestPayload, SearchStreamPayload
 } from '../payloads';
 import { StreamDto, Webhook } from '../dtos';
 import { TokenResponse } from '../constant';
@@ -55,40 +56,10 @@ export class StreamController {
     return DataResponse.ok(data);
   }
 
-  @Get('/session/:type')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async getSessionId(
-    @CurrentUser() performer: PerformerDto,
-    @Param() param: StreamPayload
-  ): Promise<DataResponse<string>> {
-    const sessionId = await this.streamService.getSessionId(
-      performer._id,
-      param.type
-    );
-
-    return DataResponse.ok(sessionId);
-  }
-
-  @Get('/session/:id/:type')
-  @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async getPerformerSessionId(
-    @Param() params: StreamPayload
-  ): Promise<DataResponse<string>> {
-    const sessionId = await this.streamService.getSessionId(
-      params.id,
-      params.type
-    );
-
-    return DataResponse.ok(sessionId);
-  }
-
   @Post('/live')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
   @UsePipes(new ValidationPipe({ transform: true }))
   async goLive(
     @CurrentUser() performer: PerformerDto
@@ -100,21 +71,25 @@ export class StreamController {
   @Post('/join/:id')
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(UserInterceptor)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('user')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async join(@Param('id') performerId: string) {
+  async join(
+    @Param('id') performerId: string
+  ) {
     const data = await this.streamService.joinPublicChat(performerId);
     return DataResponse.ok(data);
   }
 
   @Post('/private-chat/:id')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('user')
   @UsePipes(new ValidationPipe({ transform: true }))
   async requestPrivateChat(
     @Param('id') performerId: string,
     @Body() payload: PrivateCallRequestPayload,
-    @CurrentUser() user: PerformerDto
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
     const data = await this.streamService.requestPrivateChat(user, payload, performerId);
     return DataResponse.ok(data);
@@ -122,7 +97,8 @@ export class StreamController {
 
   @Post('/private-chat/:id/decline')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
   @UsePipes(new ValidationPipe({ transform: true }))
   async declinePrivateChat(
     @Param('id') id: string,
@@ -134,13 +110,14 @@ export class StreamController {
 
   @Get('/private-chat/:id')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
   @UsePipes(new ValidationPipe({ transform: true }))
   async accpetPrivateChat(
     @Param('id') id: string,
     @CurrentUser() performer: PerformerDto
   ): Promise<DataResponse<any>> {
-    const data = await this.streamService.acceptPrivateChat(id, performer._id);
+    const data = await this.streamService.acceptPrivateChat(id, performer);
     return DataResponse.ok(data);
   }
 
@@ -163,7 +140,8 @@ export class StreamController {
 
   @Put('/update')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
   async setFree(
     @CurrentUser() user: PerformerDto,
     @Body() payload: SetFreePayload
@@ -174,7 +152,8 @@ export class StreamController {
 
   @Put('/set-duration')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
   async setDuration(
     @CurrentUser() user: PerformerDto,
     @Body() payload: SetDurationPayload
@@ -185,11 +164,12 @@ export class StreamController {
 
   @Get('/group-chat/:id')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('user')
   @UsePipes(new ValidationPipe({ transform: true }))
   async joinGroupChat(
     @Param('id') id: string,
-    @CurrentUser() user: PerformerDto
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
     const data = await this.streamService.joinGroupChat(id, user);
 
@@ -198,7 +178,8 @@ export class StreamController {
 
   @Post('/group-chat')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
   @UsePipes(new ValidationPipe({ transform: true }))
   async startGroupChat(
     @CurrentUser() performer: PerformerDto

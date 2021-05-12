@@ -258,7 +258,7 @@ export class UserService {
     id: string | ObjectId,
     payload: Record<string, number>
   ) {
-    return this.userModel.updateOne({ _id: id }, { $inc: payload });
+    return this.userModel.updateOne({ _id: id }, { $inc: payload }, { upsert: true });
   }
 
   public async updateCCbillPaymentInfo(userId: | ObjectId, subscriptionId: string) {

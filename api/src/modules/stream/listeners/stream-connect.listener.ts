@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { QueueEvent, QueueEventService } from 'src/kernel';
 import { Model } from 'mongoose';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
@@ -8,6 +8,7 @@ import {
   LIVE_STREAM_EVENT_NAME
 } from 'src/modules/stream/constant';
 import { PerformerService } from 'src/modules/performer/services';
+import { UserService } from 'src/modules/user/services';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
 import { StreamModel } from '../models';
 
@@ -17,11 +18,14 @@ const MODEL_LIVE_STREAM_DISCONNECTED = 'MODEL_LIVE_STREAM_CONNECTED';
 @Injectable()
 export class StreamConnectListener {
   constructor(
-    private readonly queueEventService: QueueEventService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
-    private readonly socketUserService: SocketUserService,
     @Inject(STREAM_MODEL_PROVIDER)
-    private readonly streamModel: Model<StreamModel>
+    private readonly streamModel: Model<StreamModel>,
+    private readonly queueEventService: QueueEventService,
+    private readonly socketUserService: SocketUserService
   ) {
     this.queueEventService.subscribe(
       MEMBER_LIVE_STREAM_CHANNEL,
@@ -41,19 +45,16 @@ export class StreamConnectListener {
     }
 
     const sourceId = event.data;
-    const user = await this.performerService.findById(sourceId);
+    const user = sourceId && await this.userService.findById(sourceId);
     if (!user) {
       return;
     }
-
     const connectedRedisRooms = await this.socketUserService.userGetAllConnectedRooms(
       sourceId
     );
-
     if (!connectedRedisRooms.length) {
       return;
     }
-
     await Promise.all(
       connectedRedisRooms.map((id) => this.socketUserService.removeConnectionFromRoom(id, sourceId))
     );
@@ -66,7 +67,7 @@ export class StreamConnectListener {
             id,
             `message_created_conversation_${conversationIds[index]}`,
             {
-              text: `${user?.name || user?.username || 'N/A'} has left this conversation`,
+              text: `${user?.name || user?.username || 'N/A'} left`,
               _id: conversationIds[index],
               conversationId: conversationIds[index],
               isSystem: true
@@ -104,7 +105,8 @@ export class StreamConnectListener {
      */
     await this.streamModel.updateMany(
       { isStreaming: 1 },
-      { $set: { isStreaming: 0, lastStreamingTime: new Date() } }
+      { $set: { isStreaming: 0, lastStreamingTime: new Date() } },
+      { upsert: true }
     );
   }
 

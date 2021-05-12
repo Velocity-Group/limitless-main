@@ -151,8 +151,7 @@ class GalleryViewPage extends PureComponent<IProps> {
         error: null,
         success: false,
         items: []
-      },
-      user
+      }
     } = this.props;
     const {
       fetching, photos, isBought, isSubscribed, submiting, openPurchaseModal, openSubscriptionModal
@@ -335,7 +334,6 @@ class GalleryViewPage extends PureComponent<IProps> {
             onCancel={() => this.setState({ openSubscriptionModal: false })}
           >
             <ConfirmSubscriptionPerformerForm
-              user={user}
               type={this.subscriptionType || 'monthly'}
               performer={gallery?.performer}
               submiting={submiting}

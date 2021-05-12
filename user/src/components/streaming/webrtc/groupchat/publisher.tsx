@@ -8,6 +8,7 @@ import React, { PureComponent } from 'react';
 import withAntmedia from 'src/antmedia';
 import { WEBRTC_ADAPTOR_INFORMATIONS } from 'src/antmedia/constants';
 import { SocketContext } from 'src/socket';
+import '../../index.less';
 
 interface IProps {
   participantId?: string;
@@ -27,24 +28,21 @@ interface States {
   streamId?: string;
 }
 
-class Publisher extends PureComponent<IProps, States> {
+class GroupWebrtcPublisher extends PureComponent<IProps, States> {
   private socket;
 
   constructor(props) {
     super(props);
     this.state = {
+      streamId: '',
       conversationId: ''
     };
   }
 
   componentDidMount() {
-    const { id, containerClassName } = this.props;
     this.socket = this.context;
     Router.events.on('routeChangeStart', this.onbeforeunload);
     window.addEventListener('beforeunload', this.onbeforeunload);
-    const video = document.getElementById(id) as HTMLVideoElement;
-    const container = document.getElementsByClassName(containerClassName)[0];
-    video.width = container.clientWidth / 4;
   }
 
   componentWillUnmount() {
@@ -56,16 +54,14 @@ class Publisher extends PureComponent<IProps, States> {
     const { webRTCAdaptor, settings } = this.props;
     const { conversationId, streamId } = this.state;
     if (info === WEBRTC_ADAPTOR_INFORMATIONS.INITIALIZED) {
-      webRTCAdaptor.joinRoom(conversationId, streamId);
-    } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.JOINED_THE_ROOM) {
       const token = await streamService.getPublishToken({ streamId, settings });
       webRTCAdaptor.publish(streamId, token);
-    } else if (info === 'publish_started') {
+    } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.PUBLISH_STARTED) {
       this.socket.emit('private-stream/join', {
         conversationId,
         streamId
       });
-    } else if (info === 'publish_finished') {
+    } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.PUBLISH_FINISHED) {
       this.socket.emit('private-stream/leave', {
         conversationId,
         streamId
@@ -89,9 +85,9 @@ class Publisher extends PureComponent<IProps, States> {
     this.setState({ conversationId });
   }
 
-  publish(streamId: string) {
+  async publish(streamId: string) {
     const { initWebRTCAdaptor } = this.props;
-    this.setState({ streamId });
+    await this.setState({ streamId });
     initWebRTCAdaptor(this.handler.bind(this));
   }
 
@@ -102,7 +98,6 @@ class Publisher extends PureComponent<IProps, States> {
 
   render() {
     const { publish_started, id, classNames } = this.props;
-
     return (
       <video
         id={id}
@@ -116,5 +111,5 @@ class Publisher extends PureComponent<IProps, States> {
   }
 }
 
-Publisher.contextType = SocketContext;
-export default withAntmedia(Publisher);
+GroupWebrtcPublisher.contextType = SocketContext;
+export default withAntmedia(GroupWebrtcPublisher);

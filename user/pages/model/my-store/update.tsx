@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import { message } from 'antd';
 import { productService } from '@services/product.service';
-import { IProductUpdate, IUIConfig } from 'src/interfaces';
+import { IProduct, IUIConfig } from 'src/interfaces';
 import Loader from '@components/common/base/loader';
 import { FormProduct } from '@components/product/form-product';
 import Router from 'next/router';
@@ -32,7 +32,7 @@ class ProductUpdate extends PureComponent<IProps> {
   state = {
     submiting: false,
     fetching: true,
-    product: {} as IProductUpdate,
+    product: {} as IProduct,
     uploadPercentage: 0
   };
 

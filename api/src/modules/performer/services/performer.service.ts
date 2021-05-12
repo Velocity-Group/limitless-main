@@ -836,15 +836,15 @@ export class PerformerService {
     id: string | ObjectId,
     payload: Record<string, number>
   ) {
-    return this.performerModel.updateOne({ _id: id }, { $inc: payload });
+    return this.performerModel.updateOne({ _id: id }, { $inc: payload }, { upsert: true });
   }
 
   public async goLive(id: string | ObjectId) {
-    return this.performerModel.updateOne({ _id: id }, { $set: { live: 1 } });
+    return this.performerModel.updateOne({ _id: id }, { $set: { live: 1 } }, { upsert: true });
   }
 
   public async setStreamingStatus(id: string | ObjectId, streamingStatus: string) {
-    return this.performerModel.updateOne({ _id: id }, { $set: { streamingStatus } });
+    return this.performerModel.updateOne({ _id: id }, { $set: { streamingStatus } }, { upsert: true });
   }
 
   public async updatePaymentGateway(payload: PaymentGatewaySettingPayload) {

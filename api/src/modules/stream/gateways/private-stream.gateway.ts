@@ -3,11 +3,13 @@ import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Inject, forwardRef } from '@nestjs/common';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { AuthService } from 'src/modules/auth/services';
+import { Socket } from 'socket.io';
 import { Model } from 'mongoose';
 import { PerformerService } from 'src/modules/performer/services';
 import * as moment from 'moment';
 import { ConversationService } from 'src/modules/message/services';
-import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserService } from 'src/modules/user/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { BroadcastStatus } from '../constant';
 import { StreamModel } from '../models';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
@@ -20,6 +22,8 @@ const STREAM_INFORMATION_CHANGED = 'private-stream/streamInformationChanged';
 @WebSocketGateway()
 export class PrivateStreamWsGateway {
   constructor(
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => AuthService))
@@ -36,7 +40,7 @@ export class PrivateStreamWsGateway {
 
   @SubscribeMessage('private-stream/join')
   async handleJoinStream(
-    client: any,
+    client: Socket,
     payload: { conversationId: string; streamId: string; sessionId: string }
   ): Promise<void> {
     try {
@@ -98,11 +102,11 @@ export class PrivateStreamWsGateway {
           // }
         });
         if (memberIds.length) {
-          const members = await this.performerService.findByIds(memberIds);
+          const members = await this.userService.findByIds(memberIds);
           const data = {
             conversationId,
             total: members.length,
-            members: members.map((m) => new PerformerDto(m).toResponse())
+            members: members.map((m) => new UserDto(m).toResponse())
           };
           this.socketUserService.emitToRoom(
             roomName,
@@ -118,7 +122,7 @@ export class PrivateStreamWsGateway {
 
   @SubscribeMessage('private-stream/leave')
   async handleLeaveStream(
-    client: any,
+    client: Socket,
     payload: { conversationId: string; streamId: string; sessionId: string }
   ): Promise<void> {
     try {
@@ -172,9 +176,7 @@ export class PrivateStreamWsGateway {
         const timeJoined = values[1] ? parseInt(values[1], 10) : null;
         const role = values[0];
         if (timeJoined) {
-          const streamTime = moment()
-            .toDate()
-            .getTime() - timeJoined;
+          const streamTime = moment().toDate().getTime() - timeJoined;
           if (role === 'model') {
             await Promise.all([
               stream && stream.isStreaming && this.streamModel.updateOne({ _id: stream._id }, { $set: { lastStreamingTime: new Date(), isStreaming: 0, streamingTime: streamTime / 1000 } }),
@@ -188,7 +190,7 @@ export class PrivateStreamWsGateway {
               })
             ]);
           } else if (role === 'member') {
-            await this.performerService.updateStats(user._id, {
+            await this.userService.updateStats(user._id, {
               'stats.totalViewTime': streamTime
             });
           }
@@ -207,11 +209,11 @@ export class PrivateStreamWsGateway {
         }
       });
       if (memberIds.length) {
-        const members = await this.performerService.findByIds(memberIds);
+        const members = await this.userService.findByIds(memberIds);
         const data = {
           conversationId,
           total: members.length,
-          members: members.map((m) => new PerformerDto(m).toResponse())
+          members: members.map((m) => new UserDto(m).toResponse())
         };
         this.socketUserService.emitToRoom(
           roomName,

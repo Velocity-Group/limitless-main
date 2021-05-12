@@ -6,10 +6,9 @@ import { streamService } from 'src/services';
 import classnames from 'classnames';
 import withAntMedia from 'src/antmedia';
 import { WEBRTC_ADAPTOR_INFORMATIONS } from 'src/antmedia/constants';
-import './index.less';
+import '../../index.less';
 
 interface Props {
-  participantId?: string;
   webRTCAdaptor: any;
   initWebRTCAdaptor: Function;
   publish_started: boolean;
@@ -19,7 +18,7 @@ interface Props {
   settings: StreamSettings;
 }
 
-class Subscriber extends React.PureComponent<Props> {
+class PrivateWebrtcSubscriber extends React.PureComponent<Props> {
   private streamId: string;
 
   private activeStreams = [];
@@ -88,4 +87,4 @@ class Subscriber extends React.PureComponent<Props> {
   }
 }
 
-export default withAntMedia(Subscriber);
+export default withAntMedia(PrivateWebrtcSubscriber);

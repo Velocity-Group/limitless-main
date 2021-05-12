@@ -2,6 +2,7 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Model } from 'mongoose';
 import { Inject, forwardRef } from '@nestjs/common';
+import { Socket } from 'socket.io';
 import { AuthService } from 'src/modules/auth/services';
 import { StreamService } from 'src/modules/stream/services';
 import { PUBLIC_CHAT } from 'src/modules/stream/constant';
@@ -9,13 +10,16 @@ import { SocketUserService } from 'src/modules/socket/services/socket-user.servi
 import * as moment from 'moment';
 import { PerformerService } from 'src/modules/performer/services';
 import { ConversationService } from 'src/modules/message/services';
-import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserService } from 'src/modules/user/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { StreamModel } from '../models';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
 
 @WebSocketGateway()
 export class PublicStreamWsGateway {
   constructor(
+    @Inject(forwardRef(() => UserService))
+  private readonly userService: UserService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => AuthService))
@@ -30,28 +34,25 @@ export class PublicStreamWsGateway {
   ) {}
 
   @SubscribeMessage('public-stream/live')
-  async goLive(client: any, payload: { conversationId: string }) {
+  async goLive(client: Socket, payload: { conversationId: string }) {
     try {
       const { conversationId } = payload;
-      if (!conversationId) {
-        return;
-      }
-
+      if (!conversationId) return;
       const conversation = await this.conversationService.findById(conversationId);
       if (!conversation) return;
-
       const { token } = client.handshake.query;
       if (!token) return;
-
       const user = await this.authService.getSourceFromJWT(token);
       if (!user) return;
-
       const roomName = this.streamService.getRoomName(conversation._id, conversation.type);
       this.socketService.emitToRoom(roomName, 'join-broadcaster', {
         performerId: user._id,
         conversationId
       });
-      await Promise.all([this.performerService.goLive(user._id), this.streamModel.updateOne({ _id: conversation.streamId }, { $set: { isStreaming: 1 } })]);
+      await Promise.all([
+        this.performerService.goLive(user._id),
+        this.streamModel.updateOne({ _id: conversation.streamId }, { $set: { isStreaming: 1 } })
+      ]);
     } catch (error) {
       console.log(error);
     }
@@ -59,23 +60,21 @@ export class PublicStreamWsGateway {
 
   @SubscribeMessage('public-stream/join')
   async handleJoinPublicRoom(
-    client: any,
+    client: Socket,
     payload: { conversationId: string }
   ): Promise<void> {
     try {
       const { token } = client.handshake.query;
       const { conversationId } = payload;
-      if (!conversationId) {
-        return;
-      }
+      if (!conversationId) return;
       const conversation = conversationId && await this.conversationService.findById(conversationId);
-      if (!conversation) {
-        return;
-      }
-
+      if (!conversation) return;
       const { performerId, type } = conversation;
-      const decodded = token && await this.authService.verifyJWT(token);
-      const user = await this.performerService.findById(decodded.sourceId);
+      const authUser = token && await this.authService.verifyJWT(token);
+      let user = await this.performerService.findById(authUser?.sourceId) as any;
+      if (!user) {
+        user = await this.userService.findById(authUser?.sourceId);
+      }
       const roomName = this.streamService.getRoomName(conversationId, type);
       await client.join(roomName);
       let role = 'guest';
@@ -85,7 +84,7 @@ export class PublicStreamWsGateway {
           roomName,
           `message_created_conversation_${conversation._id}`,
           {
-            text: `${user?.name || user?.username || 'N/A'} has joined this conversation`,
+            text: `${user?.name || user?.username || 'N/A'} joined`,
             _id: conversation._id,
             conversationId,
             isSystem: true
@@ -117,11 +116,11 @@ export class PublicStreamWsGateway {
         await this.socketService.emitToUsers(memberIds, 'model-joined', { conversationId });
       }
 
-      const members = (memberIds.length && await this.performerService.findByIds(memberIds)) || [];
+      const members = (memberIds.length && await this.userService.findByIds(memberIds)) || [];
       const data = {
         conversationId,
         total: members.length,
-        members: members.map((m) => new PerformerDto(m).toResponse())
+        members: members.map((m) => new UserDto(m).toResponse())
       };
       this.socketService.emitToRoom(roomName, 'public-room-changed', data);
 
@@ -143,7 +142,7 @@ export class PublicStreamWsGateway {
 
   @SubscribeMessage('public-stream/leave')
   async handleLeavePublicRoom(
-    client: any,
+    client: Socket,
     payload: { conversationId: string }
   ): Promise<void> {
     try {
@@ -158,29 +157,28 @@ export class PublicStreamWsGateway {
       }
 
       const { performerId, type } = conversation;
-      const [user] = await Promise.all([
-        token && this.authService.getSourceFromJWT(token)
-      ]);
+      const authUser = token && await this.authService.getSourceFromJWT(token);
+      let user = await this.performerService.findById(authUser?.sourceId) as any;
+      if (!user) {
+        user = await this.userService.findById(authUser?.sourceId);
+      }
       const roomName = this.streamService.getRoomName(conversationId, type);
       await client.leave(roomName);
 
-      const [stream] = await Promise.all([
-        this.streamService.findByPerformerId(performerId, {
-          type: PUBLIC_CHAT
-        })
-      ]);
-
+      const stream = await this.streamService.findByPerformerId(performerId, {
+        type: PUBLIC_CHAT
+      });
       if (user) {
-        await this.socketService.emitToRoom(
-          roomName,
-          `message_created_conversation_${payload.conversationId}`,
-          {
-            text: `${user?.name || user?.username || 'N/A'} left this conversation`,
-            _id: payload.conversationId,
-            conversationId,
-            isSystem: true
-          }
-        );
+        // await this.socketService.emitToRoom(
+        //   roomName,
+        //   `message_created_conversation_${payload.conversationId}`,
+        //   {
+        //     text: `${user?.name || user?.username || 'N/A'} left this conversation`,
+        //     _id: payload.conversationId,
+        //     conversationId,
+        //     isSystem: true
+        //   }
+        // );
         const results = await this.socketService.getConnectionValue(
           roomName,
           user._id
@@ -207,7 +205,7 @@ export class PublicStreamWsGateway {
                 })
               ]);
             } else if (role === 'member') {
-              await this.performerService.updateStats(user._id, {
+              await this.userService.updateStats(user._id, {
                 'stats.totalViewTime': streamTime
               });
             }
@@ -230,11 +228,11 @@ export class PublicStreamWsGateway {
           memberIds.push(id);
         }
       });
-      const members = await this.performerService.findByIds(memberIds);
+      const members = await this.userService.findByIds(memberIds);
       const data = {
         conversationId,
         total: members.length,
-        members: members.map((m) => new PerformerDto(m).toResponse())
+        members: members.map((m) => new UserDto(m).toResponse())
       };
       await this.socketService.emitToRoom(roomName, 'public-room-changed', data);
     } catch (e) {

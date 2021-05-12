@@ -6,9 +6,9 @@ import { streamService } from 'src/services';
 import classnames from 'classnames';
 import withAntMedia from 'src/antmedia';
 import { WEBRTC_ADAPTOR_INFORMATIONS } from 'src/antmedia/constants';
+import '../../index.less';
 
 interface Props {
-  participantId?: string;
   webRTCAdaptor: any;
   initWebRTCAdaptor: Function;
   onClick?: (id) => void;
@@ -23,7 +23,7 @@ interface Props {
 class Subscriber extends React.PureComponent<Props> {
   private streamIds: string[] = [];
 
-  private videoIds = [];
+  private availableStreamIds = [];
 
   async handler(info: WEBRTC_ADAPTOR_INFORMATIONS, obj: any) {
     const { webRTCAdaptor, settings } = this.props;
@@ -37,14 +37,33 @@ class Subscriber extends React.PureComponent<Props> {
       const token = await streamService.getSubscriberToken({ streamId: this.streamIds, settings });
       webRTCAdaptor.play(this.streamIds, token);
     } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.NEW_STREAM_AVAILABLE) {
-      const playedVideo = this.videoIds.find((id) => id === obj.streamId);
-      if (!playedVideo) {
-        this.videoIds.push(obj.streamId);
+      const availableStream = this.availableStreamIds.find((id) => id === obj.streamId);
+      if (!availableStream) {
+        this.availableStreamIds.push(obj.streamId);
         this.createRemoteVideo(obj);
       }
     } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.PLAY_FINISHED) {
-      this.videoIds = this.videoIds.filter((id) => id !== obj.streamId);
+      this.availableStreamIds = this.availableStreamIds.filter((id) => id !== obj.streamId);
       this.removeRemoteVideo(obj.streamId);
+      setTimeout(() => {
+        webRTCAdaptor.getStreamInfo(obj.streamId);
+      }, 3000);
+    } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.STREAM_INFORMATION) {
+      if (this.streamIds.includes(obj.streamId)) {
+        const token = await streamService.getSubscriberToken({ streamId: obj.streamId, settings });
+        webRTCAdaptor.play(obj.streamId, token);
+      }
+    }
+  }
+
+  async cbErrorHandler(error: string) {
+    if (error === 'no_stream_exist') {
+      const { webRTCAdaptor, initWebRTCAdaptor } = this.props;
+      if (!webRTCAdaptor) {
+        initWebRTCAdaptor(this.handler.bind(this), this.cbErrorHandler.bind(this));
+      } else {
+        this.streamIds.forEach((id) => webRTCAdaptor.getStreamInfo(id));
+      }
     }
   }
 
@@ -58,9 +77,8 @@ class Subscriber extends React.PureComponent<Props> {
     video.muted = true;
     video.controls = true;
     video.playsInline = true;
-    video.width = container.clientWidth / 4;
     video.srcObject = stream;
-    video.addEventListener('click', handleClick);
+    // video.addEventListener('click', handleClick);
     container.append(video);
   }
 
@@ -78,6 +96,7 @@ class Subscriber extends React.PureComponent<Props> {
     const {
       initWebRTCAdaptor, initialized, webRTCAdaptor, settings
     } = this.props;
+    this.streamIds = [...this.streamIds, ...streamIds];
     if (initialized) {
       if (Array.isArray(streamIds)) {
         const tokens = await Promise.all(streamIds.map((streamId) => streamService.getSubscriberToken({ streamId, settings })));
@@ -86,8 +105,12 @@ class Subscriber extends React.PureComponent<Props> {
       return;
     }
 
-    this.streamIds = [...this.streamIds, ...streamIds];
-    initWebRTCAdaptor(this.handler.bind(this));
+    initWebRTCAdaptor(this.handler.bind(this), this.cbErrorHandler.bind(this));
+  }
+
+  close(streamId: string) {
+    this.streamIds = this.streamIds.filter((id) => id !== streamId);
+    this.removeRemoteVideo(streamId);
   }
 
   stop() {

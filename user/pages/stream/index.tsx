@@ -2,9 +2,9 @@
 import { PureComponent, createRef } from 'react';
 import Head from 'next/head';
 import {
-  Row, Col, message, Button, Alert, Modal
+  Layout, Row, Col, message, Button, Alert, Modal, Rate
 } from 'antd';
-import { ClockCircleOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, CommentOutlined } from '@ant-design/icons';
 import { IResponse } from 'src/services/api-request';
 import {
   IPerformer,
@@ -16,13 +16,14 @@ import {
 } from 'src/interfaces';
 import { connect } from 'react-redux';
 import {
-  streamService, performerService, messageService, paymentService
+  streamService, performerService, messageService, purchaseTokenService, reviewService
 } from 'src/services';
 import { SocketContext, Event } from 'src/socket';
 import nextCookie from 'next-cookies';
 import Router from 'next/router';
 import ChatBox from '@components/stream-chat/chat-box';
 import LiveSubscriber from 'src/components/streaming/subscriber';
+import { updateBalance } from '@redux/user/actions';
 import {
   loadStreamMessages,
   getStreamConversationSuccess,
@@ -31,7 +32,10 @@ import {
 } from '@redux/stream-chat/actions';
 import { getResponseError, videoDuration } from '@lib/index';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
-import '../model/live/index.less';
+import { TipPerformerForm } from '@components/performer/index';
+import { ReviewPerformerForm } from '@components/reviews';
+import ListReviews from '@components/reviews/list-reviews';
+import '../live/index.less';
 
 // eslint-disable-next-line no-shadow
 enum STREAM_EVENT {
@@ -43,9 +47,11 @@ enum STREAM_EVENT {
 
 const DEFAULT_OFFLINE_IMAGE_URL = '/static/offline.jpg';
 const DEFAULT_PRIVATE_IMAGE_URL = '/static/private.png';
+const DEFAULT_GROUP_IMAGE_URL = '/static/group.png';
 const DEFAULT_IMAGE_URL = '/static/offline.jpg';
 
 interface IProps {
+  updateBalance: Function;
   resetStreamMessage: Function;
   resetAllStreamMessage: Function;
   getStreamConversationSuccess: Function;
@@ -53,23 +59,22 @@ interface IProps {
   activeConversation: any;
   ui: IUIConfig;
   user: IUser;
-  loggedIn: boolean;
   performer: IPerformer;
-  success: boolean;
-  searching: boolean;
   settings: StreamSettings;
 }
 
 class LivePage extends PureComponent<IProps> {
+  static layout = 'stream';
+
   static authenticate = true;
 
   private subscrbierRef: any;
 
-  private socket;
+  private interval;
 
-  private interval: NodeJS.Timeout;
+  private streamDurationInterval;
 
-  private streamDurationInterval: NodeJS.Timeout;
+  private intervalCharge;
 
   private sessionId;
 
@@ -105,14 +110,15 @@ class LivePage extends PureComponent<IProps> {
     poster: '',
     total: 0,
     members: [],
-    isBought: false,
     conversationDescription: '',
+    sessionDuration: 0,
+    isFree: false,
+    isBought: false,
     openPurchaseModal: false,
     submiting: false,
-    live: false,
-    streamingStatus: 'public',
-    sessionPrice: 0,
-    sessionDuration: 0
+    openTipModal: false,
+    openReviewModal: false,
+    newReview: null
   };
 
   componentDidMount() {
@@ -122,18 +128,26 @@ class LivePage extends PureComponent<IProps> {
       return;
     }
     this.subscrbierRef = createRef();
-    this.socket = this.context;
     Router.events.on('routeChangeStart', this.onbeforeunload.bind(this));
     window.addEventListener('beforeunload', this.onbeforeunload.bind(this));
-    this.interval = setInterval(this.updatePerformerInfo.bind(this), 60 * 1000);
+    this.updatePerformerInfo();
+    this.interval = setInterval(this.updatePerformerInfo.bind(this), 30 * 1000);
     this.initProfilePage();
-    this.setStreamStatus(performer.live, performer.streamingStatus);
-    this.subscribe.bind(this, { performerId: performer._id });
+    this.subscribe({ performerId: performer._id });
   }
 
-  componentDidUpdate(_, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     const { poster, isBought } = this.state;
-    if (!prevState.isBought && isBought) {
+    const {
+      settings: { optionForBroadcast }
+    } = this.props;
+    if (!prevState.isBought && isBought && this.sessionId) {
+      if (optionForBroadcast === HLS) {
+        this.sessionId && this.subscrbierRef.current?.playHLS(this.sessionId);
+      }
+      if (optionForBroadcast === WEBRTC) {
+        this.sessionId && this.subscrbierRef.current?.play(this.sessionId);
+      }
       if (window['player']) {
         window['player'].dispose();
       }
@@ -158,19 +172,42 @@ class LivePage extends PureComponent<IProps> {
     this.setState({ sessionDuration: sessionDuration + 1 });
   }
 
-  handleStreamInfo(data) {
+  handleStreamInfo = (data) => {
+    const { isBought } = this.state;
     const { conversation, stream } = data;
     conversation && this.setState({ conversationDescription: conversation.name });
-    stream && this.setState({ sessionPrice: stream.price });
+    stream && this.setState({ isFree: stream.isFree });
+    if (stream && stream.isFree) {
+      message.info('This stream is free to watch now!', 10);
+      !isBought && this.setState({ isBought: true });
+      this.intervalCharge && clearInterval(this.intervalCharge);
+    }
+  }
+
+  async handleReview({ rating, comment }) {
+    const { performer, user } = this.props;
+    if (!performer || !this.sessionId) return;
+    try {
+      const resp = await reviewService.create({
+        objectId: this.sessionId, performerId: performer._id, rating, comment
+      });
+      this.setState({ newReview: { ...resp.data, creator: user } });
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later');
+    } finally {
+      this.setState({ openReviewModal: false });
+    }
   }
 
   onbeforeunload = () => {
     this.interval && clearInterval(this.interval);
     this.streamDurationInterval && clearInterval(this.streamDurationInterval);
+    this.intervalCharge && clearInterval(this.intervalCharge);
     this.leavePublicRoom();
   };
 
-  onChange({ total, members, conversationId }) {
+  onChangeMembers({ total, members, conversationId }) {
     const { activeConversation } = this.props;
     if (
       activeConversation?.data?._id
@@ -185,6 +222,9 @@ class LivePage extends PureComponent<IProps> {
       case 'private':
         this.setState({ poster: DEFAULT_PRIVATE_IMAGE_URL });
         break;
+      case 'group':
+        this.setState({ poster: DEFAULT_GROUP_IMAGE_URL });
+        break;
       case 'offline':
         this.setState({ poster: DEFAULT_OFFLINE_IMAGE_URL });
         break;
@@ -197,10 +237,6 @@ class LivePage extends PureComponent<IProps> {
     }
   }
 
-  setStreamStatus(live: boolean, streamingStatus: string) {
-    this.setState({ live, streamingStatus });
-  }
-
   updatePerformerInfo = async () => {
     try {
       const { performer } = this.props;
@@ -208,9 +244,8 @@ class LivePage extends PureComponent<IProps> {
         return;
       }
       const resp = await performerService.findOne(performer.username);
-      const { streamingStatus, live } = resp.data;
+      const { streamingStatus } = resp.data;
       this.setPoster(streamingStatus);
-      this.setStreamStatus(live, streamingStatus);
     } catch (e) {
       const error = await Promise.resolve(e);
       // eslint-disable-next-line no-console
@@ -218,46 +253,54 @@ class LivePage extends PureComponent<IProps> {
     }
   };
 
-  async purchaseStream(couponCode: string) {
+  async purchaseStream() {
+    const { isFree, isBought } = this.state;
+    const { performer, user, updateBalance: handleUpdateBalance } = this.props;
+    if (isFree || !this.sessionId) return;
+    if (!isFree && user.balance < performer.publicChatPrice) {
+      isBought && this.setState({ isBought: false });
+      message.error('Your token balance is not enough!', 15);
+      Router.push('/token-package');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.purchaseStream({ streamId: this.sessionId, couponCode, type: 'public_chat' })).data;
-      if (resp && resp.success) {
-        message.info('Payment success', 10);
-        setTimeout(() => { window.location.reload(); }, 3000);
-        window.location.reload();
-      }
+      await purchaseTokenService.purchaseStream(this.sessionId);
+      !isBought && this.setState({ isBought: true });
+      handleUpdateBalance({ token: -performer.publicChatPrice });
     } catch (e) {
+      isBought && this.setState({ isBought: false });
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(error?.message || 'Error occured, please try again later');
     } finally {
       this.setState({ submiting: false });
     }
   }
 
+  async confirmJoinStream() {
+    if (!this.intervalCharge) {
+      this.purchaseStream();
+      this.intervalCharge = setInterval(this.purchaseStream.bind(this), 60 * 1000);
+    }
+    this.setState({ openPurchaseModal: false });
+  }
+
   async subscribe({ performerId }) {
     try {
-      const {
-        settings: { optionForBroadcast }
-      } = this.props;
       const resp = await streamService.joinPublicChat(performerId);
       const {
-        sessionId, isBought, price, isStreaming, streamingTime
+        sessionId, isFree, isStreaming, streamingTime
       } = resp.data;
       this.sessionId = sessionId;
-      await this.setState({ sessionPrice: price || 0 });
+      await this.setState({ isFree });
       if (isStreaming) {
-        await this.setStreamStatus(true, 'public');
         await this.setState({ sessionDuration: streamingTime || 0 });
         this.streamDurationInterval = setInterval(this.handleDuration.bind(this), 1000);
-      }
-      isBought && await this.setState({ isBought });
-      if (isBought) {
-        if (optionForBroadcast === HLS) {
-          this.subscrbierRef.current?.playHLS(sessionId);
-        }
-        if (optionForBroadcast === WEBRTC) {
-          this.subscrbierRef.current?.play(sessionId);
+        if (isFree) {
+          this.intervalCharge && clearInterval(this.intervalCharge);
+          this.setState({ isBought: true });
+        } else {
+          this.setState({ openPurchaseModal: true });
         }
       }
     } catch (err) {
@@ -304,7 +347,7 @@ class LivePage extends PureComponent<IProps> {
         });
         socket && socket.emit('public-stream/join', { conversationId: conversation._id });
       } else {
-        throw new Promise((resolve) => resolve('No available broadcast. Try again later'));
+        message.info('No available stream. Try again later');
       }
     } catch (e) {
       const error = await Promise.resolve(e);
@@ -335,22 +378,47 @@ class LivePage extends PureComponent<IProps> {
   modelLeftHandler() {
     this.setState({ sessionDuration: 0 });
     this.streamDurationInterval && clearInterval(this.streamDurationInterval);
-    message.info('Broadcaster left chat room!');
+    message.info('Streaming session has ended!');
+    setTimeout(() => {
+      this.setState({ openReviewModal: true });
+    }, 2000);
+  }
+
+  async sendTip(token) {
+    const {
+      performer, user, updateBalance: handleUpdateBalance, activeConversation
+    } = this.props;
+    if (user.balance < token) {
+      message.error('Your token balance is not enough!');
+      Router.push('/token-package');
+      return;
+    }
+    try {
+      await this.setState({ submiting: true });
+      await purchaseTokenService.sendTip(performer?._id, { token, conversationId: activeConversation.data._id, streamType: 'stream_public' });
+      message.success('Thank you for the tip!');
+      handleUpdateBalance({ token: -token });
+    } catch (e) {
+      const err = await e;
+      message.error(err.message || 'error occured, please try again later');
+    } finally {
+      this.setState({ submiting: false, openTipModal: false });
+    }
   }
 
   render() {
     const {
       performer, user, ui, settings, resetAllStreamMessage: dispatchResetAllStreamMessage
     } = this.props;
+    if (!this.subscrbierRef) this.subscrbierRef = createRef();
     const {
-      members, total, isBought, conversationDescription, poster, openPurchaseModal, submiting,
-      live, streamingStatus, sessionPrice, sessionDuration
+      members, total, conversationDescription, poster, openPurchaseModal,
+      sessionDuration, isBought, submiting, openTipModal, openReviewModal, newReview
     } = this.state;
-
     return (
-      <>
+      <Layout>
         <Head>
-          <title>{`${ui.siteName || ''} | ${performer?.name || performer?.username} Broadcast`}</title>
+          <title>{`${ui?.siteName || ''} | ${performer?.name || performer?.username} Broadcast`}</title>
         </Head>
         <Event
           event={STREAM_EVENT.JOIN_BROADCASTER}
@@ -366,55 +434,93 @@ class LivePage extends PureComponent<IProps> {
         />
         <Event
           event={STREAM_EVENT.ROOM_INFORMATIOM_CHANGED}
-          handler={this.onChange.bind(this)}
+          handler={this.onChangeMembers.bind(this)}
         />
-        <div className="">
+        <div>
           <Row className="streaming-container">
             <Col md={14} xs={24}>
               {conversationDescription && <Alert style={{ margin: '0 0 10px', textAlign: 'center' }} type="info" message={conversationDescription} />}
-              {isBought && this.sessionId && (
-              <LiveSubscriber
-                {...this.props}
-                participantId={user.name}
-                ref={this.subscrbierRef}
-                configs={{
-                  isPlayMode: true
-                }}
-              />
-              )}
+              <div className={isBought ? 'stream-show' : 'stream-hide'}>
+                <LiveSubscriber
+                  {...this.props}
+                  ref={this.subscrbierRef}
+                  configs={{
+                    isPlayMode: true
+                  }}
+                />
+              </div>
               {!isBought && (
                 <img alt="img" src={poster} width="100%" />
               )}
-              <p className="stream-duration">
-                <ClockCircleOutlined />
-                {' '}
-                {videoDuration(sessionDuration)}
-              </p>
+              <div className="stream-duration">
+                <div>
+                  <Rate style={{ fontSize: 14 }} allowHalf defaultValue={performer?.stats?.avgRating || 0} disabled />
+                  {performer?.stats?.avgRating > 0 && (
+                  <small>
+                    {' '}
+                    {performer.stats.avgRating.toFixed(2)}
+                  </small>
+                  )}
+                </div>
+                <span>
+                  <span style={{ marginRight: 5 }}>
+                    <ClockCircleOutlined />
+                    {' '}
+                    {videoDuration(sessionDuration)}
+                  </span>
+                  <img src="/static/gem-ico.png" alt="gem" width="20px" />
+                  {' '}
+                  {(user?.balance || 0).toFixed(2)}
+                </span>
+              </div>
               <div style={{ margin: 10, display: 'flex' }}>
-                {!isBought && live && streamingStatus === 'public' && sessionPrice > 0 && (
-                  <Button block className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
-                    {`Join this Session by $${sessionPrice}`}
-                  </Button>
-                )}
                 <Button
                   block
                   className="secondary"
-                  disabled={!performer.isOnline}
-                  onClick={() => performer.isOnline && Router.push(
+                  disabled={!performer?.isOnline}
+                  onClick={() => Router.push(
                     {
-                      pathname: `/stream/${settings.optionForPrivate === 'webrtc'
+                      pathname: `/stream/${settings?.optionForGroup === 'webrtc'
+                        ? 'webrtc/'
+                        : ''
+                      }groupchat`,
+                      query: { performer: JSON.stringify(performer) }
+                    },
+                    `/stream/${settings?.optionForGroup === 'webrtc'
+                      ? 'webrtc/'
+                      : ''
+                    }groupchat/${performer?.username}`
+                  )}
+                >
+                  Group Chat
+                </Button>
+                <Button
+                  block
+                  className="secondary"
+                  disabled={!performer?.isOnline}
+                  onClick={() => Router.push(
+                    {
+                      pathname: `/stream/${settings?.optionForPrivate === 'webrtc'
                         ? 'webrtc/'
                         : ''
                       }privatechat`,
                       query: { performer: JSON.stringify(performer) }
                     },
-                    `/stream/${settings.optionForPrivate === 'webrtc'
+                    `/stream/${settings?.optionForPrivate === 'webrtc'
                       ? 'webrtc/'
                       : ''
-                    }privatechat/${performer.username}`
+                    }privatechat/${performer?.username}`
                   )}
                 >
-                  Go to Private Call
+                  Private Call
+                </Button>
+                <Button
+                  block
+                  className="secondary"
+                  disabled={submiting}
+                  onClick={() => this.setState({ openTipModal: true })}
+                >
+                  Send Tip
                 </Button>
               </div>
             </Col>
@@ -428,18 +534,50 @@ class LivePage extends PureComponent<IProps> {
               />
             </Col>
           </Row>
+          {this.sessionId && (
+          <div>
+            <h4 className="page-heading">
+              <CommentOutlined />
+              {' '}
+              REVIEWS
+            </h4>
+            <ListReviews newReview={newReview} objectId={this.sessionId} objectType="stream" />
+          </div>
+          )}
           <Modal
-            key="purchase_post"
-            title={`Join ${performer.name || performer.username} Broadcast`}
-            visible={openPurchaseModal}
-            confirmLoading={submiting}
+            key="reviews"
+            title={null}
+            visible={openReviewModal}
+            onOk={() => this.setState({ openReviewModal: false })}
             footer={null}
-            onCancel={() => this.setState({ openPurchaseModal: false })}
+            onCancel={() => this.setState({ openReviewModal: false })}
+            destroyOnClose
           >
-            <PurchaseStreamForm price={sessionPrice} performer={performer} submiting={submiting} onFinish={this.purchaseStream.bind(this)} />
+            <ReviewPerformerForm type="public_chat" performer={performer} submiting={submiting} onFinish={this.handleReview.bind(this)} />
+          </Modal>
+          <Modal
+            key="tip"
+            title={null}
+            visible={openTipModal}
+            onOk={() => this.setState({ openTipModal: false })}
+            footer={null}
+            onCancel={() => this.setState({ openTipModal: false })}
+            destroyOnClose
+          >
+            <TipPerformerForm performer={performer} submiting={submiting} onFinish={this.sendTip.bind(this)} />
+          </Modal>
+          <Modal
+            key="confirm_join_stream"
+            title={`Join ${performer?.name || performer?.username || 'N/A'} live chat`}
+            visible={openPurchaseModal}
+            footer={null}
+            destroyOnClose
+            onCancel={() => Router.back()}
+          >
+            <PurchaseStreamForm streamType="public" submiting={submiting} performer={performer} onFinish={this.confirmJoinStream.bind(this)} />
           </Modal>
         </div>
-      </>
+      </Layout>
     );
   }
 }
@@ -447,14 +585,13 @@ class LivePage extends PureComponent<IProps> {
 LivePage.contextType = SocketContext;
 
 const mapStateToProps = (state) => ({
-  ui: state.ui,
+  ui: { ...state.ui },
   ...state.streaming,
-  ...state.performer.performerDetails,
-  user: state.user.current,
-  loggedIn: state.auth.loggedIn,
-  activeConversation: state.streamMessage.activeConversation
+  user: { ...state.user.current },
+  activeConversation: { ...state.streamMessage.activeConversation }
 });
 const mapDispatch = {
+  updateBalance,
   loadStreamMessages,
   getStreamConversationSuccess,
   resetStreamMessage,

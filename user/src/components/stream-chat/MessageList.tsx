@@ -8,10 +8,10 @@ import {
   deleteMessage,
   deleteMessageSuccess
 } from '@redux/stream-chat/actions';
-import { SocketContext } from 'src/socket';
-import { IUser, IPerformer } from 'src/interfaces';
+import { Event } from 'src/socket';
+import { IPerformer } from 'src/interfaces';
 import '@components/messages/MessageList.less';
-import Compose from './Compose';
+import StreamChatCompose from './Compose';
 import Message from './Message';
 
 interface IProps {
@@ -19,27 +19,10 @@ interface IProps {
   receiveStreamMessageSuccess: Function;
   message: any;
   conversation: any;
-  user: IUser & IPerformer;
-  messagesRef: any;
+  user: IPerformer;
   deleteMessage: Function;
   deleteMessageSuccess: Function;
-  loggedIn?: boolean;
 }
-
-const canDelete = ({ isDeleted, senderId, performerId }, user): boolean => {
-  if (isDeleted) return false;
-  let check = false;
-  if (user && user._id) {
-    if (user.roles && user.roles.includes('admin')) {
-      check = true;
-    } if (senderId === user._id) {
-      check = true;
-    } if (performerId === user._id) {
-      check = true;
-    }
-  }
-  return check;
-};
 
 class MessageList extends PureComponent<IProps> {
   messagesRef: any;
@@ -50,33 +33,6 @@ class MessageList extends PureComponent<IProps> {
 
   async componentDidMount() {
     if (!this.messagesRef) this.messagesRef = createRef();
-    const { conversation } = this.props;
-    const socket = this.context;
-    if (conversation && conversation._id) {
-      socket
-        && socket.on
-        && socket.on(
-          `message_created_conversation_${conversation._id}`,
-          (data) => {
-            this.onMessage(data, 'created');
-          }
-        );
-      socket
-        && socket.on
-        && socket.on(
-          `message_deleted_conversation_${conversation._id}`,
-          (data) => {
-            this.onMessage(data, 'deleted');
-          }
-        );
-    }
-  }
-
-  componentWillUnmount() {
-    const { conversation } = this.props;
-    const socket = this.context;
-    socket && socket.off(`message_created_conversation_${conversation._id}`);
-    socket && socket.off(`message_deleted_conversation_${conversation._id}`);
   }
 
   async handleScroll(conversation, event) {
@@ -99,7 +55,7 @@ class MessageList extends PureComponent<IProps> {
     }
   }
 
-  onDelete(messageId) {
+  onDelete(messageId: string) {
     const { deleteMessage: _deleteMessage } = this.props;
     if (!messageId) return;
     _deleteMessage({ messageId });
@@ -115,7 +71,7 @@ class MessageList extends PureComponent<IProps> {
       const previous = messages[i - 1];
       const current = messages[i];
       const next = messages[i + 1];
-      const isMine = user && current.senderId === user._id;
+      const isMine = current?.senderId === user?._id || user?.roles.includes('admin');
       const currentMoment = moment(current.createdAt);
       let prevBySameAuthor = false;
       let nextBySameAuthor = false;
@@ -151,9 +107,8 @@ class MessageList extends PureComponent<IProps> {
         tempMessages.push(
           <Message
             onDelete={this.onDelete.bind(this, current._id)}
-            canDelete={canDelete({ ...current, performerId: conversation.performerId }, user)}
             isOwner={conversation.performerId === current.senderId}
-            key={i}
+            key={current.isDeleted ? `${current._id}_deleted_${i}` : `${current._id}_${i}`}
             isMine={isMine}
             startsSequence={startsSequence}
             endsSequence={endsSequence}
@@ -169,23 +124,20 @@ class MessageList extends PureComponent<IProps> {
     return tempMessages;
   };
 
-  onMessage = (message, type) => {
+  onMessage = (type, message) => {
     if (!message) {
       return;
     }
-
     const { receiveStreamMessageSuccess: create, deleteMessageSuccess: remove } = this.props;
     type === 'created' && create(message);
     type === 'deleted' && remove(message);
   };
 
   scrollToBottom() {
-    const { message } = this.props;
-    const { fetching } = message;
+    const { message: { fetching } } = this.props;
     const { offset } = this.state;
-    if (this.messagesRef && this.messagesRef.current) {
+    if (!fetching && this.messagesRef && this.messagesRef.current) {
       const ele = this.messagesRef.current;
-      if (fetching) return;
       window.setTimeout(() => {
         ele.scrollTop = !offset ? ele.scrollHeight : ele.scrollHeight / (offset + 1);
       }, 300);
@@ -193,9 +145,9 @@ class MessageList extends PureComponent<IProps> {
   }
 
   render() {
-    const { conversation, loggedIn } = this.props;
+    const { conversation } = this.props;
     const {
-      message: { fetching }
+      message: { fetching = false, items = [] }
     } = this.props;
     if (!this.messagesRef) this.messagesRef = createRef();
     return (
@@ -204,21 +156,22 @@ class MessageList extends PureComponent<IProps> {
         ref={this.messagesRef}
         onScroll={this.handleScroll.bind(this, conversation)}
       >
+        <Event event={`message_created_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'created')} />
+        <Event event={`message_deleted_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'deleted')} />
         {conversation && conversation._id && (
           <>
             <div className="message-list-container">
-              {fetching && <div className="text-center"><Spin /></div>}
+              {fetching && <div className="text-center" style={{ marginTop: '50px' }}><Spin /></div>}
               {this.renderMessages()}
+              {!fetching && !items.length && <p className="text-center">Let&apos;s start talking something</p>}
             </div>
-            <Compose conversation={conversation} loggedIn={loggedIn} />
+            <StreamChatCompose conversation={conversation} />
           </>
         )}
       </div>
     );
   }
 }
-
-MessageList.contextType = SocketContext;
 
 const mapStates = (state: any) => {
   const { conversationMap, activeConversation } = state.streamMessage;

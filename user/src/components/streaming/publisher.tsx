@@ -8,8 +8,6 @@ import { StreamSettings } from 'src/interfaces';
 import './index.less';
 
 interface IProps {
-  participantId?: string;
-  className?: string;
   webRTCAdaptor: any;
   initWebRTCAdaptor: Function;
   leaveSession: Function;
@@ -78,6 +76,7 @@ class Publisher extends PureComponent<IProps, States> {
   }
 
   stop() {
+    // TODO end stream session
     window.location.reload();
   }
 

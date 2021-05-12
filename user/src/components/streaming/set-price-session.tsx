@@ -1,8 +1,8 @@
 import { PureComponent } from 'react';
 import {
-  InputNumber, Button, Form, Input
+  Switch, Button, Form, Input
 } from 'antd';
-import { IPerformer, IUser } from '@interfaces/index';
+import { IPerformer } from '@interface/performer';
 
 const layout = {
   labelCol: { span: 24 },
@@ -10,21 +10,37 @@ const layout = {
 };
 
 interface IProps {
-  user: IUser | IPerformer;
   performer: IPerformer;
   onFinish: Function;
   submiting: boolean;
   streamType: string;
-  price?: number;
-  conversationDescription?: any;
+  isFree?: boolean;
+  conversationDescription?: string;
 }
 
 export default class StreamPriceForm extends PureComponent<IProps> {
+  state = {
+    isFree: false
+  }
+
+  componentDidMount() {
+    const { isFree } = this.props;
+    isFree !== undefined && this.setState({ isFree });
+  }
+
   render() {
     const {
-      onFinish, submiting = false, performer,
-      streamType, conversationDescription, price
+      onFinish, submiting = false, conversationDescription, performer, streamType
     } = this.props;
+    const { isFree } = this.state;
+    const price = () => {
+      switch (streamType) {
+        case 'public': return (performer?.publicChatPrice || 0).toFixed(2);
+        case 'group': return (performer?.groupChatPrice || 0).toFixed(2);
+        case 'private': return (performer?.privateChatPrice || 0).toFixed(2);
+        default: break;
+      }
+    };
     return (
       <div>
         <Form
@@ -33,34 +49,29 @@ export default class StreamPriceForm extends PureComponent<IProps> {
           onFinish={onFinish.bind(this)}
           initialValues={{
             name: conversationDescription || '',
-            price: streamType === 'private' ? performer.privateChatPrice : price
+            isFree
           }}
           className="account-form"
         >
-          {streamType === 'private' && <p>Add your budget to ensure model accept your call request!</p>}
-          {streamType === 'public' && (
           <Form.Item
             name="name"
-            label="Update conversation description here"
+            label="Conversation description"
           >
             <Input />
           </Form.Item>
-          )}
           <Form.Item
-            name="price"
-            label="Price"
-            help={streamType === 'private' ? `Model require minimum price is $${performer.privateChatPrice}` : null}
+            name="isFree"
+            label="Free Session?"
           >
-            <InputNumber style={{ width: '100%' }} min={streamType === 'private' ? performer.privateChatPrice : 1} />
+            <Switch unCheckedChildren="Non-free" checkedChildren="Free" checked={isFree} onChange={(val) => this.setState({ isFree: val })} />
           </Form.Item>
-          {streamType === 'private' && (
-          <Form.Item
-            name="userNote"
-            label="Note"
-            help="Note something to model"
-          >
-            <Input.TextArea allowClear maxLength={150} rows={2} showCount />
-          </Form.Item>
+          {!isFree && (
+          <p>
+            <img alt="token" src="/static/gem-ico.png" width="20px" />
+            {price()}
+            {' '}
+            per minute
+          </p>
           )}
           <Form.Item>
             <Button className="primary" type="primary" htmlType="submit" loading={submiting} disabled={submiting}>

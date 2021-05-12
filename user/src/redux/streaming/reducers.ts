@@ -9,6 +9,7 @@ const initialState = {
     viewerURL: '',
     publisherURL: '',
     optionForBroadcast: 'hls',
+    optionForGroup: 'hls',
     optionForPrivate: 'hls',
     secureOption: false
   }

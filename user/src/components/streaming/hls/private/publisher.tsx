@@ -15,6 +15,7 @@ const EVENTS = {
 };
 
 interface IProps {
+  participantId?: string;
   className?: string;
   webRTCAdaptor: any;
   initWebRTCAdaptor: Function;

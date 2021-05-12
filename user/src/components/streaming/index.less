@@ -28,6 +28,12 @@
   }
 }
 
+.groupchat-video-container {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
 .conversation-users {
   .users {
     height: 435px;
@@ -101,3 +107,42 @@
     clip-path: polygon(0px 0px, 0px 100%, 100% 100%, 95% 50%, 100% 0);
   }
 }
+.private-streaming-container {
+  position: relative;
+  margin: 5px 0;
+  min-height: 520px;
+
+  #private-publisher {
+    right: 10px;
+    top: 25px;
+    height: 145px;
+    width: 145px;
+    position: absolute;
+    z-index: 1;
+  }
+
+  #private-subscriber {
+    width: 100% !important;
+    height: 480px;
+    object-fit: cover;
+  }
+  &.hide {
+    display: none;
+  }
+}
+
+.groupchat-video-container {
+  &.hide {
+    display: none;
+  }
+  .video-js {
+    height: unset;
+  }
+  video {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+}
+
+

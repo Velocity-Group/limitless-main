@@ -1,4 +1,12 @@
-@import '../../../style/vars.less';
+@import '../../style/vars.less';
+
+.stream-show {
+  display: block;
+}
+
+.stream-hide {
+  display: none;
+}
 
 .stream-description {
   margin: 10px 0;
@@ -6,7 +14,10 @@
   width: 100%;
 }
 .stream-duration {
-  .anticon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .anticon-clock-circle, .ant-rate-star-full .anticon {
     color: @theme-color;
   }
   font-size: 11px;

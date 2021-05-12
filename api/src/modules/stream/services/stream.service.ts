@@ -13,9 +13,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { ConversationService } from 'src/modules/message/services';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { OrderService } from 'src/modules/order/services';
 import * as moment from 'moment';
 import { uniq } from 'lodash';
+import { UserService } from 'src/modules/user/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { RequestService } from './request.service';
 import { SocketUserService } from '../../socket/services/socket-user.service';
 import {
@@ -41,8 +42,8 @@ export class StreamService {
   constructor(
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
-    @Inject(forwardRef(() => OrderService))
-    private readonly orderService: OrderService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(STREAM_MODEL_PROVIDER)
     private readonly streamModel: Model<StreamModel>,
     private readonly conversationService: ConversationService,
@@ -126,38 +127,12 @@ export class StreamService {
     return { ended: true };
   }
 
-  public async findBySessionId(sessionId: string): Promise<StreamModel> {
-    const stream = await this.streamModel.findOne({ sessionId });
-    if (!stream) {
-      throw new EntityNotFoundException();
-    }
-
-    return stream;
-  }
-
   public async findByPerformerId(
     performerId: string | ObjectId,
     payload?: Partial<StreamDto>
   ): Promise<StreamModel> {
     const stream = await this.streamModel.findOne({ performerId, ...payload });
     return stream;
-  }
-
-  public async getSessionId(
-    performerId: string | ObjectId,
-    type: string
-  ): Promise<string> {
-    let stream = await this.streamModel.findOne({ performerId, type });
-    if (!stream) {
-      const data: IStream = {
-        sessionId: uuidv4(),
-        performerId,
-        type
-      };
-      stream = await this.streamModel.create(data);
-    }
-
-    return stream.sessionId;
   }
 
   public async goLive(performer: PerformerDto) {
@@ -231,7 +206,7 @@ export class StreamService {
   }
 
   public async requestPrivateChat(
-    user: PerformerDto,
+    user: UserDto,
     payload: PrivateCallRequestPayload,
     performerId: string | ObjectId
   ) {
@@ -242,13 +217,12 @@ export class StreamService {
     if (user.balance < performer.privateChatPrice) {
       throw new HttpException('Your token balance is not enough', 422);
     }
-
     const subscribed = await this.subscriptionService.checkSubscribed(
       performerId,
       user._id
     );
     if (!subscribed) {
-      throw new HttpException('You haven\'t subscribed this user yet', 403);
+      throw new HttpException('You haven\'t subscribed this model yet', 403);
     }
 
     const data: IStream = {
@@ -256,23 +230,22 @@ export class StreamService {
       performerId,
       userIds: [user._id],
       type: PRIVATE_CHAT,
-      isStreaming: 1,
-      price: performer.privateChatPrice
+      isStreaming: 1
     };
     const stream = await this.streamModel.create(data);
     const recipients = [
       { source: 'performer', sourceId: performerId },
-      { source: 'performer', sourceId: user._id }
+      { source: 'user', sourceId: user._id }
     ];
     const conversation = await this.conversationService.createStreamConversation(
       new StreamDto(stream),
       recipients
     );
     await this.socketUserService.emitToUsers(
-      [performerId.toString()],
+      performerId,
       'private-chat-request',
       {
-        user: new PerformerDto(user).toResponse(),
+        user: new UserDto(user).toResponse(),
         streamId: stream._id,
         conversationId: conversation._id,
         userNote: payload.userNote,
@@ -286,11 +259,11 @@ export class StreamService {
 
   public async declinePrivateChat(
     convesationId: string,
-    user: PerformerDto
+    performer: PerformerDto
   ) {
     const conversation = await this.conversationService.findById(convesationId);
     if (!conversation) throw new EntityNotFoundException();
-    const recipient = conversation.recipients.find((r) => `${r.sourceId}` === `${user._id}`);
+    const recipient = conversation.recipients.find((r) => `${r.sourceId}` === `${performer._id}`);
     if (!recipient) throw new ForbiddenException();
     const stream = conversation.streamId && await this.streamModel.findOne(conversation.streamId);
     if (!stream) throw new EntityNotFoundException();
@@ -312,21 +285,17 @@ export class StreamService {
     };
   }
 
-  public async acceptPrivateChat(id: string, performerId: ObjectId) {
+  public async acceptPrivateChat(id: string, performer: PerformerDto) {
     const conversation = await this.conversationService.findById(id);
     if (!conversation) {
       throw new EntityNotFoundException();
     }
-    const recipent = conversation.recipients.find((r) => r.sourceId.toString() !== performerId.toString());
+    const recipent = conversation.recipients.find((r) => r.sourceId.toString() !== performer._id.toString());
     if (!recipent) {
       throw new EntityNotFoundException();
     }
-    const user = await this.performerService.findById(recipent.sourceId);
-    if (!user) {
-      throw new EntityNotFoundException();
-    }
     const stream = await this.findOne({ _id: conversation.streamId });
-    if (!stream || `${stream.performerId}` !== `${performerId}`) {
+    if (!stream || `${stream.performerId}` !== `${performer._id}`) {
       throw new EntityNotFoundException();
     }
     if (!stream.isStreaming) {
@@ -337,7 +306,7 @@ export class StreamService {
       sessionId: stream.sessionId,
       streamId: stream._id,
       isStreaming: stream.isStreaming,
-      user: new PerformerDto(user).toResponse(),
+      user: new PerformerDto(performer).toResponse(),
       createdAt: new Date()
     };
     // fire event to user do payment
@@ -378,7 +347,7 @@ export class StreamService {
     return { conversation, sessionId: stream.sessionId, streamId: stream._id };
   }
 
-  public async joinGroupChat(performerId: string, user: PerformerDto) {
+  public async joinGroupChat(performerId: string, user: UserDto) {
     const performer = await this.performerService.findById(performerId);
     if (!performer) {
       throw new EntityNotFoundException();
@@ -393,7 +362,6 @@ export class StreamService {
       type: GROUP_CHAT,
       isStreaming: 1
     });
-
     if (!stream || (stream && !stream.isStreaming)) {
       throw new StreamOfflineException();
     }
@@ -407,10 +375,7 @@ export class StreamService {
 
     const numberOfParticipant = conversation.recipients.length - 1;
     const { maxParticipantsAllowed } = performer;
-    if (
-      maxParticipantsAllowed
-      && numberOfParticipant > maxParticipantsAllowed
-    ) {
+    if (maxParticipantsAllowed && numberOfParticipant > maxParticipantsAllowed) {
       throw new HttpException('Reached limitation of participants, please join later', 422);
     }
     const joinedTheRoom = conversation.recipients.find(
@@ -418,7 +383,7 @@ export class StreamService {
     );
     if (!joinedTheRoom) {
       const recipient = {
-        source: 'performer',
+        source: 'user',
         sourceId: user._id
       };
       await this.conversationService.addRecipient(conversation._id, recipient);
@@ -482,12 +447,12 @@ export class StreamService {
     return `conversation-${roomType}-${id}`;
   }
 
-  public async updateStreamInfo(payload: SetFreePayload, user: PerformerDto) {
+  public async updateStreamInfo(payload: SetFreePayload, performer: PerformerDto) {
     const { streamId, isFree } = payload;
     if (!streamId) throw new EntityNotFoundException();
     const stream = await this.streamModel.findById(streamId);
     if (!stream) throw new EntityNotFoundException();
-    if (stream.type === PUBLIC_CHAT && `${stream.performerId}` !== `${user._id}`) throw new ForbiddenException();
+    if (stream.type === PUBLIC_CHAT && `${stream.performerId}` !== `${performer._id}`) throw new ForbiddenException();
     stream.isFree = isFree;
     await stream.save();
     const conversation = await this.conversationService.findOne({ streamId: stream._id });
@@ -498,13 +463,13 @@ export class StreamService {
     return { isFree };
   }
 
-  public async updateStreamDuration(payload: SetDurationPayload, user: PerformerDto) {
+  public async updateStreamDuration(payload: SetDurationPayload, performer: PerformerDto) {
     const { streamId, duration } = payload;
     const stream = await this.streamModel.findById(streamId);
     if (!stream) {
       throw new EntityNotFoundException();
     }
-    if (`${user._id}` !== `${stream.performerId}`) {
+    if (`${performer._id}` !== `${stream.performerId}`) {
       throw new ForbiddenException();
     }
     if (stream.streamingTime >= duration) {

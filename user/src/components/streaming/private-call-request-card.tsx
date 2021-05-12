@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import { Tooltip, Button } from 'antd';
 import { } from '@ant-design/icons';
 import { formatDateFromnow } from '@lib/index';
-import { StreamSettings } from '@interfaces/index';
+import { StreamSettings } from 'src/interfaces/index';
 import Router from 'next/router';
 import './index.less';
 
@@ -16,17 +16,17 @@ export class PrivateCallCard extends PureComponent<IProps> {
   render() {
     const { request, settings, onDecline } = this.props;
     const {
-      user, userNote, price, createdAt
+      user, userNote, createdAt
     } = request;
     return (
       <div className="private-call-card">
         <div className="user-info">
           <img alt="p-avt" src={(user?.avatar) || '/static/no-avatar.png'} />
           <div className="user-name">
-            <span>{user?.name || 'N/A'}</span>
+            <span>{user?.name}</span>
             <small>
               @
-              {user?.username || 'n/a'}
+              {user?.username}
             </small>
           </div>
         </div>
@@ -36,22 +36,18 @@ export class PrivateCallCard extends PureComponent<IProps> {
         </Tooltip>
         )}
         <div className="date-time">{formatDateFromnow(createdAt)}</div>
-        <span className="price">
-          $
-          {price.toFixed(2)}
-        </span>
         <div style={{ display: 'flex' }}>
           <Button
             block
             className="success"
             onClick={() => Router.push({
-              pathname: `/model/live/${
+              pathname: `/live/${
                 settings.optionForPrivate === 'webrtc'
                   ? 'webrtc/'
                   : ''
               }privatechat`,
               query: { id: request.conversationId }
-            }, `/model/live/${
+            }, `/live/${
               settings.optionForPrivate === 'webrtc'
                 ? 'webrtc/'
                 : ''
