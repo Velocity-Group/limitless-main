@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import * as moment from 'moment';
 import { uniq } from 'lodash';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserService } from 'src/modules/user/services';
 import { PAYMENT_TOKEN_MODEL_PROVIDER } from '../providers';
 import { PaymentTokenModel } from '../models';
 import { PaymentTokenSearchPayload } from '../payloads';
@@ -12,6 +13,8 @@ import { PaymentDto } from '../dtos';
 @Injectable()
 export class PurchasedItemSearchService {
   constructor(
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(PAYMENT_TOKEN_MODEL_PROVIDER)
@@ -97,16 +100,12 @@ export class PurchasedItemSearchService {
     const sourceIds = data.map((d) => d.sourceId);
     const performerIds = data.map((d) => d.performerId);
     const [users, performers] = await Promise.all([
-      this.performerService.findByIds(sourceIds),
+      this.userService.findByIds(sourceIds),
       this.performerService.findByIds(performerIds)
     ]);
     const transactions = data.map((transaction) => {
-      const sourceInfo = transaction.sourceId
-        && users.find((t) => t._id.toString() === transaction.sourceId.toString());
-      const performerInfo = transaction.performerId
-        && performers.find(
-          (t) => t._id.toString() === transaction.performerId.toString()
-        );
+      const sourceInfo = transaction.sourceId && users.find((t) => t._id.toString() === transaction.sourceId.toString());
+      const performerInfo = transaction.performerId && performers.find((t) => t._id.toString() === transaction.performerId.toString());
       return {
         ...transaction,
         sourceInfo: sourceInfo && sourceInfo.toResponse(),

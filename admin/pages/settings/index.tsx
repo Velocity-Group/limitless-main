@@ -20,12 +20,6 @@ const WYSIWYG = dynamic(() => import('@components/wysiwyg'), {
 });
 
 class Settings extends PureComponent {
-  private footerContent: string = '';
-
-  private userBenefit: string = '';
-
-  private modelBenefit: string = '';
-
   state = {
     updating: false,
     loading: false,
@@ -52,6 +46,12 @@ class Settings extends PureComponent {
     this.loadSettings();
   }
 
+  async handleTextEditerContentChange(key: string, content: { [html: string]: string}) {
+    this[key] = content.html;
+    this.setVal(key, content.html);
+    this.dataChange[key] = content.html;
+  }
+
   async onMenuChange(menu) {
     await this.setState({
       selectedTab: menu.key
@@ -72,12 +72,6 @@ class Settings extends PureComponent {
     }
 
     this.dataChange.smtpTransporter = this.smtpInfo;
-  }
-
-  async handleTextEditerContentChange(key: string, content: { [html: string]: string}) {
-    this[key] = content.html;
-    this.setVal(key, content.html);
-    this.dataChange[key] = content.html;
   }
 
   async loadSettings() {
@@ -338,7 +332,7 @@ class Settings extends PureComponent {
               <Menu.Item key="mailer">SMTP</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>
-              <Menu.Item key="recaptcha">Re-Captcha</Menu.Item>
+              {/* <Menu.Item key="recaptcha">Re-Captcha</Menu.Item> */}
               <Menu.Item key="ant">Ant Media</Menu.Item>
             </Menu>
           </div>
@@ -354,7 +348,6 @@ class Settings extends PureComponent {
               initialValues={initialValues}
               ref={this.formRef}
             >
-              {selectedTab === 'ccbill' && <h4>Set up CCbill settings for user&apos;s card authorization </h4>}
               {list.map((setting) => this.renderFormItem(setting))}
               <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }} style={{ textAlign: 'right' }}>
                 <Button type="primary" htmlType="submit" disabled={updating} loading={updating}>

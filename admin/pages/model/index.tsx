@@ -9,10 +9,8 @@ import Page from '@components/common/layout/page';
 import { performerService } from '@services/performer.service';
 import { SearchFilter } from '@components/performer/search-filter';
 import {
-  EditOutlined,
-  FireOutlined,
-  DeleteOutlined,
-  SkinOutlined
+  EditOutlined, FireOutlined, DeleteOutlined, SkinOutlined,
+  VideoCameraOutlined, PictureOutlined
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import { BreadcrumbComponent, DropdownAction } from '@components/common';
@@ -239,6 +237,63 @@ export default class Performers extends PureComponent<any> {
                         <FireOutlined />
                         {' '}
                         All Posts
+                      </a>
+                    </Link>
+                  )
+                },
+                {
+                  key: 'videos',
+                  name: 'Videos',
+                  children: (
+                    <Link
+                      href={{
+                        pathname: '/video',
+                        query: { performerId: id }
+                      }}
+                      as={`/video?performerId=${id}`}
+                    >
+                      <a>
+                        <VideoCameraOutlined />
+                        {' '}
+                        All Videos
+                      </a>
+                    </Link>
+                  )
+                },
+                {
+                  key: 'galleries',
+                  name: 'Galleries',
+                  children: (
+                    <Link
+                      href={{
+                        pathname: '/gallery',
+                        query: { performerId: id }
+                      }}
+                      as={`/gallery?performerId=${id}`}
+                    >
+                      <a>
+                        <PictureOutlined />
+                        {' '}
+                        All Galleries
+                      </a>
+                    </Link>
+                  )
+                },
+                {
+                  key: 'photos',
+                  name: 'Photos',
+                  children: (
+                    <Link
+                      href={{
+                        pathname: '/photos',
+                        query: { performerId: id }
+                      }}
+                      as={`/photos?performerId=${id}`}
+                    >
+                      <a>
+                        <PictureOutlined />
+                        {' '}
+                        All Photos
                       </a>
                     </Link>
                   )

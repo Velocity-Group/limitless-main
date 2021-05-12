@@ -1,4 +1,4 @@
-import { Table, Tag, Tooltip } from 'antd';
+import { Table, Tag, Button } from 'antd';
 import { StopOutlined } from '@ant-design/icons';
 import { ISubscription } from 'src/interfaces';
 import { formatDate, formatDateNoTime } from '@lib/date';
@@ -27,10 +27,7 @@ export const TableListSubscription = ({
       render(data, records) {
         return (
           <span>
-            {`${records.userInfo.firstName} ${records.userInfo.lastName}`}
-            <br />
-            {' '}
-            {records.userInfo.email}
+            {`${records?.userInfo?.name || records?.userInfo?.username || 'N/A'}`}
           </span>
         );
       }
@@ -41,11 +38,7 @@ export const TableListSubscription = ({
       render(data, records) {
         return (
           <span>
-            {`${records.performerInfo.firstName} ${records.performerInfo.lastName}`}
-            {' '}
-            <br />
-            {' '}
-            {records.performerInfo.email}
+            {`${records?.performerInfo?.name || records?.performerInfo?.username || 'N/A'}`}
           </span>
         );
       }
@@ -59,8 +52,8 @@ export const TableListSubscription = ({
             return <Tag color="orange">Monthly Subscription</Tag>;
           case 'yearly':
             return <Tag color="purple">Yearly Subscription</Tag>;
-          case 'system':
-            return <Tag color="red">System</Tag>;
+          case 'free':
+            return <Tag color="red">Free Subscription</Tag>;
           default: return <Tag color="orange">{subscriptionType}</Tag>;
         }
       }
@@ -68,12 +61,14 @@ export const TableListSubscription = ({
     {
       title: 'Expired Date',
       dataIndex: 'expiredAt',
+      sorter: true,
       render(date: Date) {
         return <span>{formatDateNoTime(date)}</span>;
       }
     },
     {
       title: 'Next Reccuring Date',
+      sorter: true,
       dataIndex: 'expiredAt',
       render(data, records) {
         return <span>{records?.expiredAt ? formatDateNoTime(records.expiredAt) : 'N/A'}</span>;
@@ -107,9 +102,11 @@ export const TableListSubscription = ({
         return (
           <span>
             {records?.status === 'active' ? (
-              <Tooltip placement="top" title="Deactive">
-                <StopOutlined onClick={() => onCancelSubscriber(records._id)} />
-              </Tooltip>
+              <Button type="primary" onClick={() => onCancelSubscriber(records._id)}>
+                <StopOutlined />
+                {' '}
+                De-activate
+              </Button>
             ) : null}
           </span>
         );

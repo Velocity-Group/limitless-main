@@ -44,10 +44,20 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
-  // eslint-disable-next-line consistent-return
+  async handleTabChange(data) {
+    const { pagination } = this.state;
+    await this.setState({ pagination: { ...pagination, current: data.current } });
+    this.getData();
+  }
+
+  async handleFilter(filter) {
+    await this.setState({ filter });
+    this.getData();
+  }
+
   async onCancelSubscriber(id: string) {
     if (!window.confirm('Are you sure you want to delete this subscription?')) {
-      return false;
+      return;
     }
     try {
       await subscriptionService.cancelSubscription(id);
@@ -83,25 +93,14 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async handleTabChange(data) {
-    const { pagination } = this.state;
-    await this.setState({ pagination: { ...pagination, current: data.current } });
-    this.getData();
-  }
-
-  async handleFilter(filter) {
-    await this.setState({ filter });
-    this.getData();
-  }
-
   render() {
     const { subscriptionList, pagination, loading } = this.state;
     return (
       <>
         <Head>
-          <title> Subscriptions </title>
+          <title>Subscriptions </title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Subscription' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Subscriptions' }]} />
         <Page>
           <SearchFilter searchWithPerformer onSubmit={this.handleFilter.bind(this)} />
           <div style={{ marginBottom: '20px' }} />

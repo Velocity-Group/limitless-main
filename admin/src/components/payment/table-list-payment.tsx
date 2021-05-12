@@ -16,25 +16,13 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
   render() {
     const columns = [
       {
-        title: 'Seller',
-        dataIndex: 'seller',
-        key: 'seller',
-        render(seller) {
+        title: 'User',
+        dataIndex: 'sourceInfo',
+        key: 'sourceInfo',
+        render(sourceInfo) {
           return (
             <div>
-              {seller?.name || seller?.username || 'N/A'}
-            </div>
-          );
-        }
-      },
-      {
-        title: 'Buyer',
-        dataIndex: 'buyer',
-        key: 'buyer',
-        render(buyer) {
-          return (
-            <div>
-              {buyer?.name || buyer?.username || 'N/A'}
+              {sourceInfo?.name || sourceInfo?.username || 'N/A'}
             </div>
           );
         }
@@ -47,14 +35,14 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
           return <Tag color="orange">{type}</Tag>;
         }
       },
-      {
-        title: 'Quantity',
-        dataIndex: 'quantity',
-        key: 'quantity',
-        render(quantity: number) {
-          return <span>{quantity}</span>;
-        }
-      },
+      // {
+      //   title: 'Quantity',
+      //   dataIndex: 'quantity',
+      //   key: 'quantity',
+      //   render(quantity: number) {
+      //     return <span>{quantity}</span>;
+      //   }
+      // },
       {
         title: 'Original price',
         dataIndex: 'originalPrice',
@@ -97,10 +85,10 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
           switch (status) {
             case 'pending':
               return <Tag color="orange">Pending</Tag>;
-            case 'paid':
-              return <Tag color="green">Paid</Tag>;
-            case 'cancel':
-              return <Tag color="red">Cancel</Tag>;
+            case 'success':
+              return <Tag color="green">Success</Tag>;
+            case 'refunded':
+              return <Tag color="red">Refunded</Tag>;
             default: return <Tag color="red">{status}</Tag>;
           }
         }

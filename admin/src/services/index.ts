@@ -15,3 +15,4 @@ export * from './feed.service';
 export * from './block-country.service';
 export * from './email-template.service';
 export * from './payout-request.service';
+export * from './purchase-item.service';

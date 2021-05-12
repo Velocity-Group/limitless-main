@@ -225,7 +225,7 @@ class PerformerUpdate extends PureComponent<IProps> {
                   // categories={categories}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<span>Subscription Settings</span>} key="subscription">
+              <Tabs.TabPane tab={<span>Pricing Settings</span>} key="subscription">
                 <SubscriptionForm
                   submiting={updating}
                   onFinish={this.submit.bind(this)}

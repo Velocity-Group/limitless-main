@@ -3,6 +3,7 @@ import { PerformerService } from 'src/modules/performer/services';
 import { Model } from 'mongoose';
 import * as moment from 'moment';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserService } from 'src/modules/user/services';
 import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel } from '../models';
 import { PaymentSearchPayload } from '../payloads';
@@ -11,6 +12,8 @@ import { PaymentDto } from '../dtos';
 @Injectable()
 export class PaymentSearchService {
   constructor(
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(PAYMENT_TRANSACTION_MODEL_PROVIDER)
@@ -98,7 +101,7 @@ export class PaymentSearchService {
     const UIds = data.map((d) => d.sourceId);
     const PIds = data.map((d) => d.targetId);
     const [users, performers] = await Promise.all([
-      this.performerService.findByIds(UIds),
+      this.userService.findByIds(UIds),
       this.performerService.findByIds(PIds)
     ]);
     const transactions = data.map((v) => new PaymentDto(v));

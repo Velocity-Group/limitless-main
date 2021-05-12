@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import {
   Form, Button, message, InputNumber, Switch
 } from 'antd';
-import { IPerformerUpdate, IPerformerCreate } from 'src/interfaces';
+import { IPerformer } from 'src/interfaces';
 
 const layout = {
   labelCol: { span: 24 },
@@ -15,7 +15,7 @@ const validateMessages = {
 
 interface IProps {
   onFinish: Function;
-  performer?: IPerformerUpdate;
+  performer?: IPerformer;
   submiting?: boolean;
   ref?: Function;
 }
@@ -41,11 +41,15 @@ export class SubscriptionForm extends PureComponent<IProps> {
         onFinishFailed={() => message.error('Please complete the required fields in tab general info')}
         validateMessages={validateMessages}
         initialValues={
-          performer || (({
+          performer || ({
             isFreeSubscription: false,
             yearlyPrice: 99.99,
-            monthlyPrice: 9.99
-          } as unknown) as IPerformerCreate)
+            monthlyPrice: 9.99,
+            publicChatPrice: 1,
+            groupChatPrice: 1,
+            privateChatPrice: 1,
+            maxParticipantsAllowed: 16
+          })
         }
       >
         <Form.Item>
@@ -56,23 +60,53 @@ export class SubscriptionForm extends PureComponent<IProps> {
           <Form.Item
             key="yearly"
             name="yearlyPrice"
-            label="Yearly Subscription Price"
+            label="Yearly Subscription (Token per Year)"
             rules={[{ required: true }]}
-            help="Value is from $1.00"
           >
             <InputNumber min={1} />
           </Form.Item>
           <Form.Item
             key="monthly"
             name="monthlyPrice"
-            label="Monthly Subscription Price"
+            label="Monthly Subscription (Token per Month)"
             rules={[{ required: true }]}
-            help="Value is from $1.00"
           >
             <InputNumber min={1} />
           </Form.Item>
         </>
         )}
+        <Form.Item
+          key="publicChatPrice"
+          name="publicChatPrice"
+          label="Token per minute Public Chat"
+          rules={[{ required: true }]}
+        >
+          <InputNumber min={1} />
+        </Form.Item>
+        <Form.Item
+          key="groupChatPrice"
+          name="groupChatPrice"
+          label="Token per minute Group Chat"
+          rules={[{ required: true }]}
+        >
+          <InputNumber min={1} />
+        </Form.Item>
+        <Form.Item
+          key="privateChatPrice"
+          name="privateChatPrice"
+          label="Token per minute Private Chat"
+          rules={[{ required: true }]}
+        >
+          <InputNumber min={1} />
+        </Form.Item>
+        <Form.Item
+          key="maxParticipantsAllowed"
+          name="maxParticipantsAllowed"
+          label="Max Participants on Group Chat"
+          rules={[{ required: true }]}
+        >
+          <InputNumber min={1} />
+        </Form.Item>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
             Submit

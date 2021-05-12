@@ -6,7 +6,7 @@ import {
   Form, Button, Row, Col
 } from 'antd';
 import { FileOutlined } from '@ant-design/icons';
-import { IPerformerUpdate } from 'src/interfaces';
+import { IPerformer } from 'src/interfaces';
 import { performerService, authService } from '@services/index';
 import { FileUpload } from '@components/file/file-upload';
 import { ImageUpload } from '@components/file/image-upload';
@@ -18,7 +18,7 @@ const layout = {
 
 interface IProps {
   onUploaded: Function;
-  performer?: IPerformerUpdate;
+  performer?: IPerformer;
   onFinish?: Function;
   submiting?: boolean;
 }

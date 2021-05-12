@@ -102,34 +102,22 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         key: '',
         text: 'All'
       },
-      // {
-      //   key: 'sale_product',
-      //   text: 'Store'
-      // },
-      {
-        key: 'feed',
-        text: 'Post'
-      },
-      {
-        key: 'message',
-        text: 'Message'
-      },
       {
         key: 'tip',
         text: 'Tip'
       },
       {
-        key: 'gift',
-        text: 'Gift'
+        key: 'feed',
+        text: 'Post'
       },
-      {
-        key: 'monthly_subscription',
-        text: 'Monthly Subscription'
-      },
-      {
-        key: 'yearly_subscription',
-        text: 'Yearly Subscription'
-      },
+      // {
+      //   key: 'gift',
+      //   text: 'Gift'
+      // },
+      // {
+      //   key: 'message',
+      //   text: 'Message'
+      // },
       {
         key: 'public_chat',
         text: 'Public Chat'
@@ -139,8 +127,24 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         text: 'Group Chat'
       },
       {
-        key: 'public_chat',
+        key: 'private_chat',
         text: 'Private Chat'
+      },
+      {
+        key: 'video',
+        text: 'Video'
+      },
+      {
+        key: 'product',
+        text: 'Product'
+      },
+      {
+        key: 'monthly_subscription',
+        text: 'Monthly Subscription'
+      },
+      {
+        key: 'yearly_subscription',
+        text: 'Yearly Subscription'
       }
     ];
     return (
