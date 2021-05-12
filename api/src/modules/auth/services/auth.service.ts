@@ -240,7 +240,7 @@ export class AuthService {
       data: {
         forgotLink
       },
-      template: 'forgot.html'
+      template: 'forgot'
     });
     return true;
   }

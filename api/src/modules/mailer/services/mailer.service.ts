@@ -1,14 +1,17 @@
-import {
-  HttpException, Injectable, Inject, forwardRef
-} from '@nestjs/common';
-import { QueueService, StringHelper } from 'src/kernel';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { EntityNotFoundException, QueueService, StringHelper } from 'src/kernel';
 import { createTransport } from 'nodemailer';
 import { SettingService } from 'src/modules/settings';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { render } from 'mustache';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
+import { Model } from 'mongoose';
 import { IMail } from '../interfaces';
+import { EmailVerificationFailureException } from '../exceptions';
+import { EmailTemplateUpdatePayload } from '../payloads/email-template-update.payload';
+import { EmailTemplateModel } from '../models/email-template.model';
+import { EMAIL_TEMPLATE_PROVIDER } from '../providers';
 
 const TEMPLATE_DIR = join(process.env.TEMPLATE_DIR, 'emails');
 @Injectable()
@@ -17,8 +20,9 @@ export class MailerService {
 
   constructor(
     private readonly queueService: QueueService,
-    @Inject(forwardRef(() => SettingService))
-    private readonly settingService: SettingService
+    private readonly settingService: SettingService,
+    @Inject(EMAIL_TEMPLATE_PROVIDER)
+    private readonly EmailTemplate: Model<EmailTemplateModel>
   ) {
     this.init();
   }
@@ -40,7 +44,12 @@ export class MailerService {
     return createTransport(smtp);
   }
 
-  private getTemplate(template = 'default', isLayout = false): string {
+  private async getTemplate(template = 'default', isLayout = false): Promise<string> {
+    const layout = await this.EmailTemplate.findOne({
+      key: isLayout ? `layouts/${template}` : template
+    });
+    if (layout) return layout.content;
+
     // eslint-disable-next-line no-param-reassign
     template = StringHelper.getFileName(template, true);
 
@@ -61,18 +70,38 @@ export class MailerService {
       const transport = await this.getTransport();
       const data = job.data as IMail;
       let { html } = data;
+      let layout = '[[BODY]]';
+      let subject = '';
       if (!html && data.template) {
-        html = this.getTemplate(data.template);
+        // html = await this.getTemplate(data.template);
+        const template = await this.EmailTemplate.findOne({
+          key: {
+            $in: [
+              data.template,
+              `${data.template}.html`
+            ]
+          }
+        });
+        if (!template) {
+          html = '';
+          layout = await this.getTemplate(data.layout, true);
+        } else {
+          html = template.content;
+          subject = template.subject;
+          layout = template.layout ? await this.getTemplate(template.layout, true) : '[[BODY]]';
+        }
       }
-
-      const body = html ? render(html, data.data) : '';
+      const settings = SettingService._settingCache;
+      const body = html ? render(html, {
+        ...data.data,
+        settings
+      }) : '';
       const siteName = await this.settingService.getKeyValue(SETTING_KEYS.SITE_NAME);
       const logoUrl = await this.settingService.getKeyValue(SETTING_KEYS.LOGO_URL);
-      const layout = this.getTemplate(data.layout, true);
       html = render(layout, {
         siteName: siteName || process.env.SITENAME || process.env.DOMAIN,
         logoUrl,
-        subject: data.subject
+        subject: subject || data.subject
       }).replace('[[BODY]]', body);
       const senderConfig = await this.settingService.getKeyValue(SETTING_KEYS.SENDER_EMAIL);
       const senderEmail = senderConfig || process.env.SENDER_EMAIL;
@@ -81,7 +110,7 @@ export class MailerService {
         to: Array.isArray(data.to) ? data.to.join(',') : data.to,
         cc: Array.isArray(data.cc) ? data.cc.join(',') : data.cc,
         bcc: Array.isArray(data.cc) ? data.cc.join(',') : data.cc,
-        subject: data.subject,
+        subject: subject || data.subject,
         html
       });
     } catch (e) {
@@ -97,15 +126,37 @@ export class MailerService {
   }
 
   public async verify() {
-    const transport = await this.getTransport();
-    const siteName = await this.settingService.getKeyValue(SETTING_KEYS.SITE_NAME) || process.env.DOMAIN;
-    const senderEmail = await this.settingService.getKeyValue(SETTING_KEYS.SENDER_EMAIL) || process.env.SENDER_EMAIL;
-    const adminEmail = await this.settingService.getKeyValue(SETTING_KEYS.ADMIN_EMAIL) || process.env.ADMIN_EMAIL;
-    return transport.sendMail({
-      from: senderEmail,
-      to: adminEmail,
-      subject: `Test email ${siteName}`,
-      html: 'Hello, this is test email!'
-    });
+    try {
+      const transport = await this.getTransport();
+      const siteName = await this.settingService.getKeyValue(SETTING_KEYS.SITE_NAME) || process.env.DOMAIN;
+      const senderEmail = await this.settingService.getKeyValue(SETTING_KEYS.SENDER_EMAIL) || process.env.SENDER_EMAIL;
+      const adminEmail = await this.settingService.getKeyValue(SETTING_KEYS.ADMIN_EMAIL) || process.env.ADMIN_EMAIL;
+      return transport.sendMail({
+        from: senderEmail,
+        to: adminEmail,
+        subject: `Test email ${siteName}`,
+        html: 'Hello, this is test email!'
+      });
+    } catch (e) {
+      throw new EmailVerificationFailureException(e);
+    }
+  }
+
+  public async getAllTemplates() {
+    return this.EmailTemplate.find();
+  }
+
+  public async findOne(id: string) {
+    return this.EmailTemplate.findById(id);
+  }
+
+  public async updateTemplate(id: string, payload: EmailTemplateUpdatePayload) {
+    const template = await this.EmailTemplate.findById(id);
+    if (!template) throw new EntityNotFoundException();
+
+    template.subject = payload.subject;
+    template.content = payload.content;
+    template.layout = payload.layout;
+    return template.save();
   }
 }

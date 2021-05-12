@@ -18,8 +18,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "script:migrate": "ts-node -r tsconfig-paths/register src/script.ts",
-    "copy-template": "cp -r ./src/templates ./dist/templates"
+    "copy-template": "cp -r ./src/templates ./dist/templates",
+    "migrate": "node migrate",
+    "migrate:create": "./node_modules/.bin/migrate create"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.7",
@@ -39,6 +40,7 @@
     "google-auth-library": "^6.1.4",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
+    "migrate": "^1.7.0",
     "mkdirp": "^1.0.3",
     "moment": "^2.24.0",
     "mongodb": "^3.6.2",

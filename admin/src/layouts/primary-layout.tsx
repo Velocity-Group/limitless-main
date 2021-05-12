@@ -6,19 +6,10 @@ import { updateUIValue, loadUIValue } from 'src/redux/ui/actions';
 import Sider from '@components/common/layout/sider';
 import { IUIConfig } from 'src/interfaces/ui-config';
 import {
-  PieChartOutlined,
-  ContainerOutlined,
-  UserOutlined,
-  WomanOutlined,
-  // VideoCameraOutlined,
-  // CameraOutlined,
-  BlockOutlined,
-  FileImageOutlined,
-  SkinOutlined,
-  DollarOutlined,
-  HeartOutlined,
-  MenuOutlined,
-  FireOutlined
+  PieChartOutlined, ContainerOutlined, UserOutlined, WomanOutlined,
+  VideoCameraOutlined, CameraOutlined, BlockOutlined, FileImageOutlined,
+  SkinOutlined, DollarOutlined, HeartOutlined, MenuOutlined,
+  FireOutlined, MailOutlined
 } from '@ant-design/icons';
 import Header from '@components/common/layout/header';
 import { Router } from 'next/router';
@@ -188,6 +179,18 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         ]
       },
       {
+        id: 'email-template',
+        name: 'Email templates',
+        icon: <MailOutlined />,
+        children: [
+          {
+            id: 'email-templates-listing',
+            name: 'List',
+            route: '/email-templates'
+          }
+        ]
+      },
+      {
         id: 'accounts',
         name: 'Users',
         icon: <UserOutlined />,
@@ -227,57 +230,8 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         ]
       },
       {
-        id: 'trending-profiles',
-        name: 'Trending Profiles',
-        icon: <WomanOutlined />,
-        children: [
-          {
-            name: 'Trending Profiles',
-            id: 'trending-performers',
-            route: '/content-creator/trending'
-          },
-          {
-            name: 'Newest Profiles',
-            id: 'newest-performers',
-            route: '/content-creator/newest'
-          }
-        ]
-      },
-      // {
-      //   id: 'performers-photos',
-      //   name: 'Photos',
-      //   icon: <CameraOutlined />,
-      //   children: [
-      //     {
-      //       id: 'photo-listing',
-      //       name: 'Photos',
-      //       route: '/photos'
-      //     },
-      //     {
-      //       name: 'Upload',
-      //       id: 'upload-photo',
-      //       route: '/photos/upload'
-      //     },
-      //     {
-      //       name: 'Bulk Upload',
-      //       id: 'bulk-upload-photo',
-      //       route: '/photos/bulk-upload'
-      //     },
-      //     {
-      //       id: 'gallery-listing',
-      //       name: 'Albums',
-      //       route: '/gallery'
-      //     },
-      //     {
-      //       name: 'Create album',
-      //       id: 'create-galleries',
-      //       route: '/gallery/create'
-      //     }
-      //   ]
-      // },
-      {
-        id: 'fedd',
-        name: 'Posts',
+        id: 'feed',
+        name: 'Feed Posts',
         icon: <FireOutlined />,
         children: [
           {
@@ -303,6 +257,60 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         ]
       },
       {
+        id: 'videos',
+        name: 'Videos',
+        icon: <VideoCameraOutlined />,
+        children: [
+          {
+            id: 'video-listing',
+            name: 'Videos',
+            route: '/video'
+          },
+          {
+            id: 'video-upload',
+            name: 'Upload',
+            route: '/video/upload'
+          },
+          {
+            id: 'video-bulk-upload',
+            name: 'Bulk Upload',
+            route: '/video/bulk-upload'
+          }
+        ]
+      },
+      {
+        id: 'performers-photos',
+        name: 'Photos',
+        icon: <CameraOutlined />,
+        children: [
+          {
+            id: 'photo-listing',
+            name: 'Photos',
+            route: '/photos'
+          },
+          {
+            name: 'Upload',
+            id: 'upload-photo',
+            route: '/photos/upload'
+          },
+          {
+            name: 'Bulk Upload',
+            id: 'bulk-upload-photo',
+            route: '/photos/bulk-upload'
+          },
+          {
+            id: 'gallery-listing',
+            name: 'Albums',
+            route: '/gallery'
+          },
+          {
+            name: 'Create album',
+            id: 'create-galleries',
+            route: '/gallery/create'
+          }
+        ]
+      },
+      {
         id: 'performers-products',
         name: 'Products',
         icon: <SkinOutlined />,
@@ -319,28 +327,6 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
           }
         ]
       },
-      // {
-      //   id: 'videos',
-      //   name: 'Videos',
-      //   icon: <VideoCameraOutlined />,
-      //   children: [
-      //     {
-      //       id: 'video-listing',
-      //       name: 'Videos',
-      //       route: '/video'
-      //     },
-      //     {
-      //       id: 'video-upload',
-      //       name: 'Upload',
-      //       route: '/video/upload'
-      //     },
-      //     {
-      //       id: 'video-bulk-upload',
-      //       name: 'Bulk Upload',
-      //       route: '/video/bulk-upload'
-      //     }
-      //   ]
-      // },
       {
         id: 'payments',
         name: 'Transactions',

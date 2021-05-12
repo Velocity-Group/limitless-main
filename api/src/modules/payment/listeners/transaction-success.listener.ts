@@ -46,7 +46,7 @@ export class TransactionMailerListener {
             transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
             products: transaction.products
           },
-          template: 'admin-payment-success.html'
+          template: 'admin-payment-success'
         });
       }
       // mail to user
@@ -59,7 +59,7 @@ export class TransactionMailerListener {
             transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
             products: transaction.products
           },
-          template: 'user-payment-success.html'
+          template: 'user-payment-success'
         });
       }
     } catch (e) {

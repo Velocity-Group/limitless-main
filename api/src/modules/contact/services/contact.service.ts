@@ -15,7 +15,7 @@ export class ContactService {
       subject: 'New contact',
       to: adminEmail,
       data,
-      template: 'contact.html'
+      template: 'contact'
     });
     return true;
   }

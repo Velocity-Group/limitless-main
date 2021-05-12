@@ -166,7 +166,7 @@ export class OrderService {
             order,
             deliveryStatus: data.deliveryStatus
           },
-          template: 'update-order-status.html'
+          template: 'update-order-status'
         });
       }
     }

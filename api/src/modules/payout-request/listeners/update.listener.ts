@@ -56,7 +56,7 @@ export class UpdatePayoutRequestListener {
         subject: 'Update payout request',
         to: sourceInfo.email,
         data: { request },
-        template: 'payout-request.html'
+        template: 'payout-request'
       });
     }
   }
