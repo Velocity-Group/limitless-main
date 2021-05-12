@@ -6,16 +6,8 @@ export class OrderService extends APIRequest {
     return this.get(this.buildUrl('/orders/search', payload));
   }
 
-  detailsSearch(payload) {
-    return this.get(this.buildUrl('/orders/details/search', payload));
-  }
-
   findById(id) {
     return this.get(`/orders/${id}`);
-  }
-
-  findDetailsById(id) {
-    return this.get(`/orders/details/${id}`);
   }
 
   update(id, data) {

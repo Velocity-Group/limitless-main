@@ -1,5 +1,5 @@
 import {
-  Layout, message, Input, Select, Button
+  Layout, message, Input, Select, Button, Tag
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
@@ -8,6 +8,7 @@ import Page from '@components/common/layout/page';
 import { orderService } from 'src/services';
 import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
+import { IOrder } from 'src/interfaces';
 
 const { Content } = Layout;
 
@@ -16,7 +17,7 @@ interface IProps {
 }
 
 interface IStates {
-  order: any;
+  order: IOrder;
   shippingCode: string;
   deliveryStatus: string;
 }
@@ -63,7 +64,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
   async getData() {
     const { id } = this.props;
     try {
-      const { data: order } = await orderService.findDetailsById(id);
+      const { data: order } = await orderService.findById(id);
       await this.setState({
         order,
         shippingCode: order.shippingCode,
@@ -103,36 +104,37 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   <strong>Product name</strong>
                   :
                   {' '}
-                  {order.name}
+                  {order?.productInfo?.name || 'N/A'}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                   <strong>Product description</strong>
                   :
                   {' '}
-                  {order.description}
+                  {order?.productInfo?.description || 'N/A'}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                   <strong>Product type:</strong>
                   {' '}
-                  {order.productType}
+                  <Tag color="pink">{order?.productInfo?.type || 'N/A'}</Tag>
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                   <strong>Buyer</strong>
                   :
                   {' '}
-                  {`${order.buyer?.firstName} ${order.buyer?.lastName}`}
-                  {' '}
-                  - @
-                  {order.buyer?.username}
+                  {`${order.userInfo?.name || 'N/A'}  - @${order.userInfo?.username || 'n/a'}`}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                   <strong>Seller</strong>
                   :
                   {' '}
-                  {`${order.seller?.firstName} ${order.seller?.lastName}`}
+                  {`${order.performerInfo?.name || 'N/A'}  - @${order.performerInfo?.username || 'n/a'}`}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <strong>Unit tokens</strong>
+                  :
                   {' '}
-                  - @
-                  {order.seller?.username}
+                  <img src="/coin-ico.png" width="15px" alt="coin" />
+                  {(order.unitPrice || 0).toFixed(2)}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                   <strong>Quantity</strong>
@@ -141,21 +143,17 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   {order.quantity}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
-                  <strong>Total Price</strong>
-                  : $
-                  {order.totalPrice}
+                  <strong>Total tokens</strong>
+                  :
+                  {' '}
+                  <img src="/coin-ico.png" width="15px" alt="coin" />
+                  {(order.totalPrice || 0).toFixed(2)}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                   <strong>Delivery Address</strong>
                   :
                   {' '}
                   {order.deliveryAddress || 'N/A'}
-                </div>
-                <div style={{ marginBottom: '10px' }}>
-                  <strong>Delivery Postal Code</strong>
-                  :
-                  {' '}
-                  {order.postalCode || 'N/A'}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                   <strong>Shipping Code</strong>
@@ -167,9 +165,6 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   <strong>Delivery Status:</strong>
                   {' '}
                   <Select onChange={(e) => this.setState({ deliveryStatus: e })} defaultValue={order.deliveryStatus}>
-                    <Select.Option key="created" value="created">
-                      Created
-                    </Select.Option>
                     <Select.Option key="processing" value="processing">
                       Processing
                     </Select.Option>
@@ -185,7 +180,9 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   </Select>
                 </div>
                 <div style={{ marginBottom: '10px' }}>
-                  <Button danger onClick={this.onUpdate.bind(this)}>Update</Button>
+                  <Button type="primary" onClick={this.onUpdate.bind(this)}>Update</Button>
+                  &nbsp;
+                  <Button danger onClick={this.onUpdate.bind(this)}>Back</Button>
                 </div>
               </div>
               )}

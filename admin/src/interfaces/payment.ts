@@ -34,9 +34,10 @@ export interface IOrder {
   userInfo?: any;
   orderNumber: string;
   shippingCode: string;
-  productIds: string[];
-  productsInfo: any[];
+  productId: string;
+  productInfo: any;
   quantity: number;
+  unitPrice: number;
   totalPrice: number;
   deliveryAddress?: string;
   deliveryStatus: string;

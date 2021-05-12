@@ -57,7 +57,7 @@ class ModelOrderPage extends PureComponent<IProps> {
     } = this.state;
     try {
       await this.setState({ searching: true });
-      const resp = await orderService.detailsSearch({
+      const resp = await orderService.search({
         ...filter,
         limit,
         offset: (page - 1) * limit,
@@ -81,32 +81,6 @@ class ModelOrderPage extends PureComponent<IProps> {
 
   render() {
     const { list, searching, pagination } = this.state;
-    const statuses = [
-      {
-        key: '',
-        text: 'All'
-      },
-      {
-        key: 'processing',
-        text: 'Processing'
-      },
-      {
-        key: 'shipping',
-        text: 'Shipping'
-      },
-      {
-        key: 'delivered',
-        text: 'Delivered'
-      },
-      {
-        key: 'refunded',
-        text: 'Refunded'
-      },
-      {
-        key: 'created',
-        text: 'Created'
-      }
-    ];
 
     return (
       <>

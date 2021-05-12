@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Input, Row, Col, Button, Select, DatePicker
+  Input, Row, Col, Select, DatePicker
 } from 'antd';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { SelectGalleryDropdown } from '@components/gallery/common/select-gallery-dropdown';
@@ -64,7 +64,7 @@ export class SearchFilter extends PureComponent<IProps> {
     return (
       <Row gutter={24}>
         {keyword ? (
-          <Col xl={{ span: 4 }} md={{ span: 8 }}>
+          <Col lg={6} md={8}>
             <Input
               placeholder="Enter keyword"
               onChange={(evt) => this.setState({ q: evt.target.value })}
@@ -73,11 +73,11 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {statuses && statuses.length > 0 ? (
-          <Col xl={{ span: 4 }} md={{ span: 8 }}>
+          <Col lg={6} md={8}>
             <Select
               onChange={(val) => {
                 const objectFilter = keyFilter ? { [keyFilter]: val } : { status: val };
-                this.setState(objectFilter);
+                this.setState(objectFilter, () => onSubmit(this.state));
               }}
               style={{ width: '100%' }}
               placeholder="Select status"
@@ -92,11 +92,11 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {type && type.length > 0 ? (
-          <Col xl={{ span: 4 }} md={{ span: 8 }}>
+          <Col lg={6} md={8}>
             <Select
               onChange={(val) => {
                 const objectFilter = keyFilter ? { [keyFilter]: val } : { type: val };
-                this.setState(objectFilter);
+                this.setState(objectFilter, () => onSubmit(this.state));
               }}
               style={{ width: '100%' }}
               placeholder="Select type"
@@ -111,11 +111,11 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {sourceType && sourceType.length > 0 ? (
-          <Col xl={{ span: 4 }} md={{ span: 8 }}>
+          <Col lg={6} md={8}>
             <Select
               onChange={(val) => {
                 const objectFilter = keyFilter ? { [keyFilter]: val } : { sourceType: val };
-                this.setState(objectFilter);
+                this.setState(objectFilter, () => onSubmit(this.state));
               }}
               style={{ width: '100%' }}
               placeholder="Select type"
@@ -130,37 +130,32 @@ export class SearchFilter extends PureComponent<IProps> {
           </Col>
         ) : null}
         {searchWithPerformer && (
-          <Col xl={{ span: 6 }} md={{ span: 8 }}>
+          <Col lg={6} md={8}>
             <SelectPerformerDropdown
               placeholder="Search performer"
               style={{ width: '100%' }}
-              onSelect={(val) => this.setState({ performerId: val || '' })}
+              onSelect={(val) => this.setState({ performerId: val || '' }, () => onSubmit(this.state))}
               defaultValue={performerId || ''}
             />
           </Col>
         )}
         {searchWithGallery && (
-          <Col xl={{ span: 6 }} md={{ span: 8 }}>
+          <Col lg={6} md={8}>
             <SelectGalleryDropdown
               placeholder="Type to search gallery here"
               style={{ width: '100%' }}
-              onSelect={(val) => this.setState({ galleryId: val || '' })}
+              onSelect={(val) => this.setState({ galleryId: val || '' }, () => onSubmit(this.state))}
               defaultValue={galleryId || ''}
             />
           </Col>
         )}
         {dateRange && (
-          <Col xl={{ span: 6 }} md={{ span: 8 }}>
+          <Col lg={6} md={8}>
             <RangePicker
-              onChange={(dates: [any, any], dateStrings: [string, string]) => this.setState({ fromDate: dateStrings[0], toDate: dateStrings[1] })}
+              onChange={(dates: [any, any], dateStrings: [string, string]) => this.setState({ fromDate: dateStrings[0], toDate: dateStrings[1] }, () => onSubmit(this.state))}
             />
           </Col>
         )}
-        <Col xl={{ span: 4 }} md={{ span: 8 }}>
-          <Button type="primary" onClick={() => onSubmit(this.state)}>
-            Search
-          </Button>
-        </Col>
       </Row>
     );
   }

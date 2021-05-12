@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 import { Table, Tag } from 'antd';
 import {
   EyeOutlined
@@ -23,130 +24,60 @@ const OrderTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Order number',
+      title: 'Order ID',
       dataIndex: 'orderNumber',
       key: 'orderNumber'
     },
     {
-      title: 'Buyer',
-      dataIndex: 'buyer',
-      key: 'buyerId',
-      render(buyer) {
+      title: 'User',
+      dataIndex: 'userInfo',
+      key: 'userInfo',
+      render(userInfo) {
         return (
           <span>
-            {`${buyer?.name || buyer?.username || 'N/A'}`}
+            {`${userInfo?.name || userInfo?.username || 'N/A'}`}
           </span>
         );
       }
     },
     {
-      title: 'Seller',
-      dataIndex: 'seller',
-      key: 'sellerId',
-      render(seller) {
+      title: 'Model',
+      dataIndex: 'performerInfo',
+      key: 'performerInfo',
+      render(performerInfo) {
         return (
           <span>
-            {`${seller?.name || seller?.username || 'N/A'}`}
+            {`${performerInfo?.name || performerInfo?.username || 'N/A'}`}
           </span>
         );
       }
     },
     {
-      title: 'Description',
-      dataIndex: 'name',
-      key: 'name'
-    },
-    {
-      title: 'Type',
-      dataIndex: 'productType',
-      render(productType: string) {
-        switch (productType) {
-          case 'public_chat':
-            return <Tag color="violet">Public Chat</Tag>;
-          case 'private_chat':
-            return <Tag color="violet">Private Chat</Tag>;
-          case 'sale_post':
-            return <Tag color="green">Post</Tag>;
-          case 'digital_product':
-            return <Tag color="red">Digital Product</Tag>;
-          case 'physical_product':
-            return <Tag color="red">Physical Product</Tag>;
-          case 'tip_performer':
-            return <Tag color="orange">Tip</Tag>;
-          case 'monthly_subscription':
-            return <Tag color="blue">Monthly Subscription</Tag>;
-          case 'yearly_subscription':
-            return <Tag color="blue">Yearly Subscription</Tag>;
-          case 'free_subscription':
-            return <Tag color="blue">Free Subscription</Tag>;
-          default: return <Tag color="#FFCF00">{productType}</Tag>;
-        }
-      }
-    },
-    {
-      title: 'Unit Price',
-      dataIndex: 'unitPrice',
-      render(unitPrice) {
+      title: 'Product',
+      dataIndex: 'productInfo',
+      key: 'performerInfo',
+      render(productInfo) {
         return (
           <span>
-            $
-            {(unitPrice || 0).toFixed(2)}
+            {`${productInfo?.name || 'N/A'}`}
           </span>
         );
       }
     },
     {
-      title: 'Quantity',
-      dataIndex: 'quantity',
-      render(quantity) {
-        return <span>{quantity || 1}</span>;
-      }
-    },
-    {
-      title: 'Discount',
-      dataIndex: 'couponInfo',
-      render(couponInfo, record) {
-        return couponInfo ? (
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {`${(couponInfo.value || 0) * 100}%`}
-            {' '}
-            - $
-            {((record?.originalPrice || 0) * couponInfo.value).toFixed(2)}
-          </span>
-        ) : (
-          ''
-        );
-      }
-    },
-    {
-      title: 'Total Price',
+      title: 'Total_Price',
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
           <span>
-            $
+            <img src="/coin-ico.png" width="15px" alt="coin" />
             {(totalPrice || 0).toFixed(2)}
           </span>
         );
       }
     },
     {
-      title: 'Payment Status',
-      dataIndex: 'status',
-      render(status: string) {
-        switch (status) {
-          case 'refunded':
-            return <Tag color="red">Refunded</Tag>;
-          case 'created':
-            return <Tag color="gray">Created</Tag>;
-          case 'paid':
-            return <Tag color="blue">Paid</Tag>;
-          default: return <Tag color="#FFCF00">{status}</Tag>;
-        }
-      }
-    },
-    {
-      title: 'Delivery Status',
+      title: 'Delivery_Status',
       dataIndex: 'deliveryStatus',
       render(status: string) {
         switch (status) {
@@ -165,7 +96,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Updated at',
+      title: 'Updated_at',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
