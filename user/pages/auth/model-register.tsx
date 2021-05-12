@@ -107,7 +107,7 @@ class PerformerRegister extends PureComponent<IProps> {
                 sm={24}
                 md={6}
                 lg={12}
-                className="login-content left"
+                className="login-content left fixed"
                 style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
               />
               <Col
@@ -123,12 +123,12 @@ class PerformerRegister extends PureComponent<IProps> {
                   <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
                     <TwitterOutlined />
                     {' '}
-                    SIGN IN/ SIGN UP WITH TWITTER
+                    SIGN UP WITH TWITTER
                   </button>
                   <GoogleLogin
                     className="google-button"
                     clientId={ui?.googleClientId}
-                    buttonText="SIGN IN/ SIGN UP WITH GOOGLE"
+                    buttonText="SIGN UP WITH GOOGLE"
                     onSuccess={this.onGoogleLogin.bind(this)}
                     onFailure={this.onGoogleLogin.bind(this)}
                     cookiePolicy="single_host_origin"

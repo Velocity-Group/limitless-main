@@ -1,7 +1,7 @@
 import { PureComponent } from 'react';
 import {
   Layout, Badge, message,
-  Tooltip, Modal, Drawer, Divider, Switch
+  Tooltip, Drawer, Divider, Switch
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
@@ -304,13 +304,6 @@ class Header extends PureComponent<IProps> {
                     Edit Profile
                   </div>
                 </Link>
-                {/* <Link href={{ pathname: '/search/analytics' }} as="/search/analytics">
-                  <div className={router.pathname === '/search/analytics' ? 'menu-item active' : 'menu-item'}>
-                    <SearchOutlined />
-                    {' '}
-                    Keywords
-                  </div>
-                </Link> */}
                 <Link href={{ pathname: '/model/my-subscriber' }} as="/model/my-subscriber">
                   <div className={router.pathname === '/model/my-subscriber' ? 'menu-item active' : 'menu-item'}>
                     <StarOutlined />
@@ -450,6 +443,7 @@ class Header extends PureComponent<IProps> {
 }
 
 Header.contextType = SocketContext;
+
 const mapState = (state: any) => ({
   currentUser: { ...state.user.current },
   ui: { ...state.ui },

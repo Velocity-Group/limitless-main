@@ -1,67 +1,102 @@
-/* eslint-disable react/no-danger */
+/* eslint-disable prefer-promise-reject-errors */
+import {
+  Row, Col, Button, Layout, Form, Input, message,
+  Divider
+} from 'antd';
 import { PureComponent } from 'react';
-import { Row, Col } from 'antd';
 import Link from 'next/link';
+import { registerFan, loginSocial } from '@redux/auth/actions';
+import { connect } from 'react-redux';
 import Head from 'next/head';
 import { IUIConfig } from 'src/interfaces';
-import { connect } from 'react-redux';
-import { authService, userService } from '@services/index';
-import { loginSuccess } from '@redux/auth/actions';
-import { updateCurrentUser } from '@redux/user/actions';
-import Router from 'next/router';
+// import { GoogleReCaptcha } from '@components/common';
+import { TwitterOutlined } from '@ant-design/icons';
+import { authService } from '@services/auth.service';
+import Loader from '@components/common/base/loader';
+import GoogleLogin from 'react-google-login';
 import './index.less';
 
 interface IProps {
   ui: IUIConfig;
-  loginSuccess: Function;
-  updateCurrentUser: Function;
+  registerFan: Function;
+  registerFanData: any;
+  loginSocial: Function;
 }
-class Dashboard extends PureComponent<IProps> {
-  static authenticate = false;
+
+class FanRegister extends PureComponent<IProps> {
+  static authenticate: boolean = false;
 
   static layout = 'blank';
 
-  state = { loginAs: 'user' };
+  recaptchaSuccess = false;
 
-  async componentDidMount() {
-    const {
-      loginSuccess: loginSuccessHandler,
-      updateCurrentUser: updateCurrentUserHandler
-    } = this.props;
-    try {
-      const token = authService.getToken();
-      if (!token || token === 'null') {
-        return;
-      }
-      authService.setToken(token);
-      const user = await userService.me({
-        Authorization: token
-      });
+  state = {
+    isLoading: false
+  }
 
-      // TODO - check permission
-      if (!user.data._id) {
-        return;
-      }
-      loginSuccessHandler();
-      updateCurrentUserHandler(user.data);
-      Router.push('/home');
-    } catch (e) {
-      // console.log(e);
+  handleRegister = (data: any) => {
+    const { registerFan: handleRegister } = this.props;
+    // if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
+    //   message.error('Are you a robot?');
+    //   return;
+    // }
+    handleRegister(data);
+  };
+
+  handleVerifyCapcha(resp: any) {
+    if (resp?.data?.success) {
+      this.recaptchaSuccess = true;
+    } else {
+      this.recaptchaSuccess = false;
     }
   }
 
-  handleSwitch(value) {
-    this.setState({ loginAs: value });
+  async onGoogleLogin(resp: any) {
+    if (!resp.tokenId) {
+      message.error('Google login authenticated fail');
+      return;
+    }
+    const { loginSocial: handleLogin } = this.props;
+    const payload = { tokenId: resp.tokenId, role: 'user' };
+    try {
+      await this.setState({ isLoading: true });
+      const response = await (await authService.loginGoogle(payload)).data;
+      response.token && handleLogin({ token: response.token });
+    } catch (e) {
+      const error = await e;
+      message.error(error && error.message ? error.message : 'Google login authenticated fail');
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
+  async loginTwitter() {
+    try {
+      await this.setState({ isLoading: true });
+      const resp = await (await authService.loginTwitter()).data;
+      if (resp && resp.url) {
+        authService.setTwitterToken({ oauthToken: resp.oauthToken, oauthTokenSecret: resp.oauthTokenSecret }, 'user');
+        window.location.href = resp.url;
+      }
+    } catch (e) {
+      const error = await e;
+      message.error(error?.message || 'Something went wrong, please try again later');
+    } finally {
+      this.setState({ isLoading: false });
+    }
   }
 
   render() {
-    const { ui } = this.props;
-    const { loginAs } = this.state;
+    const {
+      ui, registerFanData
+    } = this.props;
+    const { requesting: submiting } = registerFanData;
+    const { isLoading } = this.state;
     return (
-      <div className="container">
+      <Layout>
         <Head>
           <title>
-            {ui?.siteName}
+            {ui && ui.siteName}
             {' '}
             | Sign up
           </title>
@@ -72,107 +107,159 @@ class Dashboard extends PureComponent<IProps> {
               <Col
                 xs={24}
                 sm={24}
-                md={12}
+                md={6}
                 lg={12}
-              >
-                <div
-                  className="login-content left fixed"
-                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
-                />
-              </Col>
+                className="login-content left fixed"
+                style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
+              />
               <Col
                 xs={24}
                 sm={24}
-                md={12}
+                md={18}
                 lg={12}
+                className="login-content right"
               >
-                <div className="login-content custom">
-                  <div className="switch-btn">
-                    <button
-                      type="button"
-                      className={loginAs === 'user' ? 'active' : ''}
-                      onClick={this.handleSwitch.bind(this, 'user')}
-                      style={{ marginRight: '20px' }}
+                {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
+                <p className="text-center"><small>Sign up to interact with your idols!</small></p>
+                <div className="social-login">
+                  <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
+                    <TwitterOutlined />
+                    {' '}
+                    SIGN UP WITH TWITTER
+                  </button>
+                  <GoogleLogin
+                    className="google-button"
+                    clientId={ui.googleClientId}
+                    buttonText="SIGN UP WITH GOOGLE"
+                    onSuccess={this.onGoogleLogin.bind(this)}
+                    onFailure={this.onGoogleLogin.bind(this)}
+                    cookiePolicy="single_host_origin"
+                  />
+                </div>
+                <Divider>Or</Divider>
+                <div className="login-form">
+                  <Form
+                    labelCol={{ span: 24 }}
+                    name="member_register"
+                    initialValues={{ remember: true, gender: 'male' }}
+                    onFinish={this.handleRegister.bind(this)}
+                  >
+                    <Form.Item
+                      name="email"
+                      validateTrigger={['onChange', 'onBlur']}
+                      hasFeedback
+                      rules={[
+                        {
+                          type: 'email',
+                          message: 'Invalid email address!'
+                        },
+                        {
+                          required: true,
+                          message: 'Please input your email address!'
+                        }
+                      ]}
                     >
-                      Fan Signup
-                    </button>
-                    <button
-                      type="button"
-                      className={loginAs === 'performer' ? 'active' : ''}
-                      onClick={this.handleSwitch.bind(this, 'performer')}
+                      <Input placeholder="E-mail" />
+                    </Form.Item>
+                    <Form.Item
+                      name="username"
+                      validateTrigger={['onChange', 'onBlur']}
+                      rules={[
+                        { required: true, message: 'Please input your username!' },
+                        {
+                          pattern: new RegExp(/^[a-z0-9]+$/g),
+                          message:
+                                'Username must contain lowercase alphanumerics only'
+                        },
+                        { min: 3, message: 'Username must containt at least 3 characters' }
+                      ]}
+                      hasFeedback
                     >
-                      Model Signup
-                    </button>
-                  </div>
-
-                  <div className="welcome-box">
-                    <h3>
-                      {loginAs === 'user' ? 'Fans' : 'Model'}
-                      {' '}
-                      Benefits
-                    </h3>
-                    {loginAs === 'performer' ? (
-                      <div>
-                        {ui && ui.modelBenefit
-                          ? <div dangerouslySetInnerHTML={{ __html: ui.modelBenefit }} />
-                          : (
-
-                            <ul>
-                              <li>Lightning fast uploading</li>
-                              <li>Multi-video uploading</li>
-                              <li>Chat with fans</li>
-                              <li>Cross-over-content between models</li>
-                              <li>Individual model store</li>
-                              <li>
-                                Affiliate program for blogs to promote your
-                                content
-                              </li>
-                              <li>80% Standard commission rate</li>
-                              <li>(Deduct 5% when gained from affiliates)</li>
-                            </ul>
-                          )}
+                      <Input placeholder="Username" />
+                    </Form.Item>
+                    <Form.Item
+                      name="name"
+                      validateTrigger={['onChange', 'onBlur']}
+                      rules={[
+                        { required: true, message: 'Please input your display name!' },
+                        {
+                          pattern: new RegExp(/^(?=.*\S).+$/g),
+                          message:
+                                'Display name can not contain only whitespace'
+                        },
+                        {
+                          min: 3,
+                          message: 'Display name must containt at least 3 characters'
+                        }
+                      ]}
+                      hasFeedback
+                    >
+                      <Input placeholder="Display name" />
+                    </Form.Item>
+                    <Form.Item
+                      name="password"
+                      validateTrigger={['onChange', 'onBlur']}
+                      hasFeedback
+                      rules={[
+                        {
+                          pattern: new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/g),
+                          message: 'Password must have minimum 8 characters, at least one uppercase letter, one lowercase letter and one number'
+                        },
+                        { required: true, message: 'Please input your password!' }
+                      ]}
+                    >
+                      <Input.Password placeholder="Password" />
+                    </Form.Item>
+                    {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
+                    <Form.Item style={{ textAlign: 'center' }}>
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        className="login-form-button"
+                        disabled={submiting}
+                        loading={submiting}
+                      >
+                        SIGN UP
+                      </Button>
+                      <p>
+                        By signing up you agree to our
+                        {' '}
+                        <a href="/page/tos" target="_blank">Terms of Service</a>
+                        {' '}
+                        and
+                        {' '}
+                        <a href="/page/privacy_policy" target="_blank">Privacy & Policy</a>
+                        , and confirm that you are at least 18 years old.
+                      </p>
+                      <p>
+                        Have an account already?
+                        <Link href="/">
+                          <a> Login.</a>
+                        </Link>
+                      </p>
+                      <p>
+                        Are you a model?
                         <Link href="/auth/model-register">
-                          <a className="btn-primary ant-btn ant-btn-primary ant-btn-lg">
-                            Model Signup
-                          </a>
+                          <a> Sign up here.</a>
                         </Link>
-                      </div>
-                    ) : (
-                      <div>
-                        {ui && ui.userBenefit ? <div dangerouslySetInnerHTML={{ __html: ui.userBenefit }} /> : (
-                          <ul>
-                            <li>View exclusive content</li>
-                            <li>Monthly and Yearly subscriptions</li>
-                            <li>Fast and reliable buffering and viewing</li>
-                            <li>Multiple solution options to choose from</li>
-                            <li>Chat with model</li>
-                            <li>Access model&apos;s personal store</li>
-                            <li>Search and filter capabilities</li>
-                            <li>Favorite your video for future viewing</li>
-                          </ul>
-                        )}
-                        <Link href="/auth/fan-register">
-                          <a className="btn-primary ant-btn ant-btn-primary ant-btn-lg">
-                            FAN SIGNUP
-                          </a>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+                      </p>
+                    </Form.Item>
+                  </Form>
                 </div>
               </Col>
             </Row>
           </div>
         </div>
-      </div>
+        {isLoading && <Loader />}
+      </Layout>
     );
   }
 }
-
 const mapStatesToProps = (state: any) => ({
-  ui: { ...state.ui }
+  ui: { ...state.ui },
+  registerFanData: { ...state.auth.registerFanData }
 });
 
-const mapDispatch = { loginSuccess, updateCurrentUser };
+const mapDispatchToProps = { registerFan, loginSocial };
 
-export default connect(mapStatesToProps, mapDispatch)(Dashboard);
+export default connect(mapStatesToProps, mapDispatchToProps)(FanRegister);

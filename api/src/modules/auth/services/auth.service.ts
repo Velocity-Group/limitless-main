@@ -12,13 +12,17 @@ import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserService } from 'src/modules/user/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { SettingService } from 'src/modules/settings';
-import { StringHelper, EntityNotFoundException } from 'src/kernel';
+import {
+  StringHelper, EntityNotFoundException, QueueEventService, QueueEvent
+} from 'src/kernel';
 import { MailerService } from 'src/modules/mailer';
 import { ConfigService } from 'nestjs-config';
-import { STATUS_ACTIVE, ROLE_USER, GENDER_MALE } from 'src/modules/user/constants';
+import {
+  STATUS_ACTIVE, ROLE_USER, GENDER_MALE, DELETE_USER_CHANNEL
+} from 'src/modules/user/constants';
 import { resolve } from 'url';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
-import { STATUS } from 'src/kernel/constants';
+import { EVENT, STATUS } from 'src/kernel/constants';
 import { AuthErrorException } from '../exceptions';
 import { AUTH_MODEL_PROVIDER, FORGOT_MODEL_PROVIDER, VERIFICATION_MODEL_PROVIDER } from '../providers/auth.provider';
 import { AuthModel, ForgotModel, VerificationModel } from '../models';
@@ -42,7 +46,8 @@ export class AuthService {
     @Inject(FORGOT_MODEL_PROVIDER)
     private readonly forgotModel: Model<ForgotModel>,
     private readonly mailService: MailerService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
+    private readonly queueEventService: QueueEventService
   ) { }
 
   /**
@@ -353,18 +358,18 @@ export class AuthService {
               const token = _this.generateJWT(authUser);
               return resolver({ token });
             }
-            const newUser = role === 'user' ? await _this.userService.socialCreate({
+            const newUser = role === 'performer' ? await _this.performerService.modelCreate({
               username: profile.screen_name,
               status: STATUS_ACTIVE,
-              roles: [ROLE_USER],
               gender: GENDER_MALE,
               twitterConnected: true,
               twitterProfile: profile,
               createdAt: new Date(),
               updatedAt: new Date()
-            }) : await _this.performerService.modelCreate({
+            }) : await _this.userService.socialCreate({
               username: profile.screen_name,
               status: STATUS_ACTIVE,
+              roles: [ROLE_USER],
               gender: GENDER_MALE,
               twitterConnected: true,
               twitterProfile: profile,
@@ -576,12 +581,18 @@ export class AuthService {
         updatedAt: new Date()
       });
       await user.remove();
+      await this.queueEventService.publish(new QueueEvent({
+        channel: DELETE_USER_CHANNEL,
+        eventName: EVENT.DELETED,
+        data: new UserDto(user)
+      }));
       await Promise.all(userAuths.map((auth) => {
         auth.source = 'performer';
         auth.sourceId = newPerformer._id;
         return auth.save();
       }));
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log(e);
     }
   }

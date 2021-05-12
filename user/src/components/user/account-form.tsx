@@ -137,7 +137,7 @@ export const UserAccountForm = ({
           hasFeedback
           validateTrigger={['onChange', 'onBlur']}
         >
-          <Input disabled={user.googleConnected} placeholder="Email Address" />
+          <Input disabled={user.verifiedEmail} placeholder="Email Address" />
         </Form.Item>
       </Col>
       <Col xs={24} sm={12}>
@@ -180,14 +180,12 @@ export const UserAccountForm = ({
         </Form.Item>
         <Form.Item label="Avatar">
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <div>
-              <AvatarUpload
-                image={user.avatar}
-                uploadUrl={options.avatarUrl}
-                headers={options.uploadHeader}
-                onUploaded={options.uploadAvatar}
-              />
-            </div>
+            <AvatarUpload
+              image={user.avatar}
+              uploadUrl={options.avatarUrl}
+              headers={options.uploadHeader}
+              onUploaded={options.uploadAvatar}
+            />
           </div>
         </Form.Item>
         {user.twitterConnected && (
@@ -214,7 +212,7 @@ export const UserAccountForm = ({
       <Button htmlType="submit" className="primary" disabled={updating} loading={updating}>
         Update Profile
       </Button>
-      {/* <Button style={{ margin: '0 5px' }} className="secondary" onClick={() => onSwitchToPerformer()}>Become a Model</Button> */}
+      <Button style={{ margin: '0 5px' }} className="secondary" onClick={() => onSwitchToPerformer()}>Become a Model</Button>
     </Form.Item>
   </Form>
 );

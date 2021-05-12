@@ -118,6 +118,7 @@ class Login extends PureComponent<IProps> {
       handleUpdateUser(user.data);
       user.data.isPerformer && user.data.username ? Router.push({ pathname: '/model/profile', query: { username: user.data.username } }, `/${user.data.username}`) : Router.push('/home');
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log(await e);
     }
   }
@@ -165,7 +166,7 @@ class Login extends PureComponent<IProps> {
 
   render() {
     const { ui } = this.props;
-    const { isLoading, loginAs } = this.state;
+    const { isLoading } = this.state;
     return (
       <>
         <Head>
@@ -194,12 +195,12 @@ class Login extends PureComponent<IProps> {
                   lg={12}
                 >
                   <div className="login-content right">
-                    {/* {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>} */}
-                    {/* <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p> */}
-                    <div className="switch-btn">
+                    {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
+                    <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
+                    {/* <div className="switch-btn">
                       <button type="button" className={loginAs === 'user' ? 'active' : ''} onClick={() => this.setState({ loginAs: 'user' })} style={{ marginRight: '20px' }}>Fan Login</button>
                       <button type="button" className={loginAs === 'performer' ? 'active' : ''} onClick={() => this.setState({ loginAs: 'performer' })}>Model Login</button>
-                    </div>
+                    </div> */}
                     <div className="social-login">
                       <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
                         <TwitterOutlined />
