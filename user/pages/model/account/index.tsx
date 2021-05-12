@@ -27,7 +27,6 @@ import {
   PerformerBlockCountriesForm,
   PerformerVerificationForm
 } from '@components/performer';
-import Router from 'next/router';
 import '../../user/index.less';
 
 interface IProps {
@@ -68,14 +67,6 @@ class AccountSettings extends PureComponent<IProps> {
     emailSending: false,
     countTime: 60
   };
-
-  componentDidMount() {
-    const { currentUser } = this.props;
-    if (!currentUser || (currentUser && !currentUser.isPerformer)) {
-      message.error('You have no permission on this page!');
-      Router.push('/home');
-    }
-  }
 
   handleCountdown = async () => {
     const { countTime } = this.state;

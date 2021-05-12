@@ -16,7 +16,9 @@ import {
 } from '@redux/comment/actions';
 import './index.less';
 import { formatDateShort, videoDuration } from '@lib/index';
-import { reactionService, paymentService, feedService } from '@services/index';
+import {
+  reactionService, feedService, purchaseTokenService
+} from '@services/index';
 import { connect } from 'react-redux';
 import { TipPerformerForm } from '@components/performer/tip-form';
 import ReactMomentCountDown from 'react-moment-countdown';
@@ -24,6 +26,8 @@ import moment from 'moment';
 import { Twitter, Facebook } from 'react-social-sharing';
 import { VideoPlayer } from '@components/common/video-player';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import Router from 'next/router';
+import { updateBalance } from '@redux/user/actions';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
 import { IFeed, IUser } from '../../interfaces';
@@ -32,6 +36,7 @@ interface IProps {
   feed: IFeed;
   onDelete?: Function;
   user: IUser;
+  updateBalance: Function;
   getComments: Function;
   moreComment: Function;
   createComment: Function;
@@ -201,18 +206,19 @@ class FeedCard extends Component<IProps> {
   }
 
   async subscribe() {
-    const { feed } = this.props;
+    const { feed, user } = this.props;
+    // eslint-disable-next-line no-nested-ternary
+    const price = this.subscriptionType === 'monthly' ? feed?.performer?.monthlyPrice : this.subscriptionType === 'yearly' ? feed?.performer?.yearlyPrice : 0;
+    if (user.balance < price) {
+      message.error('Your balance token is not enough');
+      Router.push('/token-package');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (
-        await paymentService.subscribe({ type: this.subscriptionType, performerId: feed.performer._id })
-      ).data;
-      if (resp && resp.success) {
-        message.success('Subscribed!');
-        window.location.reload();
-      } else {
-        message.success('Error occured, please try again later');
-      }
+      await purchaseTokenService.subscribePerformer({ type: this.subscriptionType, performerId: feed?.performer._id });
+      message.success('Subscribed success!');
+      window.location.reload();
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -222,35 +228,37 @@ class FeedCard extends Component<IProps> {
   }
 
   async sendTip(price) {
-    const { feed } = this.props;
+    const { feed, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user.balance < price) {
+      message.error('Your balance token is not enough');
+      Router.push('/token-package');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (
-        await paymentService.tipPerformer({ performerId: feed?.performer?._id, price })
-      ).data;
-      if (resp && resp.success) {
-        message.success('Thank you!');
-      } else {
-        message.success('Error occured, please try again later');
-      }
+      await purchaseTokenService.sendTip(feed?.performer?._id, { performerId: feed?.performer?._id, price });
+      message.success('Thank you for the tip');
+      handleUpdateBalance({ token: -price });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
-      this.setState({ submiting: false });
+      await this.setState({ submiting: false });
     }
   }
 
-  async purchaseFeed(couponCode: string) {
-    const { feed } = this.props;
+  async purchaseFeed() {
+    const { feed, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user.balance < feed.price) {
+      message.error('Your balance token is not enough');
+      Router.push('/token-package');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.purchaseFeed({ feedId: feed._id, couponCode })).data;
-      if (resp && resp.success) {
-        message.success('Thank you!');
-      } else {
-        message.success('Error occured, please try again later');
-      }
+      await purchaseTokenService.purchaseFeed(feed._id, {});
+      message.success('Unlocked!');
+      handleUpdateBalance({ token: -feed.price });
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
@@ -264,9 +272,10 @@ class FeedCard extends Component<IProps> {
     const { polls } = this.state;
     const isExpired = new Date(feed.pollExpiredAt) < new Date();
     if (isExpired) {
-      return message.error('Poll has already expired to vote');
+      message.error('Poll has already expired to vote');
+      return;
     }
-    if (!window.confirm('Vote it?')) return false;
+    if (!window.confirm('Vote it?')) return;
     try {
       await this.setState({ requesting: true });
       await feedService.votePoll(poll._id);
@@ -280,9 +289,8 @@ class FeedCard extends Component<IProps> {
       const error = await e;
       message.error(error.message || 'Something went wrong, please try again later');
     } finally {
-      await this.setState({ requesting: false });
+      this.setState({ requesting: false });
     }
-    return undefined;
   }
 
   render() {
@@ -410,7 +418,9 @@ class FeedCard extends Component<IProps> {
                 )}
                 {feed.isSale && !feed.isBought && performer && (
                   <p aria-hidden onClick={() => this.setState({ openPurchaseModal: true })}>
-                    Unlock post for $
+                    Unlock post for
+                    {' '}
+                    <img alt="coin" src="/static/coin-ico.png" width="15px" />
                     {feed.price || 0}
                   </p>
                 )}
@@ -546,7 +556,7 @@ class FeedCard extends Component<IProps> {
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}
         >
-          <PurchaseFeedForm user={user} feed={feed} submiting={submiting} onFinish={this.purchaseFeed.bind(this)} />
+          <PurchaseFeedForm feed={feed} submiting={submiting} onFinish={this.purchaseFeed.bind(this)} />
         </Modal>
         <Modal
           key="subscribe_performer"
@@ -602,6 +612,6 @@ const mapStates = (state: any) => {
 };
 
 const mapDispatch = {
-  getComments, moreComment, createComment, deleteComment
+  getComments, moreComment, createComment, deleteComment, updateBalance
 };
 export default connect(mapStates, mapDispatch)(FeedCard);
