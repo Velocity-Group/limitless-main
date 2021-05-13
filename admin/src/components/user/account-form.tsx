@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import { PureComponent } from 'react';
 import {
-  Form, Input, Button, Select, Switch, Row, Col
+  Form, Input, Button, Select, Switch, Row, Col, InputNumber
 } from 'antd';
 import { IUser, ICountry } from 'src/interfaces';
 import { AvatarUpload } from '@components/user/avatar-upload';
@@ -132,9 +132,14 @@ export class AccountForm extends PureComponent<IProps> {
               <Input placeholder="Display name" />
             </Form.Item>
           </Col>
-          <Col xs={24} md={24}>
+          <Col xs={12} md={12}>
             <Form.Item name="email" label="Email" rules={[{ type: 'email', required: true }]}>
               <Input />
+            </Form.Item>
+          </Col>
+          <Col xs={12} md={12}>
+            <Form.Item name="balance" label="Token Balance">
+              <InputNumber style={{ width: '100%' }} />
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
@@ -190,7 +195,7 @@ export class AccountForm extends PureComponent<IProps> {
                 </Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked">
+            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Tracking reality email-adress">
               <Switch />
             </Form.Item>
           </Col>
@@ -207,10 +212,7 @@ export class AccountForm extends PureComponent<IProps> {
               />
             </Form.Item>
           </Col>
-          {/* <Form.Item name="balance" label="Balance">
-            <InputNumber />
-          </Form.Item>
-          <Form.Item name="country" label="Country" rules={[{ required: true }]}>
+          {/* <Form.Item name="country" label="Country" rules={[{ required: true }]}>
             <Select
               showSearch
             >

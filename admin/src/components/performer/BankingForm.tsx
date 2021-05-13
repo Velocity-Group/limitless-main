@@ -6,8 +6,8 @@ import {
 import { IBankingSetting, ICountry } from 'src/interfaces';
 
 const layout = {
-  labelCol: { span: 6 },
-  wrapperCol: { span: 12 }
+  labelCol: { span: 24 },
+  wrapperCol: { span: 24 }
 };
 
 const validateMessages = {
@@ -97,7 +97,7 @@ export class BankingForm extends PureComponent<IProps> {
         <Form.Item name="city" label="City">
           <Input />
         </Form.Item>
-        <Form.Item name="state" label="State (County)">
+        <Form.Item name="state" label="State/County/Province">
           <Input />
         </Form.Item>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>

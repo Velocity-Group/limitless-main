@@ -1,5 +1,5 @@
 import { Upload, message } from 'antd';
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { LoadingOutlined, FileAddOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import env from 'src/env';
 
@@ -53,8 +53,7 @@ export class FileUpload extends PureComponent<IProps, IState> {
     const { loading } = this.state;
     const uploadButton = (
       <div>
-        {loading ? <LoadingOutlined /> : <PlusOutlined />}
-        <div className="ant-upload-text">Upload</div>
+        {loading ? <LoadingOutlined /> : <FileAddOutlined />}
       </div>
     );
     const { fileUrl } = this.state;

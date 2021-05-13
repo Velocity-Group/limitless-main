@@ -25,3 +25,4 @@ export * from './invitation';
 export * from './payout';
 export * from './gift';
 export * from './stream';
+export * from './token-package';

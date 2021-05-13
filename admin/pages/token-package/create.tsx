@@ -5,7 +5,7 @@ import { message } from 'antd';
 import { BreadcrumbComponent } from '@components/common';
 import Router from 'next/router';
 import FormTokenPackage from '@components/token-package/form';
-import { tokenService } from '@services/token.service';
+import { tokenService } from '@services/index';
 
 class CreateToken extends PureComponent {
     state = {
@@ -44,10 +44,10 @@ class CreateToken extends PureComponent {
       return (
         <>
           <Head>
-            <title>Create new Token Package</title>
+            <title>New Token Package</title>
           </Head>
           <BreadcrumbComponent
-            breadcrumbs={[{ title: 'Token Packages', href: '/token' }, { title: 'Create new Token package' }]}
+            breadcrumbs={[{ title: 'Token Packages', href: '/token' }, { title: 'New token package' }]}
           />
           <Page>
             <FormTokenPackage onFinish={this.submit.bind(this)} packageToken={null} submitting={submitting} />

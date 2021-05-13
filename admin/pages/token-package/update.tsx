@@ -3,8 +3,8 @@ import { PureComponent, Fragment } from 'react';
 import Page from '@components/common/layout/page';
 import { message } from 'antd';
 import Router from 'next/router';
-import { tokenService } from '@services/token.service';
-import { IToken } from 'src/interfaces/token-package';
+import { tokenService } from '@services/index';
+import { ITokenPackage } from 'src/interfaces/token-package';
 import Loader from '@components/common/base/loader';
 import { BreadcrumbComponent } from '@components/common';
 import FormTokenPackage from '@components/token-package/form';
@@ -17,7 +17,7 @@ class TokenUpdate extends PureComponent<IProps> {
   state = {
     submitting: false,
     fetching: true,
-    token: {} as IToken
+    token: {} as ITokenPackage
   };
 
   static async getInitialProps({ ctx }) {
@@ -29,7 +29,6 @@ class TokenUpdate extends PureComponent<IProps> {
     try {
       const resp = await tokenService.findById(id);
       this.setState({ token: resp.data });
-      console.log('TOKEN', resp.data);
     } catch (e) {
       message.error('Token package not found!');
     } finally {

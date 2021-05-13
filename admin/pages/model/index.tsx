@@ -120,7 +120,7 @@ export default class Performers extends PureComponent<any> {
     const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = !isMobile ? [
       {
-        title: 'Display name',
+        title: 'Display_name',
         dataIndex: 'name',
         render(name: string) {
           return <span style={{ width: '60px' }}>{name}</span>;
@@ -150,7 +150,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Verified ID Documents',
+        title: 'Verified_ID',
         dataIndex: 'verifiedDocument',
         render(verifiedDocument) {
           switch (verifiedDocument) {
@@ -159,32 +159,6 @@ export default class Performers extends PureComponent<any> {
             case false:
               return <Tag color="red">N</Tag>;
             default: return <Tag color="red">N</Tag>;
-          }
-        }
-      },
-      {
-        title: 'Verified Email',
-        dataIndex: 'verifiedEmail',
-        render(verifiedEmail) {
-          switch (verifiedEmail) {
-            case true:
-              return <Tag color="green">Y</Tag>;
-            case false:
-              return <Tag color="red">N</Tag>;
-            default: return <Tag color="default">{verifiedEmail}</Tag>;
-          }
-        }
-      },
-      {
-        title: 'Verified Account',
-        dataIndex: 'verifiedAccount',
-        render(status) {
-          switch (status) {
-            case true:
-              return <Tag color="green">Y</Tag>;
-            case false:
-              return <Tag color="red">N</Tag>;
-            default: return <Tag color="default">{status}</Tag>;
           }
         }
       },
@@ -247,7 +221,7 @@ export default class Performers extends PureComponent<any> {
                       <a>
                         <FireOutlined />
                         {' '}
-                        All Posts
+                        My Posts
                       </a>
                     </Link>
                   )
@@ -266,7 +240,7 @@ export default class Performers extends PureComponent<any> {
                       <a>
                         <VideoCameraOutlined />
                         {' '}
-                        All Videos
+                        My Videos
                       </a>
                     </Link>
                   )
@@ -285,7 +259,7 @@ export default class Performers extends PureComponent<any> {
                       <a>
                         <PictureOutlined />
                         {' '}
-                        All Galleries
+                        My Galleries
                       </a>
                     </Link>
                   )
@@ -304,7 +278,7 @@ export default class Performers extends PureComponent<any> {
                       <a>
                         <PictureOutlined />
                         {' '}
-                        All Photos
+                        My Photos
                       </a>
                     </Link>
                   )
@@ -323,7 +297,7 @@ export default class Performers extends PureComponent<any> {
                       <a>
                         <SkinOutlined />
                         {' '}
-                        Products
+                        My Products
                       </a>
                     </Link>
                   )

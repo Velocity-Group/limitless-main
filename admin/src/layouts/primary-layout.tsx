@@ -334,6 +334,11 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
             id: 'token-package',
             name: 'Listing',
             route: '/token-package'
+          },
+          {
+            id: 'new-token-package',
+            name: 'Create new',
+            route: '/token-package/create'
           }
         ]
       },

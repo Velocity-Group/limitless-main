@@ -45,7 +45,7 @@ export class UserService extends APIRequest {
   }
 
   changeTokenLogs(query?: { [key: string]: any }) {
-    return this.get(this.buildUrl('/admin/users/change-token/logs', query));
+    return this.get(this.buildUrl('/admin/change-token/logs', query));
   }
 }
 

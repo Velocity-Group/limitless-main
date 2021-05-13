@@ -36,8 +36,7 @@ import {
   PaymentGatewaySettingPayload,
   CommissionSettingPayload,
   BankingSettingPayload,
-  BlockCountriesSettingPayload,
-  ChangeTokenLogsSearchPayload
+  BlockCountriesSettingPayload
 } from '../payloads';
 import { PerformerDto, IPerformerResponse } from '../dtos';
 import { PerformerService, PerformerSearchService } from '../services';

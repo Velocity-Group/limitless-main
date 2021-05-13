@@ -2,14 +2,14 @@ import { PureComponent } from 'react';
 import {
   Form, Input, Button, InputNumber, Switch
 } from 'antd';
-import { IToken } from 'src/interfaces/token-package';
+import { ITokenPackage } from 'src/interfaces/token-package';
 
 const layout = {
-  labelCol: { span: 4 },
-  wrapperCol: { span: 16 }
+  labelCol: { span: 24 },
+  wrapperCol: { span: 24 }
 };
 interface IProps {
-  packageToken: IToken;
+  packageToken: ITokenPackage;
   onFinish: Function;
   submitting?: boolean;
 }
@@ -22,26 +22,30 @@ export default class FormTokenPackage extends PureComponent<IProps> {
         onFinish={onFinish.bind(this)}
         initialValues={
           packageToken || {
-            isActive: true
-          } as IToken
+            isActive: true,
+            name: '',
+            description: '',
+            ordering: 0,
+            tokens: 99,
+            price: 9.99
+          }
         }
         layout="vertical"
       >
         <Form.Item name="name" rules={[{ required: true, message: 'Please input name of token package!' }]} label="Name">
           <Input placeholder="Enter token package name" />
         </Form.Item>
-        <Form.Item name="description" label="Description">
+        <Form.Item name="description" label="Description" rules={[{ required: true, message: 'Please input description!' }]}>
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item name="price" label="Price">
+        <Form.Item name="price" label="Price ($)" rules={[{ required: true, message: 'Please input price!' }]}>
           <InputNumber min={1} />
         </Form.Item>
-        <Form.Item name="tokens" label="Token">
+        <Form.Item name="tokens" label="Amount of Tokens" rules={[{ required: true, message: 'Please input amount of tokens!' }]}>
           <InputNumber min={1} />
         </Form.Item>
-        <Form.Item name="isActive" label="Status">
+        <Form.Item name="isActive" label="Status" valuePropName="checked">
           <Switch
-            defaultChecked={packageToken && packageToken.isActive ? packageToken.isActive : false}
             checkedChildren="Activate"
             unCheckedChildren="Inactivate"
           />

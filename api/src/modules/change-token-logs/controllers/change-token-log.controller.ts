@@ -20,13 +20,13 @@ import {
 import { ChangeTokenLogService } from '../services/change-token-log.service';
 
 @Injectable()
-@Controller('admin')
+@Controller('admin/change-token')
 export class ChangeTokenLogsController {
   constructor(
     private readonly changeTokenLogService: ChangeTokenLogService
   ) { }
 
-  @Get('/change-token/logs')
+  @Get('/logs')
   @Roles('admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)

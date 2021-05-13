@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Form, Input, Button, Select, message, Switch, Row, Col, DatePicker
+  Form, Input, Button, Select, message, Switch, Row, Col, DatePicker, InputNumber
 } from 'antd';
 import {
   IPerformer,
@@ -14,6 +14,7 @@ import {
 import { AvatarUpload } from '@components/user/avatar-upload';
 import { CoverUpload } from '@components/user/cover-upload';
 import { authService, performerService } from '@services/index';
+import Router from 'next/router';
 import moment from 'moment';
 import './index.less';
 
@@ -178,17 +179,22 @@ export class AccountForm extends PureComponent<IProps> {
               <DatePicker style={{ width: '100%' }} />
             </Form.Item>
           </Col>
+          <Col md={12} xs={12}>
+            <Form.Item
+              label="Token balance"
+              name="balance"
+            >
+              <InputNumber style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
           <Col xs={12} md={12}>
-            <Form.Item name="gender" label="Orientation" rules={[{ required: true }]}>
+            <Form.Item name="gender" label="Gender">
               <Select>
                 <Select.Option key="male" value="male">
                   Male
                 </Select.Option>
                 <Select.Option key="female" value="female">
                   Female
-                </Select.Option>
-                <Select.Option key="couple" value="couple">
-                  Couple
                 </Select.Option>
                 <Select.Option key="transgender" value="transgender">
                   Transgender
@@ -212,7 +218,6 @@ export class AccountForm extends PureComponent<IProps> {
               <Input style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-
           {/* {categories && categories.length > 0 && (
           <Form.Item
             name="categoryIds"
@@ -235,7 +240,7 @@ export class AccountForm extends PureComponent<IProps> {
           {!performer && [
             <Col xs={12} md={12}>
               <Form.Item key="password" name="password" label="Password" rules={[{ required: true }, { min: 6 }]}>
-                <Input.Password placeholder="Performer password" />
+                <Input.Password placeholder="Password" />
               </Form.Item>
             </Col>,
             <Col xs={12} md={12}>
@@ -245,12 +250,12 @@ export class AccountForm extends PureComponent<IProps> {
                 label="Confirm password"
                 rules={[{ required: true }, { min: 6 }]}
               >
-                <Input.Password placeholder="Confirm performer password" />
+                <Input.Password placeholder="Confirm password" />
               </Form.Item>
             </Col>
           ]}
           <Col xs={12} md={12}>
-            <Form.Item name="country" label="Country" rules={[{ required: true }]}>
+            <Form.Item name="country" label="Country">
               <Select showSearch>
                 {countries.map((country) => (
                   <Select.Option key={country.code} value={country.code}>
@@ -261,7 +266,7 @@ export class AccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
-            <Form.Item name="state" label="State (County)">
+            <Form.Item name="state" label="State/County/Province">
               <Input placeholder="Enter the state (county)" />
             </Form.Item>
           </Col>
@@ -299,7 +304,7 @@ export class AccountForm extends PureComponent<IProps> {
                   Indian
                 </Option>
                 <Option key="" value="">
-                  Unknow
+                  Others
                 </Option>
               </Select>
             </Form.Item>
@@ -347,7 +352,7 @@ export class AccountForm extends PureComponent<IProps> {
                     </Option>
                   ))}
                 <Option key="" value="">
-                  Unknow
+                  Others
                 </Option>
               </Select>
             </Form.Item>
@@ -380,7 +385,7 @@ export class AccountForm extends PureComponent<IProps> {
                   Green
                 </Option>
                 <Option key="" value="">
-                  Unknow
+                  Others
                 </Option>
               </Select>
             </Form.Item>
@@ -401,29 +406,11 @@ export class AccountForm extends PureComponent<IProps> {
                   Red
                 </Option>
                 <Option key="" value="">
-                  Unknow
+                  Others
                 </Option>
               </Select>
             </Form.Item>
           </Col>
-          {/* <Col xs={12} md={12}>
-            <Form.Item name="pubicHair" label="Pubic Hair">
-              <Select>
-                <Option key="trimmed" value="trimmed">
-                  Trimmed
-                </Option>
-                <Option key="shaved" value="shaved">
-                  Shaved
-                </Option>
-                <Option key="hairy" value="hairy">
-                  Hairy
-                </Option>
-                <Option key="" value="">
-                  Unknow
-                </Option>
-              </Select>
-            </Form.Item>
-          </Col> */}
           <Col xs={12} md={12}>
             <Form.Item name="bust" label="Butt size">
               <Select>
@@ -447,7 +434,6 @@ export class AccountForm extends PureComponent<IProps> {
               <TextArea rows={3} />
             </Form.Item>
           </Col>
-
           {/* <Form.Item
           name="languages"
           label="Languages"
@@ -497,17 +483,17 @@ export class AccountForm extends PureComponent<IProps> {
             </div>
           </Col>
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked">
+            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Tracking reality email-adress">
               <Switch />
             </Form.Item>
           </Col>
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedDocument" label="Verified ID Documents" valuePropName="checked">
+            <Form.Item name="verifiedDocument" label="Verified ID Documents" valuePropName="checked" help="Accept model to start posting contents">
               <Switch />
             </Form.Item>
           </Col>
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedAccount" label="Verified Account" valuePropName="checked">
+            <Form.Item name="verifiedAccount" label="Verified Account" valuePropName="checked" help="Display verification tick beside model name">
               <Switch />
             </Form.Item>
           </Col>
@@ -530,6 +516,10 @@ export class AccountForm extends PureComponent<IProps> {
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
               <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
                 Submit
+              </Button>
+              &nbsp;
+              <Button onClick={() => Router.back()} disabled={submiting} loading={submiting}>
+                Back
               </Button>
             </Form.Item>
           </Col>

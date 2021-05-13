@@ -1,21 +1,19 @@
 /* eslint-disable no-nested-ternary */
-/* eslint-disable lines-between-class-members */
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import { message } from 'antd';
 import Page from '@components/common/layout/page';
-import { tokenService } from '@services/token.service';
+import { tokenService } from '@services/index';
 import { TableListToken } from '@components/token-package/list-token-package';
 import { BreadcrumbComponent } from '@components/common';
 
-interface IProps {
-  performerId: string;
-}
+interface IProps { }
 
 class Tokens extends PureComponent<IProps> {
   static async getInitialProps({ ctx }) {
     return ctx.query;
   }
+
   state = {
     pagination: {} as any,
     searching: false,
@@ -27,16 +25,6 @@ class Tokens extends PureComponent<IProps> {
   };
 
   async componentDidMount() {
-    const { performerId } = this.props;
-    const { filter } = this.state;
-    if (performerId) {
-      await this.setState({
-        filter: {
-          ...filter,
-          ...{ performerId }
-        }
-      });
-    }
     this.search();
   }
 
@@ -106,21 +94,6 @@ class Tokens extends PureComponent<IProps> {
 
   render() {
     const { list, searching, pagination } = this.state;
-    // const { performerId } = this.props;
-    // const statuses = [
-    //   {
-    //     key: '',
-    //     text: 'All'
-    //   },
-    //   {
-    //     key: 'active',
-    //     text: 'Active'
-    //   },
-    //   {
-    //     key: 'inactive',
-    //     text: 'Inactive'
-    //   }
-    // ];
 
     return (
       <>

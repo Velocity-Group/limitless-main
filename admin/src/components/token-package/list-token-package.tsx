@@ -1,12 +1,14 @@
+/* eslint-disable react/destructuring-assignment */
 import { Table, Tag } from 'antd';
-import { IToken } from 'src/interfaces/token-package';
+import { ITokenPackage } from 'src/interfaces/index';
 // import { formatDate, formatDateNoTime } from '@lib/date';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { DropdownAction } from '@components/common/dropdown-action';
+import { formatDate } from '@lib/date';
 
 interface IProps {
-    dataSource: IToken[];
+    dataSource: ITokenPackage[];
     pagination: {};
     rowKey: string;
     onChange(): Function;
@@ -29,14 +31,22 @@ export const TableListToken = ({
         return (
           <span>
             $
-            {price}
+            {price.toFixed(2)}
           </span>
         );
       }
     },
     {
-      title: 'No of Tokens',
-      dataIndex: 'tokens'
+      title: 'Amount of Tokens',
+      dataIndex: 'tokens',
+      render(tokens) {
+        return (
+          <span>
+            <img alt="coin" src="/coin-ico.png" width="15px" />
+            {tokens}
+          </span>
+        );
+      }
     },
     {
       title: 'Ordering',
@@ -50,7 +60,14 @@ export const TableListToken = ({
           return <Tag color="green">Active</Tag>;
         }
 
-        return <Tag color="red">Deactived</Tag>;
+        return <Tag color="red">Inactive</Tag>;
+      }
+    },
+    {
+      title: 'Created At',
+      dataIndex: 'createdAt',
+      render(date) {
+        return <span>{formatDate(date)}</span>;
       }
     },
     {
