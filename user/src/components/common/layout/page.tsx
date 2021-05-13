@@ -25,7 +25,7 @@ export default class Page extends PureComponent<IProps> {
         })}
         style={loading ? loadingStyle : null}
       >
-        {loading ? <Loader /> : ''}
+        {loading && <Loader />}
         {children}
       </div>
     );

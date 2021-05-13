@@ -3,7 +3,6 @@ import {
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
-import Loader from '@components/common/base/loader';
 import { connect } from 'react-redux';
 import {
   IPerformer,
@@ -22,7 +21,7 @@ interface IProps {
 }
 interface IStates {
   loading: boolean;
-  earning: IEarning[];
+  earnings: IEarning[];
   pagination: {
     total: number;
     current: number;
@@ -44,7 +43,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
     super(props);
     this.state = {
       loading: true,
-      earning: [],
+      earnings: [],
       pagination: { total: 0, current: 1, pageSize: 10 },
       stats: {
         totalGrossPrice: 0,
@@ -60,7 +59,6 @@ class EarningPage extends PureComponent<IProps, IStates> {
 
   componentDidMount() {
     this.getData();
-    this.getPerformerStats();
   }
 
   async handleFilter(data) {
@@ -74,7 +72,6 @@ class EarningPage extends PureComponent<IProps, IStates> {
       }
     });
     this.getData();
-    this.getPerformerStats();
   }
 
   async handleTabsChange(data) {
@@ -89,19 +86,27 @@ class EarningPage extends PureComponent<IProps, IStates> {
     const {
       pagination, sort, sortBy, type, dateRange
     } = this.state;
+    const { current, pageSize } = pagination;
     try {
-      const { current, pageSize } = pagination;
-      const earning = await earningService.performerSearch({
-        limit: pageSize,
-        offset: (current - 1) * pageSize,
-        sort,
-        sortBy,
-        type,
-        ...dateRange
-      });
-      await this.setState({
-        earning: earning.data.data,
-        pagination: { ...pagination, total: earning.data.total }
+      await this.setState({ loading: true });
+      const [earnings, stats] = await Promise.all([
+        earningService.performerSearch({
+          limit: pageSize,
+          offset: (current - 1) * pageSize,
+          sort,
+          sortBy,
+          type,
+          ...dateRange
+        }),
+        earningService.performerStarts({
+          type,
+          ...dateRange
+        })
+      ]);
+      this.setState({
+        earnings: earnings.data.data,
+        stats: stats.data,
+        pagination: { ...pagination, total: earnings.data.total }
       });
     } catch (error) {
       message.error(getResponseError(error));
@@ -110,18 +115,9 @@ class EarningPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async getPerformerStats() {
-    const { dateRange, type } = this.state;
-    const resp = await earningService.performerStarts({
-      type,
-      ...dateRange
-    });
-    await this.setState({ stats: resp.data });
-  }
-
   render() {
     const {
-      loading, earning, pagination, stats
+      loading, earnings, pagination, stats
     } = this.state;
     const { ui } = this.props;
     return (
@@ -152,52 +148,41 @@ class EarningPage extends PureComponent<IProps, IStates> {
             onSubmit={this.handleFilter.bind(this)}
             dateRange
           />
-          {loading ? (
-            <Loader />
-          ) : (
-            <div>
-              {earning && earning.length > 0 ? (
-                <div>
-                  <Row gutter={16} style={{ marginBottom: '10px' }}>
-                    <Col span={8}>
-                      <Statistic
-                        title="Total Earned"
-                        prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                        value={stats.totalGrossPrice || 0}
-                        precision={2}
-                      />
-                    </Col>
-                    <Col span={8}>
-                      <Statistic
-                        title="Site Commission"
-                        prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                        value={stats.totalSiteCommission || 0}
-                        precision={2}
-                      />
-                    </Col>
-                    <Col span={8}>
-                      <Statistic
-                        title="You Earned"
-                        prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                        value={stats.totalNetPrice || 0}
-                        precision={2}
-                      />
-                    </Col>
-                  </Row>
-                  <div className="table-responsive">
-                    <TableListEarning
-                      dataSource={earning}
-                      rowKey="_id"
-                      pagination={pagination}
-                      onChange={this.handleTabsChange.bind(this)}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <span>No data found.</span>
-              )}
-            </div>
-          )}
+          <Row gutter={16} style={{ marginBottom: '10px' }}>
+            <Col span={8}>
+              <Statistic
+                title="Total Earned"
+                prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
+                value={stats.totalGrossPrice || 0}
+                precision={2}
+              />
+            </Col>
+            <Col span={8}>
+              <Statistic
+                title="Site Commission"
+                prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
+                value={stats.totalSiteCommission || 0}
+                precision={2}
+              />
+            </Col>
+            <Col span={8}>
+              <Statistic
+                title="You Earned"
+                prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
+                value={stats.totalNetPrice || 0}
+                precision={2}
+              />
+            </Col>
+          </Row>
+          <div className="table-responsive">
+            <TableListEarning
+              dataSource={earnings}
+              rowKey="_id"
+              loading={loading}
+              pagination={pagination}
+              onChange={this.handleTabsChange.bind(this)}
+            />
+          </div>
         </div>
       </Layout>
     );

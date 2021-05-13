@@ -1,10 +1,9 @@
 /* eslint-disable react/no-danger */
 import { PureComponent } from 'react';
 import Head from 'next/head';
-import { Layout, message } from 'antd';
+import { Layout, message, Spin } from 'antd';
 import { postService } from '@services/post.service';
 import { connect } from 'react-redux';
-import Loader from '@components/common/base/loader';
 
 interface IProps {
   ui: any;
@@ -64,11 +63,11 @@ class PostDetail extends PureComponent<IProps> {
             <div className="page-heading">{post?.title}</div>
             <div
               className="page-content"
-              dangerouslySetInnerHTML={{ __html: post && post.content }}
+              dangerouslySetInnerHTML={{ __html: post?.content }}
             />
+            {fetching && <div><Spin /></div>}
           </div>
         </div>
-        {fetching && <Loader />}
       </Layout>
     );
   }

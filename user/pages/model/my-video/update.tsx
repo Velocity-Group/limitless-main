@@ -5,9 +5,8 @@ import { connect } from 'react-redux';
 import { videoService } from '@services/video.service';
 import { FormUploadVideo } from '@components/video/form-upload';
 import { IVideoUpdate, IUIConfig, IUser } from 'src/interfaces';
-import Loader from '@components/common/base/loader';
 import Router from 'next/router';
-import { Layout, message } from 'antd';
+import { Layout, message, Spin } from 'antd';
 import { getResponseError } from '@lib/utils';
 
 interface IProps {
@@ -93,9 +92,7 @@ class VideoUpdate extends PureComponent<IProps> {
             <div className="page-heading">
               <span>Video Update</span>
             </div>
-            {fetching ? (
-              <Loader />
-            ) : (
+            {!fetching && video && (
               <FormUploadVideo
                 user={user}
                 video={video}
@@ -103,6 +100,7 @@ class VideoUpdate extends PureComponent<IProps> {
                 uploading={submiting}
               />
             )}
+            {fetching && <div className="text-center"><Spin /></div>}
           </Page>
         </div>
       </Layout>

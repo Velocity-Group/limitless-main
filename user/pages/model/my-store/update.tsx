@@ -1,10 +1,9 @@
 import { PureComponent } from 'react';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
-import { message } from 'antd';
+import { message, Spin } from 'antd';
 import { productService } from '@services/product.service';
 import { IProduct, IUIConfig } from 'src/interfaces';
-import Loader from '@components/common/base/loader';
 import { FormProduct } from '@components/product/form-product';
 import Router from 'next/router';
 import { connect } from 'react-redux';
@@ -52,6 +51,7 @@ class ProductUpdate extends PureComponent<IProps> {
     } catch (e) {
       const err = await Promise.resolve(e);
       message.error(getResponseError(err) || 'Product not found!');
+      Router.back();
     } finally {
       this.setState({ fetching: false });
     }
@@ -118,20 +118,17 @@ class ProductUpdate extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <Page>
-            {fetching ? (
-              <Loader />
-            ) : (
-              <>
-                <h4 className="title-form">Update product</h4>
-                <FormProduct
-                  product={product}
-                  submit={this.submit.bind(this)}
-                  uploading={submiting}
-                  beforeUpload={this.beforeUpload.bind(this)}
-                  uploadPercentage={uploadPercentage}
-                />
-              </>
+            <h4 className="title-form">Update product</h4>
+            {!fetching && product && (
+            <FormProduct
+              product={product}
+              submit={this.submit.bind(this)}
+              uploading={submiting}
+              beforeUpload={this.beforeUpload.bind(this)}
+              uploadPercentage={uploadPercentage}
+            />
             )}
+            {fetching && <div className="text-center"><Spin /></div>}
           </Page>
         </div>
       </>

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import Head from 'next/head';
 import {
-  Layout, message, Row, Col, Card, Button, Modal, Input
+  Layout, message, Row, Col, Card, Button, Modal, Input, Spin
 } from 'antd';
 import { PureComponent } from 'react';
 import { tokenPackageService } from '@services/token-package.service';
@@ -10,7 +10,6 @@ import './index.less';
 import {
   IUIConfig, IPackageToken, IUser
 } from '@interfaces/index';
-import Loader from '@components/common/base/loader';
 import { connect } from 'react-redux';
 import { StarOutlined } from '@ant-design/icons';
 import Page from '@components/common/layout/page';
@@ -49,13 +48,13 @@ class TokenPackages extends PureComponent<IProps> {
       const resp = await tokenPackageService.search({
         limit: 99
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
@@ -213,7 +212,7 @@ class TokenPackages extends PureComponent<IProps> {
               </Button>
             </div>
           </Modal>
-          {searching && <Loader />}
+          {searching && <div><Spin /></div>}
           {!searching && !list.length && <p className="text-center" style={{ margin: '30px 0' }}>No token package found.</p>}
         </div>
       </Layout>

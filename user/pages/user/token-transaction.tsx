@@ -1,7 +1,6 @@
 import { PureComponent } from 'react';
 import { Layout, message } from 'antd';
 import Head from 'next/head';
-import Loader from '@components/common/base/loader';
 import Page from '@components/common/layout/page';
 import { purchaseTokenService } from 'src/services';
 import { ITransaction, IUIConfig } from 'src/interfaces';
@@ -16,7 +15,6 @@ interface IProps {
 interface IStates {
   loading: boolean;
   paymentList: ITransaction[];
-  searching: boolean;
   pagination: {
     total: number;
     pageSize: number;
@@ -32,7 +30,6 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
 
   state = {
     loading: true,
-    searching: false,
     paymentList: [],
     pagination: {
       total: 0,
@@ -95,7 +92,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
 
   render() {
     const {
-      loading, paymentList, searching, pagination
+      loading, paymentList, pagination
     } = this.state;
     const { ui } = this.props;
     const type = [
@@ -139,26 +136,22 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          {loading ? (
-            <Loader />
-          ) : (
-            <Page>
-              <div className="page-heading">Token Transactions History</div>
-              <SearchFilter
-                type={type}
-                onSubmit={this.handleFilter.bind(this)}
-                dateRange
-              />
+          <Page>
+            <div className="page-heading">Token Transactions History</div>
+            <SearchFilter
+              type={type}
+              onSubmit={this.handleFilter.bind(this)}
+              dateRange
+            />
 
-              <PaymentTableList
-                dataSource={paymentList}
-                pagination={pagination}
-                onChange={this.handleTableChange.bind(this)}
-                rowKey="_id"
-                loading={searching}
-              />
-            </Page>
-          )}
+            <PaymentTableList
+              dataSource={paymentList}
+              pagination={pagination}
+              onChange={this.handleTableChange.bind(this)}
+              rowKey="_id"
+              loading={loading}
+            />
+          </Page>
         </div>
       </Layout>
     );

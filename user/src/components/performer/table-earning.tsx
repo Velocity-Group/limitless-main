@@ -9,6 +9,7 @@ interface IProps {
   rowKey: string;
   pagination: {};
   onChange: Function;
+  loading: boolean;
 }
 
 export class TableListEarning extends PureComponent<IProps> {
@@ -116,7 +117,7 @@ export class TableListEarning extends PureComponent<IProps> {
       }
     ];
     const {
-      dataSource, rowKey, pagination, onChange
+      dataSource, rowKey, pagination, onChange, loading
     } = this.props;
     return (
       <div className="table-responsive">
@@ -124,6 +125,7 @@ export class TableListEarning extends PureComponent<IProps> {
           dataSource={dataSource}
           columns={columns}
           rowKey={rowKey}
+          loading={loading}
           pagination={pagination}
           onChange={onChange.bind(this)}
         />
