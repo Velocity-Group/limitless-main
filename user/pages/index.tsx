@@ -197,10 +197,6 @@ class Login extends PureComponent<IProps> {
                   <div className="login-content right">
                     {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
                     <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
-                    {/* <div className="switch-btn">
-                      <button type="button" className={loginAs === 'user' ? 'active' : ''} onClick={() => this.setState({ loginAs: 'user' })} style={{ marginRight: '20px' }}>Fan Login</button>
-                      <button type="button" className={loginAs === 'performer' ? 'active' : ''} onClick={() => this.setState({ loginAs: 'performer' })}>Model Login</button>
-                    </div> */}
                     <div className="social-login">
                       <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
                         <TwitterOutlined />
@@ -239,7 +235,7 @@ class Login extends PureComponent<IProps> {
                           validateTrigger={['onChange', 'onBlur']}
                           rules={[
                             { required: true, message: 'Please enter your password!' },
-                            { min: 6, message: 'Password is at least 6 characters' }
+                            { min: 8 }
                           ]}
                         >
                           <Input.Password placeholder="Password" />

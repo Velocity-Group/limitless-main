@@ -50,7 +50,6 @@ export interface IPerformerResponse {
     totalBlogs?: number;
     totalStories?: number;
     totalStreamTime?: number;
-    totalViewTime?: number;
     totalRating?: number;
     avgRating?: number;
   };
@@ -196,7 +195,6 @@ export class PerformerDto {
     totalBlogs: number;
     totalStories: number;
     totalStreamTime: number;
-    totalViewTime: number;
     totalRating: number;
     avgRating: number;
   };

@@ -96,7 +96,6 @@ export class PerformerModel extends Document {
     totalBlogs: number;
     totalStories: number;
     totalStreamTime: number;
-    totalViewTime: number;
     totalRating: number;
     avgRating: number;
   };

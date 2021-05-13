@@ -164,6 +164,10 @@ const performerSchema = new mongoose.Schema({
     type: Number,
     default: 1
   },
+  groupChatPrice: {
+    type: Number,
+    default: 1
+  },
   stats: {
     likes: {
       type: Number,
@@ -216,8 +220,7 @@ const performerSchema = new mongoose.Schema({
   },
   score: {
     type: Number,
-    default: 0,
-    index: true
+    default: 0
   },
   isOnline: {
     type: Number,

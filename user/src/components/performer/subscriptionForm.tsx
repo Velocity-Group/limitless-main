@@ -57,20 +57,51 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             </Form.Item>
             {!isFreeSubscription ? (
               <>
-                <Form.Item name="monthlyPrice" label="Monthly Subscription Price">
+                <Form.Item
+                  name="monthlyPrice"
+                  label="Monthly Subscription (Tokens per month)"
+                  rules={[{ required: true }]}
+                >
                   <InputNumber min={1} />
                 </Form.Item>
-                <Form.Item name="yearlyPrice" label="Yearly Subscription Price">
+                <Form.Item
+                  name="yearlyPrice"
+                  label="Yearly Subscription (Tokens per year)"
+                  rules={[{ required: true }]}
+                >
                   <InputNumber min={1} />
                 </Form.Item>
               </>
             ) : <Alert type="warning" message="User is free to access your contents!" />}
           </Col>
           <Col xl={12} md={12} xs={24}>
-            <Form.Item name="publicChatPrice" label="Default public chat price">
+            <Form.Item
+              name="publicChatPrice"
+              label="Tokens per minute Public Chat"
+              rules={[{ required: true }]}
+            >
               <InputNumber min={1} />
             </Form.Item>
-            <Form.Item name="privateChatPrice" label="Minimum private chat price">
+            <Form.Item
+              name="privateChatPrice"
+              label="Tokens per minute Private Chat"
+              rules={[{ required: true }]}
+            >
+              <InputNumber min={1} />
+            </Form.Item>
+            <Form.Item
+              name="groupChatPrice"
+              label="Tokens per minute Group Chat"
+              rules={[{ required: true }]}
+            >
+              <InputNumber min={1} />
+            </Form.Item>
+            <Form.Item
+              key="maxParticipantsAllowed"
+              name="maxParticipantsAllowed"
+              label="Maximum Participants on Group Chat"
+              rules={[{ required: true }]}
+            >
               <InputNumber min={1} />
             </Form.Item>
           </Col>

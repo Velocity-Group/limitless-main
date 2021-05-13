@@ -125,7 +125,7 @@ class FanRegister extends PureComponent<IProps> {
                   <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
                     <TwitterOutlined />
                     {' '}
-                    SIGN UP WITH TWITTER
+                    SIGN IN/SIGN UP WITH TWITTER
                   </button>
                   <GoogleLogin
                     className="google-button"
@@ -237,12 +237,12 @@ class FanRegister extends PureComponent<IProps> {
                           <a> Login.</a>
                         </Link>
                       </p>
-                      <p>
+                      {/* <p>
                         Are you a model?
                         <Link href="/auth/model-register">
                           <a> Sign up here.</a>
                         </Link>
-                      </p>
+                      </p> */}
                     </Form.Item>
                   </Form>
                 </div>
