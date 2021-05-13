@@ -102,7 +102,7 @@ export class PerformerSearchService {
   public async search(
     req: PerformerSearchPayload,
     user?: PerformerDto
-  ): Promise<PageableData<PerformerDto>> {
+  ): Promise<PageableData<any>> {
     const query = {
       status: PERFORMER_STATUSES.ACTIVE,
       verifiedDocument: true
@@ -147,7 +147,7 @@ export class PerformerSearchService {
     });
     if (req.fromAge && req.toAge) {
       query.dateOfBirth = {
-        $gte: new Date(req.fromAge),
+        $gte: moment(req.fromAge).startOf('day').toDate(),
         $lte: new Date(req.toAge)
       };
     }
@@ -160,6 +160,13 @@ export class PerformerSearchService {
         $gte: fromDate,
         $lte: toDate
       };
+    }
+    if (req.isFreeSubscription) {
+      if (typeof req.isFreeSubscription === 'string') {
+        query.isFreeSubscription = req.isFreeSubscription === 'true';
+      } else {
+        query.isFreeSubscription = req.isFreeSubscription;
+      }
     }
     let sort = {
       isOnline: -1,
@@ -194,10 +201,8 @@ export class PerformerSearchService {
         .skip(parseInt(req.offset as string, 10)),
       this.performerModel.countDocuments(query)
     ]);
-    const performers = data.map((d) => new PerformerDto(d));
-
     return {
-      data: performers,
+      data,
       total
     };
   }
@@ -288,7 +293,7 @@ export class PerformerSearchService {
     }
     const data = await this.performerModel.aggregate([
       { $match: query },
-      { $sample: { size: 90 } }
+      { $sample: { size: 99 } }
     ]);
     return {
       data: data.map((item) => new PerformerDto(item).toSearchResponse())

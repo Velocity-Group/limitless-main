@@ -4,6 +4,7 @@ import { PageableData } from 'src/kernel';
 import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { PERFORMER_PRODUCT_MODEL_PROVIDER } from '../providers';
 import { ProductModel } from '../models';
 import { ProductDto } from '../dtos';
@@ -214,7 +215,7 @@ export class ProductSearchService {
       );
       if (performer) {
         // eslint-disable-next-line no-param-reassign
-        v.performer = new UserDto(performer).toResponse(false);
+        v.performer = new PerformerDto(performer).toResponse();
       }
       // TODO - check user or performer
       const file = images.length > 0 && v.imageId

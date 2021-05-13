@@ -89,7 +89,7 @@ export class PerformerController {
     const data = await this.performerSearchService.search(query, req.user);
     return DataResponse.ok({
       total: data.total,
-      data: data.data.map((p) => p.toPublicDetailsResponse())
+      data: data.data.map((p) => new PerformerDto(p).toPublicDetailsResponse())
     });
   }
 
@@ -100,9 +100,7 @@ export class PerformerController {
   async randomSearch(
     @Query() req: PerformerSearchPayload
   ): Promise<DataResponse<any>> {
-    const query = { ...req };
-
-    const data = await this.performerSearchService.randomSearch(query);
+    const data = await this.performerSearchService.randomSearch(req);
     return DataResponse.ok(data);
   }
 

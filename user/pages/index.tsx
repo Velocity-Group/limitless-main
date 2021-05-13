@@ -235,7 +235,7 @@ class Login extends PureComponent<IProps> {
                           validateTrigger={['onChange', 'onBlur']}
                           rules={[
                             { required: true, message: 'Please enter your password!' },
-                            { min: 8 }
+                            { min: 6 }
                           ]}
                         >
                           <Input.Password placeholder="Password" />

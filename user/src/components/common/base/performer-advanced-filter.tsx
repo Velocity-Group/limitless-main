@@ -147,6 +147,24 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
           </div>
         </div>
         <div className={!showMore ? 'filter-block hide' : 'filter-block custom'}>
+          <div className="filter-item">
+            <Select
+              // eslint-disable-next-line no-nested-ternary
+              onChange={(val: any) => this.setState({ isFreeSubscription: val === 'false' ? false : val === 'true' ? true : '' }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              defaultValue=""
+            >
+              <Select.Option key="all" value="">
+                All subscriptions
+              </Select.Option>
+              <Select.Option key="false" value="false">
+                Non-free subscription
+              </Select.Option>
+              <Select.Option key="true" value="true">
+                Free subscription
+              </Select.Option>
+            </Select>
+          </div>
           {countries && countries.length > 0 && (
           <div className="filter-item">
             <Select
@@ -185,7 +203,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             </Select>
           </div>
           )}
-          {/* {ages.length > 0 && (
+          {ages.length > 0 && (
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ age: val }, () => this.handleSubmit())}
@@ -200,7 +218,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )} */}
+          )}
           {eyeColors.length > 0 && (
           <div className="filter-item">
             <Select
@@ -303,7 +321,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             </Select>
           </div>
           )}
-          {/* {bodyTypes.length > 0 && (
+          {bodyTypes.length > 0 && (
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ bodyType: val }, () => this.handleSubmit())}
@@ -318,7 +336,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )} */}
+          )}
         </div>
       </div>
     );

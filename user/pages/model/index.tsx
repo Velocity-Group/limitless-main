@@ -136,7 +136,7 @@ class Performers extends PureComponent<IProps> {
                     ))}
 
               </Row>
-              {!total && !isLoading && <p>No data was found.</p>}
+              {!total && !isLoading && <p>No model profile was found.</p>}
               {isLoading && (
                 <div className="text-center">
                   <Spin />
