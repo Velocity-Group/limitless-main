@@ -66,8 +66,8 @@ export class AuthService extends APIRequest {
     cookie.remove(TOKEN);
   }
 
-  updatePassword(password: string, type?: string, source?: string) {
-    return this.put('/auth/users/me/password', { type, password, source });
+  updatePassword(password: string, source?: string) {
+    return this.put('/auth/users/me/password', { password, source });
   }
 
   resetPassword(data: IForgot) {

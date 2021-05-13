@@ -27,7 +27,6 @@ import {
   PERFORMER_UPDATE_STATUS_CHANNEL, PERFORMER_UPDATE_GENDER_CHANNEL, DELETE_PERFORMER_CHANNEL
 } from 'src/modules/performer/constants';
 import { difference } from 'lodash';
-import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { MailerService } from 'src/modules/mailer';
 import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';

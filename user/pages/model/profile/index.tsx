@@ -405,11 +405,8 @@ class PerformerProfile extends PureComponent<IProps> {
             content={performer?.bio}
           />
         </Head>
-        <div
-          className="top-profile"
-          style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}
-        >
-          <div className="main-container bg-2nd">
+        <div className="top-profile">
+          <div className="main-container bg-2nd" style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}>
             <div className="top-banner">
               <a aria-hidden className="arrow-back" onClick={() => Router.back()}>
                 <ArrowLeftOutlined />

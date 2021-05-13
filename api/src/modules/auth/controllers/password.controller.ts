@@ -46,7 +46,6 @@ export class PasswordController {
       new AuthUpdateDto({
         source: payload.source || 'user',
         sourceId: user._id,
-        type: payload.type || 'email',
         value: payload.password
       })
     );

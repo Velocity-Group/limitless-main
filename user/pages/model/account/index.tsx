@@ -127,7 +127,7 @@ class AccountSettings extends PureComponent<IProps> {
   async updatePassword(data: any) {
     try {
       this.setState({ pwUpdating: true });
-      await authService.updatePassword(data.password, 'email', 'performer');
+      await authService.updatePassword(data.password, 'performer');
       message.success('Changes saved.');
     } catch (e) {
       const err = await e;
