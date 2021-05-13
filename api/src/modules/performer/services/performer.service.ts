@@ -597,43 +597,21 @@ export class PerformerService {
         })
       );
     }
-    // create auth key if email has changed
-    if (performer.twitterConnected && !performer.email && newPerformer.email) {
-      await this.authService.create(new AuthCreateDto({
+    if (performer.email && performer.email !== newPerformer.email) {
+      await this.authService.sendVerificationEmail(newPerformer);
+      await this.authService.updateKey({
+        source: 'performer',
         sourceId: newPerformer._id,
-        source: 'performer',
-        key: 'email',
-        value: newPerformer.email
-      }));
-    }
-    // create auth key if username has changed
-    if (performer.googleConnected && !performer.username && newPerformer.username) {
-      await this.authService.create(new AuthCreateDto({
-        sourceId: newPerformer._id,
-        source: 'performer',
-        key: 'username',
-        value: newPerformer.username
-      }));
-    }
-    // update auth key if email has changed
-    if (data.email && data.email.toLowerCase() !== performer.email) {
-      const auth = await this.authService.findOne({
-        source: 'performer',
-        sourceId: id,
         type: 'email'
       });
-      auth.key = newPerformer.email;
-      await auth.save();
     }
-    // update auth key if username has changed
-    if ((data.username && data.username.trim().toLowerCase() !== performer.username)) {
-      const auth = await this.authService.findOne({
+    // update auth key if username or email has changed
+    if (performer.username && performer.username.trim() !== newPerformer.username) {
+      await this.authService.updateKey({
         source: 'performer',
-        sourceId: id,
+        sourceId: newPerformer._id,
         type: 'username'
       });
-      auth.key = newPerformer.username;
-      await auth.save();
     }
     return true;
   }
@@ -647,10 +625,7 @@ export class PerformerService {
     if (!performer) {
       throw new EntityNotFoundException();
     }
-    if (
-      welcomeVideo
-      && !welcomeVideo.mimeType.toLowerCase().includes('video')
-    ) {
+    if (welcomeVideo && !welcomeVideo.mimeType.toLowerCase().includes('video')) {
       await this.fileService.remove(welcomeVideo._id);
     }
     const data = { ...payload } as any;
@@ -696,44 +671,21 @@ export class PerformerService {
         })
       );
     }
-    // create auth key if email has changed
-    if (performer.twitterConnected && !performer.email && newPerformer.email) {
-      await this.authService.create(new AuthCreateDto({
-        sourceId: newPerformer._id,
-        source: 'performer',
-        key: 'email',
-        value: newPerformer.email
-      }));
-    }
-    // create auth key if username has changed
-    if (performer.googleConnected && !performer.username && newPerformer.username) {
-      await this.authService.create(new AuthCreateDto({
-        sourceId: newPerformer._id,
-        source: 'performer',
-        key: 'username',
-        value: newPerformer.username
-      }));
-    }
-    // update auth key if email has changed
-    if (data.email && data.email.toLowerCase() !== performer.email) {
+    if (performer.email && performer.email !== newPerformer.email) {
       await this.authService.sendVerificationEmail(newPerformer);
-      const auth = await this.authService.findOne({
+      await this.authService.updateKey({
         source: 'performer',
-        sourceId: id,
+        sourceId: newPerformer._id,
         type: 'email'
       });
-      auth.key = newPerformer.email;
-      await auth.save();
     }
-    // update auth key if username has changed
-    if (data.username && data.username.trim().toLowerCase() !== performer.username) {
-      const auth = await this.authService.findOne({
+    // update auth key if username or email has changed
+    if (performer.username && performer.username.trim() !== newPerformer.username) {
+      await this.authService.updateKey({
         source: 'performer',
-        sourceId: id,
+        sourceId: newPerformer._id,
         type: 'username'
       });
-      auth.key = newPerformer.username;
-      await auth.save();
     }
     return true;
   }
