@@ -44,11 +44,12 @@ export class StreamService {
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    @Inject(forwardRef(() => SubscriptionService))
+    private readonly subscriptionService: SubscriptionService,
     @Inject(STREAM_MODEL_PROVIDER)
     private readonly streamModel: Model<StreamModel>,
     private readonly conversationService: ConversationService,
     private readonly socketUserService: SocketUserService,
-    private readonly subscriptionService: SubscriptionService,
     private readonly requestService: RequestService
   ) {}
 

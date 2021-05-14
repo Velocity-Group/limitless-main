@@ -43,18 +43,19 @@ const CHECK_REF_REMOVE_VIDEO_AGENDA = 'CHECK_REF_REMOVE_VIDEO_AGENDA';
 @Injectable()
 export class VideoService {
   constructor(
-    @Inject(PERFORMER_VIDEO_MODEL_PROVIDER)
-    private readonly PerformerVideoModel: Model<VideoModel>,
-    private readonly queueEventService: QueueEventService,
-    private readonly fileService: FileService,
-    private readonly subscriptionService: SubscriptionService,
-    private readonly agenda: AgendaService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
     @Inject(forwardRef(() => PaymentTokenService))
-    private readonly checkPaymentService: PaymentTokenService
+    private readonly checkPaymentService: PaymentTokenService,
+    @Inject(forwardRef(() => SubscriptionService))
+    private readonly subscriptionService: SubscriptionService,
+    @Inject(PERFORMER_VIDEO_MODEL_PROVIDER)
+    private readonly PerformerVideoModel: Model<VideoModel>,
+    private readonly queueEventService: QueueEventService,
+    private readonly fileService: FileService,
+    private readonly agenda: AgendaService
   ) {
     this.queueEventService.subscribe(
       PERFORMER_VIDEO_TEASER_CHANNEL,
