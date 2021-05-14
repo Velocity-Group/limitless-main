@@ -123,6 +123,7 @@ export class PayoutRequestService {
     const data = {
       ...payload,
       source: SOURCE_TYPE.PERFORMER,
+      tokenConversionRate: await this.settingService.getKeyValue(SETTING_KEYS.TOKEN_CONVERSION_RATE) || 1,
       sourceId: user._id,
       updatedAt: new Date(),
       createdAt: new Date()
@@ -215,7 +216,6 @@ export class PayoutRequestService {
     if (!payout) {
       throw new EntityNotFoundException();
     }
-
     if (performer._id.toString() !== payout.sourceId.toString()) {
       throw new ForbiddenException();
     }
@@ -223,6 +223,7 @@ export class PayoutRequestService {
       throw new InvalidRequestTokenException();
     }
     merge(payout, payload);
+    payout.tokenConversionRate = await this.settingService.getKeyValue(SETTING_KEYS.TOKEN_CONVERSION_RATE) || 1;
     await payout.save();
     // const adminEmail = (await this.settingService.getKeyValue(SETTING_KEYS.ADMIN_EMAIL)) || process.env.ADMIN_EMAIL;
     // adminEmail && await this.mailService.send({

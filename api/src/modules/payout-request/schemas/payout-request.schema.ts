@@ -33,6 +33,10 @@ export const payoutRequestSchema = new Schema({
     type: Number,
     default: 0
   },
+  tokenConversionRate: {
+    type: Number,
+    default: 0
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

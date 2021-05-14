@@ -102,6 +102,25 @@ export class PurchaseItemService {
     return transaction;
   }
 
+  public async systemRenewalSubscription(payload: SubscribePerformerPayload, user: UserDto) {
+    const { type, performerId } = payload;
+    const performer = await this.performerService.findById(performerId);
+    if ((!performer || (type === 'yearly' && !performer.yearlyPrice)) || (type === 'monthly' && !performer.monthlyPrice)) {
+      return;
+    }
+    if ((type === 'yearly' && user.balance < performer.yearlyPrice) || (type === 'monthly' && user.balance < performer.monthlyPrice)) {
+      return;
+    }
+    const transaction = await this.createSubscriptionPaymentTransaction(type, performer, user);
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
+        eventName: EVENT.CREATED,
+        data: new PaymentDto(transaction)
+      })
+    );
+  }
+
   public async createSubscriptionPaymentTransaction(type: string, performer: any, user: UserDto) {
     const paymentTransaction = new this.TokenPaymentModel({
       source: PURCHASE_ITEM_TARGET_SOURCE.USER,

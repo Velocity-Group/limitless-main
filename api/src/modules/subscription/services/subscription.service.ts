@@ -82,7 +82,7 @@ export class SubscriptionService {
         const users = userIds.length ? await this.userService.findByIds(userIds) : [];
         await Promise.all(subscriptions.map((sub) => {
           const user = users.find((u) => `${u._id}` === `${sub.userId}`);
-          return this.purchaseItemService.subscribePerformer({ performerId: sub.performerId, type: sub.subscriptionType }, new UserDto(user));
+          return this.purchaseItemService.systemRenewalSubscription({ performerId: sub.performerId, type: sub.subscriptionType }, new UserDto(user));
         }));
       }
     } catch (e) {

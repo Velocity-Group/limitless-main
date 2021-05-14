@@ -53,7 +53,8 @@ export const SETTING_KEYS = {
   ENABLE_GOOGLE_RECAPTCHA: 'enableGoogleReCaptcha',
   BITPAY_PRODUCTION_MODE: 'bitpayProductionMode',
   BITPAY_API_TOKEN: 'bitpayApiToken',
-  REFERRAL_COMMISSION: 'referralCommission'
+  REFERRAL_COMMISSION: 'referralCommission',
+  TOKEN_CONVERSION_RATE: 'tokenConversionRate'
 };
 
 export const MENU_SECTION = {
