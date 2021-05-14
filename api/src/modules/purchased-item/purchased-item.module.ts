@@ -1,4 +1,4 @@
-import { AgendaModule, MongoDBModule, QueueModule } from 'src/kernel';
+import { MongoDBModule, QueueModule } from 'src/kernel';
 import { Module, forwardRef } from '@nestjs/common';
 import { FeedModule } from 'src/modules/feed/feed.module';
 import { MessageModule } from 'src/modules/message/message.module';
@@ -29,7 +29,6 @@ import { UserModule } from '../user/user.module';
   imports: [
     MongoDBModule,
     QueueModule.forRoot(),
-    AgendaModule.register(),
     forwardRef(() => AuthModule),
     forwardRef(() => UserModule),
     forwardRef(() => PerformerModule),

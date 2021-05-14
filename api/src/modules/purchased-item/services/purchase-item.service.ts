@@ -20,10 +20,8 @@ import { PerformerService } from 'src/modules/performer/services';
 import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
 import { FeedService } from 'src/modules/feed/services';
 import { FeedDto } from 'src/modules/feed/dtos';
-import { SUBSCRIPTION_TYPE, SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
+import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
-import { uniq } from 'lodash';
 import { toObjectId, generateUuid } from 'src/kernel/helpers/string.helper';
 // import { ConversationService } from 'src/modules/message/services';
 import { StreamService } from 'src/modules/stream/services';
@@ -52,15 +50,12 @@ import {
 } from '../payloads';
 import { PaymentDto } from '../dtos';
 
-const RECURRING_SUBSCRIPTION_AGENDA_CHECK = 'RECURRING_SUBSCRIPTION_AGENDA_CHECK';
-
 @Injectable()
 export class PurchaseItemService {
   constructor(
     @Inject(PAYMENT_TOKEN_MODEL_PROVIDER)
     private readonly TokenPaymentModel: Model<PaymentTokenModel>,
     private readonly queueEventService: QueueEventService,
-    private readonly agenda: AgendaService,
     private readonly socketService: SocketUserService,
     @Inject(forwardRef(() => VideoService))
     private readonly videoService: VideoService,
@@ -72,8 +67,6 @@ export class PurchaseItemService {
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => FeedService))
     private readonly feedService: FeedService,
-    @Inject(forwardRef(() => SubscriptionService))
-    private readonly subscriptionService: SubscriptionService,
     @Inject(forwardRef(() => StreamService))
     private readonly streamService: StreamService
     // @Inject(forwardRef(() => ConversationService))
@@ -82,61 +75,7 @@ export class PurchaseItemService {
     // private readonly messageService: MessageService,
     // @Inject(forwardRef(() => FileService))
     // private readonly fileService: FileService
-  ) {
-    this.defindJobs();
-  }
-
-  private async defindJobs() {
-    const collection = (this.agenda as any)._collection;
-    await collection.deleteMany({
-      name: {
-        $in: [
-          RECURRING_SUBSCRIPTION_AGENDA_CHECK
-        ]
-      }
-    });
-    this.agenda.define(RECURRING_SUBSCRIPTION_AGENDA_CHECK, {}, this.handleRenewalSubscription.bind(this));
-    this.agenda.every('3600 seconds', RECURRING_SUBSCRIPTION_AGENDA_CHECK, {});
-  }
-
-  private async handleRenewalSubscription(job: any, done: any): Promise<void> {
-    try {
-      const total = await this.TokenPaymentModel.countDocuments({
-        target: PURCHASE_ITEM_TARTGET_TYPE.PERFORMER,
-        status: PURCHASE_ITEM_STATUS.SUCCESS,
-        type: { $in: [PURCHASE_ITEM_TYPE.MONTHLY_SUBSCRIPTION, PURCHASE_ITEM_TYPE.YEARLY_SUBSCRIPTION] }
-      });
-      for (let i = 0; i <= total / 99; i += 1) {
-        const transactions = await this.TokenPaymentModel.find({
-          target: PURCHASE_ITEM_TARTGET_TYPE.PERFORMER,
-          status: PURCHASE_ITEM_STATUS.SUCCESS,
-          type: { $in: [PURCHASE_ITEM_TYPE.MONTHLY_SUBSCRIPTION, PURCHASE_ITEM_TYPE.YEARLY_SUBSCRIPTION] }
-        }).limit(99).skip(i * 99).lean();
-        const transactionIds = transactions.map((t) => t._id);
-        const userIds = uniq(transactions.map((t) => t.sourceId));
-        const subscriptions = await this.subscriptionService.findSubscriptionList({ transactionId: { $in: transactionIds } });
-        const users = await this.performerService.findByIds(userIds);
-        await Promise.all([subscriptions.map(async (sub) => {
-          if (sub.status === SUBSCRIPTION_STATUS.ACTIVE && new Date(sub.expiredAt) > new Date()) return;
-          const user = users.find((u) => u._id.toString() === sub.userId.toString());
-          const transaction = transactions.find((t) => t._id.toString() === sub.transactionId.toString());
-          if (!user || !transaction || user.balance < transaction.totalPrice) return;
-          await this.queueEventService.publish(
-            new QueueEvent({
-              channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
-              eventName: EVENT.CREATED,
-              data: transaction
-            })
-          );
-        })]);
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('Check & recurring subscription error', e);
-    } finally {
-      done();
-    }
-  }
+  ) { }
 
   public async findById(id: string | ObjectId) {
     return this.TokenPaymentModel.findById(id);
@@ -145,17 +84,14 @@ export class PurchaseItemService {
   public async subscribePerformer(payload: SubscribePerformerPayload, user: UserDto) {
     const { type, performerId } = payload;
     const performer = await this.performerService.findById(performerId);
-    if ((!performer || (type === 'yearly' && !performer.yearlyPrice))
-      || (type === 'monthly' && !performer.monthlyPrice)) {
+    if ((!performer || (type === 'yearly' && !performer.yearlyPrice)) || (type === 'monthly' && !performer.monthlyPrice)) {
       throw new EntityNotFoundException();
     }
-    if ((type === 'yearly' && user.balance < performer.yearlyPrice)
-      || (type === 'monthly' && user.balance < performer.monthlyPrice)) {
+    if ((type === 'yearly' && user.balance < performer.yearlyPrice) || (type === 'monthly' && user.balance < performer.monthlyPrice)) {
       throw new NotEnoughMoneyException();
     }
 
     const transaction = await this.createSubscriptionPaymentTransaction(type, performer, user);
-
     await this.queueEventService.publish(
       new QueueEvent({
         channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
