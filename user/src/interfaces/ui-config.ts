@@ -17,4 +17,5 @@ export interface IUIConfig {
   googleReCaptchaSiteKey: string;
   enableGoogleReCaptcha: boolean;
   requireEmailVerification: boolean;
+  tokenConversionRate: number;
 }

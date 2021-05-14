@@ -23,6 +23,7 @@ export const paymentAccountTypes = [
   { value: 'bitpay', title: 'Bitpay' }
 ];
 export type PayoutStatus = 'pending' | 'approved' | 'rejected' | 'done';
+
 export enum PAYOUT_STATUS {
   PENDING = 'pending',
   APPROVED = 'approved',

@@ -16,6 +16,7 @@ const initialState = {
   modelBenefit: '',
   userBenefit: '',
   googleReCaptchaSiteKey: '',
+  tokenConversionRate: 1,
   enableGoogleReCaptcha: false,
   requireEmailVerification: false
 };

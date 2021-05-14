@@ -133,7 +133,8 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
         countries: settings.countries || [],
         userBenefit: settings.userBenefit || '',
         modelBenefit: settings.modelBenefit || '',
-        requireEmailVerification: settings.requireEmailVerification
+        requireEmailVerification: settings.requireEmailVerification,
+        tokenConversionRate: settings.tokenConversionRate
       })
     );
     store.dispatch(

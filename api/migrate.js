@@ -5,30 +5,30 @@ const { MongoClient } = require('mongodb');
 const mongoose = require('mongoose');
 
 class MongoDbStore {
-  async load (fn) {
-    let client = null
-    let data = null
+  async load(fn) {
+    let client = null;
+    let data = null;
     try {
-      client = await MongoClient.connect(process.env.MONGO_URI)
-      const db = client.db()
-      data = await db.collection('migrations').find().toArray()
+      client = await MongoClient.connect(process.env.MONGO_URI);
+      const db = client.db();
+      data = await db.collection('migrations').find().toArray();
       if (data.length !== 1) {
         // eslint-disable-next-line no-console
-        console.log('Cannot read migrations from database. If this is the first time you run migrations, then this is normal.')
-        return fn(null, {})
+        console.log('Cannot read migrations from database. If this is the first time you run migrations, then this is normal.');
+        return fn(null, {});
       }
     } finally {
-      client.close()
+      client.close();
     }
-    return fn(null, data[0])
-  };
+    return fn(null, data[0]);
+  }
 
-  async save (set, fn) {
-    let client = null
-    let result = null
+  async save(set, fn) {
+    let client = null;
+    let result = null;
     try {
-      client = await MongoClient.connect(process.env.MONGO_URI)
-      const db = client.db()
+      client = await MongoClient.connect(process.env.MONGO_URI);
+      const db = client.db();
       result = await db.collection('migrations')
         .updateOne({}, {
           $set: {
@@ -37,12 +37,12 @@ class MongoDbStore {
           $push: {
             migrations: { $each: set.migrations }
           }
-        }, { upsert: true })
+        }, { upsert: true });
     } finally {
-      client.close()
+      client.close();
     }
 
-    return fn(null, result)
+    return fn(null, result);
   }
 }
 
@@ -54,23 +54,23 @@ migrate.load({
   stateStore: new MongoDbStore(),
   // do not filter lib folder, load only js file
   filterFunction: (fileName) => fileName.includes('.js') && !fileName.includes('lib/')
-}, async function next(err, set) {
+}, async (err, set) => {
   if (err) {
-    throw err
+    throw err;
   }
 
   // connect mongoose in the boot then other scripts can use
   await mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true, 
+    useNewUrlParser: true,
     useUnifiedTopology: true
   });
 
   set.up((err2) => {
     if (err2) {
-      throw err2
+      throw err2;
     }
     // eslint-disable-next-line no-console
     console.log('Migrations successfully ran');
     process.exit();
-  })
-})
+  });
+});

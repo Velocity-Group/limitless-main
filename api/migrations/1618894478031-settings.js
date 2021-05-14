@@ -164,7 +164,7 @@ const settings = [
     value: 1,
     name: 'Token conversion rate',
     description:
-      'Token conversion rate eg: 1token = $1',
+      'Token conversion rate (0.1 mean that $1 = 10 tokens)',
     type: 'number',
     public: true,
     group: 'general',

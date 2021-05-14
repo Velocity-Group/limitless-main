@@ -479,10 +479,10 @@ export class PerformerService {
     ]);
     const adminEmail = await SettingService.getValueByKey(SETTING_KEYS.ADMIN_EMAIL);
     adminEmail && await this.mailService.send({
-      subject: 'New user sign up',
+      subject: 'New performer sign up',
       to: adminEmail,
       data: { performer },
-      template: 'new-performer-notify-admin.html'
+      template: 'new-performer-notify-admin'
     });
 
     // TODO - fire event?

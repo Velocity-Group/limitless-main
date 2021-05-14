@@ -9,7 +9,7 @@ import { IUser, StreamSettings } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined,
-  MessageOutlined, VideoCameraOutlined, FireOutlined,
+  MessageOutlined, VideoCameraOutlined, FireOutlined, NotificationOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined,
   HomeOutlined, LogoutOutlined, UsergroupAddOutlined, VideoCameraAddOutlined,
   HeartOutlined, PlusSquareOutlined, BulbOutlined, WalletOutlined
@@ -353,6 +353,13 @@ class Header extends PureComponent<IProps> {
                     <DollarOutlined />
                     {' '}
                     Earnings
+                  </div>
+                </Link>
+                <Link href="/model/payout-request" as="/model/payout-request">
+                  <div className={router.pathname === '/model/payout-request' ? 'menu-item active' : 'menu-item'}>
+                    <NotificationOutlined />
+                    {' '}
+                    Payout Requests
                   </div>
                 </Link>
                 <Divider />

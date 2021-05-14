@@ -90,14 +90,14 @@ const PaymentTableList = ({
       render(status: string) {
         switch (status) {
           case 'success':
-            return <Tag color="success">Success</Tag>;
+            return <Tag color="green">Success</Tag>;
           case 'pending':
-            return <Tag color="warning">Pending</Tag>;
+            return <Tag color="orange">Pending</Tag>;
           case 'refunded':
-            return <Tag color="danger">Refunded</Tag>;
+            return <Tag color="red">Refunded</Tag>;
           default: break;
         }
-        return <Tag color="default">{status}</Tag>;
+        return <Tag color="red">{status}</Tag>;
       }
     },
     {
