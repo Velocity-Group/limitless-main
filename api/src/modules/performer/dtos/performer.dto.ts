@@ -497,9 +497,3 @@ export class PerformerDto {
     };
   }
 }
-
-export interface IBlockedUsersResponse {
-  _id?: string | ObjectId;
-  userId?: string | ObjectId;
-  userInfo?: PerformerDto;
-}

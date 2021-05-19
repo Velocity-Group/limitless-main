@@ -14,7 +14,6 @@ import {
   Query,
   Request,
   UseInterceptors,
-  Delete,
   HttpException,
   Inject,
   forwardRef
@@ -39,16 +38,12 @@ import { UserDto } from 'src/modules/user/dtos';
 import { PERFORMER_STATUSES } from '../constants';
 import {
   PerformerDto,
-  IPerformerResponse,
-  IBlockedUsersResponse
+  IPerformerResponse
 } from '../dtos';
 import {
   SelfUpdatePayload,
   PerformerSearchPayload,
-  BankingSettingPayload,
-  BlockCountriesSettingPayload,
-  BlockedByPerformerPayload,
-  SearchBlockedByPerformerPayload
+  BankingSettingPayload
 } from '../payloads';
 import { PerformerService, PerformerSearchService } from '../services';
 
@@ -310,63 +305,6 @@ export class PerformerController {
       user
     );
     return DataResponse.ok(data);
-  }
-
-  @Put('/:id/block-countries-settings')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RoleGuard)
-  @Roles('performer')
-  async updateBlockCountriesSetting(
-    @Param('id') performerId: string,
-    @Body() payload: BlockCountriesSettingPayload,
-    @CurrentUser() user: UserDto
-  ) {
-    const data = await this.performerService.updateBlockCountriesSetting(
-      performerId,
-      payload,
-      user
-    );
-    return DataResponse.ok(data);
-  }
-
-  @Post('/blocked-users')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RoleGuard)
-  @Roles('performer')
-  async blockUser(
-    @CurrentUser() performer: UserDto,
-    @Body() payload: BlockedByPerformerPayload
-  ): Promise<DataResponse<any>> {
-    const data = await this.performerService.blockUser(performer, payload);
-    return DataResponse.ok(data);
-  }
-
-  @Delete('/blocked-users/:userId')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RoleGuard)
-  @Roles('performer')
-  async unblockUser(
-    @Param('userId') userId: string,
-    @CurrentUser() performer: UserDto
-  ): Promise<DataResponse<boolean>> {
-    const data = await this.performerService.unblockUser(performer, userId);
-    return DataResponse.ok(data);
-  }
-
-  @Get('/blocked-users')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RoleGuard)
-  @Roles('performer')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async search(
-    @CurrentUser() performer: UserDto,
-    @Body() payload: SearchBlockedByPerformerPayload
-  ): Promise<DataResponse<PageableData<IBlockedUsersResponse>>> {
-    const blocked = await this.performerService.getBlockedUsers(
-      performer,
-      payload
-    );
-    return DataResponse.ok(blocked);
   }
 
   @Get('/documents/auth/check')

@@ -40,7 +40,7 @@ module.exports.up = async function up(next) {
   const usernames = users.map((user) => user.username);
   const sources = await DB.collection(COLLECTION.USER).find({
     email: { $in: emails },
-    s: { $in: usernames }
+    username: { $in: usernames }
   }).toArray();
   const existedEmails = sources.map((source) => source.email);
   const newUsers = users.filter(

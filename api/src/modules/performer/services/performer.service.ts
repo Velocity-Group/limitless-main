@@ -3,7 +3,6 @@
 import {
   Injectable,
   Inject,
-  NotAcceptableException,
   forwardRef,
   HttpException
 } from '@nestjs/common';
@@ -32,20 +31,17 @@ import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';
 import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
+import { PerformerBlockService } from 'src/modules/block/services';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException,
-  EmailExistedException,
-  BlockedCountryException,
-  BlockedByPerformerException
+  EmailExistedException
 } from '../exceptions';
 import {
   PerformerModel,
   PaymentGatewaySettingModel,
   CommissionSettingModel,
-  BankingModel,
-  BlockCountriesSettingModel,
-  BlockedByPerformerModel
+  BankingModel
 } from '../models';
 import {
   PerformerCreatePayload,
@@ -54,15 +50,10 @@ import {
   SelfUpdatePayload,
   PaymentGatewaySettingPayload,
   CommissionSettingPayload,
-  BankingSettingPayload,
-  BlockCountriesSettingPayload,
-  BlockedByPerformerPayload,
-  SearchBlockedByPerformerPayload
+  BankingSettingPayload
 } from '../payloads';
 import {
-  BLOCKED_BY_PERFORMER_PROVIDER,
   PERFORMER_BANKING_SETTING_MODEL_PROVIDER,
-  PERFORMER_BLOCK_COUNTRIES_SETTING_MODEL_PROVIDER,
   PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER,
   PERFORMER_MODEL_PROVIDER,
   PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER
@@ -73,6 +64,8 @@ const CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA = 'CHECK_REF_REMOVE_PERFORMER_FILE_
 @Injectable()
 export class PerformerService {
   constructor(
+    @Inject(forwardRef(() => PerformerBlockService))
+    private readonly performerBlockService: PerformerBlockService,
     @Inject(forwardRef(() => ChangeTokenLogService))
     private readonly changeTokenLogService: ChangeTokenLogService,
     @Inject(forwardRef(() => UserService))
@@ -97,11 +90,7 @@ export class PerformerService {
     @Inject(PERFORMER_BANKING_SETTING_MODEL_PROVIDER)
     private readonly bankingSettingModel: Model<BankingModel>,
     @Inject(PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER)
-    private readonly commissionSettingModel: Model<CommissionSettingModel>,
-    @Inject(PERFORMER_BLOCK_COUNTRIES_SETTING_MODEL_PROVIDER)
-    private readonly blockCountriesSettingModel: Model<BlockCountriesSettingModel>,
-    @Inject(BLOCKED_BY_PERFORMER_PROVIDER)
-    private readonly blockedByPerformerModel: Model<BlockedByPerformerModel>
+    private readonly commissionSettingModel: Model<CommissionSettingModel>
   ) {
     this.defineJobs();
   }
@@ -140,37 +129,6 @@ export class PerformerService {
     }
   }
 
-  public async checkBlockedByIp(
-    performerId: string | ObjectId,
-    countryCode: string
-  ): Promise<boolean> {
-    const blockCountries = await this.blockCountriesSettingModel.findOne({
-      performerId
-    });
-
-    if (
-      blockCountries
-      && blockCountries.countries
-      && blockCountries.countries.length
-    ) {
-      return blockCountries.countries.indexOf(countryCode) > -1;
-    }
-
-    return false;
-  }
-
-  public async checkBlockedByPerformer(
-    performerId: string | ObjectId,
-    userId: string | ObjectId
-  ): Promise<boolean> {
-    const blocked = await this.blockedByPerformerModel.countDocuments({
-      userId,
-      performerId
-    });
-
-    return blocked > 0;
-  }
-
   public async checkExistedEmailorUsername(payload) {
     const data = payload.username ? await this.performerModel.countDocuments({ username: payload.username.trim().toLowerCase() })
       : await this.performerModel.countDocuments({ email: payload.email.toLowerCase() });
@@ -201,23 +159,23 @@ export class PerformerService {
     currentUser?: UserDto
   ): Promise<PerformerDto> {
     const model = await this.performerModel.findOne({ username: username.trim().toLowerCase() }).lean();
-    if (!model) throw new BlockedCountryException();
+    if (!model) throw new EntityNotFoundException();
     let isBlocked = false;
     if (countryCode && `${currentUser?._id}` !== `${model._id}`) {
-      isBlocked = await this.checkBlockedByIp(model._id, countryCode);
+      isBlocked = await this.performerBlockService.checkBlockedCountryByIp(model._id, countryCode);
       if (isBlocked) {
-        throw new BlockedCountryException();
+        throw new HttpException('You country has been blocked to access this model profile', 403);
       }
     }
     let isBlockedByPerformer = false;
     let isBookMarked = null;
     let isSubscribed = false;
     if (currentUser) {
-      isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.checkBlockedByPerformer(
+      isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
         model._id,
         currentUser._id
       );
-      if (isBlockedByPerformer) throw new BlockedByPerformerException();
+      if (isBlockedByPerformer) throw new HttpException('You has been blocked by this model', 403);
       const checkSubscribe = await this.subscriptionService.checkSubscribed(model._id, currentUser._id);
       isSubscribed = !!checkSubscribe;
       isBookMarked = await this.reactionService.findByQuery({
@@ -321,8 +279,8 @@ export class PerformerService {
     dto.bankingInformation = await this.bankingSettingModel.findOne({
       performerId: id
     });
-    dto.blockCountries = await this.blockCountriesSettingModel.findOne({
-      performerId: id
+    dto.blockCountries = await this.performerBlockService.findByQuery({
+      sourceId: id
     });
     return dto;
   }
@@ -918,122 +876,8 @@ export class PerformerService {
     return this.commissionSettingModel.findOne({ performerId });
   }
 
-  public async getBlockUserList(query) {
-    return this.blockedByPerformerModel.find(query);
-  }
-
-  public async updateBlockCountriesSetting(
-    performerId: string,
-    payload: BlockCountriesSettingPayload,
-    currentUser: UserDto
-  ) {
-    if (
-      (currentUser.roles
-        && currentUser.roles.indexOf('admin') === -1
-        && currentUser._id.toString() !== performerId)
-      || (!currentUser.roles
-        && currentUser
-        && currentUser._id.toString() !== performerId)
-    ) {
-      throw new NotAcceptableException('Permission denied');
-    }
-    let item = await this.blockCountriesSettingModel.findOne({
-      performerId
-    });
-    if (!item) {
-      // eslint-disable-next-line new-cap
-      item = new this.blockCountriesSettingModel();
-    }
-    item.performerId = performerId as any;
-    item.countries = payload.countries;
-    return item.save();
-  }
-
-  public async blockUser(
-    currentUser: UserDto,
-    payload: BlockedByPerformerPayload
-  ) {
-    const blocked = await this.blockedByPerformerModel.findOne({
-      userId: payload.userId,
-      performerId: currentUser._id
-    });
-    const subscription = await this.subscriptionService.findOneSubscription(
-      currentUser._id,
-      payload.userId
-    );
-    if (!subscription) {
-      throw new EntityNotFoundException();
-    }
-    if (blocked) {
-      subscription.status = STATUS.INACTIVE;
-      subscription.blockedUser = true;
-      await subscription.save();
-      return blocked;
-    }
-    const newBlock = await this.blockedByPerformerModel.create({
-      ...payload,
-      performerId: currentUser._id,
-      blockBy: currentUser._id,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-    subscription.status = STATUS.INACTIVE;
-    subscription.blockedUser = true;
-    await subscription.save();
-    return newBlock;
-  }
-
-  public async unblockUser(currentUser: UserDto, userId: string) {
-    const blocked = await this.blockedByPerformerModel.findOne({
-      userId,
-      performerId: currentUser._id
-    });
-    const subscription = await this.subscriptionService.findOneSubscription(
-      currentUser._id,
-      userId
-    );
-    if (!subscription) {
-      throw new EntityNotFoundException();
-    }
-    if (!blocked) {
-      return false;
-    }
-    await blocked.remove();
-    subscription.status = STATUS.ACTIVE;
-    subscription.blockedUser = false;
-    await subscription.save();
-    return true;
-  }
-
   public async updatePerformerBalance(performerId: string | ObjectId, tokens: number) {
     await this.performerModel.updateOne({ _id: performerId }, { $inc: { balance: tokens } }, { upsert: true });
-  }
-
-  public async getBlockedUsers(
-    currentUser: UserDto,
-    req: SearchBlockedByPerformerPayload
-  ) {
-    const query = {} as any;
-    query.performerId = currentUser._id;
-    let sort = {};
-    if (req.sort && req.sortBy) {
-      sort = {
-        [req.sortBy]: req.sort
-      };
-    }
-    const [data, total] = await Promise.all([
-      this.blockedByPerformerModel
-        .find(query)
-        .sort(sort)
-        .limit(req.limit ? parseInt(req.limit as string, 10) : 10)
-        .skip(parseInt(req.offset as string, 10)),
-      this.blockedByPerformerModel.countDocuments(query)
-    ]);
-
-    return {
-      data, // TODO - define mdoel
-      total
-    };
   }
 
   public async checkAuthDocument(req: any, user: UserDto) {

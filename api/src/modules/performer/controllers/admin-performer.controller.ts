@@ -35,8 +35,7 @@ import {
   PerformerSearchPayload,
   PaymentGatewaySettingPayload,
   CommissionSettingPayload,
-  BankingSettingPayload,
-  BlockCountriesSettingPayload
+  BankingSettingPayload
 } from '../payloads';
 import { PerformerDto, IPerformerResponse } from '../dtos';
 import { PerformerService, PerformerSearchService } from '../services';
@@ -242,23 +241,6 @@ export class AdminPerformerController {
     @CurrentUser() user: UserDto
   ) {
     const data = await this.performerService.updateBankingSetting(
-      performerId,
-      payload,
-      user
-    );
-    return DataResponse.ok(data);
-  }
-
-  @Put('/:id/block-countries-settings')
-  @HttpCode(HttpStatus.OK)
-  @Roles('admin')
-  @UseGuards(RoleGuard)
-  async updateBlockCountriesSetting(
-    @Param('id') performerId: string,
-    @Body() payload: BlockCountriesSettingPayload,
-    @CurrentUser() user: UserDto
-  ) {
-    const data = await this.performerService.updateBlockCountriesSetting(
       performerId,
       payload,
       user

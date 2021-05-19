@@ -23,6 +23,7 @@ import { PerformerAssetsModule } from '../performer-assets/performer-assets.modu
 import { ReactionModule } from '../reaction/reaction.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { ChangeTokenLogModule } from '../change-token-logs/change-token-log.module';
+import { BlockModule } from '../block/block.module';
 import {
   PerformerAssetsListener, PerformerConnectedListener,
   SubscriptionPerformerListener, UpdatePerformerStatusListener
@@ -42,7 +43,8 @@ import {
     forwardRef(() => MailerModule),
     forwardRef(() => SettingModule),
     forwardRef(() => ReactionModule),
-    forwardRef(() => ChangeTokenLogModule)
+    forwardRef(() => ChangeTokenLogModule),
+    forwardRef(() => BlockModule)
   ],
   providers: [
     ...performerProviders,

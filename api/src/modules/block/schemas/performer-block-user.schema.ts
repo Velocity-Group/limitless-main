@@ -1,19 +1,23 @@
 import { Schema } from 'mongoose';
 
-export const BlockedByPerformerSchema = new Schema({
-  performerId: {
+export const PerformerBlockUserSchema = new Schema({
+  source: {
+    type: String,
+    index: true
+  },
+  sourceId: {
     type: Schema.Types.ObjectId,
     index: true
   },
-  userId: {
+  target: {
+    type: String,
+    index: true
+  },
+  targetId: {
     type: Schema.Types.ObjectId,
     index: true
   },
-  blockBy: {
-    type: Schema.Types.ObjectId,
-    index: true
-  },
-  description: { type: String },
+  reason: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
