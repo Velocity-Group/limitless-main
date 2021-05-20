@@ -78,7 +78,7 @@ class AccountSettings extends PureComponent<IProps> {
           <title>Account Settings</title>
         </Head>
         <Page>
-          <Tabs defaultActiveKey="basic" tabPosition="left">
+          <Tabs defaultActiveKey="basic" tabPosition="top">
             <Tabs.TabPane tab={<span>Basic info</span>} key="basic">
               <AccountForm
                 onFinish={this.submit.bind(this)}
@@ -87,7 +87,8 @@ class AccountSettings extends PureComponent<IProps> {
                 options={{
                   uploadHeaders,
                   avatarUploadUrl: userService.getAvatarUploadUrl(),
-                  onAvatarUploaded: this.onAvatarUploaded.bind(this)
+                  onAvatarUploaded: this.onAvatarUploaded.bind(this),
+                  avatarUrl: currentUser.avatar
                 }}
                 countries={countries}
               />

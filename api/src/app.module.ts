@@ -32,6 +32,7 @@ import { PayoutRequestModule } from './modules/payout-request/payout.module';
 import { OrderModule } from './modules/order/order.module';
 import { ChangeTokenLogModule } from './modules/change-token-logs/change-token-log.module';
 import { BlockModule } from './modules/block/block.module';
+import { ReportModule } from './modules/report/report.module';
 
 @Module({
   imports: [
@@ -66,7 +67,8 @@ import { BlockModule } from './modules/block/block.module';
     PayoutRequestModule,
     OrderModule,
     ChangeTokenLogModule,
-    BlockModule
+    BlockModule,
+    ReportModule
   ],
   controllers: [AppController],
   providers: [AppService]

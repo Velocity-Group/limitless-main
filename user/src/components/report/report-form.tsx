@@ -1,33 +1,32 @@
 import { PureComponent } from 'react';
 import {
-  InputNumber, Button
+  Input, Button
 } from 'antd';
 import { IPerformer } from '@interfaces/index';
 import {
   CheckCircleOutlined
 } from '@ant-design/icons';
-import './performer.less';
 
 interface IProps {
   performer: IPerformer;
-  onFinish(price: any): Function;
+  onFinish: Function;
   submiting: boolean;
 }
 
-export class TipPerformerForm extends PureComponent<IProps> {
+export class ReportForm extends PureComponent<IProps> {
   state = {
-    price: 10
+    reason: ''
   }
 
-  onChangeValue(price) {
-    this.setState({ price });
+  onChangeValue(e) {
+    this.setState({ reason: e.target.value });
   }
 
   render() {
     const {
       onFinish, submiting = false, performer
     } = this.props;
-    const { price } = this.state;
+    const { reason } = this.state;
     return (
       <div className="confirm-subscription-form">
         <div className="profile-cover" style={{ backgroundImage: 'url(\'/static/banner-image.jpg\')' }} />
@@ -52,11 +51,11 @@ export class TipPerformerForm extends PureComponent<IProps> {
         </div>
         <div className="info-body">
           <div style={{ margin: '0 0 20px', textAlign: 'center' }}>
-            <p>Enter your amount of tokens</p>
-            <InputNumber min={1} onChange={this.onChangeValue.bind(this)} value={price} />
+            <p>Tell us why you report?</p>
+            <Input.TextArea minLength={20} maxLength={150} onChange={this.onChangeValue.bind(this)} rows={3} />
           </div>
         </div>
-        <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish(price)}>SEND TIP</Button>
+        <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish(reason)}>SUBMIT</Button>
       </div>
     );
   }

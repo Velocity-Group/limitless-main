@@ -16,7 +16,7 @@ import {
 } from '@redux/comment/actions';
 import { formatDateShort, videoDuration } from '@lib/index';
 import {
-  reactionService, feedService, purchaseTokenService, paymentService
+  reactionService, feedService, purchaseTokenService, paymentService, reportService
 } from '@services/index';
 import { connect } from 'react-redux';
 import { TipPerformerForm } from '@components/performer/tip-form';
@@ -25,6 +25,7 @@ import moment from 'moment';
 import { Twitter, Facebook } from 'react-social-sharing';
 import { VideoPlayer } from '@components/common/video-player';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import { ReportForm } from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
 import { PurchaseFeedForm } from './confirm-purchase';
@@ -70,7 +71,8 @@ class FeedCard extends Component<IProps> {
     polls: [],
     requesting: false,
     shareUrl: '',
-    openSubscriptionModal: false
+    openSubscriptionModal: false,
+    openReportModal: false
   }
 
   componentDidMount() {
@@ -153,6 +155,26 @@ class FeedCard extends Component<IProps> {
       message.error(error.message || 'Error occured, please try again later');
     } finally {
       await this.setState({ requesting: false });
+    }
+  }
+
+  async handleReport(reason: string) {
+    const { feed } = this.props;
+    if (!reason || reason.length < 20) {
+      message.error('Please fill out at least 20 characters');
+      return;
+    }
+    try {
+      await this.setState({ submiting: true });
+      await reportService.create({
+        target: 'feed', targetId: feed._id, performerId: feed.fromSourceId, description: reason
+      });
+      message.success('Your report has been sent');
+    } catch (e) {
+      const err = await e;
+      message.error(err.message || 'error occured, please try again later');
+    } finally {
+      this.setState({ submiting: false, openReportModal: false });
     }
   }
 
@@ -302,7 +324,7 @@ class FeedCard extends Component<IProps> {
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
-      shareUrl, openTeaser, openSubscriptionModal
+      shareUrl, openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
@@ -315,21 +337,14 @@ class FeedCard extends Component<IProps> {
         <Menu.Item key={`post_detail_${feed._id}`}>
           <Link href={{ pathname: '/post', query: { id: feed._id } }} as={`/post/${feed._id}`}>
             <a>
-              Post details
+              Details
             </a>
           </Link>
         </Menu.Item>
-        <Menu.Item key={`copy_link_${feed._id}`} onClick={this.copyLink.bind(this, feed._id)}>
-          <a>
-            Copy link to clipboard
-          </a>
-        </Menu.Item>
-        {user._id === feed.fromSourceId && (
-        <Menu.Item key={`pin_profile_${feed._id}`}>
-          <a target="_blank" rel="noopener noreferrer" href="#">
-            Pin to profile page
-          </a>
-        </Menu.Item>
+        {user._id !== feed.fromSourceId && (
+          <Menu.Item key={`report_${feed._id}`}>
+            <a aria-hidden onClick={() => this.setState({ openReportModal: true })}>Report</a>
+          </Menu.Item>
         )}
         {user._id === feed.fromSourceId && (
           <Menu.Item key={`edit_post_${feed._id}`}>
@@ -340,6 +355,18 @@ class FeedCard extends Component<IProps> {
             </Link>
           </Menu.Item>
         )}
+        <Menu.Item key={`copy_link_${feed._id}`} onClick={this.copyLink.bind(this, feed._id)}>
+          <a>
+            Copy link to clipboard
+          </a>
+        </Menu.Item>
+        {/* {user._id === feed.fromSourceId && (
+        <Menu.Item key={`pin_profile_${feed._id}`}>
+          <a target="_blank" rel="noopener noreferrer" href="#">
+            Pin to profile page
+          </a>
+        </Menu.Item>
+        )} */}
         {/* <Menu.Item key={`statistic_${feed._id}`}>
           <a target="_blank" href="#">
             Post statistics
@@ -422,12 +449,12 @@ class FeedCard extends Component<IProps> {
                   </p>
                 )}
                 {feed.teaser && (
-                <div className="text-center">
-                  <Button type="primary" onClick={() => this.setState({ openTeaser: true })}>
-                    <EyeOutlined />
-                    View teaser video
-                  </Button>
-                </div>
+                  <div className="text-center">
+                    <Button type="primary" onClick={() => this.setState({ openTeaser: true })}>
+                      <EyeOutlined />
+                      View teaser video
+                    </Button>
+                  </div>
                 )}
               </div>
               {feed.files && feed.files.length > 0 && (
@@ -474,7 +501,7 @@ class FeedCard extends Component<IProps> {
               </span>
               {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
                 <span>
-                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')} day(s) ` }
+                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')} day(s) `}
                   <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
                 </span>
               ) : <span>Expired</span>}
@@ -495,11 +522,11 @@ class FeedCard extends Component<IProps> {
                 {totalComment > 0 && thoudsandToK(totalComment)}
               </span>
               {performer && (
-              <span aria-hidden className="action-ico" onClick={() => this.setState({ openTipModal: true })}>
-                <DollarOutlined />
-                {' '}
-                Send tip
-              </span>
+                <span aria-hidden className="action-ico" onClick={() => this.setState({ openTipModal: true })}>
+                  <DollarOutlined />
+                  {' '}
+                  Send tip
+                </span>
               )}
             </div>
             <div className="action-item">
@@ -551,9 +578,22 @@ class FeedCard extends Component<IProps> {
           visible={openPurchaseModal}
           confirmLoading={submiting}
           footer={null}
+          destroyOnClose
           onCancel={() => this.setState({ openPurchaseModal: false })}
         >
           <PurchaseFeedForm feed={feed} submiting={submiting} onFinish={this.purchaseFeed.bind(this)} />
+        </Modal>
+        <Modal
+          key="report_post"
+          className="subscription-modal"
+          title={null}
+          visible={openReportModal}
+          confirmLoading={submiting}
+          footer={null}
+          destroyOnClose
+          onCancel={() => this.setState({ openReportModal: false })}
+        >
+          <ReportForm performer={performer} submiting={submiting} onFinish={this.handleReport.bind(this)} />
         </Modal>
         <Modal
           key="subscribe_performer"
@@ -562,6 +602,7 @@ class FeedCard extends Component<IProps> {
           title={null}
           visible={openSubscriptionModal}
           footer={null}
+          destroyOnClose
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm
