@@ -349,11 +349,10 @@ export class PaymentService {
 
   public async cancelSubscription(performerId: any, user: PerformerDto) {
     const subscription = await this.subscriptionService.findOneSubscription(performerId, user._id);
-    if (!subscription || !subscription.transactionId) {
+    if (!subscription) {
       throw new EntityNotFoundException();
     }
-    const transaction = await this.findById(subscription.transactionId);
-    if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+    if (subscription.subscriptionType === SUBSCRIPTION_TYPE.FREE || !subscription.subscriptionId) {
       await this.queueEventService.publish(
         new QueueEvent({
           channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
@@ -363,69 +362,20 @@ export class PaymentService {
       );
       subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
       await subscription.save();
-      transaction.status = PAYMENT_STATUS.CANCELLED;
-      await transaction.save();
-      return { success: true };
-    } if ([PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
-      if (!transaction || !transaction.paymentResponseInfo || !transaction.paymentResponseInfo.subscriptionId) {
-        throw new EntityNotFoundException();
-      }
-      const { subscriptionId } = transaction.paymentResponseInfo;
-      const ccbillClientAccNo = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER);
-      if (!subscriptionId || !ccbillClientAccNo) {
-        throw new EntityNotFoundException();
-      }
-      try {
-        const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
-        if (resp.data && resp.data.includes('"results"\n"1"\n')) {
-          await this.queueEventService.publish(
-            new QueueEvent({
-              channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-              eventName: EVENT.DELETED,
-              data: new SubscriptionDto(subscription)
-            })
-          );
-          subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-          await subscription.save();
-          transaction.status = PAYMENT_STATUS.CANCELLED;
-          await transaction.save();
-          return { success: true };
-        }
-        return { success: false };
-      } catch (e) {
-        throw new Error('Cancel subscription got an error');
-      }
-    } else {
-      return { success: false };
-    }
-  }
-
-  public async adminCancelSubscription(id: string) {
-    const subscription = await this.subscriptionService.findById(id);
-    if (!subscription) {
-      throw new EntityNotFoundException();
-    }
-    if (subscription && !subscription.transactionId) {
-      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-      subscription.updatedAt = new Date();
-      await subscription.save();
       return { success: true };
     }
-    const transaction = await this.findById(subscription.transactionId);
-    if (!transaction || !transaction.paymentResponseInfo || !transaction.paymentResponseInfo.subscriptionId) {
-      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-      subscription.updatedAt = new Date();
-      await subscription.save();
-      return { success: true };
-    }
-    // const performerCCbill = await this.performerService.getPaymentSetting(subscription.performerId);
-    const { subscriptionId } = transaction.paymentResponseInfo;
-    const ccbillClientAccNo = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER);
-    if (!ccbillClientAccNo) {
-      throw new EntityNotFoundException();
+    const { subscriptionId } = subscription;
+    const [ccbillClientAccNo, ccbillDatalinkUsername, ccbillDatalinkPassword] = await Promise.all([
+      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER),
+      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_DATALINK_USERNAME),
+      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_DATALINK_PASSWORD)
+    ]);
+    if (!ccbillClientAccNo || !ccbillDatalinkUsername || !ccbillDatalinkPassword) {
+      throw new MissingConfigPaymentException();
     }
     try {
-      const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
+      const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&username=${ccbillDatalinkUsername}&password=${ccbillDatalinkPassword}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
+      // TODO tracking data response
       if (resp.data && resp.data.includes('"results"\n"1"\n')) {
         await this.queueEventService.publish(
           new QueueEvent({
@@ -437,15 +387,59 @@ export class PaymentService {
         subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
         subscription.updatedAt = new Date();
         await subscription.save();
-
-        transaction.status = PAYMENT_STATUS.CANCELLED;
-        transaction.updatedAt = new Date();
-        await transaction.save();
         return { success: true };
       }
       return { success: false };
     } catch (e) {
-      throw new HttpException(e, 400);
+      throw new HttpException(e, 500);
+    }
+  }
+
+  public async adminCancelSubscription(id: string) {
+    const subscription = await this.subscriptionService.findById(id);
+    if (!subscription) {
+      throw new EntityNotFoundException();
+    }
+    if (subscription.subscriptionType === SUBSCRIPTION_TYPE.FREE || !subscription.subscriptionId) {
+      await this.queueEventService.publish(
+        new QueueEvent({
+          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+          eventName: EVENT.DELETED,
+          data: new SubscriptionDto(subscription)
+        })
+      );
+      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+      await subscription.save();
+      return { success: true };
+    }
+    const { subscriptionId } = subscription;
+    const [ccbillClientAccNo, ccbillDatalinkUsername, ccbillDatalinkPassword] = await Promise.all([
+      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER),
+      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_DATALINK_USERNAME),
+      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_DATALINK_PASSWORD)
+    ]);
+    if (!ccbillClientAccNo || !ccbillDatalinkUsername || !ccbillDatalinkPassword) {
+      throw new MissingConfigPaymentException();
+    }
+    try {
+      const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&username=${ccbillDatalinkUsername}&password=${ccbillDatalinkPassword}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
+      // TODO tracking data response
+      if (resp.data && resp.data.includes('"results"\n"1"\n')) {
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+            eventName: EVENT.DELETED,
+            data: new SubscriptionDto(subscription)
+          })
+        );
+        subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+        subscription.updatedAt = new Date();
+        await subscription.save();
+        return { success: true };
+      }
+      return { success: false };
+    } catch (e) {
+      throw new HttpException(e, 500);
     }
   }
 }
