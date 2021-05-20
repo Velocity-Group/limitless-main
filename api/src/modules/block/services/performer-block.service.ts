@@ -42,6 +42,10 @@ export class PerformerBlockService {
     return this.performerBlockCountryModel.findOne(query);
   }
 
+  public listByQuery(query) {
+    return this.blockedByPerformerModel.find(query);
+  }
+
   public async checkBlockedCountryByIp(
     performerId: string | ObjectId,
     countryCode: string

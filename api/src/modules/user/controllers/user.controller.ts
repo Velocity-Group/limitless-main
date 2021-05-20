@@ -7,20 +7,22 @@ import {
   UseGuards,
   Request,
   Body,
-  Put
+  Put,
+  Query
 } from '@nestjs/common';
-import { AuthGuard } from 'src/modules/auth/guards';
-import { CurrentUser } from 'src/modules/auth/decorators';
-import { DataResponse } from 'src/kernel';
-import { UserService } from '../services';
+import { AuthGuard, RoleGuard } from 'src/modules/auth/guards';
+import { CurrentUser, Roles } from 'src/modules/auth/decorators';
+import { DataResponse, PageableData } from 'src/kernel';
+import { UserSearchService, UserService } from '../services';
 import { UserDto, IUserResponse } from '../dtos';
-import { UserUpdatePayload } from '../payloads';
+import { UserSearchRequestPayload, UserUpdatePayload } from '../payloads';
 
 @Injectable()
 @Controller('users')
 export class UserController {
   constructor(
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly userSearchService: UserSearchService
   ) { }
 
   @Get('me')
@@ -42,5 +44,16 @@ export class UserController {
   ): Promise<DataResponse<IUserResponse>> {
     const user = await this.userService.update(currentUser._id, payload, currentUser);
     return DataResponse.ok(new UserDto(user).toResponse(true));
+  }
+
+  @Get('/search')
+  @Roles('performer')
+  @UseGuards(RoleGuard)
+  @HttpCode(HttpStatus.OK)
+  async search(
+    @Query() req: UserSearchRequestPayload,
+    @CurrentUser() user: UserDto
+  ): Promise<DataResponse<PageableData<IUserResponse>>> {
+    return DataResponse.ok(await this.userSearchService.performerSearch(req, user));
   }
 }

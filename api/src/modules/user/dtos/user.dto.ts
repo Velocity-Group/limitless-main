@@ -21,7 +21,7 @@ export interface IUserResponse {
   googleConnected?: boolean;
   isOnline?: boolean;
   stats?: any;
-  authorisedCard?: boolean;
+  isBlocked?: boolean;
 }
 
 export class UserDto {
@@ -67,9 +67,7 @@ export class UserDto {
 
   isPerformer?: boolean;
 
-  authorisedCard?: boolean;
-
-  ccbillCardToken?: string;
+  isBlocked?: boolean;
 
   constructor(data?: Partial<UserDto>) {
     data
@@ -96,8 +94,7 @@ export class UserDto {
           'twitterConnected',
           'googleConnected',
           'isPerformer',
-          'authorisedCard',
-          'ccbillCardToken'
+          'isBlocked'
         ])
       );
   }
@@ -118,19 +115,18 @@ export class UserDto {
       email: this.email,
       isOnline: this.isOnline,
       stats: this.stats,
-      twitterConnected: this.twitterConnected,
-      googleConnected: this.googleConnected,
-      isPerformer: this.isPerformer
+      isPerformer: this.isPerformer,
+      country: this.country,
+      isBlocked: this.isBlocked
     };
 
     const privateInfo = {
-      ccbillCardToken: this.ccbillCardToken,
-      authorisedCard: this.authorisedCard,
+      twitterConnected: this.twitterConnected,
+      googleConnected: this.googleConnected,
       phone: this.phone,
       status: this.status,
       gender: this.gender,
       balance: this.balance,
-      country: this.country,
       roles: this.roles,
       verifiedEmail: this.verifiedEmail
     };

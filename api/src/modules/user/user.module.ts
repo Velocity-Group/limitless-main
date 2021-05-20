@@ -13,6 +13,7 @@ import { FileModule } from '../file/file.module';
 import { UserConnectedListener } from './listeners/user-connected.listener';
 import { PerformerModule } from '../performer/performer.module';
 import { ChangeTokenLogModule } from '../change-token-logs/change-token-log.module';
+import { BlockModule } from '../block/block.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { ChangeTokenLogModule } from '../change-token-logs/change-token-log.modu
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => FileModule),
-    forwardRef(() => ChangeTokenLogModule)
+    forwardRef(() => ChangeTokenLogModule),
+    forwardRef(() => BlockModule)
   ],
   providers: [
     ...userProviders,
