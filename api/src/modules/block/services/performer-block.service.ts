@@ -39,7 +39,7 @@ export class PerformerBlockService {
   ) { }
 
   public findByQuery(query) {
-    return this.performerBlockCountryModel.find(query);
+    return this.performerBlockCountryModel.findOne(query);
   }
 
   public async checkBlockedCountryByIp(
@@ -76,20 +76,17 @@ export class PerformerBlockService {
     payload: PerformerBlockCountriesPayload,
     user: UserDto
   ) {
-    const { performerId } = payload;
-    const sourceId = user?.roles && user?.roles?.includes('admin') && performerId ? performerId : user._id;
-    if (user?.roles && user?.roles?.includes('admin') && !performerId) {
-      throw new HttpException('Missing source', 422);
-    }
+    const { countryCodes } = payload;
     let item = await this.performerBlockCountryModel.findOne({
-      sourceId
+      sourceId: user._id
     });
     if (!item) {
       // eslint-disable-next-line new-cap
       item = new this.performerBlockCountryModel();
     }
-    item.sourceId = performerId;
-    item.countryCodes = payload.countryCodes;
+    item.source = 'performer';
+    item.sourceId = user._id;
+    item.countryCodes = countryCodes;
     return item.save();
   }
 

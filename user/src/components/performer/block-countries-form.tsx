@@ -47,7 +47,7 @@ export class PerformerBlockCountriesForm extends PureComponent<IProps> {
       >
         <Row>
           <Col span={24}>
-            <Form.Item name="countries" label="Select your block countries">
+            <Form.Item name="countryCodes" label="Select countries you want to block">
               <Select
                 showSearch
                 optionFilterProp="label"

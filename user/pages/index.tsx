@@ -79,7 +79,6 @@ class Login extends PureComponent<IProps> {
 
   async onGoogleLogin(resp: any) {
     if (!resp.tokenId) {
-      message.error('Google login authenticated fail');
       return;
     }
     const { loginSocial: handleLogin } = this.props;

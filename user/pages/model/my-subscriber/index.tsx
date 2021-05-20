@@ -2,13 +2,11 @@ import { PureComponent } from 'react';
 import { message, Layout } from 'antd';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
-// import { SearchFilter } from '@components/common/search-filter';
 import { TableListSubscription } from '@components/subscription/user-table-list-subscription';
-import { ISubscription, IUIConfig, IBlockedByPerformer } from 'src/interfaces';
+import { ISubscription, IUIConfig } from 'src/interfaces';
 import { subscriptionService } from '@services/subscription.service';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
-import { performerService } from '@services/performer.service';
 
 interface IProps {
   ui: IUIConfig;
@@ -85,52 +83,6 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async blockUser(payload: IBlockedByPerformer) {
-    try {
-      const { subscriptionList } = this.state;
-      await performerService.blockUser(payload);
-      const index = subscriptionList.findIndex(
-        (element) => element.userId === payload.userId
-      );
-      if (index > -1) {
-        const newArray = [...subscriptionList];
-        newArray[index] = {
-          ...newArray[index],
-          blockedUser: true
-        };
-        await this.setState({ subscriptionList: newArray });
-      }
-      message.success('Blocked user');
-    } catch (error) {
-      message.error(
-        getResponseError(error) || 'An error occured. Please try again.'
-      );
-    }
-  }
-
-  async unblockUser(userId: string) {
-    try {
-      const { subscriptionList } = this.state;
-      await performerService.unblockUser(userId);
-      const index = subscriptionList.findIndex(
-        (element) => element.userId === userId
-      );
-      if (index > -1) {
-        const newArray = [...subscriptionList];
-        newArray[index] = {
-          ...newArray[index],
-          blockedUser: false
-        };
-        await this.setState({ subscriptionList: newArray });
-      }
-      message.success('Unblocked user');
-    } catch (error) {
-      message.error(
-        getResponseError(error) || 'An error occured. Please try again.'
-      );
-    }
-  }
-
   render() {
     const { subscriptionList, pagination, loading } = this.state;
     const { ui } = this.props;
@@ -155,8 +107,6 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
                 loading={loading}
                 onChange={this.handleTabChange.bind(this)}
                 rowKey="_id"
-                blockUser={this.blockUser.bind(this)}
-                unblockUser={this.unblockUser.bind(this)}
               />
             </div>
           </Page>

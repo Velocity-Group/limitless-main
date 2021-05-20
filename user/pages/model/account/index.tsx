@@ -18,7 +18,9 @@ import {
   updateCurrentUserCover,
   updateBlockCountries
 } from 'src/redux/user/actions';
-import { authService, performerService, utilsService } from '@services/index';
+import {
+  authService, blockService, performerService, utilsService
+} from '@services/index';
 import { UpdatePaswordForm } from '@components/user/update-password-form';
 import {
   PerformerAccountForm,
@@ -85,12 +87,9 @@ class AccountSettings extends PureComponent<IProps> {
   }
 
   async handleUpdateBlockCountries(data: IBlockCountries) {
-    const { currentUser, updateBlockCountries: handleBlockCountry } = this.props;
+    const { updateBlockCountries: handleBlockCountry } = this.props;
     try {
-      const resp = await performerService.updateBlockCountries(
-        currentUser._id,
-        { ...data, performerId: currentUser._id }
-      );
+      const resp = await blockService.blockCountries(data);
       message.success('Changes saved');
       handleBlockCountry(resp.data);
     } catch (e) {

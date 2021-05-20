@@ -1,4 +1,4 @@
-import { Table, Tag, Button } from 'antd';
+import { Table, Tag } from 'antd';
 import { ISubscription } from 'src/interfaces';
 import { formatDateNoTime } from '@lib/date';
 
@@ -8,8 +8,6 @@ interface IProps {
   rowKey: string;
   onChange: any;
   loading: boolean;
-  blockUser: Function;
-  unblockUser: Function;
 }
 
 export const TableListSubscription = ({
@@ -17,9 +15,7 @@ export const TableListSubscription = ({
   pagination,
   rowKey,
   onChange,
-  loading,
-  blockUser,
-  unblockUser
+  loading
 }: IProps) => {
   const columns = [
     {
@@ -89,25 +85,6 @@ export const TableListSubscription = ({
             return <Tag color="pink">{status}</Tag>;
         }
       }
-    },
-    {
-      title: 'Actions',
-      dataIndex: '_id',
-      render: (data, record) => (!record.blockedUser ? (
-        <Button
-          className="primary"
-          onClick={() => blockUser({ userId: record.userId })}
-        >
-          Block
-        </Button>
-      ) : (
-        <Button
-          className="secondary"
-          onClick={() => unblockUser(record.userId)}
-        >
-          Unblock
-        </Button>
-      ))
     }
   ];
   return (

@@ -27,6 +27,4 @@ export class SubscriptionModel extends Document {
   updatedAt?: Date;
 
   expiredAt?: Date;
-
-  blockedUser?: boolean;
 }

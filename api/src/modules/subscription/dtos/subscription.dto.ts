@@ -18,7 +18,6 @@ export interface ISubscriptionResponse {
   expiredAt?: Date;
   userInfo?: any;
   performerInfo?: any;
-  blockedUser?: boolean;
 }
 
 export class SubscriptionDto {
@@ -54,8 +53,6 @@ export class SubscriptionDto {
 
   performerInfo?: any;
 
-  blockedUser?: boolean;
-
   constructor(data?: Partial<SubscriptionDto>) {
     Object.assign(
       this,
@@ -75,8 +72,7 @@ export class SubscriptionDto {
         'nextRecurringDate',
         'expiredAt',
         'createdAt',
-        'updatedAt',
-        'blockedUser'
+        'updatedAt'
       ])
     );
   }
@@ -91,7 +87,6 @@ export class SubscriptionDto {
       performerInfo: this.performerInfo,
       status: this.status,
       expiredAt: this.expiredAt,
-      blockedUser: this.blockedUser,
       startRecurringDate: this.startRecurringDate,
       nextRecurringDate: this.nextRecurringDate,
       paymentGateway: this.paymentGateway

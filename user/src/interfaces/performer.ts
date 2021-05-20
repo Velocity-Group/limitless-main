@@ -148,8 +148,7 @@ export interface IPerformerStats {
 }
 
 export interface IBlockCountries {
-  performerId: string;
-  countries: string[];
+  countryCodes: string[];
 }
 
 export interface IBlockedByPerformer {

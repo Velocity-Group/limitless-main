@@ -200,7 +200,6 @@ export class SubscriptionService {
     const UIds = data.map((d) => d.userId);
     const [users] = await Promise.all([
       UIds.length ? this.userService.findByIds(UIds) : []
-      // UIds.length ? this.performerService.getBlockUserList({ performerId: user._id, userId: { $in: UIds } }) : []
     ]);
 
     subscriptions.forEach((subscription: SubscriptionDto) => {

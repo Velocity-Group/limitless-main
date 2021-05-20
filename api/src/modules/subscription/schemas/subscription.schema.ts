@@ -47,10 +47,6 @@ const subscriptionSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  blockedUser: {
-    type: Boolean,
-    default: false
-  },
   createdAt: {
     type: Date,
     default: Date.now
