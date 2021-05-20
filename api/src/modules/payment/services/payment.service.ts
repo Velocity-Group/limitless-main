@@ -1,5 +1,5 @@
 import {
-  Injectable, Inject, forwardRef, BadRequestException, HttpException
+  Injectable, Inject, forwardRef, BadRequestException, HttpException, ForbiddenException
 } from '@nestjs/common';
 import { CouponDto } from 'src/modules/coupon/dtos';
 import {
@@ -347,10 +347,13 @@ export class PaymentService {
     return { ok: true };
   }
 
-  public async cancelSubscription(performerId: any, user: PerformerDto) {
-    const subscription = await this.subscriptionService.findOneSubscription(performerId, user._id);
+  public async cancelSubscription(id: any, user: PerformerDto) {
+    const subscription = await this.subscriptionService.findById(id);
     if (!subscription) {
       throw new EntityNotFoundException();
+    }
+    if (`${subscription.userId}` !== `${user._id}`) {
+      throw new ForbiddenException();
     }
     if (subscription.subscriptionType === SUBSCRIPTION_TYPE.FREE || !subscription.subscriptionId) {
       await this.queueEventService.publish(

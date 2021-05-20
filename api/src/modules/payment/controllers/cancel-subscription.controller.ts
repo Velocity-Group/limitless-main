@@ -20,15 +20,15 @@ import { PaymentService } from '../services/payment.service';
 export class CancelSubscriptionController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Post('/ccbill/cancel-subscription/:performerId')
+  @Post('/ccbill/cancel-subscription/:subscriptionId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async ccbillCancel(
-    @Param('performerId') performerId: string,
+    @Param('subscriptionId') subscriptionId: string,
     @CurrentUser() user: PerformerDto
   ): Promise<DataResponse<any>> {
-    const data = await this.paymentService.cancelSubscription(performerId, user);
+    const data = await this.paymentService.cancelSubscription(subscriptionId, user);
     return DataResponse.ok(data);
   }
 

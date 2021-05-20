@@ -101,7 +101,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
       await this.setState({ submiting: true });
       const resp = await (await subscriptionService.cancelSubscription(subscriptionId))
         .data;
-      resp.success && message.success('Your subscription has been cancelled');
+      resp.success && message.success('Cancel subscription success');
       this.getData();
     } catch (e) {
       const error = await e;

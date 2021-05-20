@@ -27,7 +27,7 @@ export const TableListSubscription = ({
   const onCancel = (value) => {
     if (
       !window.confirm(
-        'By aggree to cancel this model subscription, your will not able to access his content immediately '
+        'By aggree to cancel this model subscription, your will not able to access his contents immediately '
       )
     ) {
       return;
@@ -65,8 +65,6 @@ export const TableListSubscription = ({
             return <Tag color="orange">Yearly Subscription</Tag>;
           case 'free':
             return <Tag color="orange">Free Subscription</Tag>;
-          case 'system':
-            return <Tag color="orange">System</Tag>;
           default:
             return null;
         }
