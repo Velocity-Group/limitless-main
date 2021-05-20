@@ -6,7 +6,7 @@ import { TableListSubscription } from '@components/subscription/table-list-subsc
 import {
   ISubscription, IUIConfig, IUser
 } from 'src/interfaces';
-import { purchaseTokenService, subscriptionService } from '@services/index';
+import { paymentService, purchaseTokenService, subscriptionService } from '@services/index';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
 import { SearchFilter } from '@components/common';
@@ -122,27 +122,23 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
   }
 
   async subscribe() {
-    const { currentUser, updateBalance: handleUpdateBalance } = this.props;
     const { selectedSubscription } = this.state;
     const { performerInfo: performer, subscriptionType } = selectedSubscription;
-    if (currentUser.isPerformer || !performer) {
-      return message.error('Forbiden!');
-    }
-    if ((subscriptionType === 'monthly' && currentUser.balance < performer.monthlyPrice) || (subscriptionType === 'yearly' && currentUser.balance < performer.monthlyPrice)) {
-      return message.error('Your token balance is not enough!');
-    }
     try {
       await this.setState({ submiting: true });
-      await purchaseTokenService.subscribePerformer({ type: subscriptionType, performerId: performer._id });
-      handleUpdateBalance({ token: subscriptionType === 'monthly' ? -performer.monthlyPrice : -performer.yearlyPrice });
-      this.getData();
+      const resp = await (await paymentService.subscribePerformer({ type: subscriptionType, performerId: performer._id })).data;
+      if (resp.paymentUrl) {
+        message.info('Redirecting to payment method...');
+        window.location.href = resp.paymentUrl;
+        return;
+      }
+      message.error('An error occured, please try again later');
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
       this.setState({ submiting: false, openSubscriptionModal: false });
     }
-    return undefined;
   }
 
   render() {
