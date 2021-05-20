@@ -7,7 +7,9 @@ import {
 } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { galleryService, photoService, purchaseTokenService } from '@services/index';
+import {
+  galleryService, paymentService, photoService, purchaseTokenService
+} from '@services/index';
 import { getRelatedGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
@@ -128,17 +130,20 @@ class GalleryViewPage extends PureComponent<IProps> {
 
   async subscribe() {
     try {
-      const { gallery, updateBalance: handleUpdateBalance } = this.props;
+      const { gallery } = this.props;
       await this.setState({ submiting: true });
-      await purchaseTokenService.subscribePerformer({ type: 'monthly', performerId: gallery.performer._id });
-      await this.setState({ isSubscribed: true, openSubscriptionModal: false });
-      handleUpdateBalance({ token: this.subscriptionType === 'monthly' ? -gallery.performer.monthlyPrice : -gallery.performer.yearlyPrice });
-      message.success('Subscribed!');
+      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: gallery.performerId })).data;
+      if (resp.paymentUrl) {
+        message.info('Redirecting to payment method...');
+        window.location.href = resp.paymentUrl;
+        return;
+      }
+      message.error('An error occured, please try again later');
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
     } finally {
-      this.setState({ submiting: false });
+      this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
 
@@ -212,7 +217,20 @@ class GalleryViewPage extends PureComponent<IProps> {
                   >
                     <h3>To view full content, subscribe me!</h3>
                     <div style={{ marginBottom: '25px' }}>
-                      {gallery?.performer?.monthlyPrice && (
+                      {gallery?.performer?.isFreeSubscription && (
+                      <Button
+                        className="primary"
+                        style={{ marginRight: '15px' }}
+                        disabled={submiting && this.subscriptionType === 'free'}
+                        onClick={() => {
+                          this.subscriptionType = 'free';
+                          this.setState({ openSubscriptionModal: true });
+                        }}
+                      >
+                        SUBSCRIBE FOR FREE
+                      </Button>
+                      )}
+                      {!gallery?.performer?.isFreeSubscription && gallery?.performer?.monthlyPrice && (
                       <Button
                         className="primary"
                         style={{ marginRight: '15px' }}
@@ -222,14 +240,11 @@ class GalleryViewPage extends PureComponent<IProps> {
                           this.setState({ openSubscriptionModal: true });
                         }}
                       >
-                        Subscribe Monthly
-                        {' '}
-                        <img alt="coin" src="/static/coin-ico.png" width="20px" />
-                        {' '}
+                        MONTHLY SUBSCRIPTION BY $
                         {gallery?.performer?.monthlyPrice.toFixed(2)}
                       </Button>
                       )}
-                      {gallery?.performer.yearlyPrice && (
+                      {!gallery?.performer?.isFreeSubscription && gallery?.performer.yearlyPrice && (
                       <Button
                         className="btn btn-yellow"
                         disabled={submiting && this.subscriptionType === 'yearly'}
@@ -238,10 +253,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                           this.setState({ openSubscriptionModal: true });
                         }}
                       >
-                        Subscribe Yearly
-                        {' '}
-                        <img alt="coin" src="/static/coin-ico.png" width="20px" />
-                        {' '}
+                        YEARLY SUBSCRIPTON BY
                         {gallery?.performer?.yearlyPrice.toFixed(2)}
                       </Button>
                       )}

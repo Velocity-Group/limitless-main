@@ -2,6 +2,10 @@
 import { APIRequest } from './api-request';
 
 export class PaymentService extends APIRequest {
+  subscribePerformer(payload: { performerId: string, type: string }) {
+    return this.post('/payment/subscribe/performers', payload);
+  }
+
   userSearch(payload) {
     return this.get(this.buildUrl('/transactions/user/search', payload));
   }

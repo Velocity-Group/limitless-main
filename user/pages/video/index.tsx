@@ -10,7 +10,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import {
-  videoService, reactionService, purchaseTokenService
+  videoService, reactionService, purchaseTokenService, paymentService
 } from '@services/index';
 import {
   RelatedListVideo,
@@ -285,15 +285,20 @@ class VideoViewPage extends PureComponent<IProps> {
 
   async subscribe() {
     try {
-      const { updateBalance: handleUpdateBalance, video } = this.props;
+      const { video } = this.props;
       await this.setState({ submiting: true });
-      await purchaseTokenService.subscribePerformer({ type: 'monthly', performerId: video.performer._id });
-      await this.setState({ isSubscribed: true, openSubscriptionModal: false });
-      handleUpdateBalance({ token: this.subscriptionType === 'monthly' ? -video.performer.monthlyPrice : -video.performer.yearlyPrice });
-      message.success('Subscribed!');
+      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: video.performerId })).data;
+      if (resp.paymentUrl) {
+        message.info('Redirecting to payment method...');
+        window.location.href = resp.paymentUrl;
+        return;
+      }
+      message.error('An error occured, please try again later');
     } catch (e) {
       const err = await e;
-      alert((err && err.message) || 'error occured, please try again later');
+      message.error(err?.message || 'Error occured, please try again later');
+    } finally {
+      this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
 
@@ -431,7 +436,7 @@ class VideoViewPage extends PureComponent<IProps> {
                     onClick={() => this.setState({ openPurchaseModal: true })}
                   >
                     <Space>
-                      Unlock video by
+                      Unlock video by $
                       {' '}
                       <img alt="coin" src="/static/coin-ico.png" height="20px" />
                       {(video.price || 0).toFixed(2)}
@@ -451,7 +456,19 @@ class VideoViewPage extends PureComponent<IProps> {
                 >
                   <h3>To view full content, subscribe me!</h3>
                   <div style={{ marginBottom: '25px' }}>
-                    {video.performer && video.performer.monthlyPrice && (
+                    {video.performer && video.performer.isFreeSubscription && (
+                    <Button
+                      className="primary"
+                      style={{ marginRight: '15px' }}
+                      onClick={() => {
+                        this.subscriptionType = 'free';
+                        this.setState({ openSubscriptionModal: true });
+                      }}
+                    >
+                      SUBSCRIBE FOR FREE
+                    </Button>
+                    )}
+                    {video.performer && !video.performer.isFreeSubscription && video.performer.monthlyPrice && (
                       <Button
                         className="primary"
                         style={{ marginRight: '15px' }}
@@ -460,13 +477,11 @@ class VideoViewPage extends PureComponent<IProps> {
                           this.setState({ openSubscriptionModal: true });
                         }}
                       >
-                        Subscribe Monthly
-                        {' '}
-                        <img alt="coin" src="/static/coin-ico.png" style={{ height: 20, margin: '0 5px' }} />
-                        {video.performer.monthlyPrice.toFixed(2)}
+                        MONTHLY SUBSCRIPTION BY $
+                        {video.performer?.monthlyPrice.toFixed(2)}
                       </Button>
                     )}
-                    {video.performer && video.performer.yearlyPrice && (
+                    {video.performer && !video.performer.isFreeSubscription && video.performer.yearlyPrice && (
                       <Button
                         className="btn btn-yellow"
                         onClick={() => {
@@ -474,10 +489,8 @@ class VideoViewPage extends PureComponent<IProps> {
                           this.setState({ openSubscriptionModal: true });
                         }}
                       >
-                        Subscribe Yearly
-                        {' '}
-                        <img alt="coin" src="/static/coin-ico.png" style={{ height: 20, margin: '0 5px' }} />
-                        {video.performer.yearlyPrice.toFixed(2)}
+                        YEARLY SUBSCRIPTION BY $
+                        {video?.performer?.yearlyPrice.toFixed(2)}
                       </Button>
                     )}
                   </div>

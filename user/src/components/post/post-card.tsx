@@ -14,10 +14,9 @@ import { CommentForm, ListComments } from '@components/comment';
 import {
   getComments, moreComment, createComment, deleteComment
 } from '@redux/comment/actions';
-import './index.less';
 import { formatDateShort, videoDuration } from '@lib/index';
 import {
-  reactionService, feedService, purchaseTokenService
+  reactionService, feedService, purchaseTokenService, paymentService
 } from '@services/index';
 import { connect } from 'react-redux';
 import { TipPerformerForm } from '@components/performer/tip-form';
@@ -31,6 +30,7 @@ import { updateBalance } from '@redux/user/actions';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
 import { IFeed, IUser } from '../../interfaces';
+import './index.less';
 
 interface IProps {
   feed: IFeed;
@@ -206,24 +206,21 @@ class FeedCard extends Component<IProps> {
   }
 
   async subscribe() {
-    const { feed, user } = this.props;
-    // eslint-disable-next-line no-nested-ternary
-    const price = this.subscriptionType === 'monthly' ? feed?.performer?.monthlyPrice : this.subscriptionType === 'yearly' ? feed?.performer?.yearlyPrice : 0;
-    if (user.balance < price) {
-      message.error('Your balance token is not enough');
-      Router.push('/token-package');
-      return;
-    }
+    const { feed } = this.props;
     try {
       await this.setState({ submiting: true });
-      await purchaseTokenService.subscribePerformer({ type: this.subscriptionType, performerId: feed?.performer._id });
-      message.success('Subscribed success!');
-      window.location.reload();
+      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: feed.fromSourceId })).data;
+      if (resp.paymentUrl) {
+        message.info('Redirecting to payment method...');
+        window.location.href = resp.paymentUrl;
+        return;
+      }
+      message.error('An error occured, please try again later');
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
-      this.setState({ submiting: false });
+      this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
 

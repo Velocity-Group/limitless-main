@@ -29,10 +29,6 @@ export class PurchaseTokenService extends APIRequest {
     return this.post(`/purchase-items/stream/${id}`);
   }
 
-  subscribePerformer(payload: { performerId: string, type: string }) {
-    return this.post('/purchase-items/subscribe/performers', payload);
-  }
-
   userSearch(query?: { [key: string]: any }) {
     return this.get(this.buildUrl('/purchased-items/user/search', query));
   }

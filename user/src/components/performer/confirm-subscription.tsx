@@ -74,9 +74,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
           {' '}
           {type !== 'free' ? (
             <>
-              by
-              {' '}
-              <img alt="coin" src="/static/coin-ico.png" width="20px" />
+              by $
               {' '}
               {type === 'monthly' ? performer.monthlyPrice.toFixed(2) : type === 'monthly' ? performer.yearlyPrice.toFixed(2) : ''}
             </>

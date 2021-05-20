@@ -11,7 +11,7 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, purchaseTokenService, feedService, reactionService
+  performerService, purchaseTokenService, feedService, reactionService, paymentService
 } from 'src/services';
 import Head from 'next/head';
 import {
@@ -229,23 +229,21 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async subscribe() {
-    const { performer, currentUser } = this.props;
-    const price = this.subscriptionType === 'monthly' ? performer.monthlyPrice : this.subscriptionType === 'yearly' ? performer.yearlyPrice : 0;
-    if (currentUser.balance < price) {
-      message.error('Your balance token is not enough');
-      Router.push('/token-package');
-      return;
-    }
+    const { performer } = this.props;
     try {
       await this.setState({ submiting: true });
-      await purchaseTokenService.subscribePerformer({ type: this.subscriptionType, performerId: performer._id });
-      message.success('Subscribed success!');
-      window.location.reload();
+      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: performer._id })).data;
+      if (resp.paymentUrl) {
+        message.info('Redirecting to payment method...');
+        window.location.href = resp.paymentUrl;
+        return;
+      }
+      message.error('An error occured, please try again later');
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
-      this.setState({ submiting: false });
+      this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
 
@@ -350,7 +348,6 @@ class PerformerProfile extends PureComponent<IProps> {
         toDate: filter.toDate || ''
       }));
     }
-    return undefined;
   }
 
   render() {
