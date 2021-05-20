@@ -15,6 +15,7 @@ class BlockCountries extends PureComponent<IProps> {
 
   state = {
     searching: false,
+    submiting: false,
     countries: [] as any,
     blockCountries: [] as any
   };
@@ -26,18 +27,22 @@ class BlockCountries extends PureComponent<IProps> {
   async handleChange(code, e) {
     if (e.target && e.target.checked) {
       try {
-        blockCountryService.create(code);
+        await this.setState({ submiting: true });
+        await blockCountryService.create(code);
       } catch (error) {
-        console.log(error);
         message.error('error');
+      } finally {
+        this.setState({ submiting: false });
       }
     }
     if (e.target && !e.target.checked) {
       try {
-        blockCountryService.delete(code);
+        await this.setState({ submiting: true });
+        await blockCountryService.delete(code);
       } catch (error) {
-        console.log(error);
         message.error('error');
+      } finally {
+        this.setState({ submiting: false });
       }
     }
   }
@@ -59,7 +64,9 @@ class BlockCountries extends PureComponent<IProps> {
   }
 
   render() {
-    const { countries, searching, blockCountries } = this.state;
+    const {
+      countries, searching, blockCountries, submiting
+    } = this.state;
     const columns = [
       {
         title: 'Country',
@@ -83,6 +90,7 @@ class BlockCountries extends PureComponent<IProps> {
         key: 'check',
         render: (code) => (
           <Checkbox
+            disabled={submiting}
             defaultChecked={!!(blockCountries.length > 0 && blockCountries.find((c) => c.countryCode === code))}
             onChange={this.handleChange.bind(this, code)}
           />
@@ -92,9 +100,9 @@ class BlockCountries extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Block Countries</title>
+          <title>Black List Countries</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Block Countries' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Black List Countries' }]} />
         <Page>
           <div style={{ marginBottom: '20px' }}>
             <div className="">

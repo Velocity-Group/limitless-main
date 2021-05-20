@@ -18,7 +18,7 @@ class SubscriptionService extends APIRequest {
   }
 
   cancelSubscription(id: string) {
-    return this.post(`/subscriptions/cancel/admin/${id}`);
+    return this.post(`/payment/ccbill/admin/cancel-subscription/${id}`);
   }
 }
 export const subscriptionService = new SubscriptionService();

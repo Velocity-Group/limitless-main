@@ -2,7 +2,7 @@ import {
   Controller, Get, HttpCode, HttpStatus, Request
 } from '@nestjs/common';
 import { DataResponse } from 'src/kernel';
-import { BlockCountryService } from 'src/modules/user/services';
+import { SiteBlockCountryService } from 'src/modules/block/services';
 import { CountryService } from 'src/modules/utils/services';
 import { AppService } from './app.service';
 
@@ -10,7 +10,7 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly blockCountryService: BlockCountryService,
+    private readonly blockCountryService: SiteBlockCountryService,
     private readonly countryService: CountryService
   ) { }
 

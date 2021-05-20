@@ -1,9 +1,10 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { QueueEventService, QueueEvent } from 'src/kernel';
-import { TRANSACTION_SUCCESS_CHANNEL } from 'src/modules/payment/constants';
+import { PAYMENT_TYPE, TRANSACTION_SUCCESS_CHANNEL } from 'src/modules/payment/constants';
 import { EVENT } from 'src/kernel/constants';
 import { MailerService } from 'src/modules/mailer/services';
 import { SettingService } from 'src/modules/settings';
+import { PerformerService } from 'src/modules/performer/services';
 import { UserService } from 'src/modules/user/services';
 import { PAYMENT_STATUS } from '../constants';
 
@@ -14,6 +15,8 @@ export class TransactionMailerListener {
   constructor(
     private readonly queueEventService: QueueEventService,
     private readonly mailService: MailerService,
+    @Inject(forwardRef(() => PerformerService))
+    private readonly performerService: PerformerService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService
   ) {
@@ -35,13 +38,46 @@ export class TransactionMailerListener {
         return;
       }
       const adminEmail = SettingService.getByKey('adminEmail').value || process.env.ADMIN_EMAIL;
+      const performer = await this.performerService.findById(transaction.performerId);
       const user = await this.userService.findById(transaction.sourceId);
+      if (!user || !performer) {
+        return;
+      }
+      // mail to performer
+      if (performer && performer.email) {
+        if ([PAYMENT_TYPE.FREE_SUBSCRIPTION, PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
+          await this.mailService.send({
+            subject: 'New subscription',
+            to: performer.email,
+            data: {
+              performer,
+              user,
+              transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+              products: transaction.products
+            },
+            template: 'performer-new-subscriber'
+          });
+        } else {
+          await this.mailService.send({
+            subject: 'New payment success',
+            to: performer.email,
+            data: {
+              performer,
+              user,
+              transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+              products: transaction.products
+            },
+            template: 'performer-payment-success'
+          });
+        }
+      }
       // mail to admin
       if (adminEmail) {
         await this.mailService.send({
           subject: 'New payment success',
           to: adminEmail,
           data: {
+            performer,
             user,
             transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
             products: transaction.products
@@ -50,7 +86,7 @@ export class TransactionMailerListener {
         });
       }
       // mail to user
-      if (user && user.email) {
+      if (user.email) {
         await this.mailService.send({
           subject: 'New payment success',
           to: user.email,
@@ -64,7 +100,7 @@ export class TransactionMailerListener {
       }
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log('payment_success-listener_error', e);
+      console.log('listen_transaction_error', e);
     }
   }
 }

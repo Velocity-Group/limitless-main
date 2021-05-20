@@ -113,14 +113,14 @@ export class PerformerController {
 
     if (payload.password) {
       await Promise.all([
-        this.authService.create({
+        performer.email && this.authService.create({
           source: 'performer',
           sourceId: performer._id,
           type: 'email',
           key: performer.email,
           value: payload.password
         }),
-        this.authService.create({
+        performer.username && this.authService.create({
           source: 'performer',
           sourceId: performer._id,
           type: 'username',

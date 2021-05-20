@@ -31,6 +31,7 @@ import { TokenPackageModule } from './modules/token-package/token-package.module
 import { PayoutRequestModule } from './modules/payout-request/payout.module';
 import { OrderModule } from './modules/order/order.module';
 import { ChangeTokenLogModule } from './modules/change-token-logs/change-token-log.module';
+import { BlockModule } from './modules/block/block.module';
 
 @Module({
   imports: [
@@ -64,7 +65,8 @@ import { ChangeTokenLogModule } from './modules/change-token-logs/change-token-l
     TokenPackageModule,
     PayoutRequestModule,
     OrderModule,
-    ChangeTokenLogModule
+    ChangeTokenLogModule,
+    BlockModule
   ],
   controllers: [AppController],
   providers: [AppService]

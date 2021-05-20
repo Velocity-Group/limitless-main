@@ -1,25 +1,17 @@
-/* eslint-disable no-await-in-loop */
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import {
   PageableData,
   QueueEventService,
-  EntityNotFoundException,
-  QueueEvent,
-  StringHelper,
-  ForbiddenException,
-  AgendaService
+  QueueEvent
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
-import { uniq } from 'lodash';
 import { UserService, UserSearchService } from 'src/modules/user/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { EVENT } from 'src/kernel/constants';
 import { UserSearchRequestPayload } from 'src/modules/user/payloads';
-import { USER_ROLES } from 'src/modules/user/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { PurchaseItemService } from 'src/modules/purchased-item/services';
 import { SubscriptionModel } from '../models/subscription.model';
 import { SUBSCRIPTION_MODEL_PROVIDER } from '../providers/subscription.provider';
 import {
@@ -33,8 +25,6 @@ import {
   UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL
 } from '../constants';
 
-const RECURRING_SUBSCRIPTION_AGENDA_CHECK = 'RECURRING_SUBSCRIPTION_AGENDA_CHECK';
-
 @Injectable()
 export class SubscriptionService {
   constructor(
@@ -44,53 +34,13 @@ export class SubscriptionService {
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
-    @Inject(forwardRef(() => PurchaseItemService))
-    private readonly purchaseItemService: PurchaseItemService,
     @Inject(SUBSCRIPTION_MODEL_PROVIDER)
     private readonly subscriptionModel: Model<SubscriptionModel>,
-    private readonly queueEventService: QueueEventService,
-    private readonly agenda: AgendaService
-  ) {
-    this.defindJobs();
-  }
+    private readonly queueEventService: QueueEventService
+  ) { }
 
-  private async defindJobs() {
-    const collection = (this.agenda as any)._collection;
-    await collection.deleteMany({
-      name: {
-        $in: [
-          RECURRING_SUBSCRIPTION_AGENDA_CHECK
-        ]
-      }
-    });
-    this.agenda.define(RECURRING_SUBSCRIPTION_AGENDA_CHECK, {}, this.handleRenewalSubscription.bind(this));
-    this.agenda.every('3600 seconds', RECURRING_SUBSCRIPTION_AGENDA_CHECK, {});
-  }
-
-  private async handleRenewalSubscription(job: any, done: any): Promise<void> {
-    try {
-      const totalSubscriptions = await this.subscriptionModel.countDocuments({
-        nextRecurringDate: { $lt: new Date() },
-        status: SUBSCRIPTION_STATUS.ACTIVE
-      });
-      for (let i = 0; i <= totalSubscriptions / 99; i += 1) {
-        const subscriptions = await this.subscriptionModel.find({
-          nextRecurringDate: { $lt: new Date() },
-          status: SUBSCRIPTION_STATUS.ACTIVE
-        }).limit(99).skip(i * 99);
-        const userIds = uniq(subscriptions.map((t) => t.userId));
-        const users = userIds.length ? await this.userService.findByIds(userIds) : [];
-        await Promise.all(subscriptions.map((sub) => {
-          const user = users.find((u) => `${u._id}` === `${sub.userId}`);
-          return this.purchaseItemService.systemRenewalSubscription({ performerId: sub.performerId, type: sub.subscriptionType }, new UserDto(user));
-        }));
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('Check & recurring subscription error', e);
-    } finally {
-      done();
-    }
+  public async findBySubscriptionId(subscriptionId: string) {
+    return this.subscriptionModel.findOne({ subscriptionId });
   }
 
   public async findSubscriptionList(query: any) {
@@ -117,6 +67,7 @@ export class SubscriptionService {
       existSubscription.expiredAt = new Date(payload.expiredAt);
       existSubscription.updatedAt = new Date();
       existSubscription.subscriptionType = payload.subscriptionType;
+      existSubscription.status = SUBSCRIPTION_STATUS.ACTIVE;
       await existSubscription.save();
       await this.queueEventService.publish(
         new QueueEvent({
@@ -129,6 +80,7 @@ export class SubscriptionService {
     }
     payload.createdAt = new Date();
     payload.updatedAt = new Date();
+    payload.status = SUBSCRIPTION_STATUS.ACTIVE;
     const newSubscription = await this.subscriptionModel.create(payload);
     await this.queueEventService.publish(
       new QueueEvent({
@@ -358,31 +310,5 @@ export class SubscriptionService {
   public async findById(id: string | ObjectId): Promise<SubscriptionModel> {
     const data = await this.subscriptionModel.findById(id);
     return data;
-  }
-
-  public async cancelSubscription(id: string, user: UserDto): Promise<any> {
-    if (!StringHelper.isObjectId(id)) throw new EntityNotFoundException();
-    const subscription = await this.findById(id);
-    if (!subscription) {
-      throw new EntityNotFoundException();
-    }
-    if (!user.roles.includes(USER_ROLES.ADMIN) && user._id.toString() !== subscription.userId.toString()) {
-      throw new ForbiddenException();
-    }
-    if (subscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) return { success: true };
-    subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-    subscription.expiredAt = new Date();
-    subscription.updatedAt = new Date();
-    subscription.startRecurringDate = new Date();
-    subscription.nextRecurringDate = new Date();
-    await subscription.save();
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-        eventName: EVENT.DELETED,
-        data: new SubscriptionDto(subscription)
-      })
-    );
-    return { success: true };
   }
 }

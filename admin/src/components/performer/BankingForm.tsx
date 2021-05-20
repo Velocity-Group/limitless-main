@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import { PureComponent } from 'react';
 import {
-  Form, Input, Button, Select, message
+  Form, Input, Button, Select, message, Row, Col
 } from 'antd';
 import { IBankingSetting, ICountry } from 'src/interfaces';
 
@@ -57,54 +57,80 @@ export class BankingForm extends PureComponent<IProps> {
           } as IBankingSetting)
         }
       >
-        <Form.Item name="bankName" label="Bank Name" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item name="bankAccount" label="Bank Account" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item name="country" label="Country" rules={[{ required: true }]}>
-          <Select
-            showSearch
-          >
-            {countries
+        <Row>
+          <Col md={12} xs={24}>
+            <Form.Item name="bankName" label="Bank Name" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="bankAccount" label="Bank Account" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="country" label="Country" rules={[{ required: true }]}>
+              <Select
+                showSearch
+              >
+                {countries
               && countries.length > 0
               && countries.map((country) => (
                 <Select.Option key={country.code} value={country.code}>
                   {country.name}
                 </Select.Option>
               ))}
-          </Select>
-        </Form.Item>
-        <Form.Item name="firstName" label="First Name">
-          <Input />
-        </Form.Item>
-        <Form.Item name="lastName" label="Last Name">
-          <Input />
-        </Form.Item>
-        <Form.Item name="SSN" label="SSN">
-          <Input />
-        </Form.Item>
-        <Form.Item name="bankRouting" label="Routing Number">
-          <Input />
-        </Form.Item>
-        <Form.Item name="bankSwiftCode" label="Swift Code">
-          <Input />
-        </Form.Item>
-        <Form.Item name="address" label="Address">
-          <Input />
-        </Form.Item>
-        <Form.Item name="city" label="City">
-          <Input />
-        </Form.Item>
-        <Form.Item name="state" label="State/County/Province">
-          <Input />
-        </Form.Item>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-          <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
-            Submit
-          </Button>
-        </Form.Item>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="firstName" label="First Name">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="lastName" label="Last Name">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="SSN" label="SSN">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="bankRouting" label="Routing Number">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="bankSwiftCode" label="Swift Code">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="address" label="Address">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="city" label="City">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="state" label="State/County/Province">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={24} xs={24}>
+            <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+              <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
+                Submit
+              </Button>
+            </Form.Item>
+          </Col>
+        </Row>
       </Form>
     );
   }

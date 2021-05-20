@@ -14,9 +14,12 @@ import {
   CCBillService, PaymentService, PaymentSearchService,
   BitpayService
 } from './services';
-import { PaymentController, PaymentSearchController } from './controllers';
+import {
+  PaymentController, PaymentSearchController, CancelSubscriptionController, PaymentWebhookController
+} from './controllers';
 import { TransactionMailerListener, UpdateUserBalanceListener } from './listeners';
 import { UserModule } from '../user/user.module';
+import { SubscriptionModule } from '../subscription/subscription.module';
 
 @Module({
   imports: [
@@ -28,7 +31,8 @@ import { UserModule } from '../user/user.module';
     forwardRef(() => SettingModule),
     forwardRef(() => CouponModule),
     forwardRef(() => MailerModule),
-    forwardRef(() => TokenPackageModule)
+    forwardRef(() => TokenPackageModule),
+    forwardRef(() => SubscriptionModule)
   ],
   providers: [
     ...paymentProviders,
@@ -39,7 +43,10 @@ import { UserModule } from '../user/user.module';
     TransactionMailerListener,
     UpdateUserBalanceListener
   ],
-  controllers: [PaymentController, PaymentSearchController],
+  controllers: [
+    PaymentController, PaymentSearchController,
+    CancelSubscriptionController, PaymentWebhookController
+  ],
   exports: [
     ...paymentProviders,
     PaymentService,

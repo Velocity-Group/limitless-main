@@ -13,13 +13,13 @@ import {
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';
 import { Roles } from 'src/modules/auth';
-import { BlockCountryService } from '../services';
-import { BlockCountryCreatePayload } from '../payloads/block-country.payload';
+import { SiteBlockCountryService } from '../services';
+import { BlockCountryCreatePayload } from '../payloads/site-block-country.payload';
 
 @Injectable()
 @Controller('admin/block/countries')
-export class BlockCountryController {
-  constructor(private readonly blockCountryService: BlockCountryService) {}
+export class SiteBlockCountryController {
+  constructor(private readonly blockCountryService: SiteBlockCountryService) {}
 
   @Get('/search')
   @Roles('admin')

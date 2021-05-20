@@ -7,12 +7,15 @@ import { PerformerService } from 'src/modules/performer/services';
 import { SettingService } from 'src/modules/settings';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { UserService } from 'src/modules/user/services';
+import { PaymentDto } from 'src/modules/payment/dtos';
+import { PAYMENT_TYPE, TRANSACTION_SUCCESS_CHANNEL } from 'src/modules/payment/constants';
 import { EarningDto } from '../dtos/earning.dto';
 import { EARNING_MODEL_PROVIDER } from '../providers/earning.provider';
 import { EarningModel } from '../models/earning.model';
 import { SETTING_KEYS } from '../../settings/constants';
 
-const UPDATE_EARNING_TOKEN_CHANNEL = 'EARNING_TOKEN_CHANNEL';
+const EARNING_TOKEN_TOPIC = 'EARNING_TOKEN_TOPIC';
+const EARNING_MONEY_TOPIC = 'EARNING_MONEY_TOPIC';
 
 @Injectable()
 export class TransactionEarningListener {
@@ -30,8 +33,13 @@ export class TransactionEarningListener {
   ) {
     this.queueEventService.subscribe(
       PURCHASED_ITEM_SUCCESS_CHANNEL,
-      UPDATE_EARNING_TOKEN_CHANNEL,
+      EARNING_TOKEN_TOPIC,
       this.handleListenEarningToken.bind(this)
+    );
+    this.queueEventService.subscribe(
+      TRANSACTION_SUCCESS_CHANNEL,
+      EARNING_MONEY_TOPIC,
+      this.handleListenEarningMoney.bind(this)
     );
   }
 
@@ -124,6 +132,67 @@ export class TransactionEarningListener {
       // update balance
       await this.updateBalance(newEarning.grossPrice, netPrice, newEarning);
       await this.notifyPerformerBalance(newEarning, netPrice);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }
+  }
+
+  public async handleListenEarningMoney(
+    event: QueueEvent
+  ): Promise<EarningDto> {
+    try {
+      if (event.eventName !== EVENT.CREATED) {
+        return;
+      }
+      const transaction = event.data as PaymentDto;
+      if (!transaction || transaction.status !== PURCHASE_ITEM_STATUS.SUCCESS || !transaction.totalPrice) {
+        return;
+      }
+      if (![PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
+        return;
+      }
+      const [
+        performerCommissions,
+        settingMonthlyCommission,
+        settingYearlyCommission
+      ] = await Promise.all([
+        this.performerService.getCommissions(transaction.performerId),
+        this.settingService.getKeyValue(SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION),
+        this.settingService.getKeyValue(SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION)
+      ]);
+
+      let commission = 0.2;
+      switch (transaction.type) {
+        case PURCHASE_ITEM_TYPE.MONTHLY_SUBSCRIPTION:
+          commission = performerCommissions?.monthlySubscriptionCommission || settingMonthlyCommission || 0.2;
+          break;
+        case PURCHASE_ITEM_TYPE.YEARLY_SUBSCRIPTION:
+          commission = performerCommissions?.yearlySubscriptionCommission || settingYearlyCommission || 0.2;
+          break;
+        default: commission = 0.2;
+      }
+      const netPrice = transaction.totalPrice - transaction.totalPrice * commission;
+      const newEarning = new this.PerformerEarningModel();
+      newEarning.set('siteCommission', commission);
+      newEarning.set('referralCommission', 0);
+      newEarning.set('grossPrice', transaction.totalPrice);
+      newEarning.set('netPrice', netPrice);
+      newEarning.set('referralPrice', 0);
+      newEarning.set('performerId', transaction.performerId);
+      newEarning.set('userId', transaction?.sourceId || null);
+      newEarning.set('transactionId', transaction?._id || null);
+      newEarning.set('sourceType', transaction.target);
+      newEarning.set('type', transaction.type);
+      newEarning.set('createdAt', transaction.createdAt);
+      newEarning.set('updatedAt', transaction.updatedAt);
+      newEarning.set('transactionStatus', transaction.status);
+      newEarning.set('isPaid', false);
+      newEarning.set('isToken', false);
+      newEarning.set('agentId', null);
+      newEarning.set('agentCommission', 0);
+      newEarning.set('agentPrice', 0);
+      await newEarning.save();
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);

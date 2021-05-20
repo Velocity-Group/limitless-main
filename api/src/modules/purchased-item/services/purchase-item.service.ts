@@ -4,8 +4,7 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import {
   EntityNotFoundException,
   QueueEventService,
-  QueueEvent,
-  AgendaService
+  QueueEvent
 } from 'src/kernel';
 import { EVENT } from 'src/kernel/constants';
 import { Model } from 'mongoose';
@@ -45,8 +44,7 @@ import {
 } from '../exceptions';
 import {
   PurchaseProductsPayload,
-  SendTipsPayload,
-  SubscribePerformerPayload
+  SendTipsPayload
 } from '../payloads';
 import { PaymentDto } from '../dtos';
 
@@ -79,46 +77,6 @@ export class PurchaseItemService {
 
   public async findById(id: string | ObjectId) {
     return this.TokenPaymentModel.findById(id);
-  }
-
-  public async subscribePerformer(payload: SubscribePerformerPayload, user: UserDto) {
-    const { type, performerId } = payload;
-    const performer = await this.performerService.findById(performerId);
-    if ((!performer || (type === 'yearly' && !performer.yearlyPrice)) || (type === 'monthly' && !performer.monthlyPrice)) {
-      throw new EntityNotFoundException();
-    }
-    if ((type === 'yearly' && user.balance < performer.yearlyPrice) || (type === 'monthly' && user.balance < performer.monthlyPrice)) {
-      throw new NotEnoughMoneyException();
-    }
-
-    const transaction = await this.createSubscriptionPaymentTransaction(type, performer, user);
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
-        eventName: EVENT.CREATED,
-        data: new PaymentDto(transaction)
-      })
-    );
-    return transaction;
-  }
-
-  public async systemRenewalSubscription(payload: SubscribePerformerPayload, user: UserDto) {
-    const { type, performerId } = payload;
-    const performer = await this.performerService.findById(performerId);
-    if ((!performer || (type === 'yearly' && !performer.yearlyPrice)) || (type === 'monthly' && !performer.monthlyPrice)) {
-      return;
-    }
-    if ((type === 'yearly' && user.balance < performer.yearlyPrice) || (type === 'monthly' && user.balance < performer.monthlyPrice)) {
-      return;
-    }
-    const transaction = await this.createSubscriptionPaymentTransaction(type, performer, user);
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: PURCHASED_ITEM_SUCCESS_CHANNEL,
-        eventName: EVENT.CREATED,
-        data: new PaymentDto(transaction)
-      })
-    );
   }
 
   public async createSubscriptionPaymentTransaction(type: string, performer: any, user: UserDto) {

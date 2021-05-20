@@ -1,14 +1,13 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongoDBModule, QueueModule } from 'src/kernel';
-import { userProviders, blockCountryProviders } from './providers';
+import { userProviders } from './providers';
 import {
   UserController,
   AvatarController,
   AdminUserController,
-  AdminAvatarController,
-  BlockCountryController
+  AdminAvatarController
 } from './controllers';
-import { UserService, UserSearchService, BlockCountryService } from './services';
+import { UserService, UserSearchService } from './services';
 import { AuthModule } from '../auth/auth.module';
 import { FileModule } from '../file/file.module';
 import { UserConnectedListener } from './listeners/user-connected.listener';
@@ -26,19 +25,16 @@ import { ChangeTokenLogModule } from '../change-token-logs/change-token-log.modu
   ],
   providers: [
     ...userProviders,
-    ...blockCountryProviders,
     UserService,
     UserSearchService,
-    BlockCountryService,
     UserConnectedListener
   ],
   controllers: [
     UserController,
     AvatarController,
     AdminUserController,
-    AdminAvatarController,
-    BlockCountryController
+    AdminAvatarController
   ],
-  exports: [...userProviders, ...blockCountryProviders, UserService, UserSearchService, BlockCountryService]
+  exports: [...userProviders, UserService, UserSearchService]
 })
 export class UserModule {}

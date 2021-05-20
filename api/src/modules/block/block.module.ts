@@ -2,9 +2,9 @@ import { Module, forwardRef } from '@nestjs/common';
 import { MongoDBModule, AgendaModule } from 'src/kernel';
 import { AuthModule } from '../auth/auth.module';
 import { blockProviders } from './providers';
-import { PerformerBlockService } from './services';
+import { PerformerBlockService, SiteBlockCountryService } from './services';
 import {
-  PerformerBlockController
+  PerformerBlockController, SiteBlockCountryController
 } from './controllers';
 import { UserModule } from '../user/user.module';
 
@@ -18,14 +18,17 @@ import { UserModule } from '../user/user.module';
   ],
   providers: [
     ...blockProviders,
-    PerformerBlockService
+    PerformerBlockService,
+    SiteBlockCountryService
   ],
   controllers: [
-    PerformerBlockController
+    PerformerBlockController,
+    SiteBlockCountryController
   ],
   exports: [
     ...blockProviders,
-    PerformerBlockService
+    PerformerBlockService,
+    SiteBlockCountryService
   ]
 })
 

@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-export const blockCountrySchema = new mongoose.Schema({
+export const siteBlockCountrySchema = new mongoose.Schema({
   countryCode: { type: String, index: true, unique: true },
   createdAt: {
     type: Date,
@@ -8,4 +8,4 @@ export const blockCountrySchema = new mongoose.Schema({
   }
 });
 
-export const BlockCountrySchema = blockCountrySchema;
+export const BlockCountrySchema = siteBlockCountrySchema;

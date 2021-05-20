@@ -16,7 +16,7 @@ import { CurrentUser, Roles } from 'src/modules/auth';
 import { ObjectId } from 'mongodb';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserDto } from 'src/modules/user/dtos';
-import { PurchaseProductsPayload, SendTipsPayload, SubscribePerformerPayload } from '../payloads';
+import { PurchaseProductsPayload, SendTipsPayload } from '../payloads';
 import { PurchaseItemService } from '../services/purchase-item.service';
 
 @Injectable()
@@ -122,18 +122,18 @@ export class PaymentTokenController {
   //   return DataResponse.ok(info);
   // }
 
-  @Post('/subscribe/performers')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RoleGuard)
-  @Roles('user')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async create(
-    @CurrentUser() user: UserDto,
-    @Body() payload: SubscribePerformerPayload
-  ): Promise<DataResponse<any>> {
-    const info = await this.paymentService.subscribePerformer(payload, user);
-    return DataResponse.ok(info);
-  }
+  // @Post('/subscribe/performers')
+  // @HttpCode(HttpStatus.OK)
+  // @UseGuards(RoleGuard)
+  // @Roles('user')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async create(
+  //   @CurrentUser() user: UserDto,
+  //   @Body() payload: SubscribePerformerPayload
+  // ): Promise<DataResponse<any>> {
+  //   const info = await this.paymentService.subscribePerformer(payload, user);
+  //   return DataResponse.ok(info);
+  // }
 
   @Post('/stream/:streamId')
   @HttpCode(HttpStatus.OK)

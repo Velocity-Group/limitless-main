@@ -56,7 +56,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
   }
 
   async onCancelSubscriber(id: string) {
-    if (!window.confirm('Are you sure you want to delete this subscription?')) {
+    if (!window.confirm('Are you sure you want to de-activate this subscription?')) {
       return;
     }
     try {

@@ -1,16 +1,17 @@
-import { Injectable, Inject, HttpException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { BlockCountryModel } from '../models';
-import { BLOCK_COUNTRY_PROVIDER } from '../providers';
+import { EntityNotFoundException } from 'src/kernel';
+import { SiteBlockCountryModel } from '../models';
+import { SITE_BLOCK_COUNTRY_PROVIDER } from '../providers';
 import {
   BlockCountryCreatePayload
 } from '../payloads';
 
 @Injectable()
-export class BlockCountryService {
+export class SiteBlockCountryService {
   constructor(
-    @Inject(BLOCK_COUNTRY_PROVIDER)
-    private readonly blockCountryModel: Model<BlockCountryModel>
+    @Inject(SITE_BLOCK_COUNTRY_PROVIDER)
+    private readonly blockCountryModel: Model<SiteBlockCountryModel>
   ) {}
 
   public async create(payload: BlockCountryCreatePayload): Promise<any> {
@@ -31,7 +32,7 @@ export class BlockCountryService {
   public async delete(code): Promise<any> {
     const country = await this.blockCountryModel.findOne({ countryCode: code });
     if (!country) {
-      throw new HttpException('NOT_FOUND', 400);
+      throw new EntityNotFoundException();
     }
     await country.remove();
     return true;

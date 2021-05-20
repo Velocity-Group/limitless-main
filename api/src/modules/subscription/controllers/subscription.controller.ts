@@ -83,16 +83,4 @@ export class SubscriptionController {
       data: data.data.map((s) => s.toResponse(false))
     });
   }
-
-  @Post('/cancel/:id')
-  @HttpCode(HttpStatus.OK)
-  @Roles('admin', 'user')
-  @UseGuards(RoleGuard)
-  async delete(
-    @Param('id') subscriptionId: string,
-    @CurrentUser() user: UserDto
-  ): Promise<any> {
-    const resp = await this.subscriptionService.cancelSubscription(subscriptionId, user);
-    return DataResponse.ok(resp);
-  }
 }

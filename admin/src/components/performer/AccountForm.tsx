@@ -85,6 +85,37 @@ export class AccountForm extends PureComponent<IProps> {
         }
       >
         <Row>
+          <Col xs={24} md={24}>
+            <div
+              className="top-profile"
+              style={{
+                position: 'relative',
+                marginBottom: 25,
+                backgroundImage:
+                  coverUrl
+                    ? `url('${coverUrl}')`
+                    : "url('/banner-image.jpg')"
+              }}
+            >
+              <div className="avatar-upload">
+                <AvatarUpload
+                  headers={uploadHeaders}
+                  uploadUrl={performerService.getAvatarUploadUrl()}
+                  onUploaded={onUploaded.bind(this, 'avatarId')}
+                  image={avatarUrl}
+                />
+              </div>
+              <div className="cover-upload">
+                <CoverUpload
+                  options={{ fieldName: 'cover' }}
+                  image={performer && performer.cover ? performer.cover : ''}
+                  headers={uploadHeaders}
+                  uploadUrl={performerService.getCoverUploadUrl()}
+                  onUploaded={onUploaded.bind(this, 'coverId')}
+                />
+              </div>
+            </div>
+          </Col>
           <Col xs={12} md={12}>
             <Form.Item
               name="firstName"
@@ -451,37 +482,6 @@ export class AccountForm extends PureComponent<IProps> {
             ))}
           </Select>
         </Form.Item> */}
-          <Col xs={24} md={24}>
-            <div
-              className="top-profile"
-              style={{
-                position: 'relative',
-                marginBottom: 25,
-                backgroundImage:
-                  coverUrl
-                    ? `url('${coverUrl}')`
-                    : "url('/banner-image.jpg')"
-              }}
-            >
-              <div className="avatar-upload">
-                <AvatarUpload
-                  headers={uploadHeaders}
-                  uploadUrl={performerService.getAvatarUploadUrl()}
-                  onUploaded={onUploaded.bind(this, 'avatarId')}
-                  image={avatarUrl}
-                />
-              </div>
-              <div className="cover-upload">
-                <CoverUpload
-                  options={{ fieldName: 'cover' }}
-                  image={performer && performer.cover ? performer.cover : ''}
-                  headers={uploadHeaders}
-                  uploadUrl={performerService.getCoverUploadUrl()}
-                  onUploaded={onUploaded.bind(this, 'coverId')}
-                />
-              </div>
-            </div>
-          </Col>
           <Col xs={8} md={8}>
             <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Tracking reality email-adress">
               <Switch />

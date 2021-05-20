@@ -5,6 +5,7 @@ import Page from '@components/common/layout/page';
 import { AccountForm } from '@components/performer/AccountForm';
 import { PerformerDocument } from '@components/performer/Document';
 import { SubscriptionForm } from '@components/performer/Subcription';
+import { CCbillSettingForm } from '@components/performer/ccbill-setting';
 import { BankingForm } from '@components/performer/BankingForm';
 import { CommissionSettingForm } from '@components/performer/commission-setting';
 import {
@@ -224,6 +225,14 @@ class PerformerUpdate extends PureComponent<IProps> {
                   // categories={categories}
                 />
               </Tabs.TabPane>
+              <Tabs.TabPane tab={<span>ID Documents</span>} key="document">
+                <PerformerDocument
+                  submiting={updating}
+                  onUploaded={this.onUploaded.bind(this)}
+                  onFinish={this.submit.bind(this)}
+                  performer={performer}
+                />
+              </Tabs.TabPane>
               <Tabs.TabPane tab={<span>Pricing Settings</span>} key="subscription">
                 <SubscriptionForm
                   submiting={updating}
@@ -246,12 +255,11 @@ class PerformerUpdate extends PureComponent<IProps> {
                   commissionSetting={performer.commissionSetting}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<span>ID Documents</span>} key="document">
-                <PerformerDocument
-                  submiting={updating}
-                  onUploaded={this.onUploaded.bind(this)}
-                  onFinish={this.submit.bind(this)}
-                  performer={performer}
+              <Tabs.TabPane tab={<span>CCbill Settings</span>} key="ccbill">
+                <CCbillSettingForm
+                  submiting={settingUpdating}
+                  onFinish={this.updatePaymentGatewaySetting.bind(this)}
+                  ccbillSetting={performer.ccbillSetting}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<span>Change password</span>} key="password">
