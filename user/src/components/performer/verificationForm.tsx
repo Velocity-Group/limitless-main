@@ -132,7 +132,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               label="ID photo"
               valuePropName="fileList"
               className="model-photo-verification"
-              help="Upload a photo of yourself holding your indentity document next to your face"
+              help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*;capture=camera" headers={headers} uploadUrl={documentUploadUrl} onFileReaded={this.onFileUploaded.bind(this, 'idFile')} />
@@ -152,7 +152,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               label="ID document"
               valuePropName="fileList"
               className="model-photo-verification"
-              help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
+              help="Upload a photo of yourself holding your indentity document next to your face"
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*;capture=camera" headers={headers} uploadUrl={documentUploadUrl} onFileReaded={this.onFileUploaded.bind(this, 'documentFile')} />

@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 import { Upload, message } from 'antd';
 import { LoadingOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
@@ -19,23 +18,20 @@ function beforeUpload(file) {
 
 interface IState {
   loading: boolean;
-  imageUrl: string;
 }
 
 interface IProps {
   imageUrl?: string;
   uploadUrl?: string;
   headers?: any;
-  onUploaded?: Function;
-  onFileReaded?: Function;
+  onUploaded: Function;
   options?: any;
   messageData?: any;
 }
 
 export class ImageMessageUpload extends PureComponent<IProps, IState> {
   state = {
-    loading: false,
-    imageUrl: this.props.imageUrl
+    loading: false
   };
 
   handleChange = (info: any) => {
@@ -44,35 +40,27 @@ export class ImageMessageUpload extends PureComponent<IProps, IState> {
       return;
     }
     if (info.file.status === 'done') {
-      this.props.onFileReaded
-        && this.props.onFileReaded(info.file.originFileObj);
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, (imageUrl) => {
-        this.setState({
-          imageUrl,
-          loading: false
-        });
-        this.props.onUploaded
-          && this.props.onUploaded({
-            response: info.file.response,
-            base64: imageUrl
-          });
+      const { onUploaded } = this.props;
+      this.setState({ loading: false });
+      onUploaded && onUploaded({
+        response: info.file.response
       });
     }
   };
 
   render() {
     const { options = {} } = this.props;
+    const { loading } = this.state;
 
     const uploadButton = (
       <div>
-        {this.state.loading ? <LoadingOutlined /> : <PaperClipOutlined />}
+        {loading ? <LoadingOutlined /> : <PaperClipOutlined />}
       </div>
     );
-    const { imageUrl } = this.state;
     const { headers, uploadUrl, messageData } = this.props;
     return (
       <Upload
+        disabled={loading}
         accept={'image/*'}
         name={options.fieldName || 'file'}
         listType="picture-card"
@@ -84,11 +72,7 @@ export class ImageMessageUpload extends PureComponent<IProps, IState> {
         headers={headers}
         data={messageData}
       >
-        {imageUrl ? (
-          <img src={imageUrl} alt="file" style={{ width: '100%' }} />
-        ) : (
-          uploadButton
-        )}
+        {uploadButton}
       </Upload>
     );
   }

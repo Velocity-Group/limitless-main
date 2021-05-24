@@ -262,7 +262,7 @@ class FeedCard extends Component<IProps> {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
-      await this.setState({ submiting: false });
+      this.setState({ submiting: false, openTipModal: false });
     }
   }
 
@@ -282,7 +282,7 @@ class FeedCard extends Component<IProps> {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
     } finally {
-      this.setState({ submiting: false });
+      this.setState({ submiting: false, openPurchaseModal: false });
     }
   }
 

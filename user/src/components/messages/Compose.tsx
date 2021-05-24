@@ -1,14 +1,20 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import { PureComponent, createRef } from 'react';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux'; import {
+  Modal, message
+} from 'antd';
 import { sendMessage, sentFileSuccess } from '@redux/message/actions';
-import { SmileFilled, SendOutlined } from '@ant-design/icons';
+import { SmileFilled, SendOutlined, DollarOutlined } from '@ant-design/icons';
 import { ImageMessageUpload } from '@components/messages/uploadPhoto';
-import { authService, messageService } from '@services/index';
+import { authService, messageService, purchaseTokenService } from '@services/index';
+import { TipPerformerForm } from '@components/performer/tip-form';
+import { updateBalance } from '@redux/user/actions';
+import Router from 'next/router';
 import { Emotions } from './emotions';
 import './Compose.less';
 
 interface IProps {
+  updateBalance: Function;
   sendMessage: Function;
   sentFileSuccess: Function;
   sendMessageStatus: any;
@@ -19,7 +25,7 @@ interface IProps {
 class Compose extends PureComponent<IProps> {
   _input: any;
 
-  state = { text: '' };
+  state = { text: '', openTipModal: false, submiting: false };
 
   componentDidMount() {
     if (!this._input) this._input = createRef();
@@ -54,7 +60,7 @@ class Compose extends PureComponent<IProps> {
     if (!data || !data.response) {
       return;
     }
-    const imageUrl = (data.response.data && data.response.data.imageUrl) || data.base64;
+    const imageUrl = data.response.data && data.response.data.imageUrl;
     handleSendFile({ ...data.response.data, ...{ imageUrl } });
   }
 
@@ -69,8 +75,28 @@ class Compose extends PureComponent<IProps> {
     });
   }
 
+  async sendTip(price) {
+    const { currentUser, conversation, updateBalance: handleUpdateBalance } = this.props;
+    if (currentUser.balance < price) {
+      message.error('Your balance token is not enough');
+      Router.push('/token-package');
+      return;
+    }
+    try {
+      await this.setState({ submiting: true });
+      await purchaseTokenService.sendTip(conversation?.recipientInfo?._id, { conversationId: conversation?._id, price });
+      message.success('Thank you for the tip');
+      handleUpdateBalance({ token: -price });
+    } catch (e) {
+      const err = await e;
+      message.error(err.message || 'error occured, please try again later');
+    } finally {
+      this.setState({ submiting: false, openTipModal: false });
+    }
+  }
+
   render() {
-    const { text } = this.state;
+    const { text, openTipModal, submiting } = this.state;
     const { sendMessageStatus: status, conversation, currentUser } = this.props;
     const uploadHeaders = {
       authorization: authService.getToken()
@@ -94,7 +120,11 @@ class Compose extends PureComponent<IProps> {
             <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
           </div>
         </div>
-
+        <div className="grp-icons">
+          <div aria-hidden className="grp-emotions" onClick={() => this.setState({ openTipModal: true })}>
+            <DollarOutlined />
+          </div>
+        </div>
         <div className="grp-icons">
           <div className="grp-file-icon">
             <ImageMessageUpload
@@ -116,6 +146,18 @@ class Compose extends PureComponent<IProps> {
             <SendOutlined />
           </div>
         </div>
+        <Modal
+          key="tip_performer"
+          className="subscription-modal"
+          title={null}
+          width={350}
+          visible={openTipModal}
+          onOk={() => this.setState({ openTipModal: false })}
+          footer={null}
+          onCancel={() => this.setState({ openTipModal: false })}
+        >
+          <TipPerformerForm performer={conversation.recipientInfo} submiting={submiting} onFinish={this.sendTip.bind(this)} />
+        </Modal>
       </div>
     );
   }
@@ -126,5 +168,5 @@ const mapStates = (state: any) => ({
   currentUser: state.user.current
 });
 
-const mapDispatch = { sendMessage, sentFileSuccess };
+const mapDispatch = { sendMessage, sentFileSuccess, updateBalance };
 export default connect(mapStates, mapDispatch)(Compose);

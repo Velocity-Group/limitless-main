@@ -5,6 +5,7 @@ import { Spin } from 'antd';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import { loadMoreMessages } from '@redux/message/actions';
+import Link from 'next/link';
 import Compose from './Compose';
 import Message from './Message';
 import './MessageList.less';
@@ -145,7 +146,11 @@ class MessageList extends PureComponent<IProps> {
                </div>
                {fetching && <div className="text-center"><Spin /></div>}
                {this.renderMessages()}
-               {!conversation.isSubscribed && <div className="sub-text">Please subscribe to this model to start the conversation</div>}
+               {!conversation.isSubscribed && (
+               <Link href={{ pathname: '/model/profile', query: { username: conversation?.recipientInfo?.username || conversation?.recipientInfo?._id } }} as={`/${conversation?.recipientInfo?.username || conversation?.recipientInfo?._id}`}>
+                 <div className="sub-text">Please subscribe to this model to start the conversation</div>
+               </Link>
+               )}
              </div>
 
              {conversation.isSubscribed && <Compose conversation={conversation} />}
