@@ -31,7 +31,7 @@ interface IProps {
 }
 
 class HomePage extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
   state = {
     itemPerPage: 12,
@@ -192,10 +192,12 @@ class HomePage extends PureComponent<IProps> {
                     </div>
                     <div className="story-list">
                       {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
-                        <div className="story-per-card">
-                          <img alt="avatr" src={per?.avatar || '/static/no-avatar.png'} />
-                          <p>{per?.name || per?.username || 'N/A'}</p>
-                        </div>
+                        <Link href={{ pathname: '/model/profile', query: { id: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
+                          <div className="story-per-card">
+                            <img alt="avatr" src={per?.avatar || '/static/no-avatar.png'} />
+                            <p>{per?.name || per?.username || 'N/A'}</p>
+                          </div>
+                        </Link>
                       ))}
                       {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No visited profile was found.</p>}
                     </div>

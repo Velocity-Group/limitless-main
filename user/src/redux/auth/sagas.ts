@@ -3,7 +3,7 @@ import { flatten } from 'lodash';
 import { put } from 'redux-saga/effects';
 import { createSagas } from '@lib/redux';
 import Router from 'next/router';
-import { authService, userService, performerService } from 'src/services';
+import { authService, userService } from 'src/services';
 import {
   ILogin, IFanRegister, IForgot, IPerformerRegister
 } from 'src/interfaces';
@@ -22,7 +22,6 @@ import {
   registerPerformerFail,
   registerPerformer,
   registerPerformerSuccess,
-  loginPerformer,
   forgot,
   forgotSuccess,
   forgotFail
@@ -44,7 +43,7 @@ const authSagas = [
           Router.push((!userResp.data.email || !userResp.data.username) ? '/user/account' : '/home');
         }
         if (userResp?.data?.isPerformer) {
-          (!userResp.data.email || !userResp.data.username) ? Router.push('/model/account') : Router.push({ pathname: '/model/profile', query: { username: userResp.data.username } }, `/${userResp.data.username}`);
+          (!userResp.data.email || !userResp.data.username) ? Router.push('/model/account') : Router.push({ pathname: '/model/profile', query: { username: userResp.data.username || userResp.data._id } }, `/${userResp.data.username || userResp.data._id}`);
         }
       } catch (e) {
         const error = yield Promise.resolve(e);
@@ -67,27 +66,8 @@ const authSagas = [
           Router.push((!userResp.data.email || !userResp.data.username) ? '/user/account' : '/home');
         }
         if (userResp?.data?.isPerformer) {
-          (!userResp.data.email || !userResp.data.username) ? Router.push('/model/account') : Router.push({ pathname: '/model/profile', query: { username: userResp.data.username } }, `/${userResp.data.username}`);
+          (!userResp.data.email || !userResp.data.username) ? Router.push('/model/account') : Router.push({ pathname: '/model/profile', query: { username: userResp.data.username || userResp.data._id } }, `/${userResp.data.username || userResp.data._id}`);
         }
-      } catch (e) {
-        const error = yield Promise.resolve(e);
-        message.error(error?.message || 'Incorrect credentials!');
-        yield put(loginFail(error));
-      }
-    }
-  },
-  {
-    on: loginPerformer,
-    * worker(data: any) {
-      try {
-        const payload = data.payload as ILogin;
-        const resp = (yield authService.loginPerformer(payload)).data;
-        // store token, update store and redirect to dashboard page
-        yield authService.setToken(resp.token, payload?.remember);
-        const userResp = (yield performerService.me()).data;
-        yield put(updateCurrentUser(userResp));
-        yield put(loginSuccess());
-        Router.push({ pathname: '/model/profile', query: { username: userResp.username } }, `/${userResp.username}`);
       } catch (e) {
         const error = yield Promise.resolve(e);
         message.error(error?.message || 'Incorrect credentials!');

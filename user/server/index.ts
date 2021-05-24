@@ -8,9 +8,9 @@ const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handler = routes.getRequestHandler(app, ({
   req, res, route, query
 }) => {
-  if (route.name === 'content-creator') {
+  if (route.name === 'model') {
     // eslint-disable-next-line no-param-reassign
-    route.page = '/content-creator/profile';
+    route.page = '/model/profile';
   }
   app.render(req, res, route.page, query);
 });

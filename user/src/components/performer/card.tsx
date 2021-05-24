@@ -29,10 +29,10 @@ class PerformerCard extends PureComponent<IProps> {
         <div className="hovering">
           <Link
             href={{
-              pathname: '/profile',
-              query: { username: performer?.username }
+              pathname: '/model/profile',
+              query: { username: performer?.username || performer?._id }
             }}
-            as={`/${performer?.username}`}
+            as={`/${performer?.username || performer?._id}`}
           >
             <a>
               {performer?.isFreeSubscription && (

@@ -1,7 +1,9 @@
 import { PureComponent } from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { Spin, Row, Col } from 'antd';
+import {
+  Spin, Row, Col, Alert
+} from 'antd';
 import { IGallery } from '@interfaces/gallery';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import GalleryCard from './gallery-card';
 
 interface IProps {
@@ -42,7 +44,11 @@ export class ScrollListGallery extends PureComponent<IProps> {
               ))}
           </Row>
         </InfiniteScroll>
-        {!loading && !items.length && <div className="text-center">No gallery was found</div>}
+        {!loading && !items.length && (
+        <div className="main-container custom">
+          <Alert className="text-center" type="info" message="No gallery was found" />
+        </div>
+        )}
         {loading && <div className="text-center"><Spin /></div>}
       </>
     );

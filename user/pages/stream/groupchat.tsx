@@ -284,11 +284,11 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
       }
     });
     this.socket.on(STREAM_LEAVED, (data: { streamId: string, user: IPerformer }) => {
-      const { performer, activeConversation } = this.props;
+      const { performer } = this.props;
       const { streamList, streamId } = this.state;
       if (data.user && data.user._id === performer._id) {
         message.info(`${performer?.name || performer?.username} has left this conversation, redirecting to his profile`);
-        setTimeout(() => { Router.replace({ pathname: '/profile', query: { performer: JSON.stringify(performer), username: performer?.username, streamId: activeConversation?.data?.streamId } }, `/${performer?.username}${activeConversation?.data?.streamId ? `?streamId=${activeConversation?.data?.streamId}` : null}`); }, 5000);
+        setTimeout(() => { Router.replace({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`); }, 5000);
         return;
       }
       if (streamId !== data.streamId) {

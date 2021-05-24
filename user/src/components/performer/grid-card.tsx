@@ -16,9 +16,9 @@ export default class PerformerGridCard extends PureComponent<IProps> {
         <Link
           href={{
             pathname: '/model/profile',
-            query: { username: performer?.username }
+            query: { username: performer?.username || performer?._id }
           }}
-          as={`/${performer?.username}`}
+          as={`/${performer?.username || performer?._id}`}
         >
           <a>
             <div className="card-img">

@@ -12,13 +12,6 @@ export class AuthService extends APIRequest {
     return this.post('/auth/login/email', data);
   }
 
-  public async loginPerformer(data: ILogin) {
-    if (data.loginUsername) {
-      return this.post('/auth/performers/login/username', data);
-    }
-    return this.post('/auth/performers/login/email', data);
-  }
-
   public async loginTwitter() {
     return this.get(
       this.buildUrl('/auth/twitter/login')

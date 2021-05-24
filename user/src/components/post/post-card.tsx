@@ -5,7 +5,7 @@ import {
 } from 'antd';
 import {
   HeartOutlined, CommentOutlined, BookOutlined,
-  MoreOutlined, DollarOutlined, LockOutlined,
+  MoreOutlined, DollarOutlined, LockOutlined, FlagOutlined,
   FileImageOutlined, VideoCameraOutlined, CaretDownOutlined,
   UnlockOutlined, CheckCircleOutlined, EyeOutlined
 } from '@ant-design/icons';
@@ -22,7 +22,7 @@ import { connect } from 'react-redux';
 import { TipPerformerForm } from '@components/performer/tip-form';
 import ReactMomentCountDown from 'react-moment-countdown';
 import moment from 'moment';
-import { Twitter, Facebook } from 'react-social-sharing';
+// import { Twitter, Facebook } from 'react-social-sharing';
 import { VideoPlayer } from '@components/common/video-player';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { ReportForm } from '@components/report/report-form';
@@ -341,11 +341,6 @@ class FeedCard extends Component<IProps> {
             </a>
           </Link>
         </Menu.Item>
-        {user._id !== feed.fromSourceId && (
-          <Menu.Item key={`report_${feed._id}`}>
-            <a aria-hidden onClick={() => this.setState({ openReportModal: true })}>Report</a>
-          </Menu.Item>
-        )}
         {user._id === feed.fromSourceId && (
           <Menu.Item key={`edit_post_${feed._id}`}>
             <Link href={{ pathname: '/model/my-post/edit', query: { id: feed._id } }}>
@@ -386,7 +381,7 @@ class FeedCard extends Component<IProps> {
     return (
       <div className="feed-card">
         <div className="feed-top">
-          <Link href={{ pathname: '/model/profile', query: { username: performer?.username } }} as={`/${performer?.username}`}>
+          <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
             <div className="feed-top-left">
               <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
               <div className="feed-name">
@@ -397,7 +392,7 @@ class FeedCard extends Component<IProps> {
                 </h4>
                 <h5>
                   @
-                  {performer?.username || 'N/A'}
+                  {performer?.username || 'n/a'}
                 </h5>
               </div>
               {performer?.isOnline ? <span className="online-status" /> : <span className="online-status off" />}
@@ -442,7 +437,7 @@ class FeedCard extends Component<IProps> {
                 )}
                 {feed.isSale && !feed.isBought && performer && (
                   <p aria-hidden onClick={() => this.setState({ openPurchaseModal: true })}>
-                    Unlock post for
+                    Unlock post by
                     {' '}
                     <img alt="coin" src="/static/coin-ico.png" width="15px" />
                     {feed.price || 0}
@@ -530,8 +525,11 @@ class FeedCard extends Component<IProps> {
               )}
             </div>
             <div className="action-item">
-              <Twitter link={shareUrl} />
-              <Facebook link={shareUrl} />
+              {/* <Twitter link={shareUrl} />
+              <Facebook link={shareUrl} /> */}
+              <span aria-hidden className={openReportModal ? 'action-ico active' : 'action-ico'} onClick={() => this.setState({ openReportModal: true })}>
+                <Tooltip title="Report"><FlagOutlined /></Tooltip>
+              </span>
               <span aria-hidden className={isBookMarked ? 'action-ico active' : 'action-ico'} onClick={this.handleBookmark.bind(this)}>
                 <Tooltip title={!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}><BookOutlined /></Tooltip>
               </span>

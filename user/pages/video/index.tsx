@@ -548,9 +548,9 @@ class VideoViewPage extends PureComponent<IProps> {
                 <Link
                   href={{
                     pathname: '/model/profile',
-                    query: { username: video?.performer?.username }
+                    query: { username: video?.performer?.username || video?.performer?._id }
                   }}
-                  as={`/model/${video?.performer?.username}`}
+                  as={`/model/${video?.performer?.username || video?.performer?._id}`}
                 >
                   <>
                     <img

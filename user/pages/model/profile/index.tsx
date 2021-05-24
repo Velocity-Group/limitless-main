@@ -621,9 +621,8 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR
+                  SUBSCRIBE FOR $
                   {' '}
-                  <img alt="coin" src="/static/coin-ico.png" width="20px" />
                   {performer?.yearlyPrice.toFixed(2)}
                 </button>
               </div>
@@ -640,9 +639,8 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR
+                  SUBSCRIBE FOR $
                   {' '}
-                  <img alt="coin" src="/static/coin-ico.png" width="20px" />
                   {performer && performer?.monthlyPrice.toFixed(2)}
                 </button>
               </div>

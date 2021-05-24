@@ -166,13 +166,12 @@
     overflow: auto;
     width: 100%;
     padding: 5px;
+    display: flex;
     .story-per-card {
-      display: flex;
-      flex-direction: column;
+      cursor: pointer;
       margin-right: 1em;
       width: 6em;
-      align-items: center;
-      position: relative;
+      text-align: center;
       img {
         width: 4.5em;
         height: 4.5em;
@@ -187,7 +186,9 @@
         font-size: 0.8em;
         opacity: 0.8;
         margin-top: 0.4em;
-        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }

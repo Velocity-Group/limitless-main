@@ -243,7 +243,7 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
       const { performer, activeConversation } = this.props;
       if (conversationId !== activeConversation.data._id) return;
       message.info(`Call ended, redirecting to ${performer?.name || performer?.username || 'N/A'} profile`, 10);
-      setTimeout(() => { Router.replace({ pathname: '/profile', query: { performer: JSON.stringify(performer), username: performer?.username } }, `/${performer?.username}`); }, 5000);
+      setTimeout(() => { Router.replace({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`); }, 5000);
     });
   }
 

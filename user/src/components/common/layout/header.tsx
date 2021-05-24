@@ -145,13 +145,13 @@ class Header extends PureComponent<IProps> {
               <ul className={currentUser._id ? 'nav-icons' : 'nav-icons custom'}>
                 {currentUser._id && currentUser.isPerformer && (
                   <Tooltip key="profile" title="Profile">
-                    <li className={router.asPath === `/${currentUser.username}` ? 'active' : ''}>
+                    <li className={router.asPath === `/${currentUser.username || currentUser._id}` ? 'active' : ''}>
                       <Link
                         href={{
                           pathname: '/model/profile',
-                          query: { username: currentUser.username }
+                          query: { username: currentUser.username || currentUser._id }
                         }}
-                        as={`/${currentUser.username}`}
+                        as={`/${currentUser.username || currentUser._id}`}
                       >
                         <a>
                           <HomeOutlined />

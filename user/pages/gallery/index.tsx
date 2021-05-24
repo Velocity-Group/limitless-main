@@ -287,9 +287,9 @@ class GalleryViewPage extends PureComponent<IProps> {
                   <Link
                     href={{
                       pathname: '/model/profile',
-                      query: { username: gallery.performer?.username }
+                      query: { username: gallery.performer?.username || gallery.performer?._id }
                     }}
-                    as={`/model/${gallery.performer?.username}`}
+                    as={`/model/${gallery.performer?.username || gallery.performer?._id}`}
                   >
                     <>
                       <img

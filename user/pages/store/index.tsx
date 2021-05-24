@@ -229,9 +229,9 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 <Link
                   href={{
                     pathname: '/model/profile',
-                    query: { username: product?.performer?.username }
+                    query: { username: product?.performer?.username || product?.performer?._id }
                   }}
-                  as={`/model/${product?.performer?.username}`}
+                  as={`/model/${product?.performer?.username || product?.performer?._id}`}
                 >
                   <>
                     <img
