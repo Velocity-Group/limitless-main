@@ -213,7 +213,7 @@ class AccountSettings extends PureComponent<IProps> {
               />
             </Tabs.TabPane>
             <Tabs.TabPane
-              tab={<span>Pricing</span>}
+              tab={<span>Pricing Settings</span>}
               key="subscription"
             >
               <PerformerSubscriptionForm

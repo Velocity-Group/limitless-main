@@ -1,9 +1,10 @@
 /* eslint-disable no-template-curly-in-string */
 import { PureComponent } from 'react';
 import {
-  Form, Input, Button, Row, Col, Select
+  Form, Input, Button, Row, Col, Select, message
 } from 'antd';
 import { IPerformer, ICountry } from 'src/interfaces';
+import { paymentService } from '@services/payment.service';
 
 const { Option } = Select;
 const layout = {
@@ -24,16 +25,40 @@ const validateMessages = {
 
 interface IProps {
   onFinish: Function;
+  updating: boolean;
   user: IPerformer;
-  updating?: boolean;
   countries?: ICountry[];
 }
 
 export class PerformerBankingForm extends PureComponent<IProps> {
+  state = {
+    submiting: false
+  }
+
+  componentDidMount() {
+
+  }
+
+  async connectAccount() {
+    try {
+      await this.setState({ submiting: true });
+      const resp = (await paymentService.connectStripeAccount()).data;
+      if (resp.url) {
+        window.location.href = resp.url;
+      }
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later');
+    } finally {
+      this.setState({ submiting: false });
+    }
+  }
+
   render() {
     const {
-      onFinish, user, updating, countries
+      user, countries, onFinish, updating
     } = this.props;
+    const { submiting } = this.state;
     return (
       <Form
         {...layout}
@@ -148,12 +173,19 @@ export class PerformerBankingForm extends PureComponent<IProps> {
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button
             className="primary"
-            type="primary"
-            htmlType="submit"
-            loading={updating}
             disabled={updating}
+            loading={updating}
+            htmlType="submit"
           >
             Save Changes
+          </Button>
+          <Button
+            className="secondary"
+            disabled={updating || submiting}
+            loading={submiting}
+            onClick={this.connectAccount.bind(this)}
+          >
+            Connect with Stripe
           </Button>
         </Form.Item>
       </Form>

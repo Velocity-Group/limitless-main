@@ -15,7 +15,6 @@ import { UserService } from 'src/modules/user/services';
 import { DataResponse } from 'src/kernel';
 import { UserCreatePayload } from 'src/modules/user/payloads';
 import { STATUS_ACTIVE, ROLE_USER } from 'src/modules/user/constants';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Response } from 'express';
 import { AuthCreateDto } from '../dtos';
 import { UserRegisterPayload, EmailVerificationPayload } from '../payloads';

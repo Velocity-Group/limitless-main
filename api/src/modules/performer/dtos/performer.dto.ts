@@ -59,6 +59,7 @@ export interface IPerformerResponse {
   verifiedDocument?: boolean;
   score?: number;
   bankingInformation?: any;
+  stripeAccount?: any;
   ccbillSetting?: any;
   commissionSetting?: any;
   blockCountries?: any;
@@ -208,6 +209,8 @@ export class PerformerDto {
 
   ccbillSetting?: any;
 
+  stripeAccount?: any;
+
   commissionSetting?: any;
 
   blockCountries?: any;
@@ -303,6 +306,7 @@ export class PerformerDto {
         'stats',
         'score',
         'bankingInformation',
+        'stripeAccount',
         'ccbillSetting',
         'commissionSetting',
         'blockCountries',
@@ -395,6 +399,7 @@ export class PerformerDto {
       documentVerificationId: this.documentVerificationId,
       documentVerification: this.documentVerification,
       bankingInformation: this.bankingInformation,
+      stripeAccount: this.stripeAccount,
       welcomeVideoId: this.welcomeVideoId,
       maxParticipantsAllowed: this.maxParticipantsAllowed,
       agentId: this.agentId,

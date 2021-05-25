@@ -121,13 +121,13 @@ class RegisterPerformer extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Model Register
+            | Model Sign Up
           </title>
         </Head>
         <div className="main-container">
           <div className="login-box register-box">
             <div className="text-center">
-              <span className="title">Model Register</span>
+              <span className="title">Model Sign Up</span>
             </div>
             <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
             <div className="social-login">

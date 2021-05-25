@@ -17,6 +17,10 @@ export class PaymentService extends APIRequest {
   applyCoupon(code: any) {
     return this.post(`/coupons/${code}/apply-coupon`);
   }
+
+  connectStripeAccount() {
+    return this.post('/stripe/accounts');
+  }
 }
 
 export const paymentService = new PaymentService();
