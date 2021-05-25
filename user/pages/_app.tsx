@@ -110,7 +110,7 @@ async function auth(
       return;
     }
 
-    noredirect ? undefined : redirectLogin(ctx);
+    !noredirect && redirectLogin(ctx);
   } catch (e) {
     redirectLogin(ctx);
   }

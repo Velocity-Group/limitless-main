@@ -21,7 +21,6 @@ const SETTING_KEYS = {
   TIP_COMMISSION: 'tipCommission',
   STREAM_COMMISSION: 'streamCommission',
   MESSAGE_COMMISSION: 'messageCommission',
-  REFERRAL_COMMISSION: 'referralCommission',
   CCBILL_CLIENT_ACCOUNT_NUMBER: 'ccbillClientAccountNumber',
   CCBILL_SUB_ACCOUNT_NUMBER: 'ccbillSubAccountNumber',
   CCBILL_FLEXFORM_ID: 'ccbillFlexformId',
@@ -56,7 +55,10 @@ const SETTING_KEYS = {
   ENABLE_GOOGLE_RECAPTCHA: 'enableGoogleReCaptcha',
   BITPAY_PRODUCTION_MODE: 'bitpayProductionMode',
   BITPAY_API_TOKEN: 'bitpayApiToken',
-  TOKEN_CONVERSION_RATE: 'tokenConversionRate'
+  BITPAY_ENABLE: 'bitpayEnable',
+  TOKEN_CONVERSION_RATE: 'tokenConversionRate',
+  STRIPE_PUBLISHABLE_KEY: 'stripePublishableKey',
+  STRIPE_SECRET_KEY: 'stripeSecretKey'
 };
 
 const settings = [
@@ -118,27 +120,27 @@ const settings = [
     editable: true,
     type: 'text-editor'
   },
-  // {
-  //   key: SETTING_KEYS.USER_BENEFIT,
-  //   // eslint-disable-next-line quotes
-  //   value: `<ul><li>View exclusive content</li><li>Monthly and Yearly subscriptions</li><li>Fast and reliable buffering and viewing</li><li>Multiple solution options to choose from</li><li>Chat with model</li><li>Access model's personal store</li><li>Search and filter capabilities</li><li>Favorite your video for future viewing</li></ul>`,
-  //   name: 'User Benefit',
-  //   description: 'Add User benefit content here',
-  //   public: true,
-  //   group: 'general',
-  //   editable: true,
-  //   type: 'text-editor'
-  // },
-  // {
-  //   key: SETTING_KEYS.MODEL_BENEFIT,
-  //   value: '<ul><li>Lightning fast uploading</li><li>Multi-video uploading</li><li>Chat with fans</li><li>Cross-over-content between models</li><li>Individual model store</li><li>Affiliate program for blogs to promote your content</li><li>80% Standard commission rate</li><li>Deduct 5% when gained from affiliate</li></ul>',
-  //   name: 'Model Benefit',
-  //   description: 'Add Model benefit content here',
-  //   public: true,
-  //   group: 'general',
-  //   editable: true,
-  //   type: 'text-editor'
-  // },
+  {
+    key: SETTING_KEYS.USER_BENEFIT,
+    // eslint-disable-next-line quotes
+    value: `<ul><li>View exclusive content</li><li>Monthly and Yearly subscriptions</li><li>Fast and reliable buffering and viewing</li><li>Multiple solution options to choose from</li><li>Chat with model</li><li>Access model's personal store</li><li>Search and filter capabilities</li><li>Favorite your video for future viewing</li></ul>`,
+    name: 'User Benefit',
+    description: 'Add User benefits content here',
+    public: true,
+    group: 'general',
+    editable: true,
+    type: 'text-editor'
+  },
+  {
+    key: SETTING_KEYS.MODEL_BENEFIT,
+    value: '<ul><li>Lightning fast uploading</li><li>Multi-video uploading</li><li>Chat with fans</li><li>Cross-over-content between models</li><li>Individual model store</li><li>Affiliate program for blogs to promote your content</li><li>80% Standard commission rate</li><li>Deduct 5% when gained from affiliate</li></ul>',
+    name: 'Model Benefit',
+    description: 'Add Model benefits content here',
+    public: true,
+    group: 'general',
+    editable: true,
+    type: 'text-editor'
+  },
   {
     key: SETTING_KEYS.MAINTENANCE_MODE,
     value: false,
@@ -147,6 +149,16 @@ const settings = [
       'If active, user will see maintenance page once visiting site',
     type: 'boolean',
     public: true,
+    group: 'general',
+    editable: true
+  },
+  {
+    key: SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
+    value: false,
+    name: 'Mandatory email verification',
+    description: 'If active, user must verify email before login to system',
+    type: 'boolean',
+    public: false,
     group: 'general',
     editable: true
   },
@@ -384,6 +396,26 @@ const settings = [
     description: 'https://admin.ccbill.com/megamenus/ccbillHome.html#AccountInfo/DataLinkServicesSuite(234)',
     public: false,
     group: 'ccbill',
+    editable: true,
+    type: 'text'
+  },
+  {
+    key: SETTING_KEYS.STRIPE_PUBLISHABLE_KEY,
+    value: '',
+    name: 'Stripe publishable key',
+    description: 'https://dashboard.stripe.com/apikeys',
+    public: true,
+    group: 'stripe',
+    editable: true,
+    type: 'text'
+  },
+  {
+    key: SETTING_KEYS.STRIPE_SECRET_KEY,
+    value: '',
+    name: 'Stripe secret key',
+    description: 'https://dashboard.stripe.com/apikeys',
+    public: false,
+    group: 'stripe',
     editable: true,
     type: 'text'
   },

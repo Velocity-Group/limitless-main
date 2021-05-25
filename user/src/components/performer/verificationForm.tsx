@@ -149,7 +149,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
           <Col xs={24} sm={24} md={12}>
             <Form.Item
               labelCol={{ span: 24 }}
-              label="ID document"
+              label="Holding ID photo"
               valuePropName="fileList"
               className="model-photo-verification"
               help="Upload a photo of yourself holding your indentity document next to your face"

@@ -12,18 +12,18 @@ import {
 } from '@nestjs/common';
 import { UserService } from 'src/modules/user/services';
 import { DataResponse } from 'src/kernel';
-// import { SettingService } from 'src/modules/settings';
+import { SettingService } from 'src/modules/settings';
 import {
-  // STATUS_PENDING_EMAIL_CONFIRMATION,
   STATUS_INACTIVE
 } from 'src/modules/user/constants';
 import { PerformerService } from 'src/modules/performer/services';
 import { PERFORMER_STATUSES } from 'src/modules/performer/constants';
+import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { AuthGooglePayload, LoginByEmailPayload, LoginByUsernamePayload } from '../payloads';
 import { AuthService } from '../services';
 import {
   EmailOrPasswordIncorrectException,
-  // EmailNotVerifiedException,
+  EmailNotVerifiedException,
   UsernameOrPasswordIncorrectException,
   AccountInactiveException
 } from '../exceptions';
@@ -44,7 +44,7 @@ export class LoginController {
     @Body() req: LoginByEmailPayload
   ): Promise<DataResponse<{ token: string }>> {
     const [user, performer] = await Promise.all([
-      this.userService.findByEmail(req.email),
+      this.userService.findOne({ email: req.email }),
       this.performerService.findOne({ email: req.email })
     ]);
     if (!user && !performer) {
@@ -52,6 +52,12 @@ export class LoginController {
     }
     if ((user && user.status === STATUS_INACTIVE) || (performer && performer.status === PERFORMER_STATUSES.INACTIVE)) {
       throw new AccountInactiveException();
+    }
+    const requireEmailVerification = SettingService.getValueByKey(
+      SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION
+    );
+    if ((requireEmailVerification && user && !user.verifiedEmail) || (requireEmailVerification && performer && !performer.verifiedEmail)) {
+      throw new EmailNotVerifiedException();
     }
     const [authUser, authPerformer] = await Promise.all([
       user && this.authService.findBySource({
@@ -94,7 +100,7 @@ export class LoginController {
     @Body() req: LoginByUsernamePayload
   ): Promise<DataResponse<{ token: string }>> {
     const [user, performer] = await Promise.all([
-      this.userService.findByUsername(req.username),
+      this.userService.findOne({ username: req.username }),
       this.performerService.findOne({ username: req.username })
     ]);
     if (!user && !performer) {
@@ -102,6 +108,12 @@ export class LoginController {
     }
     if ((user && user.status === STATUS_INACTIVE) || (performer && performer.status === PERFORMER_STATUSES.INACTIVE)) {
       throw new AccountInactiveException();
+    }
+    const requireEmailVerification = SettingService.getValueByKey(
+      SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION
+    );
+    if ((requireEmailVerification && user && !user.verifiedEmail) || (requireEmailVerification && performer && !performer.verifiedEmail)) {
+      throw new EmailNotVerifiedException();
     }
     const [authUser, authPerformer] = await Promise.all([
       user && this.authService.findBySource({
