@@ -281,6 +281,7 @@ const performerSchema = new mongoose.Schema({
 
 performerSchema.pre<any>('updateOne', async function preUpdateOne(next) {
   const model = await this.model.findOne(this.getQuery());
+  if (!model) return next();
   const { stats } = model;
   if (!stats) {
     return next();

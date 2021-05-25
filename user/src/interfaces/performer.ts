@@ -29,6 +29,7 @@ export interface IPerformer {
   eyes: string;
   sexualPreference: string;
   isFreeSubscription: boolean;
+  durationFreeSubscriptionDays: number;
   monthlyPrice: number;
   yearlyPrice: number;
   stats: {

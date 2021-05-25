@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import {
-  Layout, Collapse, Tabs, Button, Menu,
+  Layout, Tabs, Button, Menu,
   message, Modal, Tooltip, Dropdown
 } from 'antd';
 import { PureComponent } from 'react';
@@ -15,7 +15,7 @@ import {
 } from 'src/services';
 import Head from 'next/head';
 import {
-  CheckCircleOutlined, ArrowDownOutlined, ArrowLeftOutlined, FireOutlined,
+  CheckCircleOutlined, ArrowLeftOutlined, FireOutlined,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined,
   HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, ShareAltOutlined, BookOutlined
 } from '@ant-design/icons';
@@ -59,7 +59,6 @@ interface IProps {
   settings: StreamSettings;
 }
 
-const { Panel } = Collapse;
 const { TabPane } = Tabs;
 const initialFilter = {
   q: '',
@@ -590,7 +589,11 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  FOLLOW FOR FREE
+                  FOLLOW FOR FREE IN
+                  {' '}
+                  {performer.durationFreeSubscriptionDays}
+                  {' '}
+                  DAYS
                 </button>
               </div>
             )}
