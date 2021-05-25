@@ -148,6 +148,10 @@ const performerSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  durationFreeSubscriptionDays: {
+    type: Number,
+    default: 1
+  },
   monthlyPrice: {
     type: Number,
     default: 1

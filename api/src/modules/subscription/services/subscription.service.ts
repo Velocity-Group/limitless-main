@@ -1,9 +1,11 @@
+/* eslint-disable no-await-in-loop */
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import {
   PageableData,
   QueueEventService,
-  QueueEvent
+  QueueEvent,
+  AgendaService
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
 import { UserService, UserSearchService } from 'src/modules/user/services';
@@ -12,6 +14,8 @@ import { UserDto } from 'src/modules/user/dtos';
 import { EVENT } from 'src/kernel/constants';
 import { UserSearchRequestPayload } from 'src/modules/user/payloads';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { uniq } from 'lodash';
+import { MailerService } from 'src/modules/mailer';
 import { SubscriptionModel } from '../models/subscription.model';
 import { SUBSCRIPTION_MODEL_PROVIDER } from '../providers/subscription.provider';
 import {
@@ -25,6 +29,8 @@ import {
   UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL
 } from '../constants';
 
+const CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY = 'CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY';
+
 @Injectable()
 export class SubscriptionService {
   constructor(
@@ -36,8 +42,69 @@ export class SubscriptionService {
     private readonly userService: UserService,
     @Inject(SUBSCRIPTION_MODEL_PROVIDER)
     private readonly subscriptionModel: Model<SubscriptionModel>,
-    private readonly queueEventService: QueueEventService
-  ) { }
+    private readonly queueEventService: QueueEventService,
+    private readonly agenda: AgendaService,
+    private readonly mailerService: MailerService
+  ) {
+    this.defineJobs();
+  }
+
+  private async defineJobs() {
+    const collection = (this.agenda as any)._collection;
+    await collection.deleteMany({
+      name: {
+        $in: [
+          CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY
+        ]
+      }
+    });
+    this.agenda.define(CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY, { }, this.checkSubscriptionsAndNotify.bind(this));
+    this.agenda.every('24 hours', CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY, {});
+  }
+
+  private async checkSubscriptionsAndNotify(job: any, done: any): Promise<void> {
+    try {
+      const total = await this.subscriptionModel.countDocuments({
+        expiredAt: { $lt: new Date() },
+        status: SUBSCRIPTION_STATUS.ACTIVE
+      });
+      for (let i = 0; i <= total / 99; i += 1) {
+        const subscriptions = await this.subscriptionModel.find({
+          expiredAt: { $lt: new Date() },
+          status: SUBSCRIPTION_STATUS.ACTIVE
+        }).limit(99).skip(i * 99);
+        const userIds = subscriptions.map((f) => f.userId);
+        const users = await this.userService.find({ _id: { $in: uniq(userIds) } });
+        const performerIds = subscriptions.map((f) => f.performerId);
+        const performers = await this.performerService.find({ _id: { $in: uniq(performerIds) } });
+        await Promise.all(subscriptions.map((sub) => {
+          const user = users.find((p) => `${p._id}` === `${sub.userId}`);
+          const performer = performers.find((p) => `${p._id}` === `${sub.performerId}`);
+          if (user && user.email && performer && sub.subscriptionType === SUBSCRIPTION_TYPE.FREE) {
+            // mailer
+            this.mailerService.send({
+              subject: `Free subscription ${performer?.name || performer?.username} expired`,
+              to: user.email,
+              data: {
+                performerName: performer.name || performer.username,
+                userName: user.name || user.username
+              },
+              template: 'free-subscription-expired'
+            });
+            performer.isFreeSubscription = false;
+            performer.save();
+          }
+          // eslint-disable-next-line no-param-reassign
+          sub.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+          return sub.save();
+        }));
+      }
+    } catch (e) {
+      console.log('Check expired subscriptions & mailer', e);
+    } finally {
+      done();
+    }
+  }
 
   public async findBySubscriptionId(subscriptionId: string) {
     return this.subscriptionModel.findOne({ subscriptionId });

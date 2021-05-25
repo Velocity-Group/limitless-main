@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Form, InputNumber, Button, Row, Col, Switch, Alert
+  Form, InputNumber, Button, Row, Col, Switch
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 
@@ -55,24 +55,29 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             <Form.Item>
               <Switch unCheckedChildren="Non-free Subscription" checkedChildren="Free Subcription" checked={isFreeSubscription} onChange={() => this.setState({ isFreeSubscription: !isFreeSubscription })} />
             </Form.Item>
-            {!isFreeSubscription ? (
-              <>
-                <Form.Item
-                  name="monthlyPrice"
-                  label="Monthly Subscription $ price"
-                  rules={[{ required: true }]}
-                >
-                  <InputNumber min={1} />
-                </Form.Item>
-                <Form.Item
-                  name="yearlyPrice"
-                  label="Yearly Subscription $ price"
-                  rules={[{ required: true }]}
-                >
-                  <InputNumber min={1} />
-                </Form.Item>
-              </>
-            ) : <Alert type="warning" message="User is free to access your contents!" />}
+            {isFreeSubscription && (
+            <Form.Item
+              name="durationFreeSubscriptionDays"
+              label="Duration of free subscription (days)"
+              rules={[{ required: true }]}
+            >
+              <InputNumber min={1} />
+            </Form.Item>
+            )}
+            <Form.Item
+              name="monthlyPrice"
+              label="Monthly Subscription price ($)"
+              rules={[{ required: true }]}
+            >
+              <InputNumber min={1} />
+            </Form.Item>
+            <Form.Item
+              name="yearlyPrice"
+              label="Yearly Subscription price ($)"
+              rules={[{ required: true }]}
+            >
+              <InputNumber min={1} />
+            </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={24}>
             <Form.Item
