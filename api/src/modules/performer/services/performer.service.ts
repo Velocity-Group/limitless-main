@@ -279,11 +279,10 @@ export class PerformerService {
       performerId: id
     });
 
-    dto.stripeAccount = await this.stripeService.retrieveConnectAccount(id);
-
     // dto.bankingInformation = await this.bankingSettingModel.findOne({
     //   performerId: id
     // });
+
     dto.blockCountries = await this.performerBlockService.findByQuery({
       sourceId: id
     });

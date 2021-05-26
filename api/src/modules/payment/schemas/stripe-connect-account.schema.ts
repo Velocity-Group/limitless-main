@@ -10,6 +10,17 @@ export const StripeAccountSchema = new Schema({
     type: Schema.Types.ObjectId,
     index: true
   },
+  accountId: {
+    type: String
+  },
+  chargesEnabled: {
+    type: Boolean,
+    default: false
+  },
+  detailsSubmitted: {
+    type: Boolean,
+    default: false
+  },
   accountToken: {
     type: String
   },

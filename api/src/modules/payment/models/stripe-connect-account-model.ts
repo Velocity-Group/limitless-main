@@ -8,7 +8,13 @@ export class StripeConnectAccountModel extends Document {
 
   accountToken: string;
 
+  accountId: string;
+
   metaData: any;
+
+  chargesEnabled: boolean;
+
+  detailsSubmitted: boolean;
 
   createdAt: Date;
 

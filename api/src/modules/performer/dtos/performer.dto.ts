@@ -59,7 +59,6 @@ export interface IPerformerResponse {
   verifiedDocument?: boolean;
   score?: number;
   bankingInformation?: any;
-  stripeAccount?: any;
   ccbillSetting?: any;
   commissionSetting?: any;
   blockCountries?: any;

@@ -48,6 +48,7 @@ export interface IPerformer {
   };
   score: number;
   bankingInformation: IBanking;
+  stripeAccount: any;
   blockCountries: IBlockCountries;
   createdBy: string;
   createdAt: Date;

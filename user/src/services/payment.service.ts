@@ -21,6 +21,14 @@ export class PaymentService extends APIRequest {
   connectStripeAccount() {
     return this.post('/stripe/accounts');
   }
+
+  retrieveStripeAccount() {
+    return this.get('/stripe/accounts/me');
+  }
+
+  loginLink() {
+    return this.get('/stripe/accounts/me/login-link');
+  }
 }
 
 export const paymentService = new PaymentService();
