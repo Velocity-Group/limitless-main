@@ -1,8 +1,8 @@
 import { PureComponent } from 'react';
 import {
-  message, Layout, Spin
+  message, Layout, Spin, Button
 } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import {
@@ -23,18 +23,33 @@ class CardsPage extends PureComponent<IProps> {
 
   state = {
     cards: [],
-    loading: false
+    loading: false,
+    submiting: false
   };
 
   componentDidMount() {
     this.getData();
   }
 
+  async handleRemoveCard(cardId: string) {
+    if (!window.confirm('Are you sure to remove this card')) return;
+    try {
+      await this.setState({ submiting: true });
+      await paymentService.removeStripeCard(cardId);
+      this.getData();
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured please try again later');
+    } finally {
+      this.setState({ submiting: false });
+    }
+  }
+
   async getData() {
     try {
       await this.setState({ loading: true });
       const resp = await paymentService.getStripeCards();
-      resp.data && this.setState({ cards: resp.data });
+      this.setState({ cards: resp.data.data });
     } catch (error) {
       message.error(getResponseError(error) || 'An error occured. Please try again.');
     } finally {
@@ -44,7 +59,7 @@ class CardsPage extends PureComponent<IProps> {
 
   render() {
     const {
-      cards, loading
+      cards, loading, submiting
     } = this.state;
     const { ui } = this.props;
     return (
@@ -60,7 +75,7 @@ class CardsPage extends PureComponent<IProps> {
           <Page>
             <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>My Cards</span>
-              <Link href="/model/my-post/create">
+              <Link href="/user/cards/add-card">
                 <a>
                   {' '}
                   <PlusCircleOutlined />
@@ -72,11 +87,27 @@ class CardsPage extends PureComponent<IProps> {
             <div className="card-list">
               {!loading && !cards.length && (
               <p>
-                No authorised card was found,
-                {' '}
-                <Link href="/user/cards/add-new"><a> click here to add</a></Link>
+                No authorised card was found, please add a payment card.
               </p>
               )}
+              {!loading && cards.length > 0 && cards.map((card) => (
+                <div className="card-item" key={card.id}>
+                  <Button className="remove-btn" type="link" disabled={submiting} onClick={() => this.handleRemoveCard(card.id)}>
+                    <DeleteOutlined />
+                    {' '}
+                    Remove
+                  </Button>
+                  <div className="card-info">
+                    <span className="card-last-number">
+                      {`**** **** **** ${card.last4}`}
+                    </span>
+                    <span className="card-brand">{card.brand}</span>
+                  </div>
+                  <div className="card-holder-name">
+                    {card.name || 'Unknow'}
+                  </div>
+                </div>
+              ))}
               {loading && <div className="text-center"><Spin /></div>}
             </div>
           </Page>

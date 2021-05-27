@@ -287,7 +287,7 @@ export class UserService {
     await this.userModel.updateOne({ _id: userId }, { stripeCustomerId }, { upsert: true });
   }
 
-  public async updateStripeCardIds(userId: | ObjectId, cardId: string, isNew: boolean) {
+  public async updateStripeCardIds(userId: | ObjectId, cardId: string, isNew = true) {
     isNew ? await this.userModel.updateOne({ _id: userId }, { $push: { stripeCardIds: cardId } }, { upsert: true })
       : await this.userModel.updateOne({ _id: userId }, { $pull: { stripeCardIds: cardId } }, { upsert: true });
   }

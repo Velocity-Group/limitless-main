@@ -7,7 +7,9 @@ import {
   Post,
   Body,
   Get,
-  Query
+  Query,
+  Delete,
+  Param
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';
@@ -65,7 +67,7 @@ export class StripeController {
     return DataResponse.ok(resp);
   }
 
-  @Post('user/card')
+  @Post('user/cards')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
   @Roles('user')
@@ -74,6 +76,18 @@ export class StripeController {
     @Body() payload: AuthoriseCardPayload
   ): Promise<DataResponse<any>> {
     const info = await this.stripeService.authoriseCard(user, payload);
+    return DataResponse.ok(info);
+  }
+
+  @Delete('user/cards/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('user')
+  async deleteCard(
+    @CurrentUser() user: UserDto,
+    @Param('id') cardId: string
+  ): Promise<DataResponse<any>> {
+    const info = await this.stripeService.removeCard(user, cardId);
     return DataResponse.ok(info);
   }
 

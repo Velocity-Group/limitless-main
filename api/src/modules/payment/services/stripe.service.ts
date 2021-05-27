@@ -1,8 +1,7 @@
 import {
   Injectable, Inject, forwardRef, HttpException
 } from '@nestjs/common';
-import {
-} from 'src/kernel';
+import { EntityNotFoundException } from 'src/kernel';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { SettingService } from 'src/modules/settings';
@@ -29,7 +28,7 @@ export class StripeService {
   // FOR USER
   public async authoriseCard(user: UserDto, payload: AuthoriseCardPayload) {
     try {
-      const secretKey = SettingService.getByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const secretKey = SettingService.getValueByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
@@ -57,9 +56,35 @@ export class StripeService {
     }
   }
 
+  public async removeCard(user: UserDto, cardId: string) {
+    try {
+      const secretKey = SettingService.getValueByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      // find & update customer Id
+      const customer = user.stripeCustomerId ? await stripe.customers.retrieve(user.stripeCustomerId)
+        : await stripe.customers.create({
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+          description: `Create customer ${user.name || user.username}`
+        });
+      if (!customer) throw new HttpException('Could not retrieve customer', 404);
+      !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
+      // add card
+      const card = await stripe.customers.retrieveSource(customer.id, cardId);
+      if (!card) throw new EntityNotFoundException();
+      card && !user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id);
+      const deleted = await stripe.customers.deleteSource(customer.id, cardId);
+      return deleted;
+    } catch (e) {
+      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+    }
+  }
+
   public async getListCards(user: UserDto) {
     try {
-      const secretKey = SettingService.getByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const secretKey = SettingService.getValueByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
@@ -85,7 +110,7 @@ export class StripeService {
   // FOR PERFORMER
   public async createConnectAccount(user: UserDto) {
     try {
-      const secretKey = SettingService.getByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const secretKey = SettingService.getValueByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
@@ -145,7 +170,7 @@ export class StripeService {
       sourceId: user._id
     });
     if (!stripeConnectAccount || !stripeConnectAccount.accountId) return this.createConnectAccount(user);
-    const secretKey = SettingService.getByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+    const secretKey = SettingService.getValueByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
     const stripe = new Stripe(secretKey, {
       apiVersion: '2020-08-27'
     });

@@ -12,7 +12,10 @@ import {
 import { paymentService } from '@services/index';
 import { connect } from 'react-redux';
 import { loadStripe } from '@stripe/stripe-js';
-import { CardElement, Elements, ElementsConsumer } from '@stripe/react-stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import StripeCardForm from '@components/user/stripe-card-form';
+import Router from 'next/router';
+import './index.less';
 
 interface IProps {
   currentUser: IUser;
@@ -24,55 +27,26 @@ class NewCardPage extends PureComponent<IProps> {
   static authenticate: boolean = true;
 
   state = {
+    submiting: false
   };
 
-  componentDidMount() {
-    // this.getData();
+  async handleAddCard(cardToken: any) {
+    try {
+      await this.setState({ submiting: true });
+      await paymentService.addStripeCard({ sourceToken: cardToken.id });
+      message.success('Add card success');
+      Router.replace('/user/cards');
+    } catch (error) {
+      const e = await error;
+      message.error(e?.message || 'An error occured. Please try again.');
+    } finally {
+      this.setState({ submiting: false });
+    }
   }
 
-  handleSubmit = async () => {
-    const { stripe, elements } = this.props;
-
-    if (!stripe || !elements) {
-      // Stripe.js has not loaded yet. Make sure to disable
-      // form submission until Stripe.js has loaded.
-      return;
-    }
-
-    // Get a reference to a mounted CardElement. Elements knows how
-    // to find your CardElement because there can only ever be one of
-    // each type of element.
-    const cardElement = elements.getElement(CardElement);
-
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: 'card',
-      card: cardElement
-    });
-
-    if (error) {
-      console.log('[error]', error);
-    } else {
-      console.log('[PaymentMethod]', paymentMethod);
-    }
-  };
-
-  // async getData() {
-  //   try {
-  //     await this.setState({ loading: true });
-  //     const resp = await paymentService.getStripeCards();
-  //     resp.data && this.setState({ cards: resp.data });
-  //   } catch (error) {
-  //     message.error(getResponseError(error) || 'An error occured. Please try again.');
-  //   } finally {
-  //     this.setState({ loading: false });
-  //   }
-  // }
-
   render() {
-    const { } = this.state;
     const { ui, settings } = this.props;
-
-    const stripePromise = settings.stripePublishableKey && loadStripe(settings.stripePublishableKey);
+    const { submiting } = this.state;
 
     return (
       <Layout>
@@ -89,30 +63,8 @@ class NewCardPage extends PureComponent<IProps> {
               <span>Add New Card</span>
             </div>
             <div className="card-form">
-              <Elements stripe={stripePromise}>
-                <ElementsConsumer>
-                  <form onSubmit={this.handleSubmit.bind(this)}>
-                    <CardElement
-                      options={{
-                        style: {
-                          base: {
-                            fontSize: '16px',
-                            color: '#424770',
-                            '::placeholder': {
-                              color: '#aab7c4'
-                            }
-                          },
-                          invalid: {
-                            color: '#9e2146'
-                          }
-                        }
-                      }}
-                    />
-                    <button type="submit" disabled={!stripe}>
-                      Pay
-                    </button>
-                  </form>
-                </ElementsConsumer>
+              <Elements stripe={loadStripe(settings.stripePublishableKey || '')}>
+                <StripeCardForm submit={this.handleAddCard.bind(this)} submiting={submiting} />
               </Elements>
             </div>
           </Page>

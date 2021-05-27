@@ -26,6 +26,14 @@ export class PaymentService extends APIRequest {
     return this.get('/stripe/user/cards');
   }
 
+  addStripeCard(payload) {
+    return this.post('/stripe/user/cards', payload);
+  }
+
+  removeStripeCard(id) {
+    return this.del(`/stripe/user/cards/${id}`);
+  }
+
   retrieveStripeAccount() {
     return this.get('/stripe/accounts/me');
   }
