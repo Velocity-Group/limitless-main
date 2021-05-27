@@ -272,7 +272,7 @@ export class UserService {
     id: string | ObjectId,
     payload: Record<string, number>
   ) {
-    return this.userModel.updateOne({ _id: id }, { $inc: payload }, { upsert: true });
+    await this.userModel.updateOne({ _id: id }, { $inc: payload }, { upsert: true });
   }
 
   public async updateCCbillPaymentInfo(userId: | ObjectId, subscriptionId: string) {
@@ -281,6 +281,15 @@ export class UserService {
 
   public async updateBalance(userId: string | ObjectId, tokens: number) {
     await this.userModel.updateOne({ _id: userId }, { $inc: { balance: tokens } }, { upsert: true });
+  }
+
+  public async updateStripeCustomerId(userId: | ObjectId, stripeCustomerId: string) {
+    await this.userModel.updateOne({ _id: userId }, { stripeCustomerId }, { upsert: true });
+  }
+
+  public async updateStripeCardIds(userId: | ObjectId, cardId: string, isNew: boolean) {
+    isNew ? await this.userModel.updateOne({ _id: userId }, { $push: { stripeCardIds: cardId } }, { upsert: true })
+      : await this.userModel.updateOne({ _id: userId }, { $pull: { stripeCardIds: cardId } }, { upsert: true });
   }
 
   public async delete(id: string) {

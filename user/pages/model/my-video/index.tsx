@@ -147,7 +147,7 @@ class Videos extends PureComponent<IProps> {
                     </a>
                   </Link>
                 </Button>
-                  &nbsp;
+                &nbsp;
                 <Button className="secondary">
                   <Link href="/model/my-video/bulk-upload">
                     <a>

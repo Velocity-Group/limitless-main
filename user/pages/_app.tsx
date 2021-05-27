@@ -14,12 +14,13 @@ import { NextPageContext } from 'next';
 import { loginSuccess } from '@redux/auth/actions';
 import { updateCurrentUser } from '@redux/user/actions';
 import { updateUIValue } from '@redux/ui/actions';
-import '../style/index.less';
 import { Socket } from 'src/socket';
 import Head from 'next/head';
 import { SETTING_KEYS } from 'src/constants';
 import { pick } from 'lodash';
 import { updateLiveStreamSettings } from '@redux/streaming/actions';
+import { updateSettings } from '@redux/settings/actions';
+import '../style/index.less';
 
 declare global {
   interface Window {
@@ -121,9 +122,6 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
     const { store } = ctx;
     store.dispatch(
       updateUIValue({
-        googleReCaptchaSiteKey: settings.googleReCaptchaSiteKey || '',
-        enableGoogleReCaptcha: settings.enableGoogleReCaptcha || false,
-        googleClientId: settings.googleClientId || '',
         logo: settings.logoUrl || '',
         siteName: settings.siteName || '',
         favicon: settings.favicon || '',
@@ -132,9 +130,7 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
         footerContent: settings.footerContent || '',
         countries: settings.countries || [],
         userBenefit: settings.userBenefit || '',
-        modelBenefit: settings.modelBenefit || '',
-        requireEmailVerification: settings.requireEmailVerification,
-        tokenConversionRate: settings.tokenConversionRate
+        modelBenefit: settings.modelBenefit || ''
       })
     );
     store.dispatch(
@@ -147,6 +143,19 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
           SETTING_KEYS.OPTION_FOR_PRIVATE,
           SETTING_KEYS.SECURE_OPTION,
           SETTING_KEYS.ANT_MEDIA_APPNAME
+        ])
+      )
+    );
+
+    store.dispatch(
+      updateSettings(
+        pick(settings, [
+          SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
+          SETTING_KEYS.TOKEN_CONVERSION_RATE,
+          SETTING_KEYS.STRIPE_PUBLISHABLE_KEY,
+          SETTING_KEYS.GOOGLE_RECAPTCHA_SITE_KEY,
+          SETTING_KEYS.ENABLE_GOOGLE_RECAPTCHA,
+          SETTING_KEYS.GOOGLE_CLIENT_ID
         ])
       )
     );

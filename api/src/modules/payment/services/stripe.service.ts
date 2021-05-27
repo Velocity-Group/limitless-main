@@ -10,18 +10,79 @@ import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { PerformerService } from 'src/modules/performer/services';
 import { UserDto } from 'src/modules/user/dtos';
 import Stripe from 'stripe';
+import { UserService } from 'src/modules/user/services';
 import { STRIPE_ACCOUNT_CONNECT_MODEL_PROVIDER } from '../providers';
 import { StripeConnectAccountModel } from '../models';
+import { AuthoriseCardPayload } from '../payloads/authorise-card.payload';
 
 @Injectable()
 export class StripeService {
   constructor(
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(STRIPE_ACCOUNT_CONNECT_MODEL_PROVIDER)
     private readonly ConnectAccountModel: Model<StripeConnectAccountModel>
   ) { }
 
+  // FOR USER
+  public async authoriseCard(user: UserDto, payload: AuthoriseCardPayload) {
+    try {
+      const secretKey = SettingService.getByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      // find & update customer Id
+      const customer = user.stripeCustomerId ? await stripe.customers.retrieve(user.stripeCustomerId)
+        : await stripe.customers.create({
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+          description: `Create customer ${user.name || user.username}`
+        });
+      if (!customer) throw new HttpException('Could not retrieve customer', 404);
+      !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
+      // add card
+      const card = await stripe.customers.createSource(customer.id, {
+        source: payload.sourceToken
+      });
+      card && !user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id, true);
+      const cards = await stripe.customers.listSources(
+        customer.id,
+        { object: 'card', limit: 100 }
+      );
+      return cards;
+    } catch (e) {
+      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+    }
+  }
+
+  public async getListCards(user: UserDto) {
+    try {
+      const secretKey = SettingService.getByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      // find & update customer Id
+      const customer = user.stripeCustomerId ? await stripe.customers.retrieve(user.stripeCustomerId)
+        : await stripe.customers.create({
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+          description: `Create customer ${user.name || user.username}`
+        });
+      if (!customer) throw new HttpException('Could not retrieve customer', 404);
+      !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
+      const cards = await stripe.customers.listSources(
+        customer.id,
+        { object: 'card', limit: 100 }
+      );
+      return cards;
+    } catch (e) {
+      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+    }
+  }
+
+  // FOR PERFORMER
   public async createConnectAccount(user: UserDto) {
     try {
       const secretKey = SettingService.getByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
@@ -52,7 +113,7 @@ export class StripeService {
       });
       return accountLinks;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configure error', 400);
+      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
     }
   }
 

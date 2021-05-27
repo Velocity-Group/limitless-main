@@ -18,3 +18,12 @@ export interface IContact {
   message: any;
   name: string;
 }
+
+export interface ISettings {
+  requireEmailVerification: string;
+  googleReCaptchaSiteKey: string;
+  enableGoogleReCaptcha: string;
+  googleClientId: string;
+  tokenConversionRate: string;
+  stripePublishableKey: string;
+}

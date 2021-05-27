@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { registerFan, loginSocial } from '@redux/auth/actions';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { IUIConfig } from 'src/interfaces';
+import { ISettings, IUIConfig } from 'src/interfaces';
 // import { GoogleReCaptcha } from '@components/common';
 import { TwitterOutlined } from '@ant-design/icons';
 import { authService } from '@services/auth.service';
@@ -18,6 +18,7 @@ import './index.less';
 
 interface IProps {
   ui: IUIConfig;
+  settings: ISettings;
   registerFan: Function;
   registerFanData: any;
   loginSocial: Function;
@@ -88,7 +89,7 @@ class FanRegister extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, registerFanData
+      ui, registerFanData, settings
     } = this.props;
     const { requesting: submiting } = registerFanData;
     const { isLoading } = this.state;
@@ -129,7 +130,7 @@ class FanRegister extends PureComponent<IProps> {
                   </button>
                   <GoogleLogin
                     className="google-button"
-                    clientId={ui.googleClientId}
+                    clientId={settings.googleClientId}
                     buttonText="SIGN UP WITH GOOGLE"
                     onSuccess={this.onGoogleLogin.bind(this)}
                     onFailure={this.onGoogleLogin.bind(this)}
@@ -257,6 +258,7 @@ class FanRegister extends PureComponent<IProps> {
 }
 const mapStatesToProps = (state: any) => ({
   ui: { ...state.ui },
+  settings: { ...state.settings },
   registerFanData: { ...state.auth.registerFanData }
 });
 

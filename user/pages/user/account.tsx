@@ -3,8 +3,7 @@ import { PureComponent } from 'react';
 import { Layout, Tabs, message } from 'antd';
 import Head from 'next/head';
 import { connect } from 'react-redux';
-import { UserAccountForm } from '@components/user/account-form';
-import { UpdatePaswordForm } from '@components/user/update-password-form';
+import { UserAccountForm, UpdatePaswordForm } from '@components/user';
 import { IUser, IUserFormData } from 'src/interfaces/user';
 import { authService } from '@services/auth.service';
 import { userService } from '@services/user.service';
@@ -60,6 +59,11 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
     this._intervalCountdown && clearInterval(this._intervalCountdown);
   }
 
+  onFinish(data: IUserFormData) {
+    const { updateUser: handleUpdateUser } = this.props;
+    handleUpdateUser(data);
+  }
+
   handleCountdown = async () => {
     const { countTime } = this.state;
     if (countTime === 0) {
@@ -89,11 +93,6 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
     }
-  }
-
-  onFinish(data: IUserFormData) {
-    const { updateUser: handleUpdateUser } = this.props;
-    handleUpdateUser(data);
   }
 
   coundown() {
@@ -148,7 +147,7 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
         </Head>
         <div className="main-container user-account">
           <Tabs defaultActiveKey="user-profile" tabPosition="top" className="nav-tabs">
-            <Tabs.TabPane tab={<span>Basic Information</span>} key="basic">
+            <Tabs.TabPane tab={<span>Basic Settings</span>} key="basic">
               <UserAccountForm
                 onFinish={this.onFinish.bind(this)}
                 updating={updating || emailSending}

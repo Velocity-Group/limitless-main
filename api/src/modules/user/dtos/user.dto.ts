@@ -22,6 +22,8 @@ export interface IUserResponse {
   isOnline?: boolean;
   stats?: any;
   isBlocked?: boolean;
+  stripeCardIds?: string[];
+  stripeCustomerId?: string;
 }
 
 export class UserDto {
@@ -69,6 +71,10 @@ export class UserDto {
 
   isBlocked?: boolean;
 
+  stripeCardIds?: string[];
+
+  stripeCustomerId?: string;
+
   constructor(data?: Partial<UserDto>) {
     data
       && Object.assign(
@@ -94,7 +100,9 @@ export class UserDto {
           'twitterConnected',
           'googleConnected',
           'isPerformer',
-          'isBlocked'
+          'isBlocked',
+          'stripeCardIds',
+          'stripeCustomerId'
         ])
       );
   }
@@ -110,25 +118,27 @@ export class UserDto {
       name: this.getName(),
       avatar: FileDto.getPublicUrl(this.avatarPath),
       username: this.username,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
       isOnline: this.isOnline,
       stats: this.stats,
       isPerformer: this.isPerformer,
       country: this.country,
-      isBlocked: this.isBlocked
+      isBlocked: this.isBlocked,
+      twitterConnected: this.twitterConnected,
+      googleConnected: this.googleConnected
     };
 
     const privateInfo = {
-      twitterConnected: this.twitterConnected,
-      googleConnected: this.googleConnected,
+      email: this.email,
+      firstName: this.firstName,
+      lastName: this.lastName,
       phone: this.phone,
       status: this.status,
       gender: this.gender,
       balance: this.balance,
       roles: this.roles,
-      verifiedEmail: this.verifiedEmail
+      verifiedEmail: this.verifiedEmail,
+      stripeCardIds: this.stripeCardIds,
+      stripeCustomerId: this.stripeCustomerId
     };
 
     if (isAdmin) {

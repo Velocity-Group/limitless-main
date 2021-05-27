@@ -23,7 +23,7 @@ interface Props {
     previousPaidOutTokens: number;
     remainingUnpaidTokens: number;
   };
-  tokenConversionRate: any;
+  tokenConversionRate: string;
 }
 
 const PayoutRequestForm = ({

@@ -18,7 +18,7 @@ import { updateCurrentUser } from '@redux/user/actions';
 import { authService, userService } from '@services/index';
 import Link from 'next/link';
 import './auth/index.less';
-import { IUIConfig } from 'src/interfaces';
+import { ISettings, IUIConfig } from 'src/interfaces';
 import Router from 'next/router';
 import { TwitterOutlined } from '@ant-design/icons';
 import Loader from '@components/common/base/loader';
@@ -31,7 +31,8 @@ interface IProps {
   updateCurrentUser: Function;
   loginSuccess: Function;
   loginSocial: Function;
-  ui: IUIConfig
+  ui: IUIConfig;
+  settings: ISettings
 }
 
 class Login extends PureComponent<IProps> {
@@ -164,7 +165,7 @@ class Login extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui } = this.props;
+    const { ui, settings } = this.props;
     const { isLoading } = this.state;
     return (
       <>
@@ -203,7 +204,7 @@ class Login extends PureComponent<IProps> {
                       </button>
                       <GoogleLogin
                         className="google-button"
-                        clientId={ui.googleClientId}
+                        clientId={settings.googleClientId}
                         buttonText="SIGN IN/ SIGN UP WITH GOOGLE"
                         onSuccess={this.onGoogleLogin.bind(this)}
                         onFailure={this.onGoogleLogin.bind(this)}
@@ -280,7 +281,8 @@ class Login extends PureComponent<IProps> {
 }
 
 const mapStatesToProps = (state: any) => ({
-  ui: { ...state.ui }
+  ui: { ...state.ui },
+  settings: state.settings
 });
 
 const mapDispatchToProps = {

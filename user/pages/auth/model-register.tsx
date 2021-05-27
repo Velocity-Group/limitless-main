@@ -17,7 +17,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { connect } from 'react-redux';
 import { registerPerformer, loginSocial } from '@redux/auth/actions';
-import { IUIConfig } from 'src/interfaces';
+import { ISettings, IUIConfig } from 'src/interfaces';
 import { ImageUpload } from '@components/file';
 import moment from 'moment';
 import GoogleLogin from 'react-google-login';
@@ -31,6 +31,7 @@ interface IProps {
   registerPerformerData: any;
   registerPerformer: Function;
   ui: IUIConfig;
+  settings: ISettings
 }
 
 class RegisterPerformer extends PureComponent<IProps> {
@@ -102,7 +103,7 @@ class RegisterPerformer extends PureComponent<IProps> {
   }
 
   render() {
-    const { registerPerformerData = { requesting: false }, ui } = this.props;
+    const { registerPerformerData = { requesting: false }, ui, settings } = this.props;
     const { selectedGender, isLoading } = this.state;
 
     const placeholderIdImg = () => {
@@ -138,7 +139,7 @@ class RegisterPerformer extends PureComponent<IProps> {
               </button>
               <GoogleLogin
                 className="google-button"
-                clientId={ui.googleClientId}
+                clientId={settings.googleClientId}
                 buttonText="SIGN UP WITH GOOGLE"
                 onSuccess={this.onGoogleLogin.bind(this)}
                 onFailure={this.onGoogleLogin.bind(this)}
@@ -432,6 +433,7 @@ class RegisterPerformer extends PureComponent<IProps> {
 
 const mapStatesToProps = (state: any) => ({
   ui: { ...state.ui },
+  settings: { ...state.settings },
   registerPerformerData: { ...state.auth.registerPerformerData }
 });
 

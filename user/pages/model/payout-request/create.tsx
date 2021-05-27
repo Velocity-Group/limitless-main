@@ -5,10 +5,11 @@ import { message } from 'antd';
 import { connect } from 'react-redux';
 import { payoutRequestService } from 'src/services';
 import Router from 'next/router';
-import { IUIConfig } from '@interfaces/ui-config';
+import { ISettings, IUIConfig } from 'src/interfaces/index';
 
 interface Props {
   ui: IUIConfig;
+  settings: ISettings
 }
 
 interface States {
@@ -78,7 +79,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
 
   render() {
     const { submiting, statsPayout } = this.state;
-    const { ui } = this.props;
+    const { ui, settings } = this.props;
     return (
       <>
         <Head>
@@ -95,7 +96,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
             statsPayout={statsPayout}
             submit={this.submit.bind(this)}
             submiting={submiting}
-            tokenConversionRate={ui?.tokenConversionRate}
+            tokenConversionRate={settings?.tokenConversionRate}
           />
         </div>
       </>
@@ -104,7 +105,8 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
 }
 
 const mapStateToProps = (state) => ({
-  ui: state.ui
+  ui: state.ui,
+  settings: state.settings
 });
 
 export default connect(mapStateToProps)(PayoutRequestCreatePage);

@@ -22,6 +22,10 @@ export class PaymentService extends APIRequest {
     return this.post('/stripe/accounts');
   }
 
+  getStripeCards() {
+    return this.get('/stripe/user/cards');
+  }
+
   retrieveStripeAccount() {
     return this.get('/stripe/accounts/me');
   }

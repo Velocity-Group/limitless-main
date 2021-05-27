@@ -14,6 +14,7 @@ import { DataResponse } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
 import { StripeService } from '../services';
+import { AuthoriseCardPayload } from '../payloads/authorise-card.payload';
 
 @Injectable()
 @Controller('stripe')
@@ -62,5 +63,28 @@ export class StripeController {
   ) {
     const resp = await this.stripeService.getExpressLoginLink(user);
     return DataResponse.ok(resp);
+  }
+
+  @Post('user/card')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('user')
+  async authoriseCard(
+    @CurrentUser() user: UserDto,
+    @Body() payload: AuthoriseCardPayload
+  ): Promise<DataResponse<any>> {
+    const info = await this.stripeService.authoriseCard(user, payload);
+    return DataResponse.ok(info);
+  }
+
+  @Get('user/cards')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('user')
+  async getCards(
+    @CurrentUser() user: UserDto
+  ): Promise<DataResponse<any>> {
+    const info = await this.stripeService.getListCards(user);
+    return DataResponse.ok(info);
   }
 }
