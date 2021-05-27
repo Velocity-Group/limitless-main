@@ -6,7 +6,7 @@ import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import {
-  IUIConfig, IUser
+  IUIConfig
 } from 'src/interfaces';
 import { paymentService } from '@services/index';
 import { getResponseError } from '@lib/utils';
@@ -14,7 +14,6 @@ import { connect } from 'react-redux';
 import Link from 'next/link';
 
 interface IProps {
-  currentUser: IUser;
   ui: IUIConfig
 }
 
@@ -118,8 +117,7 @@ class CardsPage extends PureComponent<IProps> {
 }
 
 const mapState = (state: any) => ({
-  ui: { ...state.ui },
-  currentUser: { ...state.user.current }
+  ui: { ...state.ui }
 });
 const mapDispatch = { };
 export default connect(mapState, mapDispatch)(CardsPage);

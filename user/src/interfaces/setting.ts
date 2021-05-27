@@ -20,10 +20,13 @@ export interface IContact {
 }
 
 export interface ISettings {
-  requireEmailVerification: string;
+  requireEmailVerification: boolean;
   googleReCaptchaSiteKey: string;
-  enableGoogleReCaptcha: string;
+  enableGoogleReCaptcha: boolean;
   googleClientId: string;
-  tokenConversionRate: string;
+  tokenConversionRate: number;
   stripePublishableKey: string;
+  stripeEnable: boolean;
+  ccbillEnable: boolean;
+  bitpayEnable: boolean;
 }

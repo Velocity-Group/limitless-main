@@ -45,7 +45,7 @@ export class StripeService {
       const card = await stripe.customers.createSource(customer.id, {
         source: payload.sourceToken
       });
-      card && !user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id, true);
+      card && !user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id);
       const cards = await stripe.customers.listSources(
         customer.id,
         { object: 'card', limit: 100 }
@@ -74,7 +74,7 @@ export class StripeService {
       // add card
       const card = await stripe.customers.retrieveSource(customer.id, cardId);
       if (!card) throw new EntityNotFoundException();
-      card && !user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id);
+      card && user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id, false);
       const deleted = await stripe.customers.deleteSource(customer.id, cardId);
       return deleted;
     } catch (e) {

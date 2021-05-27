@@ -27,7 +27,7 @@ const SETTING_KEYS = {
   CCBILL_SALT: 'ccbillSalt',
   CCBILL_DATALINK_USERNAME: 'ccbillDatalinkUsername',
   CCBILL_DATALINK_PASSWORD: 'ccbillDatalinkPassword',
-  CCBILL_CURRENCY_CODE: 'ccbilCurrencyCode',
+  CCBILL_ENABLE: 'ccbillEnable',
   USE_SENDGRID_TRANSPORTER: 'useSengridTransporter',
   SMTP_TRANSPORTER: 'smtpTransporter',
   GOOGLE_ANALYTICS_CODE: 'gaCode',
@@ -58,7 +58,8 @@ const SETTING_KEYS = {
   BITPAY_ENABLE: 'bitpayEnable',
   TOKEN_CONVERSION_RATE: 'tokenConversionRate',
   STRIPE_PUBLISHABLE_KEY: 'stripePublishableKey',
-  STRIPE_SECRET_KEY: 'stripeSecretKey'
+  STRIPE_SECRET_KEY: 'stripeSecretKey',
+  STRIPE_ENABLE: 'stripeEnable'
 };
 
 const settings = [
@@ -400,6 +401,16 @@ const settings = [
     type: 'text'
   },
   {
+    key: SETTING_KEYS.CCBILL_ENABLE,
+    value: false,
+    name: 'Enable CCbill',
+    description: 'Enable/Disable CCbill payment gateway',
+    public: true,
+    group: 'ccbill',
+    editable: true,
+    type: 'boolean'
+  },
+  {
     key: SETTING_KEYS.STRIPE_PUBLISHABLE_KEY,
     value: '',
     name: 'Stripe publishable key',
@@ -418,6 +429,16 @@ const settings = [
     group: 'stripe',
     editable: true,
     type: 'text'
+  },
+  {
+    key: SETTING_KEYS.STRIPE_ENABLE,
+    value: false,
+    name: 'Enable Stripe',
+    description: 'Enable/Disable Stripe payment gateway',
+    public: true,
+    group: 'stripe',
+    editable: true,
+    type: 'boolean'
   },
   {
     key: SETTING_KEYS.SMTP_TRANSPORTER,

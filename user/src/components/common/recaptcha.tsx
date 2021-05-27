@@ -34,7 +34,7 @@ export class GoogleReCaptcha extends PureComponent<IProps> {
     }
     return (
       <div className="recaptcha-box">
-        {settings?.enableGoogleReCaptcha === 'true' && (
+        {settings?.enableGoogleReCaptcha && (
         <ReCAPTCHA
           ref={this.recaptchaRef}
           sitekey={settings?.googleReCaptchaSiteKey}

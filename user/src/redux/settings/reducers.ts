@@ -9,7 +9,10 @@ const initialState = {
   enableGoogleReCaptcha: false,
   googleClientId: '',
   tokenConversionRate: 1,
-  stripePublishableKey: ''
+  stripePublishableKey: '',
+  stripeEnable: false,
+  ccbillEnable: false,
+  bitpayEnable: false
 };
 
 const settingReducers = [
