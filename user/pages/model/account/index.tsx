@@ -213,7 +213,7 @@ class AccountSettings extends PureComponent<IProps> {
               />
             </Tabs.TabPane>
             <Tabs.TabPane
-              tab={<span>Pricing</span>}
+              tab={<span>Pricing Settings</span>}
               key="subscription"
             >
               <PerformerSubscriptionForm
@@ -223,12 +223,7 @@ class AccountSettings extends PureComponent<IProps> {
               />
             </Tabs.TabPane>
             <Tabs.TabPane tab={<span>Banking</span>} key="bankInfo">
-              <PerformerBankingForm
-                onFinish={this.handleUpdateBanking.bind(this)}
-                updating={updating}
-                user={currentUser}
-                countries={countries}
-              />
+              <PerformerBankingForm />
             </Tabs.TabPane>
             <Tabs.TabPane tab={<span>Block Countries</span>} key="block">
               <PerformerBlockCountriesForm

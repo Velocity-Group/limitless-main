@@ -8,6 +8,7 @@ import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
 import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule),
-    forwardRef(() => PurchasedItemModule)
+    forwardRef(() => PurchasedItemModule),
+    forwardRef(() => MailerModule)
   ],
   providers: [...subscriptionProviders, SubscriptionService, TransactionSubscriptionListener],
   controllers: [SubscriptionController],

@@ -10,15 +10,10 @@ const initialState = {
   menus: [],
   favicon: '/static/favicon.ico',
   loginPlaceholderImage: '',
-  googleClientId: '',
   countries: [],
   footerContent: '',
   modelBenefit: '',
-  userBenefit: '',
-  googleReCaptchaSiteKey: '',
-  tokenConversionRate: 1,
-  enableGoogleReCaptcha: false,
-  requireEmailVerification: false
+  userBenefit: ''
 };
 
 const uiReducers = [

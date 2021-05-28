@@ -32,6 +32,7 @@ import { UserService } from 'src/modules/user/services';
 import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
+import { StripeService } from 'src/modules/payment/services';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException,
@@ -80,6 +81,8 @@ export class PerformerService {
     private readonly fileService: FileService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
+    @Inject(forwardRef(() => StripeService))
+    private readonly stripeService: StripeService,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>,
     private readonly agenda: AgendaService,
@@ -268,17 +271,18 @@ export class PerformerService {
       }
       : null;
 
-    dto.ccbillSetting = await this.paymentGatewaySettingModel.findOne({
-      performerId: id
-    });
+    // dto.ccbillSetting = await this.paymentGatewaySettingModel.findOne({
+    //   performerId: id
+    // });
 
     dto.commissionSetting = await this.commissionSettingModel.findOne({
       performerId: id
     });
 
-    dto.bankingInformation = await this.bankingSettingModel.findOne({
-      performerId: id
-    });
+    // dto.bankingInformation = await this.bankingSettingModel.findOne({
+    //   performerId: id
+    // });
+
     dto.blockCountries = await this.performerBlockService.findByQuery({
       sourceId: id
     });

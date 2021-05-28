@@ -48,9 +48,9 @@ export class UserModel extends Document {
 
   googleConnected?: boolean;
 
-  authorisedCard?: boolean;
+  stripeCardIds?: string[];
 
-  ccbillCardToken?: string;
+  stripeCustomerId?: string;
 
   stats: {
     totalViewTime: number;

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { IUser, StreamSettings } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
-  ShoppingCartOutlined, UserOutlined, HistoryOutlined,
+  ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
   MessageOutlined, VideoCameraOutlined, FireOutlined, NotificationOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined,
   HomeOutlined, LogoutOutlined, UsergroupAddOutlined, VideoCameraAddOutlined,
@@ -61,6 +61,15 @@ class Header extends PureComponent<IProps> {
     }
   }
 
+  onThemeChange = (theme: string) => {
+    const { updateUIValue: handleUpdateUI } = this.props;
+    handleUpdateUI({ theme });
+  };
+
+  handleMessage = async (event) => {
+    event && this.setState({ totalNotReadMessage: event.total });
+  };
+
   async handleCountNotificationMessage() {
     try {
       const data = await (await messageService.countTotalNotRead()).data;
@@ -71,10 +80,6 @@ class Header extends PureComponent<IProps> {
       console.log(e);
     }
   }
-
-  handleMessage = async (event) => {
-    event && this.setState({ totalNotReadMessage: event.total });
-  };
 
   handlePrivateChat(data: { conversationId: string; user: IUser }) {
     const { addPrivateRequest: _addPrivateRequest } = this.props;
@@ -100,11 +105,6 @@ class Header extends PureComponent<IProps> {
       handleUpdateBalance({ token: event.token });
     }
   }
-
-  onThemeChange = (theme: string) => {
-    const { updateUIValue: handleUpdateUI } = this.props;
-    handleUpdateUI({ theme });
-  };
 
   async beforeLogout() {
     const { logout: handleLogout } = this.props;
@@ -384,6 +384,13 @@ class Header extends PureComponent<IProps> {
                     <WalletOutlined />
                     {' '}
                     Add Tokens
+                  </div>
+                </Link>
+                <Link href="/user/cards" as="/user/cards">
+                  <div className={router.pathname === '/user/cards' ? 'menu-item active' : 'menu-item'}>
+                    <CreditCardOutlined />
+                    {' '}
+                    Add Cards
                   </div>
                 </Link>
                 <Divider />

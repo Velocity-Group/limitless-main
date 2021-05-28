@@ -20,3 +20,4 @@ export * from './payout-request';
 export * from './photo';
 export * from './gallery';
 export * from './token-package';
+export * from './setting';

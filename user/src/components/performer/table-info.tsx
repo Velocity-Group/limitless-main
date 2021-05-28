@@ -15,16 +15,14 @@ export class PerformerInfo extends PureComponent<IProps> {
     const country = countries.length && countries.find((c) => c.code === performer.country);
     return (
       <>
-        <Descriptions className="performer-country">
-          {performer?.country && (
-            <Descriptions.Item key="country">
-              <img alt="performer-country" src={country?.flag} height="20px" />
-              &nbsp;
-              {country?.name}
-            </Descriptions.Item>
-          )}
-        </Descriptions>
         <Descriptions className="performer-info">
+          {performer?.country && (
+          <Descriptions.Item key="country" label="Country">
+            <img alt="performer-country" src={country?.flag} height="20px" />
+              &nbsp;
+            {country?.name}
+          </Descriptions.Item>
+          )}
           {performer.gender && (
           <Descriptions.Item label="Gender">
             <Tag color="magenta">

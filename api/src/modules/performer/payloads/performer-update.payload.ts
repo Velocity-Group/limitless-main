@@ -203,6 +203,12 @@ export class PerformerUpdatePayload {
   @IsNumber()
   @Min(1)
   @IsOptional()
+  durationFreeSubscriptionDays: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(1)
+  @IsOptional()
   monthlyPrice: number;
 
   @ApiProperty()
@@ -362,6 +368,12 @@ export class SelfUpdatePayload {
   @IsBoolean()
   @IsOptional()
   isFreeSubscription: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(1)
+  @IsOptional()
+  durationFreeSubscriptionDays: number;
 
   @ApiProperty()
   @IsNumber()

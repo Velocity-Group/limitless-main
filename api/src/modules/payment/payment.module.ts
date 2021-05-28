@@ -12,10 +12,11 @@ import { SettingModule } from '../settings/setting.module';
 import { MailerModule } from '../mailer/mailer.module';
 import {
   CCBillService, PaymentService, PaymentSearchService,
-  BitpayService
+  BitpayService, StripeService
 } from './services';
 import {
-  PaymentController, PaymentSearchController, CancelSubscriptionController, PaymentWebhookController
+  PaymentController, PaymentSearchController, CancelSubscriptionController, PaymentWebhookController,
+  StripeController
 } from './controllers';
 import { TransactionMailerListener, UpdateUserBalanceListener } from './listeners';
 import { UserModule } from '../user/user.module';
@@ -39,17 +40,19 @@ import { SubscriptionModule } from '../subscription/subscription.module';
     PaymentService,
     CCBillService,
     BitpayService,
+    StripeService,
     PaymentSearchService,
     TransactionMailerListener,
     UpdateUserBalanceListener
   ],
   controllers: [
-    PaymentController, PaymentSearchController,
+    PaymentController, PaymentSearchController, StripeController,
     CancelSubscriptionController, PaymentWebhookController
   ],
   exports: [
     ...paymentProviders,
     PaymentService,
+    StripeService,
     PaymentSearchService
   ]
 })

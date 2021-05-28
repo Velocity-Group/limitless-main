@@ -22,6 +22,7 @@ import { SUBSCRIPTION_STATUS, SUBSCRIPTION_TYPE, UPDATE_PERFORMER_SUBSCRIPTION_C
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import axios from 'axios';
 import { SubscriptionDto } from 'src/modules/subscription/dtos/subscription.dto';
+import { UserDto } from 'src/modules/user/dtos';
 import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel } from '../models';
 import {
@@ -102,7 +103,7 @@ export class PaymentService {
     };
   }
 
-  public async createSubscriptionPaymentTransaction(performer: PerformerDto, subscriptionType: string, user: PerformerDto, couponInfo?: CouponDto, paymentGateway = 'ccbill') {
+  public async createSubscriptionPaymentTransaction(performer: PerformerDto, subscriptionType: string, user: UserDto, couponInfo?: CouponDto, paymentGateway = 'ccbill') {
     const price = () => {
       switch (subscriptionType) {
         case PAYMENT_TYPE.FREE_SUBSCRIPTION: return 0;
@@ -149,7 +150,7 @@ export class PaymentService {
     });
   }
 
-  public async subscribePerformer(payload: SubscribePerformerPayload, user: PerformerDto) {
+  public async subscribePerformer(payload: SubscribePerformerPayload, user: UserDto) {
     const { type, performerId } = payload;
     const performer = await this.performerService.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
@@ -181,7 +182,7 @@ export class PaymentService {
     products: any[],
     gateway,
     totalPrice: number,
-    user: PerformerDto,
+    user: UserDto,
     couponInfo?: CouponDto
   ) {
     const paymentTransaction = new this.TransactionModel();
@@ -202,7 +203,7 @@ export class PaymentService {
     return paymentTransaction;
   }
 
-  public async buyTokens(tokenId: string | ObjectId, payload: PurchaseTokenPayload, user: PerformerDto) {
+  public async buyTokens(tokenId: string | ObjectId, payload: PurchaseTokenPayload, user: UserDto) {
     const { gateway, couponCode, currency } = payload;
 
     let totalPrice = 0;

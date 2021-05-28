@@ -148,6 +148,10 @@ const performerSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  durationFreeSubscriptionDays: {
+    type: Number,
+    default: 1
+  },
   monthlyPrice: {
     type: Number,
     default: 1
@@ -277,6 +281,7 @@ const performerSchema = new mongoose.Schema({
 
 performerSchema.pre<any>('updateOne', async function preUpdateOne(next) {
   const model = await this.model.findOne(this.getQuery());
+  if (!model) return next();
   const { stats } = model;
   if (!stats) {
     return next();

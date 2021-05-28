@@ -105,12 +105,12 @@ const authSagas = [
         const payload = _.pick(data.payload, ['name', 'username', 'password',
           'gender', 'email', 'firstName', 'lastName', 'country', 'dateOfBirth']) as IPerformerRegister;
         const resp = (yield authService.registerPerformer(verificationFiles, payload, () => {})).data;
-        message.success(resp && resp.message, 5);
+        message.success(resp.message || 'Your register success!');
         Router.push('/');
         yield put(registerPerformerSuccess(resp));
       } catch (e) {
         const error = yield Promise.resolve(e);
-        message.error(error.message || 'This Username or email ID has been already taken.', 5);
+        message.error(error.message || 'An error occured, please try again later');
         yield put(registerPerformerFail(error));
       }
     }

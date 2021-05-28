@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import {
-  Layout, Collapse, Tabs, Button, Menu,
+  Layout, Tabs, Button, Menu,
   message, Modal, Tooltip, Dropdown
 } from 'antd';
 import { PureComponent } from 'react';
@@ -15,7 +15,7 @@ import {
 } from 'src/services';
 import Head from 'next/head';
 import {
-  CheckCircleOutlined, ArrowDownOutlined, ArrowLeftOutlined, FireOutlined,
+  CheckCircleOutlined, ArrowLeftOutlined, FireOutlined,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined,
   HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, ShareAltOutlined, BookOutlined
 } from '@ant-design/icons';
@@ -59,7 +59,6 @@ interface IProps {
   settings: StreamSettings;
 }
 
-const { Panel } = Collapse;
 const { TabPane } = Tabs;
 const initialFilter = {
   q: '',
@@ -166,7 +165,7 @@ class PerformerProfile extends PureComponent<IProps> {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
     } finally {
-      await this.setState({ requesting: false });
+      this.setState({ requesting: false });
     }
   }
 
@@ -233,12 +232,14 @@ class PerformerProfile extends PureComponent<IProps> {
     try {
       await this.setState({ submiting: true });
       const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: performer._id })).data;
+      if (resp.success) {
+        message.success('Subscribed success!');
+        window.location.reload();
+      }
       if (resp.paymentUrl) {
         message.info('Redirecting to payment method...');
         window.location.href = resp.paymentUrl;
-        return;
       }
-      message.error('An error occured, please try again later');
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -263,7 +264,7 @@ class PerformerProfile extends PureComponent<IProps> {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
-      await this.setState({ submiting: false });
+      this.setState({ submiting: false, openTipModal: false });
     }
   }
 
@@ -371,7 +372,6 @@ class PerformerProfile extends PureComponent<IProps> {
       isSubscribed,
       isBookMarked,
       openSubscriptionModal,
-      requesting,
       tab,
       isGrid
     } = this.state;
@@ -574,23 +574,7 @@ class PerformerProfile extends PureComponent<IProps> {
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <div className="show-more">
                 {performer.bio && <p>{performer.bio}</p>}
-                <Collapse
-                  expandIconPosition="right"
-                  bordered={false}
-                  expandIcon={({ isActive }) => (
-                    <ArrowDownOutlined rotate={isActive ? 180 : 0} />
-                  )}
-                  defaultActiveKey={['1']}
-                  className="site-collapse-custom-collapse"
-                >
-                  <Panel
-                    header="More info"
-                    key="1"
-                    className="site-collapse-custom-panel"
-                  >
-                    <PerformerInfo countries={ui?.countries || []} performer={performer} />
-                  </Panel>
-                </Collapse>
+                <PerformerInfo countries={ui?.countries || []} performer={performer} />
               </div>
             </div>
             {performer?.isFreeSubscription && !isSubscribed && (
@@ -605,7 +589,11 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  FOLLOW FOR FREE
+                  FOLLOW FOR FREE IN
+                  {' '}
+                  {performer.durationFreeSubscriptionDays}
+                  {' '}
+                  DAYS
                 </button>
               </div>
             )}

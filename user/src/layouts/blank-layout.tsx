@@ -13,6 +13,7 @@ const Loader = dynamic(() => import('@components/common/base/loader'));
 interface DefaultProps {
   children: any;
   ui: IUIConfig;
+  loadUIValue: Function;
 }
 
 class BlankLayout extends PureComponent<DefaultProps> {
@@ -21,6 +22,8 @@ class BlankLayout extends PureComponent<DefaultProps> {
   };
 
   componentDidMount() {
+    const { loadUIValue: handleLoadUI } = this.props;
+    process.browser && handleLoadUI();
     process.browser && this.handleStateChange();
   }
 

@@ -17,6 +17,30 @@ export class PaymentService extends APIRequest {
   applyCoupon(code: any) {
     return this.post(`/coupons/${code}/apply-coupon`);
   }
+
+  connectStripeAccount() {
+    return this.post('/stripe/accounts');
+  }
+
+  getStripeCards() {
+    return this.get('/stripe/user/cards');
+  }
+
+  addStripeCard(payload) {
+    return this.post('/stripe/user/cards', payload);
+  }
+
+  removeStripeCard(id) {
+    return this.del(`/stripe/user/cards/${id}`);
+  }
+
+  retrieveStripeAccount() {
+    return this.get('/stripe/accounts/me');
+  }
+
+  loginLink() {
+    return this.get('/stripe/accounts/me/login-link');
+  }
 }
 
 export const paymentService = new PaymentService();

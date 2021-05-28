@@ -91,17 +91,12 @@ export const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  authorisedCard: {
-    type: Boolean,
-    default: false
-  },
-  ccbillCardToken: {
+  stripeCardIds: [{
+    type: String
+  }],
+  stripeCustomerId: {
     type: String
   }
 });
-
-// userSchema.pre<any>('save', function(next) {
-//   next();
-// });
 
 export const UserSchema = userSchema;

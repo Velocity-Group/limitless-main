@@ -55,8 +55,9 @@ export const SETTING_KEYS = {
   ENABLE_GOOGLE_RECAPTCHA: 'enableGoogleReCaptcha',
   BITPAY_PRODUCTION_MODE: 'bitpayProductionMode',
   BITPAY_API_TOKEN: 'bitpayApiToken',
-  REFERRAL_COMMISSION: 'referralCommission',
-  TOKEN_CONVERSION_RATE: 'tokenConversionRate'
+  TOKEN_CONVERSION_RATE: 'tokenConversionRate',
+  STRIPE_PUBLISHABLE_KEY: 'stripePublishableKey',
+  STRIPE_SECRET_KEY: 'stripeSecretKey'
 };
 
 export const MENU_SECTION = {

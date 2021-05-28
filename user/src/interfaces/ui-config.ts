@@ -9,13 +9,8 @@ export interface IUIConfig {
   menus: any[];
   favicon: string;
   loginPlaceholderImage?: string;
-  googleClientId?: string;
   footerContent: string;
   countries?: ICountry[];
   userBenefit: string;
   modelBenefit: string;
-  googleReCaptchaSiteKey: string;
-  enableGoogleReCaptcha: boolean;
-  requireEmailVerification: boolean;
-  tokenConversionRate: number;
 }

@@ -340,20 +340,20 @@ export class PurchaseItemService {
   }
 
   async sendTips(user: PerformerDto, performerId: string, payload: SendTipsPayload) {
-    const { token, conversationId, streamType } = payload;
+    const { price, conversationId, streamType } = payload;
     const performer = await this.performerService.findById(performerId);
     if (!performer) {
       throw new EntityNotFoundException();
     }
 
-    if (!token || user.balance < token) {
+    if (!price || user.balance < price) {
       throw new NotEnoughMoneyException();
     }
 
     const paymentTransaction = new this.TokenPaymentModel();
-    paymentTransaction.originalPrice = token;
-    paymentTransaction.totalPrice = token;
-    paymentTransaction.source = ROLE.PERFORMER;
+    paymentTransaction.originalPrice = price;
+    paymentTransaction.totalPrice = price;
+    paymentTransaction.source = ROLE.USER;
     paymentTransaction.sourceId = user._id;
     paymentTransaction.target = PURCHASE_ITEM_TARTGET_TYPE.PERFORMER;
     paymentTransaction.performerId = performer._id;
@@ -361,9 +361,9 @@ export class PurchaseItemService {
     paymentTransaction.type = PURCHASE_ITEM_TYPE.TIP;
     paymentTransaction.products = [
       {
-        name: `Tip to ${performer.name}`,
-        description: `Tip ${token} token to ${performer.name}`,
-        price: token,
+        name: `Tip to ${performer.name || performer.username || performer._id}`,
+        description: `Tip ${price} tokens to ${performer.name || performer.username || performer._id}`,
+        price,
         productId: performer._id,
         productType: PURCHASE_ITEM_TARTGET_TYPE.PERFORMER,
         performerId: performer._id,
@@ -386,10 +386,22 @@ export class PurchaseItemService {
         roomName,
         `message_created_conversation_${conversationId}`,
         {
-          text: `${user?.name || user?.username} tip ${token}`,
+          text: `${user?.name || user?.username} tip ${price} tokens`,
           _id: generateUuid(),
           conversationId: payload.conversationId,
           isTip: true
+        }
+      );
+    }
+    if (conversationId && !streamType) {
+      // send notification to conversation
+      await this.socketService.emitToUsers(
+        performerId,
+        'message_created',
+        {
+          text: `${user?.name || user?.username} tipped ${price.toFixed(2)} tokens to you`,
+          _id: generateUuid(),
+          isSystem: true
         }
       );
     }

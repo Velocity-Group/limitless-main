@@ -80,6 +80,8 @@ export class PerformerModel extends Document {
 
   isFreeSubscription: boolean;
 
+  durationFreeSubscriptionDays: number;
+
   monthlyPrice: number;
 
   yearlyPrice: number;

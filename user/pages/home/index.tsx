@@ -9,7 +9,9 @@ import { Banner } from '@components/common';
 import { getBanners } from '@redux/banner/actions';
 import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
 import { performerService, feedService } from '@services/index';
-import { IFeed, IPerformer, IUser } from 'src/interfaces';
+import {
+  IFeed, IPerformer, ISettings, IUser
+} from 'src/interfaces';
 import ScrollListFeed from '@components/post/scroll-list';
 import {
   SyncOutlined, TagOutlined, SearchOutlined, CloseOutlined
@@ -20,6 +22,7 @@ import './index.less';
 
 interface IProps {
   ui: any;
+  settings: ISettings;
   user: IUser;
   bannerState: any;
   getBanners: Function;
@@ -133,7 +136,7 @@ class HomePage extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, feedState, user, bannerState
+      ui, feedState, user, bannerState, settings
     } = this.props;
     const { items: banners } = bannerState;
     const { items: feeds, total: totalFeeds, requesting: loadingFeed } = feedState;
@@ -184,7 +187,7 @@ class HomePage extends PureComponent<IProps> {
               </div>
               <div className="home-container">
                 <div className="left-container">
-                  {user._id && !user.verifiedEmail && ui.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
+                  {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
                   <div className="visit-history">
                     <div className="top-story">
                       <a>Story</a>
@@ -192,7 +195,7 @@ class HomePage extends PureComponent<IProps> {
                     </div>
                     <div className="story-list">
                       {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
-                        <Link key={per._id} href={{ pathname: '/model/profile', query: { id: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
+                        <Link key={per._id} href={{ pathname: '/model/profile', query: { username: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
                           <div className="story-per-card">
                             <img alt="avatr" src={per?.avatar || '/static/no-avatar.png'} />
                             <p>{per?.name || per?.username || 'N/A'}</p>
@@ -252,7 +255,8 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui },
   bannerState: { ...state.banner.listBanners },
   user: { ...state.user.current },
-  feedState: { ...state.feed.feeds }
+  feedState: { ...state.feed.feeds },
+  settings: { ...state.settings }
 });
 
 const mapDispatch = {

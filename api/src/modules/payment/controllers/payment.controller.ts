@@ -8,13 +8,12 @@ import {
   UseGuards,
   Post,
   Body,
-  Query,
   Param
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
-import { PerformerDto } from 'src/modules/performer/dtos';
+import { UserDto } from 'src/modules/user/dtos';
 import { PurchaseTokenPayload, SubscribePerformerPayload } from '../payloads';
 import { PaymentService } from '../services/payment.service';
 
@@ -29,7 +28,7 @@ export class PaymentController {
   @Roles('user')
   @UsePipes(new ValidationPipe({ transform: true }))
   async create(
-    @CurrentUser() user: PerformerDto,
+    @CurrentUser() user: UserDto,
     @Body() payload: SubscribePerformerPayload
   ): Promise<DataResponse<any>> {
     const info = await this.paymentService.subscribePerformer(payload, user);
@@ -42,7 +41,7 @@ export class PaymentController {
   @Roles('user')
   @UsePipes(new ValidationPipe({ transform: true }))
   async purchaseTokens(
-    @CurrentUser() user: PerformerDto,
+    @CurrentUser() user: UserDto,
     @Param('tokenId') tokenId: string,
     @Body() payload: PurchaseTokenPayload
   ): Promise<DataResponse<any>> {

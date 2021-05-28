@@ -8,15 +8,17 @@ import { tokenPackageService } from '@services/token-package.service';
 import { paymentService } from '@services/index';
 import './index.less';
 import {
-  IUIConfig, IPackageToken, IUser
+  IUIConfig, IPackageToken, IUser, ISettings
 } from '@interfaces/index';
 import { connect } from 'react-redux';
 import { StarOutlined } from '@ant-design/icons';
 import Page from '@components/common/layout/page';
+import Router from 'next/router';
 
 interface IProps {
   ui: IUIConfig;
   user: IUser;
+  settings: ISettings
 }
 
 class TokenPackages extends PureComponent<IProps> {
@@ -30,7 +32,7 @@ class TokenPackages extends PureComponent<IProps> {
     isApliedCode: false,
     openPurchaseModal: false,
     selectedPackage: null,
-    gateway: 'ccbill',
+    gateway: 'stripe',
     coupon: null
   };
 
@@ -74,8 +76,8 @@ class TokenPackages extends PureComponent<IProps> {
       //   message.success('Redirecting to payment method');
       //   window.location.href = pay.paymentUrl;
       // }
-      message.success('Redirecting to payment method');
-      window.location.reload();
+      // message.success('Redirecting to payment method');
+      // window.location.reload();
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
@@ -97,9 +99,7 @@ class TokenPackages extends PureComponent<IProps> {
   }
 
   render() {
-    const {
-      ui, user
-    } = this.props;
+    const { ui, user, settings } = this.props;
     const {
       list, searching, openPurchaseModal, submiting,
       selectedPackage, isApliedCode, gateway, coupon
@@ -175,14 +175,23 @@ class TokenPackages extends PureComponent<IProps> {
                 </div>
               </div>
               <div style={{ margin: '20px 0' }}>
-                {/* <p className="text-center">Please select payment gateway</p> */}
+                <p className="text-center">Please select payment gateway</p>
                 <div className="payment-gateway">
+                  {settings.ccbillEnable && (
                   <div aria-hidden onClick={() => this.onChangeGateway('ccbill')} className={gateway === 'ccbill' ? 'gateway-item active' : 'gateway-item'}>
                     <a><img src="/static/ccbill-ico.png" alt="ccbill" width="100%" /></a>
                   </div>
-                  {/* <div aria-hidden onClick={() => this.onChangeGateway('bitpay')} className={gateway === 'bitpay' ? 'gateway-item active' : 'gateway-item'}>
+                  )}
+                  {settings.stripeEnable && (
+                  <div aria-hidden onClick={() => this.onChangeGateway('stripe')} className={gateway === 'stripe' ? 'gateway-item active' : 'gateway-item'}>
+                    <a><img src="/static/stripe-icon.jpeg" alt="stripe" width="100%" /></a>
+                  </div>
+                  )}
+                  {settings.bitpayEnable && (
+                  <div aria-hidden onClick={() => this.onChangeGateway('bitpay')} className={gateway === 'bitpay' ? 'gateway-item active' : 'gateway-item'}>
                     <a><img src="/static/bitpay-ico.png" alt="bitpay" width="65px" /></a>
-                  </div> */}
+                  </div>
+                  )}
                 </div>
                 <Row>
                   <Col span={18}>
@@ -202,14 +211,20 @@ class TokenPackages extends PureComponent<IProps> {
                   </Col>
                 </Row>
               </div>
-              <Button type="primary" disabled={submiting} loading={submiting} onClick={() => this.purchaseTokenPackage()}>
-                Confirm purchase $
-                {coupon ? (selectedPackage?.price - coupon.value * selectedPackage?.price).toFixed(2) : selectedPackage?.price.toFixed(2)}
-                {' '}
-                /
-                <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 3px' }} />
-                {selectedPackage?.tokens}
-              </Button>
+              {gateway === 'stripe' && !user.stripeCardIds.length ? (
+                <Button type="primary" onClick={() => Router.push('/user/cards/add-card')}>
+                  Please add a payment card
+                </Button>
+              ) : (
+                <Button type="primary" disabled={submiting} loading={submiting} onClick={() => this.purchaseTokenPackage()}>
+                  Confirm purchase $
+                  {coupon ? (selectedPackage?.price - coupon.value * selectedPackage?.price).toFixed(2) : selectedPackage?.price.toFixed(2)}
+                  {' '}
+                  /
+                  <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 3px' }} />
+                  {selectedPackage?.tokens}
+                </Button>
+              )}
             </div>
           </Modal>
           {searching && <div><Spin /></div>}
@@ -222,7 +237,8 @@ class TokenPackages extends PureComponent<IProps> {
 
 const mapStates = (state) => ({
   ui: { ...state.ui },
-  user: { ...state.user.current }
+  user: { ...state.user.current },
+  settings: { ...state.settings }
 });
 
 export default connect(mapStates)(TokenPackages);

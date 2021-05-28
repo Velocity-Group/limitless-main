@@ -1,9 +1,7 @@
-/* eslint-disable react/jsx-no-target-blank */
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import React from 'react';
 import moment from 'moment';
-import './Message.less';
 import { IUser, IPerformer } from '@interfaces/index';
+import './Message.less';
 
 interface IProps {
   data: any;
@@ -37,7 +35,7 @@ export default function Message(props: IProps) {
           <div className="bubble" title={friendlyTimestamp}>
             {!data.imageUrl && data.text}
             {' '}
-            {data.imageUrl && <a title="Click to view full content" href={data?.imageUrl} target="_blank"><img alt="" src={data.imageUrl} width="180px" /></a>}
+            {data.imageUrl && <a rel="noreferrer" title="Click to view full content" aria-label="Click to view full content" href={data?.imageUrl} target="_blank"><img alt="" src={data.imageUrl} /></a>}
           </div>
           {isMine && <img alt="" src={currentUser?.avatar || '/static/no-avatar.png'} className="avatar" />}
         </div>

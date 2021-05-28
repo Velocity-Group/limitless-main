@@ -4,6 +4,15 @@ import { updateSettings } from './actions';
 
 // TODO -
 const initialState = {
+  requireEmailVerification: false,
+  googleReCaptchaSiteKey: '',
+  enableGoogleReCaptcha: false,
+  googleClientId: '',
+  tokenConversionRate: 1,
+  stripePublishableKey: '',
+  stripeEnable: false,
+  ccbillEnable: false,
+  bitpayEnable: false
 };
 
 const settingReducers = [

@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { QueueEventService, QueueEvent } from 'src/kernel';
 import {
@@ -7,6 +7,7 @@ import {
 import { EVENT } from 'src/kernel/constants';
 import * as moment from 'moment';
 import { PaymentDto } from 'src/modules/payment/dtos';
+import { PerformerService } from 'src/modules/performer/services';
 import { SubscriptionModel } from '../models/subscription.model';
 import { SUBSCRIPTION_MODEL_PROVIDER } from '../providers/subscription.provider';
 import { SubscriptionDto } from '../dtos/subscription.dto';
@@ -20,6 +21,8 @@ const UPDATE_SUBSCRIPTION_TOPIC = 'UPDATE_SUBSCRIPTION_TOPIC';
 @Injectable()
 export class TransactionSubscriptionListener {
   constructor(
+    @Inject(forwardRef(() => PerformerService))
+    private readonly performerService: PerformerService,
     @Inject(SUBSCRIPTION_MODEL_PROVIDER)
     private readonly subscriptionModel: Model<SubscriptionModel>,
     private readonly queueEventService: QueueEventService
@@ -46,12 +49,14 @@ export class TransactionSubscriptionListener {
       userId: transaction.sourceId,
       performerId: transaction.performerId
     });
+    const performer = await this.performerService.findById(transaction.performerId);
+    if (!performer) return;
     const subscriptionId = transaction?.paymentResponseInfo?.subscriptionId || transaction?.paymentResponseInfo?.subscription_id;
     // eslint-disable-next-line no-nested-ternary
     const expiredAt = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION
       ? moment().add(30, 'days').toDate()
       : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION
-        ? moment().add(365, 'days').toDate() : moment().add(99, 'years').toDate();
+        ? moment().add(365, 'days').toDate() : moment().add(performer.durationFreeSubscriptionDays, 'days').toDate();
       // eslint-disable-next-line no-nested-ternary
     const subscriptionType = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION
       ? SUBSCRIPTION_TYPE.MONTHLY

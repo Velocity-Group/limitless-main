@@ -17,6 +17,8 @@ export interface IUser {
   dateOfBirth: Date;
   verifiedDocument: boolean;
   balance: number;
+  stripeCardIds: string[];
+  stripeCustomerId: string;
 }
 
 export interface IUserFormData {

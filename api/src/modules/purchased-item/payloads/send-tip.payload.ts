@@ -12,7 +12,7 @@ export class SendTipsPayload {
   @IsNumber()
   @Min(1)
   @IsNotEmpty()
-  token: number;
+  price: number;
 
   @ApiProperty()
   @IsString()

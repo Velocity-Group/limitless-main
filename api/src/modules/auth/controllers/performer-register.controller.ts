@@ -7,7 +7,8 @@ import {
   UseInterceptors,
   // HttpException,
   forwardRef,
-  Inject
+  Inject,
+  HttpException
 } from '@nestjs/common';
 import { DataResponse, getConfig } from 'src/kernel';
 // import { SettingService } from 'src/modules/settings';
@@ -61,9 +62,9 @@ export class PerformerRegisterController {
     @FilesUploaded() files: Record<string, FileDto>
   ): Promise<DataResponse<{ message: string }>> {
     try {
-      // if (!files.idVerification || !files.documentVerification) {
-      //   throw new HttpException('Missing ID documents!', 404);
-      // }
+      if (!files.idVerification || !files.documentVerification) {
+        throw new HttpException('Missing ID documents!', 404);
+      }
 
       // TODO - define key for performer separately
       // const requireEmailVerification = SettingService.getValueByKey(

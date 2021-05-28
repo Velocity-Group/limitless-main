@@ -6,3 +6,4 @@ export * from './bookmarks/performer-bookmarks';
 export * from './payment-token-history-table';
 export * from './select-users-dropdown';
 export * from './users-block-list';
+export * from './stripe-card-form';

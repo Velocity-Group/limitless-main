@@ -72,6 +72,11 @@ const templateMap = {
     name: 'New payout request',
     subject: 'New payout request',
     desc: 'Email will be sent to admin to notify new payout request'
+  },
+  'free-subscription-expired': {
+    name: 'Free subscription expired',
+    subject: 'Free subscription expired',
+    desc: 'Email to user to nofity his free subscription expired'
   }
 };
 

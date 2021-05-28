@@ -3,7 +3,7 @@ import Head from 'next/head';
 import PayoutRequestForm from '@components/payout-request/form';
 import { message } from 'antd';
 import { payoutRequestService } from 'src/services';
-import { IUIConfig, PayoutRequestInterface } from 'src/interfaces';
+import { ISettings, IUIConfig, PayoutRequestInterface } from 'src/interfaces';
 import nextCookie from 'next-cookies';
 import Router from 'next/router';
 import { connect } from 'react-redux';
@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 interface Props {
   payout: PayoutRequestInterface;
   ui: IUIConfig;
+  settings: ISettings
 }
 
 interface States {
@@ -110,7 +111,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
   }
 
   render() {
-    const { payout, ui } = this.props;
+    const { payout, ui, settings } = this.props;
     const { submiting, statsPayout } = this.state;
     return (
       <>
@@ -124,7 +125,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
             payout={payout}
             submit={this.submit.bind(this)}
             submiting={submiting}
-            tokenConversionRate={ui?.tokenConversionRate}
+            tokenConversionRate={settings?.tokenConversionRate}
           />
         </div>
       </>
@@ -133,7 +134,8 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
 }
 
 const mapStateToProps = (state) => ({
-  ui: state.ui
+  ui: state.ui,
+  settings: state.settings
 });
 
 export default connect(mapStateToProps)(PayoutRequestUpdatePage);

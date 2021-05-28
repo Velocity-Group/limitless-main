@@ -1,11 +1,10 @@
-/* eslint-disable no-console */
 import { PureComponent, createRef } from 'react';
-import { IUIConfig } from 'src/interfaces';
+import { ISettings } from 'src/interfaces';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { utilsService } from '@services/index';
 
 interface IProps {
-  ui: IUIConfig;
+  settings: ISettings;
   handleVerify: Function;
 }
 
@@ -29,16 +28,16 @@ export class GoogleReCaptcha extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui } = this.props;
+    const { settings } = this.props;
     if (!this.recaptchaRef) {
       this.recaptchaRef = createRef();
     }
     return (
       <div className="recaptcha-box">
-        {ui?.enableGoogleReCaptcha && (
+        {settings?.enableGoogleReCaptcha && (
         <ReCAPTCHA
           ref={this.recaptchaRef}
-          sitekey={ui?.googleReCaptchaSiteKey}
+          sitekey={settings?.googleReCaptchaSiteKey}
           onChange={this.handleVerifyCapcha.bind(this)}
         />
         )}

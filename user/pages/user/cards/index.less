@@ -1,0 +1,58 @@
+@import '../../../style/vars.less';
+
+.card-form {
+  width: 100%;
+  max-width: 400px;
+  margin: 30px auto;
+  border: 1px solid @light-card;
+  border-radius: 5px;
+  padding: 5px;
+  text-align: center;
+  .stripe-card-form {
+    padding: 25px 10px;
+  }
+}
+.card-list {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.card-item {
+  height: 200px;
+  width: 320px; 
+  border-radius: 5px;
+  border: 1px solid @light-card;
+  padding: 5px;
+  margin: 10px;
+  background-image: url('/static/stripe-card.png');
+  background-color: @primary-color;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  color: @white;
+  position: relative;
+  display: flex;
+  align-items: center;
+  .card-info {
+    position: absolute;
+    bottom: 50px;
+    left: 0;
+    padding: 10px;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-holder-name {
+    position: absolute;
+    bottom: 0;
+    padding: 5px;
+    text-transform: uppercase;
+  }
+  .remove-btn {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+    color: @white;
+  }
+}

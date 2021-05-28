@@ -34,6 +34,7 @@ export interface IPerformerResponse {
   ethnicity?: string;
   sexualPreference?: string;
   isFreeSubscription?: boolean;
+  durationFreeSubscriptionDays?: number;
   monthlyPrice?: number;
   yearlyPrice?: number;
   publicChatPrice?: number;
@@ -173,6 +174,8 @@ export class PerformerDto {
 
   isFreeSubscription?: boolean;
 
+  durationFreeSubscriptionDays?: number;
+
   monthlyPrice?: number;
 
   yearlyPrice?: number;
@@ -204,6 +207,8 @@ export class PerformerDto {
   bankingInformation?: any;
 
   ccbillSetting?: any;
+
+  stripeAccount?: any;
 
   commissionSetting?: any;
 
@@ -291,6 +296,7 @@ export class PerformerDto {
         'ethnicity',
         'sexualPreference',
         'isFreeSubscription',
+        'durationFreeSubscriptionDays',
         'monthlyPrice',
         'yearlyPrice',
         'publicChatPrice',
@@ -299,6 +305,7 @@ export class PerformerDto {
         'stats',
         'score',
         'bankingInformation',
+        'stripeAccount',
         'ccbillSetting',
         'commissionSetting',
         'blockCountries',
@@ -350,6 +357,23 @@ export class PerformerDto {
       live: this.live,
       streamingStatus: this.streamingStatus,
       dateOfBirth: this.dateOfBirth,
+      isFreeSubscription: this.isFreeSubscription,
+      durationFreeSubscriptionDays: this.durationFreeSubscriptionDays,
+      monthlyPrice: this.monthlyPrice,
+      yearlyPrice: this.yearlyPrice,
+      publicChatPrice: this.publicChatPrice,
+      groupChatPrice: this.groupChatPrice,
+      privateChatPrice: this.privateChatPrice,
+      height: this.height,
+      weight: this.weight,
+      hair: this.hair,
+      pubicHair: this.pubicHair,
+      bust: this.bust,
+      ethnicity: this.ethnicity,
+      bio: this.bio,
+      eyes: this.eyes,
+      bodyType: this.bodyType,
+      sexualPreference: this.sexualPreference,
       isPerformer: true
     };
     const privateInfo = {
@@ -373,23 +397,8 @@ export class PerformerDto {
       idVerification: this.idVerification,
       documentVerificationId: this.documentVerificationId,
       documentVerification: this.documentVerification,
-      height: this.height,
-      weight: this.weight,
-      hair: this.hair,
-      pubicHair: this.pubicHair,
-      bust: this.bust,
-      ethnicity: this.ethnicity,
-      bio: this.bio,
-      eyes: this.eyes,
-      bodyType: this.bodyType,
-      sexualPreference: this.sexualPreference,
-      isFreeSubscription: this.isFreeSubscription,
-      monthlyPrice: this.monthlyPrice,
-      yearlyPrice: this.yearlyPrice,
-      publicChatPrice: this.publicChatPrice,
-      groupChatPrice: this.groupChatPrice,
-      privateChatPrice: this.privateChatPrice,
       bankingInformation: this.bankingInformation,
+      stripeAccount: this.stripeAccount,
       welcomeVideoId: this.welcomeVideoId,
       maxParticipantsAllowed: this.maxParticipantsAllowed,
       agentId: this.agentId,
@@ -435,6 +444,7 @@ export class PerformerDto {
       score: this.score,
       isOnline: this.isOnline,
       isFreeSubscription: this.isFreeSubscription,
+      durationFreeSubscriptionDays: this.durationFreeSubscriptionDays,
       verifiedAccount: this.verifiedAccount,
       lastStreamingTime: this.lastStreamingTime,
       live: this.live,
@@ -471,6 +481,7 @@ export class PerformerDto {
       ethnicity: this.ethnicity,
       sexualPreference: this.sexualPreference,
       isFreeSubscription: this.isFreeSubscription,
+      durationFreeSubscriptionDays: this.durationFreeSubscriptionDays,
       monthlyPrice: this.monthlyPrice,
       yearlyPrice: this.yearlyPrice,
       publicChatPrice: this.publicChatPrice,
