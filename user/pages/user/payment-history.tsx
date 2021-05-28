@@ -115,6 +115,10 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
         text: 'Pending'
       },
       {
+        key: 'fail',
+        text: 'Fail'
+      },
+      {
         key: 'Refunded',
         text: 'refunded'
       }

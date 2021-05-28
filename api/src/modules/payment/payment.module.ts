@@ -64,5 +64,8 @@ export class PaymentModule implements NestModule {
     consumer
       .apply(RequestLoggerMiddleware)
       .forRoutes('/payment/bitpay/callhook');
+    consumer
+      .apply(RequestLoggerMiddleware)
+      .forRoutes('/payment/stripe/callhook');
   }
 }

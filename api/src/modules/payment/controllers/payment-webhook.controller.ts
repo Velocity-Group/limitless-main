@@ -48,6 +48,16 @@ export class PaymentWebhookController {
     return DataResponse.ok(info);
   }
 
+  @Post('/stripe/callhook')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async stripePaymentCallhook(
+    @Body() payload: Record<string, string>
+  ): Promise<DataResponse<any>> {
+    const info = await this.paymentService.stripePaymentWebhook(payload);
+    return DataResponse.ok(info);
+  }
+
   @Post('/bitpay/callhook')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))

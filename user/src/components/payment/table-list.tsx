@@ -21,7 +21,7 @@ const PaymentTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Order_ID',
+      title: 'Transaction_ID',
       dataIndex: '_id',
       key: '_id',
       render(id) {
@@ -33,12 +33,20 @@ const PaymentTableList = ({
       }
     },
     {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description'
+    },
+    {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
       render(type: string) {
         switch (type) {
           case 'token_package': return <Tag color="blue">Token Package</Tag>;
+          case 'monthy_subscription': return <Tag color="orange">Monthly Subscription</Tag>;
+          case 'yearly_subscription': return <Tag color="orange">Yearly Subscription</Tag>;
+          case 'free_subscription': return <Tag color="orange">Free Subscription</Tag>;
           default: return <Tag>{type}</Tag>;
         }
       }
@@ -91,10 +99,14 @@ const PaymentTableList = ({
         switch (status) {
           case 'success':
             return <Tag color="green">Success</Tag>;
+          case 'fail':
+            return <Tag color="red">Fail</Tag>;
           case 'pending':
             return <Tag color="orange">Pending</Tag>;
+          case 'canceled':
+            return <Tag color="pink">Canceled</Tag>;
           case 'refunded':
-            return <Tag color="red">Refunded</Tag>;
+            return <Tag color="violet">Refunded</Tag>;
           default: break;
         }
         return <Tag color="red">{status}</Tag>;

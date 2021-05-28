@@ -1,7 +1,8 @@
 export const PAYMENT_STATUS = {
   PENDING: 'pending',
   SUCCESS: 'success',
-  CANCELLED: 'cancelled',
+  FAIL: 'fail',
+  CANCELED: 'canceled',
   REFUNDED: 'refunded'
 };
 export const PAYMENT_TYPE = {

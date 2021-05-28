@@ -100,10 +100,15 @@ export class SubscriptionService {
         }));
       }
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log('Check expired subscriptions & mailer', e);
     } finally {
       done();
     }
+  }
+
+  public updateSubscriptionId({ userId, performerId }, subscriptionId: string) {
+    return this.subscriptionModel.updateOne({ userId, performerId }, { subscriptionId }, { upsert: true });
   }
 
   public async findBySubscriptionId(subscriptionId: string) {
@@ -352,14 +357,8 @@ export class SubscriptionService {
     });
   }
 
-  public async findOneSubscription(
-    performerId: string | ObjectId,
-    userId: string | ObjectId
-  ) {
-    const subscription = await this.subscriptionModel.findOne({
-      performerId,
-      userId
-    });
+  public async findOneSubscription(payload) {
+    const subscription = await this.subscriptionModel.findOne(payload);
     return subscription;
   }
 

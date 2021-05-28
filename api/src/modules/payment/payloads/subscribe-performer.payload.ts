@@ -1,7 +1,8 @@
 import {
   IsNotEmpty,
   IsString,
-  IsIn
+  IsIn,
+  IsOptional
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ObjectId } from 'mongodb';
@@ -15,5 +16,15 @@ export class SubscribePerformerPayload {
   @ApiProperty()
   @IsNotEmpty()
   @IsIn(['monthly', 'yearly', 'free'])
-  type: string
+  type: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  paymentGateway: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  stripeCardId: string;
 }

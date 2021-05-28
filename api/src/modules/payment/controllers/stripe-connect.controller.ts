@@ -7,7 +7,6 @@ import {
   Post,
   Body,
   Get,
-  Query,
   Delete,
   Param
 } from '@nestjs/common';
@@ -37,10 +36,8 @@ export class StripeController {
   @Post('accounts/callback')
   @HttpCode(HttpStatus.OK)
   async accountCallback(
-    @Body() payload: any,
-    @Query() req: any
+    @Body() payload: any
   ) {
-    console.log(11, req, payload);
     const resp = await this.stripeService.connectAccountCallback(payload);
     return DataResponse.ok(resp);
   }
