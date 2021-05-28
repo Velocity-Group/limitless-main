@@ -192,7 +192,7 @@ class HomePage extends PureComponent<IProps> {
                     </div>
                     <div className="story-list">
                       {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
-                        <Link href={{ pathname: '/model/profile', query: { id: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
+                        <Link key={per._id} href={{ pathname: '/model/profile', query: { id: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
                           <div className="story-per-card">
                             <img alt="avatr" src={per?.avatar || '/static/no-avatar.png'} />
                             <p>{per?.name || per?.username || 'N/A'}</p>

@@ -180,9 +180,8 @@ class Application extends App<IApp> {
   static async getInitialProps({ Component, ctx }) {
     // won't check auth for un-authenticated page such as login, register
     // use static field in the component
-    if (Component.authenticate !== false) {
-      const { noredirect } = Component;
-      const { onlyPerformer } = Component;
+      const { noredirect, onlyPerformer, authenticate } = Component;
+    if (authenticate !== false) {
       await auth(ctx, noredirect, onlyPerformer);
     }
     const { token } = nextCookie(ctx);

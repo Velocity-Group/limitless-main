@@ -14,7 +14,7 @@ export class BlockService extends APIRequest {
   }
 
   getBlockListUsers(query: any) {
-    return this.get(this.buildUrl('/performer-blocks/users'), query);
+    return this.get(this.buildUrl('/performer-blocks/users', query));
   }
 }
 
