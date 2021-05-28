@@ -23,7 +23,7 @@ interface Props {
     previousPaidOutTokens: number;
     remainingUnpaidTokens: number;
   };
-  tokenConversionRate: string;
+  tokenConversionRate: number;
 }
 
 const PayoutRequestForm = ({
@@ -73,7 +73,7 @@ const PayoutRequestForm = ({
       <Form.Item label="Requested amount of tokens" name="requestTokens">
         <InputNumber min={1} onChange={(val) => setToken(val)} />
       </Form.Item>
-      <p className="error-color">{`Conversion rate of tokens to dollars: $${(parseFloat(tokenConversionRate) * tokens).toFixed(2)}`}</p>
+      <p className="error-color">{`Conversion rate of tokens to dollars: $${(tokenConversionRate * tokens).toFixed(2)}`}</p>
       <Form.Item label="Note to Admin" name="requestNote">
         <Input.TextArea placeholder="Text something to admin here" rows={3} />
       </Form.Item>

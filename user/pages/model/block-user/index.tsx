@@ -9,13 +9,13 @@ import UsersBlockList from '@components/user/users-block-list';
 import Router from 'next/router';
 import './index.less';
 
-
 interface IProps {
   ui: IUIConfig;
 }
 
 class blockPage extends PureComponent<IProps> {
   static onlyPerformer = true;
+
   static authenticate = true;
 
   state = {
@@ -25,7 +25,7 @@ class blockPage extends PureComponent<IProps> {
     offset: 0,
     blockUserId: '',
     userBlockedList: [],
-    totalBlockedUsers: 0,
+    totalBlockedUsers: 0
   }
 
   componentDidMount() {
@@ -33,14 +33,28 @@ class blockPage extends PureComponent<IProps> {
   }
 
   async handleTabChange(data) {
-    await this.setState({ offset: data.current -1 })
+    await this.setState({ offset: data.current - 1 });
     this.getBlockList();
+  }
+
+  async handleUnblockUser(userId: string) {
+    if (!window.confirm('Are you sure to unblock this user')) return;
+    try {
+      await this.setState({ submiting: true });
+      await blockService.unBlockUser(userId);
+      this.getBlockList();
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'An error occured. Please try again later');
+    } finally {
+      this.setState({ submiting: false });
+    }
   }
 
   async getBlockList() {
     const { limit, offset } = this.state;
     try {
-      await this.setState({ loading: true })
+      await this.setState({ loading: true });
       const kq = await blockService.getBlockListUsers({
         limit,
         offset: offset * limit
@@ -48,57 +62,46 @@ class blockPage extends PureComponent<IProps> {
       this.setState({
         userBlockedList: kq.data.data,
         totalBlockedUsers: kq.data.total
-      })
+      });
     } catch (e) {
-      message.error('An error occured, please try again later')
-      Router.back()
+      message.error('An error occured, please try again later');
+      Router.back();
     } finally {
-      this.setState({ loading: false })
+      this.setState({ loading: false });
     }
   }
 
   async blockUser() {
     const { blockUserId } = this.state;
     if (!blockUserId) {
-      message.error('Please select a user')
+      message.error('Please select a user');
       return;
     }
     try {
-      await this.setState({ submiting: true })
-      const resp = await blockService.blockUser({ targetId: blockUserId, target: 'user', reason: 'tao thich' });
-      message.success('Blocked success')
+      await this.setState({ submiting: true });
+      await blockService.blockUser({ targetId: blockUserId, target: 'user', reason: 'tao thich' });
+      message.success('Blocked success');
       this.getBlockList();
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'An error occured, please try again later')
+      message.error(err?.message || 'An error occured, please try again later');
     } finally {
-      this.setState({ submiting: false })
-    }
-  }
-  
-  async handleUnblockUser(userId: string) {
-    if (!window.confirm('Are you sure to unblock this user')) return;
-    try {
-      await this.setState({ submiting: true })
-      const resp = await blockService.unBlockUser(userId);
-      this.getBlockList();
-    }
-    catch (e) {
-      const err = await e;
-      message.error(err?.message || 'An error occured. Please try again later')
-    }
-    finally {
-      this.setState({ submiting: false})
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { userBlockedList, totalBlockedUsers, loading, limit, submiting } = this.state;
+    const {
+      userBlockedList, totalBlockedUsers, loading, limit, submiting
+    } = this.state;
     const { ui } = this.props;
     return (
       <Layout>
         <Head>
-          <title> {ui && ui.siteName}</title>
+          <title>
+            {' '}
+            {ui && ui.siteName}
+          </title>
         </Head>
         <div className="main-container">
           <div className="page-heading">Block Page</div>
@@ -130,5 +133,3 @@ const mapStates = (state) => ({
   ui: { ...state.ui }
 });
 export default connect(mapStates)(blockPage);
-
-
