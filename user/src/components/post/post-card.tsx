@@ -250,14 +250,13 @@ class FeedCard extends Component<IProps> {
         paymentGateway: 'stripe',
         stripeCardId: user.stripeCardIds[0]
       })).data;
-      if (this.subscriptionType === 'free' && resp.success) {
-        message.success('Free Subscription Success!');
-        window.location.reload();
+      if (resp.success || resp.status === 'succeeded') {
+        Router.push('/payment/success');
       }
-      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
+    } finally {
       this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
