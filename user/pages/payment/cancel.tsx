@@ -30,7 +30,7 @@ class PaymentCancel extends PureComponent<IProps> {
           <div className="page-heading">Payment Canceled</div>
           <Alert
             message="Payment canceled"
-            description={`Hi ${user?.name || user?.username}, your payment has been canceled! Please contact us for more information.`}
+            description={`Hi ${user?.name || user?.username || 'there'}, your payment has been canceled! Please contact us for more information.`}
             type="error"
             showIcon
           />

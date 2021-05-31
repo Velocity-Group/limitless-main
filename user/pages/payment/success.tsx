@@ -39,7 +39,7 @@ class PaymentSuccess extends PureComponent<IProps> {
           <div className="page-heading">Payment Success</div>
           <Alert
             message="Payment success"
-            description={`Hi ${user.name}, your payment has been successfully! Again, thank you for choosing us.`}
+            description={`Hi ${user.name || user.username || 'there'}, your payment has been successfully!`}
             type="success"
             showIcon
           />

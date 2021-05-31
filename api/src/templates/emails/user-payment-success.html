@@ -1,17 +1,3 @@
-<p>Hi {{user.name}}, </p>
+<p>Hi {{userName}}, </p>
 <p>Your payment success</p>
-<p>Order number: {{order.orderNumber}}</p>
-<table>
-  <tr>
-    <th>Product</th>
-    <th>Description</th>
-    <th>Price</th>
-  </tr>
-  {{#orderDetails}}
-  <tr>
-    <td>{{name}}</td>
-    <td>{{description}}</td>
-    <td>${{totalPrice}}</td>
-  </tr>
-  {{/orderDetails}}
-</table>
+<p>Transaction ID: {{transactionId}}</p>

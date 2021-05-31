@@ -474,8 +474,7 @@ export class PaymentService {
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data } = payload;
-    const { object } = data as any;
-    const transactionId = object?.metadata?.transactionId;
+    const transactionId = data?.object?.metadata?.transactionId;
     const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
     if (!transactionId || !checkForHexRegExp.test(transactionId)) {
       return { ok: false };

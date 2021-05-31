@@ -97,7 +97,7 @@ export class StripeService {
       const customer = user.stripeCustomerId ? await stripe.customers.retrieve(user.stripeCustomerId)
         : await stripe.customers.create({
           email: user.email,
-          name: `${user.firstName} ${user.lastName}`,
+          name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : `${user?.name || user?.username}`,
           description: `Create customer ${user.name || user.username}`
         });
       if (!customer) throw new HttpException('Could not retrieve customer', 404);
