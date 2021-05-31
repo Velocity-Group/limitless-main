@@ -40,13 +40,10 @@ export class PerformerSearchService {
     if (req.performerIds) {
       query._id = { $in: req.performerIds.split(',') };
     }
-    if (req.status) {
-      query.status = req.status;
-    }
-    ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender',
+    ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender', 'status',
       'height', 'weight', 'eyes', 'bust', 'sexualPreference'].forEach((f) => {
       if (req[f]) {
-        query[f] = { $regex: req[f] };
+        query[f] = req[f];
       }
     });
     if (req.fromAge && req.toAge) {
@@ -136,13 +133,10 @@ export class PerformerSearchService {
     if (req.performerIds) {
       query._id = { $in: req.performerIds.split(',') };
     }
-    if (req.status) {
-      query.status = req.status;
-    }
-    ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender',
+    ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender', 'status',
       'height', 'weight', 'eyes', 'bust', 'sexualPreference'].forEach((f) => {
       if (req[f]) {
-        query[f] = { $regex: req[f] };
+        query[f] = req[f];
       }
     });
     if (req.fromAge && req.toAge) {

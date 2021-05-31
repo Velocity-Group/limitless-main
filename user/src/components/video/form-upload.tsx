@@ -66,7 +66,6 @@ export class FormUploadVideo extends PureComponent<IProps> {
         }
       );
     }
-
     this.getPerformers('', video?.participantIds || [user._id]);
   }
 
@@ -102,6 +101,8 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   beforeUpload(file: File, field: string) {
     const { beforeUpload: beforeUploadHandler } = this.props;
+    if (field === 'teaser') this.setState({ previewTeaser: '/static/video.png' });
+    if (field === 'video') this.setState({ previewTeaser: '/static/video.png' });
     return beforeUploadHandler(file, field);
   }
 
@@ -279,36 +280,46 @@ export class FormUploadVideo extends PureComponent<IProps> {
             <Form.Item label="Teaser File">
               {!previewTeaser && (
               <Upload
+                customRequest={() => false}
                 listType="picture-card"
                 className="avatar-uploader"
                 accept="video/*"
                 multiple={false}
-                showUploadList
+                showUploadList={false}
                 disabled={uploading || haveVideo}
                 beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
               >
                 <VideoCameraAddOutlined />
               </Upload>
               )}
-              {previewTeaser && <a href={previewTeaser} target="_blank" rel="noreferrer">Click to view</a>}
+              {previewTeaser && (
+              <a href={previewTeaser} target="_blank" rel="noreferrer">
+                <img src="/static/video.png" width="65px" alt="" />
+              </a>
+              )}
             </Form.Item>
           </Col>
           <Col xs={24} md={8}>
             <Form.Item label="Main video File">
               {!previewVideo && (
               <Upload
+                customRequest={() => false}
                 listType="picture-card"
                 className="avatar-uploader"
                 accept="video/*"
                 multiple={false}
-                showUploadList
+                showUploadList={false}
                 disabled={uploading || haveVideo}
                 beforeUpload={(file) => this.beforeUpload(file, 'video')}
               >
                 <VideoCameraAddOutlined />
               </Upload>
               )}
-              {previewVideo && <a href={previewVideo} target="_blank" rel="noreferrer">Click to view</a>}
+              {previewVideo && (
+              <a href={previewVideo} target="_blank" rel="noreferrer">
+                <img src="/static/video.png" width="65px" alt="" />
+              </a>
+              )}
             </Form.Item>
           </Col>
         </Row>

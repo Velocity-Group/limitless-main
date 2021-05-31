@@ -115,7 +115,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
         name="nest-messages"
         onFinish={(values) => {
           if (!this.idVerificationFileId || !this.documentVerificationFileId) {
-            return message.error('ID photo & ID document are required', 5);
+            return message.error('ID documents are required', 5);
           }
           const data = { ...values };
           data.idVerificationId = this.idVerificationFileId;
@@ -135,10 +135,10 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
             >
               <div className="document-upload">
-                <ImageUpload accept="image/*;capture=camera" headers={headers} uploadUrl={documentUploadUrl} onFileReaded={this.onFileUploaded.bind(this, 'idFile')} />
+                <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'idFile')} />
                 {idImage && (
                 <a title="Click to view" href={idImage} rel="noreferrer" target="_blank">
-                  <img alt="id-img" src={idImage} style={{ margin: 5, width: '250px' }} />
+                  <img alt="id-img" src={idImage} style={{ margin: 5, width: '100px' }} />
                   <p className="text-center"><small>Click to view</small></p>
                 </a>
                 )}
@@ -155,10 +155,10 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               help="Upload a photo of yourself holding your indentity document next to your face"
             >
               <div className="document-upload">
-                <ImageUpload accept="image/*;capture=camera" headers={headers} uploadUrl={documentUploadUrl} onFileReaded={this.onFileUploaded.bind(this, 'documentFile')} />
+                <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'documentFile')} />
                 {documentImage && (
                 <a title="Click to view" href={documentImage} rel="noreferrer" target="_blank">
-                  <img alt="id-img" src={documentImage} style={{ margin: 5, width: '250px' }} />
+                  <img alt="id-img" src={documentImage} style={{ margin: 5, width: '100px' }} />
                   <p className="text-center"><small>Click to view</small></p>
                 </a>
                 )}
