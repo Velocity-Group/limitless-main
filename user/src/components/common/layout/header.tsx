@@ -106,6 +106,17 @@ class Header extends PureComponent<IProps> {
     }
   }
 
+  async handlePaymentStatusCallback(event) {
+    const { status } = event;
+    if (status && status === 'success') {
+      window.location.href = '/payment/success';
+    }
+    if (status && status === 'cancel') {
+      window.location.href = '/payment/cancel';
+    }
+    // TODO handle more event
+  }
+
   async beforeLogout() {
     const { logout: handleLogout } = this.props;
     const token = authService.getToken();
@@ -138,6 +149,10 @@ class Header extends PureComponent<IProps> {
         <Event
           event="update_balance"
           handler={this.handleUpdateBalance.bind(this)}
+        />
+        <Event
+          event="payment_status_callback"
+          handler={this.handlePaymentStatusCallback.bind(this)}
         />
         <div className="main-container">
           <Layout.Header className="header" id="layoutHeader">

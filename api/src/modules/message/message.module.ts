@@ -17,8 +17,6 @@ import { MessageController } from './controllers/message.controller';
     MongoDBModule,
     QueueModule.forRoot(),
     SocketModule,
-    // inject user module because we request guard from auth, need to check and fix dependencies if not needed later
-
     forwardRef(() => UserModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => AuthModule),

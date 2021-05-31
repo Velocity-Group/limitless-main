@@ -30,6 +30,7 @@ import { redirectToErrorPage } from '@redux/system/actions';
 import { TipPerformerForm } from '@components/performer/tip-form';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import SearchPostBar from '@components/post/search-bar';
+import Loader from '@components/common/base/loader';
 import {
   IPerformer, IUser, IUIConfig, IFeed, StreamSettings
 } from '../../../src/interfaces';
@@ -127,9 +128,10 @@ class PerformerProfile extends PureComponent<IProps> {
   async handleDeleteFeed(feed: IFeed) {
     const { currentUser, removeFeedSuccess: handleRemoveFeed } = this.props;
     if (currentUser._id !== feed.fromSourceId) {
-      return message.error('Permission denied');
+      message.error('Permission denied');
+      return;
     }
-    if (!window.confirm('Are you sure to delete this post?')) return undefined;
+    if (!window.confirm('Are you sure to delete this post?')) return;
     try {
       await feedService.delete(feed._id);
       message.success('Deleted the post successfully');
@@ -137,7 +139,6 @@ class PerformerProfile extends PureComponent<IProps> {
     } catch {
       message.error('Something went wrong, please try again later');
     }
-    return undefined;
   }
 
   async handleBookmark() {
@@ -228,22 +229,33 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async subscribe() {
-    const { performer } = this.props;
+    const { performer, currentUser } = this.props;
+    if (!currentUser._id) {
+      message.error('Please log in');
+      Router.push('/auth/login');
+      return;
+    }
+    if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
+      message.error('Please add payment card');
+      Router.push('/user/cards');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: performer._id })).data;
-      if (resp.success) {
-        message.success('Subscribed success!');
+      const resp = await (await paymentService.subscribePerformer({
+        type: this.subscriptionType,
+        performerId: performer._id,
+        paymentGateway: 'stripe',
+        stripeCardId: currentUser.stripeCardIds[0]
+      })).data;
+      if (this.subscriptionType === 'free' && resp.success) {
+        message.success('Free Subscription Success!');
         window.location.reload();
       }
-      if (resp.paymentUrl) {
-        message.info('Redirecting to payment method...');
-        window.location.href = resp.paymentUrl;
-      }
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
-    } finally {
       this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
@@ -271,7 +283,7 @@ class PerformerProfile extends PureComponent<IProps> {
   checkBlock() {
     const { error, redirectToErrorPage: handleRedirect } = this.props;
     if (error && process.browser) {
-      return handleRedirect({
+      handleRedirect({
         url: '/error',
         error: {
           ...error,
@@ -284,7 +296,6 @@ class PerformerProfile extends PureComponent<IProps> {
         }
       });
     }
-    return undefined;
   }
 
   async loadMoreItem() {
@@ -542,6 +553,7 @@ class PerformerProfile extends PureComponent<IProps> {
                       </Link>
                     </button>
                     <button
+                      disabled
                       type="button"
                       className="normal"
                     >
@@ -589,15 +601,18 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  FOLLOW FOR FREE IN
+                  FREE SUBSCRIPTION IN
                   {' '}
-                  {performer.durationFreeSubscriptionDays}
+                  {performer.durationFreeSubscriptionDays || 1}
                   {' '}
-                  DAYS
+                  DAYS THEN $
+                  {performer.monthlyPrice.toFixed(2)}
+                  {' '}
+                  MONTHLY LATER
                 </button>
               </div>
             )}
-            {!performer?.isFreeSubscription && !isSubscribed && (
+            {!isSubscribed && (
               <div className="subscription-bl">
                 <h5>Yearly Subscription</h5>
                 <button
@@ -615,7 +630,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {!performer?.isFreeSubscription && !isSubscribed && (
+            {!isSubscribed && (
               <div className="subscription-bl">
                 <h5>Monthly Subscription</h5>
                 <button
@@ -780,6 +795,7 @@ class PerformerProfile extends PureComponent<IProps> {
             onFinish={this.subscribe.bind(this)}
           />
         </Modal>
+        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
       </Layout>
     );
   }

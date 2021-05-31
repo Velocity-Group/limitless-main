@@ -28,6 +28,7 @@ import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { ReportForm } from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
+import Loader from '@components/common/base/loader';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
 import { IFeed, IUser } from '../../interfaces';
@@ -228,20 +229,33 @@ class FeedCard extends Component<IProps> {
   }
 
   async subscribe() {
-    const { feed } = this.props;
+    const { feed, user } = this.props;
+    if (!user._id) {
+      message.error('Please log in');
+      Router.push('/auth/login');
+      return;
+    }
+    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      message.error('Please add payment card');
+      Router.push('/user/cards');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: feed.fromSourceId })).data;
-      if (resp.paymentUrl) {
-        message.info('Redirecting to payment method...');
-        window.location.href = resp.paymentUrl;
-        return;
+      const resp = await (await paymentService.subscribePerformer({
+        type: this.subscriptionType,
+        performerId: feed.fromSourceId,
+        paymentGateway: 'stripe',
+        stripeCardId: user.stripeCardIds[0]
+      })).data;
+      if (this.subscriptionType === 'free' && resp.success) {
+        message.success('Free Subscription Success!');
+        window.location.reload();
       }
-      message.error('An error occured, please try again later');
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
-    } finally {
       this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
@@ -633,6 +647,7 @@ class FeedCard extends Component<IProps> {
             }}
           />
         </Modal>
+        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
       </div>
     );
   }

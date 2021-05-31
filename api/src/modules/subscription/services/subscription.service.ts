@@ -83,7 +83,7 @@ export class SubscriptionService {
           if (user && user.email && performer && sub.subscriptionType === SUBSCRIPTION_TYPE.FREE) {
             // mailer
             this.mailerService.send({
-              subject: `Free subscription ${performer?.name || performer?.username} expired`,
+              subject: `Free trial subscription ${performer?.name || performer?.username} has been expired`,
               to: user.email,
               data: {
                 performerName: performer.name || performer.username,
@@ -91,8 +91,6 @@ export class SubscriptionService {
               },
               template: 'free-subscription-expired'
             });
-            performer.isFreeSubscription = false;
-            performer.save();
           }
           // eslint-disable-next-line no-param-reassign
           sub.status = SUBSCRIPTION_STATUS.DEACTIVATED;

@@ -14,7 +14,6 @@ import { CouponService } from 'src/modules/coupon/services';
 import { SettingService } from 'src/modules/settings';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { TokenPackageService } from 'src/modules/token-package/services';
-import { PaymentDto } from 'src/modules/purchased-item/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { PerformerService } from 'src/modules/performer/services';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
@@ -23,6 +22,7 @@ import { SubscriptionService } from 'src/modules/subscription/services/subscript
 import axios from 'axios';
 import { SubscriptionDto } from 'src/modules/subscription/dtos/subscription.dto';
 import { UserDto } from 'src/modules/user/dtos';
+import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel } from '../models';
 import {
@@ -40,6 +40,7 @@ import {
 import { CCBillService } from './ccbill.service';
 import { BitpayService } from './bitpay.service';
 import { StripeService } from './stripe.service';
+import { PaymentDto } from '../dtos';
 
 const ccbillCancelUrl = 'https://datalink.ccbill.com/utils/subscriptionManagement.cgi';
 
@@ -60,7 +61,8 @@ export class PaymentService {
     private readonly stripeService: StripeService,
     private readonly bitpayService: BitpayService,
     private readonly queueEventService: QueueEventService,
-    private readonly settingService: SettingService
+    private readonly settingService: SettingService,
+    private readonly socketUserService: SocketUserService
   ) { }
 
   public async findById(id: string | ObjectId) {
@@ -68,7 +70,7 @@ export class PaymentService {
     return data;
   }
 
-  private async getPerformerSubscriptionPaymentGateway(performerId, paymentGateway = 'ccbill') {
+  private async getPerformerSubscriptionPaymentGateway(performerId, paymentGateway = 'stripe') {
     // get performer information and do transaction
     const performerPaymentSetting = await this.performerService.getPaymentSetting(
       performerId,
@@ -105,7 +107,7 @@ export class PaymentService {
     };
   }
 
-  public async createSubscriptionPaymentTransaction(performer: PerformerDto, subscriptionType: string, user: UserDto, couponInfo?: CouponDto, paymentGateway = 'ccbill') {
+  public async createSubscriptionPaymentTransaction(performer: PerformerDto, subscriptionType: string, user: UserDto, couponInfo?: CouponDto, paymentGateway = 'stripe') {
     const price = () => {
       switch (subscriptionType) {
         case PAYMENT_TYPE.FREE_SUBSCRIPTION: return 0;
@@ -132,7 +134,7 @@ export class PaymentService {
     });
   }
 
-  public async createRenewalSubscriptionPaymentTransaction(subscription: SubscriptionModel, payload: any, paymentGateway = 'ccbill') {
+  public async createRenewalSubscriptionPaymentTransaction(subscription: SubscriptionModel, payload: any, paymentGateway = 'stripe') {
     const price = payload.billedAmount || payload.accountingAmount;
     const { userId, performerId, subscriptionType } = subscription;
     return this.TransactionModel.create({
@@ -169,9 +171,22 @@ export class PaymentService {
           data: new PaymentDto(transaction)
         })
       );
+      setTimeout(async () => {
+        const subscription = await this.subscriptionService.findOneSubscription({ transactionId: transaction._id });
+        if (subscription && !subscription?.subscriptionId) {
+        // create plan
+          const plan = await this.stripeService.createSubscriptionPlan(transaction);
+          if (plan) {
+            await this.subscriptionService.updateSubscriptionId({
+              userId: transaction.sourceId,
+              performerId: transaction.performerId
+            }, plan.id);
+          }
+        }
+      }, 5000); // delay 5s to create subscription model first
       return { success: true };
     }
-    if (paymentGateway === 'ccbill') {
+    if (paymentGateway === 'stripe') {
       const { flexformId, subAccountNumber, salt } = await this.getPerformerSubscriptionPaymentGateway(performer._id);
       return this.ccbillService.subscription({
         transactionId: transaction._id,
@@ -200,14 +215,14 @@ export class PaymentService {
 
   public async createTokenPaymentTransaction(
     products: any[],
-    gateway,
+    gateway: string,
     totalPrice: number,
     user: UserDto,
     couponInfo?: CouponDto
   ) {
     const paymentTransaction = new this.TransactionModel();
     paymentTransaction.originalPrice = totalPrice;
-    paymentTransaction.paymentGateway = gateway || 'ccbill';
+    paymentTransaction.paymentGateway = gateway || 'stripe';
     paymentTransaction.source = 'user';
     paymentTransaction.sourceId = user._id;
     paymentTransaction.target = PAYMENT_TARGET_TYPE.TOKEN_PACKAGE;
@@ -224,8 +239,9 @@ export class PaymentService {
   }
 
   public async buyTokens(tokenId: string | ObjectId, payload: PurchaseTokenPayload, user: UserDto) {
-    const { gateway, couponCode, currency } = payload;
-
+    const {
+      paymentGateway, couponCode, currency, stripeCardId
+    } = payload;
     let totalPrice = 0;
     const tokenPackage = await this.tokenPackageService.findById(tokenId);
     if (!tokenPackage) {
@@ -250,13 +266,13 @@ export class PaymentService {
 
     const transaction = await this.createTokenPaymentTransaction(
       products,
-      gateway,
+      paymentGateway,
       totalPrice,
       user,
       coupon
     );
 
-    if (gateway === 'ccbill') {
+    if (paymentGateway === 'stripe') {
       const { flexformId, subAccountNumber, salt } = await this.getCCbillPaymentGatewaySettings();
       return this.ccbillService.singlePurchase({
         salt,
@@ -266,7 +282,7 @@ export class PaymentService {
         transactionId: transaction._id
       });
     }
-    if (gateway === 'bitpay') {
+    if (paymentGateway === 'bitpay') {
       const [bitpayApiToken, bitpayProductionMode] = await Promise.all([
         this.settingService.getKeyValue(SETTING_KEYS.BITPAY_API_TOKEN),
         this.settingService.getKeyValue(SETTING_KEYS.BITPAY_PRODUCTION_MODE)
@@ -288,6 +304,20 @@ export class PaymentService {
       } catch (e) {
         throw new MissingConfigPaymentException();
       }
+    }
+    if (paymentGateway === 'stripe') {
+      if (!user.stripeCustomerId || !stripeCardId) {
+        throw new HttpException('Please add a payment card', 422);
+      }
+      const data = await this.stripeService.createSingleCharge({
+        transaction,
+        item: {
+          name: tokenPackage.name
+        },
+        user,
+        stripeCardId
+      });
+      return data;
     }
 
     throw new MissingConfigPaymentException();
@@ -512,11 +542,12 @@ export class PaymentService {
               }, plan.id);
             }
           }
-        }, 10000); // delay 10s
+        }, 5000); // delay 5s to create subscription model first
       }
       return { ok: true };
     }
-    // TODO notify to user
+    // notify to user
+    await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', new PaymentDto(transaction).toResponse());
     return { ok: false };
   }
 }

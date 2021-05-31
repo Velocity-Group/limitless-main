@@ -21,11 +21,13 @@ import {
 import { TransactionMailerListener, UpdateUserBalanceListener } from './listeners';
 import { UserModule } from '../user/user.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
   imports: [
     MongoDBModule,
     QueueModule.forRoot(),
+    SocketModule,
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule),

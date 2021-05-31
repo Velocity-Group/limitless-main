@@ -25,6 +25,7 @@ import Router from 'next/router';
 import { videoDuration } from '@lib/index';
 import { updateBalance } from '@redux/user/actions';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import Loader from '@components/common/base/loader';
 import {
   IVideoResponse,
   IUser,
@@ -285,19 +286,32 @@ class VideoViewPage extends PureComponent<IProps> {
 
   async subscribe() {
     try {
-      const { video } = this.props;
-      await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: video.performerId })).data;
-      if (resp.paymentUrl) {
-        message.info('Redirecting to payment method...');
-        window.location.href = resp.paymentUrl;
+      const { video, user } = this.props;
+      if (!user._id) {
+        message.error('Please log in');
+        Router.push('/auth/login');
         return;
       }
-      message.error('An error occured, please try again later');
+      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+        message.error('Please add payment card');
+        Router.push('/user/cards');
+        return;
+      }
+      await this.setState({ submiting: true });
+      const resp = await (await paymentService.subscribePerformer({
+        type: this.subscriptionType,
+        performerId: video.performerId,
+        paymentGateway: 'stripe',
+        stripeCardId: user.stripeCardIds[0]
+      })).data;
+      if (this.subscriptionType === 'free' && resp.success) {
+        message.success('Free Subscription Success!');
+        window.location.reload();
+      }
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
@@ -697,6 +711,7 @@ class VideoViewPage extends PureComponent<IProps> {
         >
           <PurchaseVideoForm video={video} submiting={submiting} onFinish={this.purchaseVideo.bind(this)} />
         </Modal>
+        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
       </Layout>
     );
   }
