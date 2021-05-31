@@ -193,7 +193,6 @@ export class ReactionService {
     const sort = {
       [req.sortBy || 'createdAt']: req.sort === 'desc' ? -1 : 1
     };
-    console.log(11, query);
     const [items, total] = await Promise.all([
       this.reactionModel
         .find(query)
@@ -203,11 +202,9 @@ export class ReactionService {
         .skip(parseInt(req.offset as string, 10)),
       this.reactionModel.countDocuments(query)
     ]);
-    console.log(22, items);
     const videoIds = uniq(items.map((i) => i.objectId));
     const videos = videoIds.length > 0 ? await this.videoService.findByIds(videoIds) : [];
     const reactions = items.map((v) => new ReactionDto(v));
-    console.log(333);
     reactions.forEach((item) => {
       const video = videos.find((p) => `${p._id}` === `${item.objectId}`);
       if (video) {

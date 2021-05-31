@@ -55,12 +55,12 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
-  async onCancelSubscriber(id: string) {
+  async onCancelSubscription(subscription: ISubscription) {
     if (!window.confirm('Are you sure you want to de-activate this subscription?')) {
       return;
     }
     try {
-      await subscriptionService.cancelSubscription(id);
+      await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
       this.getData();
       message.success('This subscription have been deactived');
     } catch (error) {
@@ -111,7 +111,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
               loading={loading}
               onChange={this.handleTabChange.bind(this)}
               rowKey="_id"
-              onCancelSubscriber={this.onCancelSubscriber.bind(this)}
+              onCancelSubscription={this.onCancelSubscription.bind(this)}
             />
           </div>
         </Page>

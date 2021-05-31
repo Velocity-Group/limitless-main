@@ -1,4 +1,5 @@
 export interface ISubscription {
+  _id: string;
   subscriptionType?: string;
   userId?: string;
   userInfo?: any;

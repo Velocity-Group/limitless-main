@@ -17,8 +17,8 @@ class SubscriptionService extends APIRequest {
     return this.del(`/subscriptions/admin/${id}`);
   }
 
-  cancelSubscription(id: string) {
-    return this.post(`/payment/ccbill/admin/cancel-subscription/${id}`);
+  cancelSubscription(id: string, gateway: string) {
+    return this.post(`/payment/${gateway}/cancel-subscription/${id}`);
   }
 }
 export const subscriptionService = new SubscriptionService();

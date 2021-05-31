@@ -421,61 +421,13 @@ export class PaymentService {
     return { ok: true };
   }
 
-  public async cancelSubscription(id: any, user: PerformerDto) {
+  public async ccbillCancelSubscription(id: any, user: UserDto) {
     const subscription = await this.subscriptionService.findById(id);
     if (!subscription) {
       throw new EntityNotFoundException();
     }
-    if (`${subscription.userId}` !== `${user._id}`) {
+    if (!user.roles.includes('admin') && `${subscription.userId}` !== `${user._id}`) {
       throw new ForbiddenException();
-    }
-    if (subscription.subscriptionType === SUBSCRIPTION_TYPE.FREE || !subscription.subscriptionId) {
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-          eventName: EVENT.DELETED,
-          data: new SubscriptionDto(subscription)
-        })
-      );
-      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-      await subscription.save();
-      return { success: true };
-    }
-    const { subscriptionId } = subscription;
-    const [ccbillClientAccNo, ccbillDatalinkUsername, ccbillDatalinkPassword] = await Promise.all([
-      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_CLIENT_ACCOUNT_NUMBER),
-      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_DATALINK_USERNAME),
-      this.settingService.getKeyValue(SETTING_KEYS.CCBILL_DATALINK_PASSWORD)
-    ]);
-    if (!ccbillClientAccNo || !ccbillDatalinkUsername || !ccbillDatalinkPassword) {
-      throw new MissingConfigPaymentException();
-    }
-    try {
-      const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&username=${ccbillDatalinkUsername}&password=${ccbillDatalinkPassword}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
-      // TODO tracking data response
-      if (resp.data && resp.data.includes('"results"\n"1"\n')) {
-        await this.queueEventService.publish(
-          new QueueEvent({
-            channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-            eventName: EVENT.DELETED,
-            data: new SubscriptionDto(subscription)
-          })
-        );
-        subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-        subscription.updatedAt = new Date();
-        await subscription.save();
-        return { success: true };
-      }
-      return { success: false };
-    } catch (e) {
-      throw new HttpException(e, 500);
-    }
-  }
-
-  public async adminCancelSubscription(id: string) {
-    const subscription = await this.subscriptionService.findById(id);
-    if (!subscription) {
-      throw new EntityNotFoundException();
     }
     if (subscription.subscriptionType === SUBSCRIPTION_TYPE.FREE || !subscription.subscriptionId) {
       await this.queueEventService.publish(
@@ -576,5 +528,40 @@ export class PaymentService {
     // notify to user
     await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', new PaymentDto(transaction).toResponse());
     return { ok: false };
+  }
+
+  public async stripeCancelSubscription(id: any, user: UserDto) {
+    const subscription = await this.subscriptionService.findById(id);
+    if (!subscription) {
+      throw new EntityNotFoundException();
+    }
+    if (!user.roles.includes('admin') && `${subscription.userId}` !== `${user._id}`) {
+      throw new ForbiddenException();
+    }
+    if (!subscription.subscriptionId) {
+      await this.queueEventService.publish(
+        new QueueEvent({
+          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+          eventName: EVENT.DELETED,
+          data: new SubscriptionDto(subscription)
+        })
+      );
+      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+      await subscription.save();
+      return { success: true };
+    }
+    await this.stripeService.deleteSubscriptionPlan(subscription);
+    // TODO tracking data response
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
+        eventName: EVENT.DELETED,
+        data: new SubscriptionDto(subscription)
+      })
+    );
+    subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+    subscription.updatedAt = new Date();
+    await subscription.save();
+    return { success: true };
   }
 }

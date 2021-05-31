@@ -123,7 +123,7 @@ export const TableListSubscription = ({
             {!['free', 'system'].includes(record.subscriptionType) && (
               <>
                 {record.status !== 'deactivated' ? (
-                  <Button danger onClick={() => onCancel(record._id)}>
+                  <Button danger onClick={() => onCancel(record)}>
                     Cancel subscription
                   </Button>
                 ) : (

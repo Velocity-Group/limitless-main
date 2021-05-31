@@ -695,6 +695,8 @@ class VideoViewPage extends PureComponent<IProps> {
           visible={openSubscriptionModal}
           confirmLoading={submiting}
           footer={null}
+          width={500}
+          className="subscription-modal"
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm

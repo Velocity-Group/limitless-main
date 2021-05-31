@@ -96,10 +96,10 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async cancelSubscription(subscriptionId: string) {
+  async cancelSubscription(subscription: ISubscription) {
     try {
       await this.setState({ submiting: true });
-      const resp = await (await subscriptionService.cancelSubscription(subscriptionId))
+      const resp = await (await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway))
         .data;
       resp.success && message.success('Cancel subscription success');
       this.getData();

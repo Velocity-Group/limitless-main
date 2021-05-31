@@ -12,6 +12,7 @@ import Stripe from 'stripe';
 import { UserService } from 'src/modules/user/services';
 import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
 import * as moment from 'moment';
+import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
 import { STRIPE_ACCOUNT_CONNECT_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel, StripeConnectAccountModel } from '../models';
 import { AuthoriseCardPayload } from '../payloads/authorise-card.payload';
@@ -169,6 +170,16 @@ export class StripeService {
       }
     });
     return plan;
+  }
+
+  public async deleteSubscriptionPlan(subscription: SubscriptionModel) {
+    const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+    const stripe = new Stripe(secretKey, {
+      apiVersion: '2020-08-27'
+    });
+    const plan = await stripe.subscriptions.retrieve(subscription.subscriptionId);
+    plan && await stripe.subscriptions.del(plan.id);
+    return true;
   }
 
   // FOR PERFORMER

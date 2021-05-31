@@ -782,7 +782,7 @@ class PerformerProfile extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={350}
+          width={500}
           title={null}
           visible={openSubscriptionModal}
           footer={null}
