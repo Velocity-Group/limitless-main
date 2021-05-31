@@ -146,7 +146,7 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
           </title>
         </Head>
         <div className="main-container user-account">
-          <Tabs defaultActiveKey="user-profile" tabPosition="top" className="nav-tabs">
+          <Tabs defaultActiveKey="user-profile" tabPosition="top" className="nav-tabs custom">
             <Tabs.TabPane tab={<span>Basic Settings</span>} key="basic">
               <UserAccountForm
                 onFinish={this.onFinish.bind(this)}

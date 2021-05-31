@@ -793,7 +793,7 @@ export class PerformerService {
       { _id: performerId },
       {
         $inc: { 'stats.subscribers': num },
-        verifiedAccount: !!(performer.stats.subscribers === (minimumVerificationNumber - 1) && num === 1)
+        verifiedAccount: (performer.stats.subscribers === (minimumVerificationNumber - 1)) && num === 1
       },
       { upsert: true }
     );
