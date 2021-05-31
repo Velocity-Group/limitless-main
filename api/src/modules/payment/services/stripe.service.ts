@@ -161,7 +161,7 @@ export class StripeService {
       ],
       cancel_at_period_end: false,
       metadata: {
-        transactionId: transaction._id
+        transactionId: transaction._id.toString()
       },
       billing_cycle_anchor: startRecurringDate, // next date charge
       transfer_data: {
@@ -310,7 +310,7 @@ export class StripeService {
         source: stripeCardId,
         description: `${user?.name || user?.username} ${transaction.type} ${performer?.name || performer?.username}`,
         metadata: {
-          transactionId: transaction._id // to track on webhook
+          transactionId: transaction._id.toString() // to track on webhook
         },
         receipt_email: user.email,
         transfer_data: {
@@ -340,7 +340,7 @@ export class StripeService {
         source: stripeCardId,
         description: `${user?.name || user?.username} purchase ${transaction.type} ${item.name}`,
         metadata: {
-          transactionId: transaction._id // to track on webhook
+          transactionId: transaction._id.toString() // to track on webhook
         },
         receipt_email: user.email
       });

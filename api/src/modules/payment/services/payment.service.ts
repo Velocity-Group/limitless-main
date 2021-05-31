@@ -474,7 +474,7 @@ export class PaymentService {
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data } = payload;
-    const transactionId = data?.metadata?.transactionId;
+    const transactionId = data?.metadata?.object?.transactionId;
     const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
     if (!transactionId || !checkForHexRegExp.test(transactionId)) {
       return { ok: false };
@@ -484,14 +484,11 @@ export class PaymentService {
     if (['charge.expired'].includes(type)) {
       transaction.status = PAYMENT_STATUS.CANCELED;
       transaction.paymentResponseInfo = payload;
-      await transaction.save();
-      return { ok: false };
     }
     if (['charge.failed'].includes(type)) {
       transaction.status = PAYMENT_STATUS.FAIL;
       transaction.paymentResponseInfo = payload;
       await transaction.save();
-      return { ok: false };
     }
     if (['charge.succeeded'].includes(type)) {
       transaction.status = PAYMENT_STATUS.SUCCESS;
@@ -523,9 +520,7 @@ export class PaymentService {
           }
         }, 5000); // delay 5s to create subscription model first
       }
-      return { ok: true };
     }
-    // notify to user
     await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', new PaymentDto(transaction).toResponse());
     return { ok: false };
   }

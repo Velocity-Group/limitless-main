@@ -15,7 +15,7 @@ class Loader extends PureComponent<IProps> {
     const { ui, customText } = this.props;
     return (
       <div className="loading-screen">
-        <div>
+        <div style={{ textAlign: 'center' }}>
           {ui.logo ? <img alt="loading-ico" src={ui.logo} /> : ui.siteName ? <span>{ui.siteName}</span> : <Spin size="large" />}
           {customText && <p>{customText}</p>}
         </div>

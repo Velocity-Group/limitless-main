@@ -1,8 +1,9 @@
-import { Layout, Alert } from 'antd';
+import { Layout, Alert, Button } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import { clearCart } from '@redux/cart/actions';
+import Router from 'next/router';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
 interface IProps {
@@ -42,6 +43,7 @@ class PaymentSuccess extends PureComponent<IProps> {
             type="success"
             showIcon
           />
+          <h4 className="text-center"><Button type="link" onClick={() => Router.back()}>Click here to back</Button></h4>
         </div>
       </Layout>
     );

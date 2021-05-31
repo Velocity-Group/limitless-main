@@ -106,7 +106,7 @@ class Header extends PureComponent<IProps> {
     if (status && status === 'success') {
       window.location.href = '/payment/success';
     }
-    if (status && status === 'cancel') {
+    if (status && ['cancel', 'fail'].includes(status)) {
       window.location.href = '/payment/cancel';
     }
     // TODO handle more event
