@@ -59,11 +59,6 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
     this._intervalCountdown && clearInterval(this._intervalCountdown);
   }
 
-  onFinish(data: IUserFormData) {
-    const { updateUser: handleUpdateUser } = this.props;
-    handleUpdateUser(data);
-  }
-
   handleCountdown = async () => {
     const { countTime } = this.state;
     if (countTime === 0) {
@@ -93,6 +88,11 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
     }
+  }
+
+  onFinish(data: IUserFormData) {
+    const { updateUser: handleUpdateUser } = this.props;
+    handleUpdateUser(data);
   }
 
   coundown() {
@@ -146,7 +146,7 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
           </title>
         </Head>
         <div className="main-container user-account">
-          <Tabs defaultActiveKey="user-profile" tabPosition="top" className="nav-tabs custom">
+          <Tabs defaultActiveKey="user-profile" tabPosition="top" className="nav-tabs">
             <Tabs.TabPane tab={<span>Basic Settings</span>} key="basic">
               <UserAccountForm
                 onFinish={this.onFinish.bind(this)}

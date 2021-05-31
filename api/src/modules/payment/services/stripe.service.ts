@@ -57,7 +57,7 @@ export class StripeService {
       );
       return cards;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
 
@@ -83,7 +83,7 @@ export class StripeService {
       const deleted = await stripe.customers.deleteSource(customer.id, cardId);
       return deleted;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
 
@@ -108,7 +108,7 @@ export class StripeService {
       );
       return cards;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
 
@@ -216,7 +216,7 @@ export class StripeService {
       });
       return accountLinks;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
 
@@ -258,7 +258,7 @@ export class StripeService {
       await stripeConnectAccount.save();
       return stripeConnectAccount;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
 
@@ -275,7 +275,7 @@ export class StripeService {
       const link = await stripe.accounts.createLoginLink(stripeConnectAccount.accountId);
       return link;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
 
@@ -320,7 +320,7 @@ export class StripeService {
       });
       return charge;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
 
@@ -346,7 +346,7 @@ export class StripeService {
       });
       return charge;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
 }

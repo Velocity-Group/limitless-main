@@ -59,6 +59,7 @@ class FeedCard extends Component<IProps> {
     isOpenComment: false,
     isLiked: false,
     isBookMarked: false,
+    isBought: false,
     totalLike: 0,
     totalComment: 0,
     isFirstLoadComment: true,
@@ -82,6 +83,7 @@ class FeedCard extends Component<IProps> {
       this.setState({
         isLiked: feed.isLiked,
         isBookMarked: feed.isBookMarked,
+        isBought: feed.isBought,
         totalLike: feed.totalLike,
         totalComment: feed.totalComment,
         polls: feed.polls ? feed.polls : [],
@@ -291,6 +293,7 @@ class FeedCard extends Component<IProps> {
       await this.setState({ submiting: true });
       await purchaseTokenService.purchaseFeed(feed._id, {});
       message.success('Unlocked!');
+      this.setState({ isBought: true });
       handleUpdateBalance({ token: -feed.price });
     } catch (e) {
       const error = await e;
@@ -336,7 +339,7 @@ class FeedCard extends Component<IProps> {
     const comments = commentMapping.hasOwnProperty(feed._id) ? commentMapping[feed._id].items : [];
     const totalComments = commentMapping.hasOwnProperty(feed._id) ? commentMapping[feed._id].total : 0;
     const {
-      isOpenComment, isLiked, totalComment, totalLike, isHovered,
+      isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
       shareUrl, openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
@@ -430,12 +433,12 @@ class FeedCard extends Component<IProps> {
               </Collapse.Panel>
             </Collapse>
           </div>
-          {((!feed.isSale && feed.isSubscribed) || (feed.isSale && feed.isBought)) && (
+          {((!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought)) && (
             <div className="feed-content">
               <FeedSlider feed={feed} />
             </div>
           )}
-          {((!feed.isSale && !feed.isSubscribed) || (feed.isSale && !feed.isBought)) && (
+          {((!feed.isSale && !feed.isSubscribed) || (feed.isSale && !isBought)) && (
             <div className="lock-content" style={feed.thumbnailUrl && { backgroundImage: `url(${feed.thumbnailUrl})` }}>
               <div
                 className="text-center"
@@ -449,7 +452,7 @@ class FeedCard extends Component<IProps> {
                     Subcribe to see model post
                   </p>
                 )}
-                {feed.isSale && !feed.isBought && performer && (
+                {feed.isSale && !isBought && performer && (
                   <p aria-hidden onClick={() => this.setState({ openPurchaseModal: true })}>
                     Unlock post by
                     {' '}
