@@ -45,7 +45,7 @@ export class VideoService extends APIRequest {
   }
 
   getBookmarks(payload) {
-    return this.get(this.buildUrl('/reactions/videos/bookmarks', payload));
+    return this.get(this.buildUrl('/reactions/videos/bookmark', payload));
   }
 }
 

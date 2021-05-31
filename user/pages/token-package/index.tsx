@@ -176,13 +176,13 @@ class TokenPackages extends PureComponent<IProps> {
                 </div>
               </div>
               <div style={{ margin: '20px 0' }}>
-                <p className="text-center">Please select payment paymentGateway</p>
-                <div className="payment-paymentGateway">
-                  {settings.ccbillEnable && (
+                {/* <p className="text-center">Please select payment gateway</p> */}
+                <div className="payment-gateway">
+                  {/* {settings.ccbillEnable && (
                   <div aria-hidden onClick={() => this.onChangepaymentGateway('ccbill')} className={paymentGateway === 'ccbill' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
                     <a><img src="/static/ccbill-ico.png" alt="ccbill" width="100%" /></a>
                   </div>
-                  )}
+                  )} */}
                   {settings.stripeEnable && (
                   <div aria-hidden onClick={() => this.onChangepaymentGateway('stripe')} className={paymentGateway === 'stripe' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
                     <a><img src="/static/stripe-card.png" alt="stripe" width="100%" /></a>
@@ -212,7 +212,7 @@ class TokenPackages extends PureComponent<IProps> {
                   </Col>
                 </Row>
               </div>
-              {paymentGateway === 'stripe' && !user.stripeCardIds.length ? (
+              {paymentGateway === 'stripe' && !user?.stripeCardIds?.length ? (
                 <Button type="primary" onClick={() => Router.push('/user/cards/add-card')}>
                   Please add a payment card
                 </Button>

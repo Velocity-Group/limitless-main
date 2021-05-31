@@ -31,7 +31,7 @@ class GalleryService extends APIRequest {
   }
 
   getBookmarks(payload) {
-    return this.get(this.buildUrl('/reactions/galleries/bookmarks', payload));
+    return this.get(this.buildUrl('/reactions/galleries/bookmark', payload));
   }
 }
 

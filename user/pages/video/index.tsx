@@ -274,12 +274,14 @@ class VideoViewPage extends PureComponent<IProps> {
       return;
     }
     try {
+      await this.setState({ submiting: true });
       await (await purchaseTokenService.purchaseVideo(video._id, {})).data;
       message.success('Video is unlocked!');
       handleUpdateBalance({ token: video.price });
       this.setState({ isBought: true, openPurchaseModal: false });
     } catch (e) {
       const error = await e;
+      this.setState({ submiting: false, openPurchaseModal: false });
       message.error(error.message || 'Error occured, please try again later');
     }
   }

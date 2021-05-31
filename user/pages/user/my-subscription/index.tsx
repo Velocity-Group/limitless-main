@@ -57,6 +57,19 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
+  async handleFilter(data) {
+    await this.setState({ filter: data });
+    this.handleTabChange({ ...data, current: 1 });
+  }
+
+  async handleTabChange(data) {
+    const { pagination } = this.state;
+    await this.setState({
+      pagination: { ...pagination, current: data.current }
+    });
+    this.getData();
+  }
+
   async getData() {
     try {
       const {
@@ -81,19 +94,6 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     } finally {
       this.setState({ loading: false });
     }
-  }
-
-  async handleFilter(data) {
-    await this.setState({ filter: data });
-    this.handleTabChange({ ...data, current: 1 });
-  }
-
-  async handleTabChange(data) {
-    const { pagination } = this.state;
-    await this.setState({
-      pagination: { ...pagination, current: data.current }
-    });
-    this.getData();
   }
 
   async cancelSubscription(subscriptionId: string) {

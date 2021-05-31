@@ -140,14 +140,14 @@ class FeedCard extends Component<IProps> {
         await reactionService.create({
           objectId: feed._id,
           action: 'book_mark',
-          objectType: `feed_${feed.type}`
+          objectType: 'feed'
         });
         this.setState({ isBookMarked: true });
       } else {
         await reactionService.delete({
           objectId: feed._id,
           action: 'book_mark',
-          objectType: `feed_${feed.type}`
+          objectType: 'feed'
         });
         this.setState({ isBookMarked: false });
       }

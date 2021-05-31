@@ -589,26 +589,21 @@ class PerformerProfile extends PureComponent<IProps> {
                 <PerformerInfo countries={ui?.countries || []} performer={performer} />
               </div>
             </div>
-            {performer?.isFreeSubscription && !isSubscribed && (
+            {!isSubscribed && (
               <div className="subscription-bl">
-                <h5>Free Subscription</h5>
+                <h5>Monthly Subscription</h5>
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={submiting && this.subscriptionType === 'free'}
+                  disabled={submiting && this.subscriptionType === 'monthly'}
                   onClick={() => {
-                    this.subscriptionType = 'free';
+                    this.subscriptionType = 'monthly';
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  FREE SUBSCRIPTION IN
+                  SUBSCRIBE FOR $
                   {' '}
-                  {performer.durationFreeSubscriptionDays || 1}
-                  {' '}
-                  DAYS THEN $
-                  {performer.monthlyPrice.toFixed(2)}
-                  {' '}
-                  MONTHLY LATER
+                  {performer && performer?.monthlyPrice.toFixed(2)}
                 </button>
               </div>
             )}
@@ -630,21 +625,26 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {!isSubscribed && (
+            {performer?.isFreeSubscription && !isSubscribed && (
               <div className="subscription-bl">
-                <h5>Monthly Subscription</h5>
+                <h5>Free Subscription</h5>
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={submiting && this.subscriptionType === 'monthly'}
+                  disabled={submiting && this.subscriptionType === 'free'}
                   onClick={() => {
-                    this.subscriptionType = 'monthly';
+                    this.subscriptionType = 'free';
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR $
+                  SUBSCRIBE FOR FREE IN
                   {' '}
-                  {performer && performer?.monthlyPrice.toFixed(2)}
+                  {performer.durationFreeSubscriptionDays || 1}
+                  {' '}
+                  DAYS THEN $
+                  {performer.monthlyPrice.toFixed(2)}
+                  {' '}
+                  MONTHLY LATER
                 </button>
               </div>
             )}

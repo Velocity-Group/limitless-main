@@ -15,8 +15,10 @@ class Loader extends PureComponent<IProps> {
     const { ui, customText } = this.props;
     return (
       <div className="loading-screen">
-        {ui.logo ? <img alt="loading-ico" src={ui.logo} /> : ui.siteName ? <span>{ui.siteName}</span> : <Spin size="large" />}
-        {customText && <p>{customText}</p>}
+        <div>
+          {ui.logo ? <img alt="loading-ico" src={ui.logo} /> : ui.siteName ? <span>{ui.siteName}</span> : <Spin size="large" />}
+          {customText && <p>{customText}</p>}
+        </div>
       </div>
     );
   }
@@ -24,4 +26,4 @@ class Loader extends PureComponent<IProps> {
 const mapStatesToProps = (state) => ({
   ui: { ...state.ui }
 });
-export default connect(mapStatesToProps)(Loader) as any;
+export default connect(mapStatesToProps)(Loader);

@@ -127,7 +127,17 @@ export class PaymentService {
       type: subscriptionType,
       originalPrice: price(),
       totalPrice,
-      products: [],
+      products: [
+        {
+          price: totalPrice,
+          quantity: 1,
+          name: `${subscriptionType} ${performer?.name || performer?.username}`,
+          description: `${subscriptionType} ${performer?.name || performer?.username}`,
+          productId: performer._id,
+          productType: PAYMENT_TARGET_TYPE.PERFORMER,
+          performerId: performer._id
+        }
+      ],
       couponInfo,
       status: PAYMENT_STATUS.PENDING,
       paymentResponseInfo: null
@@ -137,6 +147,8 @@ export class PaymentService {
   public async createRenewalSubscriptionPaymentTransaction(subscription: SubscriptionModel, payload: any, paymentGateway = 'stripe') {
     const price = payload.billedAmount || payload.accountingAmount;
     const { userId, performerId, subscriptionType } = subscription;
+    const performer = await this.performerService.findById(performerId);
+    if (!performer) return null;
     return this.TransactionModel.create({
       paymentGateway,
       source: 'performer',
@@ -147,7 +159,15 @@ export class PaymentService {
       type: subscriptionType,
       originalPrice: price,
       totalPrice: price,
-      products: [],
+      products: [{
+        price,
+        quantity: 1,
+        name: `${subscriptionType} subscription ${performer?.name || performer?.username}`,
+        description: `recurring ${subscriptionType} subscription ${performer?.name || performer?.username}`,
+        productId: performer._id,
+        productType: PAYMENT_TARGET_TYPE.PERFORMER,
+        performerId: performer._id
+      }],
       couponInfo: null,
       status: PAYMENT_STATUS.SUCCESS,
       paymentResponseInfo: payload
@@ -164,6 +184,8 @@ export class PaymentService {
     const subscriptionType = type === SUBSCRIPTION_TYPE.FREE ? PAYMENT_TYPE.FREE_SUBSCRIPTION : type === SUBSCRIPTION_TYPE.MONTHLY ? PAYMENT_TYPE.MONTHLY_SUBSCRIPTION : PAYMENT_TYPE.YEARLY_SUBSCRIPTION;
     const transaction = await this.createSubscriptionPaymentTransaction(performer, subscriptionType, user);
     if (subscriptionType === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+      transaction.status = PAYMENT_STATUS.SUCCESS;
+      await transaction.save();
       await this.queueEventService.publish(
         new QueueEvent({
           channel: TRANSACTION_SUCCESS_CHANNEL,
@@ -171,6 +193,7 @@ export class PaymentService {
           data: new PaymentDto(transaction)
         })
       );
+      // stripe only
       setTimeout(async () => {
         const subscription = await this.subscriptionService.findOneSubscription({ transactionId: transaction._id });
         if (subscription && !subscription?.subscriptionId) {
@@ -186,7 +209,7 @@ export class PaymentService {
       }, 5000); // delay 5s to create subscription model first
       return { success: true };
     }
-    if (paymentGateway === 'stripe') {
+    if (paymentGateway === 'ccbill') {
       const { flexformId, subAccountNumber, salt } = await this.getPerformerSubscriptionPaymentGateway(performer._id);
       return this.ccbillService.subscription({
         transactionId: transaction._id,
@@ -272,7 +295,7 @@ export class PaymentService {
       coupon
     );
 
-    if (paymentGateway === 'stripe') {
+    if (paymentGateway === 'ccbill') {
       const { flexformId, subAccountNumber, salt } = await this.getCCbillPaymentGatewaySettings();
       return this.ccbillService.singlePurchase({
         salt,
@@ -521,6 +544,10 @@ export class PaymentService {
     if (['charge.succeeded'].includes(type)) {
       transaction.status = PAYMENT_STATUS.SUCCESS;
       transaction.paymentResponseInfo = payload;
+      if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+        // change free to monthly subscription
+        transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
+      }
       await transaction.save();
       await this.queueEventService.publish(
         new QueueEvent({

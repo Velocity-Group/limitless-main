@@ -91,9 +91,9 @@ export const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  stripeCardId: {
+  stripeCardIds: [{
     type: String
-  },
+  }],
   stripeCustomerId: {
     type: String
   }

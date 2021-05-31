@@ -34,8 +34,10 @@ const PaymentTableList = ({
     },
     {
       title: 'Description',
-      dataIndex: 'description',
-      key: 'description'
+      key: 'description',
+      render(record: any) {
+        return <span>{record?.products[0]?.description}</span>;
+      }
     },
     {
       title: 'Type',

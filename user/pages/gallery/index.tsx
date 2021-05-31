@@ -21,6 +21,7 @@ import GalleryCard from '@components/gallery/gallery-card';
 import { Carousel } from 'react-responsive-carousel';
 import Router from 'next/router';
 import Link from 'next/link';
+import Loader from '@components/common/base/loader';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import './index.less';
 
@@ -130,20 +131,33 @@ class GalleryViewPage extends PureComponent<IProps> {
 
   async subscribe() {
     try {
-      const { gallery } = this.props;
-      await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: gallery.performerId })).data;
-      if (resp.paymentUrl) {
-        message.info('Redirecting to payment method...');
-        window.location.href = resp.paymentUrl;
+      const { gallery, user } = this.props;
+      if (!user._id) {
+        message.error('Please log in');
+        Router.push('/auth/login');
         return;
       }
-      message.error('An error occured, please try again later');
+      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+        message.error('Please add payment card');
+        Router.push('/user/cards');
+        return;
+      }
+      await this.setState({ submiting: true });
+      const resp = await (await paymentService.subscribePerformer({
+        type: this.subscriptionType,
+        performerId: gallery.performerId,
+        paymentGateway: 'stripe',
+        stripeCardId: user.stripeCardIds[0]
+      })).data;
+      if (this.subscriptionType === 'free' && resp.success) {
+        message.success('Free Subscription Success!');
+        window.location.reload();
+      }
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ submiting: false, openSubscriptionModal: false });
+      message.error(err?.message || 'Error occured, please try again later');
     }
   }
 
@@ -361,6 +375,7 @@ class GalleryViewPage extends PureComponent<IProps> {
           >
             <PurchaseGalleryForm gallery={gallery} submiting={submiting} onFinish={this.purchaseGallery.bind(this)} />
           </Modal>
+          {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
         </Layout>
       </>
     );

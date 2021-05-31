@@ -6,15 +6,17 @@ import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import {
-  IUIConfig
+  IUIConfig, IUser
 } from 'src/interfaces';
 import { paymentService } from '@services/index';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
 import Link from 'next/link';
+import './index.less';
 
 interface IProps {
-  ui: IUIConfig
+  ui: IUIConfig;
+  user: IUser
 }
 
 class CardsPage extends PureComponent<IProps> {
@@ -60,7 +62,7 @@ class CardsPage extends PureComponent<IProps> {
     const {
       cards, loading, submiting
     } = this.state;
-    const { ui } = this.props;
+    const { ui, user } = this.props;
     return (
       <Layout>
         <Head>
@@ -74,6 +76,7 @@ class CardsPage extends PureComponent<IProps> {
           <Page>
             <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>My Cards</span>
+              {(!user.stripeCardIds || !user.stripeCardIds.length) && (
               <Link href="/user/cards/add-card">
                 <a>
                   {' '}
@@ -82,6 +85,7 @@ class CardsPage extends PureComponent<IProps> {
                   Add Card
                 </a>
               </Link>
+              )}
             </div>
             <div className="card-list">
               {!loading && !cards.length && (
@@ -117,7 +121,8 @@ class CardsPage extends PureComponent<IProps> {
 }
 
 const mapState = (state: any) => ({
-  ui: { ...state.ui }
+  ui: { ...state.ui },
+  user: { ...state.user.current }
 });
 const mapDispatch = { };
 export default connect(mapState, mapDispatch)(CardsPage);

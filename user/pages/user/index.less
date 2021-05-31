@@ -1,6 +1,72 @@
 @import '../../style/vars';
-@import '../../style/default';
 
 .user-profile-box {
   margin: 40px 0;
+}
+
+.ant-tabs {
+  padding: 0;
+  .ant-tabs-tab.ant-tabs-tab-active {
+    border-right: 1px solid;
+    border-left: 1px solid;
+    border-bottom: none !important;
+  }
+
+  .ant-tabs-nav {
+    &:before {
+      border-bottom: none;
+    }
+    .ant-tabs-tab {
+      width: 20%;
+      border-bottom: 1px solid;
+      font-size: 25px;
+      font-weight: 600;
+      color: @gray;
+      justify-content: center;
+      margin: 0;
+      padding: 8px;
+    }
+  }
+
+  .ant-tabs-ink-bar {
+    bottom: unset !important;
+    top: 0;
+    background-color: @gray;
+    height: 1px!important;
+  }
+
+  .ant-tabs-nav-wrap {
+    padding: 0 30px;
+
+    &::before {
+      opacity: 1;
+      box-shadow: none;
+      border-bottom: 1px solid @gray;
+    }
+
+    &::after {
+      opacity: 1;
+      box-shadow: none;
+      border-bottom: 1px solid @gray;
+    }
+
+    @media screen and (max-width: @mobile-screen) {
+      padding: 0;
+    }
+  }
+
+  .ant-tabs-nav-list {
+    width: 100%;
+    justify-content: space-around;
+
+  }
+
+  .ant-tabs-content-holder {
+    margin-bottom: 73px;
+
+    .ant-tabs-tabpane.ant-tabs-tabpane-active {
+      overflow: none;
+      max-height: none;
+    }
+  }
 }

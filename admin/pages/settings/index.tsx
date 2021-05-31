@@ -302,15 +302,10 @@ class Settings extends PureComponent {
     const {
       updating, selectedTab, list, loading
     } = this.state;
-    const layout = selectedTab === 'commission' || selectedTab === 'ccbill'
-      ? {
-        labelCol: { span: 6 },
-        wrapperCol: { span: 16 }
-      }
-      : {
-        labelCol: { span: 4 },
-        wrapperCol: { span: 16 }
-      };
+    const layout = {
+      labelCol: { span: 6 },
+      wrapperCol: { span: 16 }
+    };
 
     const initialValues = {} as any;
     list.forEach((item: ISetting) => {
@@ -328,7 +323,8 @@ class Settings extends PureComponent {
               <Menu.Item key="email">Email</Menu.Item>
               <Menu.Item key="custom">SEO</Menu.Item>
               <Menu.Item key="commission">Commission</Menu.Item>
-              <Menu.Item key="ccbill">CCbill</Menu.Item>
+              <Menu.Item key="stripe">Stripe</Menu.Item>
+              {/* <Menu.Item key="ccbill">CCbill</Menu.Item> */}
               <Menu.Item key="mailer">SMTP</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>

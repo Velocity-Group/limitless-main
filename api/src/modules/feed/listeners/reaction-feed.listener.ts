@@ -30,7 +30,7 @@ export class ReactionFeedListener {
       return;
     }
     const { objectId, objectType, action } = event.data;
-    if (![REACTION_TYPE.FEED_PHOTO, REACTION_TYPE.FEED_TEXT, REACTION_TYPE.FEED_VIDEO, REACTION_TYPE.FEED_AUDIO].includes(objectType) || action !== REACTION.LIKE) {
+    if (![REACTION_TYPE.FEED].includes(objectType) || action !== REACTION.LIKE) {
       return;
     }
     if (REACTION.LIKE && event.eventName === EVENT.CREATED) {

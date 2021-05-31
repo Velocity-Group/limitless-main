@@ -65,7 +65,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
             </li>
           </ul>
         </div>
-        <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()}>
+        <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()} style={{ textTransform: 'capitalize' }}>
           Confirm
           {' '}
           {type}
