@@ -189,9 +189,12 @@ export class StripeService {
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
-      // create a connected account
+      // create a connected account for model
       const account = await stripe.accounts.create({
-        type: 'express'
+        type: 'express',
+        capabilities: {
+          transfers: { requested: true }
+        }
       });
       let stripeConnectAccount = await this.ConnectAccountModel.findOne({
         sourceId: user._id
@@ -207,8 +210,8 @@ export class StripeService {
       // create an account link
       const accountLinks = await stripe.accountLinks.create({
         account: account.id,
-        refresh_url: `${process.env.USER_URL}/${user.isPerformer ? 'model' : 'user'}/account`,
-        return_url: `${process.env.USER_URL}/${user.isPerformer ? 'model' : 'user'}/account`,
+        refresh_url: `${process.env.USER_URL}/model/banking`,
+        return_url: `${process.env.USER_URL}/model/banking`,
         type: 'account_onboarding'
       });
       return accountLinks;
@@ -241,16 +244,20 @@ export class StripeService {
   }
 
   public async getExpressLoginLink(user: UserDto) {
-    const stripeConnectAccount = await this.ConnectAccountModel.findOne({
-      sourceId: user._id
-    });
-    if (!stripeConnectAccount || !stripeConnectAccount.accountId) return this.createConnectAccount(user);
-    const secretKey = SettingService.getValueByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
-    const stripe = new Stripe(secretKey, {
-      apiVersion: '2020-08-27'
-    });
-    const link = await stripe.accounts.createLoginLink(stripeConnectAccount.accountId);
-    return link;
+    try {
+      const stripeConnectAccount = await this.ConnectAccountModel.findOne({
+        sourceId: user._id
+      });
+      if (!stripeConnectAccount || !stripeConnectAccount.accountId) return this.createConnectAccount(user);
+      const secretKey = SettingService.getValueByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      const link = await stripe.accounts.createLoginLink(stripeConnectAccount.accountId);
+      return link;
+    } catch (e) {
+      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+    }
   }
 
   // PAYMENT
