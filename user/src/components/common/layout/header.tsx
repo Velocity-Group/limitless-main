@@ -10,7 +10,7 @@ import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
   MessageOutlined, VideoCameraOutlined, FireOutlined, NotificationOutlined,
-  DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined,
+  DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
   HomeOutlined, LogoutOutlined, UsergroupAddOutlined, VideoCameraAddOutlined,
   HeartOutlined, PlusSquareOutlined, BulbOutlined, WalletOutlined
 } from '@ant-design/icons';
@@ -60,11 +60,6 @@ class Header extends PureComponent<IProps> {
       this.handleCountNotificationMessage();
     }
   }
-
-  onThemeChange = (theme: string) => {
-    const { updateUIValue: handleUpdateUI } = this.props;
-    handleUpdateUI({ theme });
-  };
 
   handleMessage = async (event) => {
     event && this.setState({ totalNotReadMessage: event.total });
@@ -116,6 +111,11 @@ class Header extends PureComponent<IProps> {
     }
     // TODO handle more event
   }
+
+  onThemeChange = (theme: string) => {
+    const { updateUIValue: handleUpdateUI } = this.props;
+    handleUpdateUI({ theme });
+  };
 
   async beforeLogout() {
     const { logout: handleLogout } = this.props;
@@ -317,6 +317,13 @@ class Header extends PureComponent<IProps> {
                     <UserOutlined />
                     {' '}
                     Edit Profile
+                  </div>
+                </Link>
+                <Link href={{ pathname: '/model/banking' }} as="/model/banking">
+                  <div className={router.pathname === '/model/banking' ? 'menu-item active' : 'menu-item'}>
+                    <BankOutlined />
+                    {' '}
+                    Banking (to earn)
                   </div>
                 </Link>
                 <Link href={{ pathname: '/model/my-subscriber' }} as="/model/my-subscriber">

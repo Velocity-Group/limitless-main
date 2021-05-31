@@ -36,8 +36,7 @@
   }
 
   .ant-tabs-nav-wrap {
-    padding: 0 30px;
-
+    overflow: auto!important;
     &::before {
       opacity: 1;
       box-shadow: none;
@@ -57,8 +56,6 @@
 
   .ant-tabs-nav-list {
     width: 100%;
-    justify-content: space-around;
-
   }
 
   .ant-tabs-content-holder {
@@ -72,7 +69,8 @@
   &.custom {
     .ant-tabs-nav {
       .ant-tabs-tab {
-        width: auto;
+        font-size: 15px;
+        width: 100%;
       }
     }
   }

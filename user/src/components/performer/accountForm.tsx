@@ -240,12 +240,12 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                   Email Address
                   {'  '}
                   {user.verifiedEmail ? (
-                    <Popover title="Your email address is not verified" content={null}>
+                    <Popover title="Your email address is verified" content={null}>
                       <a style={{ fontSize: 18 }}><CheckCircleOutlined /></a>
                     </Popover>
                   ) : (
                     <Popover
-                      title="Your email is not verified"
+                      title="Your email address is not verified"
                       content={(
                         <Button
                           type="primary"

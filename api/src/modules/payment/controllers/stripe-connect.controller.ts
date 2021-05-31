@@ -33,7 +33,7 @@ export class StripeController {
     return DataResponse.ok(info);
   }
 
-  @Post('accounts/callback')
+  @Post('accounts/callhook')
   @HttpCode(HttpStatus.OK)
   async accountCallback(
     @Body() payload: any

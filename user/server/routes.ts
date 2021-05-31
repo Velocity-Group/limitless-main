@@ -22,6 +22,7 @@ export default routes()
   .add('token-package', '/token-package', '/token-package')
   // performer
   .add('models', '/model', '/model')
+  .add('banking', '/model/banking', '/model/banking')
   .add('block-user', '/model/block-user', '/model/block-user')
   .add('account', '/model/account', '/model/account')
   .add('earning', '/model/earning', '/model/earning')

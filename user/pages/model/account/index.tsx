@@ -24,7 +24,6 @@ import {
 import { UpdatePaswordForm } from '@components/user/update-password-form';
 import {
   PerformerAccountForm,
-  PerformerBankingForm,
   PerformerSubscriptionForm,
   PerformerBlockCountriesForm,
   PerformerVerificationForm
@@ -184,7 +183,7 @@ class AccountSettings extends PureComponent<IProps> {
             </p>
           </div>
           )}
-          <Tabs defaultActiveKey="basic" tabPosition="top" className="nav-tabs">
+          <Tabs defaultActiveKey="basic" tabPosition="top" className="nav-tabs custom">
             <Tabs.TabPane tab={<span>Basic Settings</span>} key="basic">
               <PerformerAccountForm
                 onFinish={this.submit.bind(this)}
@@ -221,9 +220,6 @@ class AccountSettings extends PureComponent<IProps> {
                 updating={updating}
                 user={currentUser}
               />
-            </Tabs.TabPane>
-            <Tabs.TabPane tab={<span>Banking</span>} key="bankInfo">
-              <PerformerBankingForm />
             </Tabs.TabPane>
             <Tabs.TabPane tab={<span>Block Countries</span>} key="block">
               <PerformerBlockCountriesForm
