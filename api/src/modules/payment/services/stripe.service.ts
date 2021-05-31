@@ -238,9 +238,28 @@ export class StripeService {
   }
 
   public async retrieveConnectAccount(sourceId: ObjectId | string) {
-    return this.ConnectAccountModel.findOne({
-      sourceId
-    });
+    try {
+      const stripeConnectAccount = await this.ConnectAccountModel.findOne({
+        sourceId
+      });
+      if (!stripeConnectAccount) {
+        throw new HttpException('Please connect to Stripe with your account', 404);
+      }
+      const secretKey = SettingService.getValueByKey(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      const data = await stripe.accounts.retrieve(stripeConnectAccount.accountId);
+      stripeConnectAccount.chargesEnabled = data.charges_enabled; // charge status
+      stripeConnectAccount.detailsSubmitted = data.details_submitted;
+      stripeConnectAccount.metaData = data;
+      stripeConnectAccount.createdAt = new Date();
+      stripeConnectAccount.updatedAt = new Date();
+      await stripeConnectAccount.save();
+      return stripeConnectAccount;
+    } catch (e) {
+      throw new HttpException(e?.raw?.message || 'Stripe configuration error', 400);
+    }
   }
 
   public async getExpressLoginLink(user: UserDto) {

@@ -45,19 +45,6 @@ class BankingSettings extends PureComponent<IProps> {
     }
   }
 
-  async getLoginLink() {
-    try {
-      await this.setState({ loading: true });
-      const resp = await (await paymentService.retrieveStripeAccount()).data;
-      this.setState({ stripeAccount: resp });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(await e);
-    } finally {
-      this.setState({ loading: false });
-    }
-  }
-
   async connectAccount() {
     try {
       await this.setState({ submiting: true });
