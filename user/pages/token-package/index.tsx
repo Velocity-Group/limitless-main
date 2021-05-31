@@ -185,7 +185,7 @@ class TokenPackages extends PureComponent<IProps> {
                   )}
                   {settings.stripeEnable && (
                   <div aria-hidden onClick={() => this.onChangepaymentGateway('stripe')} className={paymentGateway === 'stripe' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
-                    <a><img src="/static/stripe-icon.jpeg" alt="stripe" width="100%" /></a>
+                    <a><img src="/static/stripe-card.png" alt="stripe" width="100%" /></a>
                   </div>
                   )}
                   {settings.bitpayEnable && (
