@@ -248,7 +248,7 @@ class PerformerProfile extends PureComponent<IProps> {
         paymentGateway: 'stripe',
         stripeCardId: currentUser.stripeCardIds[0]
       })).data;
-      !resp.success && this.setState({ openSubscriptionModal: false, submiting: false });
+      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
