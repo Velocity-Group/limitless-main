@@ -11,8 +11,9 @@ import { UserDto } from 'src/modules/user/dtos';
 import Stripe from 'stripe';
 import { UserService } from 'src/modules/user/services';
 import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
-import * as moment from 'moment';
+// import * as moment from 'moment';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { STRIPE_ACCOUNT_CONNECT_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel, StripeConnectAccountModel } from '../models';
 import { AuthoriseCardPayload } from '../payloads/authorise-card.payload';
@@ -112,16 +113,14 @@ export class StripeService {
     }
   }
 
-  public async createSubscriptionPlan(transaction: PaymentTransactionModel) {
+  public async createSubscriptionPlan(transaction: PaymentTransactionModel, performer: PerformerDto, user: UserDto) {
     const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
     if (!connectAccount) return null;
     const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
     const stripe = new Stripe(secretKey, {
       apiVersion: '2020-08-27'
     });
-    const user = await this.userService.findById(transaction.sourceId);
     if (!user || !user.stripeCustomerId) return null;
-    const performer = await this.performerService.findById(transaction.performerId);
     if (!performer) return null;
     const performerCommissions = await this.performerService.getCommissions(transaction.performerId);
     const settingCommission = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? await this.settingService.getKeyValue(SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION) : await this.settingService.getKeyValue(SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION);
@@ -143,7 +142,7 @@ export class StripeService {
     // monthly subscription will be used once free trial end
     const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
     // eslint-disable-next-line no-nested-ternary
-    const startRecurringDate = moment().add(transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 30 : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 365 : performer.durationFreeSubscriptionDays, 'days').valueOf();
+    // const startRecurringDate = moment().add(transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 30 : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 365 : performer.durationFreeSubscriptionDays, 'days').valueOf();
     const plan = await stripe.subscriptions.create({
       customer: user.stripeCustomerId,
       items: [
@@ -159,11 +158,9 @@ export class StripeService {
           }
         }
       ],
-      cancel_at_period_end: false,
       metadata: {
         transactionId: transaction._id.toString()
       },
-      billing_cycle_anchor: startRecurringDate, // next date charge
       transfer_data: {
         destination: connectAccount.accountId,
         amount_percent: 100 - commission * 100 // % percentage

@@ -198,7 +198,7 @@ export class PaymentService {
         const subscription = await this.subscriptionService.findOneSubscription({ transactionId: transaction._id });
         if (subscription && !subscription?.subscriptionId) {
         // create plan
-          const plan = await this.stripeService.createSubscriptionPlan(transaction);
+          const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
           if (plan) {
             await this.subscriptionService.updateSubscriptionId({
               userId: transaction.sourceId,
@@ -224,13 +224,7 @@ export class PaymentService {
       if (!user.stripeCustomerId || !stripeCardId) {
         throw new HttpException('Please add a payment card', 422);
       }
-      const data = await this.stripeService.createSubscriptionCharge({
-        transaction,
-        subscriptionType,
-        user,
-        performer,
-        stripeCardId
-      });
+      const data = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
       return data;
     }
     throw new MissingConfigPaymentException();
