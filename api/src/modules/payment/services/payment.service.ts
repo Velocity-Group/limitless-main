@@ -267,7 +267,7 @@ export class PaymentService {
       price: totalPrice,
       quantity: 1,
       name: tokenPackage.name,
-      description: tokenPackage.description,
+      description: `purchase token package ${tokenPackage.name || tokenPackage.description}`,
       productId: tokenPackage._id,
       productType: PAYMENT_TARGET_TYPE.TOKEN_PACKAGE,
       performerId: null,
