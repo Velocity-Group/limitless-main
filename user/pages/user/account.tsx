@@ -8,10 +8,10 @@ import { IUser, IUserFormData } from 'src/interfaces/user';
 import { authService } from '@services/auth.service';
 import { userService } from '@services/user.service';
 import { updateUser, updateCurrentUserAvatar, updatePassword } from 'src/redux/user/actions';
-import './index.less';
 import { IUIConfig } from 'src/interfaces';
 import { SocketContext } from 'src/socket';
 import { logout } from '@redux/auth/actions';
+import './index.less';
 
 interface IProps {
   name: string;
@@ -146,7 +146,7 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
           </title>
         </Head>
         <div className="main-container user-account">
-          <Tabs defaultActiveKey="user-profile" tabPosition="top" className="nav-tabs">
+          <Tabs defaultActiveKey="user-profile" tabPosition="top" className="nav-tabs custom">
             <Tabs.TabPane tab={<span>Basic Settings</span>} key="basic">
               <UserAccountForm
                 onFinish={this.onFinish.bind(this)}

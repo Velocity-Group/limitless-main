@@ -186,32 +186,6 @@ export class PaymentService {
     // eslint-disable-next-line no-nested-ternary
     const subscriptionType = type === SUBSCRIPTION_TYPE.FREE ? PAYMENT_TYPE.FREE_SUBSCRIPTION : type === SUBSCRIPTION_TYPE.MONTHLY ? PAYMENT_TYPE.MONTHLY_SUBSCRIPTION : PAYMENT_TYPE.YEARLY_SUBSCRIPTION;
     const transaction = await this.createSubscriptionPaymentTransaction(performer, subscriptionType, user);
-    if (subscriptionType === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
-      transaction.status = PAYMENT_STATUS.SUCCESS;
-      await transaction.save();
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: TRANSACTION_SUCCESS_CHANNEL,
-          eventName: EVENT.CREATED,
-          data: new PaymentDto(transaction)
-        })
-      );
-      // stripe only
-      setTimeout(async () => {
-        const subscription = await this.subscriptionService.findOneSubscription({ transactionId: transaction._id });
-        if (subscription && !subscription?.subscriptionId) {
-        // create plan
-          const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
-          if (plan) {
-            await this.subscriptionService.updateSubscriptionId({
-              userId: transaction.sourceId,
-              performerId: transaction.performerId
-            }, plan.id);
-          }
-        }
-      }, 5000); // delay 5s to create subscription model first
-      return { success: true };
-    }
     if (paymentGateway === 'ccbill') {
       const { flexformId, subAccountNumber, salt } = await this.getPerformerSubscriptionPaymentGateway(performer._id);
       return this.ccbillService.subscription({
@@ -227,8 +201,28 @@ export class PaymentService {
       if (!user.stripeCustomerId || !stripeCardId) {
         throw new HttpException('Please add a payment card', 422);
       }
-      const data = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
-      return data;
+      const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
+      console.log(123, plan);
+      if (plan) {
+        transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.PENDING;
+        transaction.paymentResponseInfo = plan;
+        await transaction.save();
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: TRANSACTION_SUCCESS_CHANNEL,
+            eventName: EVENT.CREATED,
+            data: new PaymentDto(transaction)
+          })
+        );
+        setTimeout(async () => {
+          await this.subscriptionService.updateSubscriptionId({
+            userId: transaction.sourceId,
+            performerId: transaction.performerId
+          }, plan.id);
+        }, 5000); // to create subscription model first
+        return { success: true };
+      }
+      return { success: false };
     }
     throw new MissingConfigPaymentException();
   }
@@ -491,6 +485,9 @@ export class PaymentService {
     if (['charge.succeeded'].includes(type)) {
       transaction.status = PAYMENT_STATUS.SUCCESS;
       transaction.paymentResponseInfo = payload;
+      if ([PAYMENT_TYPE.FREE_SUBSCRIPTION].includes(transaction.type)) {
+        transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
+      }
       await transaction.save();
       await this.queueEventService.publish(
         new QueueEvent({
@@ -562,6 +559,7 @@ export class PaymentService {
   public async stripeSubscriptionCallhook(payload: any) {
     try {
       const { type, data } = payload;
+      console.log('stripe callhook', payload);
       if (!type.includes('subscription_schedule')) return { ok: false };
       const subscriptionId = data?.object?.id;
       const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
