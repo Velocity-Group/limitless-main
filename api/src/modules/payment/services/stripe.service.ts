@@ -116,13 +116,11 @@ export class StripeService {
   public async createSubscriptionPlan(transaction: PaymentTransactionModel, performer: PerformerDto, user: UserDto) {
     try {
       const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
-      if (!connectAccount) return null;
+      if (!connectAccount) throw new HttpException('Stripe configuration error', 400);
       const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
-      if (!user || !user.stripeCustomerId) return null;
-      if (!performer) return null;
       const performerCommissions = await this.performerService.getCommissions(transaction.performerId);
       const settingCommission = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? await this.settingService.getKeyValue(SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION) : await this.settingService.getKeyValue(SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION);
       let commission = 0.2;
@@ -139,7 +137,7 @@ export class StripeService {
         name: `Subcription ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
         description: `${user?.name || user?.username || `${user?.firstName} ${user?.lastName}`} ${transaction.type} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
       });
-      if (!product) return null;
+      if (!product) throw new HttpException('Stripe configuration error', 400);
       // monthly subscription will be used once free trial end
       const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
       const plan = await stripe.subscriptions.create({
@@ -168,7 +166,6 @@ export class StripeService {
       });
       return plan;
     } catch (e) {
-      console.log('create subscription error', e);
       throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
@@ -182,7 +179,6 @@ export class StripeService {
       const plan = await stripe.subscriptions.retrieve(transaction.paymentResponseInfo);
       return plan;
     } catch (e) {
-      console.log('create subscription error', e);
       throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }

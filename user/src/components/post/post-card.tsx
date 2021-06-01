@@ -244,17 +244,17 @@ class FeedCard extends Component<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      const resp = await (await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: feed.fromSourceId,
         paymentGateway: 'stripe',
         stripeCardId: user.stripeCardIds[0]
-      });
-      this.setState({ openSubscriptionModal: false });
+      })).data;
+      !resp.success && this.setState({ openSubscriptionModal: false, submiting: false });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
-      Router.push('/payment/cancel');
+      this.setState({ openSubscriptionModal: false, submiting: false });
     }
   }
 

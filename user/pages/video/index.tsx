@@ -300,17 +300,17 @@ class VideoViewPage extends PureComponent<IProps> {
         return;
       }
       await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      const resp = await (await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: video.performerId,
         paymentGateway: 'stripe',
         stripeCardId: user.stripeCardIds[0]
-      });
-      this.setState({ openSubscriptionModal: false });
+      })).data;
+      !resp.success && this.setState({ openSubscriptionModal: false, submiting: false });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
-      Router.push('/payment/cancel');
+      this.setState({ openSubscriptionModal: false, submiting: false });
     }
   }
 

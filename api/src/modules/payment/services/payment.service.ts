@@ -202,7 +202,6 @@ export class PaymentService {
         throw new HttpException('Please add a payment card', 422);
       }
       const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
-      console.log(123, plan);
       if (plan) {
         transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.PENDING;
         transaction.paymentResponseInfo = plan;
@@ -460,11 +459,10 @@ export class PaymentService {
   }
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
-    console.log('stripe callhook', payload);
     const { type, data } = payload;
     const latestInvoiceId = data?.object?.invoice;
     const transactionId = data?.object?.metadata?.transactionId;
-    if (!latestInvoiceId && transactionId) {
+    if (!latestInvoiceId && !transactionId) {
       return { ok: false };
     }
     const transaction = await this.TransactionModel.findOne({
@@ -544,7 +542,6 @@ export class PaymentService {
   public async stripeSubscriptionCallhook(payload: any) {
     try {
       const { type, data } = payload;
-      console.log('stripe callhook', payload);
       if (!type.includes('subscription_schedule')) return { ok: false };
       const subscriptionId = data?.object?.id;
       const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
@@ -560,7 +557,6 @@ export class PaymentService {
       }
       return { ok: true };
     } catch (e) {
-      console.log('create subscription error', e);
       throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }
   }
