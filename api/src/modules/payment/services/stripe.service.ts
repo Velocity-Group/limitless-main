@@ -137,7 +137,7 @@ export class StripeService {
       }
       const product = await stripe.products.create({
         name: `Subcription ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
-        description: `${transaction.type} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
+        description: `${user?.name || user?.username || `${user?.firstName} ${user?.lastName}`} ${transaction.type} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
       });
       if (!product) return null;
       // monthly subscription will be used once free trial end
@@ -165,19 +165,10 @@ export class StripeService {
         transfer_data: {
           destination: connectAccount.accountId,
           amount_percent: 100 - commission * 100 // % percentage
-        }
+        },
+        trial_period_days: transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.durationFreeSubscriptionDays : 0
       });
       return plan;
-    } catch (e) {
-      console.log('create subscription error', e);
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
-    }
-  }
-
-  public async subscriptionCallhook(payload: any) {
-    try {
-      console.log('sub', payload);
-      return { ok: true };
     } catch (e) {
       console.log('create subscription error', e);
       throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);

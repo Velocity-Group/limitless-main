@@ -557,4 +557,28 @@ export class PaymentService {
     await subscription.save();
     return { success: true };
   }
+
+  // listen webhook to update subscription
+  public async stripeSubscriptionCallhook(payload: any) {
+    try {
+      const { type, data } = payload;
+      if (!type.includes('subscription_schedule')) return { ok: false };
+      const subscriptionId = data?.object?.id;
+      const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
+      if (!subscriptionId || !checkForHexRegExp.test(subscriptionId)) {
+        return { ok: false };
+      }
+      const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
+      if (!subscription) return { ok: false };
+      if (data?.object?.status !== 'active') {
+        subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+        subscription.expiredAt = new Date();
+        await subscription.save();
+      }
+      return { ok: true };
+    } catch (e) {
+      console.log('create subscription error', e);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+    }
+  }
 }
