@@ -10,7 +10,7 @@ import { PerformerService } from 'src/modules/performer/services';
 import { UserDto } from 'src/modules/user/dtos';
 import Stripe from 'stripe';
 import { UserService } from 'src/modules/user/services';
-import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
+// import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
 // import * as moment from 'moment';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
 import { PerformerDto } from 'src/modules/performer/dtos';
@@ -114,59 +114,64 @@ export class StripeService {
   }
 
   public async createSubscriptionPlan(transaction: PaymentTransactionModel, performer: PerformerDto, user: UserDto) {
-    const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
-    if (!connectAccount) return null;
-    const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
-    const stripe = new Stripe(secretKey, {
-      apiVersion: '2020-08-27'
-    });
-    if (!user || !user.stripeCustomerId) return null;
-    if (!performer) return null;
-    const performerCommissions = await this.performerService.getCommissions(transaction.performerId);
-    const settingCommission = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? await this.settingService.getKeyValue(SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION) : await this.settingService.getKeyValue(SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION);
-    let commission = 0.2;
-    switch (transaction.type) {
-      case PAYMENT_TYPE.MONTHLY_SUBSCRIPTION:
-        commission = performerCommissions?.monthlySubscriptionCommission || settingCommission;
-        break;
-      case PAYMENT_TYPE.YEARLY_SUBSCRIPTION:
-        commission = performerCommissions?.yearlySubscriptionCommission || settingCommission;
-        break;
-      default: commission = performerCommissions?.monthlySubscriptionCommission || settingCommission;
-    }
-    const product = await stripe.products.create({
-      name: `Subcription ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
-      description: `${transaction.type} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
-    });
-    if (!product) return null;
-    // monthly subscription will be used once free trial end
-    const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
-    // eslint-disable-next-line no-nested-ternary
-    // const startRecurringDate = moment().add(transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 30 : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 365 : performer.durationFreeSubscriptionDays, 'days').valueOf();
-    const plan = await stripe.subscriptions.create({
-      customer: user.stripeCustomerId,
-      items: [
-        {
-          price_data: {
-            currency: 'usd',
-            unit_amount: 100 * price,
-            product: product.id,
-            recurring: {
-              interval: 'day',
-              interval_count: transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 365 : 30
+    try {
+      const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
+      if (!connectAccount) return null;
+      const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      if (!user || !user.stripeCustomerId) return null;
+      if (!performer) return null;
+      const performerCommissions = await this.performerService.getCommissions(transaction.performerId);
+      const settingCommission = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? await this.settingService.getKeyValue(SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION) : await this.settingService.getKeyValue(SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION);
+      let commission = 0.2;
+      switch (transaction.type) {
+        case PAYMENT_TYPE.MONTHLY_SUBSCRIPTION:
+          commission = performerCommissions?.monthlySubscriptionCommission || settingCommission;
+          break;
+        case PAYMENT_TYPE.YEARLY_SUBSCRIPTION:
+          commission = performerCommissions?.yearlySubscriptionCommission || settingCommission;
+          break;
+        default: commission = performerCommissions?.monthlySubscriptionCommission || settingCommission;
+      }
+      const product = await stripe.products.create({
+        name: `Subcription ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
+        description: `${transaction.type} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
+      });
+      if (!product) return null;
+      // monthly subscription will be used once free trial end
+      const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
+      // eslint-disable-next-line no-nested-ternary
+      // const startRecurringDate = moment().add(transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 30 : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 365 : performer.durationFreeSubscriptionDays, 'days').valueOf();
+      const plan = await stripe.subscriptions.create({
+        customer: user.stripeCustomerId,
+        items: [
+          {
+            price_data: {
+              currency: 'usd',
+              unit_amount: 100 * price,
+              product: product.id,
+              recurring: {
+                interval: 'day',
+                interval_count: transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 365 : 30
+              }
             }
           }
+        ],
+        metadata: {
+          transactionId: transaction._id.toString()
+        },
+        transfer_data: {
+          destination: connectAccount.accountId,
+          amount_percent: 100 - commission * 100 // % percentage
         }
-      ],
-      metadata: {
-        transactionId: transaction._id.toString()
-      },
-      transfer_data: {
-        destination: connectAccount.accountId,
-        amount_percent: 100 - commission * 100 // % percentage
-      }
-    });
-    return plan;
+      });
+      return plan;
+    } catch (e) {
+      console.log('create subscription error', e);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+    }
   }
 
   public async deleteSubscriptionPlan(subscription: SubscriptionModel) {
@@ -271,51 +276,6 @@ export class StripeService {
       });
       const link = await stripe.accounts.createLoginLink(stripeConnectAccount.accountId);
       return link;
-    } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
-    }
-  }
-
-  // PAYMENT
-  public async createSubscriptionCharge(payload: any) {
-    try {
-      const {
-        transaction, subscriptionType, user, performer, stripeCardId
-      } = payload;
-      const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
-      if (!connectAccount) throw new HttpException('Model connected Stripe account was not found', 404);
-      const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
-      const stripe = new Stripe(secretKey, {
-        apiVersion: '2020-08-27'
-      });
-      const performerCommissions = await this.performerService.getCommissions(transaction.performerId);
-      const settingCommission = subscriptionType === SUBSCRIPTION_TYPE.MONTHLY ? await this.settingService.getKeyValue(SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION) : await this.settingService.getKeyValue(SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION);
-      let commission = 0.2;
-      switch (transaction.type) {
-        case PAYMENT_TYPE.MONTHLY_SUBSCRIPTION:
-          commission = performerCommissions?.monthlySubscriptionCommission || settingCommission;
-          break;
-        case PAYMENT_TYPE.YEARLY_SUBSCRIPTION:
-          commission = performerCommissions?.yearlySubscriptionCommission || settingCommission;
-          break;
-        default: commission = 0.2;
-      }
-      const charge = await stripe.charges.create({
-        amount: transaction.totalPrice * 100, // convert cents to dollars
-        currency: 'usd',
-        customer: user.stripeCustomerId,
-        source: stripeCardId,
-        description: `${user?.name || user?.username} ${transaction.type} ${performer?.name || performer?.username}`,
-        metadata: {
-          transactionId: transaction._id.toString() // to track on webhook
-        },
-        receipt_email: user.email,
-        transfer_data: {
-          destination: connectAccount.accountId,
-          amount: (transaction.totalPrice - transaction.totalPrice * commission) * 100
-        }
-      });
-      return charge;
     } catch (e) {
       throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
     }

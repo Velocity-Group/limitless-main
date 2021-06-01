@@ -23,6 +23,7 @@ import axios from 'axios';
 import { SubscriptionDto } from 'src/modules/subscription/dtos/subscription.dto';
 import { UserDto } from 'src/modules/user/dtos';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
+import { UserService } from 'src/modules/user/services';
 import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel } from '../models';
 import {
@@ -51,6 +52,8 @@ export class PaymentService {
     private readonly subscriptionService: SubscriptionService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(forwardRef(() => CouponService))
     private readonly couponService: CouponService,
     @Inject(forwardRef(() => TokenPackageService))
@@ -467,6 +470,7 @@ export class PaymentService {
   }
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
+    console.log('stripe callhook', payload);
     const { type, data } = payload;
     const transactionId = data?.object?.metadata?.transactionId;
     const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
@@ -487,10 +491,6 @@ export class PaymentService {
     if (['charge.succeeded'].includes(type)) {
       transaction.status = PAYMENT_STATUS.SUCCESS;
       transaction.paymentResponseInfo = payload;
-      if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
-        // change free to monthly subscription
-        transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
-      }
       await transaction.save();
       await this.queueEventService.publish(
         new QueueEvent({
@@ -504,7 +504,11 @@ export class PaymentService {
           const subscription = await this.subscriptionService.findOneSubscription({ transactionId });
           if (subscription && !subscription?.subscriptionId) {
           // create plan
-            const plan = await this.stripeService.createSubscriptionPlan(transaction);
+            const [performer, user] = await Promise.all([
+              this.performerService.findById(subscription.performerId),
+              this.userService.findById(subscription.userId)
+            ]);
+            const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, new UserDto(user));
             if (plan) {
               await this.subscriptionService.updateSubscriptionId({
                 userId: transaction.sourceId,
