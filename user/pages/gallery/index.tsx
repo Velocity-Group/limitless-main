@@ -143,20 +143,17 @@ class GalleryViewPage extends PureComponent<IProps> {
         return;
       }
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({
+      await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: gallery.performerId,
         paymentGateway: 'stripe',
         stripeCardId: user.stripeCardIds[0]
-      })).data;
-      if (resp.success || resp.status === 'succeeded') {
-        Router.push('/payment/success');
-      }
+      });
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
-    } finally {
-      this.setState({ submiting: false, openSubscriptionModal: false });
+      Router.push('/payment/cancel');
     }
   }
 

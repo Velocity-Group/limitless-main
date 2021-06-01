@@ -64,7 +64,7 @@ class TokenPackages extends PureComponent<IProps> {
   async purchaseTokenPackage() {
     const { user } = this.props;
     const {
-      isApliedCode, paymentGateway, couponCode, selectedPackage
+      isApliedCode, paymentGateway = 'stripe', couponCode, selectedPackage
     } = this.state;
     if (!user.stripeCardIds || !user.stripeCardIds.length) {
       message.error('Please add payment card');
@@ -73,23 +73,23 @@ class TokenPackages extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      const pay = await (await paymentService.purchaseTokenPackage(selectedPackage._id, {
+      const resp = await (await paymentService.purchaseTokenPackage(selectedPackage._id, {
         paymentGateway,
         stripeCardId: user.stripeCardIds[0],
         couponCode: isApliedCode ? couponCode : null
       })).data;
       // TOTO update logic here
-      if (paymentGateway === 'ccbill' && pay.paymentUrl) {
-        message.success('Redirecting to payment method');
-        window.location.href = pay.paymentUrl;
-      }
-      if (paymentGateway === 'stripe') {
-        this.setState({ openPurchaseModal: false });
+      // if (paymentGateway === 'ccbill' && resp.paymentUrl) {
+      //   message.success('Redirecting to payment method');
+      //   window.location.href = resp.paymentUrl;
+      // }
+      if (resp.success || resp.status === 'succeeded') {
+        Router.push('/payment/success');
       }
     } catch (e) {
       const error = await e;
-      this.setState({ openPurchaseModal: false, submiting: false });
       message.error(error.message || 'Error occured, please try again later');
+      Router.push('/payment/cancel');
     }
   }
 

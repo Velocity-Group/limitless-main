@@ -247,7 +247,7 @@ export class PaymentService {
     paymentTransaction.totalPrice = couponInfo ? totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2)) : totalPrice;
     paymentTransaction.products = products;
     paymentTransaction.paymentResponseInfo = {};
-    paymentTransaction.status = PAYMENT_STATUS.SUCCESS;
+    paymentTransaction.status = PAYMENT_STATUS.PENDING;
     paymentTransaction.couponInfo = couponInfo;
     await paymentTransaction.save();
     return paymentTransaction;
@@ -330,7 +330,6 @@ export class PaymentService {
       });
       return data;
     }
-
     throw new MissingConfigPaymentException();
   }
 
@@ -464,10 +463,16 @@ export class PaymentService {
     console.log('stripe callhook', payload);
     const { type, data } = payload;
     const latestInvoiceId = data?.object?.invoice;
-    if (!latestInvoiceId) {
+    const transactionId = data?.object?.metadata?.transactionId;
+    if (!latestInvoiceId && transactionId) {
       return { ok: false };
     }
-    const transaction = await this.TransactionModel.findOne({ latestInvoiceId });
+    const transaction = await this.TransactionModel.findOne({
+      $or: [
+        { latestInvoiceId },
+        { _id: transactionId }
+      ]
+    });
     if (!transaction) return { ok: false };
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();
