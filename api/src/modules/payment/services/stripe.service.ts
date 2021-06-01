@@ -142,8 +142,6 @@ export class StripeService {
       if (!product) return null;
       // monthly subscription will be used once free trial end
       const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
-      // eslint-disable-next-line no-nested-ternary
-      // const startRecurringDate = moment().add(transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 30 : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 365 : performer.durationFreeSubscriptionDays, 'days').valueOf();
       const plan = await stripe.subscriptions.create({
         customer: user.stripeCustomerId,
         items: [
@@ -168,6 +166,20 @@ export class StripeService {
         },
         trial_period_days: transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.durationFreeSubscriptionDays : 0
       });
+      return plan;
+    } catch (e) {
+      console.log('create subscription error', e);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+    }
+  }
+
+  public async retrieveSubscriptionPlan(transaction: PaymentTransactionModel) {
+    try {
+      const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      const plan = await stripe.subscriptions.retrieve(transaction.paymentResponseInfo);
       return plan;
     } catch (e) {
       console.log('create subscription error', e);

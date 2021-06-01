@@ -66,11 +66,17 @@ class TokenPackages extends PureComponent<IProps> {
     const {
       isApliedCode, paymentGateway, couponCode, selectedPackage
     } = this.state;
-    if (user.isPerformer) return;
+    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      message.error('Please add payment card');
+      Router.push('/user/cards');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
       const pay = await (await paymentService.purchaseTokenPackage(selectedPackage._id, {
-        paymentGateway, couponCode: isApliedCode ? couponCode : null
+        paymentGateway,
+        stripeCardId: user.stripeCardIds[0],
+        couponCode: isApliedCode ? couponCode : null
       })).data;
       // TOTO update logic here
       if (paymentGateway === 'ccbill' && pay.paymentUrl) {

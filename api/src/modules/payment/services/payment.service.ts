@@ -206,6 +206,7 @@ export class PaymentService {
       if (plan) {
         transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.PENDING;
         transaction.paymentResponseInfo = plan;
+        transaction.latestInvoiceId = plan.latest_invoice as any;
         await transaction.save();
         await this.queueEventService.publish(
           new QueueEvent({
@@ -304,20 +305,16 @@ export class PaymentService {
       if (!bitpayApiToken) {
         throw new MissingConfigPaymentException();
       }
-      try {
-        const resp = await this.bitpayService.createInvoice({
-          bitpayApiToken,
-          bitpayProductionMode,
-          transaction: new PaymentDto(transaction),
-          currency
-        }) as any;
-        if (resp.data && resp.data.data && resp.data.data.url) {
-          return { paymentUrl: resp.data.data.url };
-        }
-        return { paymentUrl: `${process.env.USER_URL}/payment/cancel` };
-      } catch (e) {
-        throw new MissingConfigPaymentException();
+      const resp = await this.bitpayService.createInvoice({
+        bitpayApiToken,
+        bitpayProductionMode,
+        transaction: new PaymentDto(transaction),
+        currency
+      }) as any;
+      if (resp.data && resp.data.data && resp.data.data.url) {
+        return { paymentUrl: resp.data.data.url };
       }
+      return { paymentUrl: `${process.env.USER_URL}/payment/cancel` };
     }
     if (paymentGateway === 'stripe') {
       if (!user.stripeCustomerId || !stripeCardId) {
@@ -466,55 +463,38 @@ export class PaymentService {
   public async stripePaymentWebhook(payload: Record<string, any>) {
     console.log('stripe callhook', payload);
     const { type, data } = payload;
-    const transactionId = data?.object?.metadata?.transactionId;
-    const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
-    if (!transactionId || !checkForHexRegExp.test(transactionId)) {
+    const latestInvoiceId = data?.object?.invoice;
+    if (!latestInvoiceId) {
       return { ok: false };
     }
-    const transaction = await this.TransactionModel.findById(transactionId);
+    const transaction = await this.TransactionModel.findOne({ latestInvoiceId });
     if (!transaction) return { ok: false };
-    if (['charge.expired'].includes(type)) {
-      transaction.status = PAYMENT_STATUS.CANCELED;
-      transaction.paymentResponseInfo = payload;
-    }
-    if (['charge.failed'].includes(type)) {
-      transaction.status = PAYMENT_STATUS.FAIL;
-      transaction.paymentResponseInfo = payload;
-      await transaction.save();
-    }
-    if (['charge.succeeded'].includes(type)) {
-      transaction.status = PAYMENT_STATUS.SUCCESS;
-      transaction.paymentResponseInfo = payload;
-      if ([PAYMENT_TYPE.FREE_SUBSCRIPTION].includes(transaction.type)) {
-        transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
-      }
-      await transaction.save();
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: TRANSACTION_SUCCESS_CHANNEL,
-          eventName: EVENT.CREATED,
-          data: new PaymentDto(transaction)
-        })
-      );
-      if ([PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
-        setTimeout(async () => {
-          const subscription = await this.subscriptionService.findOneSubscription({ transactionId });
-          if (subscription && !subscription?.subscriptionId) {
-          // create plan
-            const [performer, user] = await Promise.all([
-              this.performerService.findById(subscription.performerId),
-              this.userService.findById(subscription.userId)
-            ]);
-            const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, new UserDto(user));
-            if (plan) {
-              await this.subscriptionService.updateSubscriptionId({
-                userId: transaction.sourceId,
-                performerId: transaction.performerId
-              }, plan.id);
-            }
-          }
-        }, 5000); // delay 5s to create subscription model first
-      }
+    transaction.paymentResponseInfo = payload;
+    transaction.updatedAt = new Date();
+    switch (type) {
+      case 'charge.expired':
+        transaction.status = PAYMENT_STATUS.CANCELED;
+        await transaction.save();
+        break;
+      case 'charge.failed':
+        transaction.status = PAYMENT_STATUS.FAIL;
+        await transaction.save();
+        break;
+      case 'charge.succeeded': transaction.status = PAYMENT_STATUS.SUCCESS;
+        transaction.latestInvoiceId = latestInvoiceId;
+        if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+          transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
+        }
+        await transaction.save();
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: TRANSACTION_SUCCESS_CHANNEL,
+            eventName: EVENT.CREATED,
+            data: new PaymentDto(transaction)
+          })
+        );
+        break;
+      default: break;
     }
     await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', new PaymentDto(transaction).toResponse());
     return { ok: false };
