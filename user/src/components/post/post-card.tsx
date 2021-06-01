@@ -632,7 +632,7 @@ class FeedCard extends Component<IProps> {
           visible={openTeaser}
           footer={null}
           onCancel={() => this.setState({ openTeaser: false })}
-          width={990}
+          width={650}
         >
           <VideoPlayer
             key={feed?.teaser?._id}

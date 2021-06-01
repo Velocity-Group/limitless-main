@@ -174,6 +174,16 @@ export class StripeService {
     }
   }
 
+  public async subscriptionCallhook(payload: any) {
+    try {
+      console.log('sub', payload);
+      return { ok: true };
+    } catch (e) {
+      console.log('create subscription error', e);
+      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+    }
+  }
+
   public async deleteSubscriptionPlan(subscription: SubscriptionModel) {
     const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
     const stripe = new Stripe(secretKey, {
