@@ -31,7 +31,6 @@ export class StripeService {
     private readonly settingService: SettingService
   ) { }
 
-  // FOR USER
   public async authoriseCard(user: UserDto, payload: AuthoriseCardPayload) {
     try {
       const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
@@ -170,19 +169,6 @@ export class StripeService {
     }
   }
 
-  public async retrieveSubscriptionPlan(transaction: PaymentTransactionModel) {
-    try {
-      const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
-      const stripe = new Stripe(secretKey, {
-        apiVersion: '2020-08-27'
-      });
-      const plan = await stripe.subscriptions.retrieve(transaction.paymentResponseInfo);
-      return plan;
-    } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
-    }
-  }
-
   public async deleteSubscriptionPlan(subscription: SubscriptionModel) {
     const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
     const stripe = new Stripe(secretKey, {
@@ -193,7 +179,6 @@ export class StripeService {
     return true;
   }
 
-  // FOR PERFORMER
   public async createConnectAccount(user: UserDto) {
     try {
       const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
