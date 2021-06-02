@@ -67,6 +67,10 @@ export const userSchema = new mongoose.Schema({
     totalViewTime: {
       type: Number,
       default: 0
+    },
+    totalSubscriptions: {
+      type: Number,
+      default: 0
     }
   },
   createdAt: {

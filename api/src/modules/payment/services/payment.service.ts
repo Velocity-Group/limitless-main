@@ -17,7 +17,7 @@ import { TokenPackageService } from 'src/modules/token-package/services';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { PerformerService } from 'src/modules/performer/services';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
-import { SUBSCRIPTION_STATUS, SUBSCRIPTION_TYPE, UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL } from 'src/modules/subscription/constants';
+import { SUBSCRIPTION_STATUS, SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import axios from 'axios';
 import { SubscriptionDto } from 'src/modules/subscription/dtos/subscription.dto';
@@ -416,15 +416,12 @@ export class PaymentService {
       throw new ForbiddenException();
     }
     if (subscription.subscriptionType === SUBSCRIPTION_TYPE.FREE || !subscription.subscriptionId) {
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-          eventName: EVENT.DELETED,
-          data: new SubscriptionDto(subscription)
-        })
-      );
       subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
       await subscription.save();
+      await Promise.all([
+        this.performerService.updateSubscriptionStat(subscription.performerId, -1),
+        this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
+      ]);
       return { success: true };
     }
     const { subscriptionId } = subscription;
@@ -440,16 +437,13 @@ export class PaymentService {
       const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&username=${ccbillDatalinkUsername}&password=${ccbillDatalinkPassword}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
       // TODO tracking data response
       if (resp.data && resp.data.includes('"results"\n"1"\n')) {
-        await this.queueEventService.publish(
-          new QueueEvent({
-            channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-            eventName: EVENT.DELETED,
-            data: new SubscriptionDto(subscription)
-          })
-        );
         subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
         subscription.updatedAt = new Date();
         await subscription.save();
+        await Promise.all([
+          this.performerService.updateSubscriptionStat(subscription.performerId, -1),
+          this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
+        ]);
         return { success: true };
       }
       return { success: false };
@@ -512,29 +506,22 @@ export class PaymentService {
       throw new ForbiddenException();
     }
     if (!subscription.subscriptionId) {
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-          eventName: EVENT.DELETED,
-          data: new SubscriptionDto(subscription)
-        })
-      );
       subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
       await subscription.save();
+      await Promise.all([
+        this.performerService.updateSubscriptionStat(subscription.performerId, -1),
+        this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
+      ]);
       return { success: true };
     }
     await this.stripeService.deleteSubscriptionPlan(subscription);
-    // TODO tracking data response
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-        eventName: EVENT.DELETED,
-        data: new SubscriptionDto(subscription)
-      })
-    );
     subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
     subscription.updatedAt = new Date();
     await subscription.save();
+    await Promise.all([
+      this.performerService.updateSubscriptionStat(subscription.performerId, -1),
+      this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
+    ]);
     return { success: true };
   }
 

@@ -3,15 +3,12 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import {
   PageableData,
-  QueueEventService,
-  QueueEvent,
   AgendaService
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
 import { UserService, UserSearchService } from 'src/modules/user/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { UserDto } from 'src/modules/user/dtos';
-import { EVENT } from 'src/kernel/constants';
 import { UserSearchRequestPayload } from 'src/modules/user/payloads';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { uniq } from 'lodash';
@@ -25,8 +22,7 @@ import {
 import { SubscriptionDto } from '../dtos/subscription.dto';
 import {
   SUBSCRIPTION_TYPE,
-  SUBSCRIPTION_STATUS,
-  UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL
+  SUBSCRIPTION_STATUS
 } from '../constants';
 
 const CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY = 'CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY';
@@ -42,7 +38,6 @@ export class SubscriptionService {
     private readonly userService: UserService,
     @Inject(SUBSCRIPTION_MODEL_PROVIDER)
     private readonly subscriptionModel: Model<SubscriptionModel>,
-    private readonly queueEventService: QueueEventService,
     private readonly agenda: AgendaService,
     private readonly mailerService: MailerService
   ) {
@@ -139,26 +134,20 @@ export class SubscriptionService {
       existSubscription.subscriptionType = payload.subscriptionType;
       existSubscription.status = SUBSCRIPTION_STATUS.ACTIVE;
       await existSubscription.save();
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-          eventName: EVENT.CREATED,
-          data: new SubscriptionDto(existSubscription)
-        })
-      );
+      await Promise.all([
+        this.performerService.updateSubscriptionStat(existSubscription.performerId, 1),
+        this.userService.updateStats(existSubscription.userId, { totalSubscriptions: 1 })
+      ]);
       return new SubscriptionDto(existSubscription);
     }
     payload.createdAt = new Date();
     payload.updatedAt = new Date();
     payload.status = SUBSCRIPTION_STATUS.ACTIVE;
     const newSubscription = await this.subscriptionModel.create(payload);
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-        eventName: EVENT.CREATED,
-        data: new SubscriptionDto(newSubscription)
-      })
-    );
+    await Promise.all([
+      this.performerService.updateSubscriptionStat(newSubscription.performerId, 1),
+      this.userService.updateStats(newSubscription.userId, { totalSubscriptions: 1 })
+    ]);
     return new SubscriptionDto(newSubscription);
   }
 
