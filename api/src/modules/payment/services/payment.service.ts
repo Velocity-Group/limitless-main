@@ -20,7 +20,6 @@ import { SubscriptionModel } from 'src/modules/subscription/models/subscription.
 import { SUBSCRIPTION_STATUS, SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import axios from 'axios';
-import { SubscriptionDto } from 'src/modules/subscription/dtos/subscription.dto';
 import { UserDto } from 'src/modules/user/dtos';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { UserService } from 'src/modules/user/services';
@@ -122,7 +121,7 @@ export class PaymentService {
     const totalPrice = couponInfo ? price() - parseFloat((price() * couponInfo.value).toFixed(2)) : price();
     return this.TransactionModel.create({
       paymentGateway,
-      source: 'performer',
+      source: 'user',
       sourceId: user._id,
       target: PAYMENT_TARGET_TYPE.PERFORMER,
       targetId: performer._id,
@@ -154,7 +153,7 @@ export class PaymentService {
     if (!performer) return null;
     return this.TransactionModel.create({
       paymentGateway,
-      source: 'performer',
+      source: 'user',
       sourceId: userId,
       target: PAYMENT_TARGET_TYPE.PERFORMER,
       targetId: performerId,
@@ -229,14 +228,14 @@ export class PaymentService {
 
   public async createTokenPaymentTransaction(
     products: any[],
-    gateway: string,
+    paymentGateway: string,
     totalPrice: number,
     user: UserDto,
     couponInfo?: CouponDto
   ) {
     const paymentTransaction = new this.TransactionModel();
     paymentTransaction.originalPrice = totalPrice;
-    paymentTransaction.paymentGateway = gateway || 'stripe';
+    paymentTransaction.paymentGateway = paymentGateway || 'stripe';
     paymentTransaction.source = 'user';
     paymentTransaction.sourceId = user._id;
     paymentTransaction.target = PAYMENT_TARGET_TYPE.TOKEN_PACKAGE;
@@ -493,7 +492,7 @@ export class PaymentService {
         break;
       default: break;
     }
-    await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', new PaymentDto(transaction).toResponse());
+    type.includes('charge') && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', new PaymentDto(transaction).toResponse());
     return { ok: false };
   }
 
@@ -523,28 +522,5 @@ export class PaymentService {
       this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
     ]);
     return { success: true };
-  }
-
-  // listen webhook to update subscription
-  public async stripeSubscriptionCallhook(payload: any) {
-    try {
-      const { type, data } = payload;
-      if (!type.includes('subscription_schedule')) return { ok: false };
-      const subscriptionId = data?.object?.id;
-      const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
-      if (!subscriptionId || !checkForHexRegExp.test(subscriptionId)) {
-        return { ok: false };
-      }
-      const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
-      if (!subscription) return { ok: false };
-      if (data?.object?.status !== 'active') {
-        subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-        subscription.expiredAt = new Date();
-        await subscription.save();
-      }
-      return { ok: true };
-    } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
-    }
   }
 }

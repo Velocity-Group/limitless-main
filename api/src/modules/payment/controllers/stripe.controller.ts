@@ -36,24 +36,6 @@ export class StripeController {
     return DataResponse.ok(info);
   }
 
-  @Post('accounts/callhook')
-  @HttpCode(HttpStatus.OK)
-  async accountCallback(
-    @Body() payload: any
-  ) {
-    const resp = await this.stripeService.connectAccountCallback(payload);
-    return DataResponse.ok(resp);
-  }
-
-  @Post('subscription/callhook')
-  @HttpCode(HttpStatus.OK)
-  async subscriptionCallhook(
-    @Body() payload: any
-  ) {
-    const resp = await this.paymentService.stripeSubscriptionCallhook(payload);
-    return DataResponse.ok(resp);
-  }
-
   @Get('accounts/me')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)

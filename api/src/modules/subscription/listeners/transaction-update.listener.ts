@@ -68,6 +68,7 @@ export class TransactionSubscriptionListener {
     const startRecurringDate = expiredAt;
     const nextRecurringDate = expiredAt;
     if (existSubscription) {
+      existSubscription.paymentGateway = transaction.paymentGateway;
       existSubscription.expiredAt = new Date(expiredAt);
       existSubscription.updatedAt = new Date();
       existSubscription.subscriptionType = subscriptionType;
@@ -82,6 +83,7 @@ export class TransactionSubscriptionListener {
     const newSubscription = await this.subscriptionModel.create({
       performerId: transaction.performerId,
       userId: transaction.sourceId,
+      paymentGateway: transaction.paymentGateway,
       createdAt: new Date(),
       updatedAt: new Date(),
       expiredAt: new Date(expiredAt),

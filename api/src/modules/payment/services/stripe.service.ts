@@ -31,6 +31,10 @@ export class StripeService {
     private readonly settingService: SettingService
   ) { }
 
+  public async getConnectAccount(sourceId: string | ObjectId) {
+    return this.ConnectAccountModel.findOne({ sourceId });
+  }
+
   public async authoriseCard(user: UserDto, payload: AuthoriseCardPayload) {
     try {
       const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
@@ -44,7 +48,7 @@ export class StripeService {
           name: `${user.firstName} ${user.lastName}`,
           description: `Create customer ${user.name || user.username}`
         });
-      if (!customer) throw new HttpException('Could not retrieve customer', 404);
+      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 404);
       !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
       // add card
       const card = await stripe.customers.createSource(customer.id, {
@@ -57,7 +61,7 @@ export class StripeService {
       );
       return cards;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Authorise card on Stripe error, please try again later', 400);
     }
   }
 
@@ -74,7 +78,7 @@ export class StripeService {
           name: `${user.firstName} ${user.lastName}`,
           description: `Create customer ${user.name || user.username}`
         });
-      if (!customer) throw new HttpException('Could not retrieve customer', 404);
+      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 404);
       !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
       // add card
       const card = await stripe.customers.retrieveSource(customer.id, cardId);
@@ -83,7 +87,7 @@ export class StripeService {
       const deleted = await stripe.customers.deleteSource(customer.id, cardId);
       return deleted;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Remove card on Stripe error, please try again later', 400);
     }
   }
 
@@ -100,7 +104,7 @@ export class StripeService {
           name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : `${user?.name || user?.username}`,
           description: `Create customer ${user.name || user.username}`
         });
-      if (!customer) throw new HttpException('Could not retrieve customer', 404);
+      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 404);
       !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
       const cards = await stripe.customers.listSources(
         customer.id,
@@ -108,14 +112,14 @@ export class StripeService {
       );
       return cards;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Get list cards on Stripe error, please try again later', 400);
     }
   }
 
   public async createSubscriptionPlan(transaction: PaymentTransactionModel, performer: PerformerDto, user: UserDto) {
     try {
       const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
-      if (!connectAccount) throw new HttpException('Stripe configuration error', 400);
+      if (!connectAccount) throw new HttpException('This model hasn\'t connect with Stripe', 404);
       const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
@@ -136,7 +140,7 @@ export class StripeService {
         name: `Subcription ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
         description: `${user?.name || user?.username || `${user?.firstName} ${user?.lastName}`} ${transaction.type} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
       });
-      if (!product) throw new HttpException('Stripe configuration error', 400);
+      if (!product) throw new HttpException('Stripe configuration error, please try again later', 400);
       // monthly subscription will be used once free trial end
       const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
       const plan = await stripe.subscriptions.create({
@@ -165,18 +169,22 @@ export class StripeService {
       });
       return plan;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Create a subscription plan on Stripe error, please try again later', 400);
     }
   }
 
   public async deleteSubscriptionPlan(subscription: SubscriptionModel) {
-    const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
-    const stripe = new Stripe(secretKey, {
-      apiVersion: '2020-08-27'
-    });
-    const plan = await stripe.subscriptions.retrieve(subscription.subscriptionId);
-    plan && await stripe.subscriptions.del(plan.id);
-    return true;
+    try {
+      const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      const plan = await stripe.subscriptions.retrieve(subscription.subscriptionId);
+      plan && await stripe.subscriptions.del(plan.id);
+      return true;
+    } catch (e) {
+      throw new HttpException(e?.raw?.message || e?.response || 'Delete a subscription plan on Stripe error, please try again later', 400);
+    }
   }
 
   public async createConnectAccount(user: UserDto) {
@@ -212,25 +220,8 @@ export class StripeService {
       });
       return accountLinks;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Create a connect account on Stripe error, please try again later', 400);
     }
-  }
-
-  public async connectAccountCallback(payload: any) {
-    const { data, type } = payload;
-    if (!['account.updated'].includes(type)) return { success: false };
-    if (!data.object || !data.object.id) return { success: false };
-    const stripeConnectAccount = await this.ConnectAccountModel.findOne({
-      accountId: data.object.id // check params
-    });
-    if (!stripeConnectAccount) return { success: false };
-    stripeConnectAccount.metaData = data;
-    stripeConnectAccount.detailsSubmitted = data.details_submitted;
-    stripeConnectAccount.chargesEnabled = data.charges_enabled;
-    stripeConnectAccount.createdAt = new Date();
-    stripeConnectAccount.updatedAt = new Date();
-    await stripeConnectAccount.save();
-    return { success: true };
   }
 
   public async retrieveConnectAccount(sourceId: ObjectId | string) {
@@ -254,7 +245,7 @@ export class StripeService {
       await stripeConnectAccount.save();
       return stripeConnectAccount;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Retrieve connected account on Stripe error, please try again later', 400);
     }
   }
 
@@ -271,7 +262,7 @@ export class StripeService {
       const link = await stripe.accounts.createLoginLink(stripeConnectAccount.accountId);
       return link;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Get Stripe login link error, please try again later', 400);
     }
   }
 
@@ -297,7 +288,7 @@ export class StripeService {
       });
       return charge;
     } catch (e) {
-      throw new HttpException(e?.raw?.message || e?.response || 'Stripe configuration error', 400);
+      throw new HttpException(e?.raw?.message || e?.response || 'Charge error, please try again later', 400);
     }
   }
 }

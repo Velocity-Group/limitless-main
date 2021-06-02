@@ -48,6 +48,10 @@ export class ReactionService {
 
   ) { }
 
+  public async findOneQuery(query) {
+    return this.reactionModel.findOne(query).lean();
+  }
+
   public async findByQuery(query) {
     return this.reactionModel.find(query).lean();
   }

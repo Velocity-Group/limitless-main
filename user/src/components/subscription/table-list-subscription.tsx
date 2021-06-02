@@ -71,28 +71,28 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Expired Date',
+      title: 'Expire_date',
       dataIndex: 'expiredAt',
       render(date: Date) {
         return <span>{formatDateNoTime(date)}</span>;
       }
     },
     {
-      title: 'Start Recurring Date',
+      title: 'Start_recurring_date',
       dataIndex: 'startRecurringDate',
-      render(date: Date) {
-        return <span>{formatDateNoTime(date)}</span>;
+      render(date: Date, record) {
+        return <span>{record.status === 'active' && formatDateNoTime(date)}</span>;
       }
     },
     {
-      title: 'Next Recurring Date',
+      title: 'Next_recurring_date',
       dataIndex: 'nextRecurringDate',
-      render(date: Date) {
-        return <span>{formatDateNoTime(date)}</span>;
+      render(date: Date, record) {
+        return <span>{record.status === 'active' && formatDateNoTime(date)}</span>;
       }
     },
     {
-      title: 'Last updated at',
+      title: 'Last_updated_at',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {

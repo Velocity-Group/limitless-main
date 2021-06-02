@@ -80,7 +80,6 @@ class PerformerProfile extends PureComponent<IProps> {
     productPage: 0,
     feedPage: 0,
     galleryPage: 0,
-    isSubscribed: false,
     viewedVideo: true,
     openTipModal: false,
     submiting: false,
@@ -113,7 +112,7 @@ class PerformerProfile extends PureComponent<IProps> {
     const { performer } = this.props;
     await this.checkBlock();
     if (performer) {
-      this.setState({ isBookMarked: performer.isBookMarked || false, isSubscribed: performer.isSubscribed });
+      this.setState({ isBookMarked: performer.isBookMarked || false });
       this.loadItems();
       performerService.increaseView(performer.username);
     }
@@ -230,6 +229,7 @@ class PerformerProfile extends PureComponent<IProps> {
 
   async subscribe() {
     const { performer, currentUser } = this.props;
+    if (!performer.canBeSubscribed) return;
     if (!currentUser._id) {
       message.error('Please log in');
       Router.push('/auth/login');
@@ -376,7 +376,6 @@ class PerformerProfile extends PureComponent<IProps> {
       viewedVideo,
       openTipModal,
       submiting,
-      isSubscribed,
       isBookMarked,
       openSubscriptionModal,
       tab,
@@ -558,7 +557,7 @@ class PerformerProfile extends PureComponent<IProps> {
                       </a>
                     </button>
                   </div>
-                  {/* {isSubscribed && (
+                  {/* {performer.isSubscribed && (
                       <div className="stream-btns">
                         <Button
                           type="link"
@@ -585,13 +584,13 @@ class PerformerProfile extends PureComponent<IProps> {
                 <PerformerInfo countries={ui?.countries || []} performer={performer} />
               </div>
             </div>
-            {!isSubscribed && (
+            {!performer.isSubscribed && (
               <div className="subscription-bl">
                 <h5>Monthly Subscription</h5>
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={submiting && this.subscriptionType === 'monthly'}
+                  disabled={(submiting && this.subscriptionType === 'monthly') || !performer.canBeSubscribed}
                   onClick={() => {
                     this.subscriptionType = 'monthly';
                     this.setState({ openSubscriptionModal: true });
@@ -603,13 +602,13 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {!isSubscribed && (
+            {!performer.isSubscribed && (
               <div className="subscription-bl">
                 <h5>Yearly Subscription</h5>
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={submiting && this.subscriptionType === 'yearly'}
+                  disabled={(submiting && this.subscriptionType === 'yearly') || !performer.canBeSubscribed}
                   onClick={() => {
                     this.subscriptionType = 'yearly';
                     this.setState({ openSubscriptionModal: true });
@@ -621,13 +620,13 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {performer?.isFreeSubscription && !isSubscribed && (
+            {performer?.isFreeSubscription && !performer.isSubscribed && (
               <div className="subscription-bl">
                 <h5>Free Subscription</h5>
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={submiting && this.subscriptionType === 'free'}
+                  disabled={(submiting && this.subscriptionType === 'free') || !performer.canBeSubscribed}
                   onClick={() => {
                     this.subscriptionType = 'free';
                     this.setState({ openSubscriptionModal: true });
