@@ -137,7 +137,6 @@ class PayoutRequestPage extends PureComponent<IProps, IStates> {
     const statuses = [
       { text: 'All', key: '' },
       { text: 'Pending', key: 'pending' },
-      { text: 'Approved', key: 'approved' },
       { text: 'Rejected', key: 'rejected' },
       { text: 'Done', key: 'done' }
     ];

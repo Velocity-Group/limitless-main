@@ -14,6 +14,7 @@ import { UserService } from 'src/modules/user/services';
 // import * as moment from 'moment';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { PayoutRequestModel } from 'src/modules/payout-request/models/payout-request.model';
 import { STRIPE_ACCOUNT_CONNECT_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel, StripeConnectAccountModel } from '../models';
 import { AuthoriseCardPayload } from '../payloads/authorise-card.payload';
@@ -237,7 +238,7 @@ export class StripeService {
         apiVersion: '2020-08-27'
       });
       const data = await stripe.accounts.retrieve(stripeConnectAccount.accountId);
-      stripeConnectAccount.chargesEnabled = data.charges_enabled; // charge status
+      stripeConnectAccount.payoutsEnabled = data.payouts_enabled; // payout status
       stripeConnectAccount.detailsSubmitted = data.details_submitted;
       stripeConnectAccount.metaData = data;
       stripeConnectAccount.createdAt = new Date();
@@ -289,6 +290,23 @@ export class StripeService {
       return charge;
     } catch (e) {
       throw new HttpException(e?.raw?.message || e?.response || 'Charge error, please try again later', 400);
+    }
+  }
+
+  public async createPayout(request: PayoutRequestModel) {
+    try {
+      const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: request.sourceId });
+      if (!connectAccount || !connectAccount.accountId) throw new HttpException('Stripe connected account was not found', 404);
+      const account = await stripe.accounts.retrieve(connectAccount.accountId);
+      if (!account || !account.payouts_enabled) throw new HttpException('Could not payout to this account, please check then try again later', 404);
+      console.log(account);
+      return account;
+    } catch (e) {
+      throw new HttpException(e?.raw?.message || e?.response || 'Payout error, please try again later', 400);
     }
   }
 }

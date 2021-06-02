@@ -37,6 +37,9 @@ export const payoutRequestSchema = new Schema({
     type: Number,
     default: 0
   },
+  payoutId: {
+    type: String
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -19,6 +19,7 @@ import * as moment from 'moment';
 import { EARNING_MODEL_PROVIDER } from 'src/modules/earning/providers/earning.provider';
 import { EarningModel } from 'src/modules/earning/models/earning.model';
 import { UserDto } from 'src/modules/user/dtos';
+import { StripeService } from 'src/modules/payment/services';
 import {
   PAYOUT_REQUEST_CHANEL,
   PAYOUT_REQUEST_EVENT,
@@ -50,7 +51,9 @@ export class PayoutRequestService {
     @Inject(forwardRef(() => MailerService))
     private readonly mailService: MailerService,
     @Inject(forwardRef(() => SettingService))
-    private readonly settingService: SettingService
+    private readonly settingService: SettingService,
+    @Inject(forwardRef(() => StripeService))
+    private readonly stripeService: StripeService
   ) { }
 
   public async search(
@@ -307,5 +310,30 @@ export class PayoutRequestService {
     };
     await this.queueEventService.publish(event);
     return request;
+  }
+
+  public async adminPayout(
+    id: string | ObjectId
+  ): Promise<any> {
+    const request = await this.payoutRequestModel.findById(id);
+    if (!request) {
+      throw new EntityNotFoundException();
+    }
+    const payout = await this.stripeService.createPayout(request);
+    return payout;
+    // const oldStatus = request.status;
+    // request.updatedAt = new Date();
+    // await request.save();
+
+    // const event: QueueEvent = {
+    //   channel: PAYOUT_REQUEST_CHANEL,
+    //   eventName: PAYOUT_REQUEST_EVENT.UPDATED,
+    //   data: {
+    //     request,
+    //     oldStatus
+    //   }
+    // };
+    // await this.queueEventService.publish(event);
+    // return request;
   }
 }

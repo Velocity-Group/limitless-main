@@ -9,7 +9,7 @@ import {
   PieChartOutlined, ContainerOutlined, UserOutlined, WomanOutlined,
   VideoCameraOutlined, CameraOutlined, BlockOutlined, FileImageOutlined,
   SkinOutlined, DollarOutlined, HeartOutlined, MenuOutlined,
-  FireOutlined, MailOutlined, LinkOutlined
+  FireOutlined, MailOutlined, LinkOutlined, NotificationOutlined
 } from '@ant-design/icons';
 import Header from '@components/common/layout/header';
 import { Router } from 'next/router';
@@ -361,8 +361,13 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         children: [
           {
             id: 'earning',
-            name: 'Listing',
-            route: '/earning'
+            name: 'Token',
+            route: '/earning/token'
+          },
+          {
+            id: 'earning',
+            name: 'Money',
+            route: '/earning/money'
           }
         ]
       },
@@ -404,6 +409,18 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
             id: 'payment',
             name: 'Listing',
             route: '/token-transactions'
+          }
+        ]
+      },
+      {
+        id: 'request-payout',
+        name: 'Payout Requests',
+        icon: <NotificationOutlined />,
+        children: [
+          {
+            id: 'payout',
+            name: 'Listing',
+            route: '/payout-request'
           }
         ]
       },

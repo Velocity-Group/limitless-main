@@ -85,7 +85,7 @@ export interface IPerformerResponse {
   },
   invitationId?: ObjectId;
   referralId?: ObjectId;
-  canBeSubscribed: boolean;
+  canBeSubscribed?: boolean;
 }
 
 export class PerformerDto {

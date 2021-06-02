@@ -39,7 +39,28 @@ export class RequestPayoutTable extends PureComponent<IProps> {
       {
         title: 'Request Tokens',
         dataIndex: 'requestTokens',
-        key: 'requestTokens'
+        key: 'requestTokens',
+        render(requestTokens: number) {
+          return (
+            <span>
+              <img src="/coin-ico.png" width="15px" alt="coin" />
+              {requestTokens}
+            </span>
+          );
+        }
+      },
+      {
+        title: 'Conversion Rate',
+        dataIndex: 'tokenConversionRate',
+        key: 'tokenConversionRate',
+        render(tokenConversionRate: number, record) {
+          return (
+            <span>
+              $
+              {(tokenConversionRate || 1) * record.requestTokens}
+            </span>
+          );
+        }
       },
       {
         title: 'Status',
@@ -56,16 +77,7 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Created at',
-        dataIndex: 'createdAt',
-        sorter: true,
-        render(date: Date) {
-          return <span>{formatDate(date)}</span>;
-        }
-      },
-
-      {
-        title: 'Updated at',
+        title: 'Last Updated at',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {

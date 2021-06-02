@@ -19,12 +19,12 @@ export class PerformerBankingForm extends PureComponent<IProps> {
       <div
         className="account-form"
       >
-        {stripeAccount && stripeAccount.chargesEnabled && stripeAccount.detailsSubmitted && (
+        {stripeAccount && stripeAccount.payoutsEnabled && stripeAccount.detailsSubmitted && (
           <Button className="primary">
             <a href={loginUrl} target="_blank" rel="noreferrer">You are connected with Stripe, click here to log in</a>
           </Button>
         )}
-        {(!stripeAccount || (stripeAccount && !stripeAccount.chargesEnabled) || (stripeAccount && !stripeAccount.detailsSubmitted)) && (
+        {(!stripeAccount || (stripeAccount && !stripeAccount.payoutsEnabled) || (stripeAccount && !stripeAccount.detailsSubmitted)) && (
           <div>
             <p>Please click here to complete the onboarding process & start earning money.</p>
             <Button

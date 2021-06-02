@@ -185,7 +185,7 @@ export class PerformerService {
         objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: currentUser._id, action: REACTION.BOOK_MARK
       });
       const connectAccount = await this.stripeService.getConnectAccount(model._id);
-      canBeSubscribed = connectAccount && connectAccount.chargesEnabled && connectAccount.detailsSubmitted;
+      canBeSubscribed = connectAccount && connectAccount.payoutsEnabled && connectAccount.detailsSubmitted;
     }
     const dto = new PerformerDto(model);
     dto.isSubscribed = !!isSubscribed;

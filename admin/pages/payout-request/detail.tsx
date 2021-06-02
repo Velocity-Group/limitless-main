@@ -63,6 +63,10 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
+  async handlePayout() {
+
+  }
+
   async onUpdate(id: string) {
     const { status, adminNote } = this.state;
     try {
