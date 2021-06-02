@@ -89,9 +89,7 @@ export class FeedService {
         const difIds = difference(feedIds, Ids);
         const difFileIds = files.filter((file) => difIds.includes(file.refItems[0].itemId.toString()));
         await Promise.all(
-          difFileIds.map(async (fileId) => {
-            await this.fileService.remove(fileId);
-          })
+          difFileIds.map((fileId) => this.fileService.remove(fileId))
         );
       }
     } catch (e) {
@@ -109,32 +107,30 @@ export class FeedService {
         scheduleAt: { $lte: new Date() },
         status: STATUS.INACTIVE
       }).lean();
-      await Promise.all([
-        feeds.forEach(async (feed) => {
-          const v = new FeedDto(feed);
-          await this.feedModel.updateOne(
-            {
-              _id: v._id
-            },
-            {
-              isSchedule: false,
-              status: STATUS.ACTIVE,
-              updatedAt: new Date()
+      await Promise.all(feeds.map((feed) => {
+        const v = new FeedDto(feed);
+        this.feedModel.updateOne(
+          {
+            _id: v._id
+          },
+          {
+            isSchedule: false,
+            status: STATUS.ACTIVE,
+            updatedAt: new Date()
+          }
+        );
+        const oldStatus = feed.status;
+        return this.queueEventService.publish(
+          new QueueEvent({
+            channel: PERFORMER_FEED_CHANNEL,
+            eventName: EVENT.UPDATED,
+            data: {
+              ...v,
+              oldStatus
             }
-          );
-          const oldStatus = feed.status;
-          await this.queueEventService.publish(
-            new QueueEvent({
-              channel: PERFORMER_FEED_CHANNEL,
-              eventName: EVENT.UPDATED,
-              data: {
-                ...v,
-                oldStatus
-              }
-            })
-          );
-        })
-      ]);
+          })
+        );
+      }));
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('Schedule feed error', e);

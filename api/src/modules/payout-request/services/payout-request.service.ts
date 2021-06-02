@@ -261,14 +261,15 @@ export class PayoutRequestService {
     if (!payout) {
       throw new EntityNotFoundException();
     }
-
     const data = new PayoutRequestDto(payout);
-    const { sourceId, source } = data;
+    const { sourceId, source, paymentAccountType } = data;
     if (source === SOURCE_TYPE.PERFORMER) {
       const sourceInfo = await this.performerService.findById(sourceId);
       if (sourceInfo) {
         data.sourceInfo = new PerformerDto(sourceInfo).toResponse();
-        data.paymentAccountInfo = await this.performerService.getBankInfo(sourceInfo._id);
+        if (paymentAccountType === 'paypal') {
+          data.paymentAccountInfo = await this.performerService.getPaymentSetting(sourceInfo._id, 'paypal');
+        }
       }
     }
     return data;
@@ -320,7 +321,12 @@ export class PayoutRequestService {
       throw new EntityNotFoundException();
     }
     const payout = await this.stripeService.createPayout(request);
-    return payout;
+    console.log(payout);
+    if (payout) {
+      request.payoutId = payout.id;
+      await request.save();
+    }
+    return { success: true };
     // const oldStatus = request.status;
     // request.updatedAt = new Date();
     // await request.save();

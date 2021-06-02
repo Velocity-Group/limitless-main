@@ -136,7 +136,6 @@ class PostListing extends PureComponent<IProps> {
                 </a>
               </Link>
             </div>
-            <div />
             <div>
               <SearchFilter
                 onSubmit={this.handleFilter.bind(this)}
@@ -144,7 +143,6 @@ class PostListing extends PureComponent<IProps> {
                 searchWithKeyword
               />
             </div>
-
             <div className="main-container custom">
               <ScrollListFeed
                 items={list}

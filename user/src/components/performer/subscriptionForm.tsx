@@ -58,7 +58,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             {isFreeSubscription && (
             <Form.Item
               name="durationFreeSubscriptionDays"
-              label="Duration of free subscription (days)"
+              label="Duration (days)"
               help="Free subscription in xx days then $xx monthly later"
               rules={[{ required: true }]}
             >

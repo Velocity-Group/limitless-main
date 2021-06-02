@@ -60,12 +60,8 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
       return;
     }
     try {
-      this.setState({ submiting: true });
-      const body = {
-        requestNote: data.requestNote,
-        source: 'performer',
-        requestTokens: data.requestTokens
-      };
+      await this.setState({ submiting: true });
+      const body = { ...data, source: 'performer' };
       await payoutRequestService.create(body);
       message.success('Requested a payout');
       Router.push('/model/payout-request');

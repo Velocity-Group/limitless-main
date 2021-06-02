@@ -128,10 +128,6 @@ const performerSchema = new mongoose.Schema({
     type: String,
     index: true
   },
-  pubicHair: {
-    type: String,
-    index: true
-  },
   bust: {
     type: String,
     index: true

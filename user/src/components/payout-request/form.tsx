@@ -7,7 +7,8 @@ import {
   Statistic,
   Tag,
   InputNumber,
-  Alert
+  Alert,
+  Select
 } from 'antd';
 import {
   PayoutRequestInterface
@@ -31,7 +32,7 @@ const PayoutRequestForm = ({
 }: Props) => {
   const [form] = Form.useForm();
   const {
-    requestNote, requestTokens, status
+    requestNote, requestTokens, status, paymentAccountType
   } = payout;
 
   const [tokens, setToken] = useState(payout?.requestTokens || 0);
@@ -45,7 +46,8 @@ const PayoutRequestForm = ({
       onFinish={(data) => submit(data)}
       initialValues={{
         requestNote: requestNote || '',
-        requestTokens: requestTokens || statsPayout?.remainingUnpaidTokens || 0
+        requestTokens: requestTokens || statsPayout?.remainingUnpaidTokens || 0,
+        paymentAccountType: paymentAccountType || 'stripe'
       }}
     >
       <div>
@@ -71,7 +73,7 @@ const PayoutRequestForm = ({
         </Space>
       </div>
       <Form.Item label="Requested amount of tokens" name="requestTokens">
-        <InputNumber min={1} onChange={(val) => setToken(val)} />
+        <InputNumber min={1} onChange={(val) => setToken(val)} max={statsPayout?.remainingUnpaidTokens} />
       </Form.Item>
       <p className="error-color">{`Conversion rate of tokens to dollars: $${(tokenConversionRate * tokens).toFixed(2)}`}</p>
       <Form.Item label="Note to Admin" name="requestNote">
@@ -87,6 +89,20 @@ const PayoutRequestForm = ({
         <Tag color="orange" style={{ textTransform: 'capitalize' }}>{status}</Tag>
       </Form.Item>
       )}
+      <Form.Item label="Select payout method" name="paymentAccountType">
+        <Select>
+          <Select.Option value="stripe" key="stripe">
+            <img src="/static/stripe-icon.jpeg" width="30px" alt="stripe" />
+            {' '}
+            Stripe
+          </Select.Option>
+          <Select.Option value="paypal" key="paypal">
+            <img src="/static/paypal-ico.png" width="30px" alt="paypal" />
+            {' '}
+            Paypal
+          </Select.Option>
+        </Select>
+      </Form.Item>
       <Form.Item>
         <Button
           className="primary"

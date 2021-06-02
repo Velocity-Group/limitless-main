@@ -15,7 +15,8 @@ export const payoutRequestSchema = new Schema({
   },
   paymentAccountType: {
     type: String,
-    index: true
+    index: true,
+    default: 'stripe'
   },
   requestNote: {
     type: String
@@ -35,7 +36,7 @@ export const payoutRequestSchema = new Schema({
   },
   tokenConversionRate: {
     type: Number,
-    default: 0
+    default: 1
   },
   payoutId: {
     type: String

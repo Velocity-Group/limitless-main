@@ -11,3 +11,4 @@ export * from './trending-profile';
 export * from './scroll-list';
 export * from './grid-card';
 export * from './tip-form';
+export * from './paypalForm';

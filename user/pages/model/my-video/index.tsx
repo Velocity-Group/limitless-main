@@ -129,14 +129,14 @@ class Videos extends PureComponent<IProps> {
           </div>
           <div>
             <Row>
-              <Col xl={17} xs={24}>
+              <Col lg={17} xs={24}>
                 <SearchFilter
                   searchWithKeyword
                   statuses={statuses}
                   onSubmit={this.handleFilter.bind(this)}
                 />
               </Col>
-              <Col xl={7} xs={24} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Col lg={7} xs={24} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Button className="primary">
                   <Link href="/model/my-video/upload">
                     <a>
@@ -160,7 +160,6 @@ class Videos extends PureComponent<IProps> {
               </Col>
             </Row>
           </div>
-          <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
             <TableListVideo
               dataSource={list}

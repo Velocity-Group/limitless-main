@@ -41,7 +41,7 @@ class PayoutRequestPage extends PureComponent<IProps, IStates> {
         pageSize: 10
       },
       sort: {
-        sortBy: 'createAt',
+        sortBy: 'updatedAt',
         sorter: 'desc'
       },
       filter: {}
@@ -115,7 +115,7 @@ class PayoutRequestPage extends PureComponent<IProps, IStates> {
     if (!dateStrings[0] && !dateStrings[1]) {
       await this.setState({
         query: {},
-        sort: { sortBy: 'createdAt', sorter: 'desc' }
+        sort: { sortBy: 'updatedAt', sorter: 'desc' }
       });
       this.getList();
     }

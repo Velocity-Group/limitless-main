@@ -275,8 +275,14 @@ export class PerformerService {
       : null;
 
     // dto.ccbillSetting = await this.paymentGatewaySettingModel.findOne({
-    //   performerId: id
+    //   performerId: id,
+    //   key: 'ccbill'
     // });
+
+    dto.paypalSetting = await this.paymentGatewaySettingModel.findOne({
+      performerId: id,
+      key: 'paypal'
+    });
 
     dto.commissionSetting = await this.commissionSettingModel.findOne({
       performerId: id

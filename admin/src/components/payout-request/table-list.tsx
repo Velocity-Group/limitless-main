@@ -63,6 +63,22 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Payout Gateway',
+        dataIndex: 'paymentAccountType',
+        key: 'paymentAccountType',
+        render: (paymentAccountType: string) => {
+          switch (paymentAccountType) {
+            case 'stripe':
+              return <Tag color="#656fde">Stripe</Tag>;
+            case 'paypal':
+              return <Tag color="#25397c">Paypal</Tag>;
+            default:
+              break;
+          }
+          return <Tag color="default">{paymentAccountType}</Tag>;
+        }
+      },
+      {
         title: 'Status',
         dataIndex: 'status',
         key: 'status',

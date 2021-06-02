@@ -11,7 +11,7 @@ import { UserDto } from 'src/modules/user/dtos';
 import Stripe from 'stripe';
 import { UserService } from 'src/modules/user/services';
 // import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
-// import * as moment from 'moment';
+import * as moment from 'moment';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { PayoutRequestModel } from 'src/modules/payout-request/models/payout-request.model';
@@ -303,8 +303,16 @@ export class StripeService {
       if (!connectAccount || !connectAccount.accountId) throw new HttpException('Stripe connected account was not found', 404);
       const account = await stripe.accounts.retrieve(connectAccount.accountId);
       if (!account || !account.payouts_enabled) throw new HttpException('Could not payout to this account, please check then try again later', 404);
-      console.log(account);
-      return account;
+      const payout = await stripe.transfers.create({
+        amount: request.requestTokens * (request.tokenConversionRate || 1) * 100,
+        currency: 'usd',
+        description: `Payout via request at ${moment(request.createdAt).format('DD/MM/YYYY HH:mm')}`,
+        metadata: {
+          payoutRequestId: request._id.toString()
+        },
+        destination: account.id
+      });
+      return payout;
     } catch (e) {
       throw new HttpException(e?.raw?.message || e?.response || 'Payout error, please try again later', 400);
     }

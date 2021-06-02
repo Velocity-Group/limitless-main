@@ -167,7 +167,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
           <Button className="primary" type="primary" htmlType="submit" disabled={updating || isUploading} loading={updating || isUploading}>
             Submit
           </Button>

@@ -1,8 +1,9 @@
 import {
-  Layout, message, Row, Col, Statistic
+  Layout, message, Statistic, Switch
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
+import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import {
   IPerformer,
@@ -14,6 +15,7 @@ import { earningService } from 'src/services';
 import { getResponseError } from '@lib/utils';
 import { TableListEarning } from '@components/performer/table-earning';
 import { SearchFilter } from 'src/components/common/search-filter';
+import './index.less';
 
 interface IProps {
   performer: IPerformer;
@@ -21,7 +23,7 @@ interface IProps {
 }
 interface IStates {
   loading: boolean;
-  earnings: IEarning[];
+  earning: IEarning[];
   pagination: {
     total: number;
     current: number;
@@ -30,41 +32,46 @@ interface IStates {
   stats: IPerformerStats;
   sortBy: string;
   sort: string;
-  type: string;
+  sourceType: string;
   dateRange: any;
+  isToken: boolean;
 }
 
-class EarningPage extends PureComponent<IProps, IStates> {
-  static onlyPerformer = true;
+const initialState = {
+  loading: true,
+  isToken: false,
+  earning: [],
+  pagination: { total: 0, current: 1, pageSize: 10 },
+  stats: {
+    totalGrossPrice: 0,
+    totalSiteCommission: 0,
+    totalNetPrice: 0,
+    totalReferralCommission: 0,
+    totalAgentCommission: 0
+  },
+  sortBy: 'createdAt',
+  sort: 'desc',
+  sourceType: '',
+  dateRange: null
+};
 
+class EarningPage extends PureComponent<IProps, IStates> {
   static authenticate = true;
 
   constructor(props: IProps) {
     super(props);
-    this.state = {
-      loading: true,
-      earnings: [],
-      pagination: { total: 0, current: 1, pageSize: 10 },
-      stats: {
-        totalGrossPrice: 0,
-        totalSiteCommission: 0,
-        totalNetPrice: 0
-      },
-      sortBy: 'createdAt',
-      sort: 'desc',
-      type: '',
-      dateRange: null
-    };
+    this.state = initialState;
   }
 
   componentDidMount() {
     this.getData();
+    this.getPerformerStats();
   }
 
   async handleFilter(data) {
     const { dateRange } = this.state;
     await this.setState({
-      type: data.type,
+      sourceType: data.type,
       dateRange: {
         ...dateRange,
         fromDate: data.fromDate,
@@ -72,6 +79,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
       }
     });
     this.getData();
+    this.getPerformerStats();
   }
 
   async handleTabsChange(data) {
@@ -82,31 +90,30 @@ class EarningPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
+  async handleSwitch(val) {
+    await this.setState({ ...initialState, isToken: val });
+    this.getData();
+    this.getPerformerStats();
+  }
+
   async getData() {
     const {
-      pagination, sort, sortBy, type, dateRange
+      pagination, sort, sortBy, sourceType, dateRange, isToken
     } = this.state;
-    const { current, pageSize } = pagination;
     try {
-      await this.setState({ loading: true });
-      const [earnings, stats] = await Promise.all([
-        earningService.performerSearch({
-          limit: pageSize,
-          offset: (current - 1) * pageSize,
-          sort,
-          sortBy,
-          type,
-          ...dateRange
-        }),
-        earningService.performerStarts({
-          type,
-          ...dateRange
-        })
-      ]);
-      this.setState({
-        earnings: earnings.data.data,
-        stats: stats.data,
-        pagination: { ...pagination, total: earnings.data.total }
+      const { current, pageSize } = pagination;
+      const earning = await earningService.performerSearch({
+        limit: pageSize,
+        offset: (current - 1) * pageSize,
+        sort,
+        sortBy,
+        sourceType,
+        isToken,
+        ...dateRange
+      });
+      await this.setState({
+        earning: earning.data.data,
+        pagination: { ...pagination, total: earning.data.total }
       });
     } catch (error) {
       message.error(getResponseError(error));
@@ -115,74 +122,85 @@ class EarningPage extends PureComponent<IProps, IStates> {
     }
   }
 
+  async getPerformerStats() {
+    const { dateRange, sourceType, isToken } = this.state;
+    const resp = await earningService.performerStarts({
+      isToken,
+      sourceType,
+      ...dateRange
+    });
+    await this.setState({ stats: resp.data });
+  }
+
   render() {
     const {
-      loading, earnings, pagination, stats
+      loading, earning, pagination, stats, isToken
     } = this.state;
     const { ui } = this.props;
     return (
       <Layout>
         <Head>
           <title>
-            {' '}
-            {ui && ui.siteName}
-            {' '}
-            | Earning Report
+            {`${ui?.siteName} | ${isToken ? 'Token Earning Report' : 'USD Earning Report'}`}
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Earning Report</div>
-          <SearchFilter
-            type={[
-              { key: '', text: 'All' },
-              { key: 'monthly_subscription', text: 'Monthly Subscription' },
-              { key: 'yearly_subscription', text: 'Yearly Subscription' },
-              { key: 'private_chat', text: 'Private Chat' },
-              { key: 'public_chat', text: 'Public Chat' },
-              { key: 'group_chat', text: 'Group Chat' },
-              { key: 'feed', text: 'Feed Post' },
-              { key: 'product', text: 'Product' },
-              { key: 'video', text: 'Video' },
-              { key: 'tip', text: 'Tip' }
-            ]}
-            onSubmit={this.handleFilter.bind(this)}
-            dateRange
-          />
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={8}>
-              <Statistic
-                title="Total Earned"
-                prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                value={stats.totalGrossPrice || 0}
-                precision={2}
-              />
-            </Col>
-            <Col span={8}>
-              <Statistic
-                title="Site Commission"
-                prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                value={stats.totalSiteCommission || 0}
-                precision={2}
-              />
-            </Col>
-            <Col span={8}>
-              <Statistic
-                title="You Earned"
-                prefix={<img alt="coin" src="/static/coin-ico.png" width="20px" />}
-                value={stats.totalNetPrice || 0}
-                precision={2}
-              />
-            </Col>
-          </Row>
-          <div className="table-responsive">
-            <TableListEarning
-              dataSource={earnings}
-              rowKey="_id"
-              loading={loading}
-              pagination={pagination}
-              onChange={this.handleTabsChange.bind(this)}
+          <Page>
+            <div className="page-heading">
+              <Switch checked={isToken} unCheckedChildren="USD EARNING REPORT" checkedChildren="TOKEN EARNING REPORT" onChange={this.handleSwitch.bind(this)} />
+            </div>
+            <SearchFilter
+              type={isToken ? [
+                { key: '', text: 'All type' },
+                { key: 'private_chat', text: 'Private Chat' },
+                { key: 'group_chat', text: 'Group Chat' },
+                { key: 'public_chat', text: 'Public Chat' },
+                { key: 'product', text: 'Product' },
+                { key: 'gallery', text: 'Gallery' },
+                { key: 'feed', text: 'Post' },
+                { key: 'video', text: 'Video' },
+                { key: 'tip', text: 'Tip' }
+                // { key: 'gift', text: 'Gift' },
+                // { key: 'message', text: 'Message' }
+              ] : [
+                { key: '', text: 'All type' },
+                { key: 'monthly_subscription', text: 'Monthly Subscription' },
+                { key: 'yearly_subscription', text: 'Yearly Subscription' }
+              ]}
+              onSubmit={this.handleFilter.bind(this)}
+              dateRange
             />
-          </div>
+            <div className="stats-earning">
+              <Statistic
+                title="Total tokens"
+                prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+                value={stats?.totalGrossPrice || 0}
+                precision={2}
+              />
+              <Statistic
+                title="Admin earned"
+                prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+                value={stats?.totalSiteCommission || 0}
+                precision={2}
+              />
+              <Statistic
+                title="You earned"
+                prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+                value={stats?.totalNetPrice || 0}
+                precision={2}
+              />
+            </div>
+            <div className="table-responsive">
+              <TableListEarning
+                dataSource={earning}
+                rowKey="_id"
+                pagination={pagination}
+                loading={loading}
+                isToken={isToken}
+                onChange={this.handleTabsChange.bind(this)}
+              />
+            </div>
+          </Page>
         </div>
       </Layout>
     );

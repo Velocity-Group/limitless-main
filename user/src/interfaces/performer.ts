@@ -49,6 +49,7 @@ export interface IPerformer {
   score: number;
   bankingInformation: IBanking;
   stripeAccount: any;
+  paypalSetting: any;
   blockCountries: IBlockCountries;
   createdBy: string;
   createdAt: Date;
