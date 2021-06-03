@@ -3,7 +3,7 @@ export interface IPayoutRequest {
   source?: string;
   sourceId?: string;
   sourceInfo?: any;
-  paymentAccountType: strring;
+  paymentAccountType: string;
   paymentAccountInfo: any;
   requestNote?: string;
   adminNote?: string;

@@ -602,6 +602,7 @@ class VideoViewPage extends PureComponent<IProps> {
             <Tabs
               defaultActiveKey="Video"
               onChange={this.onChangeTab.bind(this)}
+              className="custom"
             >
               <TabPane tab="Description" key="description">
                 <p>{video.description || 'No description...'}</p>

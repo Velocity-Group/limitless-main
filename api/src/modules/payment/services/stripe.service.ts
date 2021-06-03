@@ -58,7 +58,7 @@ export class StripeService {
       card && !user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id);
       const cards = await stripe.customers.listSources(
         customer.id,
-        { object: 'card', limit: 100 }
+        { limit: 100 }
       );
       return cards;
     } catch (e) {
@@ -103,13 +103,16 @@ export class StripeService {
         : await stripe.customers.create({
           email: user.email,
           name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : `${user?.name || user?.username}`,
-          description: `Create customer ${user.name || user.username}`
+          description: `Create customer ${user.name || user.username}`,
+          metadata: {
+            userId: user._id.toString()
+          }
         });
       if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 404);
       !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
       const cards = await stripe.customers.listSources(
         customer.id,
-        { object: 'card', limit: 100 }
+        { limit: 100 }
       );
       return cards;
     } catch (e) {

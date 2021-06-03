@@ -323,6 +323,7 @@ class GalleryViewPage extends PureComponent<IProps> {
           <div className="vid-info">
             <div className="main-container">
               <Tabs
+                className="custom"
                 defaultActiveKey="Description"
               >
                 <Tabs.TabPane tab="Description" key="description">

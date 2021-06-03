@@ -6,7 +6,7 @@ import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import {
-  IUIConfig, IUser
+  IUIConfig
 } from 'src/interfaces';
 import { paymentService } from '@services/index';
 import { getResponseError } from '@lib/utils';
@@ -16,7 +16,6 @@ import './index.less';
 
 interface IProps {
   ui: IUIConfig;
-  user: IUser
 }
 
 class CardsPage extends PureComponent<IProps> {
@@ -50,7 +49,13 @@ class CardsPage extends PureComponent<IProps> {
     try {
       await this.setState({ loading: true });
       const resp = await paymentService.getStripeCards();
-      this.setState({ cards: resp.data.data });
+      this.setState({
+        cards: resp.data.data.map((d) => {
+          if (d.card) return { ...d.card, id: d.id };
+          if (d.three_d_secure) return { ...d.three_d_secure, id: d.id };
+          return d;
+        })
+      });
     } catch (error) {
       message.error(getResponseError(error) || 'An error occured. Please try again.');
     } finally {
@@ -62,7 +67,7 @@ class CardsPage extends PureComponent<IProps> {
     const {
       cards, loading, submiting
     } = this.state;
-    const { ui, user } = this.props;
+    const { ui } = this.props;
     return (
       <Layout>
         <Head>
@@ -76,7 +81,7 @@ class CardsPage extends PureComponent<IProps> {
           <Page>
             <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>My Cards</span>
-              {(!user.stripeCardIds || !user.stripeCardIds.length) && (
+              {(!cards.length && !loading) && (
               <Link href="/user/cards/add-card">
                 <a>
                   {' '}
@@ -121,8 +126,7 @@ class CardsPage extends PureComponent<IProps> {
 }
 
 const mapState = (state: any) => ({
-  ui: { ...state.ui },
-  user: { ...state.user.current }
+  ui: { ...state.ui }
 });
 const mapDispatch = { };
 export default connect(mapState, mapDispatch)(CardsPage);

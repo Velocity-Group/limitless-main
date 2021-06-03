@@ -239,7 +239,7 @@ export class PaymentService {
     paymentTransaction.source = 'user';
     paymentTransaction.sourceId = user._id;
     paymentTransaction.target = PAYMENT_TARGET_TYPE.TOKEN_PACKAGE;
-    paymentTransaction.targetId = null;
+    paymentTransaction.targetId = products[0].productId;
     paymentTransaction.performerId = null;
     paymentTransaction.type = PAYMENT_TYPE.TOKEN_PACKAGE;
     paymentTransaction.totalPrice = couponInfo ? totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2)) : totalPrice;
@@ -458,12 +458,8 @@ export class PaymentService {
     if (!latestInvoiceId && !transactionId) {
       return { ok: false };
     }
-    const transaction = await this.TransactionModel.findOne({
-      $or: [
-        { latestInvoiceId },
-        { _id: transactionId }
-      ]
-    });
+    const transaction = latestInvoiceId ? await this.TransactionModel.findOne({ latestInvoiceId })
+      : await this.TransactionModel.findOne({ _id: transactionId });
     if (!transaction) return { ok: false };
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();

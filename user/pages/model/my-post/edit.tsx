@@ -42,27 +42,29 @@ class EditPost extends PureComponent<IProps> {
     return (
       <>
         {feed && (
-        <Layout>
-          <Head>
-            <title>
-              {ui?.siteName}
-              {' '}
-              | Edit Post
-            </title>
-          </Head>
-          <div className="main-container">
-            <Page>
-              <div className="page-heading">
-                <a aria-hidden onClick={() => Router.back()}><ArrowLeftOutlined /></a>
-                &nbsp;
-                <span>Edit Post</span>
-              </div>
-              <div>
-                <FeedForm feed={feed} />
-              </div>
-            </Page>
-          </div>
-        </Layout>
+          <Layout>
+            <Head>
+              <title>
+                {ui?.siteName}
+                {' '}
+                | Edit Post
+              </title>
+            </Head>
+            <div className="main-container">
+              <Page>
+                <div className="page-heading">
+                  <span>
+                    <a aria-hidden onClick={() => Router.back()}><ArrowLeftOutlined /></a>
+                    {' '}
+                    Edit Post
+                  </span>
+                </div>
+                <div>
+                  <FeedForm feed={feed} />
+                </div>
+              </Page>
+            </div>
+          </Layout>
         )}
       </>
     );

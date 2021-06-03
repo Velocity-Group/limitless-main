@@ -1,26 +1,25 @@
 import { PureComponent } from 'react';
 import {
-  message, Layout, Spin
+  message, Layout
 } from 'antd';
-import { } from '@ant-design/icons';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import {
-  ISettings,
-  IUIConfig, IUser
+  ISettings, IUIConfig
 } from 'src/interfaces';
 import { paymentService } from '@services/index';
 import { connect } from 'react-redux';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
+import { Elements, ElementsConsumer } from '@stripe/react-stripe-js';
+import { getCurrentUser } from '@redux/auth/actions';
 import StripeCardForm from '@components/user/stripe-card-form';
 import Router from 'next/router';
 import './index.less';
 
 interface IProps {
-  currentUser: IUser;
   ui: IUIConfig;
-  settings: ISettings
+  settings: ISettings;
+  getCurrentUser: Function;
 }
 
 class NewCardPage extends PureComponent<IProps> {
@@ -30,10 +29,12 @@ class NewCardPage extends PureComponent<IProps> {
     submiting: false
   };
 
-  async handleAddCard(cardToken: any) {
+  async handleAddCard(source: any) {
+    const { getCurrentUser: handleUpdateCurrentUser } = this.props;
     try {
       await this.setState({ submiting: true });
-      await paymentService.addStripeCard({ sourceToken: cardToken.id });
+      await paymentService.addStripeCard({ sourceToken: source.id });
+      handleUpdateCurrentUser();
       message.success('Add card success');
       Router.replace('/user/cards');
     } catch (error) {
@@ -64,7 +65,12 @@ class NewCardPage extends PureComponent<IProps> {
             </div>
             <div className="card-form">
               <Elements stripe={loadStripe(settings.stripePublishableKey || '')}>
-                <StripeCardForm submit={this.handleAddCard.bind(this)} submiting={submiting} />
+                <ElementsConsumer>
+                  {({ stripe, elements }) => (
+                    <StripeCardForm submit={this.handleAddCard.bind(this)} stripe={stripe} elements={elements} submiting={submiting} />
+                  )}
+                </ElementsConsumer>
+
               </Elements>
             </div>
           </Page>
@@ -76,8 +82,7 @@ class NewCardPage extends PureComponent<IProps> {
 
 const mapState = (state: any) => ({
   ui: { ...state.ui },
-  settings: { ...state.settings },
-  currentUser: { ...state.user.current }
+  settings: { ...state.settings }
 });
-const mapDispatch = { };
+const mapDispatch = { getCurrentUser };
 export default connect(mapState, mapDispatch)(NewCardPage);

@@ -31,3 +31,5 @@ export const { forgot, forgotSuccess, forgotFail } = createAsyncAction(
 );
 
 export const logout = createAction('logout');
+
+export const getCurrentUser = createAction('getCurrentUser');
