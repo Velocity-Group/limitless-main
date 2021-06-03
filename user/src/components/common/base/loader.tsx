@@ -2,19 +2,23 @@
 import { PureComponent } from 'react';
 import { Spin } from 'antd';
 import { connect } from 'react-redux';
-import './loader.less';
 import { IUIConfig } from '@interfaces/index';
+import './loader.less';
 
 interface IProps {
-  ui: IUIConfig
+  ui: IUIConfig,
+  customText?: string;
 }
 
 class Loader extends PureComponent<IProps> {
   render() {
-    const { ui } = this.props;
+    const { ui, customText } = this.props;
     return (
       <div className="loading-screen">
-        {ui.logo ? <img alt="loading-ico" src={ui.logo} /> : ui.siteName ? <span>{ui.siteName}</span> : <Spin size="large" />}
+        <div style={{ textAlign: 'center' }}>
+          {ui.logo ? <img alt="loading-ico" src={ui.logo} /> : ui.siteName ? <span>{ui.siteName}</span> : <Spin size="large" />}
+          {customText && <p>{customText}</p>}
+        </div>
       </div>
     );
   }
@@ -22,4 +26,4 @@ class Loader extends PureComponent<IProps> {
 const mapStatesToProps = (state) => ({
   ui: { ...state.ui }
 });
-export default connect(mapStatesToProps)(Loader) as any;
+export default connect(mapStatesToProps)(Loader);

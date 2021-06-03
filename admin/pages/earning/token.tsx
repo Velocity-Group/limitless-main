@@ -73,6 +73,7 @@ class Earning extends PureComponent<IProps> {
       await this.setState({ searching: true });
       const resp = await earningService.search({
         ...filter,
+        isToken: true,
         limit,
         offset: (page - 1) * limit,
         sort,
@@ -97,7 +98,8 @@ class Earning extends PureComponent<IProps> {
     const { filter } = this.state;
     try {
       const resp = await earningService.stats({
-        ...filter
+        ...filter,
+        isToken: true
       });
       await this.setState({
         stats: resp.data
@@ -107,75 +109,34 @@ class Earning extends PureComponent<IProps> {
     }
   }
 
-  async updatePaidStatus() {
-    try {
-      const { filter } = this.state;
-      if (!filter.performerId) {
-        return message.error('Please filter by a performer and date range');
-      }
-      if (!filter.fromDate || !filter.toDate) {
-        return message.error('Please filter by performer and date range');
-      }
-      await earningService.updatePaidStatus(pick(filter, ['performerId', 'fromDate', 'toDate']));
-      message.success('Updated successfully');
-      this.search();
-      this.stats();
-    } catch (error) {
-      message.error('An error occurred, please try again!');
-    }
-    return undefined;
-  }
-
   render() {
     const {
       list, searching, pagination, stats
     } = this.state;
 
-    // const statuses = [
-    //   {
-    //     key: '',
-    //     text: 'All'
-    //   },
-    //   {
-    //     key: 'true',
-    //     text: 'Paid'
-    //   },
-    //   {
-    //     key: 'false',
-    //     text: 'Unpaid'
-    //   }
-    // ];
     const type = [
       {
         key: '',
         text: 'All Type'
       },
       {
-        key: 'monthly_subscription',
-        text: 'Monthly Subscription'
+        key: 'video',
+        text: 'Video'
       },
       {
-        key: 'yearly_subscription',
-        text: 'Yearly Subscription'
+        key: 'product',
+        text: 'Product'
       },
       {
-        key: 'free_subscription',
-        text: 'Free Subscription'
+        key: 'gallery',
+        text: 'Gallery'
       },
       {
-        key: 'digital_product',
-        text: 'Digital Product'
-      },
-      {
-        key: 'physical_product',
-        text: 'Physical Product'
-      },
-      {
-        key: 'performer_post',
+        key: 'feed',
         text: 'Post'
       },
       {
-        key: 'tip_performer',
+        key: 'tip',
         text: 'Tip'
       }
     ];
@@ -183,9 +144,9 @@ class Earning extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Earnings Report</title>
+          <title>Token Earnings Report</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Earnings Report' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Token Earnings Report' }]} />
         <Page>
           <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={8}>

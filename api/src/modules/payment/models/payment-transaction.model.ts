@@ -47,6 +47,8 @@ export class PaymentTransactionModel extends Document {
 
   paymentResponseInfo: any;
 
+  latestInvoiceId: string;
+
   status: string;
 
   createdAt: Date;

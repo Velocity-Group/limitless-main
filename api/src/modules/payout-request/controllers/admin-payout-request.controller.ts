@@ -23,6 +23,18 @@ import { PayoutRequestUpdatePayload } from '../payloads/payout-request.payload';
 export class AdminPayoutRequestController {
   constructor(private readonly payoutRequestService: PayoutRequestService) {}
 
+  @Post('/payout/:id')
+  @HttpCode(HttpStatus.OK)
+  @Roles('admin')
+  @UseGuards(RoleGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async payout(
+    @Param('id') id: string
+  ): Promise<DataResponse<any>> {
+    const data = await this.payoutRequestService.adminPayout(id);
+    return DataResponse.ok(data);
+  }
+
   @Post('/status/:id')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')

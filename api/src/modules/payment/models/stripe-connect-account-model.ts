@@ -12,7 +12,7 @@ export class StripeConnectAccountModel extends Document {
 
   metaData: any;
 
-  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
 
   detailsSubmitted: boolean;
 

@@ -19,7 +19,6 @@ export default class ScrollListFeed extends PureComponent<IProps> {
     const {
       items = [], loadMore, onDelete, canLoadmore, loading = false, isGrid = false
     } = this.props;
-
     return (
       <InfiniteScroll
         dataLength={items.length}

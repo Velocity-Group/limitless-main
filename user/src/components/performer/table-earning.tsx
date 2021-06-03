@@ -10,11 +10,15 @@ interface IProps {
   pagination: {};
   onChange: Function;
   loading: boolean;
+  isToken: boolean;
 }
 
 export class TableListEarning extends PureComponent<IProps> {
   render() {
-    const columns = [
+    const {
+      dataSource, rowKey, pagination, onChange, loading, isToken
+    } = this.props;
+    const columns = isToken ? [
       {
         title: 'User',
         dataIndex: 'userInfo',
@@ -28,45 +32,35 @@ export class TableListEarning extends PureComponent<IProps> {
       },
       {
         title: 'Type',
-        dataIndex: 'sourceType',
-        render(sourceType: string) {
-          switch (sourceType) {
+        dataIndex: 'type',
+        render(type: string) {
+          switch (type) {
             case 'private_chat':
               return <Tag color="violet">Private Chat</Tag>;
+            case 'group_chat':
+              return <Tag color="violet">Group Chat</Tag>;
             case 'public_chat':
               return <Tag color="violet">Public Chat</Tag>;
-            case 'performer':
-              return <Tag color="red">Subscription</Tag>;
-            case 'performer_product':
-              return <Tag color="blue">Store</Tag>;
-            case 'performer_post':
+            case 'feed':
               return <Tag color="green">Post</Tag>;
-            case 'tip_performer':
+            case 'tip':
               return <Tag color="orange">Tip</Tag>;
+            case 'gift':
+              return <Tag color="orange">Gift</Tag>;
+            case 'message':
+              return <Tag color="pink">Message</Tag>;
           }
-          return <Tag color="#936dc9">{sourceType}</Tag>;
+          return <Tag color="#936dc9">{type}</Tag>;
         }
       },
       {
         title: 'GROSS',
         dataIndex: 'grossPrice',
-        render(grossPrice: number) {
+        render(grossPrice: number, record: any) {
           return (
-            <span>
-              <img src="/static/coin-ico.png" alt="coin" width="15px" />
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
               {grossPrice.toFixed(2)}
-            </span>
-          );
-        }
-      },
-      {
-        title: 'NET',
-        dataIndex: 'netPrice',
-        render(netPrice: number) {
-          return (
-            <span>
-              <img src="/static/coin-ico.png" alt="coin" width="15px" />
-              {netPrice.toFixed(2)}
             </span>
           );
         }
@@ -74,58 +68,118 @@ export class TableListEarning extends PureComponent<IProps> {
       {
         title: 'Site_Commission',
         dataIndex: 'siteCommission',
-        render(commission: number, record) {
+        render(commission: number, record: any) {
           return (
-            <span>
-              {(commission || 0) * 100}
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {commission * 100}
               % -
               {' '}
-              <img src="/static/coin-ico.png" alt="coin" width="15px" />
-              {((commission || 0) * record.grossPrice).toFixed(2)}
+              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
+              {commission ? (commission * record.grossPrice).toFixed(2) : '0.00'}
             </span>
           );
         }
       },
-      // {
-      //   title: 'Status',
-      //   dataIndex: 'isPaid',
-      //   sorter: true,
-      //   render(isPaid: boolean) {
-      //     switch (isPaid) {
-      //       case true:
-      //         return <Tag color="green">Paid</Tag>;
-      //       case false:
-      //         return <Tag color="orange">Pending</Tag>;
-      //     }
-      //   }
-      // },
-      // {
-      //   title: 'Paid At',
-      //   dataIndex: 'paidAt',
-      //   sorter: true,
-      //   render(date: Date) {
-      //     return <span>{date ? formatDate(date) : null}</span>;
-      //   }
-      // },
+      {
+        title: 'NET',
+        dataIndex: 'netPrice',
+        render(netPrice: number, record: any) {
+          return (
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
+              {(netPrice || 0).toFixed(2)}
+            </span>
+          );
+        }
+      },
       {
         title: 'Date',
-        dataIndex: 'createdAt',
+        dataIndex: 'updatedAt',
+        sorter: true,
+        render(date: Date) {
+          return <span style={{ whiteSpace: 'nowrap' }}>{formatDate(date)}</span>;
+        }
+      }
+    ] : [
+      {
+        title: 'User',
+        dataIndex: 'userInfo',
+        render(userInfo) {
+          return (
+            <span>
+              {userInfo?.name || userInfo?.username || 'N/A'}
+            </span>
+          );
+        }
+      },
+      {
+        title: 'Type',
+        dataIndex: 'type',
+        render(type: string) {
+          switch (type) {
+            case 'monthly_subscription':
+              return <Tag color="red">Monthly Sub</Tag>;
+            case 'yearly_subscription':
+              return <Tag color="red">Yearly Sub</Tag>;
+          }
+          return <Tag color="#936dc9">{type}</Tag>;
+        }
+      },
+      {
+        title: 'GROSS',
+        dataIndex: 'grossPrice',
+        render(grossPrice: number, record: any) {
+          return (
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
+              {grossPrice.toFixed(2)}
+            </span>
+          );
+        }
+      },
+      {
+        title: 'Site_Commission',
+        dataIndex: 'siteCommission',
+        render(commission: number, record: any) {
+          return (
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {commission * 100}
+              % -
+              {' '}
+              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
+              {commission ? (commission * record.grossPrice).toFixed(2) : '0.00'}
+            </span>
+          );
+        }
+      },
+      {
+        title: 'NET',
+        dataIndex: 'netPrice',
+        render(netPrice: number, record: any) {
+          return (
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
+              {(netPrice || 0).toFixed(2)}
+            </span>
+          );
+        }
+      },
+      {
+        title: 'Date',
+        dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
           return <span>{formatDate(date)}</span>;
         }
       }
     ];
-    const {
-      dataSource, rowKey, pagination, onChange, loading
-    } = this.props;
     return (
       <div className="table-responsive">
         <Table
+          loading={loading}
           dataSource={dataSource}
           columns={columns}
           rowKey={rowKey}
-          loading={loading}
           pagination={pagination}
           onChange={onChange.bind(this)}
         />

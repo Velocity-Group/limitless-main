@@ -1,4 +1,6 @@
-import { Layout, message, Tabs } from 'antd';
+import {
+  Layout, message, Tabs, Tooltip
+} from 'antd';
 import { PureComponent } from 'react';
 import Page from '@components/common/layout/page';
 import {
@@ -19,7 +21,10 @@ import UserPerformerBookmarks from '@components/user/bookmarks/performer-bookmar
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
-import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
+import { ScrollListGallery } from '@components/gallery/scroll-list-gallery'; import {
+  FireOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, StarOutlined
+} from '@ant-design/icons';
+import '../index.less';
 
 interface IProps {
   ui: IUIConfig;
@@ -48,34 +53,33 @@ interface IStates {
   tab: string;
 }
 
+const initialState = {
+  loading: false,
+  feeds: [],
+  totalFeeds: 0,
+  currentPage: {
+    feed: 0,
+    gallery: 0,
+    performer: 0,
+    video: 0,
+    product: 0
+  },
+  limit: 12,
+  videos: [],
+  totalVideos: 0,
+  galleries: [],
+  totalGalleries: 0,
+  performers: [],
+  totalPerformers: 0,
+  products: [],
+  totalProducts: 0,
+  tab: 'feeds'
+};
+
 class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   static authenticate = true;
 
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      loading: false,
-      feeds: [],
-      totalFeeds: 0,
-      currentPage: {
-        feed: 0,
-        gallery: 0,
-        performer: 0,
-        video: 0,
-        product: 0
-      },
-      limit: 12,
-      videos: [],
-      totalVideos: 0,
-      galleries: [],
-      totalGalleries: 0,
-      performers: [],
-      totalPerformers: 0,
-      products: [],
-      totalProducts: 0,
-      tab: 'feeds'
-    };
-  }
+  state = initialState;
 
   componentDidMount() {
     this.getBookmarkedPosts();
@@ -106,9 +110,9 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  onTabsChange(key: string) {
+  async onTabsChange(key: string) {
+    await this.setState({ ...initialState, tab: key });
     this.loadData(key);
-    this.setState({ tab: key });
   }
 
   async onDeleteFeed(feed: IFeed) {
@@ -138,7 +142,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         offset: currentPage.feed * limit
       });
       this.setState({
-        feeds: [...feeds, resp.data.data],
+        feeds: [...feeds, ...resp.data.data],
         totalFeeds: resp.data.total
       });
     } catch (error) {
@@ -157,7 +161,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         offset: currentPage.video * limit
       });
       this.setState({
-        videos: [...videos, resp.data.data],
+        videos: [...videos, ...resp.data.data],
         totalVideos: resp.data.total
       });
     } catch (error) {
@@ -176,7 +180,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         offset: currentPage.gallery * limit
       });
       this.setState({
-        galleries: [...galleries, resp.data.data],
+        galleries: [...galleries, ...resp.data.data],
         totalGalleries: resp.data.total
       });
     } catch (error) {
@@ -195,7 +199,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         offset: currentPage.product * limit
       });
       this.setState({
-        products: [...products, resp.data.data],
+        products: [...products, ...resp.data.data],
         totalProducts: resp.data.total
       });
     } catch (error) {
@@ -215,7 +219,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
       });
 
       this.setState({
-        performers: [...performers, resp.data.data],
+        performers: [...performers, ...resp.data.data],
         totalPerformers: resp.data.total
       });
     } catch (error) {
@@ -269,71 +273,69 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Bookmarks</div>
-          <div className="main-container">
-            <Page>
-              <Tabs
-                defaultActiveKey={tab || 'feeds'}
-                style={{ padding: '0 24px' }}
-                size="large"
-                onChange={this.onTabsChange.bind(this)}
-              >
-                <Tabs.TabPane tab="Posts" key="feeds">
-                  <div className="main-container custom">
-                    <ScrollListFeed
-                      items={feeds.filter((f) => f.objectInfo)}
-                      loading={loading}
-                      canLoadmore={totalFeeds > feeds.length}
-                      onDelete={this.onDeleteFeed.bind(this)}
-                      loadMore={this.handlePagechange.bind(this, 'feeds')}
-                    />
-                  </div>
-                </Tabs.TabPane>
-                <Tabs.TabPane tab="Videos" key="videos">
-                  <div className="main-container custom">
-                    <ScrollListVideo
-                      items={videos.filter((f) => f.objectInfo)}
-                      loading={loading}
-                      canLoadmore={totalVideos > videos.length}
-                      loadMore={this.handlePagechange.bind(this, 'videos')}
-                    />
-                  </div>
-                </Tabs.TabPane>
-                <Tabs.TabPane tab="Galleries" key="galleries">
-                  <div className="main-container custom">
-                    <ScrollListGallery
-                      items={galleries.filter((f) => f.objectInfo)}
-                      loading={loading}
-                      canLoadmore={totalGalleries > galleries.length}
-                      loadMore={this.handlePagechange.bind(this, 'galleries')}
-                    />
-                  </div>
-                </Tabs.TabPane>
-                <Tabs.TabPane tab="Products" key="products">
-                  <ScrollListProduct
+          <Page>
+            <div className="page-heading">Bookmarks</div>
+            <Tabs
+              defaultActiveKey={tab || 'feeds'}
+              style={{ padding: '0 24px' }}
+              size="large"
+              onChange={this.onTabsChange.bind(this)}
+            >
+              <Tabs.TabPane tab={<Tooltip title="Feeds"><FireOutlined /></Tooltip>} key="feeds">
+                <div className="main-container custom">
+                  <ScrollListFeed
+                    items={feeds.map((f) => f.objectInfo)}
                     loading={loading}
-                    items={products.filter((p) => p.objectInfo)}
-                    canLoadmore={totalProducts > products.length}
-                    loadMore={this.handlePagechange.bind(
-                      this,
-                      'products'
-                    )}
+                    canLoadmore={totalFeeds > feeds.length}
+                    onDelete={this.onDeleteFeed.bind(this)}
+                    loadMore={this.handlePagechange.bind(this, 'feeds')}
                   />
-                </Tabs.TabPane>
-                <Tabs.TabPane tab="Models" key="performers">
-                  <UserPerformerBookmarks
+                </div>
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={<Tooltip title="Videos"><VideoCameraOutlined /></Tooltip>} key="videos">
+                <div className="main-container custom">
+                  <ScrollListVideo
+                    items={videos.map((f) => f.objectInfo)}
                     loading={loading}
-                    performers={performers.filter((p) => p.objectInfo)}
-                    total={totalPerformers}
-                    loadMore={this.handlePagechange.bind(
-                      this,
-                      'performers'
-                    )}
+                    canLoadmore={totalVideos > videos.length}
+                    loadMore={this.handlePagechange.bind(this, 'videos')}
                   />
-                </Tabs.TabPane>
-              </Tabs>
-            </Page>
-          </div>
+                </div>
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={<Tooltip title="Galleries"><PictureOutlined /></Tooltip>} key="galleries">
+                <div className="main-container custom">
+                  <ScrollListGallery
+                    items={galleries.map((f) => f.objectInfo)}
+                    loading={loading}
+                    canLoadmore={totalGalleries > galleries.length}
+                    loadMore={this.handlePagechange.bind(this, 'galleries')}
+                  />
+                </div>
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={<Tooltip title="Shop"><ShopOutlined /></Tooltip>} key="products">
+                <ScrollListProduct
+                  loading={loading}
+                  items={products.map((p) => p.objectInfo)}
+                  canLoadmore={totalProducts > products.length}
+                  loadMore={this.handlePagechange.bind(
+                    this,
+                    'products'
+                  )}
+                />
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={<Tooltip title="Models"><StarOutlined /></Tooltip>} key="performers">
+                <UserPerformerBookmarks
+                  loading={loading}
+                  performers={performers.map((p) => p.objectInfo)}
+                  total={totalPerformers}
+                  loadMore={this.handlePagechange.bind(
+                    this,
+                    'performers'
+                  )}
+                />
+              </Tabs.TabPane>
+            </Tabs>
+          </Page>
         </div>
       </Layout>
     );

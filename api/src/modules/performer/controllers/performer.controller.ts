@@ -43,7 +43,8 @@ import {
 import {
   SelfUpdatePayload,
   PerformerSearchPayload,
-  BankingSettingPayload
+  BankingSettingPayload,
+  PaymentGatewaySettingPayload
 } from '../payloads';
 import { PerformerService, PerformerSearchService } from '../services';
 
@@ -304,6 +305,20 @@ export class PerformerController {
       payload,
       user
     );
+    return DataResponse.ok(data);
+  }
+
+  @Put('/:id/payment-gateway-settings')
+  @HttpCode(HttpStatus.OK)
+  @Roles('performer')
+  @UseGuards(RoleGuard)
+  async updatePaymentGatewaySetting(
+    @Body() payload: PaymentGatewaySettingPayload,
+    @CurrentUser() user: UserDto
+  ) {
+    // eslint-disable-next-line no-param-reassign
+    payload.performerId = user._id;
+    const data = await this.performerService.updatePaymentGateway(payload);
     return DataResponse.ok(data);
   }
 

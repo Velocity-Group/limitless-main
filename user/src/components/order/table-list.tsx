@@ -77,7 +77,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Date',
+      title: 'Last_updated',
       dataIndex: 'createdAt',
       sorter: true,
       render(date: Date) {

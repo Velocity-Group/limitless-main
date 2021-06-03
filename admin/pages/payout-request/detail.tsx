@@ -9,7 +9,8 @@ import {
   Input,
   Space,
   Statistic,
-  Alert
+  Alert,
+  Tag
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
@@ -63,11 +64,14 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
-  async onUpdate(id: string) {
-    const { status, adminNote } = this.state;
+  async onUpdate() {
+    const { status, adminNote, request } = this.state;
     try {
       await this.setState({ loading: true });
-      await payoutRequestService.update(id, {
+      if (status === 'done' && request.paymentAccountType === 'stripe') {
+        await payoutRequestService.payout(request._id);
+      }
+      await payoutRequestService.update(request._id, {
         status,
         adminNote
       });
@@ -75,7 +79,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
       Router.replace('/payout-request');
     } catch (e) {
       const err = await Promise.resolve(e);
-      message.error(getResponseError(err));
+      message.error(getResponseError(err), 10);
     } finally {
       this.setState({ loading: false });
     }
@@ -144,16 +148,19 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
                       <Space size="large">
                         <Statistic
+                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
                           title="Total Earned Tokens"
                           value={statsPayout?.totalEarnedTokens || 0}
                           precision={2}
                         />
                         <Statistic
+                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
                           title="Previous paid out tokens"
                           value={statsPayout?.previousPaidOutTokens || 0}
                           precision={2}
                         />
                         <Statistic
+                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
                           title="Remaining unpaid tokens"
                           value={statsPayout?.remainingUnpaidTokens || 0}
                           precision={2}
@@ -168,12 +175,12 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                       <strong>{request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}</strong>
                     </p>
                     <p>
-                      Requested amount of tokens:
+                      Requested tokens:
                       {' '}
                       {request.requestTokens || 0}
                     </p>
                     <p>
-                      Requested Date:
+                      Requested at:
                       {' '}
                       {formatDate(request.createdAt)}
                     </p>
@@ -183,76 +190,35 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                       {request.requestNote && <Alert message={request.requestNote} />}
                     </p>
                   </Col>
+
                   <Col md={12} lg={12} xs={24}>
-                    <h4>User Banking Informations</h4>
                     <p>
-                      First Name:
+                      Payout payment gateway:
                       {' '}
-                      {paymentAccountInfo?.firstName || 'N/A'}
+                      <Tag style={{ textTransform: 'capitalize' }} color="cyan">{request.paymentAccountType}</Tag>
                     </p>
-                    <p>
-                      Last Name:
-                      {' '}
-                      {paymentAccountInfo?.lastName || 'N/A'}
-                    </p>
-                    <p>
-                      Bank Name:
-                      {' '}
-                      {paymentAccountInfo?.bankName || 'N/A'}
-                    </p>
-                    <p>
-                      Bank Account Number:
-                      {' '}
-                      {paymentAccountInfo?.bankName || 'N/A'}
-                    </p>
-                    {paymentAccountInfo?.SSN && (
-                    <p>
-                      Bank SSN:
+                    {request.paymentAccountType === 'paypal' && (
+                    <>
+                      <h4>Paypal Informations</h4>
+                      <p>
+                        Email address:
                         {' '}
-                      {paymentAccountInfo?.SSN || 'N/A'}
-                    </p>
-                    )}
-                    {paymentAccountInfo?.bankSwiftCode && (
-                    <p>
-                      Bank SWIFT:
+                        {paymentAccountInfo?.value?.email || 'N/A'}
+                      </p>
+                      <p>
+                        Phone number:
                         {' '}
-                      {paymentAccountInfo?.bankSwiftCode || 'N/A'}
-                    </p>
-                    )}
-                    {paymentAccountInfo?.address && (
-                    <p>
-                      Bank Address:
-                        {' '}
-                      {paymentAccountInfo?.address || 'N/A'}
-                    </p>
-                    )}
-                    {paymentAccountInfo?.city && (
-                    <p>
-                      Bank City:
-                        {' '}
-                      {paymentAccountInfo?.city}
-                    </p>
-                    )}
-                    {paymentAccountInfo?.state && (
-                    <p>
-                      Bank State:
-                        {' '}
-                      {paymentAccountInfo?.state || 'N/A'}
-                    </p>
-                    )}
-                    {paymentAccountInfo?.country && (
-                    <p>
-                      Bank Country:
-                        {' '}
-                      {paymentAccountInfo?.country}
-                    </p>
+                        {paymentAccountInfo?.value?.phoneNumber || 'N/A'}
+                      </p>
+                    </>
                     )}
                   </Col>
                   <Col md={24} lg={24}>
                     <div style={{ marginBottom: '10px' }}>
                       <p>
-                        Update Status here:
+                        Update status here:
                       </p>
+                      {request.paymentAccountType === 'stripe' && <p style={{ color: 'red' }}><small>Once you select to Done, system is going to payout via Stripe Connect</small></p>}
                       <Select
                         disabled={loading || ['done', 'rejected'].includes(request?.status)}
                         style={{ width: '100%' }}
@@ -262,7 +228,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                         {/* <Select.Option key="approved" value="approved">
                           Approved
                         </Select.Option> */}
-                        <Select.Option key="pending" value="pending">
+                        <Select.Option key="pending" value="pending" disabled>
                           Pending
                         </Select.Option>
                         <Select.Option key="rejected" value="rejected">
@@ -290,7 +256,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 <div style={{ marginBottom: '10px', display: 'flex' }}>
                   <Button
                     type="primary"
-                    onClick={this.onUpdate.bind(this, request._id)}
+                    onClick={this.onUpdate.bind(this)}
                   >
                     Update
                   </Button>

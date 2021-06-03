@@ -104,7 +104,11 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
     const statuses = [
       {
         key: '',
-        text: 'Payment Status'
+        text: 'All Status'
+      },
+      {
+        key: 'fail',
+        text: 'Fail'
       },
       {
         key: 'success',
@@ -115,8 +119,8 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
         text: 'Pending'
       },
       {
-        key: 'Refunded',
-        text: 'refunded'
+        key: 'canceled',
+        text: 'Canceled'
       }
     ];
     return (

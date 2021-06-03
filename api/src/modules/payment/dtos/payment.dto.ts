@@ -38,6 +38,8 @@ export class IPaymentResponse {
 
   paymentResponseInfo?: any;
 
+  latestInvoiceId?: string;
+
   totalPrice?: number;
 
   originalPrice?: number;
@@ -76,6 +78,8 @@ export class PaymentDto {
 
   paymentResponseInfo?: any;
 
+  latestInvoiceId?: string;
+
   totalPrice?: number;
 
   originalPrice?: number;
@@ -105,6 +109,7 @@ export class PaymentDto {
           'type',
           'products',
           'paymentResponseInfo',
+          'latestInvoiceId',
           'status',
           'totalPrice',
           'originalPrice',
@@ -137,7 +142,8 @@ export class PaymentDto {
     };
 
     const privateInfo = {
-      paymentResponseInfo: this.paymentResponseInfo
+      paymentResponseInfo: this.paymentResponseInfo,
+      latestInvoiceId: this.latestInvoiceId
     };
     if (!includePrivateInfo) {
       return publicInfo;

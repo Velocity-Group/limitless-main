@@ -9,8 +9,8 @@ class SubscriptionService extends APIRequest {
     return this.get(this.buildUrl('/subscriptions/user/search', query));
   }
 
-  cancelSubscription(id: string) {
-    return this.post(`/payment/ccbill/cancel-subscription/${id}`);
+  cancelSubscription(id: string, gateway: string) {
+    return this.post(`/payment/${gateway}/cancel-subscription/${id}`);
   }
 }
 export const subscriptionService = new SubscriptionService();

@@ -28,6 +28,7 @@ import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { ReportForm } from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
+import Loader from '@components/common/base/loader';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
 import { IFeed, IUser } from '../../interfaces';
@@ -58,6 +59,7 @@ class FeedCard extends Component<IProps> {
     isOpenComment: false,
     isLiked: false,
     isBookMarked: false,
+    isBought: false,
     totalLike: 0,
     totalComment: 0,
     isFirstLoadComment: true,
@@ -81,6 +83,7 @@ class FeedCard extends Component<IProps> {
       this.setState({
         isLiked: feed.isLiked,
         isBookMarked: feed.isBookMarked,
+        isBought: feed.isBought,
         totalLike: feed.totalLike,
         totalComment: feed.totalComment,
         polls: feed.polls ? feed.polls : [],
@@ -139,14 +142,14 @@ class FeedCard extends Component<IProps> {
         await reactionService.create({
           objectId: feed._id,
           action: 'book_mark',
-          objectType: `feed_${feed.type}`
+          objectType: 'feed'
         });
         this.setState({ isBookMarked: true });
       } else {
         await reactionService.delete({
           objectId: feed._id,
           action: 'book_mark',
-          objectType: `feed_${feed.type}`
+          objectType: 'feed'
         });
         this.setState({ isBookMarked: false });
       }
@@ -228,21 +231,30 @@ class FeedCard extends Component<IProps> {
   }
 
   async subscribe() {
-    const { feed } = this.props;
+    const { feed, user } = this.props;
+    if (!user._id) {
+      message.error('Please log in');
+      Router.push('/auth/login');
+      return;
+    }
+    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      message.error('Please add payment card');
+      Router.push('/user/cards');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: feed.fromSourceId })).data;
-      if (resp.paymentUrl) {
-        message.info('Redirecting to payment method...');
-        window.location.href = resp.paymentUrl;
-        return;
-      }
-      message.error('An error occured, please try again later');
+      const resp = await (await paymentService.subscribePerformer({
+        type: this.subscriptionType,
+        performerId: feed.fromSourceId,
+        paymentGateway: 'stripe',
+        stripeCardId: user.stripeCardIds[0]
+      })).data;
+      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
-    } finally {
-      this.setState({ submiting: false, openSubscriptionModal: false });
+      this.setState({ openSubscriptionModal: false, submiting: false });
     }
   }
 
@@ -277,6 +289,7 @@ class FeedCard extends Component<IProps> {
       await this.setState({ submiting: true });
       await purchaseTokenService.purchaseFeed(feed._id, {});
       message.success('Unlocked!');
+      this.setState({ isBought: true });
       handleUpdateBalance({ token: -feed.price });
     } catch (e) {
       const error = await e;
@@ -322,7 +335,7 @@ class FeedCard extends Component<IProps> {
     const comments = commentMapping.hasOwnProperty(feed._id) ? commentMapping[feed._id].items : [];
     const totalComments = commentMapping.hasOwnProperty(feed._id) ? commentMapping[feed._id].total : 0;
     const {
-      isOpenComment, isLiked, totalComment, totalLike, isHovered,
+      isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
       shareUrl, openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
@@ -416,12 +429,12 @@ class FeedCard extends Component<IProps> {
               </Collapse.Panel>
             </Collapse>
           </div>
-          {((!feed.isSale && feed.isSubscribed) || (feed.isSale && feed.isBought)) && (
+          {((!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought)) && (
             <div className="feed-content">
               <FeedSlider feed={feed} />
             </div>
           )}
-          {((!feed.isSale && !feed.isSubscribed) || (feed.isSale && !feed.isBought)) && (
+          {((!feed.isSale && !feed.isSubscribed) || (feed.isSale && !isBought)) && (
             <div className="lock-content" style={feed.thumbnailUrl && { backgroundImage: `url(${feed.thumbnailUrl})` }}>
               <div
                 className="text-center"
@@ -435,7 +448,7 @@ class FeedCard extends Component<IProps> {
                     Subcribe to see model post
                   </p>
                 )}
-                {feed.isSale && !feed.isBought && performer && (
+                {feed.isSale && !isBought && performer && (
                   <p aria-hidden onClick={() => this.setState({ openPurchaseModal: true })}>
                     Unlock post by
                     {' '}
@@ -596,7 +609,7 @@ class FeedCard extends Component<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={350}
+          width={500}
           title={null}
           visible={openSubscriptionModal}
           footer={null}
@@ -616,7 +629,7 @@ class FeedCard extends Component<IProps> {
           visible={openTeaser}
           footer={null}
           onCancel={() => this.setState({ openTeaser: false })}
-          width={990}
+          width={650}
         >
           <VideoPlayer
             key={feed?.teaser?._id}
@@ -633,6 +646,7 @@ class FeedCard extends Component<IProps> {
             }}
           />
         </Modal>
+        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
       </div>
     );
   }

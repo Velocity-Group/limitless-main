@@ -25,6 +25,7 @@ import Router from 'next/router';
 import { videoDuration } from '@lib/index';
 import { updateBalance } from '@redux/user/actions';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import Loader from '@components/common/base/loader';
 import {
   IVideoResponse,
   IUser,
@@ -273,32 +274,43 @@ class VideoViewPage extends PureComponent<IProps> {
       return;
     }
     try {
+      await this.setState({ submiting: true });
       await (await purchaseTokenService.purchaseVideo(video._id, {})).data;
       message.success('Video is unlocked!');
       handleUpdateBalance({ token: video.price });
       this.setState({ isBought: true, openPurchaseModal: false });
     } catch (e) {
       const error = await e;
+      this.setState({ submiting: false, openPurchaseModal: false });
       message.error(error.message || 'Error occured, please try again later');
     }
   }
 
   async subscribe() {
     try {
-      const { video } = this.props;
-      await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({ type: this.subscriptionType, performerId: video.performerId })).data;
-      if (resp.paymentUrl) {
-        message.info('Redirecting to payment method...');
-        window.location.href = resp.paymentUrl;
+      const { video, user } = this.props;
+      if (!user._id) {
+        message.error('Please log in');
+        Router.push('/auth/login');
         return;
       }
-      message.error('An error occured, please try again later');
+      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+        message.error('Please add payment card');
+        Router.push('/user/cards');
+        return;
+      }
+      await this.setState({ submiting: true });
+      const resp = await (await paymentService.subscribePerformer({
+        type: this.subscriptionType,
+        performerId: video.performerId,
+        paymentGateway: 'stripe',
+        stripeCardId: user.stripeCardIds[0]
+      })).data;
+      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
-    } finally {
-      this.setState({ submiting: false, openSubscriptionModal: false });
+      this.setState({ openSubscriptionModal: false, submiting: false });
     }
   }
 
@@ -679,6 +691,8 @@ class VideoViewPage extends PureComponent<IProps> {
           visible={openSubscriptionModal}
           confirmLoading={submiting}
           footer={null}
+          width={500}
+          className="subscription-modal"
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm
@@ -697,6 +711,7 @@ class VideoViewPage extends PureComponent<IProps> {
         >
           <PurchaseVideoForm video={video} submiting={submiting} onFinish={this.purchaseVideo.bind(this)} />
         </Modal>
+        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
       </Layout>
     );
   }

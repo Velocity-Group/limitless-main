@@ -28,6 +28,11 @@ export class PayoutRequestCreatePayload {
   @IsString()
   @IsOptional()
   requestNote: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  paymentAccountType?: string;
 }
 
 export class PayoutRequestPerformerUpdatePayload {
@@ -41,6 +46,11 @@ export class PayoutRequestPerformerUpdatePayload {
   @IsNumber()
   @Min(1)
   requestTokens: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  paymentAccountType?: string;
 }
 
 export class PayoutRequestUpdatePayload {

@@ -10,7 +10,7 @@ import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
   MessageOutlined, VideoCameraOutlined, FireOutlined, NotificationOutlined,
-  DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined,
+  DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
   HomeOutlined, LogoutOutlined, UsergroupAddOutlined, VideoCameraAddOutlined,
   HeartOutlined, PlusSquareOutlined, BulbOutlined, WalletOutlined
 } from '@ant-design/icons';
@@ -61,11 +61,6 @@ class Header extends PureComponent<IProps> {
     }
   }
 
-  onThemeChange = (theme: string) => {
-    const { updateUIValue: handleUpdateUI } = this.props;
-    handleUpdateUI({ theme });
-  };
-
   handleMessage = async (event) => {
     event && this.setState({ totalNotReadMessage: event.total });
   };
@@ -106,6 +101,22 @@ class Header extends PureComponent<IProps> {
     }
   }
 
+  async handlePaymentStatusCallback(event) {
+    const { status } = event;
+    if (status && status === 'success') {
+      window.location.href = '/payment/success';
+    }
+    if (status && ['cancel', 'fail'].includes(status)) {
+      window.location.href = '/payment/cancel';
+    }
+    // TODO handle more event
+  }
+
+  onThemeChange = (theme: string) => {
+    const { updateUIValue: handleUpdateUI } = this.props;
+    handleUpdateUI({ theme });
+  };
+
   async beforeLogout() {
     const { logout: handleLogout } = this.props;
     const token = authService.getToken();
@@ -138,6 +149,10 @@ class Header extends PureComponent<IProps> {
         <Event
           event="update_balance"
           handler={this.handleUpdateBalance.bind(this)}
+        />
+        <Event
+          event="payment_status_callback"
+          handler={this.handlePaymentStatusCallback.bind(this)}
         />
         <div className="main-container">
           <Layout.Header className="header" id="layoutHeader">
@@ -302,6 +317,13 @@ class Header extends PureComponent<IProps> {
                     <UserOutlined />
                     {' '}
                     Edit Profile
+                  </div>
+                </Link>
+                <Link href={{ pathname: '/model/banking' }} as="/model/banking">
+                  <div className={router.pathname === '/model/banking' ? 'menu-item active' : 'menu-item'}>
+                    <BankOutlined />
+                    {' '}
+                    Banking (to earn)
                   </div>
                 </Link>
                 <Link href={{ pathname: '/model/my-subscriber' }} as="/model/my-subscriber">

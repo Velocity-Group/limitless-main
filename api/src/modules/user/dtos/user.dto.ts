@@ -45,6 +45,7 @@ export class UserDto {
 
   stats: {
     totalViewTime: number;
+    totalSubscriptions: number;
   }
 
   avatarPath?: string;

@@ -172,22 +172,25 @@ export class PerformerService {
     }
     let isBlockedByPerformer = false;
     let isBookMarked = null;
-    let isSubscribed = false;
+    let isSubscribed = null;
+    let canBeSubscribed = null;
     if (currentUser) {
       isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
         model._id,
         currentUser._id
       );
       if (isBlockedByPerformer) throw new HttpException('You has been blocked by this model', 403);
-      const checkSubscribe = await this.subscriptionService.checkSubscribed(model._id, currentUser._id);
-      isSubscribed = !!checkSubscribe;
-      isBookMarked = await this.reactionService.findByQuery({
+      isSubscribed = await this.subscriptionService.checkSubscribed(model._id, currentUser._id);
+      isBookMarked = await this.reactionService.findOneQuery({
         objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: currentUser._id, action: REACTION.BOOK_MARK
       });
+      const connectAccount = await this.stripeService.getConnectAccount(model._id);
+      canBeSubscribed = connectAccount && connectAccount.payoutsEnabled && connectAccount.detailsSubmitted;
     }
     const dto = new PerformerDto(model);
-    dto.isSubscribed = isSubscribed;
-    dto.isBookMarked = !!(isBookMarked && isBookMarked.length);
+    dto.isSubscribed = !!isSubscribed;
+    dto.canBeSubscribed = canBeSubscribed;
+    dto.isBookMarked = !!isBookMarked;
     if (model.avatarId) {
       const avatar = await this.fileService.findById(model.avatarId);
       dto.avatarPath = avatar ? avatar.path : null;
@@ -272,8 +275,14 @@ export class PerformerService {
       : null;
 
     // dto.ccbillSetting = await this.paymentGatewaySettingModel.findOne({
-    //   performerId: id
+    //   performerId: id,
+    //   key: 'ccbill'
     // });
+
+    dto.paypalSetting = await this.paymentGatewaySettingModel.findOne({
+      performerId: id,
+      key: 'paypal'
+    });
 
     dto.commissionSetting = await this.commissionSettingModel.findOne({
       performerId: id
@@ -793,7 +802,7 @@ export class PerformerService {
       { _id: performerId },
       {
         $inc: { 'stats.subscribers': num },
-        verifiedAccount: !!(performer.stats.subscribers === (minimumVerificationNumber - 1) && num === 1)
+        verifiedAccount: (performer.stats.subscribers === (minimumVerificationNumber - 1)) && num === 1
       },
       { upsert: true }
     );

@@ -7,7 +7,6 @@ import {
   Post,
   Body,
   Get,
-  Query,
   Delete,
   Param
 } from '@nestjs/common';
@@ -21,7 +20,9 @@ import { AuthoriseCardPayload } from '../payloads/authorise-card.payload';
 @Injectable()
 @Controller('stripe')
 export class StripeController {
-  constructor(private readonly stripeService: StripeService) {}
+  constructor(
+    private readonly stripeService: StripeService
+  ) {}
 
   @Post('accounts')
   @HttpCode(HttpStatus.OK)
@@ -32,17 +33,6 @@ export class StripeController {
   ): Promise<DataResponse<any>> {
     const info = await this.stripeService.createConnectAccount(user);
     return DataResponse.ok(info);
-  }
-
-  @Post('accounts/callback')
-  @HttpCode(HttpStatus.OK)
-  async accountCallback(
-    @Body() payload: any,
-    @Query() req: any
-  ) {
-    console.log(11, req, payload);
-    const resp = await this.stripeService.connectAccountCallback(payload);
-    return DataResponse.ok(resp);
   }
 
   @Get('accounts/me')

@@ -14,6 +14,7 @@ import { MailerModule } from '../mailer/mailer.module';
 import { SettingModule } from '../settings/setting.module';
 import { EarningModule } from '../earning/earning.module';
 import { UpdatePayoutRequestListener } from './listeners';
+import { PaymentModule } from '../payment/payment.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { UpdatePayoutRequestListener } from './listeners';
     forwardRef(() => PerformerAssetsModule),
     forwardRef(() => MailerModule),
     forwardRef(() => SettingModule),
-    forwardRef(() => EarningModule)
+    forwardRef(() => EarningModule),
+    forwardRef(() => PaymentModule)
   ],
   providers: [
     ...payoutRequestProviders,

@@ -8,11 +8,11 @@ import { EVENT } from 'src/kernel/constants';
 import * as moment from 'moment';
 import { PaymentDto } from 'src/modules/payment/dtos';
 import { PerformerService } from 'src/modules/performer/services';
+import { UserService } from 'src/modules/user/services';
 import { SubscriptionModel } from '../models/subscription.model';
 import { SUBSCRIPTION_MODEL_PROVIDER } from '../providers/subscription.provider';
 import { SubscriptionDto } from '../dtos/subscription.dto';
 import {
-  UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
   SUBSCRIPTION_TYPE, SUBSCRIPTION_STATUS
 } from '../constants';
 
@@ -23,6 +23,8 @@ export class TransactionSubscriptionListener {
   constructor(
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
     @Inject(SUBSCRIPTION_MODEL_PROVIDER)
     private readonly subscriptionModel: Model<SubscriptionModel>,
     private readonly queueEventService: QueueEventService
@@ -66,6 +68,7 @@ export class TransactionSubscriptionListener {
     const startRecurringDate = expiredAt;
     const nextRecurringDate = expiredAt;
     if (existSubscription) {
+      existSubscription.paymentGateway = transaction.paymentGateway;
       existSubscription.expiredAt = new Date(expiredAt);
       existSubscription.updatedAt = new Date();
       existSubscription.subscriptionType = subscriptionType;
@@ -80,6 +83,7 @@ export class TransactionSubscriptionListener {
     const newSubscription = await this.subscriptionModel.create({
       performerId: transaction.performerId,
       userId: transaction.sourceId,
+      paymentGateway: transaction.paymentGateway,
       createdAt: new Date(),
       updatedAt: new Date(),
       expiredAt: new Date(expiredAt),
@@ -95,12 +99,9 @@ export class TransactionSubscriptionListener {
       transactionId: transaction._id,
       status: SUBSCRIPTION_STATUS.ACTIVE
     });
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: UPDATE_PERFORMER_SUBSCRIPTION_CHANNEL,
-        eventName: event.eventName,
-        data: new SubscriptionDto(newSubscription)
-      })
-    );
+    await Promise.all([
+      this.performerService.updateSubscriptionStat(newSubscription.performerId, 1),
+      this.userService.updateStats(newSubscription.userId, { totalSubscriptions: 1 })
+    ]);
   }
 }

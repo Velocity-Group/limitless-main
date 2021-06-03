@@ -13,7 +13,7 @@ export const StripeAccountSchema = new Schema({
   accountId: {
     type: String
   },
-  chargesEnabled: {
+  payoutsEnabled: {
     type: Boolean,
     default: false
   },

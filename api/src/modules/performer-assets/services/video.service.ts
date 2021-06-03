@@ -116,32 +116,30 @@ export class VideoService {
         scheduledAt: { $lte: new Date() },
         status: { $ne: VIDEO_STATUS.ACTIVE }
       }).lean();
-      await Promise.all([
-        videos.forEach(async (video) => {
-          const v = new VideoDto(video);
-          await this.PerformerVideoModel.updateOne(
-            {
-              _id: v._id
-            },
-            {
-              isSchedule: false,
-              status: VIDEO_STATUS.ACTIVE,
-              updatedAt: new Date()
+      await Promise.all(videos.map((video) => {
+        const v = new VideoDto(video);
+        this.PerformerVideoModel.updateOne(
+          {
+            _id: v._id
+          },
+          {
+            isSchedule: false,
+            status: VIDEO_STATUS.ACTIVE,
+            updatedAt: new Date()
+          }
+        );
+        const oldStatus = video.status;
+        return this.queueEventService.publish(
+          new QueueEvent({
+            channel: PERFORMER_COUNT_VIDEO_CHANNEL,
+            eventName: EVENT.UPDATED,
+            data: {
+              ...v,
+              oldStatus
             }
-          );
-          const oldStatus = video.status;
-          await this.queueEventService.publish(
-            new QueueEvent({
-              channel: PERFORMER_COUNT_VIDEO_CHANNEL,
-              eventName: EVENT.UPDATED,
-              data: {
-                ...v,
-                oldStatus
-              }
-            })
-          );
-        })
-      ]);
+          })
+        );
+      }));
     } catch (e) {
       console.log('Schedule video error', e);
     } finally {

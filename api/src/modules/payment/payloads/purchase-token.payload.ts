@@ -1,5 +1,5 @@
 import {
-  IsNotEmpty, IsOptional, IsString
+  IsOptional, IsString
 } from 'class-validator';
 
 export class PurchaseTokenPayload {
@@ -11,7 +11,11 @@ export class PurchaseTokenPayload {
   @IsString()
   currency: string
 
-  @IsNotEmpty()
   @IsString()
-  gateway: string
+  @IsOptional()
+  paymentGateway: string;
+
+  @IsString()
+  @IsOptional()
+  stripeCardId: string;
 }

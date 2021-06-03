@@ -62,8 +62,6 @@ export class PerformerModel extends Document {
 
   hair: string;
 
-  pubicHair: string;
-
   bust: string;
 
   ethnicity: string;

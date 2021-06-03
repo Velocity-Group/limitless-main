@@ -50,8 +50,8 @@ export class TransactionMailerListener {
             subject: 'New subscription',
             to: performer.email,
             data: {
-              performer,
-              user,
+              performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
+              userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
               transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
               products: transaction.products
             },
@@ -62,8 +62,8 @@ export class TransactionMailerListener {
             subject: 'New payment success',
             to: performer.email,
             data: {
-              performer,
-              user,
+              performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
+              userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
               transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
               products: transaction.products
             },
@@ -77,8 +77,8 @@ export class TransactionMailerListener {
           subject: 'New payment success',
           to: adminEmail,
           data: {
-            performer,
-            user,
+            performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
+            userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
             transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
             products: transaction.products
           },
@@ -91,7 +91,7 @@ export class TransactionMailerListener {
           subject: 'New payment success',
           to: user.email,
           data: {
-            user,
+            userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
             transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
             products: transaction.products
           },

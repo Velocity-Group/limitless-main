@@ -15,6 +15,10 @@ export class PayoutRequestService extends APIRequest {
     return this.post('/payout-requests/performer/calculate', payload);
   }
 
+  payout(id: string) {
+    return this.post(`/payout-requests/payout/${id}`);
+  }
+
   findById(id: string) {
     return this.get(`/payout-requests/admin/${id}`);
   }

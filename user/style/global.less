@@ -170,12 +170,13 @@
 }
 
 .page-heading {
-  margin: 20px 0;
-  padding-bottom: 0px;
+  display: flex;
+  justify-content: space-between;
   font-size: 20px;
   font-weight: 600;
-  color: @black;
-  font-family: @primary-font-bold;
+  color: @grey-color;
+  margin-top: 1.5rem;
+  margin-bottom: 10px;
 
   span {
     text-transform: capitalize;
@@ -275,7 +276,7 @@
   .ant-input,
   .ant-select-selector,
   .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
-    height: 40px;
+    min-height: 40px;
   }
 }
 
@@ -687,5 +688,46 @@
   h4 {
     text-transform: capitalize;
     font-weight: 600;
+  }
+}
+
+.search-filter {
+  .ant-select-single:not(.ant-select-customize-input) .ant-select-selector, .ant-select-selector, .ant-picker.ant-picker-range, .ant-input {
+    height: 38px;
+  }
+}
+
+.md-heading {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  font-weight: 600;
+  color: @grey-color;
+  margin-top: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.md-below-heading {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  .sort-model {
+    text-align: right;
+    width: 15%;
+    button {
+      border: 1px solid @light-grey!important;
+      height: 40px;
+      width: 100px;
+    }
+  }
+  @media screen and (max-width: @mobile-screen) {
+    flex-direction: column-reverse;
+    .sort-model {
+      width: 100%;
+      margin-bottom: 5px;
+      button {
+        width: 100%;
+      }
+    }
   }
 }

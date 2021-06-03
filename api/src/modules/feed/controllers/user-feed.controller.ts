@@ -32,7 +32,7 @@ export class UserFeedController {
   ) {}
 
   @Get('')
-  @UseGuards(AuthGuard)
+  @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getPerformerFeeds(
@@ -41,7 +41,7 @@ export class UserFeedController {
     @Request() req: any
   ): Promise<DataResponse<any>> {
     const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = req.authUser && await this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
     const data = await this.feedService.userSearchFeeds(query, user, jwToken);
     return DataResponse.ok(data);
   }

@@ -24,6 +24,8 @@ export class PayoutRequestDto {
 
   tokenConversionRate: number;
 
+  payoutId: string;
+
   createdAt: Date;
 
   updatedAt: Date;
@@ -44,6 +46,7 @@ export class PayoutRequestDto {
         'sourceType',
         'requestTokens',
         'tokenConversionRate',
+        'payoutId',
         'createdAt',
         'updatedAt'
       ])

@@ -60,8 +60,8 @@ export class PerformerService extends APIRequest {
     return this.put(`/performers/${id}/banking-settings`, payload);
   }
 
-  updateBlockCountries(id: string, payload: IBlockCountries) {
-    return this.put(`/performers/${id}/block-countries-settings`, payload);
+  updatePaymentGateway(id, payload) {
+    return this.put(`/performers/${id}/payment-gateway-settings`, payload);
   }
 
   blockUser(payload: IBlockedByPerformer) {

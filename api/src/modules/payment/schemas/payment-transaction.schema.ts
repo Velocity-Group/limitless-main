@@ -55,6 +55,10 @@ export const PaymentTransactionSchema = new Schema({
   paymentResponseInfo: {
     type: Schema.Types.Mixed
   },
+  // latest invoice id
+  latestInvoiceId: {
+    type: String
+  },
   // pending, success, etc...
   status: {
     type: String,

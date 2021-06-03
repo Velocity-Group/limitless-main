@@ -29,7 +29,6 @@ export interface IPerformerResponse {
   bio?: string;
   eyes?: string;
   hair?: string;
-  pubicHair?: string;
   bust?: string;
   ethnicity?: string;
   sexualPreference?: string;
@@ -60,6 +59,7 @@ export interface IPerformerResponse {
   score?: number;
   bankingInformation?: any;
   ccbillSetting?: any;
+  paypalSetting?: any;
   commissionSetting?: any;
   blockCountries?: any;
   createdBy?: ObjectId;
@@ -85,6 +85,7 @@ export interface IPerformerResponse {
   },
   invitationId?: ObjectId;
   referralId?: ObjectId;
+  canBeSubscribed?: boolean;
 }
 
 export class PerformerDto {
@@ -164,8 +165,6 @@ export class PerformerDto {
 
   hair?: string;
 
-  pubicHair?: string;
-
   bust?: string;
 
   ethnicity?: string;
@@ -207,6 +206,8 @@ export class PerformerDto {
   bankingInformation?: any;
 
   ccbillSetting?: any;
+
+  paypalSetting?: any;
 
   stripeAccount?: any;
 
@@ -254,6 +255,8 @@ export class PerformerDto {
     linkedIn: String;
   }
 
+  canBeSubscribed: boolean;
+
   constructor(data?: Partial<any>) {
     Object.assign(
       this,
@@ -291,7 +294,6 @@ export class PerformerDto {
         'bio',
         'eyes',
         'hair',
-        'pubicHair',
         'bust',
         'ethnicity',
         'sexualPreference',
@@ -307,6 +309,7 @@ export class PerformerDto {
         'bankingInformation',
         'stripeAccount',
         'ccbillSetting',
+        'paypalSetting',
         'commissionSetting',
         'blockCountries',
         'createdBy',
@@ -330,7 +333,8 @@ export class PerformerDto {
         'dateOfBirth',
         'bodyType',
         'balance',
-        'socialsLink'
+        'socialsLink',
+        'canBeSubscribed'
       ])
     );
   }
@@ -364,17 +368,18 @@ export class PerformerDto {
       publicChatPrice: this.publicChatPrice,
       groupChatPrice: this.groupChatPrice,
       privateChatPrice: this.privateChatPrice,
+      maxParticipantsAllowed: this.maxParticipantsAllowed,
       height: this.height,
       weight: this.weight,
       hair: this.hair,
-      pubicHair: this.pubicHair,
       bust: this.bust,
       ethnicity: this.ethnicity,
       bio: this.bio,
       eyes: this.eyes,
       bodyType: this.bodyType,
       sexualPreference: this.sexualPreference,
-      isPerformer: true
+      isPerformer: true,
+      canBeSubscribed: this.canBeSubscribed
     };
     const privateInfo = {
       balance: this.balance,
@@ -400,7 +405,7 @@ export class PerformerDto {
       bankingInformation: this.bankingInformation,
       stripeAccount: this.stripeAccount,
       welcomeVideoId: this.welcomeVideoId,
-      maxParticipantsAllowed: this.maxParticipantsAllowed,
+      paypalSetting: this.paypalSetting,
       agentId: this.agentId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
@@ -476,7 +481,6 @@ export class PerformerDto {
       bio: this.bio,
       eyes: this.eyes,
       hair: this.hair,
-      pubicHair: this.pubicHair,
       bust: this.bust,
       ethnicity: this.ethnicity,
       sexualPreference: this.sexualPreference,

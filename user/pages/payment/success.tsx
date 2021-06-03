@@ -1,4 +1,4 @@
-import { Layout, Alert } from 'antd';
+import { Layout, Alert, Button } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
@@ -38,10 +38,11 @@ class PaymentSuccess extends PureComponent<IProps> {
           <div className="page-heading">Payment Success</div>
           <Alert
             message="Payment success"
-            description={`Hi ${user.name}, your payment has been successfully! Again, thank you for choosing us.`}
+            description={`Hi ${user.name || user.username || 'there'}, your payment has been successfully!`}
             type="success"
             showIcon
           />
+          <h4 className="text-center"><Button type="link" onClick={() => window.history.back()}>Click here to back</Button></h4>
         </div>
       </Layout>
     );

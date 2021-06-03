@@ -48,6 +48,10 @@ export class ReactionService {
 
   ) { }
 
+  public async findOneQuery(query) {
+    return this.reactionModel.findOne(query).lean();
+  }
+
   public async findByQuery(query) {
     return this.reactionModel.find(query).lean();
   }
@@ -143,10 +147,11 @@ export class ReactionService {
   }
 
   public async getListProduct(req: ReactionSearchRequestPayload) {
-    const query = {} as any;
+    const query = {
+      objectType: REACTION_TYPE.PRODUCT
+    } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
-    query.objectType = REACTION_TYPE.PRODUCT;
 
     const sort = {
       [req.sortBy || 'createdAt']: req.sort === 'desc' ? -1 : 1
@@ -183,10 +188,11 @@ export class ReactionService {
   }
 
   public async getListVideo(req: ReactionSearchRequestPayload) {
-    const query = {} as any;
+    const query = {
+      objectType: REACTION_TYPE.VIDEO
+    } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
-    query.objectType = REACTION_TYPE.VIDEO;
 
     const sort = {
       [req.sortBy || 'createdAt']: req.sort === 'desc' ? -1 : 1
@@ -200,7 +206,6 @@ export class ReactionService {
         .skip(parseInt(req.offset as string, 10)),
       this.reactionModel.countDocuments(query)
     ]);
-
     const videoIds = uniq(items.map((i) => i.objectId));
     const videos = videoIds.length > 0 ? await this.videoService.findByIds(videoIds) : [];
     const reactions = items.map((v) => new ReactionDto(v));
@@ -219,10 +224,11 @@ export class ReactionService {
   }
 
   public async getListGallery(req: ReactionSearchRequestPayload) {
-    const query = {} as any;
+    const query = {
+      objectType: REACTION_TYPE.GALLERY
+    } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
-    query.objectType = REACTION_TYPE.GALLERY;
 
     const sort = {
       [req.sortBy || 'createdAt']: req.sort === 'desc' ? -1 : 1
@@ -255,10 +261,11 @@ export class ReactionService {
   }
 
   public async getListPerformer(req: ReactionSearchRequestPayload) {
-    const query = {} as any;
+    const query = {
+      objectType: REACTION_TYPE.PERFORMER
+    } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
-    query.objectType = REACTION_TYPE.PERFORMER;
 
     const sort = {
       [req.sortBy || 'createdAt']: req.sort === 'desc' ? -1 : 1
@@ -288,9 +295,10 @@ export class ReactionService {
   }
 
   public async getListUser(req: ReactionSearchRequestPayload, user: UserDto) {
-    const query = {} as any;
+    const query = {
+      objectType: REACTION_TYPE.PERFORMER
+    } as any;
     if (req.action) query.action = req.action;
-    query.objectType = REACTION_TYPE.PERFORMER;
     query.objectId = user._id;
 
     const sort = {
@@ -321,7 +329,9 @@ export class ReactionService {
   }
 
   public async getListFeeds(req: ReactionSearchRequestPayload, user: UserDto, jwToken: string) {
-    const query = {} as any;
+    const query = {
+      objectType: REACTION_TYPE.FEED
+    } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
     if (req.objectType) {

@@ -1,5 +1,4 @@
 /* eslint-disable react/destructuring-assignment */
-import * as React from 'react';
 import { Table, Tag } from 'antd';
 import Link from 'next/link';
 import { PayoutRequestInterface } from 'src/interfaces';
@@ -10,7 +9,7 @@ interface IProps {
   searching: boolean;
   total: number;
   pageSize: number;
-  onChange(pagination, filters, sorter, extra): Function;
+  onChange: Function;
 }
 
 const PayoutRequestList = ({
@@ -28,13 +27,13 @@ const PayoutRequestList = ({
       render: (id: string, record) => (
         <Link
           href={{
-            pathname: '/payout-requests/update',
+            pathname: '/model/payout-requests/update',
             query: {
               data: JSON.stringify(record),
               id: record._id
             }
           }}
-          as={`/payout-request/update?id=${record._id}`}
+          as={`/model/payout-request/update?id=${record._id}`}
         >
           <a>
             {id.slice(16, 24).toUpperCase()}
@@ -43,7 +42,7 @@ const PayoutRequestList = ({
       )
     },
     {
-      title: 'Request Tokens',
+      title: 'Request_Tokens',
       dataIndex: 'requestTokens',
       key: 'requestTokens',
       render: (requestTokens: number) => (
@@ -52,6 +51,33 @@ const PayoutRequestList = ({
           {requestTokens || 0}
         </span>
       )
+    },
+    {
+      title: 'Conversion Rate',
+      dataIndex: 'tokenConversionRate',
+      key: 'tokenConversionRate',
+      render: (tokenConversionRate: number, record) => (
+        <span>
+          $
+          {(tokenConversionRate || 1) * record.requestTokens}
+        </span>
+      )
+    },
+    {
+      title: 'Payout Gateway',
+      dataIndex: 'paymentAccountType',
+      key: 'paymentAccountType',
+      render: (paymentAccountType: string) => {
+        switch (paymentAccountType) {
+          case 'stripe':
+            return <Tag color="#656fde">Stripe</Tag>;
+          case 'paypal':
+            return <Tag color="#25397c">Paypal</Tag>;
+          default:
+            break;
+        }
+        return <Tag color="default">{paymentAccountType}</Tag>;
+      }
     },
     {
       title: 'Status',
@@ -71,7 +97,7 @@ const PayoutRequestList = ({
       }
     },
     {
-      title: 'Request at',
+      title: 'Created_at',
       key: 'createdAt',
       dataIndex: 'createdAt',
       render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>,
@@ -98,7 +124,7 @@ const PayoutRequestList = ({
           }}
           as={`/payout-request/update?id=${request._id}`}
         >
-          <a>View details</a>
+          <a>{request.status === 'pending' ? 'Edit' : 'View details'}</a>
         </Link>
       )
     }
@@ -117,7 +143,7 @@ const PayoutRequestList = ({
       scroll={{ x: true }}
       showSorterTooltip={false}
       loading={searching}
-      onChange={onChange}
+      onChange={onChange.bind(this)}
     />
   );
 };

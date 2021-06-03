@@ -12,6 +12,8 @@ import { connect } from 'react-redux';
 import { SearchFilter } from '@components/common';
 import { updateBalance } from '@redux/user/actions';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import Loader from '@components/common/base/loader';
+import Router from 'next/router';
 
 interface IProps {
   currentUser: IUser;
@@ -57,6 +59,19 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
+  async handleFilter(data) {
+    await this.setState({ filter: data });
+    this.handleTabChange({ ...data, current: 1 });
+  }
+
+  async handleTabChange(data) {
+    const { pagination } = this.state;
+    await this.setState({
+      pagination: { ...pagination, current: data.current }
+    });
+    this.getData();
+  }
+
   async getData() {
     try {
       const {
@@ -83,23 +98,10 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async handleFilter(data) {
-    await this.setState({ filter: data });
-    this.handleTabChange({ ...data, current: 1 });
-  }
-
-  async handleTabChange(data) {
-    const { pagination } = this.state;
-    await this.setState({
-      pagination: { ...pagination, current: data.current }
-    });
-    this.getData();
-  }
-
-  async cancelSubscription(subscriptionId: string) {
+  async cancelSubscription(subscription: ISubscription) {
     try {
       await this.setState({ submiting: true });
-      const resp = await (await subscriptionService.cancelSubscription(subscriptionId))
+      const resp = await (await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway))
         .data;
       resp.success && message.success('Cancel subscription success');
       this.getData();
@@ -114,29 +116,31 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
   async activeSubscription(subscription: ISubscription) {
     const { currentUser } = this.props;
     const { performerInfo: performer } = subscription;
-    if (currentUser.isPerformer || !performer) {
-      message.error('Forbiden!');
-      return;
-    }
+    if (currentUser.isPerformer || !performer) return;
     this.setState({ openSubscriptionModal: true, selectedSubscription: subscription });
   }
 
   async subscribe() {
     const { selectedSubscription } = this.state;
     const { performerInfo: performer, subscriptionType } = selectedSubscription;
+    const { currentUser } = this.props;
+    if (!currentUser._id) {
+      message.error('Please log in');
+      Router.push('/auth/login');
+      return;
+    }
+    if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
+      message.error('Please add payment card');
+      Router.push('/user/cards');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
       const resp = await (await paymentService.subscribePerformer({ type: subscriptionType, performerId: performer._id })).data;
-      if (resp.paymentUrl) {
-        message.info('Redirecting to payment method...');
-        window.location.href = resp.paymentUrl;
-        return;
-      }
-      message.error('An error occured, please try again later');
+      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
-    } finally {
       this.setState({ submiting: false, openSubscriptionModal: false });
     }
   }
@@ -191,6 +195,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
               />
             </Modal>
           </Page>
+          {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
         </div>
       </Layout>
     );

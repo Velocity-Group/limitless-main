@@ -9,7 +9,7 @@ interface IProps {
   rowKey: string;
   onChange(): Function;
   loading: boolean;
-  onCancelSubscriber: Function;
+  onCancelSubscription: Function;
 }
 
 export const TableListSubscription = ({
@@ -18,7 +18,7 @@ export const TableListSubscription = ({
   rowKey,
   onChange,
   loading,
-  onCancelSubscriber
+  onCancelSubscription
 }: IProps) => {
   const columns = [
     {
@@ -102,7 +102,7 @@ export const TableListSubscription = ({
         return (
           <span>
             {records?.status === 'active' ? (
-              <Button type="primary" onClick={() => onCancelSubscriber(records._id)}>
+              <Button type="primary" onClick={() => onCancelSubscription(records)}>
                 <StopOutlined />
                 {' '}
                 De-activate

@@ -21,6 +21,7 @@ export default class PerformerGridCard extends PureComponent<IProps> {
           as={`/${performer?.username || performer?._id}`}
         >
           <a>
+            {performer.isFreeSubscription && <span className="free-status">Free</span>}
             <div className="card-img">
               <img alt="avatar" src={performer?.avatar || '/static/no-avatar.png'} />
             </div>

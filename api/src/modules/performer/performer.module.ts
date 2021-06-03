@@ -25,8 +25,7 @@ import { MailerModule } from '../mailer/mailer.module';
 import { ChangeTokenLogModule } from '../change-token-logs/change-token-log.module';
 import { BlockModule } from '../block/block.module';
 import {
-  PerformerAssetsListener, PerformerConnectedListener,
-  SubscriptionPerformerListener, UpdatePerformerStatusListener
+  PerformerAssetsListener, PerformerConnectedListener, UpdatePerformerStatusListener
 } from './listeners';
 import { PaymentModule } from '../payment/payment.module';
 
@@ -56,7 +55,6 @@ import { PaymentModule } from '../payment/payment.module';
     PerformerSearchService,
     PerformerAssetsListener,
     PerformerConnectedListener,
-    SubscriptionPerformerListener,
     UpdatePerformerStatusListener
   ],
   controllers: [

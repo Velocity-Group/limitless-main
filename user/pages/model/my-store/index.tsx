@@ -140,14 +140,14 @@ class Products extends PureComponent<IProps> {
             </div>
             <div>
               <Row>
-                <Col xl={21}>
+                <Col lg={20} xs={24}>
                   <SearchFilter
                     statuses={statuses}
                     onSubmit={this.handleFilter.bind(this)}
                     searchWithKeyword
                   />
                 </Col>
-                <Col xl={3} style={{ display: 'flex', alignItems: 'center' }}>
+                <Col lg={4} xs={24} style={{ display: 'flex', alignItems: 'center' }}>
                   <Button className="secondary">
                     <Link href="/model/my-store/create">
                       <a>New Product</a>
@@ -156,8 +156,6 @@ class Products extends PureComponent<IProps> {
                 </Col>
               </Row>
             </div>
-
-            <div style={{ marginBottom: '20px' }} />
             <div className="table-responsive">
               <TableListProduct
                 dataSource={list}

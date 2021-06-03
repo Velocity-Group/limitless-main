@@ -6,7 +6,6 @@ import {
 import { PureComponent } from 'react';
 import { tokenPackageService } from '@services/token-package.service';
 import { paymentService } from '@services/index';
-import './index.less';
 import {
   IUIConfig, IPackageToken, IUser, ISettings
 } from '@interfaces/index';
@@ -14,6 +13,8 @@ import { connect } from 'react-redux';
 import { StarOutlined } from '@ant-design/icons';
 import Page from '@components/common/layout/page';
 import Router from 'next/router';
+import Loader from '@components/common/base/loader';
+import './index.less';
 
 interface IProps {
   ui: IUIConfig;
@@ -32,7 +33,7 @@ class TokenPackages extends PureComponent<IProps> {
     isApliedCode: false,
     openPurchaseModal: false,
     selectedPackage: null,
-    gateway: 'stripe',
+    paymentGateway: 'stripe',
     coupon: null
   };
 
@@ -40,8 +41,8 @@ class TokenPackages extends PureComponent<IProps> {
     this.search();
   }
 
-  onChangeGateway(gateway: string) {
-    this.setState({ gateway });
+  onChangepaymentGateway(paymentGateway: string) {
+    this.setState({ paymentGateway });
   }
 
   async search() {
@@ -63,26 +64,32 @@ class TokenPackages extends PureComponent<IProps> {
   async purchaseTokenPackage() {
     const { user } = this.props;
     const {
-      isApliedCode, gateway, couponCode, selectedPackage
+      isApliedCode, paymentGateway = 'stripe', couponCode, selectedPackage
     } = this.state;
-    if (user.isPerformer) return;
+    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      message.error('Please add payment card');
+      Router.push('/user/cards');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
-      const pay = await (await paymentService.purchaseTokenPackage(selectedPackage._id, {
-        gateway, couponCode: isApliedCode ? couponCode : null
+      const resp = await (await paymentService.purchaseTokenPackage(selectedPackage._id, {
+        paymentGateway,
+        stripeCardId: user.stripeCardIds[0],
+        couponCode: isApliedCode ? couponCode : null
       })).data;
       // TOTO update logic here
-      // if (pay.paymentUrl) {
+      // if (paymentGateway === 'ccbill' && resp.paymentUrl) {
       //   message.success('Redirecting to payment method');
-      //   window.location.href = pay.paymentUrl;
+      //   window.location.href = resp.paymentUrl;
       // }
-      // message.success('Redirecting to payment method');
-      // window.location.reload();
+      if (resp.success || resp.status === 'succeeded') {
+        Router.push('/payment/success');
+      }
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
-    } finally {
-      this.setState({ openPurchaseModal: false, submiting: false });
+      Router.push('/payment/cancel');
     }
   }
 
@@ -102,7 +109,7 @@ class TokenPackages extends PureComponent<IProps> {
     const { ui, user, settings } = this.props;
     const {
       list, searching, openPurchaseModal, submiting,
-      selectedPackage, isApliedCode, gateway, coupon
+      selectedPackage, isApliedCode, paymentGateway, coupon
     } = this.state;
     return (
       <Layout>
@@ -175,20 +182,20 @@ class TokenPackages extends PureComponent<IProps> {
                 </div>
               </div>
               <div style={{ margin: '20px 0' }}>
-                <p className="text-center">Please select payment gateway</p>
+                {/* <p className="text-center">Please select payment gateway</p> */}
                 <div className="payment-gateway">
-                  {settings.ccbillEnable && (
-                  <div aria-hidden onClick={() => this.onChangeGateway('ccbill')} className={gateway === 'ccbill' ? 'gateway-item active' : 'gateway-item'}>
+                  {/* {settings.ccbillEnable && (
+                  <div aria-hidden onClick={() => this.onChangepaymentGateway('ccbill')} className={paymentGateway === 'ccbill' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
                     <a><img src="/static/ccbill-ico.png" alt="ccbill" width="100%" /></a>
                   </div>
-                  )}
+                  )} */}
                   {settings.stripeEnable && (
-                  <div aria-hidden onClick={() => this.onChangeGateway('stripe')} className={gateway === 'stripe' ? 'gateway-item active' : 'gateway-item'}>
-                    <a><img src="/static/stripe-icon.jpeg" alt="stripe" width="100%" /></a>
+                  <div aria-hidden onClick={() => this.onChangepaymentGateway('stripe')} className={paymentGateway === 'stripe' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
+                    <a><img src="/static/stripe-card.png" alt="stripe" width="100%" /></a>
                   </div>
                   )}
                   {settings.bitpayEnable && (
-                  <div aria-hidden onClick={() => this.onChangeGateway('bitpay')} className={gateway === 'bitpay' ? 'gateway-item active' : 'gateway-item'}>
+                  <div aria-hidden onClick={() => this.onChangepaymentGateway('bitpay')} className={paymentGateway === 'bitpay' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
                     <a><img src="/static/bitpay-ico.png" alt="bitpay" width="65px" /></a>
                   </div>
                   )}
@@ -211,7 +218,7 @@ class TokenPackages extends PureComponent<IProps> {
                   </Col>
                 </Row>
               </div>
-              {gateway === 'stripe' && !user.stripeCardIds.length ? (
+              {paymentGateway === 'stripe' && !user?.stripeCardIds?.length ? (
                 <Button type="primary" onClick={() => Router.push('/user/cards/add-card')}>
                   Please add a payment card
                 </Button>
@@ -229,6 +236,7 @@ class TokenPackages extends PureComponent<IProps> {
           </Modal>
           {searching && <div><Spin /></div>}
           {!searching && !list.length && <p className="text-center" style={{ margin: '30px 0' }}>No token package found.</p>}
+          {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
         </div>
       </Layout>
     );

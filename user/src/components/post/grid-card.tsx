@@ -1,7 +1,7 @@
 import { PureComponent } from 'react';
 import {
   HeartOutlined, CommentOutlined, LockOutlined, UnlockOutlined,
-  FileImageOutlined, VideoCameraOutlined, QuestionCircleOutlined
+  FileImageOutlined, VideoCameraOutlined, InfoCircleOutlined
 } from '@ant-design/icons';
 import { Popover } from 'antd';
 import Link from 'next/link';
@@ -41,7 +41,7 @@ export class FeedGridCard extends PureComponent<IProps> {
             )}
             <span className="feed-info">
               <Popover content={feed.text} title={null}>
-                <QuestionCircleOutlined />
+                <InfoCircleOutlined />
               </Popover>
             </span>
             <div className="card-bottom">

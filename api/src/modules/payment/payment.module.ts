@@ -21,11 +21,13 @@ import {
 import { TransactionMailerListener, UpdateUserBalanceListener } from './listeners';
 import { UserModule } from '../user/user.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
   imports: [
     MongoDBModule,
     QueueModule.forRoot(),
+    SocketModule,
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule),
@@ -64,5 +66,8 @@ export class PaymentModule implements NestModule {
     consumer
       .apply(RequestLoggerMiddleware)
       .forRoutes('/payment/bitpay/callhook');
+    consumer
+      .apply(RequestLoggerMiddleware)
+      .forRoutes('/payment/stripe/callhook');
   }
 }

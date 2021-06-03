@@ -1,24 +1,12 @@
 import {
   IsString,
-  IsNotEmpty,
-  ValidateNested,
-  IsOptional
+  IsNotEmpty
 } from 'class-validator';
-
-export class CCBillPaymentGateway {
-  @IsNotEmpty()
-  subAccountNumber: string;
-
-  @IsNotEmpty()
-  flexformId: string;
-
-  @IsOptional()
-  salt?: string;
-}
+import { ObjectId } from 'mongodb';
 
 export class PaymentGatewaySettingPayload {
   @IsString()
-  performerId: string;
+  performerId: string | ObjectId;
 
   @IsString()
   key = 'ccbill';
@@ -27,6 +15,5 @@ export class PaymentGatewaySettingPayload {
   status = 'active';
 
   @IsNotEmpty()
-  @ValidateNested()
-  value: CCBillPaymentGateway;
+  value: any;
 }

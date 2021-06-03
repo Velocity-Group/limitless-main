@@ -1,6 +1,7 @@
-import { Layout, Alert } from 'antd';
+import { Layout, Alert, Button } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
+import Router from 'next/router';
 import Head from 'next/head';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
@@ -22,17 +23,18 @@ class PaymentCancel extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Payment canceled
+            | Payment fail
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Payment Canceled</div>
+          <div className="page-heading">Payment fail</div>
           <Alert
-            message="Payment canceled"
-            description={`Hi ${user?.name}, your payment has been canceled! Please contact us for more information.`}
+            message="Payment fail"
+            description={`Hi ${user?.name || user?.username || 'there'}, your payment has been fail! Please contact us for more information.`}
             type="error"
             showIcon
           />
+          <h4 className="text-center"><Button type="link" onClick={() => Router.back()}>Click here to back</Button></h4>
         </div>
       </Layout>
     );

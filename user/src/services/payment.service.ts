@@ -2,7 +2,7 @@
 import { APIRequest } from './api-request';
 
 export class PaymentService extends APIRequest {
-  subscribePerformer(payload: { performerId: string, type: string }) {
+  subscribePerformer(payload: any) {
     return this.post('/payment/subscribe/performers', payload);
   }
 

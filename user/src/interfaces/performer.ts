@@ -49,6 +49,7 @@ export interface IPerformer {
   score: number;
   bankingInformation: IBanking;
   stripeAccount: any;
+  paypalSetting: any;
   blockCountries: IBlockCountries;
   createdBy: string;
   createdAt: Date;
@@ -85,6 +86,7 @@ export interface IPerformer {
     twitter: string;
     linkedIn: string;
   };
+  canBeSubscribed: boolean;
 }
 
 export interface IUpdatePerformer {

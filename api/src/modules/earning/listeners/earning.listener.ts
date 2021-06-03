@@ -164,10 +164,10 @@ export class TransactionEarningListener {
 
       let commission = 0.2;
       switch (transaction.type) {
-        case PURCHASE_ITEM_TYPE.MONTHLY_SUBSCRIPTION:
+        case PAYMENT_TYPE.MONTHLY_SUBSCRIPTION:
           commission = performerCommissions?.monthlySubscriptionCommission || settingMonthlyCommission || 0.2;
           break;
-        case PURCHASE_ITEM_TYPE.YEARLY_SUBSCRIPTION:
+        case PAYMENT_TYPE.YEARLY_SUBSCRIPTION:
           commission = performerCommissions?.yearlySubscriptionCommission || settingYearlyCommission || 0.2;
           break;
         default: commission = 0.2;

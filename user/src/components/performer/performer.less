@@ -759,6 +759,19 @@
     overflow: hidden;
     font-family: @primary-font-bold;
   }
+
+  .free-status {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border-radius: 5px;
+    text-align: center;
+    color: @white;
+    font-size: 10px;
+    padding: 5px 10px;
+    font-weight: 600;
+    background-image: linear-gradient(to bottom, #04040e00 0%, @theme-color 100%);
+  }
 }
 
 
@@ -915,41 +928,6 @@
   border-bottom: 1px solid @theme-color;
 }
 
-.md-heading {
-  display: flex;
-  justify-content: space-between;
-  font-size: 20px;
-  font-weight: 600;
-  color: @grey-color;
-  margin-top: 1.5rem;
-  margin-bottom: 10px;
-}
-
-.md-below-heading {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  .sort-model {
-    text-align: right;
-    width: 15%;
-    button {
-      border: 1px solid @light-grey!important;
-      height: 40px;
-      width: 100px;
-    }
-  }
-  @media screen and (max-width: @mobile-screen) {
-    flex-direction: column-reverse;
-    .sort-model {
-      width: 100%;
-      margin-bottom: 5px;
-      button {
-        width: 100%;
-      }
-    }
-  }
-}
-
 .trending-carousel {
   .ant-carousel .slick-slide {
     height: 25vh;
@@ -1012,6 +990,10 @@
   .info-body {
     text-align: left;
     padding: 0 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     p {
       padding-left: 25px;
       font-size: 16px;

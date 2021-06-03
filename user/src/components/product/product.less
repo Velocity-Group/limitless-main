@@ -7,17 +7,14 @@
   cursor: pointer;
   border-radius: 5px;
   overflow: hidden;
+  border-radius: 0.5em;
   .prd-thumb {
     position: relative;
+    height: 200px;
     img {
-      border-top-left-radius: 0.5em;
-      border-top-right-radius: 0.5em;
-      height: 18em;
+      height: 100%;
       width: 100%;
       object-fit: cover;
-      @media screen and (max-width: @tablet-screen) {
-        height: 13em;
-      }
     }
     .bookmark-btn {
       background: rgba(255, 255, 255, 0.1);
@@ -36,6 +33,9 @@
         color: @theme-color;
       }
     }
+    @media screen and (max-width: @tablet-screen) {
+      height: 150px;
+    }
   }
   &:hover .prd-info {
     color: @white;
@@ -45,13 +45,12 @@
     }
   }
   .prd-info {
+    text-transform: capitalize;
     font-family: @primary-font-bold;
     color: @gray;
     background-color: @light-card;
     padding: 1em;
     text-align: center;
-    border-bottom-left-radius: 0.5em;
-    border-bottom-right-radius: 0.5em;
     font-weight: 600;
     white-space: nowrap;
     text-overflow: ellipsis;

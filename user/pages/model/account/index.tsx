@@ -23,11 +23,8 @@ import {
 } from '@services/index';
 import { UpdatePaswordForm } from '@components/user/update-password-form';
 import {
-  PerformerAccountForm,
-  PerformerBankingForm,
-  PerformerSubscriptionForm,
-  PerformerBlockCountriesForm,
-  PerformerVerificationForm
+  PerformerAccountForm, PerformerSubscriptionForm, PerformerBlockCountriesForm,
+  PerformerVerificationForm, PerformerPaypalForm
 } from '@components/performer';
 import '../../user/index.less';
 
@@ -50,15 +47,15 @@ class AccountSettings extends PureComponent<IProps> {
   static onlyPerformer: boolean = true;
 
   static async getInitialProps() {
-    const [countries, heights, weights] = await Promise.all([
+    const [countries, heights] = await Promise.all([
       utilsService.countriesList(),
-      utilsService.heightList(),
-      utilsService.weightList()
+      utilsService.heightList()
+      // utilsService.weightList()
     ]);
     return {
       countries: countries && countries.data ? countries.data : [],
-      heights: heights && heights.data ? heights.data : [],
-      weights: weights && weights.data ? weights.data : []
+      heights: heights && heights.data ? heights.data : []
+      // weights: weights && weights.data ? weights.data : []
     };
   }
 
@@ -92,6 +89,18 @@ class AccountSettings extends PureComponent<IProps> {
       const resp = await blockService.blockCountries(data);
       message.success('Changes saved');
       handleBlockCountry(resp.data);
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try againl later');
+    }
+  }
+
+  async handleUpdatePaypal(data) {
+    const { currentUser } = this.props;
+    try {
+      const payload = { key: 'paypal', value: data, performerId: currentUser._id };
+      await performerService.updatePaymentGateway(currentUser._id, payload);
+      message.success('Changes saved');
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try againl later');
@@ -156,7 +165,7 @@ class AccountSettings extends PureComponent<IProps> {
 
   render() {
     const {
-      currentUser, updating, ui, countries, weights, heights
+      currentUser, updating, ui, countries, heights
     } = this.props;
     const { pwUpdating, emailSending, countTime } = this.state;
     const uploadHeaders = {
@@ -177,14 +186,11 @@ class AccountSettings extends PureComponent<IProps> {
           <div className="verify-info">
             Your ID documents are not verified yet! You could not post any content right now.
             <p>
-              Please upload your ID documents to get approval then start making money.
-            </p>
-            <p>
               If you have any question, please contact our administrator to get more information.
             </p>
           </div>
           )}
-          <Tabs defaultActiveKey="basic" tabPosition="top" className="nav-tabs">
+          <Tabs defaultActiveKey="basic" tabPosition="top" className="nav-tabs custom">
             <Tabs.TabPane tab={<span>Basic Settings</span>} key="basic">
               <PerformerAccountForm
                 onFinish={this.submit.bind(this)}
@@ -201,7 +207,7 @@ class AccountSettings extends PureComponent<IProps> {
                   videoUploadUrl: performerService.getVideoUploadUrl()
                 }}
                 countries={countries}
-                weights={weights}
+                // weights={weights}
                 heights={heights}
               />
             </Tabs.TabPane>
@@ -222,8 +228,15 @@ class AccountSettings extends PureComponent<IProps> {
                 user={currentUser}
               />
             </Tabs.TabPane>
-            <Tabs.TabPane tab={<span>Banking</span>} key="bankInfo">
-              <PerformerBankingForm />
+            <Tabs.TabPane
+              tab={<span>Paypal Settings</span>}
+              key="paypal"
+            >
+              <PerformerPaypalForm
+                onFinish={this.handleUpdatePaypal.bind(this)}
+                updating={updating}
+                user={currentUser}
+              />
             </Tabs.TabPane>
             <Tabs.TabPane tab={<span>Block Countries</span>} key="block">
               <PerformerBlockCountriesForm

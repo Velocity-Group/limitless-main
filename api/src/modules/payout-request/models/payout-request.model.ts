@@ -18,6 +18,8 @@ export class PayoutRequestModel extends Document {
 
   tokenConversionRate?: number;
 
+  payoutId?: string;
+
   createdAt: Date;
 
   updatedAt: Date;
