@@ -38,10 +38,6 @@ class CardForm extends PureComponent<IProps> {
       message.error(error?.message || 'Invalid card information, please check then try again');
       return;
     }
-    if (source1.status === 'chargeable') {
-      submit(source1);
-      return;
-    }
     if (source1?.card?.three_d_secure === 'required') {
       const { error: err, source: source2 } = await stripe.createSource({
         type: 'three_d_secure',
@@ -80,7 +76,7 @@ class CardForm extends PureComponent<IProps> {
       message.error(error?.message || 'Process on 3D secure card error, please check then try again');
       return;
     }
-    if (source.status !== 'chargeable') return;
+    if (source?.status !== 'chargeable') return;
     submit(source);
   };
 
