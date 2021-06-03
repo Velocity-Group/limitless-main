@@ -1,4 +1,6 @@
-import { Layout, Button, message } from 'antd';
+import {
+  Layout, Button, message, Modal, Form, Input
+} from 'antd';
 import Head from 'next/head';
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -11,6 +13,7 @@ import './index.less';
 
 interface IProps {
   ui: IUIConfig;
+  className: string;
 }
 
 class blockPage extends PureComponent<IProps> {
@@ -25,7 +28,8 @@ class blockPage extends PureComponent<IProps> {
     offset: 0,
     blockUserId: '',
     userBlockedList: [],
-    totalBlockedUsers: 0
+    totalBlockedUsers: 0,
+    openBlockModal: false
   }
 
   componentDidMount() {
@@ -71,7 +75,7 @@ class blockPage extends PureComponent<IProps> {
     }
   }
 
-  async blockUser() {
+  async blockUser(data) {
     const { blockUserId } = this.state;
     if (!blockUserId) {
       message.error('Please select a user');
@@ -79,20 +83,20 @@ class blockPage extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      await blockService.blockUser({ targetId: blockUserId, target: 'user', reason: 'tao thich' });
+      await blockService.blockUser({ targetId: blockUserId, target: 'user', reason: data.reason });
       message.success('Blocked success');
       this.getBlockList();
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'An error occured, please try again later');
     } finally {
-      this.setState({ submiting: false });
+      this.setState({ submiting: false, openBlockModal: false });
     }
   }
 
   render() {
     const {
-      userBlockedList, totalBlockedUsers, loading, limit, submiting
+      userBlockedList, totalBlockedUsers, loading, limit, submiting, openBlockModal
     } = this.state;
     const { ui } = this.props;
     return (
@@ -104,12 +108,10 @@ class blockPage extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Block Page</div>
-          <div className="select-user">
-            <p>Please select user you want to block</p>
-            <SelectUserDropdown onSelect={(val) => this.setState({ blockUserId: val })} />
-            <Button className="block-user" type="primary" onClick={this.blockUser.bind(this)}>
-              Block
+          <div className="page-heading">Users blocked list page</div>
+          <div className="block-user">
+            <Button className="" type="primary" onClick={() => this.setState({ openBlockModal: true })}>
+              Block User
             </Button>
           </div>
           <div className="users-blocked-list">
@@ -117,13 +119,59 @@ class blockPage extends PureComponent<IProps> {
               items={userBlockedList}
               searching={loading}
               total={totalBlockedUsers}
-              onChange={this.handleTabChange.bind(this)}
+              onPaginationChange={this.handleTabChange.bind(this)}
               pageSize={limit}
               submiting={submiting}
               unblockUser={this.handleUnblockUser.bind(this)}
             />
           </div>
         </div>
+        <Modal
+          title="Block user"
+          visible={openBlockModal}
+          onCancel={() => this.setState({ openBlockModal: false })}
+          footer={null}
+          destroyOnClose
+        >
+          <Form
+            name="blockForm"
+            onFinish={this.blockUser.bind(this)}
+            initialValues={{
+              reason: ''
+            }}
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            className="account-form"
+          >
+            <Form.Item label="Please select user you want to block">
+              <SelectUserDropdown onSelect={(val) => this.setState({ blockUserId: val })} />
+            </Form.Item>
+            <Form.Item
+              name="reason"
+              label="Reason"
+              rules={[{ required: true, message: 'Tell us your reason' }]}
+            >
+              <Input.TextArea />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                className="primary"
+                htmlType="submit"
+                loading={submiting}
+                disabled={submiting}
+                style={{ marginRight: '20px' }}
+              >
+                Submit
+              </Button>
+              <Button
+                className="secondary"
+                onClick={() => this.setState({ openBlockModal: false })}
+              >
+                Close
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
       </Layout>
     );
   }

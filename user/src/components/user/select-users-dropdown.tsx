@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import { Select, message } from 'antd';
 import { debounce } from 'lodash';
 import { userService } from '@services/user.service';
+// import '../../../pages/model/block-user/index.less';
 
 interface IProps {
   placeholder?: string;
@@ -48,7 +49,7 @@ export class SelectUserDropdown extends PureComponent<IProps> {
         placeholder="Type to search user"
         style={style}
         onSearch={this.loadUsers.bind(this)}
-        onChange={(val) => onSelect(val)}
+        onChange={onSelect.bind(this)}
         loading={loading}
         optionFilterProp="children"
         disabled={disabled}
