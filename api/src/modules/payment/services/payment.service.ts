@@ -206,22 +206,12 @@ export class PaymentService {
         transaction.paymentResponseInfo = plan;
         transaction.latestInvoiceId = plan.latest_invoice as any;
         await transaction.save();
-        await this.queueEventService.publish(
-          new QueueEvent({
-            channel: TRANSACTION_SUCCESS_CHANNEL,
-            eventName: EVENT.CREATED,
-            data: new PaymentDto(transaction)
-          })
-        );
-        setTimeout(async () => {
-          await this.subscriptionService.updateSubscriptionId({
-            userId: transaction.sourceId,
-            performerId: transaction.performerId
-          }, plan.id);
-        }, 5000); // to create subscription model first
-        return { success: true };
+        await this.subscriptionService.updateSubscriptionId({
+          userId: transaction.sourceId,
+          performerId: transaction.performerId
+        }, plan.id);
       }
-      return { success: false };
+      return new PaymentDto(transaction).toResponse();
     }
     throw new MissingConfigPaymentException();
   }
@@ -323,10 +313,13 @@ export class PaymentService {
         item: {
           name: tokenPackage.name
         },
-        user,
-        stripeCardId
+        user
       });
-      return data;
+      if (data) {
+        transaction.latestInvoiceId = data.invoice.toString();
+        await transaction.save();
+      }
+      return new PaymentDto(transaction).toResponse();
     }
     throw new MissingConfigPaymentException();
   }
@@ -463,16 +456,20 @@ export class PaymentService {
     if (!transaction) return { ok: false };
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();
+    let redirectUrl = '/payment/cancel';
     switch (type) {
-      case 'charge.expired':
+      case 'payment_intent.canceled':
         transaction.status = PAYMENT_STATUS.CANCELED;
         await transaction.save();
         break;
-      case 'charge.failed':
+      case 'payment_intent.payment_failed':
         transaction.status = PAYMENT_STATUS.FAIL;
         await transaction.save();
         break;
-      case 'charge.succeeded': transaction.status = PAYMENT_STATUS.SUCCESS;
+      case 'payment_intent.requires_action':
+        redirectUrl = data?.object?.next_action?.use_stripe_sdk?.stripe_js || '/payment/cancel';
+        break;
+      case 'payment_intent.succeeded': transaction.status = PAYMENT_STATUS.SUCCESS;
         transaction.latestInvoiceId = latestInvoiceId;
         if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
           transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
@@ -485,10 +482,11 @@ export class PaymentService {
             data: new PaymentDto(transaction)
           })
         );
+        redirectUrl = '/payment/success';
         break;
       default: break;
     }
-    type.includes('charge') && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', new PaymentDto(transaction).toResponse());
+    type.includes('charge') && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { ok: false };
   }
 

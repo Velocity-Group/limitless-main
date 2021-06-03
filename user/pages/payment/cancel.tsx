@@ -1,7 +1,6 @@
 import { Layout, Alert, Button } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import Router from 'next/router';
 import Head from 'next/head';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
@@ -34,7 +33,7 @@ class PaymentCancel extends PureComponent<IProps> {
             type="error"
             showIcon
           />
-          <h4 className="text-center"><Button type="link" onClick={() => Router.back()}>Click here to back</Button></h4>
+          <h4 className="text-center"><Button type="link" onClick={() => window.history.back()}>Click here to back</Button></h4>
         </div>
       </Layout>
     );

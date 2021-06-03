@@ -242,13 +242,13 @@ class PerformerProfile extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({
+      await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: performer._id,
         paymentGateway: 'stripe',
-        stripeCardId: currentUser.stripeCardIds[0]
-      })).data;
-      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
+        stripeCardId: currentUser.stripeCardIds[0] // TODO user can choose card
+      });
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');

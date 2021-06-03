@@ -73,23 +73,21 @@ class TokenPackages extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.purchaseTokenPackage(selectedPackage._id, {
+      await paymentService.purchaseTokenPackage(selectedPackage._id, {
         paymentGateway,
         stripeCardId: user.stripeCardIds[0],
         couponCode: isApliedCode ? couponCode : null
-      })).data;
+      });
       // TOTO update logic here
       // if (paymentGateway === 'ccbill' && resp.paymentUrl) {
       //   message.success('Redirecting to payment method');
       //   window.location.href = resp.paymentUrl;
       // }
-      if (resp.success || resp.status === 'succeeded') {
-        Router.push('/payment/success');
-      }
+      this.setState({ openPurchaseModal: false });
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
-      Router.push('/payment/cancel');
+      this.setState({ openPurchaseModal: false, submiting: false });
     }
   }
 

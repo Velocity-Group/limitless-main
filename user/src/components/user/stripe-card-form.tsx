@@ -4,7 +4,6 @@ import {
   message
 } from 'antd';
 import { } from '@ant-design/icons';
-import Router from 'next/router';
 
 interface IProps {
   submit: Function;
@@ -14,13 +13,6 @@ interface IProps {
 }
 
 class CardForm extends PureComponent<IProps> {
-  componentDidMount() {
-    const { router } = Router;
-    if (router?.query?.client_secret && router?.query?.source) {
-      this.retrieveSource(router?.query?.source, router?.query?.client_secret);
-    }
-  }
-
   async handleSubmit(event) {
     event.preventDefault();
     const {
@@ -31,54 +23,20 @@ class CardForm extends PureComponent<IProps> {
     }
     const cardElement = elements.getElement(CardElement);
     // Use your card Element with other Stripe.js APIs
-    const { error, source: source1 } = await stripe.createSource(cardElement, { type: 'card' });
+    const { error, source } = await stripe.createSource(cardElement, {
+      type: 'card',
+      redirect: {
+        return_url: window.location.href
+      }
+    });
     if (error) {
       // eslint-disable-next-line no-console
       console.log('[error]', error);
       message.error(error?.message || 'Invalid card information, please check then try again');
       return;
     }
-    if (source1?.card?.three_d_secure === 'required') {
-      const { error: err, source: source2 } = await stripe.createSource({
-        type: 'three_d_secure',
-        amount: 1000,
-        currency: 'usd',
-        three_d_secure: {
-          card: source1.id
-        },
-        redirect: {
-          return_url: window.location.href
-        }
-      });
-      if (err) {
-        message.error(err?.message || 'Process on 3D secure card error, please check then try again');
-        return;
-      }
-      if (source2?.status === 'chargeable') {
-        submit(source2);
-        return;
-      }
-      if (source2?.status === 'pending' || source2?.redirect?.status === 'pending') {
-        window.location.href = source2?.redirect.url;
-        return;
-      }
-    }
-    submit(source1);
-  }
-
-  retrieveSource = async (sourceId, clientSecret) => {
-    const { stripe, submit, submiting } = this.props;
-    if (!stripe || submiting) {
-      return;
-    }
-    const { error, source } = await stripe.retrieveSource({ id: sourceId, client_secret: clientSecret } as any);
-    if (error) {
-      message.error(error?.message || 'Process on 3D secure card error, please check then try again');
-      return;
-    }
-    if (source?.status !== 'chargeable') return;
     submit(source);
-  };
+  }
 
   render() {
     const { submiting, stripe } = this.props;
