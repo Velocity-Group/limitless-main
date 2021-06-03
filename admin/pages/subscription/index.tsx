@@ -82,6 +82,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
         limit: pagination.pageSize,
         offset: (pagination.current - 1) * pagination.pageSize
       });
+      console.log(resp);
       await this.setState({
         subscriptionList: resp.data.data,
         pagination: { ...pagination, total: resp.data.total }

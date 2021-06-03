@@ -1,16 +1,15 @@
 /* eslint-disable react/destructuring-assignment */
 import * as React from 'react';
-import { Table, Button } from 'antd';
-// import Link from 'next/link';
-import { formatDate } from 'src/lib';
-import './../../../pages/model/block-user/index.less';
+import { Table, Button, Tooltip } from 'antd';
+import '../../../pages/model/block-user/index.less';
+import { formatDate } from '@lib/date';
 
 interface IProps {
   items: any[];
   searching: boolean;
   total: number;
   pageSize: number;
-  onChange: Function;
+  onPaginationChange: Function;
   unblockUser: Function;
   submiting: boolean;
 }
@@ -20,7 +19,7 @@ const UsersBlockList = ({
   searching,
   total,
   pageSize,
-  onChange,
+  onPaginationChange,
   unblockUser,
   submiting
 }: IProps) => {
@@ -36,24 +35,36 @@ const UsersBlockList = ({
     {
       title: 'Reason',
       dataIndex: 'reason',
-      key: 'reason'
+      key: 'reason',
+      render: (reason: any) => (
+        <Tooltip title={reason}>
+          <div style={{
+            maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          }}
+          >
+            {reason}
+          </div>
+        </Tooltip>
+      )
     },
     {
       title: 'Blocked at',
       key: 'createdAt',
       dataIndex: 'createdAt',
-      render: (createdAt: Date) => <span>{createdAt}</span>,
+      render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>,
       sorter: true
     },
     {
       title: 'Actions',
       key: '_id',
       render: (item) => (
-        <Button 
-          type="primary" 
-          disabled={submiting} 
-          onClick={() => unblockUser(item.targetId)}>
-            Unblock
+        <Button
+          className="unblock-user"
+          type="primary"
+          disabled={submiting}
+          onClick={() => unblockUser(item.targetId)}
+        >
+          Unblock
         </Button>
       )
     }
@@ -69,9 +80,9 @@ const UsersBlockList = ({
         total,
         pageSize
       }}
-      // scroll={{ x: true }}
+      scroll={{ x: true }}
       loading={searching}
-      onChange={onChange.bind(this)}
+      onChange={onPaginationChange.bind(this)}
     />
   );
 };
