@@ -3,6 +3,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import { clearCart } from '@redux/cart/actions';
+import Router from 'next/router';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
 interface IProps {
@@ -36,6 +37,14 @@ class PaymentSuccess extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <div className="page-heading">Payment Success</div>
+          {Router?.query?.transactionId && (
+          <h4>
+            <a>
+              #
+              {Router?.query?.transactionId}
+            </a>
+          </h4>
+          )}
           <Alert
             message="Payment success"
             description={`Hi ${user.name || user.username || 'there'}, your payment has been successfully!`}

@@ -466,11 +466,11 @@ export class PaymentService {
         transaction.status = PAYMENT_STATUS.PROCESSING;
         break;
       case 'payment_intent.canceled':
-        redirectUrl = '/payment/cancel';
+        redirectUrl = `/payment/cancel?transactionId=${transaction._id.slice(16, 24)}`;
         transaction.status = PAYMENT_STATUS.CANCELED;
         break;
       case 'payment_intent.payment_failed':
-        redirectUrl = '/payment/cancel';
+        redirectUrl = `/payment/cancel?transactionId=${transaction._id.slice(16, 24)}`;
         transaction.status = PAYMENT_STATUS.FAIL;
         break;
       case 'payment_intent.requires_action':
@@ -489,7 +489,7 @@ export class PaymentService {
             data: new PaymentDto(transaction)
           })
         );
-        redirectUrl = '/payment/success';
+        redirectUrl = `/payment/success?transactionId=${transaction._id.slice(16, 24)}`;
         break;
       default: break;
     }

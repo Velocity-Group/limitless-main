@@ -2,6 +2,7 @@ import { Layout, Alert, Button } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
+import Router from 'next/router';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
 interface IProps {
@@ -27,6 +28,14 @@ class PaymentCancel extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <div className="page-heading">Payment fail</div>
+          {Router?.query?.transactionId && (
+          <h4>
+            <a>
+              #
+              {Router?.query?.transactionId}
+            </a>
+          </h4>
+          )}
           <Alert
             message="Payment fail"
             description={`Hi ${user?.name || user?.username || 'there'}, your payment has been fail! Please contact us for more information.`}
