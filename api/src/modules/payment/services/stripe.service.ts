@@ -273,7 +273,7 @@ export class StripeService {
   public async createSingleCharge(payload: any) {
     try {
       const {
-        transaction, item, user
+        transaction, item, user, stripeCardId
       } = payload;
       const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
       const stripe = new Stripe(secretKey, {
@@ -283,12 +283,14 @@ export class StripeService {
         amount: transaction.totalPrice * 100, // convert cents to dollars
         currency: 'usd',
         customer: user.stripeCustomerId,
+        payment_method: stripeCardId,
         description: `${user?.name || user?.username} purchase ${transaction.type} ${item.name}`,
         metadata: {
           transactionId: transaction._id.toString() // to track on webhook
         },
         receipt_email: user.email,
-        return_url: `${process.env.USER_URL}/token-package`
+        confirm: true,
+        return_url: `${process.env.USER_URL}/user/payment-history`
       });
       return charge;
     } catch (e) {

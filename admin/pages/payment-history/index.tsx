@@ -83,12 +83,24 @@ class PaymentTransaction extends PureComponent<IProps> {
         text: 'All'
       },
       {
-        key: 'pending',
-        text: 'Pending'
+        key: 'created',
+        text: 'Created'
+      },
+      {
+        key: 'processing',
+        text: 'Processing'
       },
       {
         key: 'success',
         text: 'Success'
+      },
+      {
+        key: 'fail',
+        text: 'Fail'
+      },
+      {
+        key: 'canceled',
+        text: 'Canceled'
       },
       {
         key: 'refunded',

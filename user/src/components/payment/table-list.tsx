@@ -103,12 +103,16 @@ const PaymentTableList = ({
             return <Tag color="green">Success</Tag>;
           case 'fail':
             return <Tag color="red">Fail</Tag>;
-          case 'pending':
-            return <Tag color="orange">Pending</Tag>;
+          case 'processing':
+            return <Tag color="orange">Processing</Tag>;
           case 'canceled':
             return <Tag color="pink">Canceled</Tag>;
           case 'refunded':
             return <Tag color="violet">Refunded</Tag>;
+          case 'created':
+            return <Tag color="default">Created</Tag>;
+          case 'require_authentication':
+            return <Tag color="default">Require Authentication</Tag>;
           default: break;
         }
         return <Tag color="red">{status}</Tag>;

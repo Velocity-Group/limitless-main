@@ -83,12 +83,20 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
         dataIndex: 'status',
         render(status: string) {
           switch (status) {
-            case 'pending':
-              return <Tag color="orange">Pending</Tag>;
             case 'success':
               return <Tag color="green">Success</Tag>;
+            case 'fail':
+              return <Tag color="red">Fail</Tag>;
+            case 'processing':
+              return <Tag color="orange">Processing</Tag>;
+            case 'canceled':
+              return <Tag color="pink">Canceled</Tag>;
             case 'refunded':
-              return <Tag color="red">Refunded</Tag>;
+              return <Tag color="violet">Refunded</Tag>;
+            case 'created':
+              return <Tag color="default">Created</Tag>;
+            case 'require_authentication':
+              return <Tag color="default">Require Authentication</Tag>;
             default: return <Tag color="red">{status}</Tag>;
           }
         }

@@ -1,9 +1,11 @@
 export const PAYMENT_STATUS = {
-  PENDING: 'pending',
+  CREATED: 'created',
+  PROCESSING: 'processing',
   SUCCESS: 'success',
   FAIL: 'fail',
   CANCELED: 'canceled',
-  REFUNDED: 'refunded'
+  REFUNDED: 'refunded',
+  REQUIRE_AUTHENTICATION: 'require_authentication'
 };
 export const PAYMENT_TYPE = {
   TOKEN_PACKAGE: 'token_package',

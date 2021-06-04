@@ -107,16 +107,24 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
         text: 'All Status'
       },
       {
+        key: 'created',
+        text: 'Created'
+      },
+      {
+        key: 'processing',
+        text: 'Processing'
+      },
+      {
+        key: 'require_authentication',
+        text: 'Require authentication'
+      },
+      {
         key: 'fail',
         text: 'Fail'
       },
       {
         key: 'success',
         text: 'Success'
-      },
-      {
-        key: 'pending',
-        text: 'Pending'
       },
       {
         key: 'canceled',
