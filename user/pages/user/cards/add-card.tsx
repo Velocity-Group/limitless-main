@@ -2,6 +2,8 @@ import { PureComponent } from 'react';
 import {
   message, Layout
 } from 'antd';
+import PageHeading from '@components/common/page-heading';
+import { CreditCardOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import {
@@ -63,6 +65,7 @@ class NewCardPage extends PureComponent<IProps> {
             <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Add New Card</span>
             </div>
+            <PageHeading title="Add new Card" icon={<CreditCardOutlined />} />
             <div className="card-form">
               <Elements stripe={loadStripe(settings.stripePublishableKey || '')}>
                 <ElementsConsumer>

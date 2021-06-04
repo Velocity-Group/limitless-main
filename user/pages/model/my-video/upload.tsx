@@ -2,6 +2,8 @@ import { PureComponent } from 'react';
 import Head from 'next/head';
 import { connect } from 'react-redux';
 import { message, Layout } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { videoService } from '@services/video.service';
 import { FormUploadVideo } from '@components/video/form-upload';
 import Router from 'next/router';
@@ -107,13 +109,11 @@ class UploadVideo extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Upload new video
+            | Upload Video
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">
-            <span>Upload new video</span>
-          </div>
+          <PageHeading title="Upload Video" icon={<UploadOutlined />} />
           <FormUploadVideo
             user={user}
             submit={this.submit.bind(this)}

@@ -1,5 +1,7 @@
 import { PureComponent } from 'react';
 import { message, Layout, Modal } from 'antd';
+import PageHeading from '@components/common/page-heading';
+import { HeartOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import { TableListSubscription } from '@components/subscription/table-list-subscription';
@@ -136,8 +138,8 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({ type: subscriptionType, performerId: performer._id })).data;
-      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
+      await paymentService.subscribePerformer({ type: subscriptionType, performerId: performer._id });
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -161,9 +163,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading">
-              <span>My subscriptions</span>
-            </div>
+            <PageHeading title="My Subscriptions" icon={<HeartOutlined />} />
             <SearchFilter
               searchWithPerformer
               onSubmit={this.handleFilter.bind(this)}

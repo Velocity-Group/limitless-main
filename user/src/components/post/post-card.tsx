@@ -509,7 +509,7 @@ class FeedCard extends Component<IProps> {
               </span>
               {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
                 <span>
-                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')} day(s) `}
+                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')} days `}
                   <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
                 </span>
               ) : <span>Expired</span>}

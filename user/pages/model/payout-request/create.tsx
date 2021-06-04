@@ -1,5 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
+import { NotificationOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import PayoutRequestForm from '@components/payout-request/form';
 import { message } from 'antd';
 import { connect } from 'react-redux';
@@ -82,7 +84,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
           <title>{`${ui?.siteName} | Request a Payout`}</title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Request a Payout</div>
+          <PageHeading title="Request a Payout" icon={<NotificationOutlined />} />
           <PayoutRequestForm
             payout={{
               requestNote: '',

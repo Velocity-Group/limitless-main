@@ -3,6 +3,8 @@ import Head from 'next/head';
 import {
   message, Button, Row, Col
 } from 'antd';
+import { ShopOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import Page from '@components/common/layout/page';
 import { productService } from '@services/product.service';
 import { SearchFilter } from '@components/common/search-filter';
@@ -130,14 +132,12 @@ class Products extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | My Store
+            | My Products
           </title>
         </Head>
         <Page>
           <div className="main-container">
-            <div className="page-heading">
-              <span>My Store</span>
-            </div>
+            <PageHeading title="My Products" icon={<ShopOutlined />} />
             <div>
               <Row>
                 <Col lg={20} xs={24}>

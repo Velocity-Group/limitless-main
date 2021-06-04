@@ -1,6 +1,8 @@
 import { PureComponent } from 'react';
 import Head from 'next/head';
 import { message } from 'antd';
+import { PaperClipOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import Page from '@components/common/layout/page';
 import { orderService } from '@services/index';
 import { OrderSearchFilter } from '@components/order';
@@ -101,9 +103,7 @@ class ModelOrderPage extends PureComponent<IProps> {
         </Head>
         <Page>
           <div className="main-container">
-            <div className="page-heading">
-              <span>My orders </span>
-            </div>
+            <PageHeading title="My Orders" icon={<PaperClipOutlined />} />
             <OrderSearchFilter
               onSubmit={this.handleFilter.bind(this)}
             />

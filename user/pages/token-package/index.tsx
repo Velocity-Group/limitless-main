@@ -3,6 +3,8 @@ import Head from 'next/head';
 import {
   Layout, message, Row, Col, Card, Button, Modal, Input, Spin
 } from 'antd';
+import PageHeading from '@components/common/page-heading';
+import { WalletOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import { tokenPackageService } from '@services/token-package.service';
 import { paymentService } from '@services/index';
@@ -10,7 +12,6 @@ import {
   IUIConfig, IPackageToken, IUser, ISettings
 } from '@interfaces/index';
 import { connect } from 'react-redux';
-import { StarOutlined } from '@ant-design/icons';
 import Page from '@components/common/layout/page';
 import Router from 'next/router';
 import Loader from '@components/common/base/loader';
@@ -78,11 +79,6 @@ class TokenPackages extends PureComponent<IProps> {
         stripeCardId: user.stripeCardIds[0],
         couponCode: isApliedCode ? couponCode : null
       });
-      // TOTO update logic here
-      // if (paymentGateway === 'ccbill' && resp.paymentUrl) {
-      //   message.success('Redirecting to payment method');
-      //   window.location.href = resp.paymentUrl;
-      // }
       this.setState({ openPurchaseModal: false });
     } catch (e) {
       const error = await e;
@@ -120,29 +116,20 @@ class TokenPackages extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <Page>
-            <div
-              className="page-heading flex-row-space-between"
-              style={{ position: 'relative' }}
-            >
-              <span>
-                <StarOutlined />
-                {' '}
-                Token Packages
-              </span>
-            </div>
+            <PageHeading title="Token Packages" icon={<WalletOutlined />} />
             <Row>
               {!searching && list.length > 0 && list.map((item: IPackageToken) => (
                 <Col md={6} sm={12} xs={24} key={item._id}>
                   <Card title={item.name} className="site-card-wrapper">
                     <p className="price-style">
                       $
-                      {item.price.toFixed(2)}
+                      {(item.price || 0).toFixed(2)}
                       {' '}
                       /
                       {' '}
                       <img alt="token" src="/static/coin-ico.png" height="20px" />
                       {' '}
-                      {item.tokens}
+                      {item.tokens || 0}
                     </p>
                     <div className="scrollbar" id="style-3">
                       <div className="force-overflow">{item.description}</div>

@@ -74,13 +74,13 @@ class CardsPage extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | My Cards
+            | My Card
           </title>
         </Head>
         <div className="main-container">
           <Page>
             <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>My Cards</span>
+              <span>My Card</span>
               {(!cards.length && !loading) && (
               <Link href="/user/cards/add-card">
                 <a>

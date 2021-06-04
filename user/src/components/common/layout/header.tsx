@@ -407,7 +407,7 @@ class Header extends PureComponent<IProps> {
                   <div className={router.pathname === '/user/cards' ? 'menu-item active' : 'menu-item'}>
                     <CreditCardOutlined />
                     {' '}
-                    Add Cards
+                    Add Card
                   </div>
                 </Link>
                 <Divider />

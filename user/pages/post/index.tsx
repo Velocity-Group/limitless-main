@@ -10,7 +10,7 @@ import {
   IFeed, IUIConfig, IUser
 } from '@interfaces/index';
 import FeedCard from '@components/post/post-card';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { FireOutlined } from '@ant-design/icons';
 import Router from 'next/router';
 import { redirectToErrorPage } from '@redux/system/actions';
 
@@ -38,7 +38,7 @@ class PostDetails extends PureComponent<IProps> {
   async componentDidMount() {
     const { feed, redirectToErrorPage: handleRedirect } = this.props;
     if (!feed) {
-      return handleRedirect({
+      handleRedirect({
         url: '/error',
         error: {
           statusCode: 404,
@@ -46,15 +46,15 @@ class PostDetails extends PureComponent<IProps> {
         }
       });
     }
-    return false;
   }
 
   async onDelete(feed: IFeed) {
     const { user } = this.props;
     if (user._id !== feed.fromSourceId) {
-      return message.error('Permission denied');
+      message.error('Permission denied');
+      return;
     }
-    if (!window.confirm('Are you sure to delete this post?')) return false;
+    if (!window.confirm('Are you sure to delete this post?')) return;
     try {
       await feedService.delete(feed._id);
       message.success('Deleted the post successfully');
@@ -62,7 +62,6 @@ class PostDetails extends PureComponent<IProps> {
     } catch {
       message.error('Something went wrong, please try again later');
     }
-    return undefined;
   }
 
   render() {
@@ -72,7 +71,7 @@ class PostDetails extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${performer?.name}`}
+            {`${ui?.siteName} | ${performer?.name || performer?.username}`}
           </title>
           <meta
             name="keywords"
@@ -101,7 +100,7 @@ class PostDetails extends PureComponent<IProps> {
           <Page>
             <div className="page-heading">
               <a aria-hidden onClick={() => Router.back()}>
-                <ArrowLeftOutlined />
+                <FireOutlined />
                 {' '}
                 {`${performer?.name} post`}
               </a>

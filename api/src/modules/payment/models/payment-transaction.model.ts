@@ -47,7 +47,7 @@ export class PaymentTransactionModel extends Document {
 
   paymentResponseInfo: any;
 
-  latestInvoiceId: string;
+  paymentIntentId: string;
 
   status: string;
 

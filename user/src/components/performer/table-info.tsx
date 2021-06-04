@@ -39,7 +39,7 @@ export class PerformerInfo extends PureComponent<IProps> {
           )}
           {performer.dateOfBirth && <Descriptions.Item label="Date of Birth">{formatDateNoTime(performer.dateOfBirth)}</Descriptions.Item>}
           {performer.bodyType && <Descriptions.Item label="Body Type">{performer.bodyType}</Descriptions.Item>}
-          {performer.state && <Descriptions.Item label="State (County)">{performer.state}</Descriptions.Item>}
+          {performer.state && <Descriptions.Item label="State/County/Province">{performer.state}</Descriptions.Item>}
           {performer.city && <Descriptions.Item label="City">{performer.city}</Descriptions.Item>}
           {performer.height && <Descriptions.Item label="Height">{performer.height}</Descriptions.Item>}
           {performer.weight && <Descriptions.Item label="Weight">{performer.weight}</Descriptions.Item>}

@@ -2,11 +2,13 @@ import Head from 'next/head';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Layout, message } from 'antd';
+import { BankOutlined } from '@ant-design/icons';
 import {
   IPerformer, IUIConfig
 } from 'src/interfaces';
 import { PerformerBankingForm } from '@components/performer';
 import { paymentService } from '@services/payment.service';
+import PageHeading from '@components/common/page-heading';
 import '../../user/index.less';
 
 interface IProps {
@@ -73,12 +75,12 @@ class BankingSettings extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Banking
+            | Stripe Banking
             {' '}
           </title>
         </Head>
         <div className="main-container user-account">
-          <div className="page-heading">Banking</div>
+          <PageHeading icon={<BankOutlined />} title="Stripe Banking" />
           <PerformerBankingForm stripeAccount={stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
         </div>
       </Layout>

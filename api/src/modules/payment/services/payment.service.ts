@@ -204,7 +204,7 @@ export class PaymentService {
       if (plan) {
         transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.CREATED;
         transaction.paymentResponseInfo = plan;
-        transaction.latestInvoiceId = plan.latest_invoice as any;
+        transaction.paymentIntentId = plan.latest_invoice as any;
         await transaction.save();
         await this.subscriptionService.updateSubscriptionId({
           userId: transaction.sourceId,
@@ -317,7 +317,7 @@ export class PaymentService {
         stripeCardId
       });
       if (data) {
-        transaction.latestInvoiceId = data.invoice.toString();
+        transaction.paymentIntentId = data.id || (data.invoice && data.invoice.toString());
         await transaction.save();
       }
       return new PaymentDto(transaction).toResponse();
@@ -447,13 +447,15 @@ export class PaymentService {
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data } = payload;
-    const latestInvoiceId = data?.object?.invoice;
+    const paymentIntentId = data?.object?.invoice || data?.object?.id;
     const transactionId = data?.object?.metadata?.transactionId;
-    if (!latestInvoiceId && !transactionId) {
+    if (!paymentIntentId && !transactionId) {
       return { ok: false };
     }
-    const transaction = latestInvoiceId ? await this.TransactionModel.findOne({ latestInvoiceId })
-      : await this.TransactionModel.findOne({ _id: transactionId });
+    let transaction = paymentIntentId && await this.TransactionModel.findOne({ paymentIntentId });
+    if (!transaction) {
+      transaction = transactionId && await this.TransactionModel.findOne({ _id: transactionId });
+    }
     if (!transaction) return { ok: false };
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();
@@ -478,7 +480,7 @@ export class PaymentService {
         redirectUrl = data?.object?.next_action?.use_stripe_sdk?.stripe_js || data?.object?.next_action?.redirect_to_url?.url || '/user/payment-history';
         break;
       case 'payment_intent.succeeded': transaction.status = PAYMENT_STATUS.SUCCESS;
-        transaction.latestInvoiceId = latestInvoiceId;
+        transaction.paymentIntentId = paymentIntentId;
         if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
           transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
         }

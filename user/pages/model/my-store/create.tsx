@@ -2,6 +2,8 @@ import { PureComponent } from 'react';
 import Head from 'next/head';
 import { message } from 'antd';
 import Page from '@components/common/layout/page';
+import { ShopOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { productService } from '@services/product.service';
 import Router from 'next/router';
 import { FormProduct } from '@components/product/form-product';
@@ -109,7 +111,7 @@ class CreateProduct extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <Page>
-            <h4 className="title-form">New product</h4>
+            <PageHeading title="New Product" icon={<ShopOutlined />} />
             <FormProduct
               submit={this.submit.bind(this)}
               beforeUpload={this.beforeUpload.bind(this)}

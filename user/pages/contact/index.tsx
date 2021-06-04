@@ -103,7 +103,6 @@ class ContactPage extends PureComponent<IProps> {
             {ui?.siteName}
             {' '}
             | Contact
-            {' '}
           </title>
         </Head>
         <div className="main-container">

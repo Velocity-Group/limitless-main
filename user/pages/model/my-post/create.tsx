@@ -5,11 +5,14 @@ import { PureComponent } from 'react';
 import {
   Layout, message
 } from 'antd';
+import PageHeading from '@components/common/page-heading';
 import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import { IPerformer, IUIConfig } from '@interfaces/index';
 import FeedForm from '@components/post/form';
-import { ArrowLeftOutlined, PictureOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import {
+  PictureOutlined, VideoCameraOutlined, FireOutlined
+} from '@ant-design/icons';
 import Router from 'next/router';
 
 interface IProps {
@@ -49,12 +52,7 @@ class CreatePost extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading">
-              <span>
-                <a aria-hidden onClick={() => Router.back()}><ArrowLeftOutlined /></a>
-                {` New ${type} Post`}
-              </span>
-            </div>
+            <PageHeading icon={<FireOutlined />} title={` New ${type} Post`} />
             <div>
               {!chosenType ? (
                 <div className="story-switch-type">

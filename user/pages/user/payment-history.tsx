@@ -3,6 +3,8 @@ import { PureComponent } from 'react';
 import { Layout, message } from 'antd';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
+import { HistoryOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { paymentService } from 'src/services';
 import { IOrder, IUIConfig } from 'src/interfaces';
 import { SearchFilter } from '@components/common/search-filter';
@@ -135,16 +137,14 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {' '}
             {ui && ui.siteName}
             {' '}
             | Payment History
-            {' '}
           </title>
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading">Payment History</div>
+            <PageHeading title="Payment History" icon={<HistoryOutlined />} />
             <SearchFilter
               statuses={statuses}
               onSubmit={this.handleFilter.bind(this)}

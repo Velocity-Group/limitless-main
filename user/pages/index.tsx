@@ -44,7 +44,7 @@ class Login extends PureComponent<IProps> {
 
   state = {
     loginAs: 'user',
-    isLoading: false,
+    isLoading: true,
     loginInput: ''
   }
 
@@ -120,6 +120,8 @@ class Login extends PureComponent<IProps> {
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(await e);
+    } finally {
+      await this.setState({ isLoading: false });
     }
   }
 
@@ -131,7 +133,6 @@ class Login extends PureComponent<IProps> {
       return;
     }
     try {
-      await this.setState({ isLoading: true });
       const auth = await authService.callbackLoginTwitter({
         oauth_verifier: oauthVerifier,
         oauthToken: twitterInfo.oauthToken,

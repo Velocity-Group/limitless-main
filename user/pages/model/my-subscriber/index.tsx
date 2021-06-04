@@ -2,6 +2,8 @@ import { PureComponent } from 'react';
 import { message, Layout } from 'antd';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
+import { UserAddOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { TableListSubscription } from '@components/subscription/user-table-list-subscription';
 import { ISubscription, IUIConfig } from 'src/interfaces';
 import { subscriptionService } from '@services/subscription.service';
@@ -97,9 +99,7 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading">
-              <span>My Subscribers</span>
-            </div>
+            <PageHeading title="My Subscribers" icon={<UserAddOutlined />} />
             <div className="table-responsive">
               <TableListSubscription
                 dataSource={subscriptionList}

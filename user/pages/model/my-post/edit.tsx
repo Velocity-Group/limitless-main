@@ -3,12 +3,13 @@ import { PureComponent } from 'react';
 import {
   Layout
 } from 'antd';
+import { FireOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { feedService } from '@services/index';
 import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import { IFeed, IUIConfig } from '@interfaces/index';
 import FeedForm from '@components/post/form';
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import Router from 'next/router';
 
 interface IProps {
@@ -52,13 +53,7 @@ class EditPost extends PureComponent<IProps> {
             </Head>
             <div className="main-container">
               <Page>
-                <div className="page-heading">
-                  <span>
-                    <a aria-hidden onClick={() => Router.back()}><ArrowLeftOutlined /></a>
-                    {' '}
-                    Edit Post
-                  </span>
-                </div>
+                <PageHeading icon={<FireOutlined />} title=" Edit Post" />
                 <div>
                   <FeedForm feed={feed} />
                 </div>

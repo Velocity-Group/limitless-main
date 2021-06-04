@@ -1,4 +1,6 @@
 import { Layout, Alert, Button } from 'antd';
+import { PayCircleOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
@@ -23,11 +25,11 @@ class PaymentCancel extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Payment fail
+            | Payment Fail
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Payment fail</div>
+          <PageHeading title="Payment Fail" icon={<PayCircleOutlined />} />
           {Router?.query?.transactionId && (
           <h4>
             <a>

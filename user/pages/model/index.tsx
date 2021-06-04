@@ -2,11 +2,13 @@ import { PureComponent } from 'react';
 import {
   Row, Col, Layout, Pagination, Spin
 } from 'antd';
+import { StarOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import { getList } from '@redux/performer/actions';
 import PerformerGridCard from '@components/performer/grid-card';
 import Head from 'next/head';
 import { PerformerAdvancedFilter } from '@components/common/base/performer-advanced-filter';
+import PageHeading from '@components/common/page-heading';
 import { IUIConfig } from 'src/interfaces/';
 import { DropOption } from '@components/common/base/drop-option';
 import Router from 'next/router';
@@ -107,9 +109,7 @@ class Performers extends PureComponent<IProps> {
         <Layout>
           <div className="main-container">
             <div className="main-background">
-              <div className="md-heading">
-                Models
-              </div>
+              <PageHeading title="Models" icon={<StarOutlined />} />
               <div className="md-below-heading">
                 <PerformerAdvancedFilter
                   onSubmit={this.handleFilter.bind(this)}
