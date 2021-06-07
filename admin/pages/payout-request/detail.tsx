@@ -222,7 +222,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
                     <input type="hidden" name="currency_code" value="USD" />
                     <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
-                    <input type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
+                    <input disabled={loading || request?.status !== 'pending'} type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
                   </form>
                   <p style={{ color: 'red' }}>
                     <small>Please update status manually after transaction success!</small>

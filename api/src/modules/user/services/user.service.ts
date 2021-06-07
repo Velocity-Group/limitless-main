@@ -281,6 +281,11 @@ export class UserService {
 
   public async updateBalance(userId: string | ObjectId, tokens: number) {
     await this.userModel.updateOne({ _id: userId }, { $inc: { balance: tokens } }, { upsert: true });
+    await this.changeTokenLogService.changeTokenLog({
+      source: CHANGE_TOKEN_LOG_SOURCES.USER,
+      sourceId: userId,
+      token: tokens
+    });
   }
 
   public async updateStripeCustomerId(userId: | ObjectId, stripeCustomerId: string) {
