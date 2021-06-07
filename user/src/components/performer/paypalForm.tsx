@@ -43,14 +43,15 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
           <Col lg={12} xs={24}>
             <Form.Item
               name="email"
-              label="Paypal Email"
+              label="Paypal buisiness account email"
               validateTrigger={['onChange', 'onBlur']}
               rules={[{ required: true }, { type: 'email' }]}
+              help="You must upgrade to Business account to earn money"
             >
               <Input />
             </Form.Item>
           </Col>
-          <Col lg={12} xs={24}>
+          {/* <Col lg={12} xs={24}>
             <Form.Item
               name="phoneNumber"
               label="Paypal Phone Number"
@@ -63,7 +64,7 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
             >
               <Input />
             </Form.Item>
-          </Col>
+          </Col> */}
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>
