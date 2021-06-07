@@ -44,7 +44,7 @@ class Login extends PureComponent<IProps> {
 
   state = {
     loginAs: 'user',
-    isLoading: true,
+    isLoading: false,
     loginInput: ''
   }
 
@@ -110,6 +110,7 @@ class Login extends PureComponent<IProps> {
     }
     authService.setToken(token);
     try {
+      await this.setState({ isLoading: true });
       const user = await userService.me({
         Authorization: token
       });
@@ -133,6 +134,7 @@ class Login extends PureComponent<IProps> {
       return;
     }
     try {
+      await this.setState({ isLoading: true });
       const auth = await authService.callbackLoginTwitter({
         oauth_verifier: oauthVerifier,
         oauthToken: twitterInfo.oauthToken,
