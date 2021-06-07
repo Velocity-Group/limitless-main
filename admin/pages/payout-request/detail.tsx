@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import {
   Layout, message, Select, Button, PageHeader,
-  Row, Col, Input, Space, Statistic
+  Input, Space, Statistic, Divider
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
@@ -63,8 +63,11 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
     try {
       await this.setState({ loading: true });
       const resp = await (await payoutRequestService.payout(request._id)).data;
-      resp?.status && await this.setState({ status: resp.status });
-      this.onUpdate();
+      if (resp.status === 'done') {
+        message.success('Transfer money via Stripe Connect success', 5);
+        await this.setState({ status: resp.status });
+        this.onUpdate();
+      }
     } catch (e) {
       const err = await Promise.resolve(e);
       this.setState({ loading: false });
@@ -147,141 +150,139 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
             />
             {request ? (
               <Page>
-                <PageHeader title="Request informations" />
-                <Row>
-                  <Col span={24}>
-                    <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
-                      <Space size="large">
-                        <Statistic
-                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                          title="Total Earned Tokens"
-                          value={statsPayout?.totalEarnedTokens || 0}
-                          precision={2}
-                        />
-                        <Statistic
-                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                          title="Previous paid out tokens"
-                          value={statsPayout?.previousPaidOutTokens || 0}
-                          precision={2}
-                        />
-                        <Statistic
-                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                          title="Remaining unpaid tokens"
-                          value={statsPayout?.remainingUnpaidTokens || 0}
-                          precision={2}
-                        />
-                      </Space>
-                    </div>
-                  </Col>
-                  <Col md={24} lg={12} xs={24}>
-                    <p>
-                      Model:
-                      {' '}
-                      <strong>{request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}</strong>
-                    </p>
-                    <p>
-                      Requested tokens:
-                      {' '}
-                      {request.requestTokens || 0}
-                    </p>
-                    <p>
-                      Conversion rate:
-                      {' '}
-                      $
+                <PageHeader title="Payout Request Informations" />
+                <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
+                  <Space size="large">
+                    <Statistic
+                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
+                      title="Total Earned Tokens"
+                      value={statsPayout?.totalEarnedTokens || 0}
+                      precision={2}
+                    />
+                    <Statistic
+                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
+                      title="Previous paid out tokens"
+                      value={statsPayout?.previousPaidOutTokens || 0}
+                      precision={2}
+                    />
+                    <Statistic
+                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
+                      title="Remaining unpaid tokens"
+                      value={statsPayout?.remainingUnpaidTokens || 0}
+                      precision={2}
+                    />
+                  </Space>
+                </div>
+                <p>
+                  Model:
+                  {' '}
+                  <strong>{request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}</strong>
+                </p>
+                <p>
+                  Requested tokens:
+                  {' '}
+                  {request.requestTokens || 0}
+                </p>
+                <p>
+                  Conversion rate:
+                  {' '}
+                  $
+                  {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                </p>
+                <p>
+                  Requested at:
+                  {' '}
+                  {formatDate(request.createdAt)}
+                </p>
+                <p>
+                  User Note:
+                  {' '}
+                  {request.requestNote}
+                </p>
+                <Divider />
+                {request.paymentAccountType === 'paypal' && (
+                <div>
+                  <h2>Confirm payout via Paypal</h2>
+                  <p>
+                    Account:
+                    {' '}
+                    {paymentAccountInfo?.value?.email || 'N/A'}
+                  </p>
+                  <p>
+                    Amount: $
+                    {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                  </p>
+                  <form action={env.paypalPayoutUrl} method="post" className="paypal-payout">
+                    <input type="hidden" name="cmd" value="_xclick" />
+                    <input type="hidden" name="return" value={window.location.href} />
+                    <input type="hidden" name="cancel_return" value={window.location.href} />
+                    {/* <input type="hidden" name="notify_url" value={`${env.apiEndpoint}/payout-requests/webhooks/paypal`} /> */}
+                    <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
+                    <input type="hidden" name="item_number" value={request._id} />
+                    <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
+                    <input type="hidden" name="currency_code" value="USD" />
+                    <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
+                    <input type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
+                  </form>
+                  <p style={{ color: 'red' }}>
+                    <small>Please update status manually after transaction success!</small>
+                  </p>
+                </div>
+                )}
+                {request.paymentAccountType === 'stripe' && (
+                <div>
+                  <h2>
+                    Confirm transfer via Stripe Connect
+                  </h2>
+                  <div>
+                    <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
+                      Click here to transfer $
                       {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
-                    </p>
-                    <p>
-                      Requested at:
                       {' '}
-                      {formatDate(request.createdAt)}
-                    </p>
-                    <p>
-                      User Note:
+                      to
                       {' '}
-                      {request.requestNote}
-                    </p>
-                    {request.paymentAccountType === 'paypal' && (
-                      <div>
-                        <h4>Confirm payout via Paypal</h4>
-                        <p>
-                          Account:
-                          {' '}
-                          {paymentAccountInfo?.value?.email || 'N/A'}
-                        </p>
-                        <p>
-                          Amount: $
-                          {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
-                        </p>
-                        <form action={env.paypalPayoutUrl} method="post" className="paypal-payout">
-                          <input type="hidden" name="cmd" value="_xclick" />
-                          <input type="hidden" name="return" value={window.location.href} />
-                          <input type="hidden" name="notify_url" value={`${env.apiEndpoint}/payout-requests/webhooks/paypal`} />
-                          <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
-                          <input type="hidden" name="item_number" value={request._id} />
-                          <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
-                          <input type="hidden" name="currency_code" value="USD" />
-                          <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
-                          <input type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
-                        </form>
-                      </div>
-                    )}
-                    {request.paymentAccountType === 'stripe' && (
-                    <div>
-                      <h4>
-                        Confirm payout via Stripe Connect
-                      </h4>
-                      <div>
-                        <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
-                          Click here to transfer $
-                          {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
-                          {' '}
-                          to
-                          {' '}
-                          {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
-                        </Button>
-                      </div>
-                    </div>
-                    )}
-                  </Col>
-                  <Col md={24} lg={24} xs={24}>
-                    <div style={{ marginBottom: '10px' }}>
-                      <p>
-                        Click here to update status (manual payout only)
-                      </p>
-                      <Select
-                        disabled={loading || ['done', 'rejected'].includes(request?.status)}
-                        style={{ width: '100%' }}
-                        onChange={(e) => this.setState({ status: e })}
-                        value={status}
-                      >
-                        {/* <Select.Option key="approved" value="approved">
+                      {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
+                    </Button>
+                  </div>
+                </div>
+                )}
+                <Divider />
+                <div style={{ marginBottom: '10px' }}>
+                  <p>
+                    Update status here
+                  </p>
+                  <Select
+                    disabled={loading || ['done', 'rejected'].includes(request?.status)}
+                    style={{ width: '100%' }}
+                    onChange={(e) => this.setState({ status: e })}
+                    value={status}
+                  >
+                    {/* <Select.Option key="approved" value="approved">
                           Approved
                         </Select.Option> */}
-                        <Select.Option key="pending" value="pending">
-                          Pending
-                        </Select.Option>
-                        {/* <Select.Option key="rejected" value="rejected">
-                          Rejected
-                        </Select.Option> */}
-                        <Select.Option key="done" value="done">
-                          Done
-                        </Select.Option>
-                      </Select>
-                    </div>
-                    <div style={{ marginBottom: '10px' }}>
-                      <p>Note to user: </p>
-                      <Input.TextArea
-                        defaultValue={adminNote}
-                        style={{ width: '100%' }}
-                        onChange={(v) => {
-                          this.setState({ adminNote: v.target.value });
-                        }}
-                        placeholder="Text something to user"
-                        autoSize={{ minRows: 3 }}
-                      />
-                    </div>
-                  </Col>
-                </Row>
+                    <Select.Option key="pending" value="pending">
+                      Pending
+                    </Select.Option>
+                    <Select.Option key="rejected" value="rejected">
+                      Rejected
+                    </Select.Option>
+                    <Select.Option key="done" value="done">
+                      Done
+                    </Select.Option>
+                  </Select>
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <p>Note to user: </p>
+                  <Input.TextArea
+                    defaultValue={adminNote}
+                    style={{ width: '100%' }}
+                    onChange={(v) => {
+                      this.setState({ adminNote: v.target.value });
+                    }}
+                    placeholder="Text something to user"
+                    autoSize={{ minRows: 3 }}
+                  />
+                </div>
                 <div style={{ marginBottom: '10px', display: 'flex' }}>
                   <Button
                     type="primary"

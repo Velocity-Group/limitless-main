@@ -342,38 +342,4 @@ export class PayoutRequestService {
     }
     return request;
   }
-
-  public async paypalPayoutCallhook(payload: any) {
-    console.log('paypal_callhook', payload);
-    const { item_number: itemNumber, txn_id: txnId, payment_status: status } = payload;
-    const requestId = itemNumber;
-    const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
-    if (!requestId || !checkForHexRegExp.test(requestId)) {
-      return { ok: false };
-    }
-    const request = await this.payoutRequestModel.findById(requestId);
-    if (!request) {
-      return { ok: false };
-    }
-    request.payoutId = txnId;
-    request.updatedAt = new Date();
-    if (['Paid', 'Completed'].includes(status)) {
-      request.status = STATUSES.DONE;
-    }
-    await request.save();
-    const oldStatus = request.status;
-    request.updatedAt = new Date();
-    await request.save();
-
-    const event: QueueEvent = {
-      channel: PAYOUT_REQUEST_CHANEL,
-      eventName: PAYOUT_REQUEST_EVENT.UPDATED,
-      data: {
-        request,
-        oldStatus
-      }
-    };
-    await this.queueEventService.publish(event);
-    return { success: true };
-  }
 }

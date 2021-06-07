@@ -1,14 +1,13 @@
 import {
-  Module, forwardRef, NestModule, MiddlewareConsumer
+  Module, forwardRef
 } from '@nestjs/common';
 import { MongoDBModule, QueueModule } from 'src/kernel';
-import { RequestLoggerMiddleware } from 'src/kernel/logger/request-log.middleware';
 import { AuthModule } from '../auth/auth.module';
 import { payoutRequestProviders } from './providers/payout-request.provider';
 import { PayoutRequestService } from './services';
 import {
   PayoutRequestController, AdminPayoutRequestController,
-  PayoutRequestSearchController, PayoutWebhookController
+  PayoutRequestSearchController
 } from './controllers';
 import { PerformerModule } from '../performer/performer.module';
 import { PerformerAssetsModule } from '../performer-assets/performer-assets.module';
@@ -39,15 +38,8 @@ import { PaymentModule } from '../payment/payment.module';
   controllers: [
     PayoutRequestController,
     AdminPayoutRequestController,
-    PayoutRequestSearchController,
-    PayoutWebhookController
+    PayoutRequestSearchController
   ],
   exports: [PayoutRequestService]
 })
-export class PayoutRequestModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(RequestLoggerMiddleware)
-      .forRoutes('/payout-requests/webhooks');
-  }
-}
+export class PayoutRequestModule {}

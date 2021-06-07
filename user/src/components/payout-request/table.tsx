@@ -116,13 +116,13 @@ const PayoutRequestList = ({
       render: (request: PayoutRequestInterface) => (
         <Link
           href={{
-            pathname: '/payout-requests/update',
+            pathname: '/model/payout-requests/update',
             query: {
               data: JSON.stringify(request),
               id: request._id
             }
           }}
-          as={`/payout-request/update?id=${request._id}`}
+          as={`/model/payout-request/update?id=${request._id}`}
         >
           <a>{request.status === 'pending' ? 'Edit' : 'View details'}</a>
         </Link>
