@@ -9,6 +9,7 @@ export interface IPayoutRequest {
   adminNote?: string;
   status?: string;
   requestTokens?: number;
+  tokenConversionRate?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

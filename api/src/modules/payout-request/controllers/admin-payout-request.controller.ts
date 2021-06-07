@@ -31,7 +31,7 @@ export class AdminPayoutRequestController {
   async payout(
     @Param('id') id: string
   ): Promise<DataResponse<any>> {
-    const data = await this.payoutRequestService.adminPayout(id);
+    const data = await this.payoutRequestService.adminStripePayout(id);
     return DataResponse.ok(data);
   }
 

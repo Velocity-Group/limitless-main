@@ -1,16 +1,7 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import {
-  Layout,
-  message,
-  Select,
-  Button,
-  PageHeader,
-  Row,
-  Col,
-  Input,
-  Space,
-  Statistic,
-  Alert,
-  Tag
+  Layout, message, Select, Button, PageHeader,
+  Row, Col, Input, Space, Statistic
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
@@ -21,6 +12,8 @@ import { payoutRequestService } from 'src/services';
 import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
 import { formatDate } from 'src/lib/date';
+import env from 'src/env';
+import './index.less';
 
 const { Content } = Layout;
 
@@ -64,13 +57,25 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
+  async handleStripePayout() {
+    const { status, request } = this.state;
+    if (status !== 'pending' || request.paymentAccountType !== 'stripe') return;
+    try {
+      await this.setState({ loading: true });
+      const resp = await (await payoutRequestService.payout(request._id)).data;
+      resp?.status && await this.setState({ status: resp.status });
+      this.onUpdate();
+    } catch (e) {
+      const err = await Promise.resolve(e);
+      this.setState({ loading: false });
+      message.error(getResponseError(err), 10);
+    }
+  }
+
   async onUpdate() {
     const { status, adminNote, request } = this.state;
     try {
       await this.setState({ loading: true });
-      if (status === 'done' && request.paymentAccountType === 'stripe') {
-        await payoutRequestService.payout(request._id);
-      }
       await payoutRequestService.update(request._id, {
         status,
         adminNote
@@ -122,7 +127,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
 
   render() {
     const {
-      request, adminNote, loading, statsPayout
+      request, adminNote, loading, statsPayout, status
     } = this.state;
     const paymentAccountInfo = request?.paymentAccountInfo;
     return (
@@ -168,7 +173,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                       </Space>
                     </div>
                   </Col>
-                  <Col md={12} lg={12} xs={24}>
+                  <Col md={24} lg={12} xs={24}>
                     <p>
                       Model:
                       {' '}
@@ -180,6 +185,12 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                       {request.requestTokens || 0}
                     </p>
                     <p>
+                      Conversion rate:
+                      {' '}
+                      $
+                      {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                    </p>
+                    <p>
                       Requested at:
                       {' '}
                       {formatDate(request.createdAt)}
@@ -187,53 +198,71 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     <p>
                       User Note:
                       {' '}
-                      {request.requestNote && <Alert message={request.requestNote} />}
-                    </p>
-                  </Col>
-
-                  <Col md={12} lg={12} xs={24}>
-                    <p>
-                      Payout payment gateway:
-                      {' '}
-                      <Tag style={{ textTransform: 'capitalize' }} color="cyan">{request.paymentAccountType}</Tag>
+                      {request.requestNote}
                     </p>
                     {request.paymentAccountType === 'paypal' && (
-                    <>
-                      <h4>Paypal Informations</h4>
-                      <p>
-                        Email address:
-                        {' '}
-                        {paymentAccountInfo?.value?.email || 'N/A'}
-                      </p>
-                      <p>
-                        Phone number:
-                        {' '}
-                        {paymentAccountInfo?.value?.phoneNumber || 'N/A'}
-                      </p>
-                    </>
+                      <div>
+                        <h4>Confirm payout via Paypal</h4>
+                        <p>
+                          Account:
+                          {' '}
+                          {paymentAccountInfo?.value?.email || 'N/A'}
+                        </p>
+                        <p>
+                          Amount: $
+                          {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                        </p>
+                        <form action={env.paypalPayoutUrl} method="post" className="paypal-payout">
+                          <input type="hidden" name="cmd" value="_xclick" />
+                          <input type="hidden" name="return" value={window.location.href} />
+                          <input type="hidden" name="notify_url" value={`${env.apiEndpoint}/payout-requests/webhooks/paypal`} />
+                          <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
+                          <input type="hidden" name="item_number" value={request._id} />
+                          <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
+                          <input type="hidden" name="currency_code" value="USD" />
+                          <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
+                          <input type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
+                        </form>
+                      </div>
+                    )}
+                    {request.paymentAccountType === 'stripe' && (
+                    <div>
+                      <h4>
+                        Confirm payout via Stripe Connect
+                      </h4>
+                      <div>
+                        <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
+                          Click here to transfer $
+                          {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                          {' '}
+                          to
+                          {' '}
+                          {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
+                        </Button>
+                      </div>
+                    </div>
                     )}
                   </Col>
-                  <Col md={24} lg={24}>
+                  <Col md={24} lg={24} xs={24}>
                     <div style={{ marginBottom: '10px' }}>
                       <p>
-                        Update status here:
+                        Click here to update status (manual payout only)
                       </p>
-                      {request.paymentAccountType === 'stripe' && <p style={{ color: 'red' }}><small>Once you select to Done, system is going to payout via Stripe Connect</small></p>}
                       <Select
                         disabled={loading || ['done', 'rejected'].includes(request?.status)}
                         style={{ width: '100%' }}
                         onChange={(e) => this.setState({ status: e })}
-                        defaultValue={request.status || 'N/A'}
+                        value={status}
                       >
                         {/* <Select.Option key="approved" value="approved">
                           Approved
                         </Select.Option> */}
-                        <Select.Option key="pending" value="pending" disabled>
+                        <Select.Option key="pending" value="pending">
                           Pending
                         </Select.Option>
-                        <Select.Option key="rejected" value="rejected">
+                        {/* <Select.Option key="rejected" value="rejected">
                           Rejected
-                        </Select.Option>
+                        </Select.Option> */}
                         <Select.Option key="done" value="done">
                           Done
                         </Select.Option>

@@ -63,7 +63,7 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Payout Gateway',
+        title: 'Gateway',
         dataIndex: 'paymentAccountType',
         key: 'paymentAccountType',
         render: (paymentAccountType: string) => {

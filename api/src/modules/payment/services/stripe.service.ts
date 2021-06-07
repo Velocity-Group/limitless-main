@@ -308,6 +308,7 @@ export class StripeService {
       if (!connectAccount || !connectAccount.accountId) throw new HttpException('Stripe connected account was not found', 404);
       const account = await stripe.accounts.retrieve(connectAccount.accountId);
       if (!account || !account.payouts_enabled) throw new HttpException('Could not payout to this account, please check then try again later', 404);
+      // we transfer to model connected account then model payout manual
       const payout = await stripe.transfers.create({
         amount: request.requestTokens * (request.tokenConversionRate || 1) * 100,
         currency: 'usd',
