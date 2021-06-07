@@ -30,9 +30,7 @@ export class EarningService {
   public async admminSearch(
     req: EarningSearchRequestPayload
   ): Promise<PageableData<EarningDto>> {
-    const query = {
-      isToken: true
-    } as any;
+    const query = {} as any;
     if (req.performerId) {
       query.performerId = req.performerId;
     }
@@ -42,7 +40,9 @@ export class EarningService {
     if (req.sourceType) {
       query.sourceType = req.sourceType;
     }
-
+    if (req.isToken) {
+      query.isToken = req.isToken === 'true';
+    }
     if (req.isPaid) {
       query.isPaid = req.isPaid;
     }
@@ -102,7 +102,6 @@ export class EarningService {
     user: UserDto
   ): Promise<PageableData<EarningDto>> {
     const query = {
-      isToken: true,
       performerId: user._id
     } as any;
     if (req.sourceType) {
@@ -110,6 +109,9 @@ export class EarningService {
     }
     if (req.type) {
       query.type = req.type;
+    }
+    if (req.isToken) {
+      query.isToken = req.isToken === 'true';
     }
     if (req.isPaid) {
       query.isPaid = req.isPaid;
@@ -179,9 +181,7 @@ export class EarningService {
   public async stats(
     req: EarningSearchRequestPayload
   ): Promise<IEarningStatResponse> {
-    const query = {
-      isToken: true
-    } as any;
+    const query = {} as any;
     if (req.performerId) {
       query.performerId = toObjectId(req.performerId);
     }
@@ -193,6 +193,9 @@ export class EarningService {
     }
     if (req.type) {
       query.type = req.type;
+    }
+    if (req.isToken) {
+      query.isToken = req.isToken === 'true';
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
