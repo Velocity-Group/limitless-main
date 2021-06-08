@@ -2,6 +2,8 @@ import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
 
 export class ReportDto {
+  _id: string;
+
   description: string;
 
   source: string;
@@ -28,6 +30,7 @@ export class ReportDto {
     Object.assign(
       this,
       pick(data, [
+        '_id',
         'description',
         'source',
         'sourceId',

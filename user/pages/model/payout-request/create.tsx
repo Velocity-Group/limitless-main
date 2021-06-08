@@ -7,10 +7,11 @@ import { message } from 'antd';
 import { connect } from 'react-redux';
 import { payoutRequestService } from 'src/services';
 import Router from 'next/router';
-import { ISettings, IUIConfig } from 'src/interfaces/index';
+import { ISettings, IUIConfig, IUser } from 'src/interfaces/index';
 
 interface Props {
   ui: IUIConfig;
+  user: IUser;
   settings: ISettings
 }
 
@@ -57,8 +58,9 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
     requestTokens: number;
     requestNote: string;
   }) {
-    if (!data.requestTokens || data.requestTokens < 1) {
-      message.error('Invalid request tokens');
+    const { user } = this.props;
+    if (data.requestTokens > 1 && data.requestTokens <= user.balance) {
+      message.error('Request tokens must be greater than 1');
       return;
     }
     try {
@@ -104,6 +106,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
 
 const mapStateToProps = (state) => ({
   ui: state.ui,
+  user: state.user.current,
   settings: state.settings
 });
 

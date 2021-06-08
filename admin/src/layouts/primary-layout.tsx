@@ -360,12 +360,12 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         icon: <DollarOutlined />,
         children: [
           {
-            id: 'earning',
+            id: 'earning-token',
             name: 'Token',
             route: '/earning/token'
           },
           {
-            id: 'earning',
+            id: 'earning-money',
             name: 'Money',
             route: '/earning/money'
           }
