@@ -425,6 +425,18 @@ class PrimaryLayout extends React.PureComponent<DefaultProps> {
         ]
       },
       {
+        id: 'report',
+        name: 'Reports',
+        icon: <NotificationOutlined />,
+        children: [
+          {
+            id: 'Report',
+            name: 'Listing',
+            route: '/report'
+          }
+        ]
+      },
+      {
         id: 'settings',
         name: 'Settings',
         icon: <PieChartOutlined />,
