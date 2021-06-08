@@ -1,23 +1,23 @@
 /* eslint-disable react/destructuring-assignment */
-import * as React from 'react';
-import { Button, Table } from 'antd';
 import { formatDate } from '@lib/date';
+import {
+  Button, Table, Tag, Tooltip
+} from 'antd';
 
 interface IProps {
   items: any[];
-  searching: boolean;
   total: number;
   pageSize: number;
-  onChange: Function;
-  handleReport: Function;
+  searching: boolean;
   submiting: boolean;
+  onChange: Function;
 }
 
 const reportTableList = ({
   items,
-  searching,
   total,
   pageSize,
+  searching,
   onChange
 }: IProps) => {
   const columns = [
@@ -32,7 +32,7 @@ const reportTableList = ({
       )
     },
     {
-      title: 'Username',
+      title: 'Model',
       dataIndex: 'performerInfo',
       key: 'performerInfo',
       render: (performer) => (
@@ -41,10 +41,29 @@ const reportTableList = ({
         </span>
       )
     },
+
+    {
+      title: 'Object',
+      dataIndex: 'target',
+      key: 'target',
+      render: (target) => (
+        <Tag color="blue" style={{ textTransform: 'capitalize' }}>{target}</Tag>
+      )
+    },
     {
       title: 'Reason',
       dataIndex: 'description',
-      key: 'description'
+      key: 'description',
+      render: (description) => (
+        <Tooltip title={description}>
+          <div style={{
+            width: 150, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden'
+          }}
+          >
+            {description || 'N/A'}
+          </div>
+        </Tooltip>
+      )
     },
     {
       title: 'Created at',
@@ -56,11 +75,9 @@ const reportTableList = ({
     {
       title: 'Actions',
       key: '_id',
-      render: () => (
-        <Button
-          type="primary"
-        >
-          View
+      render: (report) => (
+        <Button type="link">
+          <a href={`/feed/update?id=${report.targetId}`}>View</a>
         </Button>
       )
     }
@@ -77,7 +94,7 @@ const reportTableList = ({
         total,
         pageSize
       }}
-      scroll={{ x: true }}
+      rowKey="_id"
       loading={searching}
       onChange={onChange.bind(this)}
     />

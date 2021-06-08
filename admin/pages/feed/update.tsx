@@ -5,6 +5,7 @@ import { message } from 'antd';
 import { BreadcrumbComponent } from '@components/common';
 import FormFeed from '@components/feed/feed-form';
 import { feedService } from '@services/feed.service';
+import Router from 'next/router';
 
 interface IProps {
     id: string;
@@ -33,6 +34,21 @@ class FeedUpdate extends PureComponent<IProps> {
       }
     }
 
+    async deleteFeed(id: string) {
+      console.log(id);
+      if (!window.confirm('Are you sure you want to delete this post?')) {
+        return;
+      }
+      try {
+        await feedService.delete(id);
+        message.success('Deleted successfully');
+        Router.back();
+      } catch (e) {
+        const err = (await Promise.resolve(e)) || {};
+        message.error(err.message || 'An error occurred, please try again!');
+      }
+    }
+
     render() {
       const { feed } = this.state;
       return (
@@ -49,6 +65,7 @@ class FeedUpdate extends PureComponent<IProps> {
           <Page>
             {feed && (
             <FormFeed
+              onDelete={this.deleteFeed.bind(this)}
               feed={feed}
             />
             )}

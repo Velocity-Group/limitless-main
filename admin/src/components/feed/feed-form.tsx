@@ -33,7 +33,8 @@ const layout = {
 };
 interface IProps {
   discard?: Function;
-  feed?: IFeed
+  feed?: IFeed;
+  onDelete?: Function;
 }
 const validateMessages = {
   required: 'This field is required!'
@@ -331,7 +332,7 @@ export default class FormFeed extends PureComponent<IProps> {
 
   render() {
     if (!this.formRef) this.formRef = createRef();
-    const { feed } = this.props;
+    const { feed, onDelete } = this.props;
     const {
       uploading, fileList, fileIds, isSale, pollList, type,
       addPoll, openPollDuration, expirePollTime, thumbnail
@@ -519,14 +520,24 @@ export default class FormFeed extends PureComponent<IProps> {
             <Button
               type="primary"
               htmlType="submit"
+              style={{ marginRight: '20px' }}
               loading={uploading}
               disabled={uploading}
             >
               {!feed ? 'Post' : 'Update'}
             </Button>
+            {feed && (
+            <Button
+              style={{ marginRight: '20px' }}
+              loading={uploading}
+              disabled={uploading}
+              onClick={() => onDelete(feed._id)}
+            >
+              Delete
+            </Button>
+            )}
             <Button
               onClick={() => Router.back()}
-              type="default"
               loading={uploading}
               disabled={uploading}
             >
