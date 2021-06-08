@@ -29,13 +29,15 @@ export default class UploadList extends PureComponent<IProps> {
         {files && files.map((file) => (
           <div className="f-upload-item" key={file._id || file.uid}>
             <div className="f-upload-thumb">
-              {(file.type.includes('feed-photo') || file.type.includes('blog-photo') || file.type.includes('image'))
-                ? <img alt="img" src={file.url ? file.url : file.thumbnail} width="100%" />
+              {(file.type.includes('feed-photo') || file.type.includes('image'))
+                ? <a href={file.url} target="_blank" rel="noreferrer"><img alt="img" src={file.url ? file.url : file.thumbnail} width="100%" /></a>
                 : file.type.includes('video') ? (
-                  <span className="f-thumb-vid">
-                    <PlayCircleOutlined />
-                  </span>
-                ) : <img alt="img" src="/placeholder-image.jpg" width="100%" />}
+                  <a href={file.url} target="_blank" rel="noreferrer">
+                    <span className="f-thumb-vid">
+                      <PlayCircleOutlined />
+                    </span>
+                  </a>
+                ) : <a href={file.url} target="_blank" rel="noreferrer"><img alt="img" src="/placeholder-image.jpg" width="100%" /></a>}
             </div>
             <div className="f-upload-name">
               <Tooltip title={file.name}>{file.name}</Tooltip>

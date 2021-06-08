@@ -376,6 +376,9 @@ export default class FormFeed extends PureComponent<IProps> {
           <Form.Item label="Add description" name="text" rules={[{ required: true, message: 'Please add a description' }]}>
             <TextArea className="feed-input" rows={3} placeholder="Add a description" allowClear />
           </Form.Item>
+          <Form.Item>
+            <Switch checkedChildren="PPV Content" unCheckedChildren="Free Content" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
+          </Form.Item>
           {['photo', 'video'].includes(type) && (
           <Form.Item label={type === 'video' ? 'Video file' : 'Photo files'}>
             {fileList.length ? (
@@ -396,9 +399,6 @@ export default class FormFeed extends PureComponent<IProps> {
             )}
           </Form.Item>
           )}
-          <Form.Item>
-            <Switch checkedChildren="PPV Content" unCheckedChildren="Free Content" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
-          </Form.Item>
           {isSale && (
             <Form.Item label="Set price here" name="price" rules={[{ required: isSale, message: 'Please add price' }]}>
               <InputNumber min={1} />
@@ -406,7 +406,9 @@ export default class FormFeed extends PureComponent<IProps> {
           )}
           {thumbnail && (
             <Form.Item label="Thumbnail">
-              <img alt="thumbnail" src={thumbnail} width="100px" />
+              <a href={thumbnail} target="_blank" rel="noreferrer">
+                <img alt="thumbnail" src={thumbnail} width="100px" />
+              </a>
             </Form.Item>
           )}
           {this.teaser && (
@@ -414,9 +416,11 @@ export default class FormFeed extends PureComponent<IProps> {
               <div className="f-upload-list">
                 <div className="f-upload-item">
                   <div className="f-upload-thumb">
-                    <span className="f-thumb-vid">
-                      <PlayCircleOutlined />
-                    </span>
+                    <a href={this.teaser?.url} target="_blank" rel="noreferrer">
+                      <span className="f-thumb-vid">
+                        <PlayCircleOutlined />
+                      </span>
+                    </a>
                   </div>
                   <div className="f-upload-name">
                     <Tooltip title={this.teaser?.name}>{this.teaser?.name}</Tooltip>
