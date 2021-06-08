@@ -891,6 +891,11 @@ export class PerformerService {
 
   public async updatePerformerBalance(performerId: string | ObjectId, tokens: number) {
     await this.performerModel.updateOne({ _id: performerId }, { $inc: { balance: tokens } }, { upsert: true });
+    await this.changeTokenLogService.changeTokenLog({
+      source: CHANGE_TOKEN_LOG_SOURCES.PERFORMER,
+      sourceId: performerId,
+      token: tokens
+    });
   }
 
   public async checkAuthDocument(req: any, user: UserDto) {

@@ -6,6 +6,8 @@ export class PerformerBlockUserModel extends Document {
 
   sourceId: ObjectId;
 
+  reason: string;
+
   target: string;
 
   targetId: ObjectId;

@@ -4,12 +4,10 @@ import {
 import Head from 'next/head';
 import { PureComponent } from 'react';
 import Page from '@components/common/layout/page';
+import { DollarOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import {
-  IPerformer,
-  IUIConfig,
-  IEarning,
-  IPerformerStats
+  IPerformer, IUIConfig, IEarning, IPerformerStats
 } from 'src/interfaces';
 import { earningService } from 'src/services';
 import { getResponseError } from '@lib/utils';
@@ -147,7 +145,24 @@ class EarningPage extends PureComponent<IProps, IStates> {
         <div className="main-container">
           <Page>
             <div className="page-heading">
-              <Switch checked={isToken} unCheckedChildren="USD EARNING REPORT" checkedChildren="TOKEN EARNING REPORT" onChange={this.handleSwitch.bind(this)} />
+              <Switch
+                checked={isToken}
+                unCheckedChildren={(
+                  <>
+                    <DollarOutlined />
+                    {' '}
+                    USD EARNING REPORT
+                  </>
+                )}
+                checkedChildren={(
+                  <>
+                    <img src="/static/coin-ico.png" width="20px" alt="coin" />
+                    {' '}
+                    TOKEN EARNING REPORT
+                  </>
+                )}
+                onChange={this.handleSwitch.bind(this)}
+              />
             </div>
             <SearchFilter
               type={isToken ? [

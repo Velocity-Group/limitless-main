@@ -5,7 +5,7 @@ import Page from '@components/common/layout/page';
 import { AccountForm } from '@components/performer/AccountForm';
 import { PerformerDocument } from '@components/performer/Document';
 import { SubscriptionForm } from '@components/performer/Subcription';
-import { CCbillSettingForm } from '@components/performer/ccbill-setting';
+import { PerformerPaypalForm } from '@components/performer/paypalForm';
 import { BankingForm } from '@components/performer/BankingForm';
 import { CommissionSettingForm } from '@components/performer/commission-setting';
 import {
@@ -75,7 +75,7 @@ class PerformerUpdate extends PureComponent<IProps> {
   async componentDidMount() {
     const { id } = this.props;
     try {
-      this.setState({ fetching: true });
+      await this.setState({ fetching: true });
       const resp = await (await performerService.findById(id)).data as IPerformer;
       this.setState({ performer: resp });
       resp.avatar && this.setState({ avatarUrl: resp.avatar });
@@ -104,7 +104,7 @@ class PerformerUpdate extends PureComponent<IProps> {
   async updatePassword(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ pwUpdating: true });
+      await this.setState({ pwUpdating: true });
       await authService.updatePassword(data.password, id, 'performer');
       message.success('Password has been updated!');
     } catch (e) {
@@ -114,17 +114,17 @@ class PerformerUpdate extends PureComponent<IProps> {
     }
   }
 
-  async updatePaymentGatewaySetting(data: any) {
+  async updatePaymentGatewaySetting(key: string, data: any) {
     const { id } = this.props;
     try {
-      this.setState({ settingUpdating: true });
+      await this.setState({ settingUpdating: true });
       await performerService.updatePaymentGatewaySetting(id, {
         performerId: id,
-        key: 'ccbill',
+        key: key || 'ccbill',
         status: 'active',
         value: data
       });
-      message.success('CCbill settings has been updated!');
+      message.success('Paypal settings updated success');
     } catch (error) {
       message.error('An error occurred, please try again!');
     } finally {
@@ -149,7 +149,7 @@ class PerformerUpdate extends PureComponent<IProps> {
   async updateBankingSetting(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ settingUpdating: true });
+      await this.setState({ settingUpdating: true });
       await performerService.updateBankingSetting(id, { ...data, performerId: id });
       message.success('Banking settings has been updated!');
     } catch (error) {
@@ -233,33 +233,40 @@ class PerformerUpdate extends PureComponent<IProps> {
                   performer={performer}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<span>Pricing Settings</span>} key="subscription">
+              <Tabs.TabPane tab={<span>Pricing</span>} key="subscription">
                 <SubscriptionForm
                   submiting={updating}
                   onFinish={this.submit.bind(this)}
                   performer={performer}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<span>Banking Settings</span>} key="banking">
+              {/* <Tabs.TabPane tab={<span>Banking</span>} key="banking">
                 <BankingForm
                   submiting={settingUpdating}
                   onFinish={this.updateBankingSetting.bind(this)}
                   bankingInformation={performer.bankingInformation || null}
                   countries={countries}
                 />
-              </Tabs.TabPane>
-              <Tabs.TabPane tab={<span>Commission Settings</span>} key="commission">
+              </Tabs.TabPane> */}
+              <Tabs.TabPane tab={<span>Commission</span>} key="commission">
                 <CommissionSettingForm
                   submiting={settingUpdating}
                   onFinish={this.updateCommissionSetting.bind(this)}
                   commissionSetting={performer.commissionSetting}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<span>CCbill Settings</span>} key="ccbill">
+              {/* <Tabs.TabPane tab={<span>CCbill</span>} key="ccbill">
                 <CCbillSettingForm
                   submiting={settingUpdating}
-                  onFinish={this.updatePaymentGatewaySetting.bind(this)}
+                  onFinish={this.updatePaymentGatewaySetting.bind(this, 'ccbill')}
                   ccbillSetting={performer.ccbillSetting}
+                />
+              </Tabs.TabPane> */}
+              <Tabs.TabPane tab={<span>Paypal</span>} key="paypal">
+                <PerformerPaypalForm
+                  updating={settingUpdating}
+                  onFinish={this.updatePaymentGatewaySetting.bind(this, 'paypal')}
+                  user={performer}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<span>Change password</span>} key="password">

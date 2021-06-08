@@ -313,7 +313,7 @@ export class PayoutRequestService {
     return request;
   }
 
-  public async adminPayout(
+  public async adminStripePayout(
     id: string | ObjectId
   ): Promise<any> {
     const request = await this.payoutRequestModel.findById(id);
@@ -321,25 +321,25 @@ export class PayoutRequestService {
       throw new EntityNotFoundException();
     }
     const payout = await this.stripeService.createPayout(request);
-    console.log(payout);
     if (payout) {
       request.payoutId = payout.id;
+      request.status = STATUSES.DONE;
+      request.updatedAt = new Date();
       await request.save();
-    }
-    return { success: true };
-    // const oldStatus = request.status;
-    // request.updatedAt = new Date();
-    // await request.save();
+      const oldStatus = request.status;
+      request.updatedAt = new Date();
+      await request.save();
 
-    // const event: QueueEvent = {
-    //   channel: PAYOUT_REQUEST_CHANEL,
-    //   eventName: PAYOUT_REQUEST_EVENT.UPDATED,
-    //   data: {
-    //     request,
-    //     oldStatus
-    //   }
-    // };
-    // await this.queueEventService.publish(event);
-    // return request;
+      const event: QueueEvent = {
+        channel: PAYOUT_REQUEST_CHANEL,
+        eventName: PAYOUT_REQUEST_EVENT.UPDATED,
+        data: {
+          request,
+          oldStatus
+        }
+      };
+      await this.queueEventService.publish(event);
+    }
+    return request;
   }
 }

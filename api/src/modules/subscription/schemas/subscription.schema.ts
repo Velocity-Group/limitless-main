@@ -25,7 +25,7 @@ const subscriptionSchema = new mongoose.Schema({
   },
   paymentGateway: {
     type: String,
-    default: 'ccbill',
+    default: 'stripe',
     index: true
   },
   startRecurringDate: {

@@ -2,8 +2,10 @@
 import { PureComponent } from 'react';
 import Head from 'next/head';
 import { Layout, message, Spin } from 'antd';
+import { ReadOutlined } from '@ant-design/icons';
 import { postService } from '@services/post.service';
 import { connect } from 'react-redux';
+import PageHeading from '@components/common/page-heading';
 
 interface IProps {
   ui: any;
@@ -55,12 +57,12 @@ class PostDetail extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${post?.title || ''}`}
+            {`${ui?.siteName} | ${post?.title}`}
           </title>
         </Head>
         <div className="main-container">
           <div className="page-container">
-            <div className="page-heading">{post?.title}</div>
+            <PageHeading title={post?.title} icon={<ReadOutlined />} />
             <div
               className="page-content"
               dangerouslySetInnerHTML={{ __html: post?.content }}

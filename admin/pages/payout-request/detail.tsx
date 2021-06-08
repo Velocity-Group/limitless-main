@@ -1,16 +1,7 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import {
-  Layout,
-  message,
-  Select,
-  Button,
-  PageHeader,
-  Row,
-  Col,
-  Input,
-  Space,
-  Statistic,
-  Alert,
-  Tag
+  Layout, message, Select, Button, PageHeader,
+  Input, Space, Statistic, Divider
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
@@ -21,6 +12,8 @@ import { payoutRequestService } from 'src/services';
 import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
 import { formatDate } from 'src/lib/date';
+import env from 'src/env';
+import './index.less';
 
 const { Content } = Layout;
 
@@ -64,13 +57,28 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
+  async handleStripePayout() {
+    const { status, request } = this.state;
+    if (status !== 'pending' || request.paymentAccountType !== 'stripe') return;
+    try {
+      await this.setState({ loading: true });
+      const resp = await (await payoutRequestService.payout(request._id)).data;
+      if (resp.status === 'done') {
+        message.success('Transfer money via Stripe Connect success', 5);
+        await this.setState({ status: resp.status });
+        this.onUpdate();
+      }
+    } catch (e) {
+      const err = await Promise.resolve(e);
+      this.setState({ loading: false });
+      message.error(getResponseError(err), 10);
+    }
+  }
+
   async onUpdate() {
     const { status, adminNote, request } = this.state;
     try {
       await this.setState({ loading: true });
-      if (status === 'done' && request.paymentAccountType === 'stripe') {
-        await payoutRequestService.payout(request._id);
-      }
       await payoutRequestService.update(request._id, {
         status,
         adminNote
@@ -122,7 +130,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
 
   render() {
     const {
-      request, adminNote, loading, statsPayout
+      request, adminNote, loading, statsPayout, status
     } = this.state;
     const paymentAccountInfo = request?.paymentAccountInfo;
     return (
@@ -142,117 +150,139 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
             />
             {request ? (
               <Page>
-                <PageHeader title="Request informations" />
-                <Row>
-                  <Col span={24}>
-                    <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
-                      <Space size="large">
-                        <Statistic
-                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                          title="Total Earned Tokens"
-                          value={statsPayout?.totalEarnedTokens || 0}
-                          precision={2}
-                        />
-                        <Statistic
-                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                          title="Previous paid out tokens"
-                          value={statsPayout?.previousPaidOutTokens || 0}
-                          precision={2}
-                        />
-                        <Statistic
-                          prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                          title="Remaining unpaid tokens"
-                          value={statsPayout?.remainingUnpaidTokens || 0}
-                          precision={2}
-                        />
-                      </Space>
-                    </div>
-                  </Col>
-                  <Col md={12} lg={12} xs={24}>
-                    <p>
-                      Model:
+                <PageHeader title="Payout Request Informations" />
+                <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
+                  <Space size="large">
+                    <Statistic
+                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
+                      title="Total Earned Tokens"
+                      value={statsPayout?.totalEarnedTokens || 0}
+                      precision={2}
+                    />
+                    <Statistic
+                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
+                      title="Previous paid out tokens"
+                      value={statsPayout?.previousPaidOutTokens || 0}
+                      precision={2}
+                    />
+                    <Statistic
+                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
+                      title="Remaining unpaid tokens"
+                      value={statsPayout?.remainingUnpaidTokens || 0}
+                      precision={2}
+                    />
+                  </Space>
+                </div>
+                <p>
+                  Model:
+                  {' '}
+                  <strong>{request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}</strong>
+                </p>
+                <p>
+                  Requested tokens:
+                  {' '}
+                  {request.requestTokens || 0}
+                </p>
+                <p>
+                  Conversion rate:
+                  {' '}
+                  $
+                  {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                </p>
+                <p>
+                  Requested at:
+                  {' '}
+                  {formatDate(request.createdAt)}
+                </p>
+                <p>
+                  User Note:
+                  {' '}
+                  {request.requestNote}
+                </p>
+                <Divider />
+                {request.paymentAccountType === 'paypal' && (
+                <div>
+                  <h2>Confirm payout via Paypal</h2>
+                  <p>
+                    Account:
+                    {' '}
+                    {paymentAccountInfo?.value?.email || 'N/A'}
+                  </p>
+                  <p>
+                    Amount: $
+                    {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                  </p>
+                  <form action={env.paypalPayoutUrl} method="post" className="paypal-payout">
+                    <input type="hidden" name="cmd" value="_xclick" />
+                    <input type="hidden" name="return" value={window.location.href} />
+                    <input type="hidden" name="cancel_return" value={window.location.href} />
+                    {/* <input type="hidden" name="notify_url" value={`${env.apiEndpoint}/payout-requests/webhooks/paypal`} /> */}
+                    <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
+                    <input type="hidden" name="item_number" value={request._id} />
+                    <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
+                    <input type="hidden" name="currency_code" value="USD" />
+                    <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
+                    <input disabled={loading || request?.status !== 'pending'} type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
+                  </form>
+                  <p style={{ color: 'red' }}>
+                    <small>Please update status manually after transaction success!</small>
+                  </p>
+                </div>
+                )}
+                {request.paymentAccountType === 'stripe' && (
+                <div>
+                  <h2>
+                    Confirm transfer via Stripe Connect
+                  </h2>
+                  <div>
+                    <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
+                      Click here to transfer $
+                      {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
                       {' '}
-                      <strong>{request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}</strong>
-                    </p>
-                    <p>
-                      Requested tokens:
+                      to
                       {' '}
-                      {request.requestTokens || 0}
-                    </p>
-                    <p>
-                      Requested at:
-                      {' '}
-                      {formatDate(request.createdAt)}
-                    </p>
-                    <p>
-                      User Note:
-                      {' '}
-                      {request.requestNote && <Alert message={request.requestNote} />}
-                    </p>
-                  </Col>
-
-                  <Col md={12} lg={12} xs={24}>
-                    <p>
-                      Payout payment gateway:
-                      {' '}
-                      <Tag style={{ textTransform: 'capitalize' }} color="cyan">{request.paymentAccountType}</Tag>
-                    </p>
-                    {request.paymentAccountType === 'paypal' && (
-                    <>
-                      <h4>Paypal Informations</h4>
-                      <p>
-                        Email address:
-                        {' '}
-                        {paymentAccountInfo?.value?.email || 'N/A'}
-                      </p>
-                      <p>
-                        Phone number:
-                        {' '}
-                        {paymentAccountInfo?.value?.phoneNumber || 'N/A'}
-                      </p>
-                    </>
-                    )}
-                  </Col>
-                  <Col md={24} lg={24}>
-                    <div style={{ marginBottom: '10px' }}>
-                      <p>
-                        Update status here:
-                      </p>
-                      {request.paymentAccountType === 'stripe' && <p style={{ color: 'red' }}><small>Once you select to Done, system is going to payout via Stripe Connect</small></p>}
-                      <Select
-                        disabled={loading || ['done', 'rejected'].includes(request?.status)}
-                        style={{ width: '100%' }}
-                        onChange={(e) => this.setState({ status: e })}
-                        defaultValue={request.status || 'N/A'}
-                      >
-                        {/* <Select.Option key="approved" value="approved">
+                      {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
+                    </Button>
+                  </div>
+                </div>
+                )}
+                <Divider />
+                <div style={{ marginBottom: '10px' }}>
+                  <p>
+                    Update status here
+                  </p>
+                  <Select
+                    disabled={loading || ['done', 'rejected'].includes(request?.status)}
+                    style={{ width: '100%' }}
+                    onChange={(e) => this.setState({ status: e })}
+                    value={status}
+                  >
+                    {/* <Select.Option key="approved" value="approved">
                           Approved
                         </Select.Option> */}
-                        <Select.Option key="pending" value="pending" disabled>
-                          Pending
-                        </Select.Option>
-                        <Select.Option key="rejected" value="rejected">
-                          Rejected
-                        </Select.Option>
-                        <Select.Option key="done" value="done">
-                          Done
-                        </Select.Option>
-                      </Select>
-                    </div>
-                    <div style={{ marginBottom: '10px' }}>
-                      <p>Note to user: </p>
-                      <Input.TextArea
-                        defaultValue={adminNote}
-                        style={{ width: '100%' }}
-                        onChange={(v) => {
-                          this.setState({ adminNote: v.target.value });
-                        }}
-                        placeholder="Text something to user"
-                        autoSize={{ minRows: 3 }}
-                      />
-                    </div>
-                  </Col>
-                </Row>
+                    <Select.Option key="pending" value="pending">
+                      Pending
+                    </Select.Option>
+                    <Select.Option key="rejected" value="rejected">
+                      Rejected
+                    </Select.Option>
+                    <Select.Option key="done" value="done">
+                      Done
+                    </Select.Option>
+                  </Select>
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <p>Note to user: </p>
+                  <Input.TextArea
+                    defaultValue={adminNote}
+                    style={{ width: '100%' }}
+                    onChange={(v) => {
+                      this.setState({ adminNote: v.target.value });
+                    }}
+                    placeholder="Text something to user"
+                    autoSize={{ minRows: 3 }}
+                  />
+                </div>
                 <div style={{ marginBottom: '10px', display: 'flex' }}>
                   <Button
                     type="primary"

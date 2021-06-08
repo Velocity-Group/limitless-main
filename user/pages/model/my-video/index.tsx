@@ -3,12 +3,13 @@ import Head from 'next/head';
 import {
   message, Layout, Button, Row, Col
 } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { videoService } from '@services/video.service';
 import { SearchFilter } from '@components/common/search-filter';
 import { TableListVideo } from '@components/video/table-list';
 import Link from 'next/link';
 import { connect } from 'react-redux';
-import { UploadOutlined } from '@ant-design/icons';
 import { IUIConfig } from 'src/interfaces';
 
 interface IProps {
@@ -124,19 +125,17 @@ class Videos extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">
-            My Videos
-          </div>
+          <PageHeading title="My Videos" icon={<UploadOutlined />} />
           <div>
             <Row>
-              <Col lg={17} xs={24}>
+              <Col lg={16} xs={24}>
                 <SearchFilter
                   searchWithKeyword
                   statuses={statuses}
                   onSubmit={this.handleFilter.bind(this)}
                 />
               </Col>
-              <Col lg={7} xs={24} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Col lg={8} xs={24} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                 <Button className="primary">
                   <Link href="/model/my-video/upload">
                     <a>

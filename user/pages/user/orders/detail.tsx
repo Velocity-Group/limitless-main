@@ -2,6 +2,10 @@ import { PureComponent } from 'react';
 import {
   Layout, message, Button, Descriptions, Tag, Spin
 } from 'antd';
+import {
+  ShoppingCartOutlined
+} from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
 import { IOrder, IUIConfig } from 'src/interfaces';
 import Page from '@components/common/layout/page';
@@ -75,11 +79,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
           <Page>
             {!loading && order && (
             <div className="main-container">
-              <div style={{ marginBottom: '10px' }}>
-                Order ID:
-                {' '}
-                {order?.orderNumber || 'N/A'}
-              </div>
+              <PageHeading title={`Order ID ${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
               <Descriptions>
                 <Item key="seller" label="Model">
                   {order?.performerInfo?.name || order?.performerInfo?.username || 'N/A'}

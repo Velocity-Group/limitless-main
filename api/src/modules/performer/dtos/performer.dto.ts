@@ -508,7 +508,8 @@ export class PerformerDto {
       dateOfBirth: this.dateOfBirth,
       bodyType: this.bodyType,
       socialsLink: this.socialsLink,
-      isPerformer: true
+      isPerformer: true,
+      canBeSubscribed: this.canBeSubscribed
     };
   }
 }

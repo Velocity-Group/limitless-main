@@ -2,27 +2,23 @@ import {
   Layout, message, Tabs, Tooltip
 } from 'antd';
 import { PureComponent } from 'react';
+import PageHeading from '@components/common/page-heading';
 import Page from '@components/common/layout/page';
 import {
-  IUIConfig,
-  IFeed,
-  IUser
+  IUIConfig, IFeed, IUser
 } from 'src/interfaces';
 import { connect } from 'react-redux';
 import {
-  feedService,
-  productService,
-  galleryService,
-  videoService,
-  performerService
+  feedService, productService, galleryService, videoService, performerService
 } from 'src/services';
 import Head from 'next/head';
 import UserPerformerBookmarks from '@components/user/bookmarks/performer-bookmarks';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
-import { ScrollListGallery } from '@components/gallery/scroll-list-gallery'; import {
-  FireOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, StarOutlined
+import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
+import {
+  FireOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, StarOutlined, BookOutlined
 } from '@ant-design/icons';
 import '../index.less';
 
@@ -274,7 +270,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading">Bookmarks</div>
+            <PageHeading title="BookMarks" icon={<BookOutlined />} />
             <Tabs
               defaultActiveKey={tab || 'feeds'}
               style={{ padding: '0 24px' }}

@@ -12,6 +12,8 @@ export class PerformerBlockUserDto {
 
   targetId: ObjectId;
 
+  reason: string;
+
   targetInfo?: any;
 
   createdAt: Date;
@@ -25,6 +27,7 @@ export class PerformerBlockUserDto {
         '_id',
         'source',
         'sourceId',
+        'reason',
         'target',
         'targetId',
         'targetInfo',

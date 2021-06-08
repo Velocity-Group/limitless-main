@@ -3,6 +3,8 @@ import {
 } from 'antd';
 import Head from 'next/head';
 import React, { PureComponent } from 'react';
+import { BlockOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
 import { IUIConfig } from 'src/interfaces';
 import { SelectUserDropdown } from '@components/user/select-users-dropdown';
@@ -102,16 +104,13 @@ class blockPage extends PureComponent<IProps> {
     return (
       <Layout>
         <Head>
-          <title>
-            {' '}
-            {ui && ui.siteName}
-          </title>
+          <title>{`${ui?.siteName} | Blacklist`}</title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Users blocked list page</div>
+          <PageHeading icon={<BlockOutlined />} title="Blacklist" />
           <div className="block-user">
             <Button className="" type="primary" onClick={() => this.setState({ openBlockModal: true })}>
-              Block User
+              Click here to block
             </Button>
           </div>
           <div className="users-blocked-list">

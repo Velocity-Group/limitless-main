@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react';
 import { Button, message } from 'antd';
+import { NotificationOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import Router from 'next/router';
 import Head from 'next/head';
 import { connect } from 'react-redux';
@@ -74,7 +76,7 @@ class PerformerPayoutRequestPage extends PureComponent<IProps> {
           <title>Payout Requests</title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Payout Requests</div>
+          <PageHeading title="Payout Requests" icon={<NotificationOutlined />} />
           <div style={{ margin: '10px 0' }}>
             <Button
               type="primary"

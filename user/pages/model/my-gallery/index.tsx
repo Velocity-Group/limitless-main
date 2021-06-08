@@ -2,8 +2,8 @@ import { PureComponent } from 'react';
 import {
   Layout, message, Button, Row, Col
 } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-
+import { PlusOutlined, PictureOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
 import { TableListGallery } from '@components/gallery/table-list';
 import Page from '@components/common/layout/page';
@@ -139,14 +139,12 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
             {' '}
             {ui && ui.siteName}
             {' '}
-            | My Gallery
+            | My Galleries
           </title>
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading">
-              <span>My Gallery</span>
-            </div>
+            <PageHeading title="My Galleries" icon={<PictureOutlined />} />
             <div>
               <Row>
                 <Col lg={20} xs={24}>

@@ -3,8 +3,10 @@ import { PureComponent } from 'react';
 import {
   Layout, message, Spin
 } from 'antd';
+import { PictureOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import FormGallery from '@components/gallery/form-gallery';
+import PageHeading from '@components/common/page-heading';
 import {
   IGallery, IGalleryCreate, IUIConfig
 } from 'src/interfaces';
@@ -196,15 +198,13 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
             {' '}
             {ui && ui.siteName}
             {' '}
-            | Update Gallery
+            | Edit Gallery
             {' '}
           </title>
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading">
-              <span>Update Gallery</span>
-            </div>
+            <PageHeading title="Edit Gallery" icon={<PictureOutlined />} />
             {!loading && gallery && (
               <FormGallery
                 gallery={gallery}

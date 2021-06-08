@@ -2,6 +2,8 @@ import React from 'react';
 import Head from 'next/head';
 import PayoutRequestForm from '@components/payout-request/form';
 import { message } from 'antd';
+import { NotificationOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { payoutRequestService } from 'src/services';
 import { ISettings, IUIConfig, PayoutRequestInterface } from 'src/interfaces';
 import nextCookie from 'next-cookies';
@@ -116,10 +118,10 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
     return (
       <>
         <Head>
-          <title>{`${ui?.siteName} | Update Payout Request `}</title>
+          <title>{`${ui?.siteName} | Edit Payout Request `}</title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Update Payout Request</div>
+          <PageHeading title="Edit Payout Request" icon={<NotificationOutlined />} />
           <PayoutRequestForm
             statsPayout={statsPayout}
             payout={payout}

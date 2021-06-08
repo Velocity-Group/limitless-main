@@ -1,12 +1,12 @@
 import { PureComponent, createRef } from 'react';
 import Head from 'next/head';
-
 import {
   Form, message, Layout, Button, Col, Row, Upload
 } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import Page from '@components/common/layout/page';
 import { FormInstance } from 'antd/lib/form';
-import { UploadOutlined } from '@ant-design/icons';
 import VideoUploadList from '@components/file/video-upload-list';
 import { videoService } from '@services/video.service';
 import { connect } from 'react-redux';
@@ -138,14 +138,12 @@ class BulkUploadVideo extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Bulk upload video
+            | Upload videos
           </title>
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading">
-              <span>Bulk upload video</span>
-            </div>
+            <PageHeading title="Upload Videos" icon={<UploadOutlined />} />
             <Form
               {...layout}
               onFinish={this.submit.bind(this)}

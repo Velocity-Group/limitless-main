@@ -38,35 +38,32 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Total earned',
+        title: 'GROSS',
         dataIndex: 'grossPrice',
-        sorter: true,
-        render(grossPrice) {
+        render(grossPrice, record) {
           return (
             <span>
-              $
+              {record.isToken ? <img src="/coin-ico.png" width="15px" alt="coin" /> : '$'}
               {(grossPrice || 0).toFixed(2)}
             </span>
           );
         }
       },
       {
-        title: 'Net price',
+        title: 'NET',
         dataIndex: 'netPrice',
-        sorter: true,
-        render(netPrice) {
+        render(netPrice, record) {
           return (
             <span>
-              $
+              {record.isToken ? <img src="/coin-ico.png" width="15px" alt="coin" /> : '$'}
               {(netPrice || 0).toFixed(2)}
             </span>
           );
         }
       },
       {
-        title: 'Commission',
-        dataIndex: 'commission',
-        sorter: true,
+        title: 'Site_Commission',
+        dataIndex: 'siteCommission',
         render(commission) {
           return (
             <span>
@@ -79,23 +76,22 @@ export class TableListEarning extends PureComponent<IProps> {
       {
         title: 'Type',
         dataIndex: 'type',
-        sorter: true,
         render(type: string) {
           switch (type) {
             case 'monthly_subscription':
               return <Tag color="#936dc9">Monthly Subscription</Tag>;
             case 'yearly_subscription':
               return <Tag color="#936dc9">Yearly Subscription</Tag>;
-            case 'free_subscription':
-              return <Tag color="#936dc9">Free Subscription</Tag>;
-            case 'digital_product':
-              return <Tag color="#FFCF00">Digital Product</Tag>;
-            case 'physical_product':
-              return <Tag color="#FFCF00">Physical Product</Tag>;
-            case 'performer_post':
+            case 'product':
+              return <Tag color="#FFCF00">Product</Tag>;
+            case 'gallery':
+              return <Tag color="#FFCF00">Gallery</Tag>;
+            case 'feed':
               return <Tag color="green">Post</Tag>;
-            case 'tip_performer':
+            case 'tip':
               return <Tag color="#00dcff">Tip</Tag>;
+            case 'video':
+              return <Tag color="blue">Video</Tag>;
             default: return <Tag color="#00dcff">{type}</Tag>;
           }
         }
@@ -122,9 +118,9 @@ export class TableListEarning extends PureComponent<IProps> {
       //   }
       // },
       {
-        title: 'Last update',
-        dataIndex: 'updatedAt',
-        sorter: true,
+        title: 'Date',
+        dataIndex: 'createdAt',
+        sorted: true,
         render(createdAt: Date) {
           return <span>{formatDate(createdAt)}</span>;
         }

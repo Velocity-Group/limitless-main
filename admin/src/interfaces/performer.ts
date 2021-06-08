@@ -86,7 +86,8 @@ export interface IPerformer {
     linkedIn: string;
   }
   commissionSetting: any;
-  ccbillSetting: any
+  ccbillSetting: any;
+  paypalSetting: any;
 }
 
 export interface IUpdatePerformer {

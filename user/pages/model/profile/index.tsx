@@ -242,13 +242,13 @@ class PerformerProfile extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({
+      await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: performer._id,
         paymentGateway: 'stripe',
-        stripeCardId: currentUser.stripeCardIds[0]
-      })).data;
-      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
+        stripeCardId: currentUser.stripeCardIds[0] // TODO user can choose card
+      });
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -468,6 +468,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </div>
               </div>
             </div>
+            {!currentUser.isPerformer && (
             <div className="drop-actions">
               <Dropdown overlay={(
                 <Menu key="menu_actions">
@@ -486,6 +487,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </a>
               </Dropdown>
             </div>
+            )}
           </div>
         </div>
         <div className="main-profile">
@@ -493,28 +495,22 @@ class PerformerProfile extends PureComponent<IProps> {
             <div className="fl-col">
               <img
                 alt="main-avt"
-                src={
-                  performer && performer?.avatar
-                    ? performer?.avatar
-                    : '/static/no-avatar.png'
-                }
+                src={performer?.avatar || '/static/no-avatar.png'}
               />
               {currentUser?._id !== performer._id && <span className={performer.isOnline ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
                 <h4>
-                  {performer?.name}
+                  {performer?.name || 'N/A'}
                     &nbsp;
-                  {currentUser._id === performer._id ? <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link> : (
-                    <>
-                      {performer?.verifiedAccount && (
-                        <CheckCircleOutlined className="theme-color" />
-                      )}
-                    </>
+                  {performer?.verifiedAccount && (
+                  <CheckCircleOutlined className="theme-color" />
                   )}
+                      &nbsp;
+                  {currentUser._id === performer._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
                 </h4>
                 <h5 style={{ textTransform: 'none' }}>
                   @
-                  {performer?.username}
+                  {performer?.username || 'n/a'}
                 </h5>
               </div>
             </div>

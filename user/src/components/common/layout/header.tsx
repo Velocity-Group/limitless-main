@@ -101,15 +101,10 @@ class Header extends PureComponent<IProps> {
     }
   }
 
-  async handlePaymentStatusCallback(event) {
-    const { status } = event;
-    if (status && status === 'success') {
-      window.location.href = '/payment/success';
+  async handlePaymentStatusCallback({ redirectUrl }) {
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
     }
-    if (status && ['cancel', 'fail'].includes(status)) {
-      window.location.href = '/payment/cancel';
-    }
-    // TODO handle more event
   }
 
   onThemeChange = (theme: string) => {
@@ -412,7 +407,7 @@ class Header extends PureComponent<IProps> {
                   <div className={router.pathname === '/user/cards' ? 'menu-item active' : 'menu-item'}>
                     <CreditCardOutlined />
                     {' '}
-                    Add Cards
+                    Add Card
                   </div>
                 </Link>
                 <Divider />

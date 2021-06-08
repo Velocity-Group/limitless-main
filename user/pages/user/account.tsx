@@ -138,7 +138,6 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
       <Layout>
         <Head>
           <title>
-            {' '}
             {ui && ui.siteName}
             {' '}
             | Account

@@ -300,13 +300,13 @@ class VideoViewPage extends PureComponent<IProps> {
         return;
       }
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({
+      await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: video.performerId,
         paymentGateway: 'stripe',
         stripeCardId: user.stripeCardIds[0]
-      })).data;
-      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
+      });
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
@@ -412,12 +412,12 @@ class VideoViewPage extends PureComponent<IProps> {
             <a>
               <HourglassOutlined />
               &nbsp;
-              {videoDuration(video.video.duration)}
+              {videoDuration(video?.video?.duration || 0)}
             </a>
             <a>
               <EyeOutlined />
               &nbsp;
-              {videoStats && videoStats.views ? videoStats.views : 0}
+              {videoStats?.views || 0}
             </a>
           </div>
           <div className="vid-player">
@@ -602,6 +602,7 @@ class VideoViewPage extends PureComponent<IProps> {
             <Tabs
               defaultActiveKey="Video"
               onChange={this.onChangeTab.bind(this)}
+              className="custom"
             >
               <TabPane tab="Description" key="description">
                 <p>{video.description || 'No description...'}</p>

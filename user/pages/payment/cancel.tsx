@@ -1,8 +1,10 @@
 import { Layout, Alert, Button } from 'antd';
+import { PayCircleOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import Router from 'next/router';
 import Head from 'next/head';
+import Router from 'next/router';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
 interface IProps {
@@ -23,18 +25,26 @@ class PaymentCancel extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Payment fail
+            | Payment Fail
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Payment fail</div>
+          <PageHeading title="Payment Fail" icon={<PayCircleOutlined />} />
+          {Router?.query?.transactionId && (
+          <h4>
+            <a>
+              #
+              {Router?.query?.transactionId}
+            </a>
+          </h4>
+          )}
           <Alert
             message="Payment fail"
             description={`Hi ${user?.name || user?.username || 'there'}, your payment has been fail! Please contact us for more information.`}
             type="error"
             showIcon
           />
-          <h4 className="text-center"><Button type="link" onClick={() => Router.back()}>Click here to back</Button></h4>
+          <h4 className="text-center"><Button type="link" onClick={() => window.history.back()}>Click here to back</Button></h4>
         </div>
       </Layout>
     );

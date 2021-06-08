@@ -9,7 +9,6 @@ import { earningService } from '@services/earning.service';
 import { SearchFilter } from '@components/common/search-filter';
 import { TableListEarning } from '@components/earning/table-list-earning';
 import { BreadcrumbComponent } from '@components/common';
-import { pick } from 'lodash';
 
 interface IEarningStatResponse {
   totalSiteCommission: number;
@@ -125,10 +124,6 @@ class Earning extends PureComponent<IProps> {
       {
         key: 'yearly_subscription',
         text: 'Yearly Subscription'
-      },
-      {
-        key: 'token_package',
-        text: 'Token Package'
       }
     ];
 

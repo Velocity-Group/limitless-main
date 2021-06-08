@@ -1,9 +1,9 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Row, Col, Spin, Tabs, Button, Modal
+  Layout, message, Row, Col, Spin, Button, Modal
 } from 'antd';
 import {
-  HeartOutlined, BookOutlined
+  HeartOutlined, BookOutlined, PictureOutlined
 } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
@@ -22,6 +22,7 @@ import { Carousel } from 'react-responsive-carousel';
 import Router from 'next/router';
 import Link from 'next/link';
 import Loader from '@components/common/base/loader';
+import PageHeading from '@components/common/page-heading';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import './index.less';
 
@@ -143,13 +144,13 @@ class GalleryViewPage extends PureComponent<IProps> {
         return;
       }
       await this.setState({ submiting: true });
-      const resp = await (await paymentService.subscribePerformer({
+      await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: gallery.performerId,
         paymentGateway: 'stripe',
         stripeCardId: user.stripeCardIds[0]
-      })).data;
-      setTimeout(() => { this.setState({ openSubscriptionModal: false, submiting: false }); }, 3000);
+      });
+      this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
@@ -176,21 +177,14 @@ class GalleryViewPage extends PureComponent<IProps> {
       <>
         <Head>
           <title>
-            {ui && ui.siteName}
-            {' '}
-            |
-            {' '}
-            {gallery?.title || 'Gallery'}
+            {`${ui?.siteName} | ${gallery?.title || 'Gallery'}`}
           </title>
           <meta name="keywords" content={gallery?.description} />
           <meta name="description" content={gallery?.description} />
           {/* OG tags */}
           <meta
             property="og:title"
-            content={
-              ui
-              && `${ui.siteName} | ${gallery?.title || 'Gallery'}`
-            }
+            content={`${ui?.siteName} | ${gallery?.title || 'Gallery'}`}
             key="title"
           />
           <meta property="og:image" content={gallery?.coverPhoto?.thumbnails[0] || gallery?.coverPhoto?.url} />
@@ -202,7 +196,7 @@ class GalleryViewPage extends PureComponent<IProps> {
         </Head>
         <Layout>
           <div className="main-container">
-            <div className="page-heading">{gallery?.title}</div>
+            <PageHeading icon={<PictureOutlined />} title={gallery?.title} />
             <div className="photo-carousel">
               <Carousel>
                 {photos.length > 0 && photos.map((photo) => (
@@ -217,7 +211,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                     {' '}
                     <img alt="coin" src="/static/coin-ico.png" width="20px" />
                     {' '}
-                    {gallery.price.toFixed(2)}
+                    {(gallery.price || 0).toFixed(2)}
                   </Button>
                   )}
                   {!gallery.isSale && !isSubscribed && (
@@ -251,7 +245,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                         }}
                       >
                         MONTHLY SUBSCRIPTION BY $
-                        {gallery?.performer?.monthlyPrice.toFixed(2)}
+                        {(gallery?.performer?.monthlyPrice || 0).toFixed(2)}
                       </Button>
                       )}
                       {!gallery?.performer?.isFreeSubscription && gallery?.performer.yearlyPrice && (
@@ -264,7 +258,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                         }}
                       >
                         YEARLY SUBSCRIPTON BY
-                        {gallery?.performer?.yearlyPrice.toFixed(2)}
+                        {(gallery?.performer?.yearlyPrice || 0).toFixed(2)}
                       </Button>
                       )}
                     </div>
@@ -301,7 +295,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                     }}
                     as={`/model/${gallery.performer?.username || gallery.performer?._id}`}
                   >
-                    <>
+                    <a>
                       <img
                         alt="performer avatar"
                         src={gallery.performer?.avatar || '/static/no-avatar.png'}
@@ -314,7 +308,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                           {gallery?.performer?.username || 'n/a'}
                         </small>
                       </div>
-                    </>
+                    </a>
                   </Link>
                 </div>
               </div>
@@ -322,13 +316,7 @@ class GalleryViewPage extends PureComponent<IProps> {
           </div>
           <div className="vid-info">
             <div className="main-container">
-              <Tabs
-                defaultActiveKey="Description"
-              >
-                <Tabs.TabPane tab="Description" key="description">
-                  <p>{gallery.description || 'No description...'}</p>
-                </Tabs.TabPane>
-              </Tabs>
+              <p>{gallery.description || 'No description...'}</p>
             </div>
           </div>
           <div className="main-container">

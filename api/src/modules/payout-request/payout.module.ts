@@ -1,11 +1,12 @@
-import { Module, forwardRef } from '@nestjs/common';
+import {
+  Module, forwardRef
+} from '@nestjs/common';
 import { MongoDBModule, QueueModule } from 'src/kernel';
 import { AuthModule } from '../auth/auth.module';
 import { payoutRequestProviders } from './providers/payout-request.provider';
 import { PayoutRequestService } from './services';
 import {
-  PayoutRequestController,
-  AdminPayoutRequestController,
+  PayoutRequestController, AdminPayoutRequestController,
   PayoutRequestSearchController
 } from './controllers';
 import { PerformerModule } from '../performer/performer.module';

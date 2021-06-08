@@ -6,5 +6,6 @@ export default {
   // videoAccept: '',
   maximumSizeUploadImage: 5,
   maximumSizeUploadFile: 5,
-  maximumSizeUploadVideo: 2000
+  maximumSizeUploadVideo: 2000,
+  paypalPayoutUrl: 'https://www.sandbox.paypal.com/cgi-bin/webscr'
 };

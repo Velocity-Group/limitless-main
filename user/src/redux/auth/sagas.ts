@@ -24,7 +24,8 @@ import {
   registerPerformerSuccess,
   forgot,
   forgotSuccess,
-  forgotFail
+  forgotFail,
+  getCurrentUser
 } from './actions';
 
 const authSagas = [
@@ -141,6 +142,18 @@ const authSagas = [
         const error = yield Promise.resolve(e);
         message.error((error && error.message) || 'Something went wrong. Please try again later', 5);
         yield put(forgotFail(error));
+      }
+    }
+  },
+  {
+    on: getCurrentUser,
+    * worker() {
+      try {
+        const userResp = yield userService.me();
+        yield put(updateCurrentUser(userResp.data));
+      } catch (e) {
+        const error = yield Promise.resolve(e);
+        console.log(error);
       }
     }
   }

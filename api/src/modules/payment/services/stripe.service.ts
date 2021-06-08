@@ -58,7 +58,7 @@ export class StripeService {
       card && !user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id);
       const cards = await stripe.customers.listSources(
         customer.id,
-        { object: 'card', limit: 100 }
+        { limit: 100 }
       );
       return cards;
     } catch (e) {
@@ -103,13 +103,16 @@ export class StripeService {
         : await stripe.customers.create({
           email: user.email,
           name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : `${user?.name || user?.username}`,
-          description: `Create customer ${user.name || user.username}`
+          description: `Create customer ${user.name || user.username}`,
+          metadata: {
+            userId: user._id.toString()
+          }
         });
       if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 404);
       !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
       const cards = await stripe.customers.listSources(
         customer.id,
-        { object: 'card', limit: 100 }
+        { limit: 100 }
       );
       return cards;
     } catch (e) {
@@ -276,16 +279,18 @@ export class StripeService {
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
-      const charge = await stripe.charges.create({
+      const charge = await stripe.paymentIntents.create({
         amount: transaction.totalPrice * 100, // convert cents to dollars
         currency: 'usd',
         customer: user.stripeCustomerId,
-        source: stripeCardId,
+        payment_method: stripeCardId,
         description: `${user?.name || user?.username} purchase ${transaction.type} ${item.name}`,
         metadata: {
           transactionId: transaction._id.toString() // to track on webhook
         },
-        receipt_email: user.email
+        receipt_email: user.email,
+        confirm: true,
+        return_url: `${process.env.USER_URL}/user/payment-history`
       });
       return charge;
     } catch (e) {
@@ -303,6 +308,7 @@ export class StripeService {
       if (!connectAccount || !connectAccount.accountId) throw new HttpException('Stripe connected account was not found', 404);
       const account = await stripe.accounts.retrieve(connectAccount.accountId);
       if (!account || !account.payouts_enabled) throw new HttpException('Could not payout to this account, please check then try again later', 404);
+      // we transfer to model connected account then model payout manual
       const payout = await stripe.transfers.create({
         amount: request.requestTokens * (request.tokenConversionRate || 1) * 100,
         currency: 'usd',

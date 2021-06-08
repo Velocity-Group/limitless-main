@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { connect } from 'react-redux';
 import { IUIConfig, IUser } from '@interfaces/index';
 import ScrollListFeed from '@components/post/scroll-list';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, FireOutlined } from '@ant-design/icons';
 
 interface IProps {
   ui: IUIConfig;
@@ -126,7 +126,11 @@ class PostListing extends PureComponent<IProps> {
         <div className="main-container">
           <Page>
             <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>My Posts</span>
+              <span>
+                <FireOutlined />
+                {' '}
+                My Posts
+              </span>
               <Link href="/model/my-post/create">
                 <a>
                   {' '}

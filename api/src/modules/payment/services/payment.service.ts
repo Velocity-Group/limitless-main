@@ -141,7 +141,7 @@ export class PaymentService {
         }
       ],
       couponInfo,
-      status: PAYMENT_STATUS.PENDING,
+      status: PAYMENT_STATUS.CREATED,
       paymentResponseInfo: null
     });
   }
@@ -202,26 +202,16 @@ export class PaymentService {
       }
       const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
       if (plan) {
-        transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.PENDING;
+        transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.CREATED;
         transaction.paymentResponseInfo = plan;
-        transaction.latestInvoiceId = plan.latest_invoice as any;
+        transaction.paymentIntentId = plan.latest_invoice as any;
         await transaction.save();
-        await this.queueEventService.publish(
-          new QueueEvent({
-            channel: TRANSACTION_SUCCESS_CHANNEL,
-            eventName: EVENT.CREATED,
-            data: new PaymentDto(transaction)
-          })
-        );
-        setTimeout(async () => {
-          await this.subscriptionService.updateSubscriptionId({
-            userId: transaction.sourceId,
-            performerId: transaction.performerId
-          }, plan.id);
-        }, 5000); // to create subscription model first
-        return { success: true };
+        await this.subscriptionService.updateSubscriptionId({
+          userId: transaction.sourceId,
+          performerId: transaction.performerId
+        }, plan.id);
       }
-      return { success: false };
+      return new PaymentDto(transaction).toResponse();
     }
     throw new MissingConfigPaymentException();
   }
@@ -239,13 +229,13 @@ export class PaymentService {
     paymentTransaction.source = 'user';
     paymentTransaction.sourceId = user._id;
     paymentTransaction.target = PAYMENT_TARGET_TYPE.TOKEN_PACKAGE;
-    paymentTransaction.targetId = null;
+    paymentTransaction.targetId = products[0].productId;
     paymentTransaction.performerId = null;
     paymentTransaction.type = PAYMENT_TYPE.TOKEN_PACKAGE;
     paymentTransaction.totalPrice = couponInfo ? totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2)) : totalPrice;
     paymentTransaction.products = products;
     paymentTransaction.paymentResponseInfo = {};
-    paymentTransaction.status = PAYMENT_STATUS.PENDING;
+    paymentTransaction.status = PAYMENT_STATUS.CREATED;
     paymentTransaction.couponInfo = couponInfo;
     await paymentTransaction.save();
     return paymentTransaction;
@@ -326,7 +316,11 @@ export class PaymentService {
         user,
         stripeCardId
       });
-      return data;
+      if (data) {
+        transaction.paymentIntentId = data.id || (data.invoice && data.invoice.toString());
+        await transaction.save();
+      }
+      return new PaymentDto(transaction).toResponse();
     }
     throw new MissingConfigPaymentException();
   }
@@ -453,35 +447,43 @@ export class PaymentService {
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data } = payload;
-    const latestInvoiceId = data?.object?.invoice;
+    const paymentIntentId = data?.object?.invoice || data?.object?.id;
     const transactionId = data?.object?.metadata?.transactionId;
-    if (!latestInvoiceId && !transactionId) {
+    if (!paymentIntentId && !transactionId) {
       return { ok: false };
     }
-    const transaction = await this.TransactionModel.findOne({
-      $or: [
-        { latestInvoiceId },
-        { _id: transactionId }
-      ]
-    });
+    let transaction = paymentIntentId && await this.TransactionModel.findOne({ paymentIntentId });
+    if (!transaction) {
+      transaction = transactionId && await this.TransactionModel.findOne({ _id: transactionId });
+    }
     if (!transaction) return { ok: false };
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();
+    let redirectUrl = '';
     switch (type) {
-      case 'charge.expired':
+      case 'payment_intent.created':
+        transaction.status = PAYMENT_STATUS.CREATED;
+        break;
+      case 'payment_intent.processing':
+        transaction.status = PAYMENT_STATUS.PROCESSING;
+        break;
+      case 'payment_intent.canceled':
+        redirectUrl = `/payment/cancel?transactionId=${transaction._id.slice(16, 24)}`;
         transaction.status = PAYMENT_STATUS.CANCELED;
-        await transaction.save();
         break;
-      case 'charge.failed':
+      case 'payment_intent.payment_failed':
+        redirectUrl = `/payment/cancel?transactionId=${transaction._id.slice(16, 24)}`;
         transaction.status = PAYMENT_STATUS.FAIL;
-        await transaction.save();
         break;
-      case 'charge.succeeded': transaction.status = PAYMENT_STATUS.SUCCESS;
-        transaction.latestInvoiceId = latestInvoiceId;
+      case 'payment_intent.requires_action':
+        transaction.status = PAYMENT_STATUS.REQUIRE_AUTHENTICATION;
+        redirectUrl = data?.object?.next_action?.use_stripe_sdk?.stripe_js || data?.object?.next_action?.redirect_to_url?.url || '/user/payment-history';
+        break;
+      case 'payment_intent.succeeded': transaction.status = PAYMENT_STATUS.SUCCESS;
+        transaction.paymentIntentId = paymentIntentId;
         if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
           transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
         }
-        await transaction.save();
         await this.queueEventService.publish(
           new QueueEvent({
             channel: TRANSACTION_SUCCESS_CHANNEL,
@@ -489,11 +491,13 @@ export class PaymentService {
             data: new PaymentDto(transaction)
           })
         );
+        redirectUrl = `/payment/success?transactionId=${transaction._id.slice(16, 24)}`;
         break;
       default: break;
     }
-    type.includes('charge') && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', new PaymentDto(transaction).toResponse());
-    return { ok: false };
+    await transaction.save();
+    type.includes('payment_intent') && redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
+    return { ok: true };
   }
 
   public async stripeCancelSubscription(id: any, user: UserDto) {

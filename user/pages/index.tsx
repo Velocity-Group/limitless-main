@@ -110,6 +110,7 @@ class Login extends PureComponent<IProps> {
     }
     authService.setToken(token);
     try {
+      await this.setState({ isLoading: true });
       const user = await userService.me({
         Authorization: token
       });
@@ -120,6 +121,8 @@ class Login extends PureComponent<IProps> {
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(await e);
+    } finally {
+      await this.setState({ isLoading: false });
     }
   }
 

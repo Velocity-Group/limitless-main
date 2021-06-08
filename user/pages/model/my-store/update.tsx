@@ -2,6 +2,8 @@ import { PureComponent } from 'react';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import { message, Spin } from 'antd';
+import { ShopOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { productService } from '@services/product.service';
 import { IProduct, IUIConfig } from 'src/interfaces';
 import { FormProduct } from '@components/product/form-product';
@@ -113,12 +115,12 @@ class ProductUpdate extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Update Product
+            | Edit Product
           </title>
         </Head>
         <div className="main-container">
           <Page>
-            <h4 className="title-form">Update product</h4>
+            <PageHeading title="Edit Product" icon={<ShopOutlined />} />
             {!fetching && product && (
             <FormProduct
               product={product}

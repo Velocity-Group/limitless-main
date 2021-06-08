@@ -1,7 +1,10 @@
 import {
   Layout, Button, message, Spin, Modal, Tooltip
 } from 'antd';
-import { BookOutlined, DollarOutlined, HeartOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
+import {
+  BookOutlined, DollarOutlined, HeartOutlined, ShopOutlined
+} from '@ant-design/icons';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
@@ -181,7 +184,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
               ) : <div><Spin /></div>}
               {product && (
               <div className="prod-info">
-                <div className="prod-name">{product?.name}</div>
+                <PageHeading title={product.name || 'N/A'} icon={<ShopOutlined />} />
                 <p className="prod-desc">{product?.description}</p>
                 <div className="add-cart">
                   <p className="prod-price">

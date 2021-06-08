@@ -21,22 +21,16 @@ export class UpdateUserBalanceListener {
   }
 
   public async handleUpdateUser(event: QueueEvent) {
-    try {
-      if (![EVENT.CREATED, EVENT.DELETED].includes(event.eventName)) {
-        return false;
-      }
-      const transaction = event.data;
-      // TOTO handle more event transaction
-      if (transaction.status !== PAYMENT_STATUS.SUCCESS) {
-        return false;
-      }
-      if (transaction.type === PAYMENT_TYPE.TOKEN_PACKAGE) {
-        await this.userService.updateBalance(transaction.sourceId, transaction.products[0].tokens);
-      }
-      return true;
-    } catch (e) {
-      // TODO - log me
-      return false;
+    if (![EVENT.CREATED, EVENT.DELETED].includes(event.eventName)) {
+      return;
+    }
+    const transaction = event.data;
+    // TOTO handle more event transaction
+    if (transaction.status !== PAYMENT_STATUS.SUCCESS) {
+      return;
+    }
+    if (transaction.type === PAYMENT_TYPE.TOKEN_PACKAGE) {
+      await this.userService.updateBalance(transaction.sourceId, transaction.products[0].tokens);
     }
   }
 }

@@ -1,14 +1,17 @@
 import React from 'react';
 import Head from 'next/head';
+import { NotificationOutlined } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import PayoutRequestForm from '@components/payout-request/form';
 import { message } from 'antd';
 import { connect } from 'react-redux';
 import { payoutRequestService } from 'src/services';
 import Router from 'next/router';
-import { ISettings, IUIConfig } from 'src/interfaces/index';
+import { ISettings, IUIConfig, IUser } from 'src/interfaces/index';
 
 interface Props {
   ui: IUIConfig;
+  user: IUser;
   settings: ISettings
 }
 
@@ -55,8 +58,9 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
     requestTokens: number;
     requestNote: string;
   }) {
-    if (!data.requestTokens || data.requestTokens < 1) {
-      message.error('Invalid request tokens');
+    const { user } = this.props;
+    if (data.requestTokens > 1 && data.requestTokens <= user.balance) {
+      message.error('Request tokens must be greater than 1');
       return;
     }
     try {
@@ -82,7 +86,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
           <title>{`${ui?.siteName} | Request a Payout`}</title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">Request a Payout</div>
+          <PageHeading title="Request a Payout" icon={<NotificationOutlined />} />
           <PayoutRequestForm
             payout={{
               requestNote: '',
@@ -102,6 +106,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
 
 const mapStateToProps = (state) => ({
   ui: state.ui,
+  user: state.user.current,
   settings: state.settings
 });
 
