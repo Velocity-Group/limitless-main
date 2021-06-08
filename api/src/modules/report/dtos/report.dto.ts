@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
 
 export class ReportDto {
-  _id: string;
+  _id?: ObjectId;
 
   description: string;
 

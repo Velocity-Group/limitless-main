@@ -2,6 +2,8 @@ import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
 
 export class ReactionDto {
+  _id?: ObjectId;
+
   source?: string;
 
   action?: string;
@@ -24,6 +26,7 @@ export class ReactionDto {
     Object.assign(
       this,
       pick(data, [
+        '_id',
         'source',
         'action',
         'objectId',
