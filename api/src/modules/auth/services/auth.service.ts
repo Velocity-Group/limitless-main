@@ -333,7 +333,7 @@ export class AuthService {
                     type: 'username',
                     source: 'user',
                     sourceId: user._id,
-                    key: profile.screen_name
+                    key: profile.screen_name.trim().toLowerCase()
                   })
                 );
               }
@@ -351,7 +351,7 @@ export class AuthService {
                     type: 'username',
                     source: 'performer',
                     sourceId: performer._id,
-                    key: profile.screen_name
+                    key: profile.screen_name.trim().toLowerCase()
                   })
                 );
               }
@@ -359,7 +359,7 @@ export class AuthService {
               return resolver({ token });
             }
             const newUser = role === 'performer' ? await _this.performerService.modelCreate({
-              username: profile.screen_name,
+              username: profile.screen_name.trim().toLowerCase(),
               status: STATUS_ACTIVE,
               gender: GENDER_MALE,
               twitterConnected: true,
@@ -367,7 +367,7 @@ export class AuthService {
               createdAt: new Date(),
               updatedAt: new Date()
             }) : await _this.userService.socialCreate({
-              username: profile.screen_name,
+              username: profile.screen_name.trim().toLowerCase(),
               status: STATUS_ACTIVE,
               roles: [ROLE_USER],
               gender: GENDER_MALE,
@@ -381,7 +381,7 @@ export class AuthService {
                 source: role || 'user',
                 sourceId: newUser._id,
                 type: 'username',
-                key: profile.screen_name
+                key: profile.screen_name.trim().toLowerCase()
               })
             );
             const token = _this.generateJWT(newAuth);
@@ -409,10 +409,10 @@ export class AuthService {
     }
     const [user, performer] = await Promise.all([
       this.userService.findOne({
-        email: profile.email
+        email: profile.email.toLowerCase()
       }),
       this.performerService.findOne({
-        email: profile.email
+        email: profile.email.toLowerCase()
       })
     ]);
     if (user) {
@@ -444,7 +444,7 @@ export class AuthService {
             type: 'email',
             source: 'performer',
             sourceId: performer._id,
-            key: profile.email
+            key: profile.email.toLowerCase()
           })
         );
       }

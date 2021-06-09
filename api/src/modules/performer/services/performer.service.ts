@@ -33,6 +33,7 @@ import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/ch
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
 import { StripeService } from 'src/modules/payment/services';
+import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException,
@@ -161,13 +162,16 @@ export class PerformerService {
     countryCode?: string,
     currentUser?: UserDto
   ): Promise<PerformerDto> {
-    const model = await this.performerModel.findOne({ username: username.trim().toLowerCase() }).lean();
+    const query = !isObjectId(username) ? {
+      username: username.trim()
+    } : { _id: username };
+    const model = await this.performerModel.findOne(query).lean();
     if (!model) throw new EntityNotFoundException();
     let isBlocked = false;
     if (countryCode && `${currentUser?._id}` !== `${model._id}`) {
       isBlocked = await this.performerBlockService.checkBlockedCountryByIp(model._id, countryCode);
       if (isBlocked) {
-        throw new HttpException('You country has been blocked to access this model profile', 403);
+        throw new HttpException('Your country has been blocked by this model', 403);
       }
     }
     let isBlockedByPerformer = false;
