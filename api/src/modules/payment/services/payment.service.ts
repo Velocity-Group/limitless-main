@@ -447,7 +447,7 @@ export class PaymentService {
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data } = payload;
-    const paymentIntentId = data?.object?.invoice || data?.object?.id;
+    const paymentIntentId = data?.object?.id;
     const transactionId = data?.object?.metadata?.transactionId;
     if (!paymentIntentId && !transactionId) {
       return { ok: false };
@@ -468,19 +468,19 @@ export class PaymentService {
         transaction.status = PAYMENT_STATUS.PROCESSING;
         break;
       case 'payment_intent.canceled':
-        redirectUrl = `/payment/cancel?transactionId=${transaction._id.slice(16, 24)}`;
+        redirectUrl = `/payment/cancel?transactionId=${transaction._id.toString().slice(16, 24)}`;
         transaction.status = PAYMENT_STATUS.CANCELED;
         break;
       case 'payment_intent.payment_failed':
-        redirectUrl = `/payment/cancel?transactionId=${transaction._id.slice(16, 24)}`;
+        redirectUrl = `/payment/cancel?transactionId=${transaction._id.toString().slice(16, 24)}`;
         transaction.status = PAYMENT_STATUS.FAIL;
         break;
       case 'payment_intent.requires_action':
         transaction.status = PAYMENT_STATUS.REQUIRE_AUTHENTICATION;
         redirectUrl = data?.object?.next_action?.use_stripe_sdk?.stripe_js || data?.object?.next_action?.redirect_to_url?.url || '/user/payment-history';
         break;
-      case 'payment_intent.succeeded': transaction.status = PAYMENT_STATUS.SUCCESS;
-        transaction.paymentIntentId = paymentIntentId;
+      case 'payment_intent.succeeded':
+        transaction.status = PAYMENT_STATUS.SUCCESS;
         if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
           transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
         }
@@ -491,7 +491,7 @@ export class PaymentService {
             data: new PaymentDto(transaction)
           })
         );
-        redirectUrl = `/payment/success?transactionId=${transaction._id.slice(16, 24)}`;
+        redirectUrl = `/payment/success?transactionId=${transaction._id.toString().slice(16, 24)}`;
         break;
       default: break;
     }

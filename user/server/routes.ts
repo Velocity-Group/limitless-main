@@ -20,6 +20,8 @@ export default routes()
   .add('home', '/home', '/home')
   .add('search', '/search', '/search')
   .add('token-package', '/token-package', '/token-package')
+  .add('payment-success', '/payment/success', '/payment/success')
+  .add('payment-cancel', '/payment/cancel', '/payment/cancel')
   // performer
   .add('models', '/model', '/model')
   .add('banking', '/model/banking', '/model/banking')
