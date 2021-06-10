@@ -107,6 +107,7 @@ export class SubscriptionService {
         createdAt: new Date(),
         updatedAt: new Date(),
         expiredAt: new Date(),
+        status: SUBSCRIPTION_STATUS.DEACTIVATED,
         userId,
         performerId
       });
