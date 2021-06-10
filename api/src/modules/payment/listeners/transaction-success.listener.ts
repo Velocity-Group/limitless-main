@@ -52,7 +52,7 @@ export class TransactionMailerListener {
             data: {
               performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
               userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
-              transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+              transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
               products: transaction.products
             },
             template: 'performer-new-subscriber'
@@ -64,7 +64,7 @@ export class TransactionMailerListener {
             data: {
               performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
               userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
-              transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+              transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
               products: transaction.products
             },
             template: 'performer-payment-success'
@@ -79,7 +79,7 @@ export class TransactionMailerListener {
           data: {
             performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
             userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
-            transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+            transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
             products: transaction.products
           },
           template: 'admin-payment-success'
@@ -92,7 +92,7 @@ export class TransactionMailerListener {
           to: user.email,
           data: {
             userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
-            transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+            transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
             products: transaction.products
           },
           template: 'user-payment-success'

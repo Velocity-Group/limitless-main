@@ -57,7 +57,7 @@ export class PaymentTokenListener {
           data: {
             performer,
             user,
-            transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+            transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
             products: transaction.products
           },
           template: 'performer-new-subscriber.html'
@@ -69,7 +69,7 @@ export class PaymentTokenListener {
           data: {
             performer,
             user,
-            transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+            transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
             products: transaction.products
           },
           template: 'performer-payment-success.html'
@@ -84,7 +84,7 @@ export class PaymentTokenListener {
         data: {
           performer,
           user,
-          transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+          transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
           products: transaction.products
         },
         template: 'admin-payment-success.html'
@@ -97,7 +97,7 @@ export class PaymentTokenListener {
         to: user.email,
         data: {
           user,
-          transactionId: transaction._id.slice(16, 24).toString().toUpperCase(),
+          transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
           products: transaction.products
         },
         template: 'user-payment-success.html'
