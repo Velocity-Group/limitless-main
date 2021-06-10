@@ -4,12 +4,13 @@ import PageHeading from '@components/common/page-heading';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import Router from 'next/router';
+import { withRouter } from 'next/router';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
 interface IProps {
   user: IUser;
-  ui: IUIConfig
+  ui: IUIConfig;
+  router: any;
 }
 
 class PaymentCancel extends PureComponent<IProps> {
@@ -18,7 +19,7 @@ class PaymentCancel extends PureComponent<IProps> {
   static noredirect: boolean = true;
 
   render() {
-    const { user, ui } = this.props;
+    const { user, ui, router } = this.props;
     return (
       <Layout>
         <Head>
@@ -30,11 +31,11 @@ class PaymentCancel extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <PageHeading title="Payment Fail" icon={<PayCircleOutlined />} />
-          {Router?.query?.transactionId && (
+          {router?.query?.transactionId && (
           <h4>
             <a>
               #
-              {Router?.query?.transactionId}
+              {router?.query?.transactionId}
             </a>
           </h4>
           )}
@@ -57,4 +58,4 @@ const mapStates = (state: any) => ({
 });
 
 const mapDispatch = {};
-export default connect(mapStates, mapDispatch)(PaymentCancel);
+export default connect(mapStates, mapDispatch)(withRouter(PaymentCancel));

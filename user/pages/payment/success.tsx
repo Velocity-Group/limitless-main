@@ -1,18 +1,16 @@
 import { Layout, Alert, Button } from 'antd';
 import { PureComponent } from 'react';
-import { PayCircleOutlined } from '@ant-design/icons';
+import { TransactionOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { clearCart } from '@redux/cart/actions';
-import Router from 'next/router';
+import { withRouter } from 'next/router';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
 interface IProps {
   user: IUser;
-  cart: any;
-  clearCart: Function;
-  ui: IUIConfig
+  ui: IUIConfig;
+  router: any
 }
 
 class PaymentSuccess extends PureComponent<IProps> {
@@ -20,14 +18,8 @@ class PaymentSuccess extends PureComponent<IProps> {
 
   static noredirect: boolean = true;
 
-  componentDidMount() {
-    const { clearCart: handleClearCart, user } = this.props;
-    handleClearCart();
-    localStorage.setItem(`cart_${user._id}`, JSON.stringify([]));
-  }
-
   render() {
-    const { ui, user } = this.props;
+    const { ui, user, router } = this.props;
     return (
       <Layout>
         <Head>
@@ -38,12 +30,12 @@ class PaymentSuccess extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Payment Success" icon={<PayCircleOutlined />} />
-          {Router?.query?.transactionId && (
+          <PageHeading title="Payment Success" icon={<TransactionOutlined />} />
+          {router?.query?.transactionId && (
           <h4>
             <a>
               #
-              {Router?.query?.transactionId}
+              {router?.query?.transactionId}
             </a>
           </h4>
           )}
@@ -65,5 +57,5 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui }
 });
 
-const mapDispatch = { clearCart };
-export default connect(mapStates, mapDispatch)(PaymentSuccess);
+const mapDispatch = { };
+export default connect(mapStates, mapDispatch)(withRouter(PaymentSuccess));
