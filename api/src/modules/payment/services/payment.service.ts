@@ -447,7 +447,7 @@ export class PaymentService {
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data } = payload;
-    const paymentIntentId = data?.object?.id;
+    const paymentIntentId = data?.object?.invoice || data?.object?.id;
     const transactionId = data?.object?.metadata?.transactionId;
     if (!paymentIntentId && !transactionId) {
       return { ok: false };
