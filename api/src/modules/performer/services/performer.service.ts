@@ -177,7 +177,6 @@ export class PerformerService {
     let isBlockedByPerformer = false;
     let isBookMarked = null;
     let isSubscribed = null;
-    let canBeSubscribed = null;
     if (currentUser) {
       isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
         model._id,
@@ -188,12 +187,9 @@ export class PerformerService {
       isBookMarked = await this.reactionService.findOneQuery({
         objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: currentUser._id, action: REACTION.BOOK_MARK
       });
-      const connectAccount = await this.stripeService.getConnectAccount(model._id);
-      canBeSubscribed = connectAccount && connectAccount.payoutsEnabled && connectAccount.detailsSubmitted;
     }
     const dto = new PerformerDto(model);
     dto.isSubscribed = !!isSubscribed;
-    dto.canBeSubscribed = canBeSubscribed;
     dto.isBookMarked = !!isBookMarked;
     if (model.avatarId) {
       const avatar = await this.fileService.findById(model.avatarId);

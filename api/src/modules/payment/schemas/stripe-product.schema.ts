@@ -23,6 +23,9 @@ export const StripeProductSchema = new Schema({
   stripeProductId: {
     type: String
   },
+  stripePriceId: {
+    type: String
+  },
   metaData: {
     type: Schema.Types.Mixed
   },

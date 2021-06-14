@@ -85,7 +85,6 @@ export interface IPerformerResponse {
   },
   invitationId?: ObjectId;
   referralId?: ObjectId;
-  canBeSubscribed?: boolean;
 }
 
 export class PerformerDto {
@@ -255,8 +254,6 @@ export class PerformerDto {
     linkedIn: String;
   }
 
-  canBeSubscribed: boolean;
-
   constructor(data?: Partial<any>) {
     Object.assign(
       this,
@@ -333,8 +330,7 @@ export class PerformerDto {
         'dateOfBirth',
         'bodyType',
         'balance',
-        'socialsLink',
-        'canBeSubscribed'
+        'socialsLink'
       ])
     );
   }
@@ -378,8 +374,7 @@ export class PerformerDto {
       eyes: this.eyes,
       bodyType: this.bodyType,
       sexualPreference: this.sexualPreference,
-      isPerformer: true,
-      canBeSubscribed: this.canBeSubscribed
+      isPerformer: true
     };
     const privateInfo = {
       balance: this.balance,
@@ -508,8 +503,7 @@ export class PerformerDto {
       dateOfBirth: this.dateOfBirth,
       bodyType: this.bodyType,
       socialsLink: this.socialsLink,
-      isPerformer: true,
-      canBeSubscribed: this.canBeSubscribed
+      isPerformer: true
     };
   }
 }

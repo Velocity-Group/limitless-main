@@ -86,7 +86,6 @@ export interface IPerformer {
     twitter: string;
     linkedIn: string;
   };
-  canBeSubscribed: boolean;
 }
 
 export interface IUpdatePerformer {
