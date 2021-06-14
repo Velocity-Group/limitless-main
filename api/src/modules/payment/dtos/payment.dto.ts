@@ -50,6 +50,8 @@ export class IPaymentResponse {
 
   status?: string;
 
+  liveMode?: boolean;
+
   createdAt: Date;
 
   updatedAt: Date;
@@ -92,6 +94,8 @@ export class PaymentDto {
 
   status?: string;
 
+  liveMode?: boolean;
+
   createdAt: Date;
 
   updatedAt: Date;
@@ -119,6 +123,7 @@ export class PaymentDto {
           'totalPrice',
           'originalPrice',
           'couponInfo',
+          'liveMode',
           'createdAt',
           'updatedAt'
         ])
@@ -143,6 +148,7 @@ export class PaymentDto {
       couponInfo: this.couponInfo,
       status: this.status,
       stripeConfirmUrl: this.stripeConfirmUrl,
+      liveMode: this.liveMode,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

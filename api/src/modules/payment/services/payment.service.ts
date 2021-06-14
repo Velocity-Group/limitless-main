@@ -474,7 +474,7 @@ export class PaymentService {
   }
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
-    const { type, data } = payload;
+    const { type, data, livemode } = payload;
     const stripeInvoiceId = data?.object?.invoice || data?.object?.id; // payment
     const transactionId = data?.object?.metadata?.transactionId;
     if (!stripeInvoiceId && !transactionId) {
@@ -487,6 +487,7 @@ export class PaymentService {
     if (!transaction) return { ok: false };
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();
+    transaction.liveMode = livemode;
     let redirectUrl = '';
     switch (type) {
       case 'payment_intent.created':
@@ -525,7 +526,7 @@ export class PaymentService {
       default: break;
     }
     await transaction.save();
-    type.includes('payment_intent') && redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
+    type.includes('payment_intent') && redirectUrl && !livemode && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { ok: true };
   }
 

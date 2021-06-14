@@ -55,7 +55,7 @@ export class PaymentWebhookController {
     @Body() payload: Record<string, string>
   ): Promise<DataResponse<any>> {
     const { type } = payload; // event type
-    if (!type.includes('payment_intent') || !type.includes('customer.subscription')) {
+    if (!type.includes('payment_intent') && !type.includes('customer.subscription')) {
       return DataResponse.ok(false);
     }
     let info;

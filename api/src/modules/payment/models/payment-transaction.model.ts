@@ -51,6 +51,8 @@ export class PaymentTransactionModel extends Document {
 
   stripeConfirmUrl: string;
 
+  liveMode: boolean;
+
   status: string;
 
   createdAt: Date;

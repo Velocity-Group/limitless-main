@@ -62,7 +62,10 @@ export const PaymentTransactionSchema = new Schema({
   stripeConfirmUrl: {
     type: String
   },
-  // pending, success, etc...
+  liveMode: {
+    type: Boolean,
+    default: false
+  },
   status: {
     type: String,
     index: true
