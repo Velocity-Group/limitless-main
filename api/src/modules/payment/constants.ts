@@ -7,12 +7,14 @@ export const PAYMENT_STATUS = {
   REFUNDED: 'refunded',
   REQUIRE_AUTHENTICATION: 'require_authentication'
 };
+
 export const PAYMENT_TYPE = {
   TOKEN_PACKAGE: 'token_package',
   FREE_SUBSCRIPTION: 'free_subscription',
   MONTHLY_SUBSCRIPTION: 'monthly_subscription',
   YEARLY_SUBSCRIPTION: 'yearly_subscription'
 };
+
 export const PAYMENT_TARGET_TYPE = {
   TOKEN_PACKAGE: 'token_package',
   PERFORMER: 'performer'

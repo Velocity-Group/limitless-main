@@ -15,10 +15,11 @@ import * as moment from 'moment';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { PayoutRequestModel } from 'src/modules/payout-request/models/payout-request.model';
-import { STRIPE_ACCOUNT_CONNECT_MODEL_PROVIDER } from '../providers';
+import { STRIPE_ACCOUNT_CONNECT_MODEL_PROVIDER, STRIPE_PRODUCT_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel, StripeConnectAccountModel } from '../models';
 import { AuthoriseCardPayload } from '../payloads/authorise-card.payload';
 import { PAYMENT_TYPE } from '../constants';
+import { StripeProductModel } from '../models/stripe-product-model';
 
 @Injectable()
 export class StripeService {
@@ -29,6 +30,8 @@ export class StripeService {
     private readonly performerService: PerformerService,
     @Inject(STRIPE_ACCOUNT_CONNECT_MODEL_PROVIDER)
     private readonly ConnectAccountModel: Model<StripeConnectAccountModel>,
+    @Inject(STRIPE_PRODUCT_MODEL_PROVIDER)
+    private readonly ProductModel: Model<StripeProductModel>,
     private readonly settingService: SettingService
   ) { }
 
@@ -120,6 +123,28 @@ export class StripeService {
     }
   }
 
+  public async getStripeProduct(performer: PerformerDto, productType: string) {
+    try {
+      const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
+      const stripe = new Stripe(secretKey, {
+        apiVersion: '2020-08-27'
+      });
+      const performerProduct = await this.ProductModel.findOne({
+        sourceId: performer._id,
+        productType
+      });
+      if (performerProduct) return { ...performerProduct, id: performerProduct.stripeProductId };
+      const product = await stripe.products.create({
+        name: `Subcription ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
+        description: `${productType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
+      });
+      if (!product) throw new HttpException('Stripe configuration error, please try again later', 400);
+      return product;
+    } catch (e) {
+      throw new HttpException(e?.raw?.message || e?.response || 'Create a subscription plan on Stripe error, please try again later', 400);
+    }
+  }
+
   public async createSubscriptionPlan(transaction: PaymentTransactionModel, performer: PerformerDto, user: UserDto) {
     try {
       const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
@@ -140,11 +165,7 @@ export class StripeService {
           break;
         default: commission = performerCommissions?.monthlySubscriptionCommission || settingCommission;
       }
-      const product = await stripe.products.create({
-        name: `Subcription ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
-        description: `${user?.name || user?.username || `${user?.firstName} ${user?.lastName}`} ${transaction.type} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
-      });
-      if (!product) throw new HttpException('Stripe configuration error, please try again later', 400);
+      const product = await this.getStripeProduct(performer, transaction.type);
       // monthly subscription will be used once free trial end
       const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
       const plan = await stripe.subscriptions.create({
