@@ -425,6 +425,7 @@ class Header extends PureComponent<IProps> {
                     Subscriptions
                   </div>
                 </Link>
+                <Divider />
                 <Link href="/user/orders" as="/user/orders">
                   <div className={router.pathname === '/user/orders' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingCartOutlined />

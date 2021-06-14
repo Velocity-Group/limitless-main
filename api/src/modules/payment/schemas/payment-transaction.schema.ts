@@ -56,7 +56,10 @@ export const PaymentTransactionSchema = new Schema({
     type: Schema.Types.Mixed
   },
   // latest invoice id
-  paymentIntentId: {
+  stripeInvoiceId: {
+    type: String
+  },
+  stripeConfirmUrl: {
     type: String
   },
   // pending, success, etc...

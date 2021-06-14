@@ -71,24 +71,24 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Expire_date',
+      title: 'Expire_at',
       dataIndex: 'expiredAt',
       render(date: Date) {
-        return <span>{formatDateNoTime(date)}</span>;
+        return <span>{formatDate(date)}</span>;
       }
     },
     {
-      title: 'Start_recurring_date',
+      title: 'Start_recurring_at',
       dataIndex: 'startRecurringDate',
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDateNoTime(date)}</span>;
+        return <span>{record.status === 'active' && formatDate(date)}</span>;
       }
     },
     {
-      title: 'Next_recurring_date',
+      title: 'Next_recurring_at',
       dataIndex: 'nextRecurringDate',
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDateNoTime(date)}</span>;
+        return <span>{record.status === 'active' && formatDate(date)}</span>;
       }
     },
     {
@@ -107,9 +107,27 @@ export const TableListSubscription = ({
           case 'active':
             return <Tag color="success">Active</Tag>;
           case 'deactivated':
-            return <Tag color="red">Cancelled</Tag>;
+            return <Tag color="red">Inactive</Tag>;
           default:
             return <Tag color="default">{status}</Tag>;
+        }
+      }
+    },
+    {
+      title: 'PM_Gateway',
+      dataIndex: 'paymentGateway',
+      render(paymentGateway: string) {
+        switch (paymentGateway) {
+          case 'stripe':
+            return <Tag color="blue">Stripe</Tag>;
+          case 'bitpay':
+            return <Tag color="pink">Bitpay</Tag>;
+          case 'paypal':
+            return <Tag color="violet">Paypal</Tag>;
+          case 'ccbill':
+            return <Tag color="orange">CCbill</Tag>;
+          default:
+            return <Tag color="default">{paymentGateway}</Tag>;
         }
       }
     },

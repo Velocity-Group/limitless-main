@@ -40,7 +40,7 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
     } catch (e) {
       message.error(getResponseError(e) || 'An error occurred, please try again!');
     } finally {
-      this.setState({ submiting: true }, () => Router.push('/model/my-gallery'));
+      this.setState({ submiting: false });
     }
   }
 

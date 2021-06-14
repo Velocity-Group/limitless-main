@@ -28,13 +28,6 @@ const subscriptionSchema = new mongoose.Schema({
     default: 'stripe',
     index: true
   },
-  startRecurringDate: {
-    type: Date,
-    default: Date.now
-  },
-  nextRecurringDate: {
-    type: Date
-  },
   status: {
     type: String,
     default: SUBSCRIPTION_STATUS.ACTIVE,
@@ -42,6 +35,13 @@ const subscriptionSchema = new mongoose.Schema({
   },
   meta: {
     type: mongoose.Schema.Types.Mixed
+  },
+  startRecurringDate: {
+    type: Date,
+    default: Date.now
+  },
+  nextRecurringDate: {
+    type: Date
   },
   expiredAt: {
     type: Date,
@@ -55,14 +55,6 @@ const subscriptionSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-});
-subscriptionSchema.pre<any>('save', function preSave(next) {
-  this.updatedAt = new Date();
-  next();
-});
-subscriptionSchema.pre<any>('updateOne', function preUpdateOne(next) {
-  this.updatedAt = new Date();
-  next();
 });
 
 export const SubscriptionSchema = subscriptionSchema;

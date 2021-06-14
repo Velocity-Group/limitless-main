@@ -131,6 +131,15 @@ export class GalleryService {
       );
       dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     }
+    if (gallery.coverPhotoId) {
+      const coverPhoto = await this.fileService.findById(
+        gallery.coverPhotoId
+      );
+      dto.coverPhoto = coverPhoto ? {
+        url: coverPhoto.getUrl(),
+        thumbnails: coverPhoto.getThumbnails()
+      } : null;
+    }
     const bookmark = await this.reactionService.checkExisting(dto._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.GALLERY);
     dto.isBookMarked = !!bookmark;
     const subscribed = user && await this.subscriptionService.checkSubscribed(dto.performerId, user._id);

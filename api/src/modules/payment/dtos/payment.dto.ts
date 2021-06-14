@@ -38,7 +38,9 @@ export class IPaymentResponse {
 
   paymentResponseInfo?: any;
 
-  paymentIntentId?: string;
+  stripeInvoiceId?: string;
+
+  stripeConfirmUrl?: string;
 
   totalPrice?: number;
 
@@ -78,7 +80,9 @@ export class PaymentDto {
 
   paymentResponseInfo?: any;
 
-  paymentIntentId?: string;
+  stripeInvoiceId?: string;
+
+  stripeConfirmUrl?: string;
 
   totalPrice?: number;
 
@@ -109,7 +113,8 @@ export class PaymentDto {
           'type',
           'products',
           'paymentResponseInfo',
-          'paymentIntentId',
+          'stripeInvoiceId',
+          'stripeConfirmUrl',
           'status',
           'totalPrice',
           'originalPrice',
@@ -137,13 +142,14 @@ export class PaymentDto {
       originalPrice: this.originalPrice,
       couponInfo: this.couponInfo,
       status: this.status,
+      stripeConfirmUrl: this.stripeConfirmUrl,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
 
     const privateInfo = {
       paymentResponseInfo: this.paymentResponseInfo,
-      paymentIntentId: this.paymentIntentId
+      stripeInvoiceId: this.stripeInvoiceId
     };
     if (!includePrivateInfo) {
       return publicInfo;

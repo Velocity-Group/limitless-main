@@ -114,10 +114,8 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   async onDeleteFeed(feed: IFeed) {
     const { user } = this.props;
     const { feeds } = this.state;
-    if (user._id !== feed.fromSourceId) {
-      return message.error('Permission denied');
-    }
-    if (!window.confirm('Are you sure to delete this post?')) return undefined;
+    if (user._id !== feed.fromSourceId) return;
+    if (!window.confirm('Are you sure to delete this post?')) return;
     try {
       await feedService.delete(feed._id);
       feeds.filter((f) => f._id !== feed._id);
@@ -126,7 +124,6 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
       const error = await e;
       message.error(error?.message || 'Something went wrong, please try again later');
     }
-    return undefined;
   }
 
   async getBookmarkedPosts() {
@@ -271,42 +268,37 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         <div className="main-container">
           <Page>
             <PageHeading title="BookMarks" icon={<BookOutlined />} />
+            <div style={{ marginBottom: 25 }} />
             <Tabs
               defaultActiveKey={tab || 'feeds'}
-              style={{ padding: '0 24px' }}
               size="large"
               onChange={this.onTabsChange.bind(this)}
             >
               <Tabs.TabPane tab={<Tooltip title="Feeds"><FireOutlined /></Tooltip>} key="feeds">
-                <div className="main-container custom">
-                  <ScrollListFeed
-                    items={feeds.map((f) => f.objectInfo)}
-                    loading={loading}
-                    canLoadmore={totalFeeds > feeds.length}
-                    onDelete={this.onDeleteFeed.bind(this)}
-                    loadMore={this.handlePagechange.bind(this, 'feeds')}
-                  />
-                </div>
+                <ScrollListFeed
+                  isGrid
+                  items={feeds.map((f) => f.objectInfo)}
+                  loading={loading}
+                  canLoadmore={totalFeeds > feeds.length}
+                  onDelete={this.onDeleteFeed.bind(this)}
+                  loadMore={this.handlePagechange.bind(this, 'feeds')}
+                />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<Tooltip title="Videos"><VideoCameraOutlined /></Tooltip>} key="videos">
-                <div className="main-container custom">
-                  <ScrollListVideo
-                    items={videos.map((f) => f.objectInfo)}
-                    loading={loading}
-                    canLoadmore={totalVideos > videos.length}
-                    loadMore={this.handlePagechange.bind(this, 'videos')}
-                  />
-                </div>
+                <ScrollListVideo
+                  items={videos.map((f) => f.objectInfo)}
+                  loading={loading}
+                  canLoadmore={totalVideos > videos.length}
+                  loadMore={this.handlePagechange.bind(this, 'videos')}
+                />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<Tooltip title="Galleries"><PictureOutlined /></Tooltip>} key="galleries">
-                <div className="main-container custom">
-                  <ScrollListGallery
-                    items={galleries.map((f) => f.objectInfo)}
-                    loading={loading}
-                    canLoadmore={totalGalleries > galleries.length}
-                    loadMore={this.handlePagechange.bind(this, 'galleries')}
-                  />
-                </div>
+                <ScrollListGallery
+                  items={galleries.map((f) => f.objectInfo)}
+                  loading={loading}
+                  canLoadmore={totalGalleries > galleries.length}
+                  loadMore={this.handlePagechange.bind(this, 'galleries')}
+                />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<Tooltip title="Shop"><ShopOutlined /></Tooltip>} key="products">
                 <ScrollListProduct

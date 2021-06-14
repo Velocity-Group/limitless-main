@@ -23,6 +23,7 @@ import axios from 'axios';
 import { UserDto } from 'src/modules/user/dtos';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { UserService } from 'src/modules/user/services';
+import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel } from '../models';
 import {
@@ -204,11 +205,12 @@ export class PaymentService {
       if (plan) {
         transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.CREATED;
         transaction.paymentResponseInfo = plan;
-        transaction.paymentIntentId = plan.latest_invoice as any;
+        transaction.stripeInvoiceId = plan.latest_invoice as any;
         await transaction.save();
         await this.subscriptionService.updateSubscriptionId({
           userId: transaction.sourceId,
-          performerId: transaction.performerId
+          performerId: transaction.performerId,
+          transactionId: transaction._id
         }, plan.id);
       }
       return new PaymentDto(transaction).toResponse();
@@ -317,7 +319,7 @@ export class PaymentService {
         stripeCardId
       });
       if (data) {
-        transaction.paymentIntentId = data.id || (data.invoice && data.invoice.toString());
+        transaction.stripeInvoiceId = data.id || (data.invoice && data.invoice.toString());
         await transaction.save();
       }
       return new PaymentDto(transaction).toResponse();
@@ -445,16 +447,42 @@ export class PaymentService {
     }
   }
 
+  public async stripeSubscriptionWebhook(payload: Record<string, any>) {
+    const { data } = payload;
+    const subscriptionId = data?.object?.id;
+    const transactionId = data?.object?.metadata?.transactionId;
+    if (!subscriptionId && !transactionId) {
+      return {
+        ok: false
+      };
+    }
+    const subscription = subscriptionId && isObjectId(subscriptionId) && await this.subscriptionService.findBySubscriptionId(subscriptionId);
+    if (!subscription || subscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) return { ok: false };
+    const oldTransaction = subscription.transactionId && await this.TransactionModel.findById(subscription.transactionId);
+    if (!oldTransaction || (`${oldTransaction._id}` !== `${transactionId}`)) {
+      return {
+        ok: false
+      };
+    }
+    if (data?.object?.status !== 'active') {
+      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+      await subscription.save();
+    }
+    oldTransaction.stripeInvoiceId = data?.object?.latest_invoice;
+    await oldTransaction.save();
+    return { ok: true };
+  }
+
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data } = payload;
-    const paymentIntentId = data?.object?.invoice || data?.object?.id;
+    const stripeInvoiceId = data?.object?.invoice || data?.object?.id; // payment
     const transactionId = data?.object?.metadata?.transactionId;
-    if (!paymentIntentId && !transactionId) {
+    if (!stripeInvoiceId && !transactionId) {
       return { ok: false };
     }
-    let transaction = paymentIntentId && await this.TransactionModel.findOne({ paymentIntentId });
+    let transaction = transactionId && await this.TransactionModel.findOne({ _id: transactionId });
     if (!transaction) {
-      transaction = transactionId && await this.TransactionModel.findOne({ _id: transactionId });
+      transaction = stripeInvoiceId && await this.TransactionModel.findOne({ stripeInvoiceId });
     }
     if (!transaction) return { ok: false };
     transaction.paymentResponseInfo = payload;
@@ -478,6 +506,7 @@ export class PaymentService {
       case 'payment_intent.requires_action':
         transaction.status = PAYMENT_STATUS.REQUIRE_AUTHENTICATION;
         redirectUrl = data?.object?.next_action?.use_stripe_sdk?.stripe_js || data?.object?.next_action?.redirect_to_url?.url || '/user/payment-history';
+        transaction.stripeConfirmUrl = redirectUrl;
         break;
       case 'payment_intent.succeeded':
         transaction.status = PAYMENT_STATUS.SUCCESS;

@@ -54,7 +54,17 @@ export class PaymentWebhookController {
   async stripePaymentCallhook(
     @Body() payload: Record<string, string>
   ): Promise<DataResponse<any>> {
-    const info = await this.paymentService.stripePaymentWebhook(payload);
+    const { type } = payload; // event type
+    if (!type.includes('payment_intent') || !type.includes('customer.subscription')) {
+      return DataResponse.ok(false);
+    }
+    let info;
+    if (type.includes('customer.subscription')) {
+      info = await this.paymentService.stripeSubscriptionWebhook(payload);
+    }
+    if (type.includes('payment_intent')) {
+      info = await this.paymentService.stripePaymentWebhook(payload);
+    }
     return DataResponse.ok(info);
   }
 

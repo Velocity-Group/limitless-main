@@ -100,7 +100,7 @@ export class SubscriptionService {
   //   }
   // }
 
-  public async updateSubscriptionId({ userId, performerId }, subscriptionId: string) {
+  public async updateSubscriptionId({ userId, performerId, transactionId }, subscriptionId: string) {
     let subscription = await this.subscriptionModel.findOne({ userId, performerId });
     if (!subscription) {
       subscription = await this.subscriptionModel.create({
@@ -109,7 +109,8 @@ export class SubscriptionService {
         expiredAt: new Date(),
         status: SUBSCRIPTION_STATUS.DEACTIVATED,
         userId,
-        performerId
+        performerId,
+        transactionId
       });
     }
     subscription.subscriptionId = subscriptionId;

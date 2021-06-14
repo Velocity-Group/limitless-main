@@ -3,6 +3,7 @@ import React from 'react';
 import { Table, Tag } from 'antd';
 import { ITransaction } from 'src/interfaces';
 import { formatDate } from '@lib/date';
+import Link from 'next/link';
 
 interface IProps {
   dataSource: ITransaction[];
@@ -124,6 +125,15 @@ const PaymentTableList = ({
       sorter: true,
       render(date: Date) {
         return <span>{formatDate(date)}</span>;
+      }
+    },
+    {
+      title: 'Actions',
+      render(record) {
+        if (record.status === 'require_authentication' && record.stripeConfirmUrl) {
+          return <Link href={record.stripeConfirmUrl}><a>Confirm</a></Link>;
+        }
+        return null;
       }
     }
   ];

@@ -47,7 +47,9 @@ export class PaymentTransactionModel extends Document {
 
   paymentResponseInfo: any;
 
-  paymentIntentId: string;
+  stripeInvoiceId: string;
+
+  stripeConfirmUrl: string;
 
   status: string;
 

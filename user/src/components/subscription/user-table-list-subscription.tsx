@@ -1,6 +1,6 @@
 import { Table, Tag } from 'antd';
 import { ISubscription } from 'src/interfaces';
-import { formatDateNoTime } from '@lib/date';
+import { formatDate } from '@lib/date';
 
 interface IProps {
   dataSource: ISubscription[];
@@ -46,22 +46,22 @@ export const TableListSubscription = ({
     {
       title: 'Expired Date',
       dataIndex: 'expiredAt',
-      render(date: Date) {
-        return <span>{formatDateNoTime(date)}</span>;
+      render(date: Date, record) {
+        return <span>{record.status === 'active' && formatDate(date)}</span>;
       }
     },
     {
       title: 'Start Recurring Date',
       dataIndex: 'startRecurringDate',
-      render(date: Date) {
-        return <span>{formatDateNoTime(date)}</span>;
+      render(date: Date, record) {
+        return <span>{record.status === 'active' && formatDate(date)}</span>;
       }
     },
     {
       title: 'Next Recurring Date',
       dataIndex: 'nextRecurringDate',
-      render(date: Date) {
-        return <span>{formatDateNoTime(date)}</span>;
+      render(date: Date, record) {
+        return <span>{record.status === 'active' && formatDate(date)}</span>;
       }
     },
     {
@@ -69,7 +69,25 @@ export const TableListSubscription = ({
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
-        return <span>{formatDateNoTime(date)}</span>;
+        return <span>{formatDate(date)}</span>;
+      }
+    },
+    {
+      title: 'PM_Gateway',
+      dataIndex: 'paymentGateway',
+      render(paymentGateway: string) {
+        switch (paymentGateway) {
+          case 'stripe':
+            return <Tag color="blue">Stripe</Tag>;
+          case 'bitpay':
+            return <Tag color="pink">Bitpay</Tag>;
+          case 'paypal':
+            return <Tag color="violet">Paypal</Tag>;
+          case 'ccbill':
+            return <Tag color="orange">CCbill</Tag>;
+          default:
+            return <Tag color="default">{paymentGateway}</Tag>;
+        }
       }
     },
     {
