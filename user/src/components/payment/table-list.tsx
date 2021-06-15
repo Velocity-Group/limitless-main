@@ -22,7 +22,7 @@ const PaymentTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Transaction_ID',
+      title: 'ID',
       dataIndex: '_id',
       key: '_id',
       render(id) {
@@ -120,8 +120,8 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Date',
-      dataIndex: 'createdAt',
+      title: 'Last_updated_at',
+      dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
         return <span>{formatDate(date)}</span>;

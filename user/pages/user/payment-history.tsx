@@ -37,7 +37,7 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
       pageSize: 10,
       current: 1
     },
-    sortBy: 'createdAt',
+    sortBy: 'updatedAt',
     sort: 'desc',
     filter: {}
   };
@@ -50,7 +50,7 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
     const { pagination: paginationVal } = this.state;
     await this.setState({
       pagination: { ...paginationVal, current: pagination.current },
-      sortBy: sorter.field || 'createdAt',
+      sortBy: sorter.field || 'updatedAt',
       // eslint-disable-next-line no-nested-ternary
       sort: sorter.order
         ? sorter.order === 'descend'
