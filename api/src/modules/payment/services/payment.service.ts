@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import {
   Injectable, Inject, forwardRef, BadRequestException, HttpException, ForbiddenException
 } from '@nestjs/common';
@@ -158,7 +159,7 @@ export class PaymentService {
       target: PAYMENT_TARGET_TYPE.PERFORMER,
       targetId: performerId,
       performerId,
-      type: subscriptionType,
+      type: subscriptionType === SUBSCRIPTION_TYPE.MONTHLY ? PAYMENT_TYPE.MONTHLY_SUBSCRIPTION : PAYMENT_TYPE.YEARLY_SUBSCRIPTION,
       originalPrice: price,
       totalPrice: price,
       products: [{
@@ -173,36 +174,6 @@ export class PaymentService {
       couponInfo: null,
       status: PAYMENT_STATUS.SUCCESS,
       paymentResponseInfo: payload
-    });
-  }
-
-  public async createStripeRenewalSubscriptionPaymentTransaction(subscription: SubscriptionModel, payload: any, price: number) {
-    const { userId, performerId, subscriptionType } = subscription;
-    const performer = await this.performerService.findById(performerId);
-    if (!performer) return null;
-    return this.TransactionModel.create({
-      paymentGateway: 'stripe',
-      source: 'user',
-      sourceId: userId,
-      target: PAYMENT_TARGET_TYPE.PERFORMER,
-      targetId: performerId,
-      performerId,
-      type: subscriptionType,
-      originalPrice: parseFloat(price.toFixed(2)),
-      totalPrice: parseFloat(price.toFixed(2)),
-      products: [{
-        price: parseFloat(price.toFixed(2)),
-        quantity: 1,
-        name: `${subscriptionType} subscription ${performer?.name || performer?.username}`,
-        description: `recurring ${subscriptionType} subscription ${performer?.name || performer?.username}`,
-        productId: performer._id,
-        productType: PAYMENT_TARGET_TYPE.PERFORMER,
-        performerId: performer._id
-      }],
-      couponInfo: null,
-      status: PAYMENT_STATUS.CREATED,
-      paymentResponseInfo: payload,
-      stripeInvoiceId: payload?.data?.object?.latest_invoice
     });
   }
 
@@ -488,17 +459,20 @@ export class PaymentService {
     if (data?.object?.status !== 'active') {
       subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
       await subscription.save();
-      return { ok: true };
     }
-    const price = data?.object?.items?.data[0]?.price?.unit_amount ? (data?.object?.items?.data[0]?.price?.unit_amount / 100) : 0;
-    await this.createStripeRenewalSubscriptionPaymentTransaction(subscription, payload, price);
+    const existedTransaction = transactionId && await this.TransactionModel.findById(transactionId);
+    if (existedTransaction) {
+      existedTransaction.stripeInvoiceId = data?.object?.latest_invoice;
+      existedTransaction.updatedAt = new Date();
+      await existedTransaction.save();
+    }
     return { ok: true };
   }
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data, livemode } = payload;
-    const stripeInvoiceId = data?.object?.invoice || data?.object?.id; // payment
-    const transactionId = data?.object?.metadata?.transactionId; // single payment
+    const transactionId = data?.object?.metadata?.transactionId;
+    const stripeInvoiceId = data?.object?.invoice || data?.object?.id;
     if (!stripeInvoiceId && !transactionId) {
       return { ok: false };
     }
