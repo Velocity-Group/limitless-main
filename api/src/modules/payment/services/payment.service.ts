@@ -23,7 +23,6 @@ import axios from 'axios';
 import { UserDto } from 'src/modules/user/dtos';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { UserService } from 'src/modules/user/services';
-import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel } from '../models';
 import {
@@ -147,13 +146,13 @@ export class PaymentService {
     });
   }
 
-  public async createRenewalSubscriptionPaymentTransaction(subscription: SubscriptionModel, payload: any, paymentGateway = 'stripe') {
+  public async createCCbillRenewalSubscriptionPaymentTransaction(subscription: SubscriptionModel, payload: any) {
     const price = payload.billedAmount || payload.accountingAmount;
     const { userId, performerId, subscriptionType } = subscription;
     const performer = await this.performerService.findById(performerId);
     if (!performer) return null;
     return this.TransactionModel.create({
-      paymentGateway,
+      paymentGateway: 'ccbill',
       source: 'user',
       sourceId: userId,
       target: PAYMENT_TARGET_TYPE.PERFORMER,
@@ -174,6 +173,36 @@ export class PaymentService {
       couponInfo: null,
       status: PAYMENT_STATUS.SUCCESS,
       paymentResponseInfo: payload
+    });
+  }
+
+  public async createStripeRenewalSubscriptionPaymentTransaction(subscription: SubscriptionModel, payload: any, price: number) {
+    const { userId, performerId, subscriptionType } = subscription;
+    const performer = await this.performerService.findById(performerId);
+    if (!performer) return null;
+    return this.TransactionModel.create({
+      paymentGateway: 'stripe',
+      source: 'user',
+      sourceId: userId,
+      target: PAYMENT_TARGET_TYPE.PERFORMER,
+      targetId: performerId,
+      performerId,
+      type: subscriptionType,
+      originalPrice: parseFloat(price.toFixed(2)),
+      totalPrice: parseFloat(price.toFixed(2)),
+      products: [{
+        price: parseFloat(price.toFixed(2)),
+        quantity: 1,
+        name: `${subscriptionType} subscription ${performer?.name || performer?.username}`,
+        description: `recurring ${subscriptionType} subscription ${performer?.name || performer?.username}`,
+        productId: performer._id,
+        productType: PAYMENT_TARGET_TYPE.PERFORMER,
+        performerId: performer._id
+      }],
+      couponInfo: null,
+      status: PAYMENT_STATUS.CREATED,
+      paymentResponseInfo: payload,
+      stripeInvoiceId: payload?.data?.object?.latest_invoice
     });
   }
 
@@ -362,7 +391,7 @@ export class PaymentService {
     if (!subscription || subscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) {
       return { ok: false };
     }
-    const transaction = await this.createRenewalSubscriptionPaymentTransaction(subscription, payload);
+    const transaction = await this.createCCbillRenewalSubscriptionPaymentTransaction(subscription, payload);
     await this.queueEventService.publish(
       new QueueEvent({
         channel: TRANSACTION_SUCCESS_CHANNEL,
@@ -452,31 +481,24 @@ export class PaymentService {
     const subscriptionId = data?.object?.id;
     const transactionId = data?.object?.metadata?.transactionId;
     if (!subscriptionId && !transactionId) {
-      return {
-        ok: false
-      };
+      return { ok: false };
     }
-    const subscription = subscriptionId && isObjectId(subscriptionId) && await this.subscriptionService.findBySubscriptionId(subscriptionId);
-    if (!subscription || subscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) return { ok: false };
-    const oldTransaction = subscription.transactionId && await this.TransactionModel.findById(subscription.transactionId);
-    if (!oldTransaction || (`${oldTransaction._id}` !== `${transactionId}`)) {
-      return {
-        ok: false
-      };
-    }
+    const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
+    if (!subscription) return { ok: false };
     if (data?.object?.status !== 'active') {
       subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
       await subscription.save();
+      return { ok: true };
     }
-    oldTransaction.stripeInvoiceId = data?.object?.latest_invoice;
-    await oldTransaction.save();
+    const price = data?.object?.items?.data[0]?.price?.unit_amount ? (data?.object?.items?.data[0]?.price?.unit_amount / 100) : 0;
+    await this.createStripeRenewalSubscriptionPaymentTransaction(subscription, payload, price);
     return { ok: true };
   }
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
     const { type, data, livemode } = payload;
     const stripeInvoiceId = data?.object?.invoice || data?.object?.id; // payment
-    const transactionId = data?.object?.metadata?.transactionId;
+    const transactionId = data?.object?.metadata?.transactionId; // single payment
     if (!stripeInvoiceId && !transactionId) {
       return { ok: false };
     }
@@ -526,7 +548,7 @@ export class PaymentService {
       default: break;
     }
     await transaction.save();
-    type.includes('payment_intent') && redirectUrl && !livemode && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
+    redirectUrl && !livemode && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { ok: true };
   }
 
