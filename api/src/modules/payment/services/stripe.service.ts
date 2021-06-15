@@ -134,8 +134,9 @@ export class StripeService {
         productType
       });
       if (performerProduct) return { ...performerProduct, id: performerProduct.stripeProductId };
+      const subscriptionType = productType === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 'Monthly Subscription' : 'Yearly Subscription';
       const product = await stripe.products.create({
-        name: `Subcription ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
+        name: `${subscriptionType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
         description: `${productType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
       });
       if (!product) throw new HttpException('Stripe configuration error, please try again later', 400);
