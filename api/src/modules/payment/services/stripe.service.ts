@@ -133,14 +133,23 @@ export class StripeService {
         sourceId: performer._id,
         productType
       });
-      if (performerProduct) return { ...performerProduct, id: performerProduct.stripeProductId };
+      if (performerProduct) return performerProduct;
       const subscriptionType = productType === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 'Monthly Subscription' : 'Yearly Subscription';
-      const product = await stripe.products.create({
+      const stripeProduct = await stripe.products.create({
         name: `${subscriptionType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
         description: `${productType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`
       });
-      if (!product) throw new HttpException('Stripe configuration error, please try again later', 400);
-      return product;
+      if (!stripeProduct) throw new HttpException('Stripe configuration error, please try again later', 400);
+      const newProduct = await this.ProductModel.create({
+        source: 'performer',
+        sourceId: performer._id,
+        productType,
+        name: `${subscriptionType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
+        description: `${productType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
+        stripeProductId: stripeProduct.id,
+        metaData: stripeProduct
+      });
+      return newProduct;
     } catch (e) {
       throw new HttpException(e?.raw?.message || e?.response || 'Create a subscription plan on Stripe error, please try again later', 400);
     }
@@ -176,7 +185,7 @@ export class StripeService {
             price_data: {
               currency: 'usd',
               unit_amount: 100 * price,
-              product: product.id,
+              product: product.stripeProductId,
               recurring: {
                 interval: 'day',
                 interval_count: transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 365 : 30
