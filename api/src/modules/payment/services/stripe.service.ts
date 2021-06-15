@@ -149,7 +149,7 @@ export class StripeService {
   public async createSubscriptionPlan(transaction: PaymentTransactionModel, performer: PerformerDto, user: UserDto) {
     try {
       const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
-      if (!connectAccount) throw new HttpException('This model hasn\'t connect with Stripe', 404);
+      if (!connectAccount) throw new HttpException('This model hasn\'t connected with Stripe', 404);
       const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
