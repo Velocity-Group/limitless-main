@@ -25,7 +25,6 @@ export default function ConversationListItem(props: IProps) {
       <div className="conversation-info">
         <h1 className="conversation-title">{recipientInfo?.name || recipientInfo?.username || 'N/A'}</h1>
         <p className="conversation-snippet">{lastMessage}</p>
-        {/* <p className="conversation-time">{moment(lastMessageCreatedAt ? lastMessageCreatedAt : updatedAt).fromNow()}</p> */}
       </div>
       <Badge
         className="notification-badge"

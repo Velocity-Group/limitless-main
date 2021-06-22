@@ -211,9 +211,7 @@ export class ConversationService {
       })
       : [];
     if (sender.source === 'user') {
-      performers = recipientIds.length
-        ? await this.performerService.findByIds(recipientIds)
-        : [];
+      performers = recipientIds.length ? await this.performerService.findByIds(recipientIds) : [];
       if (performers.length) {
         const pIds = performers.map((p) => p._id);
         subscriptions = await this.subscriptionService.findSubscriptionList({

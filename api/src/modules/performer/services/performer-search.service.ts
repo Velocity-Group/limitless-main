@@ -285,6 +285,13 @@ export class PerformerSearchService {
     if (req.country) {
       query.country = { $regex: req.country };
     }
+    if (req.isFreeSubscription) {
+      if (typeof req.isFreeSubscription === 'string') {
+        query.isFreeSubscription = req.isFreeSubscription === 'true';
+      } else {
+        query.isFreeSubscription = req.isFreeSubscription;
+      }
+    }
     const data = await this.performerModel.aggregate([
       { $match: query },
       { $sample: { size: 99 } }

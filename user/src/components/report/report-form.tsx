@@ -50,9 +50,9 @@ export class ReportForm extends PureComponent<IProps> {
           </div>
         </div>
         <div className="info-body">
-          <div style={{ margin: '0 0 20px', textAlign: 'center' }}>
-            <p>Tell us why you report?</p>
-            <Input.TextArea minLength={20} maxLength={150} onChange={this.onChangeValue.bind(this)} rows={3} />
+          <div style={{ marginBottom: '15px', width: '100%', textAlign: 'center' }}>
+            <p>Report post</p>
+            <Input.TextArea placeholder="Tell us why you report?" minLength={20} maxLength={150} onChange={this.onChangeValue.bind(this)} rows={3} />
           </div>
         </div>
         <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish(reason)}>SUBMIT</Button>

@@ -123,6 +123,7 @@ export class ProductService {
       product.imageId = imageFile._id;
     }
     if (updater) product.updatedBy = updater._id;
+    product.updatedAt = new Date();
     await product.save();
 
     deletedFileIds.length

@@ -326,9 +326,8 @@ export class PayoutRequestService {
       request.status = STATUSES.DONE;
       request.updatedAt = new Date();
       await request.save();
+
       const oldStatus = request.status;
-      request.updatedAt = new Date();
-      await request.save();
 
       const event: QueueEvent = {
         channel: PAYOUT_REQUEST_CHANEL,

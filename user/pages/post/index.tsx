@@ -10,7 +10,7 @@ import {
   IFeed, IUIConfig, IUser
 } from '@interfaces/index';
 import FeedCard from '@components/post/post-card';
-import { FireOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import Router from 'next/router';
 import { redirectToErrorPage } from '@redux/system/actions';
 
@@ -100,9 +100,9 @@ class PostDetails extends PureComponent<IProps> {
           <Page>
             <div className="page-heading">
               <a aria-hidden onClick={() => Router.back()}>
-                <FireOutlined />
+                <ArrowLeftOutlined />
                 {' '}
-                {`${performer?.name} post`}
+                Back
               </a>
             </div>
             <div className="main-container custom">
