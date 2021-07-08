@@ -41,6 +41,8 @@ export class GalleryDto {
 
   isBought: boolean;
 
+  numOfItems: number;
+
   stats: {
     likes: number;
     bookmarks: number;
@@ -70,7 +72,8 @@ export class GalleryDto {
         'isBookMarked',
         'isSubscribed',
         'isBought',
-        'stats'
+        'stats',
+        'numOfItems'
       ])
     );
   }

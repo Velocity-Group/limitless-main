@@ -149,6 +149,15 @@ export class GalleryService {
     return dto;
   }
 
+  public async updatePhotoStats(id: string | ObjectId, num = 1) {
+    return this.galleryModel.findOneAndUpdate(
+      { _id: id },
+      {
+        $inc: { numOfItems: num }
+      }
+    );
+  }
+
   public async downloadZipPhotos(galleryId: string | ObjectId, user: UserDto) {
     const gallery = await this.galleryModel.findOne({ _id: galleryId });
     if (!gallery) {

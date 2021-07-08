@@ -73,11 +73,11 @@ const PayoutRequestForm = ({
         </Space>
       </div>
       <Form.Item label="Requested amount of tokens" name="requestTokens">
-        <InputNumber min={1} onChange={(val) => setToken(val)} max={statsPayout?.remainingUnpaidTokens} />
+        <InputNumber style={{ width: '100%' }} disabled={payout && payout.status === 'done'} min={1} onChange={(val) => setToken(val)} max={statsPayout?.remainingUnpaidTokens} />
       </Form.Item>
       <p className="error-color">{`Conversion rate of tokens to dollars: $${(tokenConversionRate * tokens).toFixed(2)}`}</p>
       <Form.Item label="Note to Admin" name="requestNote">
-        <Input.TextArea placeholder="Text something to admin here" rows={3} />
+        <Input.TextArea disabled={payout && payout.status === 'done'} placeholder="Text something to admin here" rows={3} />
       </Form.Item>
       {payout?.adminNote && (
       <Form.Item label="Admin noted">
