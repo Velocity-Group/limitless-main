@@ -118,7 +118,7 @@ export class VideoService {
       }).lean();
       await Promise.all(videos.map((video) => {
         const v = new VideoDto(video);
-        this.PerformerVideoModel.updateOne(
+        this.PerformerVideoModel.findOneAndUpdate(
           {
             _id: v._id
           },
@@ -455,7 +455,7 @@ export class VideoService {
   }
 
   public async increaseView(id: string | ObjectId) {
-    return this.PerformerVideoModel.updateOne(
+    return this.PerformerVideoModel.findOneAndUpdate(
       { _id: id },
       {
         $inc: { 'stats.views': 1 }
@@ -465,7 +465,7 @@ export class VideoService {
   }
 
   public async increaseComment(id: string | ObjectId, num = 1) {
-    return this.PerformerVideoModel.updateOne(
+    return this.PerformerVideoModel.findOneAndUpdate(
       { _id: id },
       {
         $inc: { 'stats.comments': num }
@@ -475,7 +475,7 @@ export class VideoService {
   }
 
   public async increaseLike(id: string | ObjectId, num = 1) {
-    return this.PerformerVideoModel.updateOne(
+    return this.PerformerVideoModel.findOneAndUpdate(
       { _id: id },
       {
         $inc: { 'stats.likes': num }
@@ -485,7 +485,7 @@ export class VideoService {
   }
 
   public async increaseFavourite(id: string | ObjectId, num = 1) {
-    return this.PerformerVideoModel.updateOne(
+    return this.PerformerVideoModel.findOneAndUpdate(
       { _id: id },
       {
         $inc: { 'stats.bookmarks': num }

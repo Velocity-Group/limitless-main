@@ -712,6 +712,8 @@ export class PerformerService {
       itemType: REF_TYPE.PERFORMER
     });
 
+    await this.fileService.queueProcessVideo(file._id);
+
     return file;
   }
 

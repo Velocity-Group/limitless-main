@@ -131,19 +131,19 @@ export class PhotoService {
 
     const photo = event.data as PhotoDto;
     if (!photo.galleryId) return;
-
-    const defaultCover = await this.photoModel.findOne({
-      galleryId: photo.galleryId,
-      status: PHOTO_STATUS.ACTIVE
-    });
-    await this.galleryService.updateCover(photo.galleryId, defaultCover ? defaultCover._id : null);
-
+    await this.galleryService.updatePhotoStats(photo.galleryId);
     // update cover field in the photo list
     const photoCover = await this.photoModel.findOne({
       galleryId: photo.galleryId,
       isGalleryCover: true
     });
+    if (photoCover) return;
+    const defaultCover = await this.photoModel.findOne({
+      galleryId: photo.galleryId,
+      status: PHOTO_STATUS.ACTIVE
+    });
     if (!defaultCover || (photoCover && photoCover._id.toString() === defaultCover.toString())) return;
+    await this.galleryService.updateCover(photo.galleryId, defaultCover ? defaultCover._id : null);
     await this.photoModel.updateOne(
       { _id: defaultCover._id },
       {
