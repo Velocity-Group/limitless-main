@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-globals */
 import Head from 'next/head';
 import { PureComponent } from 'react';
 import {
@@ -6,113 +5,113 @@ import {
 } from 'antd';
 import { feedService } from '@services/index';
 import { SearchFilter } from '@components/common/search-filter';
-import Page from '@components/common/layout/page';
 import Link from 'next/link';
 import { connect } from 'react-redux';
-import { IUIConfig, IUser } from '@interfaces/index';
-import ScrollListFeed from '@components/post/scroll-list';
-import { PlusCircleOutlined, FireOutlined } from '@ant-design/icons';
+import { IUIConfig } from 'src/interfaces/index';
+import FeedList from '@components/post/table-list';
+import { PlusCircleOutlined } from '@ant-design/icons';
 
 interface IProps {
   ui: IUIConfig;
-  user: IUser;
 }
 
 class PostListing extends PureComponent<IProps> {
   static authenticate = true;
 
-  static onlyPerformer = true;
-
   state = {
-    canLoadMore: false,
-    list: [] as any,
-    limit: 10,
-    currentPage: 1,
-    filter: {} as any,
-    sortBy: 'createdAt',
+    items: [],
+    loading: false,
+    pagination: {
+      pageSize: 10,
+      current: 1,
+      total: 0
+    } as any,
     sort: 'desc',
-    loading: false
+    sortBy: 'createdAt',
+    filter: {}
   };
 
   componentDidMount() {
-    this.search(1);
+    this.getData();
+  }
+
+  async handleTabChange(data) {
+    const { pagination } = this.state;
+    await this.setState({
+      pagination: { ...pagination, current: data.current }
+    });
+    this.getData();
   }
 
   async handleFilter(filter) {
-    await this.setState({ filter });
-    this.search();
+    const { pagination } = this.state;
+    await this.setState({ filter, pagination: { ...pagination, current: 1 } });
+    this.getData();
   }
 
-  async search(page = 1) {
-    const {
-      filter, limit, sortBy, sort
-    } = this.state;
+  async getData() {
     try {
+      const {
+        filter, sort, sortBy, pagination
+      } = this.state;
       await this.setState({ loading: true });
       const resp = await feedService.search({
         ...filter,
-        limit,
-        offset: (page - 1) * limit,
         sort,
-        sortBy
+        sortBy,
+        limit: pagination.pageSize,
+        offset: (pagination.current - 1) * pagination.pageSize
       });
       await this.setState({
-        list: resp.data.data,
-        currentPage: page,
-        canLoadMore: resp.data.total > resp.data.data * page
+        items: resp.data.data,
+        pagination: { ...pagination, total: resp.data.total }
       });
-    } catch (e) {
-      message.error('An error occurred, please try again!');
+    } catch (error) {
+      const err = await error;
+      message.error(err?.message || 'An error occured. Please try again.');
     } finally {
       this.setState({ loading: false });
     }
   }
 
-  async loadMore() {
-    const {
-      currentPage
-    } = this.state;
-    await this.setState({ currentPage: currentPage + 1 });
-    this.search(currentPage);
-  }
-
   async deleteFeed(feed) {
-    const { list } = this.state;
-    if (!confirm('Are you sure you want to delete this video?')) {
-      return false;
+    if (!window.confirm('All earnings are related to this post will be refunded. Are you sure to remove?')) {
+      return;
     }
     try {
       await feedService.delete(feed._id);
-      const newList = list.filter((f) => f._id !== feed._id);
-      await this.setState({ list: newList });
-      message.success('Deleted post successfully!');
+      message.success('Remove success');
+      this.getData();
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
     }
-    return undefined;
   }
 
   render() {
-    const { list, loading, canLoadMore } = this.state;
+    const { items, loading, pagination } = this.state;
     const { ui } = this.props;
     const type = [
       {
         key: '',
-        text: 'All posts'
+        text: 'All type'
       },
       {
         key: 'text',
-        text: 'Text posts'
+        text: 'Text'
       },
       {
         key: 'video',
-        text: 'Video posts'
+        text: 'Video'
       },
       {
         key: 'photo',
-        text: 'Photo posts'
+        text: 'Photo'
       }
+      // {
+      //   key: 'audio',
+      //   text: 'Audio'
+      // }
     ];
     return (
       <Layout>
@@ -124,47 +123,40 @@ class PostListing extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>
-                <FireOutlined />
+          <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>My Posts</span>
+            <Link href="/my-post/create">
+              <a>
                 {' '}
-                My Posts
-              </span>
-              <Link href="/model/my-post/create">
-                <a>
-                  {' '}
-                  <PlusCircleOutlined />
-                  {' '}
-                  New Post
-                </a>
-              </Link>
-            </div>
-            <div>
-              <SearchFilter
-                onSubmit={this.handleFilter.bind(this)}
-                type={type}
-                searchWithKeyword
-              />
-            </div>
-            <div className="main-container custom">
-              <ScrollListFeed
-                items={list}
-                loading={loading}
-                canLoadmore={canLoadMore}
-                loadMore={this.loadMore.bind(this)}
-                onDelete={this.deleteFeed.bind(this)}
-              />
-            </div>
-
-          </Page>
+                <PlusCircleOutlined />
+                {' '}
+                New Post
+              </a>
+            </Link>
+          </div>
+          <div style={{ marginBottom: 25 }}>
+            <SearchFilter
+              onSubmit={this.handleFilter.bind(this)}
+              type={type}
+              searchWithKeyword
+              dateRange
+            />
+          </div>
+          <div style={{ marginBottom: 15 }} />
+          <FeedList
+            feeds={items}
+            total={pagination.total}
+            pageSize={pagination.pageSize}
+            searching={loading}
+            onChange={this.handleTabChange.bind(this)}
+            onDelete={this.deleteFeed.bind(this)}
+          />
         </div>
       </Layout>
     );
   }
 }
 const mapStates = (state) => ({
-  ui: { ...state.ui },
-  user: { ...state.user.current }
+  ui: { ...state.ui }
 });
 export default connect(mapStates)(PostListing);

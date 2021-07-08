@@ -35,7 +35,7 @@ export class UpdatePerformerStatusListener {
         subject: 'Account approval',
         to: email,
         data: { name },
-        template: 'approved-performer-account.html'
+        template: 'approved-performer-account'
       });
     }
     return true;

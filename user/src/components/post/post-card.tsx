@@ -381,7 +381,7 @@ class FeedCard extends Component<IProps> {
           </a>
         </Menu.Item> */}
         {user._id === feed.fromSourceId && <Divider style={{ margin: '10px 0' }} />}
-        {user._id === feed.fromSourceId && <Menu.Item key={`delete_post_${feed._id}`}><a aria-hidden onClick={handleDelete.bind(this, feed)}>Delete post</a></Menu.Item>}
+        {user._id === feed.fromSourceId && <Menu.Item key={`delete_post_${feed._id}`}><a aria-hidden onClick={handleDelete.bind(this, feed)}>De-active post</a></Menu.Item>}
       </Menu>
     );
     const dropdown = (

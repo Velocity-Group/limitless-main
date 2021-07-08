@@ -47,7 +47,6 @@ interface IProps {
   languages: ILangguges[];
   phoneCodes?: IPhoneCodes[];
   categories?: IPerformerCategory[];
-  ref?: Function;
   heights?: IHeight[];
   weights?: IWeight[];
   avatarUrl?: string;

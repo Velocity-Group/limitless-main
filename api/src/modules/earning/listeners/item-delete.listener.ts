@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 import { QueueEvent, QueueEventService } from 'src/kernel';
 import { Injectable, Inject } from '@nestjs/common';
@@ -17,6 +18,8 @@ import { PaymentTokenModel } from 'src/modules/purchased-item/models';
 import { MESSAGE_CHANNEL } from 'src/modules/message/constants';
 import { MessageModel } from 'src/modules/message/models';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
+import { USER_MODEL_PROVIDER } from 'src/modules/user/providers';
+import { UserModel } from 'src/modules/user/models';
 import { EARNING_MODEL_PROVIDER } from '../providers/earning.provider';
 import { EarningModel } from '../models/earning.model';
 
@@ -30,6 +33,8 @@ export class HandleDeleteItemListener {
     private readonly earningModel: Model<EarningModel>,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>,
+    @Inject(USER_MODEL_PROVIDER)
+    private readonly userModel: Model<UserModel>,
     @Inject(PAYMENT_TOKEN_MODEL_PROVIDER)
     private readonly paymentTokenModel: Model<PaymentTokenModel>,
     private readonly queueEventService: QueueEventService,
@@ -68,18 +73,14 @@ export class HandleDeleteItemListener {
       const earnings = await this.earningModel.find({
         _id: { $in: transactionIds }
       });
-      await Promise.all([
-        this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
-        earnings.length > 0 && earnings.forEach(async (earning) => {
-          // refund token to user
-          await this.performerModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
-          // reduce performer balance
-          await this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
-          // remove earning;
-          await earning.remove();
-        })
-      ]);
-      // TODO mailer
+      await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
+      for (const earning of earnings) {
+        await this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
+        // reduce performer balance
+        await this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
+        // remove earning;
+        await earning.remove();
+      }
     }
   }
 

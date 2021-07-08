@@ -83,14 +83,14 @@ export class PasswordController {
       throw new AccountNotFoundxception();
     }
     const [authUser, authPerformer] = await Promise.all([
-      this.authService.findBySource({
+      user && this.authService.findBySource({
         source: 'user',
         sourceId: user._id,
         type: 'email'
       }),
-      this.authService.findBySource({
+      performer && this.authService.findBySource({
         source: 'performer',
-        sourceId: user._id,
+        sourceId: performer._id,
         type: 'email'
       })
     ]);
@@ -99,12 +99,12 @@ export class PasswordController {
       throw new AccountNotFoundxception();
     }
 
-    authUser && await this.authService.forgot(authUser, {
+    authUser && user && user.email && await this.authService.forgot(authUser, {
       _id: user._id,
       email: user.email
     });
 
-    authPerformer && await this.authService.forgot(authPerformer, {
+    authPerformer && performer && performer.email && await this.authService.forgot(authPerformer, {
       _id: performer._id,
       email: performer.email
     });

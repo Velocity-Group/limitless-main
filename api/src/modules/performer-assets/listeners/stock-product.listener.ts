@@ -77,7 +77,7 @@ export class StockProductListener {
           transaction,
           digitalLink
         },
-        template: 'send-user-digital-product.html'
+        template: 'send-user-digital-product'
       });
     }
   }

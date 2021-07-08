@@ -5,7 +5,7 @@
 /* eslint-disable no-await-in-loop */
 import { PureComponent } from 'react';
 import {
-  Upload, message, Button, Tooltip,
+  Upload, message, Button, Tooltip, Select,
   Input, Form, InputNumber, Switch, Progress
 } from 'antd';
 import {
@@ -111,11 +111,9 @@ export default class FeedForm extends PureComponent<IProps> {
           fileItem._id = resp.data._id;
         } catch (e) {
           message.error(`File ${fileItem.name} error!`);
-        } finally {
-          this.setState({ uploading: false, fileIds: newFileIds });
-          this.forceUpdate();
         }
       }
+      this.setState({ uploading: false, fileIds: newFileIds });
     }
   }
 
@@ -175,8 +173,7 @@ export default class FeedForm extends PureComponent<IProps> {
     const { fileList, fileIds } = this.state;
     fileList.splice(fileList.findIndex((f) => (f._id ? f._id === file._id : f.uid === file.uid)), 1);
     file._id && fileIds.splice(fileIds.findIndex((id) => id === file._id), 1);
-    await this.setState({ fileList, fileIds });
-    this.forceUpdate();
+    this.setState({ fileList, fileIds });
   }
 
   async beforeUpload(file, fileList) {
@@ -208,11 +205,9 @@ export default class FeedForm extends PureComponent<IProps> {
           newFile._id = resp.data._id;
         } catch (e) {
           message.error(`File ${newFile.name} error!`);
-        } finally {
-          await this.setState({ uploading: false, fileIds: newFileIds });
-          this.forceUpdate();
         }
       }
+      this.setState({ uploading: false, fileIds: newFileIds });
     }
   }
 
@@ -355,12 +350,6 @@ export default class FeedForm extends PureComponent<IProps> {
               </span>
             </div>
           </Form.Item>
-          {/* {['video', 'photo'].includes(feed?.type || type) && (
-            <Form.Item name="tagline">
-              <Input className="feed-input" placeholder="Add a tagline here" />
-            </Form.Item>
-          )} */}
-
           {addPoll
               && (
                 <div className="poll-form">
@@ -416,6 +405,7 @@ export default class FeedForm extends PureComponent<IProps> {
               <InputNumber min={1} />
             </Form.Item>
           )}
+          s
           {thumbnail && (
           <Form.Item label="Thumbnail">
             <img alt="thumbnail" src={thumbnail} width="100px" />
@@ -455,7 +445,13 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload files"><Button type="primary"><FileAddOutlined /></Button></Tooltip>
+                <Tooltip title="Click to upload files">
+                  <Button type="primary">
+                    <FileAddOutlined />
+                    {' '}
+                    Add files
+                  </Button>
+                </Tooltip>
               </Upload>,
               <Upload
                 key="upload_thumb"
@@ -467,7 +463,13 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload thumbnail"><Button type="primary" style={{ marginLeft: 15 }}><PictureOutlined /></Button></Tooltip>
+                <Tooltip title="Click to upload thumbnail">
+                  <Button type="primary" style={{ marginLeft: 15 }}>
+                    <PictureOutlined />
+                    {' '}
+                    Add thumbnail
+                  </Button>
+                </Tooltip>
               </Upload>
             ]}
             {['video'].includes(feed?.type || type) && [
@@ -481,12 +483,39 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload teaser video (<100MB)"><Button type="primary" style={{ marginLeft: 15 }}><VideoCameraAddOutlined /></Button></Tooltip>
+                <Tooltip title="Click to upload teaser video (<100MB)">
+                  <Button type="primary" style={{ marginLeft: 15 }}>
+                    <VideoCameraAddOutlined />
+                    {' '}
+                    Add teaser
+                  </Button>
+                </Tooltip>
               </Upload>
             ]}
-            <Tooltip title="Click to add polls"><Button disabled={addPoll || (!!(feed && feed._id))} type="primary" style={{ marginLeft: '15px' }} onClick={this.onAddPoll.bind(this)}><BarChartOutlined style={{ transform: 'rotate(90deg)' }} /></Button></Tooltip>
+            <Tooltip title="Click to add polls">
+              <Button disabled={addPoll || (!!(feed && feed._id))} type="primary" style={{ marginLeft: '15px' }} onClick={this.onAddPoll.bind(this)}>
+                <BarChartOutlined style={{ transform: 'rotate(90deg)' }} />
+                {' '}
+                Add polls
+              </Button>
+            </Tooltip>
           </div>
           <AddPollDurationForm onAddPollDuration={this.onChangePollDuration.bind(this)} openDurationPollModal={openPollDuration} />
+          {feed && (
+          <Form.Item
+            name="status"
+            label="Status"
+          >
+            <Select>
+              <Select.Option key="active" value="active">
+                Active
+              </Select.Option>
+              <Select.Option key="inactive" value="inactive">
+                Inactive
+              </Select.Option>
+            </Select>
+          </Form.Item>
+          )}
           <div className="submit-btns">
             <Button
               className="primary"
@@ -494,7 +523,7 @@ export default class FeedForm extends PureComponent<IProps> {
               loading={uploading}
               disabled={uploading}
             >
-              {!feed ? 'Post' : 'Update'}
+              SUBMIT
             </Button>
             {(!feed || !feed._id) && (
             <Button

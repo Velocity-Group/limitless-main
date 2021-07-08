@@ -155,7 +155,7 @@ export class PayoutRequestService {
         request: resp,
         requestName: user?.name || user?.username || 'N/A'
       },
-      template: 'admin-payout-request.html'
+      template: 'admin-payout-request'
     });
     return new PayoutRequestDto(resp);
   }
@@ -236,7 +236,7 @@ export class PayoutRequestService {
     //     request: payout,
     //     performer
     //   },
-    //   template: 'admin-payout-request.html'
+    //   template: 'admin-payout-request'
     // });
     return new PayoutRequestDto(payout);
   }

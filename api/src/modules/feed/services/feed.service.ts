@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import {
-  Injectable, Inject, forwardRef
+  Injectable, Inject, forwardRef, HttpException
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
@@ -22,6 +22,7 @@ import { REF_TYPE } from 'src/modules/file/constants';
 import { SEARCH_CHANNEL } from 'src/modules/search/constants';
 import { PurchasedItemSearchService, PaymentTokenService } from 'src/modules/purchased-item/services';
 import { UserDto } from 'src/modules/user/dtos';
+import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
@@ -109,7 +110,7 @@ export class FeedService {
       }).lean();
       await Promise.all(feeds.map((feed) => {
         const v = new FeedDto(feed);
-        this.feedModel.updateOne(
+        this.feedModel.findOneAndUpdate(
           {
             _id: v._id
           },
@@ -151,7 +152,7 @@ export class FeedService {
   }
 
   public async handleCommentStat(feedId: string, num = 1) {
-    await this.feedModel.updateOne({ _id: feedId }, { $inc: { totalComment: num } }, { upsert: true });
+    await this.feedModel.findOneAndUpdate({ _id: feedId }, { $inc: { totalComment: num } }, { upsert: true });
   }
 
   private async _validatePayload(payload: FeedCreatePayload) {
@@ -481,7 +482,7 @@ export class FeedService {
     if (!feed || ((!user.roles || !user.roles.includes('admin')) && feed.fromSourceId.toString() !== user._id.toString())) throw new EntityNotFoundException();
     const data = { ...payload } as any;
     data.updatedAt = new Date();
-    await this.feedModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.feedModel.findOneAndUpdate({ _id: id }, data, { upsert: true });
     if (payload.fileIds && payload.fileIds.length) {
       const ids = feed.fileIds.map((_id) => _id.toString());
       const Ids = payload.fileIds.filter((_id) => !ids.includes(_id));
@@ -495,15 +496,16 @@ export class FeedService {
     return { updated: true };
   }
 
-  public async deleteFeed(id, user: UserDto) {
-    const query = { _id: id, fromSourceId: user._id };
-    if (user.roles && user.roles.includes('admin')) delete query.fromSourceId;
-
-    const feed = await this.feedModel.findOne(query);
+  public async deleteFeed(id: string, user: UserDto) {
+    if (!isObjectId(id)) throw new EntityNotFoundException();
+    const feed = await this.feedModel.findById(id);
     if (!feed) {
       throw new EntityNotFoundException();
     }
-    await this.feedModel.updateOne({ _id: id }, { status: STATUS.INACTIVE });
+    if (user.roles && !user.roles.includes('admin') && `${user._id}` !== `${feed.fromSourceId}`) {
+      throw new HttpException('You don\'t have permission to remove this post', 403);
+    }
+    await feed.remove();
     await this.queueEventService.publish(
       new QueueEvent({
         channel: PERFORMER_FEED_CHANNEL,

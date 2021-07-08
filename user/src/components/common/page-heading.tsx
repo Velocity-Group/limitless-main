@@ -1,19 +1,25 @@
 import Router from 'next/router';
+import {
+  ArrowLeftOutlined
+} from '@ant-design/icons';
 
 interface Iprops {
   title: string;
-  // eslint-disable-next-line react/require-default-props
   icon?: any
 }
 
 const PageHeading = ({ title, icon }: Iprops) => (
   <div className="page-heading">
     <span aria-hidden onClick={() => Router.back()}>
-      {icon}
+      {icon || <ArrowLeftOutlined />}
       {' '}
       {title}
     </span>
   </div>
 );
+
+PageHeading.defaultProps = {
+  icon: null
+};
 
 export default PageHeading;

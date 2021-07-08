@@ -54,7 +54,7 @@ class UploadVideo extends PureComponent {
     if (data.isSchedule) {
       data.status = 'inactive';
     }
-    data.tags = [...[], ...data.tags];
+    data.tags = [...data.tags];
     const files = Object.keys(this._files).reduce((f, key) => {
       if (this._files[key]) {
         f.push({

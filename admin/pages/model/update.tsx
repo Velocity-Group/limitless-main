@@ -6,7 +6,7 @@ import { AccountForm } from '@components/performer/AccountForm';
 import { PerformerDocument } from '@components/performer/Document';
 import { SubscriptionForm } from '@components/performer/Subcription';
 import { PerformerPaypalForm } from '@components/performer/paypalForm';
-import { BankingForm } from '@components/performer/BankingForm';
+// import { BankingForm } from '@components/performer/BankingForm';
 import { CommissionSettingForm } from '@components/performer/commission-setting';
 import {
   ICountry,
@@ -200,7 +200,7 @@ class PerformerUpdate extends PureComponent<IProps> {
         <BreadcrumbComponent
           breadcrumbs={[
             { title: 'Models', href: '/model' },
-            { title: performer.username },
+            { title: performer?.name || performer?.username || '' },
             { title: 'Update' }
           ]}
         />

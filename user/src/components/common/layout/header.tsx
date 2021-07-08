@@ -314,18 +314,18 @@ class Header extends PureComponent<IProps> {
                     Edit Profile
                   </div>
                 </Link>
-                <Link href={{ pathname: '/model/banking' }} as="/model/banking">
-                  <div className={router.pathname === '/model/banking' ? 'menu-item active' : 'menu-item'}>
-                    <BankOutlined />
-                    {' '}
-                    Banking (to earn)
-                  </div>
-                </Link>
                 <Link href={{ pathname: '/model/my-subscriber' }} as="/model/my-subscriber">
                   <div className={router.pathname === '/model/my-subscriber' ? 'menu-item active' : 'menu-item'}>
                     <StarOutlined />
                     {' '}
                     Subscribers
+                  </div>
+                </Link>
+                <Link href={{ pathname: '/model/banking' }} as="/model/banking">
+                  <div className={router.pathname === '/model/banking' ? 'menu-item active' : 'menu-item'}>
+                    <BankOutlined />
+                    {' '}
+                    Banking (to earn)
                   </div>
                 </Link>
                 <Divider />

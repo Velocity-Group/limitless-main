@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import {
   Layout
 } from 'antd';
-import { FireOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { feedService } from '@services/index';
 import Page from '@components/common/layout/page';
@@ -53,7 +53,7 @@ class EditPost extends PureComponent<IProps> {
             </Head>
             <div className="main-container">
               <Page>
-                <PageHeading icon={<FireOutlined />} title=" Edit Post" />
+                <PageHeading icon={<ArrowLeftOutlined />} title=" Edit Post" />
                 <div>
                   <FeedForm feed={feed} />
                 </div>

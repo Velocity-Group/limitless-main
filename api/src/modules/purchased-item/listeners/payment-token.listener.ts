@@ -60,7 +60,7 @@ export class PaymentTokenListener {
             transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
             products: transaction.products
           },
-          template: 'performer-new-subscriber.html'
+          template: 'performer-new-subscriber'
         });
       } else {
         await this.mailService.send({
@@ -72,7 +72,7 @@ export class PaymentTokenListener {
             transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
             products: transaction.products
           },
-          template: 'performer-payment-success.html'
+          template: 'performer-payment-success'
         });
       }
     }
@@ -87,7 +87,7 @@ export class PaymentTokenListener {
           transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
           products: transaction.products
         },
-        template: 'admin-payment-success.html'
+        template: 'admin-payment-success'
       });
     }
     // mail to user
@@ -100,7 +100,7 @@ export class PaymentTokenListener {
           transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
           products: transaction.products
         },
-        template: 'user-payment-success.html'
+        template: 'user-payment-success'
       });
     }
   }
