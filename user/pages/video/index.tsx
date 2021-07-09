@@ -105,7 +105,8 @@ class VideoViewPage extends PureComponent<IProps> {
   componentDidMount() {
     const { video, getRelated: handleGetRelated } = this.props;
     if (!video || !video._id) {
-      return Router.back();
+      Router.back();
+      return;
     }
     this.setState({
       videoStats: video.stats,
@@ -113,8 +114,7 @@ class VideoViewPage extends PureComponent<IProps> {
       isBought: video.isBought,
       isSubscribed: video.isSubscribed
     });
-    videoService.increaseView(video._id);
-    return handleGetRelated({
+    handleGetRelated({
       performerId: video.performerId,
       excludedId: video._id,
       status: 'active',
@@ -128,7 +128,6 @@ class VideoViewPage extends PureComponent<IProps> {
     } = this.props;
     const { totalComment } = this.state;
     if (prevProps.video._id !== video._id) {
-      videoService.increaseView(video._id);
       handleGetRelated({
         performerId: video.performerId,
         excludedId: video._id,

@@ -201,6 +201,7 @@ export class PerformerService {
       );
       dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : null;
     }
+    await this.increaseViewStats(dto._id);
     return dto;
   }
 
@@ -732,13 +733,12 @@ export class PerformerService {
     return { subscribed: count > 0 };
   }
 
-  public async viewProfile(username: string) {
+  public async increaseViewStats(id: string | ObjectId) {
     return this.performerModel.updateOne(
-      { username },
+      { _id: id },
       {
         $inc: { 'stats.views': 1 }
-      },
-      { new: true }
+      }
     );
   }
 

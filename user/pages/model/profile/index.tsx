@@ -130,10 +130,12 @@ class PerformerProfile extends PureComponent<IProps> {
       message.error('Permission denied');
       return;
     }
-    if (!window.confirm('Are you sure to delete this post?')) return;
+    if (!window.confirm('All earnings are related to this post will be refunded. Are you sure to remove?')) {
+      return;
+    }
     try {
       await feedService.delete(feed._id);
-      message.success('Deleted the post successfully');
+      message.success('Deleted post success');
       handleRemoveFeed({ feed });
     } catch {
       message.error('Something went wrong, please try again later');

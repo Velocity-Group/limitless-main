@@ -125,7 +125,7 @@ class PostListing extends PureComponent<IProps> {
         <div className="main-container">
           <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>My Posts</span>
-            <Link href="/my-post/create">
+            <Link href="/model/my-post/create">
               <a>
                 {' '}
                 <PlusCircleOutlined />

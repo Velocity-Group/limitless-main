@@ -14,9 +14,14 @@ export class FeedFileService {
   public async validatePhoto(photo: FileDto): Promise<any> {
     if (!photo.isImage()) {
       await this.fileService.remove(photo._id);
-
       throw new InvalidFeedTypeException('Invalid photo file!');
     }
+    await this.fileService.queueProcessPhoto(photo._id, {
+      thumbnailSize: {
+        width: 900,
+        height: 300
+      }
+    });
 
     return true;
   }

@@ -156,18 +156,11 @@ export class PerformerController {
         countryCode = userCountry.countryCode;
       }
     }
-    let performer;
-    if (isObjectId(performerUsername)) {
-      performer = await this.performerService.findById(
-        performerUsername
-      );
-    } else {
-      performer = await this.performerService.findByUsername(
-        performerUsername,
-        countryCode,
-        user
-      );
-    }
+    const performer = await this.performerService.findByUsername(
+      performerUsername,
+      countryCode,
+      user
+    );
 
     if (!performer || performer.status !== PERFORMER_STATUSES.ACTIVE) {
       throw new HttpException('This account is suspended', 403);
@@ -197,16 +190,6 @@ export class PerformerController {
     return DataResponse.ok({
       ...file,
       url: `${file.getUrl()}?documentId=${file._id}&token=${req.jwToken}`
-    });
-  }
-
-  @Post('/:username/inc-view')
-  @HttpCode(HttpStatus.OK)
-  async increaseView(@Param('username') username: string): Promise<any> {
-    await this.performerService.viewProfile(username);
-    // TODO - check roles or other to response info
-    return DataResponse.ok({
-      success: true
     });
   }
 

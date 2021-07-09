@@ -92,7 +92,12 @@ export class FeedFileController {
   @UseInterceptors(
     FileUploadInterceptor('feed-photo', 'file', {
       destination: getConfig('file').feedDir,
-      replaceWithoutExif: true
+      replaceWithThumbail: false,
+      generateThumbnail: true,
+      thumbnailSize: {
+        width: 900,
+        height: 300
+      }
     })
   )
   async uploadThumb(

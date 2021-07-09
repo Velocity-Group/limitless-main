@@ -59,7 +59,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
     requestNote: string;
   }) {
     const { user } = this.props;
-    if (data.requestTokens <= user.balance) {
+    if (data.requestTokens > user.balance) {
       message.error('Requested tokens must be greater than your balance');
       return;
     }
