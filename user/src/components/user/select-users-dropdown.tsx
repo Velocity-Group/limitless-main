@@ -54,9 +54,6 @@ export class SelectUserDropdown extends PureComponent<IProps> {
         optionFilterProp="children"
         disabled={disabled}
       >
-        <Select.Option value="" key="default">
-          All
-        </Select.Option>
         {data && data.length > 0 && data.map((u) => (
           <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>
             {`${u?.name || u?.username || 'N/A'}`}

@@ -115,6 +115,22 @@ const PaymentTableList = ({
       }
     },
     {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render(status: string) {
+        switch (status) {
+          case 'pending':
+            return <Tag color="blue">Pending</Tag>;
+          case 'success':
+            return <Tag color="green">Success</Tag>;
+          case 'refunded':
+            return <Tag color="red">Refunded</Tag>;
+          default: return <Tag color="default">{status}</Tag>;
+        }
+      }
+    },
+    {
       title: 'Date',
       dataIndex: 'createdAt',
       sorter: true,

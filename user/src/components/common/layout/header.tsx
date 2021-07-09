@@ -12,9 +12,8 @@ import {
   MessageOutlined, VideoCameraOutlined, FireOutlined, NotificationOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
   HomeOutlined, LogoutOutlined, UsergroupAddOutlined, VideoCameraAddOutlined,
-  HeartOutlined, PlusSquareOutlined, BulbOutlined, WalletOutlined
+  HeartOutlined, PlusSquareOutlined, BulbOutlined, WalletOutlined, BlockOutlined
 } from '@ant-design/icons';
-import './header.less';
 import { withRouter, Router as RouterEvent } from 'next/router';
 import {
   messageService, authService, streamService
@@ -24,6 +23,7 @@ import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/action
 // import { PrivateCallCard } from '@components/streaming/private-call-request-card';
 import { updateUIValue } from 'src/redux/ui/actions';
 import { updateBalance } from '@redux/user/actions';
+import './header.less';
 
 interface IProps {
   updateBalance: Function;
@@ -319,6 +319,13 @@ class Header extends PureComponent<IProps> {
                     <StarOutlined />
                     {' '}
                     Subscribers
+                  </div>
+                </Link>
+                <Link href={{ pathname: '/model/block-user' }} as="/model/block-user">
+                  <div className={router.pathname === '/model/block-user' ? 'menu-item active' : 'menu-item'}>
+                    <BlockOutlined />
+                    {' '}
+                    Backlist
                   </div>
                 </Link>
                 <Link href={{ pathname: '/model/banking' }} as="/model/banking">

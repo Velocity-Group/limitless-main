@@ -27,6 +27,7 @@ import { isEmail } from '@lib/string';
 // import { GoogleReCaptcha } from '@components/common';
 
 interface IProps {
+  loginAuth: any;
   login: Function;
   updateCurrentUser: Function;
   loginSuccess: Function;
@@ -168,7 +169,7 @@ class Login extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, settings } = this.props;
+    const { ui, settings, loginAuth } = this.props;
     const { isLoading } = this.state;
     return (
       <>
@@ -253,7 +254,7 @@ class Login extends PureComponent<IProps> {
                         </p>
                         {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                         <Form.Item style={{ textAlign: 'center' }}>
-                          <Button type="primary" htmlType="submit" className="login-form-button">
+                          <Button disabled={loginAuth.requesting} loading={loginAuth.requesting} type="primary" htmlType="submit" className="login-form-button">
                             LOGIN
                           </Button>
                           <p>
@@ -285,7 +286,8 @@ class Login extends PureComponent<IProps> {
 
 const mapStatesToProps = (state: any) => ({
   ui: { ...state.ui },
-  settings: state.settings
+  settings: state.settings,
+  loginAuth: { ...state.auth.loginAuth }
 });
 
 const mapDispatchToProps = {

@@ -71,7 +71,7 @@ export class HandleDeleteItemListener {
       }).limit(99).skip(i * 99).lean();
       const transactionIds = transactions.map((t) => t._id);
       const earnings = await this.earningModel.find({
-        _id: { $in: transactionIds }
+        transactionId: { $in: transactionIds }
       });
       await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
       for (const earning of earnings) {
