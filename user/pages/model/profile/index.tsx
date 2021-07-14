@@ -33,7 +33,7 @@ import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
 import {
   IPerformer, IUser, IUIConfig, IFeed, StreamSettings
-} from '../../../src/interfaces';
+} from 'src/interfaces';
 import '@components/performer/performer.less';
 
 interface IProps {
@@ -110,7 +110,7 @@ class PerformerProfile extends PureComponent<IProps> {
 
   async componentDidMount() {
     const { performer } = this.props;
-    await this.checkBlock();
+    this.checkBlock();
     if (performer) {
       this.setState({ isBookMarked: performer.isBookMarked || false });
       this.loadItems();
@@ -284,12 +284,7 @@ class PerformerProfile extends PureComponent<IProps> {
         url: '/error',
         error: {
           ...error,
-          message:
-            error.message === 'BLOCKED_BY_PERFORMER'
-              ? 'You have been blocked by this model!'
-              : error.message === 'BLOCK_COUNTRY'
-                ? 'This model blocked accessbility from your country!'
-                : error.message
+          message: error?.message || 'You have been blocked by this model'
         }
       });
     }
@@ -386,7 +381,7 @@ class PerformerProfile extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${performer?.name || performer?.username}`}
+            {`${ui?.siteName} | ${performer?.name || performer?.username || 'N/A'}`}
           </title>
           <meta
             name="keywords"
@@ -417,7 +412,7 @@ class PerformerProfile extends PureComponent<IProps> {
               </a>
               <div className="stats-row">
                 <div className="t-user-name">
-                  {performer?.name || ''}
+                  {performer?.name || 'N/A'}
                   {' '}
                   {performer?.verifiedAccount && (
                     <CheckCircleOutlined className="theme-color" />
@@ -498,7 +493,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 alt="main-avt"
                 src={performer?.avatar || '/static/no-avatar.png'}
               />
-              {currentUser?._id !== performer._id && <span className={performer.isOnline ? 'online-status' : 'online-status off'} />}
+              {currentUser?._id !== performer?._id && <span className={performer?.isOnline ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
                 <h4>
                   {performer?.name || 'N/A'}
@@ -507,7 +502,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <CheckCircleOutlined className="theme-color" />
                   )}
                       &nbsp;
-                  {currentUser._id === performer._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
+                  {currentUser._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
                 </h4>
                 <h5 style={{ textTransform: 'none' }}>
                   @
@@ -554,7 +549,7 @@ class PerformerProfile extends PureComponent<IProps> {
                       </a>
                     </button>
                   </div>
-                  {/* {performer.isSubscribed && (
+                  {/* {performer?.isSubscribed && (
                       <div className="stream-btns">
                         <Button
                           type="link"
@@ -577,11 +572,11 @@ class PerformerProfile extends PureComponent<IProps> {
             )}
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <div className="show-more">
-                {performer.bio && <p>{performer.bio}</p>}
-                <PerformerInfo countries={ui?.countries || []} performer={performer} />
+                <p>{performer?.bio || ''}</p>
+                {performer && <PerformerInfo countries={ui?.countries || []} performer={performer} />}
               </div>
             </div>
-            {!performer.isSubscribed && (
+            {!performer?.isSubscribed && (
               <div className="subscription-bl">
                 <h5>Monthly Subscription</h5>
                 <button
@@ -599,7 +594,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {!performer.isSubscribed && (
+            {!performer?.isSubscribed && (
               <div className="subscription-bl">
                 <h5>Yearly Subscription</h5>
                 <button
@@ -617,7 +612,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {performer?.isFreeSubscription && !performer.isSubscribed && (
+            {performer?.isFreeSubscription && !performer?.isSubscribed && (
               <div className="subscription-bl">
                 <h5>Free Subscription</h5>
                 <button
@@ -631,10 +626,10 @@ class PerformerProfile extends PureComponent<IProps> {
                 >
                   SUBSCRIBE FOR FREE IN
                   {' '}
-                  {performer.durationFreeSubscriptionDays || 1}
+                  {performer?.durationFreeSubscriptionDays || 1}
                   {' '}
                   DAYS THEN $
-                  {performer.monthlyPrice.toFixed(2)}
+                  {performer?.monthlyPrice.toFixed(2)}
                   {' '}
                   MONTHLY LATER
                 </button>

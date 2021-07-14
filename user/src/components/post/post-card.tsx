@@ -35,6 +35,7 @@ import { IFeed, IUser } from '../../interfaces';
 import './index.less';
 
 interface IProps {
+  logo: string;
   feed: IFeed;
   onDelete?: Function;
   user: IUser;
@@ -327,7 +328,7 @@ class FeedCard extends Component<IProps> {
 
   render() {
     const {
-      feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment
+      logo, feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment
     } = this.props;
     const { performer } = feed;
     const { requesting: commenting } = comment;
@@ -637,6 +638,7 @@ class FeedCard extends Component<IProps> {
               autoplay: false,
               controls: true,
               playsinline: true,
+              poster: feed?.thumbnailUrl || logo,
               sources: [
                 {
                   src: feed?.teaser?.url,
@@ -655,6 +657,7 @@ class FeedCard extends Component<IProps> {
 const mapStates = (state: any) => {
   const { commentMapping, comment } = state.comment;
   return {
+    logo: state.ui.logo,
     user: state.user.current,
     commentMapping,
     comment
