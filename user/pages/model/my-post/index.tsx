@@ -43,9 +43,9 @@ class PostListing extends PureComponent<IProps> {
     this.getData();
   }
 
-  async handleFilter(filter) {
-    const { pagination } = this.state;
-    await this.setState({ filter, pagination: { ...pagination, current: 1 } });
+  async handleFilter(values) {
+    const { pagination, filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values }, pagination: { ...pagination, current: 1 } });
     this.getData();
   }
 

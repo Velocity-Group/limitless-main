@@ -171,8 +171,9 @@ class PerformerProfile extends PureComponent<IProps> {
     }
   }
 
-  async handleFilterSearch(filter) {
-    await this.setState({ filter });
+  async handleFilterSearch(values) {
+    const { filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values } });
     this.loadItems();
   }
 

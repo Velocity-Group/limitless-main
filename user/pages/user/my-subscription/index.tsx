@@ -62,7 +62,8 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
   }
 
   async handleFilter(data) {
-    await this.setState({ filter: data });
+    const { filter } = this.state;
+    await this.setState({ filter: { ...filter, ...data } });
     this.handleTabChange({ ...data, current: 1 });
   }
 

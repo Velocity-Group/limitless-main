@@ -69,7 +69,10 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
       delete filter.performerId;
       delete filter.sellerId;
     }
-    this.setState({ filter }, () => this.userSearchTransactions());
+    const { filter: values } = this.state;
+    await this.setState({ filter: { ...values, ...filter } });
+    this.setState({ filter });
+    this.userSearchTransactions();
   }
 
   async userSearchTransactions() {

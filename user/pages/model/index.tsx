@@ -27,7 +27,8 @@ class Performers extends PureComponent<IProps> {
 
   state = {
     offset: 0,
-    limit: 12
+    limit: 12,
+    filter: {} as any
   };
 
   async componentDidMount() {
@@ -44,39 +45,40 @@ class Performers extends PureComponent<IProps> {
     }
   }
 
-  handleFilter(values: any) {
+  async handleFilter(values: any) {
     const { getList: getListHandler } = this.props;
-    const { limit } = this.state;
-    this.setState({ offset: 0 });
+    const { limit, filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values }, limit: 0 });
     getListHandler({
       limit,
       offset: 0,
-      ...values
+      ...filter
     });
   }
 
-  handleSort(values: any) {
+  async handleSort(values: any) {
     const sort = {
       sort: values.key
     };
     const { getList: getListHandler } = this.props;
-    const { limit } = this.state;
-    this.setState({ offset: 0 });
+    const { limit, filter } = this.state;
+    await this.setState({ offset: 0 });
     getListHandler({
       limit,
       offset: 0,
-      ...sort,
-      status: 'active'
+      ...filter,
+      ...sort
     });
   }
 
   pageChanged = (page: number) => {
     const { getList: getListHandler } = this.props;
-    const { limit } = this.state;
+    const { limit, filter } = this.state;
     this.setState({ offset: page });
     getListHandler({
       limit,
-      offset: (page - 1) * 12
+      offset: (page - 1) * limit,
+      ...filter
     });
   };
 

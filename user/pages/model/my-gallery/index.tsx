@@ -77,10 +77,10 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async handleFilter(param) {
-    const { pagination } = this.state;
+  async handleFilter(params) {
+    const { pagination, filters } = this.state;
     await this.setState({
-      filters: param,
+      filters: { ...filters, ...params },
       pagination: {
         ...pagination,
         current: 1
