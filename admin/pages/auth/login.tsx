@@ -1,14 +1,13 @@
 import {
   Form, Input, Button, Row, Alert
 } from 'antd';
-import { Fragment, PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-
-import './index.less';
 import Head from 'next/head';
 import { login } from '@redux/auth/actions';
 import Link from 'next/link';
 import { getResponseError } from '@lib/utils';
+import './index.less';
 
 const FormItem = Form.Item;
 
@@ -45,15 +44,14 @@ class Login extends PureComponent<IProps> {
         </Head>
         <div className="form">
           <div className="logo">
-            {ui && ui.logo && <img alt="logo" src={ui && ui.logo} />}
-            <span>{ui && ui.siteName}</span>
+            {ui.logo ? <div><img alt="logo" src={ui && ui.logo} /></div> : ui.siteName}
+            <div><span>Login</span></div>
           </div>
           {loginAuth.error && (
             <Alert
               message="Error"
               description={getResponseError(loginAuth.error)}
               type="error"
-              showIcon
             />
           )}
           {loginAuth.success ? (

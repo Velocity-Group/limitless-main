@@ -62,8 +62,10 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     this.userSearchTransactions();
   };
 
-  async handleFilter(filter) {
-    this.setState({ filter }, () => this.userSearchTransactions());
+  async handleFilter(values) {
+    const { filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values } });
+    this.userSearchTransactions();
   }
 
   async userSearchTransactions() {

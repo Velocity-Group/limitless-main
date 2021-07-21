@@ -1,7 +1,7 @@
 import { PureComponent } from 'react';
 import Head from 'next/head';
 import { message } from 'antd';
-import { PaperClipOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import Page from '@components/common/layout/page';
 import { orderService } from '@services/index';
@@ -104,11 +104,10 @@ class ModelOrderPage extends PureComponent<IProps> {
         </Head>
         <Page>
           <div className="main-container">
-            <PageHeading title="My Orders" icon={<PaperClipOutlined />} />
+            <PageHeading title="My Orders" icon={<ShoppingCartOutlined />} />
             <OrderSearchFilter
               onSubmit={this.handleFilter.bind(this)}
             />
-            <div style={{ marginBottom: '20px' }} />
             <OrderTableList
               user={user}
               dataSource={list}

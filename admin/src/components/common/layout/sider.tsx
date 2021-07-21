@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { Layout, Switch } from 'antd';
 import { BulbOutlined } from '@ant-design/icons';
+import Link from 'next/link';
 import ScrollBar from '../base/scroll-bar';
 import { SiderMenu } from './menu';
 import './sider.less';
@@ -32,10 +33,12 @@ class Sider extends PureComponent<ISiderProps> {
         className="slider"
       >
         <div className="brand">
-          <div className="logo">
-            {logo && <img alt="logo" src={logo} />}
-            {!collapsed && <h1>{siteName}</h1>}
-          </div>
+          <Link href="/">
+            <div className="logo">
+              {logo && <img alt="logo" src={logo} />}
+              {!collapsed && <h1>{siteName}</h1>}
+            </div>
+          </Link>
         </div>
 
         <div className="menuContainer">

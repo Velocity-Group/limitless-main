@@ -50,8 +50,9 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
-  async handleFilter(filter) {
-    await this.setState({ filter });
+  async handleFilter(values) {
+    const { filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values } });
     this.getData();
   }
 

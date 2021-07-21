@@ -48,7 +48,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
             defaultValue=""
           >
             <Select.Option key="all" value="">
-              All
+              All delivery status
             </Select.Option>
             {deliveryStatuses.map((s) => (
               <Select.Option key={s.key} value={s.key}>

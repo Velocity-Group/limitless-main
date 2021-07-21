@@ -98,16 +98,10 @@ class Application extends App<IApp> {
       await auth(ctx);
     }
     let settings = {};
-    if (!process.browser) {
-      try {
-        const resp = await settingService.public();
-        // TODO encrypt, decypt header script, footer script or other info if needed
-        settings = resp.data;
-        if (settings) await updateSettingsStore(ctx, settings);
-      } catch (e) {
-        console.log(await e);
-      }
-    }
+    const resp = await settingService.public('all');
+    // TODO encrypt, decypt header script, footer script or other info if needed
+    settings = resp.data;
+    if (settings) await updateSettingsStore(ctx, settings);
     let pageProps = {};
 
     if (Component.getInitialProps) {

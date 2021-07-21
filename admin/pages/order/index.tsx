@@ -8,7 +8,9 @@ import { OrderSearchFilter } from '@components/order';
 import OrderTableList from '@components/order/table-list';
 import { BreadcrumbComponent } from '@components/common';
 
-interface IProps { }
+interface IProps {
+  deliveryStatus: string;
+}
 
 class ModelOrderPage extends PureComponent<IProps> {
   static authenticate = true;
@@ -28,6 +30,10 @@ class ModelOrderPage extends PureComponent<IProps> {
   };
 
   async componentDidMount() {
+    const { deliveryStatus } = this.props;
+    if (deliveryStatus) {
+      await this.setState({ filter: { deliveryStatus } });
+    }
     this.search();
   }
 
@@ -46,8 +52,9 @@ class ModelOrderPage extends PureComponent<IProps> {
     this.search(pager.current);
   };
 
-  async handleFilter(filter) {
-    await this.setState({ filter });
+  async handleFilter(values) {
+    const { filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values } });
     this.search();
   }
 

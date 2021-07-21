@@ -107,7 +107,6 @@ class UserOrderPage extends PureComponent<IProps> {
             <OrderSearchFilter
               onSubmit={this.handleFilter.bind(this)}
             />
-            <div style={{ marginBottom: '20px' }} />
             <OrderTableList
               user={user}
               dataSource={list}

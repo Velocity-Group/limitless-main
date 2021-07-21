@@ -52,8 +52,9 @@ class Menus extends PureComponent<IProps> {
     this.search(pager.current);
   };
 
-  async handleFilter(filter) {
-    await this.setState({ filter });
+  async handleFilter(values) {
+    const { filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values } });
     this.search();
   }
 

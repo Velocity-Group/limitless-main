@@ -52,8 +52,9 @@ class PayoutRequestPage extends PureComponent<IProps, IStates> {
     this.getList();
   }
 
-  async handleFilter(filter) {
-    await this.setState({ filter });
+  async handleFilter(values) {
+    const { filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values } });
     this.getList();
   }
 

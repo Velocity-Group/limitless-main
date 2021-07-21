@@ -3,8 +3,16 @@ import { APIRequest, IResponse } from './api-request';
 import env from '../env';
 
 export class SettingService extends APIRequest {
-  public(): Promise<IResponse<ISetting>> {
-    return this.get(this.buildUrl('/settings/public'));
+  private _settings = {} as any;
+
+  async public(group = '', forceReload = false): Promise<IResponse<ISetting>> {
+    const settingGroup = group || 'all';
+    if (this._settings[settingGroup] && !forceReload) {
+      return this._settings[settingGroup];
+    }
+    const resp = await this.get(this.buildUrl('/settings/public', { group }));
+    this._settings[settingGroup] = resp;
+    return resp;
   }
 
   all(group = ''): Promise<IResponse<ISetting>> {

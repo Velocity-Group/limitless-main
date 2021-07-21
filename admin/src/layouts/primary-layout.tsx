@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { PureComponent } from 'react';
 import { Layout, Drawer, BackTop } from 'antd';
 import { enquireScreen, unenquireScreen } from 'enquire-js';
 import { connect } from 'react-redux';
@@ -14,7 +14,6 @@ import {
 import Header from '@components/common/layout/header';
 import { Router } from 'next/router';
 import Loader from '@components/common/base/loader';
-
 import './primary-layout.less';
 
 interface DefaultProps extends IUIConfig {
@@ -30,7 +29,7 @@ export async function getStaticProps() {
   };
 }
 
-class PrimaryLayout extends React.PureComponent<DefaultProps> {
+class PrimaryLayout extends PureComponent<DefaultProps> {
   state = {
     isMobile: false,
     routerChange: false

@@ -165,7 +165,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   <strong>Delivery Status:</strong>
                   {' '}
                   <Select onChange={(e) => this.setState({ deliveryStatus: e })} defaultValue={order.deliveryStatus}>
-                    <Select.Option key="processing" value="processing">
+                    <Select.Option key="processing" value="processing" disabled>
                       Processing
                     </Select.Option>
                     <Select.Option key="shipping" value="shipping">

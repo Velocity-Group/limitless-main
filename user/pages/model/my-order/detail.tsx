@@ -3,7 +3,7 @@ import {
   Layout, message, Input, Select, Button,
   Tag, Descriptions, Alert
 } from 'antd';
-import { PaperClipOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
 import { IOrder, IUIConfig } from 'src/interfaces';
@@ -101,7 +101,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
           <Page>
             {order && (
             <div className="main-container">
-              <PageHeading title={`Order ID ${order?.orderNumber}`} icon={<PaperClipOutlined />} />
+              <PageHeading title={`Order ID ${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
               <Descriptions>
                 <Item key="name" label="Product">
                   {order?.productInfo?.name || 'N/A'}
