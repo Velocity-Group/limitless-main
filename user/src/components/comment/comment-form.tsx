@@ -37,8 +37,11 @@ export class CommentForm extends PureComponent<IProps> {
   onFinish(values: ICreateComment) {
     const { onSubmit: handleComment, objectId, objectType } = this.props;
     const data = values;
+    if (!data.content) {
+      return message.error('Please add comment');
+    }
     if (data.content.length > 250) {
-      return message.error('Content is over 250 characters');
+      return message.error('Comment is over 250 characters');
     }
     data.objectId = objectId;
     data.objectType = objectType || 'video';
@@ -77,15 +80,8 @@ export class CommentForm extends PureComponent<IProps> {
           <div className="cmt-area">
             <Form.Item
               name="content"
-              validateTrigger={['onChange']}
-              rules={[
-                {
-                  min: 2,
-                  message: 'Please input at least 2 characters'
-                }
-              ]}
             >
-              <TextArea maxLength={250} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
+              <TextArea maxLength={250} minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
             <div className="grp-emotions">
               <SmileOutlined />
