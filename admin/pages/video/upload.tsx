@@ -15,9 +15,6 @@ interface IFiles {
   file: File;
 }
 
-interface IResponse {
-  data: { _id: string };
-}
 class UploadVideo extends PureComponent {
   state = {
     uploading: false,
@@ -44,12 +41,12 @@ class UploadVideo extends PureComponent {
 
   async submit(data: IVideoUpdate) {
     if (!this._files.video) {
-      return message.error('Please select video!');
+      message.error('Please select video!');
+      return;
     }
-    if (
-      (data.isSale && !data.price) || (data.isSale && data.price < 1)
-    ) {
-      return message.error('Invalid amount of tokens');
+    if ((data.isSale && !data.price) || (data.isSale && data.price < 1)) {
+      message.error('Invalid amount of tokens');
+      return;
     }
     data.tags = [...data.tags];
     const files = Object.keys(this._files).reduce((f, key) => {
@@ -66,17 +63,13 @@ class UploadVideo extends PureComponent {
       uploading: true
     });
     try {
-      const resp = (await videoService.uploadVideo(files as any, data, this.onUploading.bind(this))) as IResponse;
+      await videoService.uploadVideo(files as any, data, this.onUploading.bind(this));
       message.success('Video has been uploaded');
-      // TODO - process for response data?
       Router.push('/video');
     } catch (error) {
       message.error('An error occurred, please try again!');
-      await this.setState({
-        uploading: false
-      });
+      this.setState({ uploading: false });
     }
-    return undefined;
   }
 
   render() {

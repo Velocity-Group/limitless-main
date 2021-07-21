@@ -7,7 +7,6 @@ import {
   HttpCode,
   HttpStatus,
   Request,
-  Put,
   Get,
   Param,
   Query,
@@ -108,16 +107,49 @@ export class PerformerVideosController {
     return DataResponse.ok(resp);
   }
 
-  @Put('/:id')
+  @Post('/edit/:id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
   @Roles('performer')
+  @UseInterceptors(
+    // TODO - check and support multiple files!!!
+    MultiFileUploadInterceptor(
+      [
+        {
+          type: 'performer-video',
+          fieldName: 'video',
+          options: {
+            destination: getConfig('file').videoProtectedDir
+          }
+        },
+        {
+          type: 'performer-video-teaser',
+          fieldName: 'teaser',
+          options: {
+            destination: getConfig('file').videoDir
+          }
+        },
+        {
+          type: 'performer-video-thumbnail',
+          fieldName: 'thumbnail',
+          options: {
+            destination: getConfig('file').imageDir,
+            generateThumbnail: true,
+            replaceWithThumbail: false,
+            thumbnailSize: getConfig('image').videoThumbnail
+          }
+        }
+      ],
+      {}
+    )
+  )
   async update(
+    @FilesUploaded() files: Record<string, any>,
     @Param('id') id: string,
     @Body() payload: VideoUpdatePayload,
     @CurrentUser() updater: UserDto
   ) {
-    const details = await this.videoService.updateInfo(id, payload, updater);
+    const details = await this.videoService.updateInfo(id, payload, files, updater);
     return DataResponse.ok(details);
   }
 

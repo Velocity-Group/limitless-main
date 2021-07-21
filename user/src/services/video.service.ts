@@ -25,8 +25,11 @@ export class VideoService extends APIRequest {
     return this.get(`/user/performer-assets/videos/${id}`, headers);
   }
 
-  update(id: string, payload: any) {
-    return this.put(`/performer/performer-assets/videos/${id}`, payload);
+  update(id: string, files: [{ fieldname: string; file: File }], payload: any, onProgress?: Function) {
+    return this.upload(`/performer/performer-assets/videos/edit/${id}`, files, {
+      onProgress,
+      customData: payload
+    });
   }
 
   increaseView(id: string) {

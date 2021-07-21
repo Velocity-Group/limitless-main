@@ -137,7 +137,6 @@ export class FormUploadVideo extends PureComponent<IProps> {
       isSelectedTeaser,
       isSelectedVideo
     } = this.state;
-    const haveVideo = !!video;
     return (
       <Form
         {...layout}
@@ -287,7 +286,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 accept="video/*"
                 multiple={false}
                 showUploadList={false}
-                disabled={uploading || haveVideo}
+                disabled={uploading}
                 beforeUpload={(file) => this.beforeUpload(file, 'video')}
               >
                 {isSelectedVideo ? <FileDoneOutlined /> : <VideoCameraAddOutlined />}
@@ -310,7 +309,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 accept="video/*"
                 multiple={false}
                 showUploadList={false}
-                disabled={uploading || haveVideo}
+                disabled={uploading}
                 beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
               >
                 {isSelectedTeaser ? <FileDoneOutlined /> : <VideoCameraAddOutlined />}
@@ -332,7 +331,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 accept="image/*"
                 multiple={false}
                 showUploadList
-                disabled={uploading || haveVideo}
+                disabled={uploading}
                 beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
               >
                 <CameraOutlined />
@@ -345,7 +344,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
         ) : null}
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button className="primary" htmlType="submit" loading={uploading} disabled={uploading}>
-            {haveVideo ? 'Update' : 'Upload'}
+            {video ? 'Update' : 'Upload'}
           </Button>
           <Button className="secondary" onClick={() => Router.back()} loading={uploading} disabled={uploading}>
             Back

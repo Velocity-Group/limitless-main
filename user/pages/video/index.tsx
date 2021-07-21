@@ -1,10 +1,11 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-prototype-builtins */
 import {
-  Layout, Tabs, message, Button,
-  Alert, Spin, Tooltip
+  Layout, Tabs, message, Button, Spin, Tooltip
 } from 'antd';
 import {
-  BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined, ArrowRightOutlined
+  BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined,
+  CalendarOutlined
 } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -331,7 +332,7 @@ class VideoViewPage extends PureComponent<IProps> {
     };
     const teaserOptions = {
       key: video._id,
-      autoplay: false,
+      autoplay: true,
       controls: true,
       poster: thumbUrl,
       playsinline: true,
@@ -375,6 +376,11 @@ class VideoViewPage extends PureComponent<IProps> {
           <div className="vid-title">{video.title}</div>
           <div className="vid-duration">
             <a>
+              <CalendarOutlined />
+              &nbsp;
+              {formatDate(video.updatedAt, 'LL')}
+            </a>
+            <a>
               <HourglassOutlined />
               &nbsp;
               {videoDuration(video.video.duration || 0)}
@@ -386,7 +392,7 @@ class VideoViewPage extends PureComponent<IProps> {
             </a>
           </div>
           <div className="vid-player">
-            {(((video.isSale && !isBought) || (!video.isSale && !isSubscribed))) && (
+            {((video.isSale && !isBought) || (!video.isSale && !isSubscribed) || video.isSchedule) && (
             <div className="main-player">
               <div className="vid-group">
                 <div className="left-group">
@@ -411,39 +417,39 @@ class VideoViewPage extends PureComponent<IProps> {
                     </div>
                   )}
                   <div className="vid-exl-group">
-                    <h4>{video.isSale && !isBought ? 'UNLOCK TO VIEW FULL CONTENT' : 'SUBSCRIBE TO VIEW FULL CONTENT'}</h4>
-                    <h3>
-                      {video.isSale && !isBought ? 'UNLOCK HERE' : 'SUBSCRIBE HERE'}
-                      {' '}
-                      <ArrowRightOutlined />
-                    </h3>
-                  </div>
-                </div>
-                <div className="right-group">
-                  <div className="member-plans">
-                    {video.isSale && !isBought && (
-                    <Button type="primary" loading={submiting} disabled={submiting} onClick={this.purchaseVideo.bind(this)}>
-                      UNLOCK VIDEO BY
-                      {' '}
-                      {video.price.toFixed(2)}
-                      {' '}
-                      <img alt="token" src="/static/coin-ico.png" height="25px" />
-                    </Button>
-                    )}
-                    {!video.isSale && !isSubscribed && (
+                    <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
+                    <div className="text-center">
+                      {video.isSale && !isBought && (
+                      <Button type="primary" loading={submiting} disabled={submiting} onClick={this.purchaseVideo.bind(this)}>
+                        UNLOCK VIDEO BY
+                        {' '}
+                        {video.price.toFixed(2)}
+                        {' '}
+                        <img alt="token" src="/static/coin-ico.png" height="25px" />
+                      </Button>
+                      )}
+                      {!video.isSale && !isSubscribed && (
                       <ConfirmSubscriptionPerformerForm
                         type={video.performer.isFreeSubscription ? 'free' : 'monthly'}
                         performer={video.performer}
                         submiting={submiting}
                         onFinish={this.subscribe.bind(this)}
                       />
+                      )}
+                    </div>
+                    {video.isSchedule && (
+                    <h4>
+                      Main video will be premiered at
+                      {' '}
+                      {formatDate(video.scheduledAt, 'LL')}
+                    </h4>
                     )}
                   </div>
                 </div>
               </div>
             </div>
             )}
-            {((!video.isSale && isSubscribed) || (video.isSale && isBought)) && (
+            {((!video.isSale && isSubscribed && !video.isSchedule) || (video.isSale && isBought && !video.isSchedule)) && (
             <div className="main-player">
               <div className="vid-group">
                 {video.processing ? (
@@ -461,7 +467,6 @@ class VideoViewPage extends PureComponent<IProps> {
               </div>
             </div>
             )}
-            {video.isSchedule && video.scheduledAt && <Alert type="info" message={`Main video will be premiered at ${formatDate(video.scheduledAt, 'LL')}`} />}
           </div>
         </div>
         <div className="vid-split">

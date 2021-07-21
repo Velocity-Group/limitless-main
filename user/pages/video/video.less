@@ -173,12 +173,10 @@
 
 .main-player {
   .vid-group {
-    display: flex;
-    flex-wrap: wrap;
-    height: 500px;
+    height: 596px;
     position: relative;
     .left-group {
-      width: 70%;
+      width: 100%;
       height: 100%;
       position: relative;
       display: flex;
@@ -200,33 +198,9 @@
         }
       }
     }
-    .right-group {
-      width: 30%;
-      height: 100%;
-      .title {
-        background: @secondary-color;
-        color: @white;
-        text-align: center;
-        font-size: 20px;
-        padding: 10px;
-        margin: 0;
-      }
-      .member-plans {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: @light-card;
-        color: @secondary-color;
-        height: 100%;
-        overflow: auto;
-      }
-    }
     @media screen and (max-width: @mobile-screen) {
-      flex-direction: column;
-      flex-wrap: unset;
+      height: 440px;
       .left-group {
-        width: 100%;
-        height: 440px;
         .vid-exl-group { 
           h4 {
             font-size: 15px;
@@ -235,9 +209,6 @@
             font-size: 18px;
           }
         }
-      }
-      .right-group {
-        width: 100%;
       }
     }
   }

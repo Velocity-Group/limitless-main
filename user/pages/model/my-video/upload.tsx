@@ -14,6 +14,7 @@ interface IProps {
   ui: IUIConfig;
   user: IUser;
 }
+
 interface IFiles {
   fieldname: string;
   file: File;

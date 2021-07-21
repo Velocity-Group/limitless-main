@@ -114,7 +114,6 @@ class PerformerProfile extends PureComponent<IProps> {
     if (performer) {
       this.setState({ isBookMarked: performer.isBookMarked || false });
       this.loadItems();
-      performerService.increaseView(performer.username);
     }
   }
 

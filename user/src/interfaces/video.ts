@@ -78,6 +78,8 @@ export interface IVideoResponse {
   tagline: string;
   isSchedule: boolean;
   scheduledAt: Date;
+  updatedAt: Date;
+  createdAt: Date;
 }
 
 export interface IVideoCreate {

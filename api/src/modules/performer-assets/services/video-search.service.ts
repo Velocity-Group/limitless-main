@@ -239,6 +239,7 @@ export class VideoSearchService {
     data.forEach((v) => {
       v.thumbnailId && fileIds.push(v.thumbnailId);
       v.fileId && fileIds.push(v.fileId);
+      v.teaserId && fileIds.push(v.teaserId);
     });
 
     const [files] = await Promise.all([
@@ -252,7 +253,21 @@ export class VideoSearchService {
         const thumbnail = files.find((f) => f._id.toString() === v.thumbnailId.toString());
         if (thumbnail) {
           // eslint-disable-next-line no-param-reassign
-          v.thumbnail = thumbnail.getUrl();
+          v.thumbnail = {
+            url: thumbnail.getUrl(),
+            thumbnails: thumbnail.getThumbnails()
+          };
+        }
+      }
+      if (v.teaserId) {
+        const teaser = files.find((f) => f._id.toString() === v.teaserId.toString());
+        if (teaser) {
+          // eslint-disable-next-line no-param-reassign
+          v.teaser = {
+            url: null, // teaser.getUrl(),
+            thumbnails: teaser.getThumbnails(),
+            duration: teaser.duration
+          };
         }
       }
       if (v.fileId) {

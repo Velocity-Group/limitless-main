@@ -390,12 +390,34 @@ export class VideoService {
     return dto;
   }
 
-  public async updateInfo(id: string | ObjectId, payload: VideoUpdatePayload, updater?: UserDto): Promise<VideoDto> {
+  public async updateInfo(id: string | ObjectId, payload: VideoUpdatePayload, files: any, updater: UserDto): Promise<VideoDto> {
+    const { video: videoFile, thumbnail: thumbnailFile, teaser: teaserFile } = files;
     const video = await this.PerformerVideoModel.findById(id);
     if (!video) {
       throw new EntityNotFoundException();
     }
-
+    const { fileId, thumbnailId, teaserId } = video;
+    if (videoFile && videoFile._id) {
+      video.fileId = videoFile._id;
+    }
+    if (thumbnailFile && thumbnailFile._id) {
+      video.thumbnailId = thumbnailFile._id;
+    }
+    if (teaserFile && teaserFile._id) {
+      video.teaserId = teaserFile._id;
+    }
+    if (videoFile && !videoFile?.mimeType?.toLowerCase().includes('video')) {
+      await this.fileService.remove(videoFile._id);
+      delete video.fileId;
+    }
+    if (thumbnailFile && !thumbnailFile.isImage()) {
+      await this.fileService.remove(thumbnailFile._id);
+      delete video.thumbnailId;
+    }
+    if (teaserFile && !teaserFile.mimeType.toLowerCase().includes('video')) {
+      await this.fileService.remove(teaserFile._id);
+      delete video.teaserId;
+    }
     const oldStatus = video.status;
     let { slug } = video;
     if (payload.title !== video.title) {
@@ -425,6 +447,47 @@ export class VideoService {
     video.slug = slug;
     await video.save();
     const dto = new VideoDto(video);
+    if (thumbnailFile && `${video.thumbnailId}` !== `${thumbnailId}`) {
+      await Promise.all([
+        this.fileService.addRef(video.thumbnailId, {
+          itemId: video._id,
+          itemType: REF_TYPE.VIDEO
+        }),
+        thumbnailId && this.fileService.remove(thumbnailId)
+      ]);
+    }
+    if (videoFile && `${video.fileId}` !== `${fileId}`) {
+      // add ref, remove old file, convert file
+      await Promise.all([
+        this.fileService.addRef(video.fileId, {
+          itemId: video._id,
+          itemType: REF_TYPE.VIDEO
+        }),
+        fileId && this.fileService.remove(fileId),
+        this.fileService.queueProcessVideo(video.fileId, {
+          publishChannel: PERFORMER_VIDEO_CHANNEL,
+          meta: {
+            videoId: video._id
+          }
+        })
+      ]);
+    }
+    if (teaserFile && `${video.teaserId}` !== `${teaserId}`) {
+      // add ref, remove old file, convert file
+      await Promise.all([
+        this.fileService.addRef(video.teaserId, {
+          itemId: video._id,
+          itemType: REF_TYPE.VIDEO
+        }),
+        teaserId && this.fileService.remove(teaserId),
+        this.fileService.queueProcessVideo(video.teaserId, {
+          publishChannel: PERFORMER_VIDEO_TEASER_CHANNEL,
+          meta: {
+            videoId: video._id
+          }
+        })
+      ]);
+    }
     await this.queueEventService.publish(
       new QueueEvent({
         channel: PERFORMER_COUNT_VIDEO_CHANNEL,

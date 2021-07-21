@@ -10,12 +10,19 @@ import { IVideoUpdate, IUIConfig, IUser } from 'src/interfaces';
 import Router from 'next/router';
 import { Layout, message, Spin } from 'antd';
 import { getResponseError } from '@lib/utils';
+import moment from 'moment';
 
 interface IProps {
   id: string;
   ui: IUIConfig;
   user: IUser;
 }
+
+interface IFiles {
+  fieldname: string;
+  file: File;
+}
+
 class VideoUpdate extends PureComponent<IProps> {
   static authenticate = true;
 
@@ -26,9 +33,20 @@ class VideoUpdate extends PureComponent<IProps> {
   }
 
   state = {
-    submiting: false,
     fetching: true,
+    uploading: false,
+    uploadPercentage: 0,
     video: {} as IVideoUpdate
+  };
+
+  _files: {
+    thumbnail: File;
+    teaser: File;
+    video: File;
+  } = {
+    thumbnail: null,
+    teaser: null,
+    video: null
   };
 
   async componentDidMount() {
@@ -44,40 +62,61 @@ class VideoUpdate extends PureComponent<IProps> {
     }
   }
 
+  onUploading(resp: any) {
+    this.setState({ uploadPercentage: resp.percentage });
+  }
+
+  beforeUpload(file: File, field: string) {
+    this._files[field] = file;
+  }
+
   async submit(data: any) {
+    const { video } = this.state;
+    const submitData = { ...data };
+    if ((data.isSale && !data.price) || (data.isSale && data.price < 1)) {
+      message.error('Invalid amount of tokens');
+      return;
+    }
+    if ((data.isSchedule && !data.scheduledAt) || (data.isSchedule && moment(data.scheduledAt).isBefore(moment()))) {
+      message.error('Invalid schedule date');
+      return;
+    }
+    submitData.tags = [...data.tags];
+    submitData.participantIds = [...data.participantIds];
+    const files = Object.keys(this._files).reduce((f, key) => {
+      if (this._files[key]) {
+        f.push({
+          fieldname: key,
+          file: this._files[key] || null
+        });
+      }
+      return f;
+    }, [] as IFiles[]) as [IFiles];
+
+    await this.setState({
+      uploading: true
+    });
     try {
-      const { id } = this.props;
-      const submitData = { ...data };
-      if (
-        (data.isSale && !data.price)
-        || (data.isSale && data.price < 1)
-      ) {
-        message.error('Invalid amount of tokens');
-        return;
-      }
-      if (data.isSchedule && !data.scheduledAt) {
-        message.error('Invalid schedule date');
-        return;
-      }
-      if (data.isSchedule && data.scheduledAt) {
-        submitData.status = 'inactive';
-      }
-      await this.setState({ submiting: true });
-      await videoService.update(id, submitData);
-      message.success('Changes saved.');
-      Router.push('/model/my-video');
-    } catch (e) {
-      // TODO - check and show error here
-      message.error(
-        getResponseError(e) || 'Something went wrong, please try again!'
+      await videoService.update(
+        video._id,
+        files,
+        data,
+        this.onUploading.bind(this)
       );
+
+      message.success('Video has been uploaded');
+      Router.replace('/model/my-video');
+    } catch (error) {
+      message.error(getResponseError(error) || 'An error occurred, please try again!');
     } finally {
-      this.setState({ submiting: false });
+      this.setState({ uploading: false });
     }
   }
 
   render() {
-    const { video, submiting, fetching } = this.state;
+    const {
+      video, uploading, fetching, uploadPercentage
+    } = this.state;
     const { ui, user } = this.props;
     return (
       <Layout>
@@ -99,7 +138,9 @@ class VideoUpdate extends PureComponent<IProps> {
                 user={user}
                 video={video}
                 submit={this.submit.bind(this)}
-                uploading={submiting}
+                uploading={uploading}
+                beforeUpload={this.beforeUpload.bind(this)}
+                uploadPercentage={uploadPercentage}
               />
             )}
             {fetching && <div className="text-center"><Spin /></div>}
