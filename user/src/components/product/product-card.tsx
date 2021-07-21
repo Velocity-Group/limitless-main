@@ -34,8 +34,8 @@ export class ProductCard extends PureComponent<IProps, IStates> {
         </div>
         <div className="prd-thumb">
           <Link
-            href={{ pathname: '/store', query: { id: product._id } }}
-            as={`/store/${product._id}`}
+            href={{ pathname: '/store', query: { id: product.slug || product._id } }}
+            as={`/store/${product.slug || product._id}`}
           >
             <span>
               <img alt="img" src={image} />
@@ -44,8 +44,8 @@ export class ProductCard extends PureComponent<IProps, IStates> {
         </div>
         <div className="prd-info">
           <Link
-            href={{ pathname: '/store', query: { id: product._id } }}
-            as={`/store/${product._id}`}
+            href={{ pathname: '/store', query: { id: product.slug || product._id } }}
+            as={`/store/${product.slug || product._id}`}
           >
             <a>{product.name}</a>
           </Link>

@@ -18,13 +18,13 @@ import {
 import UploadList from '@components/file/list-media';
 import { IFeed } from 'src/interfaces';
 import { feedService } from '@services/index';
-import './index.less';
 import Router from 'next/router';
 import moment from 'moment';
 import { formatDate } from '@lib/date';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { FormInstance } from 'antd/lib/form';
 import AddPollDurationForm from './add-poll-duration';
+import './index.less';
 
 const { TextArea } = Input;
 const layout = {
@@ -118,11 +118,9 @@ export default class FormFeed extends PureComponent<IProps> {
           fileItem._id = resp.data._id;
         } catch (e) {
           message.error(`File ${fileItem.name} error!`);
-        } finally {
-          await this.setState({ uploading: false, fileIds: newFileIds });
-          this.forceUpdate();
         }
       }
+      this.setState({ uploading: false, fileIds: newFileIds });
     }
   }
 
@@ -184,14 +182,14 @@ export default class FormFeed extends PureComponent<IProps> {
     const { fileList, fileIds } = this.state;
     fileList.splice(fileList.findIndex((f) => (f._id ? f._id === file._id : f.uid === file.uid)), 1);
     file._id && fileIds.splice(fileIds.findIndex((id) => id === file._id), 1);
-    await this.setState({ fileList, fileIds });
-    this.forceUpdate();
+    this.setState({ fileList, fileIds });
   }
 
   async beforeUpload(file, fileList) {
     const { fileIds } = this.state;
     if (!fileList.length) {
-      return this.setState({ fileList: [] });
+      this.setState({ fileList: [] });
+      return;
     }
     if (fileList.indexOf(file) === (fileList.length - 1)) {
       const files = await Promise.all(fileList.map((f) => {
@@ -205,7 +203,7 @@ export default class FormFeed extends PureComponent<IProps> {
       const newFileIds = [...fileIds];
       for (const newFile of fileList) {
         try {
-          if (['uploading', 'done'].includes(newFile.status) || newFile._id) continue;
+          if (['uploading', 'done'].includes(newFile.status) || newFile._id) return;
           newFile.status = 'uploading';
           const resp = (newFile.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
             newFile,
@@ -220,14 +218,10 @@ export default class FormFeed extends PureComponent<IProps> {
           newFile._id = resp.data._id;
         } catch (e) {
           message.error(`File ${newFile.name} error!`);
-        } finally {
-          await this.setState({ uploading: false, fileIds: newFileIds });
-          this.forceUpdate();
         }
       }
-      return false;
+      this.setState({ uploading: false, fileIds: newFileIds });
     }
-    return false;
   }
 
   async beforeUploadThumbnail(file) {
@@ -327,7 +321,7 @@ export default class FormFeed extends PureComponent<IProps> {
       await this.setState({ uploading: true });
       this.onsubmit(feed, formValues);
     }
-    return undefined;
+    return false;
   }
 
   render() {

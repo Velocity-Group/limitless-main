@@ -95,8 +95,7 @@ export class SelectMenuTreeDropdown extends PureComponent<IProps> {
         placeholder={placeholder || 'Please select'}
         treeDefaultExpandAll
         onChange={(values) => {
-          this.setState({ value: { values } });
-          onSelect(value);
+          this.setState({ value: values }, () => onSelect(value));
         }}
         onSearch={this.handleSearch}
         disabled={disabled}

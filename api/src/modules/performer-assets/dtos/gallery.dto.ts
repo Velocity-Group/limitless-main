@@ -11,6 +11,8 @@ export class GalleryDto {
 
   title: string;
 
+  slug: string;
+
   description: string;
 
   status: string;

@@ -76,7 +76,7 @@ export class CommentService {
     if (comment.createdBy.toString() !== user._id.toString()) {
       throw new ForbiddenException();
     }
-    await this.commentModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.commentModel.updateOne({ _id: id }, data);
     return { updated: true };
   }
 

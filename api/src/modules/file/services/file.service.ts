@@ -497,8 +497,8 @@ export class FileService {
   public async queueProcessPhoto(
     fileId: string | ObjectId,
     options?: {
-      meta: Record<string, any>;
-      publishChannel: string;
+      meta?: Record<string, any>;
+      publishChannel?: string;
       thumbnailSize: {
         width: number;
         height: number;

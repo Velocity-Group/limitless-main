@@ -9,18 +9,18 @@ interface GalleryCardIProps {
 }
 
 const GalleryCard = ({ gallery }: GalleryCardIProps) => {
-  const thumbUrl = gallery.coverPhoto && gallery.coverPhoto.thumbnails.length ? gallery.coverPhoto.thumbnails[0] : '/placeholder-image.jpg';
+  const thumbUrl = gallery?.coverPhoto?.thumbnails[0] || '/static/placeholder-image.jpg';
   return (
     <Link
-      href={{ pathname: '/gallery', query: { id: gallery?._id } }}
-      as={`/gallery/${gallery?._id}`}
+      href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
+      as={`/gallery/${gallery?.slug || gallery?._id}`}
     >
       <div className="vid-card">
-        {gallery.isSale && gallery.price > 0 && (
+        {gallery?.isSale && gallery?.price > 0 && (
         <span className="vid-price">
           <div className="label-price">
             <img alt="coin" src="/static/coin-ico.png" width="15px" />
-            {gallery.price.toFixed(2)}
+            {gallery?.price.toFixed(2)}
           </div>
         </span>
         )}
@@ -43,10 +43,10 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
         <div className="vid-info">
           <Tooltip title={gallery.title}>
             <Link
-              href={{ pathname: `/gallery/${gallery._id}`, query: { id: gallery._id } }}
-              as={`/gallery/${gallery._id}`}
+              href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
+              as={`/gallery/${gallery?.slug || gallery?._id}`}
             >
-              <span>{gallery.title}</span>
+              <span>{gallery?.title}</span>
             </Link>
           </Tooltip>
         </div>

@@ -43,7 +43,7 @@ export class StoryService {
   }
 
   public async handleCommentStat(storyId: string, num = 1) {
-    await this.storyModel.updateOne({ _id: storyId }, { $inc: { totalComment: num } }, { upsert: true });
+    await this.storyModel.updateOne({ _id: storyId }, { $inc: { totalComment: num } });
   }
 
   private async _validatePayload(payload: StoryCreatePayload) {
@@ -222,7 +222,7 @@ export class StoryService {
     if (!story || story.fromSourceId.toString() !== user._id.toString()) throw new EntityNotFoundException();
     const data = { ...payload } as any;
     data.updatedAt = new Date();
-    await this.storyModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.storyModel.updateOne({ _id: id }, data);
     return { updated: true };
   }
 

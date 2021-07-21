@@ -759,15 +759,15 @@ export class PerformerService {
     id: string | ObjectId,
     payload: Record<string, number>
   ) {
-    return this.performerModel.updateOne({ _id: id }, { $inc: payload }, { upsert: true });
+    return this.performerModel.updateOne({ _id: id }, { $inc: payload });
   }
 
   public async goLive(id: string | ObjectId) {
-    return this.performerModel.updateOne({ _id: id }, { $set: { live: 1 } }, { upsert: true });
+    return this.performerModel.updateOne({ _id: id }, { $set: { live: 1 } });
   }
 
   public async setStreamingStatus(id: string | ObjectId, streamingStatus: string) {
-    return this.performerModel.updateOne({ _id: id }, { $set: { streamingStatus } }, { upsert: true });
+    return this.performerModel.updateOne({ _id: id }, { $set: { streamingStatus } });
   }
 
   public async updatePaymentGateway(payload: PaymentGatewaySettingPayload) {
@@ -805,8 +805,7 @@ export class PerformerService {
       {
         $inc: { 'stats.subscribers': num },
         verifiedAccount: (performer.stats.subscribers === (minimumVerificationNumber - 1)) && num === 1
-      },
-      { upsert: true }
+      }
     );
   }
 
@@ -815,8 +814,7 @@ export class PerformerService {
       { _id: performerId },
       {
         $inc: { 'stats.likes': num }
-      },
-      { upsert: true }
+      }
     );
   }
 
@@ -892,7 +890,7 @@ export class PerformerService {
   }
 
   public async updatePerformerBalance(performerId: string | ObjectId, tokens: number) {
-    await this.performerModel.updateOne({ _id: performerId }, { $inc: { balance: tokens } }, { upsert: true });
+    await this.performerModel.updateOne({ _id: performerId }, { $inc: { balance: tokens } });
     await this.changeTokenLogService.changeTokenLog({
       source: CHANGE_TOKEN_LOG_SOURCES.PERFORMER,
       sourceId: performerId,

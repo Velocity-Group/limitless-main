@@ -161,7 +161,7 @@ export class UserService {
       data.email = data.email.toLowerCase();
       data.verifiedEmail = false;
     }
-    await this.userModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.userModel.updateOne({ _id: id }, data);
     if (data.email && data.email.toLowerCase() !== user.email) {
       await this.authService.sendVerificationEmail(user);
       await this.authService.updateKey({
@@ -228,7 +228,7 @@ export class UserService {
       data.email = data.email.toLowerCase();
       data.verifiedEmail = false;
     }
-    await this.userModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.userModel.updateOne({ _id: id }, data);
     const newUser = await this.userModel.findById(id);
     const oldBalance = user.balance;
     // logs change token
@@ -263,8 +263,7 @@ export class UserService {
       {
         _id: userId
       },
-      { status: STATUS.ACTIVE, verifiedEmail: true },
-      { upsert: true }
+      { status: STATUS.ACTIVE, verifiedEmail: true }
     );
   }
 
@@ -272,15 +271,15 @@ export class UserService {
     id: string | ObjectId,
     payload: Record<string, number>
   ) {
-    await this.userModel.updateOne({ _id: id }, { $inc: payload }, { upsert: true });
+    await this.userModel.updateOne({ _id: id }, { $inc: payload });
   }
 
   public async updateCCbillPaymentInfo(userId: | ObjectId, subscriptionId: string) {
-    await this.userModel.updateOne({ _id: userId }, { ccbillCardToken: subscriptionId, authorisedCard: true }, { upsert: true });
+    await this.userModel.updateOne({ _id: userId }, { ccbillCardToken: subscriptionId, authorisedCard: true });
   }
 
   public async updateBalance(userId: string | ObjectId, tokens: number) {
-    await this.userModel.updateOne({ _id: userId }, { $inc: { balance: tokens } }, { upsert: true });
+    await this.userModel.updateOne({ _id: userId }, { $inc: { balance: tokens } });
     await this.changeTokenLogService.changeTokenLog({
       source: CHANGE_TOKEN_LOG_SOURCES.USER,
       sourceId: userId,
@@ -289,12 +288,12 @@ export class UserService {
   }
 
   public async updateStripeCustomerId(userId: | ObjectId, stripeCustomerId: string) {
-    await this.userModel.updateOne({ _id: userId }, { stripeCustomerId }, { upsert: true });
+    await this.userModel.updateOne({ _id: userId }, { stripeCustomerId });
   }
 
   public async updateStripeCardIds(userId: | ObjectId, cardId: string, isNew = true) {
-    isNew ? await this.userModel.updateOne({ _id: userId }, { $push: { stripeCardIds: cardId } }, { upsert: true })
-      : await this.userModel.updateOne({ _id: userId }, { $pull: { stripeCardIds: cardId } }, { upsert: true });
+    isNew ? await this.userModel.updateOne({ _id: userId }, { $push: { stripeCardIds: cardId } })
+      : await this.userModel.updateOne({ _id: userId }, { $pull: { stripeCardIds: cardId } });
   }
 
   public async delete(id: string) {

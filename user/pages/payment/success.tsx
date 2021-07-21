@@ -5,9 +5,11 @@ import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import { withRouter } from 'next/router';
+import { clearCart } from '@redux/cart/actions';
 import { IUser, IUIConfig } from '../../src/interfaces';
 
 interface IProps {
+  clearCart: Function;
   user: IUser;
   ui: IUIConfig;
   router: any
@@ -17,6 +19,12 @@ class PaymentSuccess extends PureComponent<IProps> {
   static authenticate: boolean = true;
 
   static noredirect: boolean = true;
+
+  componentDidMount() {
+    const { clearCart: clearCartHandler } = this.props;
+    setTimeout(() => { clearCartHandler(); }, 1000);
+    localStorage.setItem('cart', JSON.stringify([]));
+  }
 
   render() {
     const { ui, user, router } = this.props;
@@ -57,5 +65,5 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui }
 });
 
-const mapDispatch = { };
+const mapDispatch = { clearCart };
 export default connect(mapStates, mapDispatch)(withRouter(PaymentSuccess));

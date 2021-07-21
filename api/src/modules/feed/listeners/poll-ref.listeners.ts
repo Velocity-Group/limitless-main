@@ -36,7 +36,7 @@ export class PollFeedListener {
     const { pollIds, _id: feedId } = event.data;
     if (!pollIds || !pollIds.length) return;
     if (event.eventName === EVENT.CREATED) {
-      await this.pollModel.updateMany({ _id: { $in: pollIds } }, { refId: feedId, fromRef: POLL_TARGET_SOURCE.FEED }, { upsert: true });
+      await this.pollModel.updateMany({ _id: { $in: pollIds } }, { refId: feedId, fromRef: POLL_TARGET_SOURCE.FEED });
     }
   }
 

@@ -27,10 +27,6 @@ export const PhotoSchema = new Schema({
     default: 0
   },
   processing: Boolean,
-  performerUsername: {
-    type: String,
-    index: true
-  },
   isGalleryCover: {
     type: Boolean,
     default: false

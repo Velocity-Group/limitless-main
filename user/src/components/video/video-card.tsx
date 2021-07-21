@@ -19,8 +19,8 @@ export class VideoCard extends PureComponent<IProps> {
     const { video } = this.props;
     return (
       <Link
-        href={{ pathname: '/video', query: { id: video._id } }}
-        as={`/video/${video._id}`}
+        href={{ pathname: '/video', query: { id: video.slug || video._id } }}
+        as={`/video/${video.slug || video._id}`}
       >
         <div className="vid-card">
           {video.isSale && video.price > 0 && (
@@ -55,8 +55,8 @@ export class VideoCard extends PureComponent<IProps> {
           <div className="vid-info">
             <Tooltip title={video.title}>
               <Link
-                href={{ pathname: '/video', query: { id: video._id } }}
-                as={`/video/${video._id}`}
+                href={{ pathname: '/video', query: { id: video.slug || video._id } }}
+                as={`/video/${video.slug || video._id}`}
               >
                 <span>{video.title}</span>
               </Link>

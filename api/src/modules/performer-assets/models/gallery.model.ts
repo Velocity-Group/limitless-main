@@ -8,6 +8,8 @@ export class GalleryModel extends Document {
 
   title: string;
 
+  slug: string;
+
   description: string;
 
   status: string;

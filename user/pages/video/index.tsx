@@ -355,6 +355,7 @@ class VideoViewPage extends PureComponent<IProps> {
       teaser: video && video.teaser ? video.teaser : ''
     };
     const videoJsOptions = {
+      key: video?._id,
       autoplay: false,
       controls: true,
       playsinline: true,
@@ -366,6 +367,7 @@ class VideoViewPage extends PureComponent<IProps> {
       ]
     };
     const teaserOptions = {
+      key: video?._id,
       autoplay: false,
       controls: true,
       playsinline: true,

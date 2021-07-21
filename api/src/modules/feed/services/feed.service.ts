@@ -110,7 +110,7 @@ export class FeedService {
       }).lean();
       await Promise.all(feeds.map((feed) => {
         const v = new FeedDto(feed);
-        this.feedModel.findOneAndUpdate(
+        this.feedModel.updateOne(
           {
             _id: v._id
           },
@@ -152,7 +152,7 @@ export class FeedService {
   }
 
   public async handleCommentStat(feedId: string, num = 1) {
-    await this.feedModel.findOneAndUpdate({ _id: feedId }, { $inc: { totalComment: num } }, { upsert: true });
+    await this.feedModel.updateOne({ _id: feedId }, { $inc: { totalComment: num } });
   }
 
   private async _validatePayload(payload: FeedCreatePayload) {
@@ -482,7 +482,7 @@ export class FeedService {
     if (!feed || ((!user.roles || !user.roles.includes('admin')) && feed.fromSourceId.toString() !== user._id.toString())) throw new EntityNotFoundException();
     const data = { ...payload } as any;
     data.updatedAt = new Date();
-    await this.feedModel.findOneAndUpdate({ _id: id }, data, { upsert: true });
+    await this.feedModel.updateOne({ _id: id }, data);
     if (payload.fileIds && payload.fileIds.length) {
       const ids = feed.fileIds.map((_id) => _id.toString());
       const Ids = payload.fileIds.filter((_id) => !ids.includes(_id));

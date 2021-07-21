@@ -3,6 +3,7 @@ import { ISearch } from './utils';
 export interface IGallery {
   _id: string;
   title: string;
+  slug: string;
   description: string;
   isSale: boolean;
   status: string;

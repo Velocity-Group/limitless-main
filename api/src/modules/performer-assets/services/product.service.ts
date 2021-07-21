@@ -2,7 +2,7 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
-  EntityNotFoundException, QueueEventService, QueueEvent
+  EntityNotFoundException, QueueEventService, QueueEvent, StringHelper
 } from 'src/kernel';
 import { FileDto } from 'src/modules/file';
 import { FileService } from 'src/modules/file/services';
@@ -13,6 +13,7 @@ import { EVENT } from 'src/kernel/constants';
 import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PRODUCT_TYPE } from '../constants';
 import { ProductDto } from '../dtos';
 import { ProductCreatePayload, ProductUpdatePayload } from '../payloads';
@@ -77,7 +78,13 @@ export class ProductService {
     }
     product.createdAt = new Date();
     product.updatedAt = new Date();
-
+    product.slug = StringHelper.createAlias(payload.name);
+    const slugCheck = await this.productModel.countDocuments({
+      slug: product.slug
+    });
+    if (slugCheck) {
+      product.slug = `${product.slug}-${StringHelper.randomString(8)}`;
+    }
     await product.save();
     const dto = new ProductDto(product);
 
@@ -110,7 +117,17 @@ export class ProductService {
     ) {
       throw new InvalidFileException('Missing digital file');
     }
-
+    let { slug } = product;
+    if (payload.name !== product.name) {
+      slug = StringHelper.createAlias(payload.name);
+      const slugCheck = await this.productModel.countDocuments({
+        slug: product.slug,
+        _id: { $ne: product._id }
+      });
+      if (slugCheck) {
+        slug = `${product.slug}-${StringHelper.randomString(8)}`;
+      }
+    }
     merge(product, payload);
     const deletedFileIds = [];
     if (digitalFile) {
@@ -124,8 +141,8 @@ export class ProductService {
     }
     if (updater) product.updatedBy = updater._id;
     product.updatedAt = new Date();
+    product.slug = slug;
     await product.save();
-
     deletedFileIds.length
       && (await Promise.all(
         deletedFileIds.map((fileId) => this.fileService.remove(fileId))
@@ -166,8 +183,9 @@ export class ProductService {
     return true;
   }
 
-  public async getDetails(id: string | ObjectId, user: UserDto) {
-    const product = await this.productModel.findOne({ _id: id });
+  public async getDetails(id: string, user: UserDto) {
+    const query = isObjectId(id) ? { _id: id } : { slug: id };
+    const product = await this.productModel.findOne(query);
     if (!product) {
       throw new EntityNotFoundException();
     }
@@ -198,8 +216,7 @@ export class ProductService {
       { _id: id },
       {
         $inc: { 'stats.comments': num }
-      },
-      { upsert: true }
+      }
     );
   }
 
@@ -208,8 +225,7 @@ export class ProductService {
       { _id: id },
       {
         $inc: { 'stats.likes': num }
-      },
-      { upsert: true }
+      }
     );
   }
 
@@ -218,8 +234,7 @@ export class ProductService {
       { _id: id },
       {
         $inc: { 'stats.bookmarks': num }
-      },
-      { upsert: true }
+      }
     );
   }
 }

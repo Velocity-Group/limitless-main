@@ -26,6 +26,7 @@ import { REF_TYPE } from 'src/modules/file/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserDto } from 'src/modules/user/dtos';
 import { PurchaseItemType } from 'src/modules/purchased-item/constants';
+import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { VideoUpdatePayload } from '../payloads';
 import { VideoDto, IVideoResponse } from '../dtos';
 import { VIDEO_STATUS, VIDEO_TEASER_STATUS } from '../constants';
@@ -118,7 +119,7 @@ export class VideoService {
       }).lean();
       await Promise.all(videos.map((video) => {
         const v = new VideoDto(video);
-        this.PerformerVideoModel.findOneAndUpdate(
+        this.PerformerVideoModel.updateOne(
           {
             _id: v._id
           },
@@ -295,6 +296,13 @@ export class VideoService {
     model.thumbnailId = thumbnail ? thumbnail._id : null;
     model.teaserId = teaser ? teaser._id : null;
     model.processing = true;
+    model.slug = StringHelper.createAlias(payload.title);
+    const slugCheck = await this.PerformerVideoModel.countDocuments({
+      slug: model.slug
+    });
+    if (slugCheck) {
+      model.slug = `${model.slug}-${StringHelper.randomString(8)}`;
+    }
     creator && model.set('createdBy', creator._id);
     model.createdAt = new Date();
     model.updatedAt = new Date();
@@ -365,8 +373,9 @@ export class VideoService {
     return dto;
   }
 
-  public async userGetDetails(videoId: string | ObjectId, currentUser: UserDto, jwToken: string): Promise<VideoDto> {
-    const video = await this.PerformerVideoModel.findById(videoId);
+  public async userGetDetails(videoId: string, currentUser: UserDto, jwToken: string): Promise<VideoDto> {
+    const query = isObjectId(videoId) ? { _id: videoId } : { slug: videoId };
+    const video = await this.PerformerVideoModel.findOne(query);
     if (!video) throw new EntityNotFoundException();
     const participantIds = video.participantIds.filter((p) => StringHelper.isObjectId(p));
     const [performer, videoFile, thumbnailFile, teaserFile, participants] = await Promise.all([
@@ -405,7 +414,17 @@ export class VideoService {
     }
 
     const oldStatus = video.status;
-
+    let { slug } = video;
+    if (payload.title !== video.title) {
+      slug = StringHelper.createAlias(payload.title);
+      const slugCheck = await this.PerformerVideoModel.countDocuments({
+        slug: video.slug,
+        _id: { $ne: video._id }
+      });
+      if (slugCheck) {
+        slug = `${video.slug}-${StringHelper.randomString(8)}`;
+      }
+    }
     merge(video, payload);
     if (video.status !== VIDEO_STATUS.FILE_ERROR && payload.status !== VIDEO_STATUS.FILE_ERROR) {
       video.status = payload.status;
@@ -420,6 +439,7 @@ export class VideoService {
     }
     updater && video.set('updatedBy', updater._id);
     video.updatedAt = new Date();
+    video.slug = slug;
     await video.save();
     const dto = new VideoDto(video);
     await this.queueEventService.publish(
@@ -456,7 +476,7 @@ export class VideoService {
   }
 
   public async increaseView(id: string | ObjectId) {
-    return this.PerformerVideoModel.findOneAndUpdate(
+    return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
         $inc: { 'stats.views': 1 }
@@ -466,7 +486,7 @@ export class VideoService {
   }
 
   public async increaseComment(id: string | ObjectId, num = 1) {
-    return this.PerformerVideoModel.findOneAndUpdate(
+    return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
         $inc: { 'stats.comments': num }
@@ -476,7 +496,7 @@ export class VideoService {
   }
 
   public async increaseLike(id: string | ObjectId, num = 1) {
-    return this.PerformerVideoModel.findOneAndUpdate(
+    return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
         $inc: { 'stats.likes': num }
@@ -486,12 +506,11 @@ export class VideoService {
   }
 
   public async increaseFavourite(id: string | ObjectId, num = 1) {
-    return this.PerformerVideoModel.findOneAndUpdate(
+    return this.PerformerVideoModel.updateOne(
       { _id: id },
       {
         $inc: { 'stats.bookmarks': num }
-      },
-      { upsert: true }
+      }
     );
   }
 

@@ -16,6 +16,8 @@ export class ProductDto {
 
   name?: string;
 
+  slug?: string;
+
   description?: string;
 
   status?: string;

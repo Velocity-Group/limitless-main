@@ -89,10 +89,10 @@ export class TableListGallery extends PureComponent<IProps> {
             <Button className="info">
               <Link
                 href={{
-                  pathname: `/gallery/${record._id}`,
+                  pathname: `/gallery/${record?.slug || record?._id}`,
                   query: { id: record._id }
                 }}
-                as={`/gallery/${record._id}`}
+                as={`/gallery/${record?.slug || record?._id}`}
               >
                 <a>
                   <EyeOutlined />

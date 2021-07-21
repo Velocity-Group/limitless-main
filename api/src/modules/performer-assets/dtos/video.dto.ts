@@ -12,6 +12,8 @@ export class VideoDto {
 
   title: string;
 
+  slug: string;
+
   description: string;
 
   status: string;
@@ -75,6 +77,7 @@ export class VideoDto {
         'fileId',
         'type',
         'title',
+        'slug',
         'description',
         'status',
         'processing',
@@ -115,6 +118,8 @@ export class IVideoResponse {
   type: string;
 
   title: string;
+
+  slug: string;
 
   description: string;
 

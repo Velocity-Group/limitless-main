@@ -29,7 +29,6 @@ import { PERFORMER_PHOTO_MODEL_PROVIDER } from '../providers';
 export const PERFORMER_PHOTO_CHANNEL = 'PERFORMER_PHOTO_CHANNEL';
 
 const FILE_PROCESSED_TOPIC = 'FILE_PROCESSED';
-const UPDATE_DEFAULT_COVER_GALLERY = 'UPDATE_DEFAULT_COVER_GALLERY';
 const CHECK_REF_REMOVE_PHOTO_AGENDA = 'CHECK_REF_REMOVE_PHOTO_AGENDA';
 
 @Injectable()
@@ -54,12 +53,6 @@ export class PhotoService {
       PERFORMER_PHOTO_CHANNEL,
       FILE_PROCESSED_TOPIC,
       this.handleFileProcessed.bind(this)
-    );
-
-    this.queueEventService.subscribe(
-      PERFORMER_PHOTO_CHANNEL,
-      UPDATE_DEFAULT_COVER_GALLERY,
-      this.handleDefaultCoverGallery.bind(this)
     );
     this.defineJobs();
   }
@@ -101,36 +94,25 @@ export class PhotoService {
   }
 
   public async handleFileProcessed(event: QueueEvent) {
-    try {
-      if (event.eventName !== FILE_EVENT.PHOTO_PROCESSED) return;
+    if (event.eventName !== FILE_EVENT.PHOTO_PROCESSED) return;
 
-      const { photoId } = event.data.meta;
-      const [photo, file] = await Promise.all([
-        this.photoModel.findById(photoId),
-        this.fileService.findById(event.data.fileId)
-      ]);
-      if (!photo) {
-        // TODO - delete file?
-        await this.fileService.remove(event.data.fileId);
-        return;
-      }
-      photo.processing = false;
-      if (file.status === 'error') {
-        photo.status = PHOTO_STATUS.FILE_ERROR;
-      }
-      await photo.save();
-    } catch (e) {
-      // TODO - log me
-    }
-  }
-
-  private async handleDefaultCoverGallery(event: QueueEvent) {
-    if (![EVENT.CREATED, EVENT.UPDATED].includes(event.eventName)) {
+    const { photoId } = event.data.meta;
+    const [photo, file] = await Promise.all([
+      this.photoModel.findById(photoId),
+      this.fileService.findById(event.data.fileId)
+    ]);
+    if (!photo) {
+      // TODO - delete file?
+      await this.fileService.remove(event.data.fileId);
       return;
     }
-
-    const photo = event.data as PhotoDto;
-    if (!photo.galleryId) return;
+    photo.processing = false;
+    if (file.status === 'error') {
+      photo.status = PHOTO_STATUS.FILE_ERROR;
+    }
+    await photo.save();
+    // add default cover photo to gallery
+    if (file.status === 'error' || !photo.galleryId) return;
     await this.galleryService.updatePhotoStats(photo.galleryId);
     // update cover field in the photo list
     const photoCover = await this.photoModel.findOne({
@@ -139,11 +121,11 @@ export class PhotoService {
     });
     if (photoCover) return;
     const defaultCover = await this.photoModel.findOne({
-      galleryId: photo.galleryId,
+      targetId: photo.galleryId,
       status: PHOTO_STATUS.ACTIVE
     });
     if (!defaultCover || (photoCover && photoCover._id.toString() === defaultCover.toString())) return;
-    await this.galleryService.updateCover(photo.galleryId, defaultCover ? defaultCover._id : null);
+    await this.galleryService.updateCover(photo.galleryId, defaultCover._id);
     await this.photoModel.updateOne(
       { _id: defaultCover._id },
       {
@@ -246,7 +228,7 @@ export class PhotoService {
       galleryId: photo.galleryId
     }, {
       isGalleryCover: false
-    }, { upsert: true });
+    });
     photo.isGalleryCover = true;
     await photo.save();
     photo.galleryId && await this.galleryService.updateCover(photo.galleryId, photo._id);

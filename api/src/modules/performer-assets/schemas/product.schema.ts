@@ -13,6 +13,14 @@ export const ProductSchema = new Schema({
     type: String
     // TODO - text index?
   },
+  slug: {
+    type: String,
+    index: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    sparse: true
+  },
   description: String,
   type: {
     type: String,

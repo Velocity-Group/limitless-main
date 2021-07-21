@@ -18,6 +18,14 @@ export const VideoSchema = new Schema({
     type: String
     // TODO - text index?
   },
+  slug: {
+    type: String,
+    index: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    sparse: true
+  },
   description: String,
   status: {
     type: String,
@@ -42,10 +50,6 @@ export const VideoSchema = new Schema({
   teaserStatus: Boolean,
   thumbnailId: ObjectId,
   teaserId: ObjectId,
-  performerUsername: {
-    type: String,
-    index: true
-  },
   stats: {
     likes: {
       type: Number,

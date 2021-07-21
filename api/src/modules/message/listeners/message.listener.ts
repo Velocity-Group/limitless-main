@@ -67,7 +67,7 @@ export class MessageListener {
       const Ids = availableData.map((a) => a._id);
       await this.notificationMessageModel.updateMany({ _id: { $in: Ids } }, {
         $inc: { totalNotReadMessage: num }, updatedAt: new Date()
-      }, { upsert: true });
+      });
       await Promise.all(receiverIds.map(async (receiverId) => {
         const totalNotReadMessage = await this.notificationMessageModel.aggregate([
           {

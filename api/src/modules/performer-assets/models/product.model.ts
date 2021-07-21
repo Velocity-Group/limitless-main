@@ -12,6 +12,8 @@ export class ProductModel extends Document {
 
   name: string;
 
+  slug: string;
+
   description: string;
 
   status: string;

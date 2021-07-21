@@ -126,6 +126,6 @@ export class CouponService {
   }
 
   public async updateNumberOfUses(couponId: string | ObjectId) {
-    await this.couponModel.updateOne({ _id: couponId }, { $inc: { numberOfUses: -1 } }, { upsert: true });
+    await this.couponModel.updateOne({ _id: couponId }, { $inc: { numberOfUses: -1 } });
   }
 }

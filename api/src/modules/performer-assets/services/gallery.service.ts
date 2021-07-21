@@ -5,7 +5,8 @@ import {
 import { Model } from 'mongoose';
 import {
   EntityNotFoundException,
-  PageableData
+  PageableData,
+  StringHelper
 } from 'src/kernel';
 import { PerformerService } from 'src/modules/performer/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
@@ -19,6 +20,7 @@ import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } fr
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { STATUS } from 'src/kernel/constants';
+import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { GalleryUpdatePayload } from '../payloads/gallery-update.payload';
 import { GalleryDto } from '../dtos';
 import { GalleryCreatePayload, GallerySearchRequest } from '../payloads';
@@ -66,6 +68,13 @@ export class GalleryService {
 
     // eslint-disable-next-line new-cap
     const model = new this.galleryModel(payload);
+    model.slug = StringHelper.createAlias(payload.title);
+    const slugCheck = await this.galleryModel.countDocuments({
+      slug: model.slug
+    });
+    if (slugCheck) {
+      model.slug = `${model.slug}-${StringHelper.randomString(8)}`;
+    }
     model.createdAt = new Date();
     model.updatedAt = new Date();
     if (creator) {
@@ -89,13 +98,23 @@ export class GalleryService {
     if (!gallery) {
       throw new EntityNotFoundException('Gallery not found!');
     }
-
+    let { slug } = gallery;
+    if (payload.title !== gallery.title) {
+      slug = StringHelper.createAlias(payload.title);
+      const slugCheck = await this.galleryModel.countDocuments({
+        slug: gallery.slug,
+        _id: { $ne: gallery._id }
+      });
+      if (slugCheck) {
+        slug = `${gallery.slug}-${StringHelper.randomString(8)}`;
+      }
+    }
     merge(gallery, payload);
     gallery.updatedAt = new Date();
     if (creator) {
       gallery.updatedBy = creator._id;
     }
-
+    gallery.slug = slug;
     await gallery.save();
     return GalleryDto.fromModel(gallery);
   }
@@ -118,12 +137,12 @@ export class GalleryService {
     return new GalleryDto(gallery);
   }
 
-  public async details(id: string | ObjectId, user: UserDto) {
-    const gallery = await this.galleryModel.findOne({ _id: id });
+  public async details(id: string, user: UserDto) {
+    const query = isObjectId(id) ? { _id: id } : { slug: id };
+    const gallery = await this.galleryModel.findOne(query);
     if (!gallery) {
       throw new EntityNotFoundException();
     }
-
     const dto = new GalleryDto(gallery);
     if (gallery.performerId) {
       const performer = await this.performerService.findById(
@@ -486,8 +505,7 @@ export class GalleryService {
       { _id: id },
       {
         $inc: { 'stats.comments': num }
-      },
-      { upsert: true }
+      }
     );
   }
 
@@ -496,8 +514,7 @@ export class GalleryService {
       { _id: id },
       {
         $inc: { 'stats.likes': num }
-      },
-      { upsert: true }
+      }
     );
   }
 
@@ -506,8 +523,7 @@ export class GalleryService {
       { _id: id },
       {
         $inc: { 'stats.bookmarks': num }
-      },
-      { upsert: true }
+      }
     );
   }
 }

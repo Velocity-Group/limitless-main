@@ -105,8 +105,7 @@ export class StreamConnectListener {
      */
     await this.streamModel.updateMany(
       { isStreaming: 1 },
-      { $set: { isStreaming: 0, lastStreamingTime: new Date() } },
-      { upsert: true }
+      { $set: { isStreaming: 0, lastStreamingTime: new Date() } }
     );
   }
 

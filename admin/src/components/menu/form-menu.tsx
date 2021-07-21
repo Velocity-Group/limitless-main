@@ -19,8 +19,6 @@ interface IProps {
 export class FormMenu extends PureComponent<IProps> {
   formRef: any;
 
-  isPage: boolean;
-
   state = {
     isPage: false,
     isInternal: false,

@@ -58,7 +58,7 @@ export class MenuService {
       updatedAt: new Date()
     } as any;
     data.ordering = await this.checkOrdering(payload.ordering || 0, menu._id);
-    await this.menuModel.updateOne({ _id: id }, data, { upsert: true });
+    await this.menuModel.updateOne({ _id: id }, data);
     return { updated: true };
   }
 

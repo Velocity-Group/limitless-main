@@ -36,13 +36,13 @@ export class ReactionCommentListener {
     const comment = await this.commentModel.findById(objectId);
     if (event.eventName === EVENT.CREATED) {
       if (comment) {
-        await this.commentModel.updateOne({ _id: objectId }, { $inc: { totalLike: 1 } }, { upsert: true });
+        await this.commentModel.updateOne({ _id: objectId }, { $inc: { totalLike: 1 } });
         await this.performerService.updateLikeStat(comment.createdBy, 1);
       }
     }
     if (event.eventName === EVENT.DELETED) {
       if (comment) {
-        await this.commentModel.updateOne({ _id: objectId }, { $inc: { totalLike: -1 } }, { upsert: true });
+        await this.commentModel.updateOne({ _id: objectId }, { $inc: { totalLike: -1 } });
         await this.performerService.updateLikeStat(comment.createdBy, -1);
       }
     }

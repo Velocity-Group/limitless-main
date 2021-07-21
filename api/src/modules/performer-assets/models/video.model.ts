@@ -10,6 +10,8 @@ export class VideoModel extends Document {
 
   title: string;
 
+  slug: string;
+
   description: string;
 
   status: string;
