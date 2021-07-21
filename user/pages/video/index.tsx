@@ -5,7 +5,7 @@ import {
 } from 'antd';
 import {
   BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined,
-  CalendarOutlined
+  CalendarOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -373,7 +373,11 @@ class VideoViewPage extends PureComponent<IProps> {
           />
         </Head>
         <div className="main-container">
-          <div className="vid-title">{video.title}</div>
+          <div className="vid-title">
+            <VideoCameraOutlined />
+            {' '}
+            {video.title}
+          </div>
           <div className="vid-duration">
             <a>
               <CalendarOutlined />
@@ -496,7 +500,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   type="button"
                   className={activeTab === 'comment' ? 'react-btn active' : 'react-btn'}
                 >
-                  {!isFirstLoadComment ? videoStats.comments : totalComments}
+                  {isFirstLoadComment ? videoStats.comments : totalComments}
                   {' '}
                   <CommentOutlined />
                 </button>
