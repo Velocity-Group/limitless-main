@@ -507,7 +507,7 @@ class VideoViewPage extends PureComponent<IProps> {
                     pathname: '/model/profile',
                     query: { username: video.performer.username || video.performer._id }
                   }}
-                  as={`/model/${video.performer.username || video.performer._id}`}
+                  as={`/${video.performer.username || video.performer._id}`}
                 >
                   <>
                     <img
@@ -554,9 +554,9 @@ class VideoViewPage extends PureComponent<IProps> {
                     key={per._id}
                     href={{
                       pathname: '/model/profile',
-                      query: { id: per?.username || per?._id }
+                      query: { username: per?.username || per?._id }
                     }}
-                    as={`/model/${per?.username || per?._id}`}
+                    as={`/${per?.username || per?._id}`}
                   >
                     <div key={per._id} className="participant-card">
                       <img
