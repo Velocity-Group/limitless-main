@@ -11,11 +11,11 @@ const layout = {
 interface IProps {
   packageToken: ITokenPackage;
   onFinish: Function;
-  submitting?: boolean;
+  submiting?: boolean;
 }
 export default class FormTokenPackage extends PureComponent<IProps> {
   render() {
-    const { submitting, onFinish, packageToken } = this.props;
+    const { submiting, onFinish, packageToken } = this.props;
     return (
       <Form
         {...layout}
@@ -54,7 +54,7 @@ export default class FormTokenPackage extends PureComponent<IProps> {
           <InputNumber />
         </Form.Item>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-          <Button type="primary" htmlType="submit" loading={submitting}>
+          <Button type="primary" htmlType="submit" loading={submiting}>
             Submit
           </Button>
         </Form.Item>

@@ -9,18 +9,18 @@ import { subscriptionService } from '@services/subscription.service';
 
 class SubscriptionCreate extends PureComponent {
   state = {
-    submitting: false
+    submiting: false
   };
 
   async submit(data) {
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
       await subscriptionService.create(data);
       message.success('Created successfully');
       // TODO - redirect
       this.setState(
         {
-          submitting: false
+          submiting: false
         },
         () => window.setTimeout(() => {
           Router.push(
@@ -35,12 +35,12 @@ class SubscriptionCreate extends PureComponent {
       // TODO - check and show error here
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { submitting } = this.state;
+    const { submiting } = this.state;
     return (
       <>
         <Head>
@@ -50,7 +50,7 @@ class SubscriptionCreate extends PureComponent {
           breadcrumbs={[{ title: 'Subscriptions', href: '/subscription' }, { title: 'New subscription' }]}
         />
         <Page>
-          <FormSubscription onFinish={this.submit.bind(this)} submitting={submitting} />
+          <FormSubscription onFinish={this.submit.bind(this)} submiting={submiting} />
         </Page>
       </>
     );

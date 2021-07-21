@@ -14,7 +14,7 @@ interface IProps {
 }
 class PhotoUpdate extends PureComponent<IProps> {
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     photo: {} as IPhotoUpdate
   };
@@ -38,7 +38,7 @@ class PhotoUpdate extends PureComponent<IProps> {
   async submit(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data
@@ -49,12 +49,12 @@ class PhotoUpdate extends PureComponent<IProps> {
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { photo, submitting, fetching } = this.state;
+    const { photo, submiting, fetching } = this.state;
     return (
       <>
         <Head>
@@ -74,7 +74,7 @@ class PhotoUpdate extends PureComponent<IProps> {
             <FormUploadPhoto
               photo={photo}
               submit={this.submit.bind(this)}
-              uploading={submitting}
+              uploading={submiting}
             />
           )}
         </Page>

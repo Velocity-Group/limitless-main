@@ -51,9 +51,6 @@ class UploadVideo extends PureComponent {
     ) {
       return message.error('Invalid amount of tokens');
     }
-    if (data.isSchedule) {
-      data.status = 'inactive';
-    }
     data.tags = [...data.tags];
     const files = Object.keys(this._files).reduce((f, key) => {
       if (this._files[key]) {

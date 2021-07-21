@@ -13,7 +13,7 @@ interface IProps {
 }
 class MenuUpdate extends PureComponent<IProps> {
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     menu: {} as IMenuUpdate
   };
@@ -37,23 +37,23 @@ class MenuUpdate extends PureComponent<IProps> {
   async submit(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data
       };
       await menuService.update(id, submitData);
       message.success('Updated successfully');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { menu, submitting, fetching } = this.state;
+    const { menu, submiting, fetching } = this.state;
     return (
       <>
         <Head>
@@ -63,7 +63,7 @@ class MenuUpdate extends PureComponent<IProps> {
           breadcrumbs={[{ title: 'Menu', href: '/menu' }, { title: menu.title ? menu.title : 'Detail menu' }]}
         />
         <Page>
-          {fetching ? <Loader /> : <FormMenu menu={menu} onFinish={this.submit.bind(this)} submitting={submitting} />}
+          {fetching ? <Loader /> : <FormMenu menu={menu} onFinish={this.submit.bind(this)} submiting={submiting} />}
         </Page>
       </>
     );

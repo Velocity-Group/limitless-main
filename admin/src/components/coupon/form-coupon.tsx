@@ -9,7 +9,7 @@ import moment from 'moment';
 interface IProps {
   coupon?: ICouponUpdate;
   onFinish: Function;
-  submitting?: boolean;
+  submiting?: boolean;
 }
 function disabledDate(current) {
   return current && current < moment().endOf('day');
@@ -30,7 +30,7 @@ export class FormCoupon extends PureComponent<IProps> {
 
   render() {
     if (!this.formRef) this.formRef = createRef();
-    const { coupon, onFinish, submitting } = this.props;
+    const { coupon, onFinish, submiting } = this.props;
     return (
       <Form
         ref={this.formRef}
@@ -93,7 +93,7 @@ export class FormCoupon extends PureComponent<IProps> {
           <DatePicker format="YYYY-MM-DD" disabledDate={disabledDate} />
         </Form.Item>
         <Form.Item wrapperCol={{ span: 20, offset: 4 }}>
-          <Button type="primary" htmlType="submit" loading={submitting}>
+          <Button type="primary" htmlType="submit" loading={submiting}>
             Submit
           </Button>
         </Form.Item>

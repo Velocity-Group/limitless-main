@@ -17,7 +17,7 @@ interface IFormValue {
 }
 class CategoryUpdate extends PureComponent<any> {
   state = {
-    submitting: false,
+    submiting: false,
     // fetching: true,
     category: null
   };
@@ -41,24 +41,24 @@ class CategoryUpdate extends PureComponent<any> {
   async submit(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data
       };
       await performerCategoryService.update(id, submitData);
       message.success('Updated successfully');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     } catch (e) {
       // TODO - check and show error here
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { category, submitting } = this.state;
+    const { category, submiting } = this.state;
     return (
       <>
         <Head>
@@ -113,7 +113,7 @@ class CategoryUpdate extends PureComponent<any> {
                 type="primary"
                 htmlType="submit"
                 style={{ float: 'right' }}
-                loading={submitting}
+                loading={submiting}
               >
                 Submit
               </Button>

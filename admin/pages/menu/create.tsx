@@ -9,12 +9,12 @@ import Router from 'next/router';
 
 class MenuCreate extends PureComponent {
   state = {
-    submitting: false
+    submiting: false
   };
 
   async submit(data: any) {
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data,
@@ -25,7 +25,7 @@ class MenuCreate extends PureComponent {
       // TODO - redirect
       await this.setState(
         {
-          submitting: false
+          submiting: false
         },
         () => window.setTimeout(() => {
           Router.push(
@@ -40,12 +40,12 @@ class MenuCreate extends PureComponent {
       // TODO - check and show error here
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { submitting } = this.state;
+    const { submiting } = this.state;
     return (
       <>
         <Head>
@@ -53,7 +53,7 @@ class MenuCreate extends PureComponent {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Menus', href: '/menu' }, { title: 'Create new menu' }]} />
         <Page>
-          <FormMenu onFinish={this.submit.bind(this)} submitting={submitting} />
+          <FormMenu onFinish={this.submit.bind(this)} submiting={submiting} />
         </Page>
       </>
     );

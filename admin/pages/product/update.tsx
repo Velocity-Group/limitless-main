@@ -19,7 +19,7 @@ interface IFiles {
 
 class ProductUpdate extends PureComponent<IProps> {
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     product: {} as IProductUpdate,
     uploadPercentage: 0
@@ -72,7 +72,7 @@ class ProductUpdate extends PureComponent<IProps> {
         return files;
       }, [] as IFiles[]) as [IFiles];
 
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data
@@ -84,17 +84,17 @@ class ProductUpdate extends PureComponent<IProps> {
         this.onUploading.bind(this)
       );
       message.success('Updated successfully');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
     const {
-      product, submitting, fetching, uploadPercentage
+      product, submiting, fetching, uploadPercentage
     } = this.state;
     return (
       <>
@@ -115,7 +115,7 @@ class ProductUpdate extends PureComponent<IProps> {
             <FormProduct
               product={product}
               submit={this.submit.bind(this)}
-              uploading={submitting}
+              uploading={submiting}
               beforeUpload={this.beforeUpload.bind(this)}
               uploadPercentage={uploadPercentage}
             />

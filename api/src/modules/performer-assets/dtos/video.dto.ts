@@ -24,17 +24,17 @@ export class VideoDto {
 
   thumbnailId: ObjectId;
 
-  teaserId: ObjectId;
+  thumbnail: any;
 
   isSale: boolean;
 
   price: number;
 
-  thumbnail: string;
+  teaserId: ObjectId;
 
   teaser: any;
 
-  teaserStatus: string;
+  teaserProcessing: boolean;
 
   video: any;
 
@@ -45,11 +45,6 @@ export class VideoDto {
     likes: number;
     comments: number;
     bookmarks: number;
-  };
-
-  userReaction: {
-    liked: boolean;
-    bookmarked: boolean;
   };
 
   createdBy: ObjectId;
@@ -66,7 +61,13 @@ export class VideoDto {
 
   tagline: string;
 
+  isSubscribed: boolean;
+
   isBought: boolean;
+
+  isLiked: boolean;
+
+  isBookmarked: boolean;
 
   constructor(init: Partial<VideoDto>) {
     Object.assign(
@@ -83,17 +84,16 @@ export class VideoDto {
         'processing',
         'thumbnailId',
         'teaserId',
+        'teaser',
+        'teaserProcessing',
         'isSchedule',
         'isSale',
         'price',
         'video',
         'thumbnail',
-        'teaser',
-        'teaserStatus',
         'performer',
         'tags',
         'stats',
-        'userReaction',
         'createdBy',
         'updatedBy',
         'scheduledAt',
@@ -102,7 +102,10 @@ export class VideoDto {
         'participantIds',
         'participants',
         'tagline',
-        'isBought'
+        'isBought',
+        'isSubscribed',
+        'isLiked',
+        'isBookmarked'
       ])
     );
   }
@@ -131,19 +134,19 @@ export class IVideoResponse {
 
   thumbnailId: ObjectId;
 
+  thumbnail: any;
+
   teaserId: ObjectId;
+
+  teaser: any;
+
+  teaserProcessing: boolean;
 
   isSale: boolean;
 
   price: number;
 
-  thumbnail: string;
-
   video: any;
-
-  teaser: any;
-
-  teaserStatus: any;
 
   performer: any;
 
@@ -154,10 +157,9 @@ export class IVideoResponse {
     bookmarks: number;
   };
 
-  userReaction: {
-    liked: boolean;
-    bookmarked: boolean;
-  };
+  isLiked: boolean;
+
+  isBookmarked: boolean;
 
   isBought: boolean;
 
@@ -191,19 +193,20 @@ export class IVideoResponse {
         'processing',
         'thumbnailId',
         'teaserId',
+        'teaser',
+        'teaserProcessing',
         'isSchedule',
         'isSale',
         'price',
         'video',
         'thumbnail',
-        'teaser',
-        'teaserStatus',
         'performer',
         'tags',
         'stats',
-        'userReaction',
         'isBought',
         'isSubscribed',
+        'isLiked',
+        'isBookmarked',
         'createdBy',
         'updatedBy',
         'scheduledAt',

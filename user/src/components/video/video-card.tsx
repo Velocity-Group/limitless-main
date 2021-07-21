@@ -17,6 +17,7 @@ interface IProps {
 export class VideoCard extends PureComponent<IProps> {
   render() {
     const { video } = this.props;
+    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/placeholder-image.jpg';
     return (
       <Link
         href={{ pathname: '/video', query: { id: video.slug || video._id } }}
@@ -31,7 +32,7 @@ export class VideoCard extends PureComponent<IProps> {
             </div>
           </span>
           )}
-          <div className="vid-thumb" style={{ backgroundImage: `url(${video?.thumbnail || video?.video?.thumbnails[0] || '/static/placeholder-image.jpg'})` }}>
+          <div className="vid-thumb" style={{ backgroundImage: `url(${thumbUrl})` }}>
             <div className="vid-stats">
               <span>
                 <a>

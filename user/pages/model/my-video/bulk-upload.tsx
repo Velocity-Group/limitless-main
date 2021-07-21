@@ -39,8 +39,6 @@ class BulkUploadVideo extends PureComponent<IProps> {
 
   state = {
     uploading: false,
-    // preview: null,
-    // uploadPercentage: 0,
     fileList: []
   };
 
@@ -83,21 +81,17 @@ class BulkUploadVideo extends PureComponent<IProps> {
   async submit() {
     const { fileList } = this.state;
     const { user } = this.props;
-    if (!fileList.length) {
-      return message.error('Please select video!');
+    const uploadFiles = fileList.filter((f) => !['uploading', 'done'].includes(f.status));
+    if (!uploadFiles.length) {
+      message.error('Please select videos');
+      return;
     }
-
-    const uploadFiles = fileList.filter(
-      (f) => !['uploading', 'done'].includes(f.status)
-    );
-    if (!uploadFiles.length) return message.error('Please select new video!');
 
     await this.setState({ uploading: true });
     // eslint-disable-next-line no-restricted-syntax
     for (const file of uploadFiles) {
       try {
-        // eslint-disable-next-line no-continue
-        if (['uploading', 'done'].includes(file.status)) continue;
+        if (['uploading', 'done'].includes(file.status)) return;
         file.status = 'uploading';
         // eslint-disable-next-line no-await-in-loop
         await videoService.uploadVideo(
@@ -123,13 +117,11 @@ class BulkUploadVideo extends PureComponent<IProps> {
         message.error(`File ${file.name} error!`);
       }
     }
-    message.success('Files has been uploaded!');
+    message.success('Videos have been uploaded!');
     Router.push('/model/my-video');
-    return undefined;
   }
 
   render() {
-    if (!this.formRef) this.formRef = createRef();
     const { uploading, fileList } = this.state;
     const { ui } = this.props;
     return (
@@ -167,11 +159,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
                       <p className="ant-upload-text">
                         Click or drag-drop files to this area to upload
                       </p>
-                      <p className="ant-upload-hint">
-                        Support video format only
-                      </p>
                     </Dragger>
-
                     <VideoUploadList
                       files={fileList}
                       remove={this.remove.bind(this)}
@@ -179,7 +167,6 @@ class BulkUploadVideo extends PureComponent<IProps> {
                   </div>
                 </Col>
               </Row>
-
               <Form.Item>
                 <Button
                   className="secondary"

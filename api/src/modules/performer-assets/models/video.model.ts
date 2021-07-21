@@ -22,7 +22,7 @@ export class VideoModel extends Document {
 
   teaserId: ObjectId;
 
-  teaserStatus: string;
+  teaserProcessing: boolean;
 
   isSale: boolean;
 

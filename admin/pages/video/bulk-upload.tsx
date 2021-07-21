@@ -92,6 +92,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
             isSale: false,
             isSchedule: false,
             status: 'inactive',
+            participantIds: [formValues.performerId],
             performerId: formValues.performerId
           },
           this.onUploading.bind(this, file)
@@ -111,9 +112,9 @@ class BulkUploadVideo extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Bulk upload video</title>
+          <title>Bulk upload</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Video', href: '/video' }, { title: 'Bulk Upload Video' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Videos', href: '/video' }, { title: 'Bulk upload' }]} />
         <Page>
           <Form
             layout="vertical"
@@ -145,9 +146,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
                   <UploadOutlined />
                 </p>
                 <p className="ant-upload-text">Click or drag-drop files to this area to upload</p>
-                <p className="ant-upload-hint">Support video format only</p>
               </Dragger>
-
               <VideoUploadList files={fileList} remove={this.remove.bind(this)} />
             </Form.Item>
             <Form.Item style={{ textAlign: 'center' }}>

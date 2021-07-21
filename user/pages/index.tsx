@@ -227,10 +227,10 @@ class Login extends PureComponent<IProps> {
                           hasFeedback
                           validateTrigger={['onChange', 'onBlur']}
                           rules={[
-                            { required: true, message: 'E-mail or Username is missing' }
+                            { required: true, message: 'Email or Username is missing' }
                           ]}
                         >
-                          <Input onChange={this.onInputChange.bind(this)} placeholder="E-mail or Username" />
+                          <Input onChange={this.onInputChange.bind(this)} placeholder="Email or Username" />
                         </Form.Item>
                         <Form.Item
                           name="password"
@@ -286,7 +286,7 @@ class Login extends PureComponent<IProps> {
 
 const mapStatesToProps = (state: any) => ({
   ui: { ...state.ui },
-  settings: state.settings,
+  settings: { ...state.settings },
   loginAuth: { ...state.auth.loginAuth }
 });
 

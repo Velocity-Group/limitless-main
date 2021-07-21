@@ -9,7 +9,7 @@ import { FormInstance } from 'antd/lib/form';
 interface IProps {
   gallery?: IGalleryUpdate;
   onFinish: Function;
-  submitting?: boolean;
+  submiting?: boolean;
 }
 
 export class FormGallery extends PureComponent<IProps> {
@@ -33,7 +33,7 @@ export class FormGallery extends PureComponent<IProps> {
 
   render() {
     if (!this.formRef) this.formRef = createRef();
-    const { gallery, onFinish, submitting } = this.props;
+    const { gallery, onFinish, submiting } = this.props;
     const { isSale } = this.state;
     return (
       <Form
@@ -83,7 +83,7 @@ export class FormGallery extends PureComponent<IProps> {
           </Select>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" disabled={submitting} loading={submitting}>
+          <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
             Submit
           </Button>
         </Form.Item>

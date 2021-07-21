@@ -14,7 +14,7 @@ import { SelectMenuTreeDropdown } from './common/menu-tree.select';
 interface IProps {
   menu?: IMenuUpdate;
   onFinish: Function;
-  submitting?: boolean;
+  submiting?: boolean;
 }
 export class FormMenu extends PureComponent<IProps> {
   formRef: any;
@@ -46,7 +46,7 @@ export class FormMenu extends PureComponent<IProps> {
 
   render() {
     if (!this.formRef) this.formRef = createRef();
-    const { menu, onFinish, submitting } = this.props;
+    const { menu, onFinish, submiting } = this.props;
     const { isInternal, path, isPage } = this.state;
     return (
       <Form
@@ -238,7 +238,7 @@ export class FormMenu extends PureComponent<IProps> {
           <InputNumber type="number" placeholder="Enter ordering of menu item" />
         </Form.Item>
         <Form.Item wrapperCol={{ span: 20, offset: 4 }}>
-          <Button type="primary" htmlType="submit" loading={submitting}>
+          <Button type="primary" htmlType="submit" loading={submiting}>
             Submit
           </Button>
         </Form.Item>

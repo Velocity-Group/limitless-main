@@ -14,7 +14,7 @@ interface IProps {
 }
 class VideoUpdate extends PureComponent<IProps> {
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     video: {} as IVideoUpdate
   };
@@ -38,25 +38,22 @@ class VideoUpdate extends PureComponent<IProps> {
   async submit(data: any) {
     const { id } = this.props;
     try {
-      await this.setState({ submitting: true });
+      await this.setState({ submiting: true });
       const submitData = {
         ...data
       };
-      if (submitData.isSchedule) {
-        submitData.status = 'inactive';
-      }
       await videoService.update(id, submitData);
       message.success('Updated successfully');
       Router.back();
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { video, submitting, fetching } = this.state;
+    const { video, submiting, fetching } = this.state;
     return (
       <>
         <Head>
@@ -69,7 +66,7 @@ class VideoUpdate extends PureComponent<IProps> {
           {fetching ? (
             <Loader />
           ) : (
-            <FormUploadVideo video={video} submit={this.submit.bind(this)} uploading={submitting} />
+            <FormUploadVideo video={video} submit={this.submit.bind(this)} uploading={submiting} />
           )}
         </Page>
       </>

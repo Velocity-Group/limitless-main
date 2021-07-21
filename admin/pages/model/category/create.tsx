@@ -18,12 +18,12 @@ interface IFormValue {
 
 class CategoryCreate extends PureComponent<any> {
   state = {
-    submitting: false
+    submiting: false
   };
 
   async submit() {
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       // const submitData = {
       //   ...data
@@ -41,14 +41,14 @@ class CategoryCreate extends PureComponent<any> {
       // TODO - check and show error here
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     } finally {
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { submitting } = this.state;
+    const { submiting } = this.state;
     return (
       <>
         <Head>
@@ -98,7 +98,7 @@ class CategoryCreate extends PureComponent<any> {
               <Input.TextArea rows={3} />
             </Form.Item>
 
-            <Button type="primary" htmlType="submit" style={{ float: 'right' }} loading={submitting}>
+            <Button type="primary" htmlType="submit" style={{ float: 'right' }} loading={submiting}>
               Submit
             </Button>
           </Form>

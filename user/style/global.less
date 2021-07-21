@@ -244,6 +244,18 @@
   padding: 10px 5px;
 }
 
+.ant-table-thead>tr>th,
+.ant-table-tbody>tr>td,
+.ant-table tfoot>tr>th,
+.ant-table tfoot>tr>td {
+  background-color: #fafafa;
+}
+
+.ant-table-thead>tr>th {
+  white-space: nowrap;
+}
+
+
 .table-responsive {
   overflow-x: auto
 }
@@ -330,6 +342,9 @@
       position: relative;
       top: 0;
       left: 0
+    }
+    &.anticon-file-done {
+      background-color: @success-color;
     }
   }
 }
@@ -481,7 +496,7 @@
   color: @white;
   padding: 0px 8px;
   height: 30px;
-  background-color: #17a2b8;
+  background-color: @info-color;
   margin-right: 5px;
 }
 
@@ -490,7 +505,7 @@
   color: @white;
   padding: 0px 8px;
   height: 30px;
-  background-color: @error-color;
+  background-color: @highlight-color;
   margin-right: 5px;
 }
 

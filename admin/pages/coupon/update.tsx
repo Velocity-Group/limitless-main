@@ -13,7 +13,7 @@ interface IProps {
 }
 class CouponUpdate extends PureComponent<IProps> {
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     coupon: {} as ICouponUpdate
   };
@@ -37,23 +37,23 @@ class CouponUpdate extends PureComponent<IProps> {
   async submit(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data
       };
       await couponService.update(id, submitData);
       message.success('Updated successfully');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { coupon, submitting, fetching } = this.state;
+    const { coupon, submiting, fetching } = this.state;
     return (
       <>
         <Head>
@@ -66,7 +66,7 @@ class CouponUpdate extends PureComponent<IProps> {
           {fetching ? (
             <Loader />
           ) : (
-            <FormCoupon coupon={coupon} onFinish={this.submit.bind(this)} submitting={submitting} />
+            <FormCoupon coupon={coupon} onFinish={this.submit.bind(this)} submiting={submiting} />
           )}
         </Page>
       </>

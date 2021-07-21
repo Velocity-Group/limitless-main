@@ -5,7 +5,7 @@ import {
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import {
-  CheckCircleOutlined, CheckSquareOutlined
+  CheckSquareOutlined
 } from '@ant-design/icons';
 import './performer.less';
 
@@ -23,26 +23,6 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
     } = this.props;
     return (
       <div className="confirm-subscription-form">
-        <div className="profile-cover" style={{ backgroundImage: 'url(\'/static/banner-image.jpg\')' }} />
-        <div className="profile-info">
-          <img
-            alt="main-avt"
-            src={performer?.avatar || '/static/no-avatar.png'}
-          />
-          <div className="m-user-name">
-            <h4>
-              {performer?.name || 'N/A'}
-                    &nbsp;
-              {performer?.verifiedAccount && (
-              <CheckCircleOutlined className="theme-color" />
-              )}
-            </h4>
-            <h5 style={{ textTransform: 'none' }}>
-              @
-              {performer?.username || 'n/a'}
-            </h5>
-          </div>
-        </div>
         <div className="info-body">
           <p>
             SUBSCRIBE & GET THIS BENEFITS
@@ -65,7 +45,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
             </li>
           </ul>
         </div>
-        <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()} style={{ textTransform: 'capitalize' }}>
+        <Button className="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()} style={{ textTransform: 'uppercase', whiteSpace: 'pre-wrap', height: 'auto' }}>
           Confirm
           {' '}
           {type}

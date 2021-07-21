@@ -15,7 +15,7 @@ interface IProps {
 
 class TokenUpdate extends PureComponent<IProps> {
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     token: {} as ITokenPackage
   };
@@ -38,7 +38,7 @@ class TokenUpdate extends PureComponent<IProps> {
 
   async submit(data: any) {
     const { id } = this.props;
-    this.setState({ submitting: true });
+    this.setState({ submiting: true });
 
     const submitData = {
       ...data
@@ -48,18 +48,18 @@ class TokenUpdate extends PureComponent<IProps> {
       submitData
     );
     message.success('Updated successfully');
-    // this.setState({ submitting: false });
+    // this.setState({ submiting: false });
     Router.back();
   }
 
   catch() {
     // TODO - check and show error here
     message.error('Something went wrong, please try again!');
-    this.setState({ submitting: false });
+    this.setState({ submiting: false });
   }
 
   render() {
-    const { submitting, fetching, token } = this.state;
+    const { submiting, fetching, token } = this.state;
     return (
       <>
         <Head>
@@ -79,7 +79,7 @@ class TokenUpdate extends PureComponent<IProps> {
             <FormTokenPackage
               packageToken={token}
               onFinish={this.submit.bind(this)}
-              submitting={submitting}
+              submiting={submiting}
             />
           )}
         </Page>

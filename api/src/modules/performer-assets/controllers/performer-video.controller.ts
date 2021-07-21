@@ -60,7 +60,7 @@ export class PerformerVideosController {
           options: {
             destination: getConfig('file').imageDir,
             generateThumbnail: true,
-            replaceWithThumbail: true,
+            replaceWithThumbail: false,
             thumbnailSize: getConfig('image').videoThumbnail
           }
         }

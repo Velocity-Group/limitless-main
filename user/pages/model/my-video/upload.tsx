@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import Head from 'next/head';
 import { connect } from 'react-redux';
 import { message, Layout } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { VideoCameraOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { videoService } from '@services/video.service';
 import { FormUploadVideo } from '@components/video/form-upload';
@@ -65,9 +65,6 @@ class UploadVideo extends PureComponent<IProps> {
       message.error('Invalid schedule date');
       return;
     }
-    if (data.isSchedule && data.scheduledAt) {
-      submitData.status = 'inactive';
-    }
     submitData.tags = [...[], ...data.tags];
     submitData.participantIds = [...[], ...data.participantIds];
     const files = Object.keys(this._files).reduce((f, key) => {
@@ -113,7 +110,7 @@ class UploadVideo extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Upload Video" icon={<UploadOutlined />} />
+          <PageHeading title="Upload Video" icon={<VideoCameraOutlined />} />
           <FormUploadVideo
             user={user}
             submit={this.submit.bind(this)}

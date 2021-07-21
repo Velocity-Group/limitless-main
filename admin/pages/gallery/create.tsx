@@ -9,12 +9,12 @@ import Router from 'next/router';
 
 class GalleryCreate extends PureComponent {
   state = {
-    submitting: false
+    submiting: false
   };
 
   async submit(data: any) {
     try {
-      await this.setState({ submitting: true });
+      await this.setState({ submiting: true });
       const submitData = {
         ...data
       };
@@ -24,12 +24,12 @@ class GalleryCreate extends PureComponent {
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { submitting } = this.state;
+    const { submiting } = this.state;
     return (
       <>
         <Head>
@@ -39,7 +39,7 @@ class GalleryCreate extends PureComponent {
           breadcrumbs={[{ title: 'Galleries', href: '/gallery' }, { title: 'New gallery' }]}
         />
         <Page>
-          <FormGallery onFinish={this.submit.bind(this)} submitting={submitting} />
+          <FormGallery onFinish={this.submit.bind(this)} submiting={submiting} />
         </Page>
       </>
     );

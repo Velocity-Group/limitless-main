@@ -1,8 +1,7 @@
 import {
   Injectable,
   Inject,
-  forwardRef,
-  HttpException
+  forwardRef
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import {

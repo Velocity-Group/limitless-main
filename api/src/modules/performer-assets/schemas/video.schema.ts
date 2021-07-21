@@ -47,7 +47,7 @@ export const VideoSchema = new Schema({
     default: 0
   },
   processing: Boolean,
-  teaserStatus: Boolean,
+  teaserProcessing: Boolean,
   thumbnailId: ObjectId,
   teaserId: ObjectId,
   stats: {

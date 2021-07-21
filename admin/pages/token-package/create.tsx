@@ -9,18 +9,18 @@ import { tokenService } from '@services/index';
 
 class CreateToken extends PureComponent {
     state = {
-      submitting: false
+      submiting: false
     };
 
     async submit(data: any) {
       try {
-        this.setState({ submitting: true });
+        this.setState({ submiting: true });
         await tokenService.create(data);
         message.success('Created successfully');
         // TODO - redirect
         await this.setState(
           {
-            submitting: false
+            submiting: false
           },
           () => window.setTimeout(() => {
             Router.push(
@@ -35,12 +35,12 @@ class CreateToken extends PureComponent {
         // TODO - check and show error here
         const err = (await Promise.resolve(e)) || {};
         message.error(err.message || 'Something went wrong, please try again!');
-        this.setState({ submitting: false });
+        this.setState({ submiting: false });
       }
     }
 
     render() {
-      const { submitting } = this.state;
+      const { submiting } = this.state;
       return (
         <>
           <Head>
@@ -50,7 +50,7 @@ class CreateToken extends PureComponent {
             breadcrumbs={[{ title: 'Token Packages', href: '/token' }, { title: 'New token package' }]}
           />
           <Page>
-            <FormTokenPackage onFinish={this.submit.bind(this)} packageToken={null} submitting={submitting} />
+            <FormTokenPackage onFinish={this.submit.bind(this)} packageToken={null} submiting={submiting} />
           </Page>
         </>
       );

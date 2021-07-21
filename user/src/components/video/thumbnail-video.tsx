@@ -5,19 +5,16 @@ import './video.less';
 
 interface IProps {
   video: IVideoResponse;
+  style?: any;
 }
 
 export class ThumbnailVideo extends PureComponent<IProps> {
   render() {
-    const { video: videoProp } = this.props;
-    const { thumbnail, video } = videoProp;
-    const url = thumbnail || video?.thumbnails[0] || '/static/placeholder-image.jpg';
+    const { video: videoProp, style } = this.props;
+    const { thumbnail, video, teaser } = videoProp;
+    const url = (thumbnail?.thumbnails && thumbnail?.thumbnails[0]) || thumbnail?.url || (teaser?.thumbnails && teaser?.thumbnails[0]) || (video?.thumbnails && video?.thumbnails[0]) || '/static/placeholder-image.jpg';
     return (
-      <div className="video-thumbs">
-        {video.thumbnails && video.thumbnails.length > 0
-          ? video.thumbnails.map((thumb) => <img alt="thumb" key={thumb} src={thumb} />)
-          : <img alt="video" src={url} />}
-      </div>
+      <img alt="thumbnail" src={url} style={style || { width: '50px' }} />
     );
   }
 }

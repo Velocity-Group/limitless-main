@@ -17,7 +17,7 @@ class EmailTemplateUpdate extends PureComponent<any, any> {
   private _content: string = '';
 
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     template: null
   };
@@ -42,7 +42,7 @@ class EmailTemplateUpdate extends PureComponent<any, any> {
 
   async submit(data: any) {
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
       const { id } = this.props;
 
       const submitData = {
@@ -51,11 +51,11 @@ class EmailTemplateUpdate extends PureComponent<any, any> {
       };
       await emailTemplateService.update(id, submitData);
       message.success('Updated successfully');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
@@ -64,7 +64,7 @@ class EmailTemplateUpdate extends PureComponent<any, any> {
   }
 
   render() {
-    const { template, fetching, submitting } = this.state;
+    const { template, fetching, submiting } = this.state;
     return (
       <>
         <Head>
@@ -123,7 +123,7 @@ class EmailTemplateUpdate extends PureComponent<any, any> {
                   type="primary"
                   htmlType="submit"
                   style={{ float: 'right' }}
-                  loading={submitting}
+                  loading={submiting}
                 >
                   Submit
                 </Button>

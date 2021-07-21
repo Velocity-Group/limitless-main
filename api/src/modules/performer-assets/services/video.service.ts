@@ -16,7 +16,6 @@ import {
 import { FileDto } from 'src/modules/file';
 import { FileService, FILE_EVENT } from 'src/modules/file/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
-import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
 import { PerformerService } from 'src/modules/performer/services';
 import { merge, difference } from 'lodash';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
@@ -27,9 +26,10 @@ import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserDto } from 'src/modules/user/dtos';
 import { PurchaseItemType } from 'src/modules/purchased-item/constants';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
+import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
 import { VideoUpdatePayload } from '../payloads';
 import { VideoDto, IVideoResponse } from '../dtos';
-import { VIDEO_STATUS, VIDEO_TEASER_STATUS } from '../constants';
+import { VIDEO_STATUS } from '../constants';
 import { VideoCreatePayload } from '../payloads/video-create.payload';
 import { VideoModel } from '../models';
 import { PERFORMER_VIDEO_MODEL_PROVIDER } from '../providers';
@@ -38,6 +38,7 @@ export const PERFORMER_VIDEO_CHANNEL = 'PERFORMER_VIDEO_CHANNEL';
 export const PERFORMER_VIDEO_TEASER_CHANNEL = 'PERFORMER_VIDEO_TEASER_CHANNEL';
 export const PERFORMER_COUNT_VIDEO_CHANNEL = 'PERFORMER_COUNT_VIDEO_CHANNEL';
 const FILE_PROCESSED_TOPIC = 'FILE_PROCESSED';
+const TEASER_PROCESSED_TOPIC = 'TEASER_PROCESSED_TOPIC';
 const SCHEDULE_VIDEO_AGENDA = 'SCHEDULE_VIDEO_AGENDA';
 const CHECK_REF_REMOVE_VIDEO_AGENDA = 'CHECK_REF_REMOVE_VIDEO_AGENDA';
 
@@ -60,7 +61,7 @@ export class VideoService {
   ) {
     this.queueEventService.subscribe(
       PERFORMER_VIDEO_TEASER_CHANNEL,
-      FILE_PROCESSED_TOPIC,
+      TEASER_PROCESSED_TOPIC,
       this.handleTeaserProcessed.bind(this)
     );
     this.queueEventService.subscribe(
@@ -172,85 +173,57 @@ export class VideoService {
   }
 
   public async handleTeaserProcessed(event: QueueEvent) {
-    try {
-      const { eventName } = event;
-      if (eventName !== FILE_EVENT.VIDEO_PROCESSED) {
-        return;
-      }
-      const { videoId } = event.data.meta;
-      const [video, file] = await Promise.all([
-        this.PerformerVideoModel.findById(videoId),
-        this.fileService.findById(event.data.fileId)
-      ]);
-      if (!video) {
-        await this.fileService.remove(event.data.fileId);
-        // TODO - delete file?
-        return;
-      }
-
-      if (file.status === 'error') {
-        // todo update teaser status
-        video.teaserStatus = VIDEO_TEASER_STATUS.FILE_ERROR;
-      }
-      await video.save();
-    } catch (e) {
-      // TODO - log me
-      // console.log(e);
+    const { eventName, data } = event;
+    if (eventName !== FILE_EVENT.VIDEO_PROCESSED) {
+      return;
     }
+    const { videoId } = data.meta;
+    const [video] = await Promise.all([
+      this.PerformerVideoModel.findById(videoId)
+    ]);
+    if (!video) {
+      await this.fileService.remove(data.fileId);
+      // TODO - delete file?
+      return;
+    }
+    video.teaserProcessing = false;
+    await video.save();
   }
 
   public async handleFileProcessed(event: QueueEvent) {
-    try {
-      const { eventName } = event;
-      if (eventName !== FILE_EVENT.VIDEO_PROCESSED) {
-        return;
-      }
-      const { videoId } = event.data.meta;
-      const [video, file] = await Promise.all([
-        this.PerformerVideoModel.findById(videoId),
-        this.fileService.findById(event.data.fileId)
-      ]);
-      if (!video) {
-        // TODO - delete file?
-        await this.fileService.remove(event.data.fileId);
-        return;
-      }
-
-      const oldStatus = video.status;
-      video.processing = false;
-      if (file.status === 'error') {
-        video.status = VIDEO_STATUS.FILE_ERROR;
-      }
-      await video.save();
-
-      // update new status?
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: PERFORMER_COUNT_VIDEO_CHANNEL,
-          eventName: EVENT.UPDATED,
-          data: {
-            ...new VideoDto(video),
-            oldStatus
-          }
-        })
-      );
-    } catch (e) {
-      // TODO - log me
-      // console.log(e);
+    const { eventName } = event;
+    if (eventName !== FILE_EVENT.VIDEO_PROCESSED) {
+      return;
     }
-  }
-
-  private async checkReaction(video: VideoDto, user: UserDto) {
-    const [liked, bookmarked] = await Promise.all([
-      user ? this.reactionService.checkExisting(video._id, user._id, REACTION.LIKE, REACTION_TYPE.VIDEO) : null,
-      user ? this.reactionService.checkExisting(video._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.VIDEO) : null
+    const { videoId } = event.data.meta;
+    const [video, file] = await Promise.all([
+      this.PerformerVideoModel.findById(videoId),
+      this.fileService.findById(event.data.fileId)
     ]);
-    // eslint-disable-next-line no-param-reassign
-    video.userReaction = {
-      liked: !!liked,
-      bookmarked: !!bookmarked
-    };
-    return video.userReaction;
+    if (!video) {
+      // TODO - delete file?
+      await this.fileService.remove(event.data.fileId);
+      return;
+    }
+
+    const oldStatus = video.status;
+    video.processing = false;
+    if (file.status === 'error') {
+      video.status = VIDEO_STATUS.FILE_ERROR;
+    }
+    await video.save();
+
+    // update new status?
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: PERFORMER_COUNT_VIDEO_CHANNEL,
+        eventName: EVENT.UPDATED,
+        data: {
+          ...new VideoDto(video),
+          oldStatus
+        }
+      })
+    );
   }
 
   public async create(
@@ -272,8 +245,6 @@ export class VideoService {
     }
 
     if (thumbnail && !thumbnail.isImage()) {
-      // delete thumb if ok
-      // TODO - detect ref and delete if not have
       await this.fileService.remove(thumbnail._id);
     }
 
@@ -294,7 +265,10 @@ export class VideoService {
       model.performerId = creator._id;
     }
     model.thumbnailId = thumbnail ? thumbnail._id : null;
-    model.teaserId = teaser ? teaser._id : null;
+    if (teaser) {
+      model.teaserId = teaser._id;
+      model.teaserProcessing = true;
+    }
     model.processing = true;
     model.slug = StringHelper.createAlias(payload.title);
     const slugCheck = await this.PerformerVideoModel.countDocuments({
@@ -307,22 +281,20 @@ export class VideoService {
     model.createdAt = new Date();
     model.updatedAt = new Date();
     await model.save();
-
-    model.thumbnailId
-      && (await this.fileService.addRef(model.thumbnailId, {
+    await Promise.all([
+      model.thumbnailId && this.fileService.addRef(model.thumbnailId, {
         itemId: model._id,
         itemType: REF_TYPE.VIDEO
-      }));
-    model.teaserId
-      && (await this.fileService.addRef(model.teaserId, {
+      }),
+      model.teaserId && this.fileService.addRef(model.teaserId, {
         itemId: model._id,
         itemType: REF_TYPE.VIDEO
-      }));
-    model.fileId
-      && (await this.fileService.addRef(model.fileId, {
+      }),
+      model.fileId && this.fileService.addRef(model.fileId, {
         itemType: REF_TYPE.VIDEO,
         itemId: model._id
-      }));
+      })
+    ]);
     if (model.status === VIDEO_STATUS.ACTIVE) {
       await this.queueEventService.publish(
         new QueueEvent({
@@ -332,14 +304,15 @@ export class VideoService {
         })
       );
     }
-
+    // covert video file
     await this.fileService.queueProcessVideo(model.fileId, {
       publishChannel: PERFORMER_VIDEO_CHANNEL,
       meta: {
         videoId: model._id
       }
     });
-    await this.fileService.queueProcessVideo(model.teaserId, {
+    // convert teaser file
+    model.teaserId && await this.fileService.queueProcessVideo(model.teaserId, {
       publishChannel: PERFORMER_VIDEO_TEASER_CHANNEL,
       meta: {
         videoId: model._id
@@ -349,8 +322,6 @@ export class VideoService {
     return new VideoDto(model);
   }
 
-  // TODO - add a service to query details from public user
-  // this request is for admin or owner only?
   public async getDetails(videoId: string | ObjectId, jwToken: string): Promise<VideoDto> {
     const video = await this.PerformerVideoModel.findById(videoId);
     if (!video) throw new EntityNotFoundException();
@@ -378,19 +349,23 @@ export class VideoService {
     const video = await this.PerformerVideoModel.findOne(query);
     if (!video) throw new EntityNotFoundException();
     const participantIds = video.participantIds.filter((p) => StringHelper.isObjectId(p));
-    const [performer, videoFile, thumbnailFile, teaserFile, participants] = await Promise.all([
+    const fileIds = [video.fileId];
+    video.teaserId && fileIds.push(video.teaserId);
+    video.thumbnailId && fileIds.push(video.thumbnailId);
+    const [performer, files, participants, reactions] = await Promise.all([
       this.performerService.findById(video.performerId),
-      this.fileService.findById(video.fileId),
-      video.thumbnailId ? this.fileService.findById(video.thumbnailId) : null,
-      video.teaserId ? this.fileService.findById(video.teaserId) : null,
-      video.participantIds.length ? await this.performerService.findByIds(participantIds) : []
+      this.fileService.findByIds(fileIds),
+      video.participantIds.length ? await this.performerService.findByIds(participantIds) : [],
+      this.reactionService.findByQuery({ objectType: REACTION_TYPE.VIDEO, objectId: video._id })
     ]);
 
     // TODO - define interface or dto?
     const dto = new IVideoResponse(video);
-    dto.userReaction = await this.checkReaction(new VideoDto(video), currentUser);
-    dto.thumbnail = thumbnailFile ? thumbnailFile.getUrl() : null;
-    dto.teaser = teaserFile ? teaserFile.getUrl() : null;
+    const thumbnailFile = files.find((f) => `${f._id}` === `${dto.thumbnailId}`);
+    const teaserFile = files.find((f) => `${f._id}` === `${dto.teaserId}`);
+    const videoFile = files.find((f) => `${f._id}` === `${dto.fileId}`);
+    dto.isLiked = !!reactions.filter((r) => r.action === REACTION.LIKE).length;
+    dto.isBookmarked = !!reactions.filter((r) => r.action === REACTION.BOOK_MARK).length;
     // TODO check video for sale or subscriber
     if (!dto.isSale) {
       const subscribed = currentUser && await this.subscriptionService.checkSubscribed(dto.performerId, currentUser._id);
@@ -400,6 +375,14 @@ export class VideoService {
       const bought = currentUser && await this.checkPaymentService.checkBought(dto, PurchaseItemType.VIDEO, currentUser);
       dto.isBought = bought;
     }
+    dto.thumbnail = thumbnailFile ? {
+      url: thumbnailFile.getUrl(),
+      thumbnails: thumbnailFile.getThumbnails()
+    } : null;
+    dto.teaser = teaserFile ? {
+      url: teaserFile.getUrl(),
+      thumbnails: teaserFile.getThumbnails()
+    } : null;
     dto.video = this.getVideoForView(videoFile, dto, jwToken);
     dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     dto.participants = participants.map((p) => p.toSearchResponse());

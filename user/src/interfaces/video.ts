@@ -9,8 +9,15 @@ export interface IVideo {
   price: number;
   status: string;
   description: string;
-  thumbnail: string;
-  teaser: string;
+  thumbnail: {
+    url: string;
+    thumbnails: any[]
+  };
+  teaser:{
+    url: string;
+    thumbnails: any[]
+  };
+  teaserProcessing: boolean;
   tags: string[];
   participantIds: string[];
   participants: any[];
@@ -44,8 +51,15 @@ export interface IVideoResponse {
   status: string;
   processing: boolean;
   description: string;
-  thumbnail: string;
-  teaser: string;
+  thumbnail: {
+    url: string;
+    thumbnails: any[]
+  };
+  teaser: {
+    url: string;
+    thumbnails: any[]
+  };
+  teaserProcessing: boolean;
   tags: string[];
   participantIds: string[];
   participants: any[];
@@ -57,13 +71,13 @@ export interface IVideoResponse {
     bookmarks: number;
   };
   performer: IPerformer;
-  userReaction: {
-    liked: boolean;
-    bookmarked: boolean;
-  };
   isBought: boolean;
   isSubscribed: boolean;
+  isBookmarked: boolean;
+  isLiked: boolean;
   tagline: string;
+  isSchedule: boolean;
+  scheduledAt: Date;
 }
 
 export interface IVideoCreate {

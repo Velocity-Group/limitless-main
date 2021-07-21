@@ -3,7 +3,7 @@ import Head from 'next/head';
 import {
   message, Layout, Button, Row, Col
 } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { VideoCameraOutlined, UploadOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { videoService } from '@services/video.service';
 import { SearchFilter } from '@components/common/search-filter';
@@ -125,7 +125,7 @@ class Videos extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="My Videos" icon={<UploadOutlined />} />
+          <PageHeading title="My Videos" icon={<VideoCameraOutlined />} />
           <div>
             <Row>
               <Col lg={16} xs={24}>

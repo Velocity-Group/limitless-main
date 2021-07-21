@@ -17,7 +17,7 @@ class PostCreate extends PureComponent<any> {
   private _content: string = '';
 
   state = {
-    submitting: false
+    submiting: false
   };
 
   static async getInitialProps({ ctx }) {
@@ -32,7 +32,7 @@ class PostCreate extends PureComponent<any> {
     const { type } = this.props;
 
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data,
@@ -52,7 +52,7 @@ class PostCreate extends PureComponent<any> {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
     } finally {
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
@@ -61,7 +61,7 @@ class PostCreate extends PureComponent<any> {
   }
 
   render() {
-    const { submitting } = this.state;
+    const { submiting } = this.state;
     return (
       <>
         <Head>
@@ -114,7 +114,7 @@ class PostCreate extends PureComponent<any> {
               </Select>
             </Form.Item>
             <Form.Item wrapperCol={{ offset: 4 }}>
-              <Button type="primary" htmlType="submit" style={{ float: 'right' }} loading={submitting}>
+              <Button type="primary" htmlType="submit" style={{ float: 'right' }} loading={submiting}>
                 Submit
               </Button>
             </Form.Item>

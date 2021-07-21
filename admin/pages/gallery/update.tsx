@@ -14,7 +14,7 @@ interface IProps {
 }
 class GalleryUpdate extends PureComponent<IProps> {
   state = {
-    submitting: false,
+    submiting: false,
     fetching: true,
     gallery: {} as IGalleryUpdate
   };
@@ -38,7 +38,7 @@ class GalleryUpdate extends PureComponent<IProps> {
   async submit(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ submitting: true });
+      this.setState({ submiting: true });
 
       const submitData = {
         ...data
@@ -50,12 +50,12 @@ class GalleryUpdate extends PureComponent<IProps> {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
     } finally {
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { gallery, submitting, fetching } = this.state;
+    const { gallery, submiting, fetching } = this.state;
     return (
       <>
         <Head>
@@ -74,7 +74,7 @@ class GalleryUpdate extends PureComponent<IProps> {
             <FormGallery
               gallery={gallery}
               onFinish={this.submit.bind(this)}
-              submitting={submitting}
+              submiting={submiting}
             />
           )}
         </Page>

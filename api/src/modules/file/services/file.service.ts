@@ -110,11 +110,7 @@ export class FileService {
       writeFileSync(multerData.path, buffer);
     }
 
-    if (
-      options.replaceWithThumbail
-      && options.generateThumbnail
-      && options.thumbnailSize
-    ) {
+    if (options.replaceWithThumbail && options.generateThumbnail && options.thumbnailSize) {
       const buffer = await this.imageService.createThumbnail(
         multerData.path,
         options.thumbnailSize
@@ -124,11 +120,7 @@ export class FileService {
     }
 
     const thumbnails = [];
-    if (
-      !options.replaceWithThumbail
-      && options.generateThumbnail
-      && options.thumbnailSize
-    ) {
+    if (!options.replaceWithThumbail && options.generateThumbnail && options.thumbnailSize) {
       // create thumbnails without replace
       const buffer = await this.imageService.createThumbnail(
         multerData.path,

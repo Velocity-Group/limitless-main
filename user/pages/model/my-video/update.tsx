@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import { videoService } from '@services/video.service';
-import { UploadOutlined } from '@ant-design/icons';
+import { VideoCameraOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { FormUploadVideo } from '@components/video/form-upload';
 import { IVideoUpdate, IUIConfig, IUser } from 'src/interfaces';
@@ -90,9 +90,9 @@ class VideoUpdate extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <Page>
-            <PageHeading title="Edit Video" icon={<UploadOutlined />} />
+            <PageHeading title="Edit Video" icon={<VideoCameraOutlined />} />
             <div className="page-heading">
-              <span>Video Update</span>
+              <span>Edit Video</span>
             </div>
             {!fetching && video && (
               <FormUploadVideo

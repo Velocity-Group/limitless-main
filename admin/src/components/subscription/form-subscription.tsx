@@ -11,7 +11,7 @@ import moment from 'moment';
 const { Option } = Select;
 interface IProps {
   onFinish: Function;
-  submitting?: boolean;
+  submiting?: boolean;
 }
 function disabledDate(current) {
   return current && current < moment().endOf('day');
@@ -38,7 +38,7 @@ export class FormSubscription extends PureComponent<IProps> {
 
   render() {
     if (!this.formRef) this.formRef = createRef();
-    const { onFinish, submitting } = this.props;
+    const { onFinish, submiting } = this.props;
     const { users } = this.state;
     const handleSearch = async (value: string) => {
       try {
@@ -129,7 +129,7 @@ export class FormSubscription extends PureComponent<IProps> {
           <DatePicker format="YYYY-MM-DD" disabledDate={disabledDate} />
         </Form.Item>
         <Form.Item wrapperCol={{ span: 20, offset: 4 }}>
-          <Button type="primary" htmlType="submit" loading={submitting}>
+          <Button type="primary" htmlType="submit" loading={submiting}>
             Submit
           </Button>
         </Form.Item>

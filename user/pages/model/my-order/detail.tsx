@@ -20,7 +20,7 @@ interface IProps {
 }
 
 interface IStates {
-  submitting: boolean;
+  submiting: boolean;
   order: IOrder;
   shippingCode: string;
   deliveryStatus: string;
@@ -38,7 +38,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      submitting: false,
+      submiting: false,
       order: null,
       shippingCode: '',
       deliveryStatus: ''
@@ -57,14 +57,14 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       return;
     }
     try {
-      await this.setState({ submitting: true });
+      await this.setState({ submiting: true });
       await orderService.update(id, { deliveryStatus, shippingCode });
       message.success('Changes saved.');
       Router.back();
     } catch (e) {
       message.error(getResponseError(e));
     } finally {
-      this.setState({ submitting: false });
+      this.setState({ submiting: false });
     }
   }
 
@@ -85,7 +85,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
 
   render() {
     const { ui } = this.props;
-    const { order, submitting } = this.state;
+    const { order, submiting } = this.state;
     return (
       <Layout>
         <Head>
@@ -149,7 +149,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                           this.setState({ deliveryStatus: e });
                         }}
                         defaultValue={order.deliveryStatus}
-                        disabled={submitting}
+                        disabled={submiting}
                         style={{ minWidth: '120px' }}
                       >
                         <Select.Option key="processing" value="processing">
@@ -167,10 +167,10 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                       </Select>
                     </div>
                     <div style={{ marginBottom: '10px' }}>
-                      <Button className="primary" onClick={this.onUpdate.bind(this)} disabled={submitting}>
+                      <Button className="primary" onClick={this.onUpdate.bind(this)} disabled={submiting}>
                         Update
                       </Button>
-                      <Button className="secondary" onClick={() => Router.back()} disabled={submitting}>
+                      <Button className="secondary" onClick={() => Router.back()} disabled={submiting}>
                         Back
                       </Button>
                     </div>
