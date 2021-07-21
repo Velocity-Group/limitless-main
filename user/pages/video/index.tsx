@@ -564,7 +564,7 @@ class VideoViewPage extends PureComponent<IProps> {
                         src={per?.avatar || '/no-avatar.png'}
                       />
                       <div className="participant-info">
-                        <h4>{per?.name || `${per?.firstName || 'N/'} ${per?.lastName || 'A'}` || 'N/A'}</h4>
+                        <h4>{per?.name || 'N/A'}</h4>
                         <h5>
                           @
                           {per?.username || 'n/a'}
