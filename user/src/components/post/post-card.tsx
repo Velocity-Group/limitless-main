@@ -631,6 +631,7 @@ class FeedCard extends Component<IProps> {
           footer={null}
           onCancel={() => this.setState({ openTeaser: false })}
           width={650}
+          destroyOnClose
         >
           <VideoPlayer
             key={feed?.teaser?._id}

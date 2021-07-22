@@ -29,9 +29,9 @@ export class ReportForm extends PureComponent<IProps> {
     const { reason } = this.state;
     return (
       <div className="confirm-subscription-form">
-        <div className="profile-cover" style={{ backgroundImage: 'url(\'/static/banner-image.jpg\')' }} />
         <div className="profile-info">
           <img
+            width="100%"
             alt="main-avt"
             src={performer?.avatar || '/static/no-avatar.png'}
           />
@@ -52,7 +52,7 @@ export class ReportForm extends PureComponent<IProps> {
         <div className="info-body">
           <div style={{ marginBottom: '15px', width: '100%', textAlign: 'center' }}>
             <p>Report post</p>
-            <Input.TextArea placeholder="Tell us why you report?" minLength={20} maxLength={150} onChange={this.onChangeValue.bind(this)} rows={3} />
+            <Input.TextArea placeholder="Tell us why you report?" minLength={20} showCount maxLength={150} onChange={this.onChangeValue.bind(this)} rows={3} />
           </div>
         </div>
         <Button type="primary" disabled={submiting} loading={submiting} onClick={() => onFinish(reason)}>SUBMIT</Button>
