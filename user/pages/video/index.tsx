@@ -505,30 +505,31 @@ class VideoViewPage extends PureComponent<IProps> {
                   <CommentOutlined />
                 </button>
               </div>
-              <div className="o-w-ner">
-                <Link
-                  href={{
-                    pathname: '/model/profile',
-                    query: { username: video.performer.username || video.performer._id }
-                  }}
-                  as={`/${video.performer.username || video.performer._id}`}
-                >
-                  <>
+
+              <Link
+                href={{
+                  pathname: '/model/profile',
+                  query: { username: video.performer.username || video.performer._id }
+                }}
+                as={`/${video.performer.username || video.performer._id}`}
+              >
+                <a>
+                  <div className="o-w-ner">
                     <img
                       alt="performer avatar"
                       src={video.performer.avatar || '/static/no-avatar.png'}
                     />
                     {' '}
-                    <div className="owner-name">
+                    <span className="owner-name">
                       <div>{video.performer.name || 'N/A'}</div>
                       <small>
                         @
                         {video.performer.username || 'n/a'}
                       </small>
-                    </div>
-                  </>
-                </Link>
-              </div>
+                    </span>
+                  </div>
+                </a>
+              </Link>
             </div>
           </div>
         </div>

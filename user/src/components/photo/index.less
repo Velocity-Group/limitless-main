@@ -1,0 +1,19 @@
+.list-photos {
+  display: flex;
+  flex-wrap: wrap;
+
+  .ant-image {
+    width: 12.5%;
+    padding: 2px;
+
+    @media (max-width: 450px) {
+      width: 20%;
+    }
+  }
+
+  &.blur {
+    img {
+      filter: blur(3px);
+    }
+  }
+}

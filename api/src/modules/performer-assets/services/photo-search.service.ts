@@ -4,6 +4,7 @@ import { PageableData } from 'src/kernel';
 import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { PERFORMER_PHOTO_MODEL_PROVIDER } from '../providers';
 import { PhotoModel } from '../models';
 import { PhotoDto } from '../dtos';
@@ -57,9 +58,7 @@ export class PhotoSearchService {
       const performer = performers.find((p) => p._id.toString() === v.performerId.toString());
       if (performer) {
         // eslint-disable-next-line no-param-reassign
-        v.performer = {
-          username: performer.username
-        };
+        v.performer = new PerformerDto(performer).toResponse();
       }
 
       if (v.galleryId) {
@@ -106,12 +105,10 @@ export class PhotoSearchService {
     ]);
 
     const performerIds = data.map((d) => d.performerId);
-    const galleryIds = data.map((d) => d.galleryId);
     const fileIds = data.map((d) => d.fileId);
     const photos = data.map((v) => new PhotoDto(v));
-    const [performers, galleries, files] = await Promise.all([
+    const [performers, files] = await Promise.all([
       performerIds.length ? this.performerService.findByIds(performerIds) : [],
-      galleryIds.length ? this.galleryService.findByIds(galleryIds) : [],
       fileIds.length ? this.fileService.findByIds(fileIds) : []
     ]);
     photos.forEach((v) => {
@@ -119,15 +116,7 @@ export class PhotoSearchService {
       const performer = performers.find((p) => p._id.toString() === v.performerId.toString());
       if (performer) {
         // eslint-disable-next-line no-param-reassign
-        v.performer = {
-          username: performer.username
-        };
-      }
-
-      if (v.galleryId) {
-        const gallery = galleries.find((p) => p._id.toString() === v.galleryId.toString());
-        // eslint-disable-next-line no-param-reassign
-        if (gallery) v.gallery = gallery;
+        v.performer = new PerformerDto(performer).toResponse();
       }
 
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
@@ -160,16 +149,6 @@ export class PhotoSearchService {
     } as any;
     if (req.galleryId) query.galleryId = req.galleryId;
     const sort = { createdAt: -1 };
-    // // if gallery photo, do not response gallery item
-    // query.$or = [
-    //   {
-    //     isGalleryCover: true
-    //   },
-    //   {
-    //     isGalleryCover: false,
-    //     galleryId: null
-    //   }
-    // ];
     const [data, total] = await Promise.all([
       this.photoModel
         .find(query)

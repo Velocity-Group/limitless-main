@@ -18,12 +18,11 @@ import {
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { PurchaseGalleryForm } from '@components/gallery/confirm-purchase';
 import GalleryCard from '@components/gallery/gallery-card';
-import { Carousel } from 'react-responsive-carousel';
 import Router from 'next/router';
 import Link from 'next/link';
 import Loader from '@components/common/base/loader';
 import PageHeading from '@components/common/page-heading';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import PhotoPreviewList from '@components/photo/photo-preview-list';
 import './index.less';
 
 interface IProps {
@@ -37,7 +36,9 @@ interface IProps {
 }
 
 class GalleryViewPage extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
+
+  static noredirect = true;
 
   subscriptionType = 'monthly';
 
@@ -162,6 +163,7 @@ class GalleryViewPage extends PureComponent<IProps> {
     const {
       ui,
       gallery,
+      user,
       relatedGalleries = {
         requesting: false,
         error: null,
@@ -197,12 +199,9 @@ class GalleryViewPage extends PureComponent<IProps> {
         <Layout>
           <div className="main-container">
             <PageHeading icon={<PictureOutlined />} title={gallery?.title} />
+            <p style={{ whiteSpace: 'pre-line' }}>{gallery.description || 'No description'}</p>
             <div className="photo-carousel">
-              <Carousel>
-                {photos.length > 0 && photos.map((photo) => (
-                  <img alt="img" src={canview ? photo?.photo?.url : '/static/no-subscribe-img.jpg'} key={photo._id} />
-                ))}
-              </Carousel>
+              {!fetching && photos && photos.length > 0 && <PhotoPreviewList isBlur={!user || !user._id || !canview} photos={photos} />}
               {!canview && (
                 <div className="text-center" style={{ margin: '20px 0' }}>
                   {gallery.isSale && !isBought && (
@@ -287,15 +286,16 @@ class GalleryViewPage extends PureComponent<IProps> {
                     <BookOutlined />
                   </button>
                 </div>
-                <div className="o-w-ner">
-                  <Link
-                    href={{
-                      pathname: '/model/profile',
-                      query: { username: gallery.performer?.username || gallery.performer?._id }
-                    }}
-                    as={`/model/${gallery.performer?.username || gallery.performer?._id}`}
-                  >
-                    <a>
+
+                <Link
+                  href={{
+                    pathname: '/model/profile',
+                    query: { username: gallery.performer?.username || gallery.performer?._id }
+                  }}
+                  as={`/model/${gallery.performer?.username || gallery.performer?._id}`}
+                >
+                  <a>
+                    <div className="o-w-ner">
                       <img
                         alt="performer avatar"
                         src={gallery.performer?.avatar || '/static/no-avatar.png'}
@@ -308,15 +308,10 @@ class GalleryViewPage extends PureComponent<IProps> {
                           {gallery?.performer?.username || 'n/a'}
                         </small>
                       </div>
-                    </a>
-                  </Link>
-                </div>
+                    </div>
+                  </a>
+                </Link>
               </div>
-            </div>
-          </div>
-          <div className="vid-info">
-            <div className="main-container">
-              <p>{gallery.description || 'No description...'}</p>
             </div>
           </div>
           <div className="main-container">

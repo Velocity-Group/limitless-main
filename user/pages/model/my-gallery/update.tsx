@@ -132,7 +132,7 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
   async getPhotosInGallery() {
     try {
       const { id } = this.props;
-      const photos = await (await photoService.searchPhotosInGallery({ galleryId: id })).data;
+      const photos = await (await photoService.searchPhotosInGallery({ galleryId: id, limit: 200 })).data;
       this.setState({
         filesList: photos ? photos.data : []
       });

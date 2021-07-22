@@ -105,9 +105,6 @@ const FormGallery = ({
           <p className="ant-upload-text">
             Drag & drop files to this area or browser to upload
           </p>
-          <p className="ant-upload-hint">
-            Support image files only.
-          </p>
         </Dragger>
         )}
         {filesList && filesList.length > 0 && (
