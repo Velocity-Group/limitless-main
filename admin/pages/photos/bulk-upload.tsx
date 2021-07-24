@@ -64,12 +64,7 @@ class BulkUploadPhoto extends PureComponent<IProps> {
 
   remove(file) {
     const { fileList } = this.state;
-    fileList.splice(
-      fileList.findIndex((f) => f.uid === file.uid),
-      1
-    );
-    this.setState({ fileList });
-    this.forceUpdate();
+    this.setState({ fileList: fileList.filter((f) => f.uid !== file.uid) });
   }
 
   async submit(data: any) {
@@ -159,12 +154,12 @@ class BulkUploadPhoto extends PureComponent<IProps> {
                   <UploadOutlined />
                 </p>
                 <p className="ant-upload-text">Click or drag-drop file to this area to upload</p>
-                <p className="ant-upload-hint">Photo is 5Mb or below</p>
+                <p className="ant-upload-hint">Photo is 5MB or below</p>
               </Dragger>
             </Form.Item>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading}>
-                Upload
+                UPLOAD ALL
               </Button>
             </Form.Item>
           </Form>

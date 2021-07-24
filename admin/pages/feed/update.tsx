@@ -35,7 +35,6 @@ class FeedUpdate extends PureComponent<IProps> {
     }
 
     async deleteFeed(id: string) {
-      console.log(id);
       if (!window.confirm('Are you sure you want to delete this post?')) {
         return;
       }

@@ -180,9 +180,10 @@ export default class FormFeed extends PureComponent<IProps> {
 
   async remove(file) {
     const { fileList, fileIds } = this.state;
-    fileList.splice(fileList.findIndex((f) => (f._id ? f._id === file._id : f.uid === file.uid)), 1);
-    file._id && fileIds.splice(fileIds.findIndex((id) => id === file._id), 1);
-    this.setState({ fileList, fileIds });
+    this.setState({
+      fileList: fileList.filter((f) => (f._id ? f._id !== file._id : f.uid !== file.uid)),
+      fileIds: fileIds.filter((id) => id !== file?._id)
+    });
   }
 
   async beforeUpload(file, fileList) {
@@ -253,6 +254,7 @@ export default class FormFeed extends PureComponent<IProps> {
     const isLt2M = file.size / 1024 / 1024 < 100;
     if (!isLt2M) {
       message.error('Teaser must be smaller than 100MB!');
+      return;
     }
     try {
       const resp = await feedService.uploadTeaser(
@@ -277,7 +279,7 @@ export default class FormFeed extends PureComponent<IProps> {
       return message.error('Please add a description');
     }
     if (formValues.price < 1) {
-      return message.error('Price must be greater than $1');
+      return message.error('Tokens must be greater than 1');
     }
     if (this.teaserId) {
       formValues.teaserId = this.teaserId;
@@ -394,7 +396,7 @@ export default class FormFeed extends PureComponent<IProps> {
           </Form.Item>
           )}
           {isSale && (
-            <Form.Item label="Set price here" name="price" rules={[{ required: isSale, message: 'Please add price' }]}>
+            <Form.Item label="Amount of tokens" name="price" rules={[{ required: isSale, message: 'Please add amount of tokens' }]}>
               <InputNumber min={1} />
             </Form.Item>
           )}
@@ -482,7 +484,11 @@ export default class FormFeed extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload files"><Button type="primary"><FileAddOutlined /></Button></Tooltip>
+                <Button type="primary">
+                  <FileAddOutlined />
+                  {' '}
+                  Add Files
+                </Button>
               </Upload>,
               <Upload
                 key="upload_thumb"
@@ -494,7 +500,11 @@ export default class FormFeed extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload thumbnail"><Button type="primary" style={{ marginLeft: 15 }}><PictureOutlined /></Button></Tooltip>
+                <Button type="primary" style={{ marginLeft: 15 }}>
+                  <PictureOutlined />
+                  {' '}
+                  Add Thumbnail
+                </Button>
               </Upload>
             ]}
             {['video'].includes(feed?.type || type) && [
@@ -508,10 +518,18 @@ export default class FormFeed extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload teaser video (<100MB)"><Button type="primary" style={{ marginLeft: 15 }}><VideoCameraAddOutlined /></Button></Tooltip>
+                <Button type="primary" style={{ marginLeft: 15 }}>
+                  <VideoCameraAddOutlined />
+                  {' '}
+                  Add Teaser
+                </Button>
               </Upload>
             ]}
-            <Tooltip title="Click to add polls"><Button disabled={addPoll || (!!(feed && feed._id))} type="primary" style={{ marginLeft: '15px' }} onClick={this.onAddPoll.bind(this)}><BarChartOutlined style={{ transform: 'rotate(90deg)' }} /></Button></Tooltip>
+            <Button disabled={addPoll || (!!(feed && feed._id))} type="primary" style={{ marginLeft: '15px' }} onClick={this.onAddPoll.bind(this)}>
+              <BarChartOutlined style={{ transform: 'rotate(90deg)' }} />
+              {' '}
+              Add Polls
+            </Button>
           </div>
           <AddPollDurationForm onAddPollDuration={this.onChangePollDuration.bind(this)} openDurationPollModal={openPollDuration} />
           <div className="submit-btns">
@@ -522,7 +540,7 @@ export default class FormFeed extends PureComponent<IProps> {
               loading={uploading}
               disabled={uploading}
             >
-              {!feed ? 'Post' : 'Update'}
+              {!feed ? 'POST' : 'UPDATE'}
             </Button>
             {feed && (
             <Button
