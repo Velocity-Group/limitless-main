@@ -63,11 +63,11 @@ export class SelectGalleryDropdown extends PureComponent<IProps> {
         disabled={disabled}
       >
         <Select.Option value="" key="default" style={{ textTransform: 'capitalize' }} disabled>
-          Type to search galleries
+          Type to search gallery
         </Select.Option>
         {data && data.length > 0 && data.map((u) => (
           <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>
-            {`${u.name}`}
+            {`${u.title}`}
           </Select.Option>
         ))}
       </Select>

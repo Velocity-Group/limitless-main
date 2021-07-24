@@ -103,7 +103,7 @@ class BulkUploadPhoto extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Upload photo</title>
+          <title>Upload photos</title>
         </Head>
         <Page>
           <Form
@@ -158,8 +158,8 @@ class BulkUploadPhoto extends PureComponent<IProps> {
                 <p className="ant-upload-drag-icon">
                   <UploadOutlined />
                 </p>
-                <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                <p className="ant-upload-hint">Support image file only</p>
+                <p className="ant-upload-text">Click or drag-drop file to this area to upload</p>
+                <p className="ant-upload-hint">Photo is 5Mb or below</p>
               </Dragger>
             </Form.Item>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
