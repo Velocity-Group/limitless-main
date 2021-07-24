@@ -218,6 +218,7 @@ export default class FeedForm extends PureComponent<IProps> {
     const isLt2M = file.size / 1024 / 1024 <= 5;
     if (!isLt2M) {
       message.error('Image is too large please provide an image 5MB or below');
+      return;
     }
     const reader = new FileReader();
     reader.addEventListener('load', () => { this.setState({ thumbnail: reader.result }); });
@@ -244,6 +245,7 @@ export default class FeedForm extends PureComponent<IProps> {
     const isLt2M = file.size / 1024 / 1024 < 100;
     if (!isLt2M) {
       message.error('Teaser video is too large please provide an video 100MB or below');
+      return;
     }
     try {
       const resp = await feedService.uploadTeaser(
@@ -269,7 +271,7 @@ export default class FeedForm extends PureComponent<IProps> {
       return;
     }
     if (formValues.price < 1) {
-      message.error('Price must be greater than $1');
+      message.error('Amount of tokens must be greater than 1');
       return;
     }
     if (this.teaserId) {
