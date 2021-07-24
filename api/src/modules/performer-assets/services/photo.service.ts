@@ -27,6 +27,7 @@ import { PhotoModel } from '../models';
 import { PERFORMER_PHOTO_MODEL_PROVIDER } from '../providers';
 
 export const PERFORMER_PHOTO_CHANNEL = 'PERFORMER_PHOTO_CHANNEL';
+const PHOTO_CONVERT_CHANNEL = 'PHOTO_CONVERT_CHANNEL';
 
 const FILE_PROCESSED_TOPIC = 'FILE_PROCESSED';
 const CHECK_REF_REMOVE_PHOTO_AGENDA = 'CHECK_REF_REMOVE_PHOTO_AGENDA';
@@ -50,7 +51,7 @@ export class PhotoService {
 
   ) {
     this.queueEventService.subscribe(
-      PERFORMER_PHOTO_CHANNEL,
+      PHOTO_CONVERT_CHANNEL,
       FILE_PROCESSED_TOPIC,
       this.handleFileProcessed.bind(this)
     );
@@ -121,7 +122,7 @@ export class PhotoService {
     });
     if (photoCover) return;
     const defaultCover = await this.photoModel.findOne({
-      targetId: photo.galleryId,
+      galleryId: photo.galleryId,
       status: PHOTO_STATUS.ACTIVE
     });
     if (!defaultCover || (photoCover && photoCover._id.toString() === defaultCover.toString())) return;
@@ -166,7 +167,7 @@ export class PhotoService {
         meta: {
           photoId: photo._id
         },
-        publishChannel: PERFORMER_PHOTO_CHANNEL,
+        publishChannel: PHOTO_CONVERT_CHANNEL,
         thumbnailSize: {
           width: 250,
           height: 250
@@ -273,7 +274,7 @@ export class PhotoService {
     await photo.remove();
     // TODO - should check ref and remove
     await this.fileService.remove(photo.fileId);
-
+    photo.galleryId && await this.galleryService.updatePhotoStats(photo.galleryId, -1);
     await this.queueEventService.publish(
       new QueueEvent({
         channel: PERFORMER_PHOTO_CHANNEL,

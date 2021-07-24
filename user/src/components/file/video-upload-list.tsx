@@ -1,8 +1,5 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { PureComponent } from 'react';
-import { FileAddOutlined, DeleteOutlined } from '@ant-design/icons';
+import { FileDoneOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Progress } from 'antd';
 
 interface IProps {
@@ -12,14 +9,15 @@ interface IProps {
 
 export default class VideoUploadList extends PureComponent<IProps> {
   render() {
+    const { files, remove } = this.props;
     return (
-      <div className="ant-upload-list ant-upload-list-picture">
-        {this.props.files && this.props.files.map((file) => (
+      <div className="ant-upload-list ant-upload-list-picture" style={{ marginBottom: 10 }}>
+        {files && files.map((file) => (
           <div className="ant-upload-list-item ant-upload-list-item-uploading ant-upload-list-item-list-type-picture" key={file.uid}>
             <div className="ant-upload-list-item-info">
-              <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span className="ant-upload-list-item-thumbnail ant-upload-list-item-file">
-                  <FileAddOutlined />
+                  <FileDoneOutlined style={{ color: 'green', fontSize: 35 }} />
                 </span>
                 <span className="ant-upload-list-item-name ant-upload-list-item-name-icon-count-1">
                   <span><b>{file.name}</b></span>
@@ -32,15 +30,16 @@ export default class VideoUploadList extends PureComponent<IProps> {
                   </span>
                 </span>
                 {file.percent !== 100
-                  && (
-                  <span className="ant-upload-list-item-card-actions picture">
-                    <a onClick={this.props.remove.bind(this, file)}>
+                && (
+                  <span className="">
+                    <a aria-hidden onClick={() => remove(file)}>
                       <DeleteOutlined />
                     </a>
                   </span>
-                  )}
-                {file.percent && <Progress percent={Math.round(file.percent)} />}
+                )}
               </div>
+
+              {file.percent && <Progress percent={Math.round(file.percent)} />}
             </div>
           </div>
         ))}

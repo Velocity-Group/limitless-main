@@ -24,7 +24,7 @@ export default class FeedSlider extends PureComponent<IProps> {
         {!processing && feed.files && feed.files.length && (
         <Carousel swipeToSlide arrows dots={false}>
           {images && images.length > 0 && images.map((img) => (
-            <Image src={img.url} title={img.name} width="100%" alt="img" />
+            <Image key={img._id} src={img.url} title={img.name} width="100%" alt="img" />
           ))}
           {videos && videos.length > 0 && videos.map((vid) => (
             <VideoPlayer

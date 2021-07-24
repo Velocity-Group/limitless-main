@@ -1,7 +1,7 @@
 import { PureComponent, createRef } from 'react';
 import Head from 'next/head';
 import {
-  Form, message, Layout, Button, Col, Row, Upload
+  Form, message, Layout, Button, Upload
 } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
@@ -130,7 +130,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Upload videos
+            | Upload Videos
           </title>
         </Head>
         <div className="main-container">
@@ -142,31 +142,27 @@ class BulkUploadVideo extends PureComponent<IProps> {
               validateMessages={validateMessages}
               ref={this.formRef}
             >
-              <Row className="ant-form-item">
-                <Col span={24}>
-                  <div>
-                    <Dragger
-                      accept="video/*"
-                      beforeUpload={this.beforeUpload.bind(this)}
-                      multiple
-                      showUploadList={false}
-                      disabled={uploading}
-                      listType="picture"
-                    >
-                      <p className="ant-upload-drag-icon">
-                        <UploadOutlined />
-                      </p>
-                      <p className="ant-upload-text">
-                        Click or drag-drop files to this area to upload
-                      </p>
-                    </Dragger>
-                    <VideoUploadList
-                      files={fileList}
-                      remove={this.remove.bind(this)}
-                    />
-                  </div>
-                </Col>
-              </Row>
+              <Form.Item>
+                <Dragger
+                  accept="video/*"
+                  beforeUpload={this.beforeUpload.bind(this)}
+                  multiple
+                  showUploadList={false}
+                  disabled={uploading}
+                  listType="picture"
+                >
+                  <p className="ant-upload-drag-icon">
+                    <UploadOutlined />
+                  </p>
+                  <p className="ant-upload-text">
+                    Click or drag & drop files to this area to upload
+                  </p>
+                </Dragger>
+              </Form.Item>
+              <VideoUploadList
+                files={fileList}
+                remove={this.remove.bind(this)}
+              />
               <Form.Item>
                 <Button
                   className="secondary"
@@ -174,7 +170,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
                   loading={uploading}
                   disabled={uploading || !fileList.length}
                 >
-                  Upload
+                  UPLOAD ALL
                 </Button>
               </Form.Item>
             </Form>

@@ -23,10 +23,6 @@ interface IStates {
 }
 
 class OrderDetailPage extends PureComponent<IProps, IStates> {
-  static authenticate = true;
-
-  static onlyPerformer = true;
-
   static async getInitialProps({ ctx }) {
     return ctx.query;
   }
@@ -48,17 +44,16 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
     const { deliveryStatus, shippingCode } = this.state;
     const { id } = this.props;
     if (!shippingCode) {
-      return message.error('Missing shipping code');
+      message.error('Missing shipping code');
+      return;
     }
     try {
       await orderService.update(id, { deliveryStatus, shippingCode });
       message.success('Changes saved.');
+      Router.push('/order');
     } catch (e) {
       message.error(getResponseError(e));
     }
-    Router.push('/order');
-
-    return undefined;
   }
 
   async getData() {
