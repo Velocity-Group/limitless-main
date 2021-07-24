@@ -70,7 +70,7 @@ export class PerformerModel extends Document {
 
   eyes: string;
 
-  sexualPreference: string;
+  sexualOrientation: string;
 
   dateOfBirth: Date;
 

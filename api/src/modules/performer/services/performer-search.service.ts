@@ -41,7 +41,7 @@ export class PerformerSearchService {
       query._id = { $in: req.performerIds.split(',') };
     }
     ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender', 'status',
-      'height', 'weight', 'eyes', 'bust', 'sexualPreference'].forEach((f) => {
+      'height', 'weight', 'eyes', 'bust', 'sexualOrientation'].forEach((f) => {
       if (req[f]) {
         query[f] = req[f];
       }
@@ -116,7 +116,7 @@ export class PerformerSearchService {
         { bodyType: searchValue },
         { gender: searchValue },
         { ethnicity: searchValue },
-        { sexualPreference: searchValue }
+        { sexualOrientation: searchValue }
       ];
       await this.queueEventService.publish(
         new QueueEvent({
@@ -134,7 +134,7 @@ export class PerformerSearchService {
       query._id = { $in: req.performerIds.split(',') };
     }
     ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender', 'status',
-      'height', 'weight', 'eyes', 'bust', 'sexualPreference'].forEach((f) => {
+      'height', 'weight', 'eyes', 'bust', 'sexualOrientation'].forEach((f) => {
       if (req[f]) {
         query[f] = req[f];
       }

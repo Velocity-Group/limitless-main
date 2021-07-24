@@ -39,7 +39,7 @@ export class PerformerInfo extends PureComponent<IProps> {
           {performer?.hair && <Descriptions.Item label="Hair color">{performer?.hair}</Descriptions.Item>}
           {performer?.pubicHair && <Descriptions.Item label="Pubic Hair">{performer?.pubicHair}</Descriptions.Item>}
           {performer?.bust && <Descriptions.Item label="Bust size">{performer?.bust}</Descriptions.Item>}
-          {performer?.sexualPreference && <Descriptions.Item label="Sexual reference">{performer?.sexualPreference}</Descriptions.Item>}
+          {performer?.sexualOrientation && <Descriptions.Item label="Sexual reference">{performer?.sexualOrientation}</Descriptions.Item>}
         </Descriptions>
       </>
     );

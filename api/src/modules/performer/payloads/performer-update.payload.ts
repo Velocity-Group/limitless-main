@@ -192,7 +192,7 @@ export class PerformerUpdatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  sexualPreference: string;
+  sexualOrientation: string;
 
   @ApiProperty()
   @IsBoolean()
@@ -362,7 +362,7 @@ export class SelfUpdatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  sexualPreference: string;
+  sexualOrientation: string;
 
   @ApiProperty()
   @IsBoolean()

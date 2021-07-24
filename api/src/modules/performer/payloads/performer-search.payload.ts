@@ -91,7 +91,7 @@ export class PerformerSearchPayload extends SearchRequest {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  sexualPreference: string;
+  sexualOrientation: string;
 
   @ApiProperty()
   @IsOptional()

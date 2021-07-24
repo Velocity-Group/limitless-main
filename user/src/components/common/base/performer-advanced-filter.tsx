@@ -14,6 +14,13 @@ const genders = [
   { key: 'transgender', text: 'Trans' }
 ];
 
+const sexualOrientations = [
+  { key: '', text: 'All sexual orientations' },
+  { key: 'male', text: 'Male' },
+  { key: 'female', text: 'Female' },
+  { key: 'transgender', text: 'Trans' }
+];
+
 const eyeColors = [
   { key: '', text: 'All eye colors' },
   { key: 'blue', text: 'Blue' },
@@ -93,6 +100,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
 
   componentDidMount() {
     this.getHeights();
+    this.getWeights();
   }
 
   handleSubmit() {
@@ -188,7 +196,6 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             </Select>
           </div>
           )}
-          {genders && (
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ gender: val }, () => this.handleSubmit())}
@@ -202,8 +209,19 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )}
-          {ages.length > 0 && (
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ sexualOrientation: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              defaultValue=""
+            >
+              {sexualOrientations.map((gen) => (
+                <Select.Option key={gen.key} value={gen.key}>
+                  {gen.text || gen.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ age: val }, () => this.handleSubmit())}
@@ -218,8 +236,6 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )}
-          {eyeColors.length > 0 && (
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ eyes: val }, () => this.handleSubmit())}
@@ -234,8 +250,6 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )}
-          {hairColors.length > 0 && (
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ hair: val }, () => this.handleSubmit())}
@@ -250,8 +264,6 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )}
-          {buttSizes.length > 0 && (
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ bust: val }, () => this.handleSubmit())}
@@ -266,7 +278,6 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )}
           {heights.length > 0 && (
           <div className="filter-item">
             <Select
@@ -305,7 +316,6 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             </Select>
           </div>
           )}
-          {ethnicities.length > 0 && (
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ ethnicity: val }, () => this.handleSubmit())}
@@ -320,8 +330,6 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )}
-          {bodyTypes.length > 0 && (
           <div className="filter-item">
             <Select
               onChange={(val) => this.setState({ bodyType: val }, () => this.handleSubmit())}
@@ -336,7 +344,6 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
-          )}
         </div>
       </div>
     );

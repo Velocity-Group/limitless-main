@@ -297,6 +297,26 @@ export class PerformerAccountForm extends PureComponent<IProps> {
           </Col>
           <Col lg={12} md={12} xs={24}>
             <Form.Item
+              name="sexualOrientation"
+              label="Sexual orientation"
+              rules={[
+                { required: true, message: 'Please select your sexual orientation!' }]}
+            >
+              <Select>
+                <Select.Option value="male" key="male">
+                  Male
+                </Select.Option>
+                <Select.Option value="female" key="female">
+                  Female
+                </Select.Option>
+                <Select.Option value="transgender" key="transgender">
+                  Trans
+                </Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col lg={12} md={12} xs={24}>
+            <Form.Item
               name="country"
               label="Country"
               rules={[{ required: true }]}
@@ -491,11 +511,6 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                   Small
                 </Option>
               </Select>
-            </Form.Item>
-          </Col>
-          <Col lg={12} md={12} xs={24}>
-            <Form.Item name="sexualPreference" label="Sexual Preference">
-              <Input />
             </Form.Item>
           </Col>
           <Col span={24}>

@@ -187,7 +187,7 @@ export class PerformerCreatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  sexualPreference: string;
+  sexualOrientation: string;
 
   @ApiProperty()
   @IsBoolean()

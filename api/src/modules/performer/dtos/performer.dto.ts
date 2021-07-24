@@ -31,7 +31,7 @@ export interface IPerformerResponse {
   hair?: string;
   bust?: string;
   ethnicity?: string;
-  sexualPreference?: string;
+  sexualOrientation?: string;
   isFreeSubscription?: boolean;
   durationFreeSubscriptionDays?: number;
   monthlyPrice?: number;
@@ -168,7 +168,7 @@ export class PerformerDto {
 
   ethnicity?: string;
 
-  sexualPreference?: string;
+  sexualOrientation?: string;
 
   isFreeSubscription?: boolean;
 
@@ -293,7 +293,7 @@ export class PerformerDto {
         'hair',
         'bust',
         'ethnicity',
-        'sexualPreference',
+        'sexualOrientation',
         'isFreeSubscription',
         'durationFreeSubscriptionDays',
         'monthlyPrice',
@@ -373,7 +373,7 @@ export class PerformerDto {
       bio: this.bio,
       eyes: this.eyes,
       bodyType: this.bodyType,
-      sexualPreference: this.sexualPreference,
+      sexualOrientation: this.sexualOrientation,
       isPerformer: true
     };
     const privateInfo = {
@@ -478,7 +478,7 @@ export class PerformerDto {
       hair: this.hair,
       bust: this.bust,
       ethnicity: this.ethnicity,
-      sexualPreference: this.sexualPreference,
+      sexualOrientation: this.sexualOrientation,
       isFreeSubscription: this.isFreeSubscription,
       durationFreeSubscriptionDays: this.durationFreeSubscriptionDays,
       monthlyPrice: this.monthlyPrice,

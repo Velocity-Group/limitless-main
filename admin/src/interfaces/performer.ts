@@ -27,7 +27,7 @@ export interface IPerformer {
   weight: string;
   bio: string;
   eyes: string;
-  sexualPreference: string;
+  sexualOrientation: string;
   isFreeSubscription: boolean;
   monthlyPrice: number;
   yearlyPrice: number;
@@ -112,7 +112,7 @@ export interface IUpdatePerformer {
   weight: string;
   bio: string;
   eyes: string;
-  sexualPreference: string;
+  sexualOrientation: string;
   isFreeSubscription: boolean;
   monthlyPrice: number;
   yearlyPrice: number;

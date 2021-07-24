@@ -93,7 +93,7 @@ export class SearchKeywordService {
           { bodyType: searchValue },
           { gender: searchValue },
           { ethnicity: searchValue },
-          { sexualPreference: searchValue }
+          { sexualOrientation: searchValue }
         ]
       }, { status: STATUS.ACTIVE, verifiedDocument: true }];
 

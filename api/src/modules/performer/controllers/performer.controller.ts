@@ -32,7 +32,6 @@ import {
 } from 'src/modules/file';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
-import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { CountryService } from 'src/modules/utils/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { PERFORMER_STATUSES } from '../constants';
@@ -74,7 +73,7 @@ export class PerformerController {
     return DataResponse.ok(new PerformerDto(user).toResponse(true, false));
   }
 
-  @Get('/search')
+  @Get('/user/search')
   @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))

@@ -15,3 +15,7 @@ export function formatDateShort(date: Date, format = 'MMM DD') {
 export function formatDateFromnow(date: Date) {
   return moment(date).fromNow();
 }
+
+export function dobToAge(date: Date) {
+  return moment().diff(moment(date), 'years') > 0 && `${moment().diff(moment(date), 'years')}+`;
+}

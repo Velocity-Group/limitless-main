@@ -11,7 +11,6 @@ import { PerformerAdvancedFilter } from '@components/common/base/performer-advan
 import PageHeading from '@components/common/page-heading';
 import { IUIConfig } from 'src/interfaces/';
 import { DropOption } from '@components/common/base/drop-option';
-import Router from 'next/router';
 import '@components/performer/performer.less';
 
 interface IProps {
@@ -34,15 +33,10 @@ class Performers extends PureComponent<IProps> {
   async componentDidMount() {
     const { getList: getListHandler } = this.props;
     const { limit, offset } = this.state;
-    try {
-      getListHandler({
-        limit,
-        offset,
-        status: 'active'
-      });
-    } catch (e) {
-      Router.back();
-    }
+    getListHandler({
+      limit,
+      offset
+    });
   }
 
   async handleFilter(values: any) {
@@ -71,10 +65,10 @@ class Performers extends PureComponent<IProps> {
     });
   }
 
-  pageChanged = (page: number) => {
+  pageChanged = async (page: number) => {
     const { getList: getListHandler } = this.props;
     const { limit, filter } = this.state;
-    this.setState({ offset: page });
+    this.setState({ offset: page - 1 });
     getListHandler({
       limit,
       offset: (page - 1) * limit,

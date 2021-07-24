@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import { IPerformer } from 'src/interfaces';
 import Link from 'next/link';
 import { StarOutlined } from '@ant-design/icons';
+import { dobToAge } from '@lib/date';
 import './performer.less';
 
 interface IProps {
@@ -31,6 +32,11 @@ export default class PerformerGridCard extends PureComponent<IProps> {
                 {' '}
                 <StarOutlined />
               </span>
+              {performer?.dateOfBirth && (
+              <span>
+                {dobToAge(performer?.dateOfBirth)}
+              </span>
+              )}
             </div>
             <div className="model-name">{performer?.name || performer?.username || 'N/A'}</div>
           </a>

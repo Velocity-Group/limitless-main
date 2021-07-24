@@ -136,7 +136,7 @@ const performerSchema = new mongoose.Schema({
     type: String,
     index: true
   },
-  sexualPreference: {
+  sexualOrientation: {
     type: String,
     index: true
   },

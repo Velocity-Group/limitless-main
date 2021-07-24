@@ -56,7 +56,7 @@ interface IProps {
 export class AccountForm extends PureComponent<IProps> {
   render() {
     const {
-      performer, onFinish, submiting, countries, onUploaded, heights, // weights
+      performer, onFinish, submiting, countries, onUploaded, heights, weights,
       avatarUrl, coverUrl
     } = this.props;
     const uploadHeaders = {
@@ -74,6 +74,7 @@ export class AccountForm extends PureComponent<IProps> {
             country: 'US',
             status: 'active',
             gender: 'male',
+            sexualOrientation: 'male',
             languages: ['en'],
             bodyType: 'slim',
             dateOfBirth: '',
@@ -219,6 +220,21 @@ export class AccountForm extends PureComponent<IProps> {
           </Col>
           <Col xs={12} md={12}>
             <Form.Item name="gender" label="Gender">
+              <Select>
+                <Select.Option key="male" value="male">
+                  Male
+                </Select.Option>
+                <Select.Option key="female" value="female">
+                  Female
+                </Select.Option>
+                <Select.Option key="transgender" value="transgender">
+                  Transgender
+                </Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col xs={12} md={12}>
+            <Form.Item name="sexualOrientation" label="Sexual orientation">
               <Select>
                 <Select.Option key="male" value="male">
                   Male
@@ -381,13 +397,10 @@ export class AccountForm extends PureComponent<IProps> {
                       {h.text}
                     </Option>
                   ))}
-                <Option key="" value="">
-                  Others
-                </Option>
               </Select>
             </Form.Item>
           </Col>
-          {/* <Col xs={12} md={12}>
+          <Col xs={12} md={12}>
             <Form.Item name="weight" label="Weight">
               <Select showSearch>
                 {weights
@@ -396,12 +409,9 @@ export class AccountForm extends PureComponent<IProps> {
                   {w.text}
                 </Option>
               ))}
-                <Option key="" value="">
-                  Unknow
-                </Option>
               </Select>
             </Form.Item>
-          </Col> */}
+          </Col>
           <Col xs={12} md={12}>
             <Form.Item name="eyes" label="Eyes">
               <Select>
@@ -413,9 +423,6 @@ export class AccountForm extends PureComponent<IProps> {
                 </Option>
                 <Option key="green" value="green">
                   Green
-                </Option>
-                <Option key="" value="">
-                  Others
                 </Option>
               </Select>
             </Form.Item>
@@ -435,9 +442,6 @@ export class AccountForm extends PureComponent<IProps> {
                 <Option key="red" value="red">
                   Red
                 </Option>
-                <Option key="" value="">
-                  Others
-                </Option>
               </Select>
             </Form.Item>
           </Col>
@@ -452,9 +456,6 @@ export class AccountForm extends PureComponent<IProps> {
                 </Option>
                 <Option key="small" value="small">
                   Small
-                </Option>
-                <Option key="" value="">
-                  Unknow
                 </Option>
               </Select>
             </Form.Item>

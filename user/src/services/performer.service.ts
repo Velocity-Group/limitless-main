@@ -1,7 +1,6 @@
 import { IPerformer } from 'src/interfaces';
 import {
   IBanking,
-  IBlockCountries,
   IBlockedByPerformer
 } from '../interfaces/performer';
 import { APIRequest, IResponse } from './api-request';
@@ -9,7 +8,7 @@ import env from '../env';
 
 export class PerformerService extends APIRequest {
   search(query?: { [key: string]: any }) {
-    return this.get(this.buildUrl('/performers/search', query));
+    return this.get(this.buildUrl('/performers/user/search', query));
   }
 
   randomSearch(query?: { [key: string]: any }) {
