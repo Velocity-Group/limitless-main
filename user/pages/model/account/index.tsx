@@ -47,15 +47,15 @@ class AccountSettings extends PureComponent<IProps> {
   static onlyPerformer: boolean = true;
 
   static async getInitialProps() {
-    const [countries, heights] = await Promise.all([
+    const [countries, heights, weights] = await Promise.all([
       utilsService.countriesList(),
-      utilsService.heightList()
-      // utilsService.weightList()
+      utilsService.heightList(),
+      utilsService.weightList()
     ]);
     return {
       countries: countries && countries.data ? countries.data : [],
-      heights: heights && heights.data ? heights.data : []
-      // weights: weights && weights.data ? weights.data : []
+      heights: heights && heights.data ? heights.data : [],
+      weights: weights && weights.data ? weights.data : []
     };
   }
 
@@ -165,7 +165,7 @@ class AccountSettings extends PureComponent<IProps> {
 
   render() {
     const {
-      currentUser, updating, ui, countries, heights
+      currentUser, updating, ui, countries, heights, weights
     } = this.props;
     const { pwUpdating, emailSending, countTime } = this.state;
     const uploadHeaders = {
@@ -207,7 +207,7 @@ class AccountSettings extends PureComponent<IProps> {
                   videoUploadUrl: performerService.getVideoUploadUrl()
                 }}
                 countries={countries}
-                // weights={weights}
+                weights={weights}
                 heights={heights}
               />
             </Tabs.TabPane>

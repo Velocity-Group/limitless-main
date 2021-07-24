@@ -98,7 +98,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
 
   render() {
     const {
-      onFinish, user, updating, countries, options, heights, // weights,
+      onFinish, user, updating, countries, options, heights, weights,
       onVerifyEmail, countTime = 60
     } = this.props;
     const {
@@ -411,9 +411,18 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                       {h.text}
                     </Option>
                   ))}
-                <Option key="" value="">
-                  Height
-                </Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col lg={12} md={12} xs={24}>
+            <Form.Item name="weight" label="Weight">
+              <Select showSearch>
+                {weights
+                  && weights.map((h: IHeight) => (
+                    <Option key={h.text} value={h.text}>
+                      {h.text}
+                    </Option>
+                  ))}
               </Select>
             </Form.Item>
           </Col>
