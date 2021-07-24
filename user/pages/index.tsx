@@ -21,7 +21,6 @@ import './auth/index.less';
 import { ISettings, IUIConfig } from 'src/interfaces';
 import Router from 'next/router';
 import { TwitterOutlined } from '@ant-design/icons';
-import Loader from '@components/common/base/loader';
 import GoogleLogin from 'react-google-login';
 import { isEmail } from '@lib/string';
 // import { GoogleReCaptcha } from '@components/common';
@@ -230,18 +229,17 @@ class Login extends PureComponent<IProps> {
                             { required: true, message: 'Email or Username is missing' }
                           ]}
                         >
-                          <Input onChange={this.onInputChange.bind(this)} placeholder="Email or Username" />
+                          <Input disabled={loginAuth.requesting || isLoading} onChange={this.onInputChange.bind(this)} placeholder="Email or Username" />
                         </Form.Item>
                         <Form.Item
                           name="password"
                           hasFeedback
                           validateTrigger={['onChange', 'onBlur']}
                           rules={[
-                            { required: true, message: 'Please enter your password!' },
-                            { min: 6 }
+                            { required: true, message: 'Please enter your password!' }
                           ]}
                         >
-                          <Input.Password placeholder="Password" />
+                          <Input.Password disabled={loginAuth.requesting || isLoading} placeholder="Password" />
                         </Form.Item>
                         <p style={{ padding: '0 5px' }}>
                           <Link
@@ -254,7 +252,7 @@ class Login extends PureComponent<IProps> {
                         </p>
                         {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                         <Form.Item style={{ textAlign: 'center' }}>
-                          <Button disabled={loginAuth.requesting} loading={loginAuth.requesting} type="primary" htmlType="submit" className="login-form-button">
+                          <Button disabled={loginAuth.requesting || isLoading} loading={loginAuth.requesting || isLoading} type="primary" htmlType="submit" className="login-form-button">
                             LOGIN
                           </Button>
                           <p>
@@ -275,7 +273,6 @@ class Login extends PureComponent<IProps> {
                   </div>
                 </Col>
               </Row>
-              {isLoading && <Loader />}
             </div>
           </div>
         </Layout>
