@@ -50,6 +50,8 @@ export class CommentForm extends PureComponent<IProps> {
   }
 
   async onEmojiClick(e, value) {
+    const { creator } = this.props;
+    if (!creator) return;
     const { text } = this.state;
     const instance = this.formRef.current as FormInstance;
     instance.setFieldsValue({
@@ -75,13 +77,12 @@ export class CommentForm extends PureComponent<IProps> {
         <div className="comment-form">
           <div className="cmt-user">
             <img alt="creator-img" src={creator && creator.avatar ? creator.avatar : '/static/no-avatar.png'} />
-            {/* <span>@{creator.username}</span> */}
           </div>
           <div className="cmt-area">
             <Form.Item
               name="content"
             >
-              <TextArea maxLength={250} minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
+              <TextArea disabled={!creator} maxLength={250} minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
             <div className="grp-emotions">
               <SmileOutlined />

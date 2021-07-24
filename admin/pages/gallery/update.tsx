@@ -45,7 +45,7 @@ class GalleryUpdate extends PureComponent<IProps> {
       };
       await galleryService.update(id, submitData);
       message.success('Updated successfully');
-      Router.back();
+      Router.push('/gallery');
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');

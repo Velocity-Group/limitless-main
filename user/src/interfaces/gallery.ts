@@ -15,6 +15,7 @@ export interface IGallery {
   tagline: string;
   isSubscribed: boolean;
   isBought: boolean;
+  numOfItems: number;
 }
 
 export interface IGalleryCreate {

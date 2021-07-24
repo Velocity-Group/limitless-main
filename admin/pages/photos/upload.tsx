@@ -41,35 +41,25 @@ class UploadPhoto extends PureComponent<IProps> {
   }
 
   beforeUpload(file) {
-    const reader = new FileReader();
-    reader.addEventListener('load', () => this.setState({
-    }));
-    reader.readAsDataURL(file);
-
     this._photo = file;
     return false;
   }
 
   async submit(data: any) {
     if (!this._photo) {
-      return message.error('Please select photo!');
+      message.error('Please select photo!');
+      return;
     }
-
-    await this.setState({
-      uploading: true
-    });
+    await this.setState({ uploading: true });
     try {
       await photoService.uploadPhoto(this._photo, data, this.onUploading.bind(this)) as IResponse;
       message.success('Photo has been uploaded');
       // TODO - process for response data?
-      Router.push('/photos');
+      Router.push('/gallery');
     } catch (error) {
       message.error('An error occurred, please try again!');
-      await this.setState({
-        uploading: false
-      });
+      this.setState({ uploading: false });
     }
-    return undefined;
   }
 
   render() {

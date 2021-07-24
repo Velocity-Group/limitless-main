@@ -51,6 +51,10 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Total photos',
+        dataIndex: 'numOfItems'
+      },
+      {
         title: 'Status',
         dataIndex: 'status',
         render(status: string) {

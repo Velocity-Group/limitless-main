@@ -24,10 +24,10 @@ const validateMessages = {
 interface IProps {
   performerId: string;
 }
+
 class BulkUploadVideo extends PureComponent<IProps> {
   state = {
     uploading: false,
-    // uploadPercentage: 0,
     fileList: []
   };
 
@@ -57,11 +57,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
 
   remove(file) {
     const { fileList } = this.state;
-    fileList.splice(
-      fileList.findIndex((f) => f.uid === file.uid),
-      1
-    );
-    this.setState({ fileList });
+    this.setState({ fileList: fileList.filter((f) => f.uid !== file.uid) });
   }
 
   async submit(formValues: any) {
@@ -112,9 +108,9 @@ class BulkUploadVideo extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Bulk upload</title>
+          <title>Bulk upload video</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Videos', href: '/video' }, { title: 'Bulk upload' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Videos', href: '/video' }, { title: 'Bulk upload video' }]} />
         <Page>
           <Form
             layout="vertical"

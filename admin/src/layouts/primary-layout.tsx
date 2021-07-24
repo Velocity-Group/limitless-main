@@ -277,12 +277,12 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
       },
       {
         id: 'performers-photos',
-        name: 'Photos',
+        name: 'Galleries',
         icon: <CameraOutlined />,
         children: [
           {
             id: 'gallery-listing',
-            name: 'Galleries',
+            name: 'Listing',
             route: '/gallery'
           },
           {
@@ -290,18 +290,18 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
             id: 'create-galleries',
             route: '/gallery/create'
           },
+          // {
+          //   id: 'photo-listing',
+          //   name: 'Photos',
+          //   route: '/photos'
+          // },
           {
-            id: 'photo-listing',
-            name: 'Photos',
-            route: '/photos'
-          },
-          {
-            name: 'Upload Photo',
+            name: 'Upload photo',
             id: 'upload-photo',
             route: '/photos/upload'
           },
           {
-            name: 'Bulk Upload Photos',
+            name: 'Bulk upload',
             id: 'bulk-upload-photo',
             route: '/photos/bulk-upload'
           }

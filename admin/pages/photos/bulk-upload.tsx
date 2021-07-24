@@ -1,17 +1,13 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable no-continue */
-/* eslint-disable no-restricted-syntax */
 import Head from 'next/head';
-import { PureComponent, Fragment, createRef } from 'react';
+import { PureComponent, createRef } from 'react';
 import {
-  Form, message, Button, Select, Col, Row, Upload
+  Form, message, Button, Select, Upload
 } from 'antd';
 import Page from '@components/common/layout/page';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { FormInstance } from 'antd/lib/form';
 import { UploadOutlined } from '@ant-design/icons';
 import { photoService } from '@services/photo.service';
-import UploadList from '@components/file/upload-list';
 import { SelectGalleryDropdown } from '@components/gallery/common/select-gallery-dropdown';
 import Router from 'next/router';
 import env from 'src/env';
@@ -57,26 +53,13 @@ class BulkUploadPhoto extends PureComponent<IProps> {
     if (field === 'performerId') this.setState({ selectedPerformerId: val });
   }
 
-  async beforeUpload(upFile, fileList) {
-    await Promise.all(
-      fileList.map((file) => {
-        // const ext = file.name.split('.').pop().toLowerCase();
-        // const isImageAccept = env.imageAccept
-        //   .split(',')
-        //   .map((item: string) => item.trim())
-        //   .indexOf(`.${ext}`);
-        const isMaxSize = file.size / 1024 / 1024 < (env.maximumSizeUploadImage || 5);
-        if (!isMaxSize) {
-          fileList.splice(
-            fileList.findIndex((f) => f.uid === file.uid),
-            1
-          );
-        }
-        return file;
-      })
-    );
-    await this.setState({ fileList });
-    return false;
+  async beforeUpload(file, fileList) {
+    if (file.size / 1024 / 1024 > (env.maximumSizeUploadImage || 5)) {
+      message.error(`${file.name} is over ${env.maximumSizeUploadImage || 5}MB`);
+    }
+    this.setState({
+      fileList: fileList.filter((f) => f.size / 1024 / 1024 < (env.maximumSizeUploadImage || 5))
+    });
   }
 
   remove(file) {
@@ -91,18 +74,17 @@ class BulkUploadPhoto extends PureComponent<IProps> {
 
   async submit(data: any) {
     const { fileList } = this.state;
-    if (!fileList.length) {
-      return message.error('Please select photo!');
+    const uploadFiles = fileList.filter((f) => !['uploading', 'done'].includes(f.status));
+    if (!uploadFiles.length) {
+      message.error('Please select photos');
+      return;
     }
 
-    const uploadFiles = fileList.filter((f) => !['uploading', 'done'].includes(f.status));
-    if (!uploadFiles.length) return message.error('Please select new file!');
-
     await this.setState({ uploading: true });
-
+    // eslint-disable-next-line no-restricted-syntax
     for (const file of uploadFiles) {
       try {
-        if (['uploading', 'done'].includes(file.status)) continue;
+        if (['uploading', 'done'].includes(file.status)) return;
         file.status = 'uploading';
         photoService.uploadPhoto(file, data, this.onUploading.bind(this, file));
       } catch (e) {
@@ -110,14 +92,13 @@ class BulkUploadPhoto extends PureComponent<IProps> {
         message.error(`File ${file.name} error!`);
       }
     }
-    message.success('Photos has been uploaded!');
-    Router.push('/photos');
-    return undefined;
+    message.success('Photos have been uploaded!');
+    Router.push('/gallery');
   }
 
   render() {
     if (!this.formRef) this.formRef = createRef();
-    const { uploading, fileList, selectedPerformerId } = this.state;
+    const { uploading, selectedPerformerId } = this.state;
     const { galleryId } = this.props;
     return (
       <>
@@ -165,32 +146,22 @@ class BulkUploadPhoto extends PureComponent<IProps> {
                 </Select.Option>
               </Select>
             </Form.Item>
-            <Row className="ant-form-item">
-              <Col span={4} className="ant-form-item-label">
-                <label className="ant-form-item-required">Photos</label>
-              </Col>
-              <Col span={16}>
-                <div>
-                  <Dragger
-                    accept="image/*"
-                    beforeUpload={this.beforeUpload.bind(this)}
-                    multiple
-                    showUploadList={false}
-                    disabled={uploading}
-                    listType="picture"
-                  >
-                    <p className="ant-upload-drag-icon">
-                      <UploadOutlined />
-                    </p>
-                    <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                    <p className="ant-upload-hint">Support image file only</p>
-                  </Dragger>
-
-                  <UploadList files={fileList} remove={this.remove.bind(this)} />
-                </div>
-              </Col>
-            </Row>
-
+            <Form.Item>
+              <Dragger
+                accept="image/*"
+                beforeUpload={this.beforeUpload.bind(this)}
+                multiple
+                showUploadList
+                disabled={uploading}
+                listType="picture"
+              >
+                <p className="ant-upload-drag-icon">
+                  <UploadOutlined />
+                </p>
+                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                <p className="ant-upload-hint">Support image file only</p>
+              </Dragger>
+            </Form.Item>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading}>
                 Upload

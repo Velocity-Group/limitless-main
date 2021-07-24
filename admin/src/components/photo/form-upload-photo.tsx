@@ -1,5 +1,4 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-import { PureComponent, createRef, Fragment } from 'react';
+import { PureComponent, createRef } from 'react';
 import {
   Form, Input, Select, Upload, Button, message, Progress
 } from 'antd';
@@ -30,7 +29,6 @@ const validateMessages = {
 
 export class FormUploadPhoto extends PureComponent<IProps> {
   state = {
-    preview: null,
     selectedPerformerId: ''
   };
 
@@ -51,24 +49,12 @@ export class FormUploadPhoto extends PureComponent<IProps> {
   }
 
   beforeUpload(file) {
-    // const ext = file.name.split('.').pop().toLowerCase();
-    // const isImageAccept = env.imageAccept
-    //   .split(',')
-    //   .map((item: string) => item.trim())
-    //   .indexOf(`.${ext}`);
-    // if (isImageAccept === -1) {
-    //   message.error(`You can only upload ${env.imageAccept} file!`);
-    //   return false;
-    // }
     const { beforeUpload: handleUpload } = this.props;
     const isMaxSize = file.size / 1024 / 1024 < (env.maximumSizeUploadImage || 5);
     if (!isMaxSize) {
       message.error(`Image must be smaller than ${env.maximumSizeUploadImage || 5}MB!`);
       return false;
     }
-    const reader = new FileReader();
-    reader.addEventListener('load', () => this.setState({ preview: reader.result }));
-    reader.readAsDataURL(file);
     handleUpload(file);
     return false;
   }
@@ -78,7 +64,7 @@ export class FormUploadPhoto extends PureComponent<IProps> {
     const {
       photo, submit, uploading, uploadPercentage
     } = this.props;
-    const { preview, selectedPerformerId } = this.state;
+    const { selectedPerformerId } = this.state;
     const havePhoto = !!photo;
     return (
       <Form
@@ -116,9 +102,6 @@ export class FormUploadPhoto extends PureComponent<IProps> {
         <Form.Item name="title" rules={[{ required: true, message: 'Please input title of photo!' }]} label="Title">
           <Input placeholder="Enter photo title" />
         </Form.Item>
-        {/* <Form.Item name="token" label="Token">
-          <InputNumber />
-        </Form.Item> */}
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
         </Form.Item>
@@ -132,47 +115,22 @@ export class FormUploadPhoto extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Form.Item>
-        <>
-          <div key="thumbnail" className="ant-row ant-form-item">
-            <div className="ant-col ant-col-4 ant-form-item-label">
-              <label>Photo</label>
-            </div>
-            <div className="ant-col ant-col-16 ant-form-item-control">
-              {!havePhoto ? (
-                <>
-                  <Upload
-                    accept={'image/*'}
-                    multiple={false}
-                    showUploadList={false}
-                    disabled={uploading || havePhoto}
-                    beforeUpload={(file) => this.beforeUpload(file)}
-                  >
-                    {preview ? <img src={preview} alt="file" style={{ width: '250px', marginBottom: '10px' }} /> : null}
-                    <div style={{ clear: 'both' }} />
-                    {!havePhoto && (
-                      <Button>
-                        <UploadOutlined />
-                        {' '}
-                        Select File
-                      </Button>
-                    )}
-                  </Upload>
-                  {uploadPercentage ? <Progress percent={uploadPercentage} /> : null}
-                </>
-              ) : (
-                <ThumbnailPhoto photo={photo} style={{ width: '250px' }} />
-              )}
-              <div className="ant-form-item-explain">
-                <div>
-                  Image must smaller than
-                  {' '}
-                  {env.maximumSizeUploadImage || 5}
-                  MB!
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+        <Form.Item label={`Image is ${env.maximumSizeUploadImage || 5}MB or below`}>
+          {!havePhoto ? (
+            <Upload
+              accept={'image/*'}
+              multiple={false}
+              showUploadList
+              disabled={uploading || havePhoto}
+              beforeUpload={(file) => this.beforeUpload(file)}
+            >
+              <UploadOutlined />
+            </Upload>
+          ) : (
+            <ThumbnailPhoto photo={photo} style={{ width: '250px' }} />
+          )}
+        </Form.Item>
+        {uploadPercentage ? <Progress percent={uploadPercentage} /> : null}
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button type="primary" htmlType="submit" loading={uploading}>
             {havePhoto ? 'Update' : 'Upload'}

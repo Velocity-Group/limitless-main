@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tooltip } from 'antd';
+import { PictureOutlined } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Link from 'next/link';
 import '@components/video/video.less';
@@ -9,7 +10,7 @@ interface GalleryCardIProps {
 }
 
 const GalleryCard = ({ gallery }: GalleryCardIProps) => {
-  const thumbUrl = gallery?.coverPhoto?.thumbnails[0] || '/static/placeholder-image.jpg';
+  const thumbUrl = (gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]) || '/static/placeholder-image.jpg';
   return (
     <Link
       href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
@@ -25,23 +26,16 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
         </span>
         )}
         <div className="vid-thumb" style={{ backgroundImage: `url(${thumbUrl})` }}>
-          {/* <div className="vid-stats">
-              <span>
-                <a>
-                  <EyeOutlined />
-                  {' '}
-                  {video?.stats?.views || 0}
-                </a>
-                <a>
-                  <LikeOutlined />
-                  {' '}
-                  {video?.stats?.likes || 0}
-                </a>
-              </span>
-            </div> */}
+          <div className="vid-stats">
+            <a>
+              <PictureOutlined />
+              {' '}
+              {gallery?.numOfItems || 0}
+            </a>
+          </div>
         </div>
         <div className="vid-info">
-          <Tooltip title={gallery.title}>
+          <Tooltip title={gallery?.title}>
             <Link
               href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
               as={`/gallery/${gallery?.slug || gallery?._id}`}

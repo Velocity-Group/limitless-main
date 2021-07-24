@@ -10,15 +10,17 @@ interface IProps {
 }
 class Footer extends PureComponent<IProps> {
   render() {
-    const linkAuth = (
-      <>
-        <li>
-          <Link href="/">
-            <a>Login</a>
-          </Link>
-        </li>
-      </>
-    );
+    const linkAuth = [
+      <li key="login">
+        <Link href="/">
+          <a>Login</a>
+        </Link>
+      </li>,
+      <li key="signup">
+        <Link href="/auth/register">
+          <a>Sign up</a>
+        </Link>
+      </li>];
     const { ui, currentUser } = this.props;
     const menus = ui.menus && ui.menus.length > 0
       ? ui.menus.filter((m) => m.section === 'footer')
@@ -29,6 +31,11 @@ class Footer extends PureComponent<IProps> {
         <div className="main-container">
           <ul>
             <li>
+              <Link href="/home">
+                <a>Home</a>
+              </Link>
+            </li>
+            <li>
               <Link href="/model">
                 <a>Models</a>
               </Link>
@@ -38,29 +45,31 @@ class Footer extends PureComponent<IProps> {
                 <a>Contact</a>
               </Link>
             </li>
-            {menus
-              && menus.length > 0
-              && menus.map((item) => (
-                <li key={item._id}>
-                  {!item.internal ? (
-                    <a rel="noreferrer" href={item.path} target={item.isNewTab ? '_blank' : ''}>
-                      {item.title}
-                    </a>
-                  ) : (
-                    <Link
-                      href={{
-                        pathname: '/page',
-                        query: { id: item.path.replace('/page/', '') }
-                      }}
-                      as={item.path}
-                    >
-                      <a target={item.isNewTab ? '_blank' : ''}>{item.title}</a>
-                    </Link>
-                  )}
-                </li>
-              ))}
             {!currentUser._id ? linkAuth : null}
           </ul>
+          { menus && menus.length > 0 && (
+          <ul>
+            {menus.map((item) => (
+              <li key={item._id}>
+                {!item.internal ? (
+                  <a rel="noreferrer" href={item.path} target={item.isNewTab ? '_blank' : ''}>
+                    {item.title}
+                  </a>
+                ) : (
+                  <Link
+                    href={{
+                      pathname: '/page',
+                      query: { id: item.path.replace('/page/', '') }
+                    }}
+                    as={item.path}
+                  >
+                    <a target={item.isNewTab ? '_blank' : ''}>{item.title}</a>
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+          )}
           {ui.footerContent ? <div className="footer-content" dangerouslySetInnerHTML={{ __html: ui.footerContent }} />
             : (
               <div className="copyright-text">

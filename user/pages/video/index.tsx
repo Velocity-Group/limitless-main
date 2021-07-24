@@ -311,7 +311,7 @@ class VideoViewPage extends PureComponent<IProps> {
       activeTab,
       isFirstLoadComment
     } = this.state;
-    const thumbUrl = video.thumbnail.thumbnails[0] || video.thumbnail.url || video.teaser.thumbnails[0] || video.video.thumbnails[0] || '/static/placeholder-image.jpg';
+    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/placeholder-image.jpg';
     const playSource = {
       file: video.video.url || '',
       image: thumbUrl,
@@ -625,7 +625,7 @@ class VideoViewPage extends PureComponent<IProps> {
               <RelatedListVideo videos={relatedVideos.items} />
             )}
             {!relatedVideos.items.length && !relatedVideos.requesting && (
-              <p>No data was found</p>
+              <p>No video was found</p>
             )}
           </div>
         </div>

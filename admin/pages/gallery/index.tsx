@@ -140,7 +140,6 @@ class Galleries extends PureComponent<IProps> {
             onSubmit={this.handleFilter.bind(this)}
             performerId={performerId || ''}
           />
-          <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
             <TableListGallery
               dataSource={list}

@@ -373,7 +373,8 @@ export class GalleryService {
     user: UserDto
   ): Promise<PageableData<GalleryDto>> {
     const query = {
-      status: STATUS.ACTIVE
+      status: STATUS.ACTIVE,
+      numOfItems: { $gt: 0 }
     } as any;
     if (req.q) {
       const regexp = new RegExp(

@@ -38,14 +38,13 @@ class PhotoUpdate extends PureComponent<IProps> {
   async submit(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ submiting: true });
-
+      await this.setState({ submiting: true });
       const submitData = {
         ...data
       };
       await photoService.update(id, submitData);
       message.success('Updated successfully');
-      Router.push('/photos');
+      Router.push('/gallery');
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
