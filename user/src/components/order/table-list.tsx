@@ -1,5 +1,5 @@
 /* eslint-disable react/destructuring-assignment */
-import { Table, Tag } from 'antd';
+import { Table, Tag, Tooltip } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 import { IOrder, IUser } from 'src/interfaces';
 import { formatDate } from '@lib/date';
@@ -24,7 +24,7 @@ const OrderTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Order_ID',
+      title: 'ID',
       dataIndex: 'orderNumber',
       key: 'orderNumber',
       render(orderNumber, record) {
@@ -42,7 +42,18 @@ const OrderTableList = ({
       dataIndex: 'productInfo',
       key: 'productInfo',
       render(product) {
-        return <span>{product?.name || 'N/A'}</span>;
+        return (
+          <Tooltip title={product.name}>
+            <div style={{
+              maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+            }}
+            >
+              <Link href={{ pathname: '/store', query: { id: product.slug || product._id } }} as={`/store/${product.slug || product._id}`}>
+                <a>{product.name}</a>
+              </Link>
+            </div>
+          </Tooltip>
+        );
       }
     },
     {
@@ -58,7 +69,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Delivery_status',
+      title: 'Delivery status',
       dataIndex: 'deliveryStatus',
       render(status: string) {
         switch (status) {
@@ -77,7 +88,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Last_updated',
+      title: 'Last update',
       dataIndex: 'createdAt',
       sorter: true,
       render(date: Date) {

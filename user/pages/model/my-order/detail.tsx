@@ -90,18 +90,14 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {' '}
-            {ui && ui.siteName}
-            {' '}
-            | My Order
-            {' '}
+            {`${ui.siteName} | ${order?.orderNumber || ''}`}
           </title>
         </Head>
         <div className="main-container">
           <Page>
             {order && (
             <div className="main-container">
-              <PageHeading title={`Order ID ${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
+              <PageHeading title={`${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
               <Descriptions>
                 <Item key="name" label="Product">
                   {order?.productInfo?.name || 'N/A'}

@@ -59,6 +59,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
         </Col>
         <Col lg={8} md={10} xs={12}>
           <RangePicker
+            style={{ width: '100%' }}
             onChange={(dates: [any, any], dateStrings: [string, string]) => this.setState({
               fromDate: dateStrings[0],
               toDate: dateStrings[1]

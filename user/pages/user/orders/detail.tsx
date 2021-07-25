@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Button, Descriptions, Tag, Spin
+  Layout, message, Button, Descriptions, Tag, Spin, Divider
 } from 'antd';
 import {
   ShoppingCartOutlined
@@ -72,14 +72,14 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | Order #${order?.orderNumber || ''}`}
+            {`${ui?.siteName} | #${order?.orderNumber || ''}`}
           </title>
         </Head>
         <div className="main-container">
           <Page>
             {!loading && order && (
             <div className="main-container">
-              <PageHeading title={`Order ID ${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
+              <PageHeading title={`#${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
               <Descriptions>
                 <Item key="seller" label="Model">
                   {order?.performerInfo?.name || order?.performerInfo?.username || 'N/A'}
@@ -110,6 +110,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 </div>
               ) : (
                 <div>
+                  <Divider>Delivery information</Divider>
                   <div style={{ marginBottom: '10px' }}>
                     Delivery Address:
                     {' '}
