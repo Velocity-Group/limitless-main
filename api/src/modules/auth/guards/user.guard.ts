@@ -12,7 +12,7 @@ export class LoadUser implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization || request?.query?.Authorization;
+    const token = request.headers.authorization || request.query.Authorization;
     if (!token || token === 'null') return true;
 
     const user = request.user

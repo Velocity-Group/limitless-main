@@ -584,7 +584,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   expandIcon={({ isActive }) => <ArrowDownOutlined rotate={isActive ? 180 : 0} />}
                 >
                   <Collapse.Panel header="BIO" key="1">
-                    <p>{performer.bio || 'No bio'}</p>
+                    <p>{performer?.bio || 'No bio'}</p>
                   </Collapse.Panel>
                 </Collapse>
                 {performer && <PerformerInfo countries={ui?.countries || []} performer={performer} />}

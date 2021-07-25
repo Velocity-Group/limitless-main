@@ -37,8 +37,8 @@ export class UserPhotosController {
   ) {
     // eslint-disable-next-line no-param-reassign
     query.status = STATUS.ACTIVE;
-    const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = await this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = auth && this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
     const data = await this.photoSearchService.searchPhotos(query, jwToken);
     return DataResponse.ok(data);
   }
@@ -49,13 +49,12 @@ export class UserPhotosController {
   async list(
     @Param('performerId') performerId: string,
     @Query() query: PhotoSearchRequest,
-    @CurrentUser() user: UserDto,
     @Request() req: any
   ) {
     // eslint-disable-next-line no-param-reassign
     query.performerId = performerId;
-    const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = await this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = auth && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
     const data = await this.photoSearchService.getModelPhotosWithGalleryCheck(query, jwToken);
     return DataResponse.ok(data);
   }
