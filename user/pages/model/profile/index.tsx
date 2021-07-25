@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import {
-  Layout, Tabs, Button, Menu,
+  Layout, Tabs, Button, Menu, Collapse,
   message, Modal, Tooltip, Dropdown
 } from 'antd';
 import { PureComponent } from 'react';
@@ -15,7 +15,7 @@ import {
 } from 'src/services';
 import Head from 'next/head';
 import {
-  CheckCircleOutlined, ArrowLeftOutlined, FireOutlined,
+  CheckCircleOutlined, ArrowLeftOutlined, FireOutlined, ArrowDownOutlined,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined,
   HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, ShareAltOutlined, BookOutlined
 } from '@ant-design/icons';
@@ -572,7 +572,16 @@ class PerformerProfile extends PureComponent<IProps> {
             )}
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <div className="show-more">
-                <p>{performer?.bio || ''}</p>
+                <Collapse
+                  bordered={false}
+                  defaultActiveKey="1"
+                  expandIconPosition="left"
+                  expandIcon={({ isActive }) => <ArrowDownOutlined rotate={isActive ? 180 : 0} />}
+                >
+                  <Collapse.Panel header="BIO" key="1">
+                    <p>{performer.bio || 'No bio'}</p>
+                  </Collapse.Panel>
+                </Collapse>
                 {performer && <PerformerInfo countries={ui?.countries || []} performer={performer} />}
               </div>
             </div>

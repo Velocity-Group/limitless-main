@@ -15,9 +15,9 @@ import {
 } from '@services/index';
 import {
   RelatedListVideo,
-  VideoPlayer,
   ThumbnailVideo
 } from '@components/video';
+import { VideoPlayer } from '@components/common/video-player';
 import { ListComments, CommentForm } from '@components/comment';
 import Link from 'next/link';
 import Router from 'next/router';

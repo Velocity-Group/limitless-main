@@ -385,15 +385,20 @@
 .show-more {
   .ant-collapse-header {
     font-weight: 600;
-    font-size: 16px;
-    display: inline-block;
+    font-size: 15px;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 5px 30px 10px 0px;
+    color: @primary-color;
   }
 
   .anticon.anticon-arrow-down.ant-collapse-arrow {
     font-size: 18px;
     right: 0;
     color: @primary-color;
-    top: -5px;
+    top: 15px;
   }
 }
 

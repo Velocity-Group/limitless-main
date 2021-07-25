@@ -1,7 +1,8 @@
 import { PureComponent } from 'react';
 import { IProduct } from 'src/interfaces';
-import './product.less';
+import { Tooltip } from 'antd';
 import Link from 'next/link';
+import './product.less';
 
 interface IProps {
   product: IProduct;
@@ -28,6 +29,13 @@ export class ProductCard extends PureComponent<IProps, IStates> {
           {!product.stock && product.type === 'physical' && (
             <div className="label-wrapper-digital">Out of stock!</div>
           )}
+          {product.stock && product.type === 'physical' && (
+          <div className="label-wrapper-digital">
+            {product.stock}
+            {' '}
+            in stock
+          </div>
+          )}
           {product.type === 'digital' && (
             <span className="label-wrapper-digital">Digital</span>
           )}
@@ -47,7 +55,9 @@ export class ProductCard extends PureComponent<IProps, IStates> {
             href={{ pathname: '/store', query: { id: product.slug || product._id } }}
             as={`/store/${product.slug || product._id}`}
           >
-            <a>{product.name}</a>
+            <Tooltip title={product.name}>
+              <a>{product.name}</a>
+            </Tooltip>
           </Link>
         </div>
       </div>

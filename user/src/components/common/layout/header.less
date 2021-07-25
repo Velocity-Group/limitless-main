@@ -21,58 +21,6 @@
     width: 100%;
   }
 
-  :global {
-    .ant-menu-submenu-title {
-      background: @primary-color  !important;
-    }
-
-    .ant-menu-horizontal {
-      // line-height: 72px;
-
-      &>.ant-menu-submenu:hover {
-        // color: @primary-color;
-        // background-color: @hover-color;
-      }
-    }
-
-    .ant-menu {
-      border-bottom: none;
-      // height: 72px;
-    }
-
-    .ant-menu-horizontal>.ant-menu-submenu {
-      top: 0;
-      margin-top: 0;
-    }
-
-    .ant-menu-horizontal>.ant-menu-item,
-    .ant-menu-horizontal>.ant-menu-submenu {
-      border-bottom: none;
-    }
-
-    .ant-menu-horizontal>.ant-menu-item-active,
-    .ant-menu-horizontal>.ant-menu-item-open,
-    .ant-menu-horizontal>.ant-menu-item-selected,
-    .ant-menu-horizontal>.ant-menu-item:hover,
-    .ant-menu-horizontal>.ant-menu-submenu-active,
-    .ant-menu-horizontal>.ant-menu-submenu-open,
-    .ant-menu-horizontal>.ant-menu-submenu-selected,
-    .ant-menu-horizontal>.ant-menu-submenu:hover {
-      border-bottom: none;
-      color: @theme-color;
-    }
-
-    @media (max-width: @mobile-screen) {
-      align-items: flex-end;
-      padding: 0;
-
-      .ant-menu-horizontal>.ant-menu-submenu {
-        margin: 0;
-      }
-    }
-
-  }
-
   .button {
     // width: 72px;
     // height: 72px;
@@ -86,10 +34,6 @@
       color: @primary-color;
       background-color: @hover-color;
     }
-  }
-
-  .logo {
-    margin: 0;
   }
 }
 
@@ -166,9 +110,6 @@
   width: 100%;
   margin: 0;
   padding: 0;
-  &.custom {
-    justify-content: flex-end;
-  }
   li {
     padding: 7px 15px;
     display: flex;
@@ -224,6 +165,13 @@
     .username {
       margin-right: 8px;
       color: @white;
+    }
+    &.logo-nav {
+      padding: 0;
+      width: 80%;
+      img {
+        height: 35px;
+      }
     }
   }
 
@@ -395,5 +343,24 @@
 
   .switch-grp {
     margin-bottom: 10px;
+  }
+
+  .nav-bar {
+    .logo-nav {
+      width: 55%;
+      img {
+        height: 23px;
+        width: auto;
+      }
+    }
+    .nav-icons {
+      li {
+        font-size: 14px;
+        padding: 5px 12px;
+        span {
+          font-size: 25px;
+        }
+      }
+    }
   }
 }

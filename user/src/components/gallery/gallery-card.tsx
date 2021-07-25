@@ -3,7 +3,7 @@ import { Tooltip } from 'antd';
 import { PictureOutlined } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Link from 'next/link';
-import '@components/video/video.less';
+import './gallery.less';
 
 interface GalleryCardIProps {
   gallery: IGallery;
@@ -16,17 +16,17 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
       href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
       as={`/gallery/${gallery?.slug || gallery?._id}`}
     >
-      <div className="vid-card">
+      <div className="gallery-card">
         {gallery?.isSale && gallery?.price > 0 && (
-        <span className="vid-price">
+        <span className="gallery-price">
           <div className="label-price">
             <img alt="coin" src="/static/coin-ico.png" width="15px" />
             {gallery?.price.toFixed(2)}
           </div>
         </span>
         )}
-        <div className="vid-thumb" style={{ backgroundImage: `url(${thumbUrl})` }}>
-          <div className="vid-stats">
+        <div className="gallery-thumb" style={{ backgroundImage: `url(${thumbUrl})` }}>
+          <div className="gallery-stats">
             <a>
               <PictureOutlined />
               {' '}
@@ -34,7 +34,7 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
             </a>
           </div>
         </div>
-        <div className="vid-info">
+        <div className="gallery-info">
           <Tooltip title={gallery?.title}>
             <Link
               href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}

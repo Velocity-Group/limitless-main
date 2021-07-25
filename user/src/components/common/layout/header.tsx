@@ -247,6 +247,11 @@ class Header extends PureComponent<IProps> {
                   </Tooltip>
                 ]}
                 {!currentUser._id && [
+                  <li key="logo" className="logo-nav">
+                    <Link href="/">
+                      <a>{ui.logo ? <img src={ui.logo} alt="logo" /> : `${ui.siteName}`}</a>
+                    </Link>
+                  </li>,
                   <li key="login" className={router.pathname === '/' ? 'active' : ''}>
                     <Link href="/">
                       <a>Login</a>

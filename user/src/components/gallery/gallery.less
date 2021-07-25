@@ -1,59 +1,131 @@
 @import '../../../style/vars.less';
 
 .gallery-card {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .05);
   position: relative;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
   border-radius: 5px;
   overflow: hidden;
-  .gallery-cover {
-    position: relative;
-    height: 200px;
+
+  .gallery-thumb {
+    height: 220px;
     position: relative;
     background-position: center;
     background-repeat: no-repeat;
-    background-size: cover;
+    background-size: 100%;
+
+    .play-ico {
+      position: absolute;
+      color: @white;
+      font-size: 24px;
+      top: calc(50% - 12px);
+      left: calc(50% - 12px);
+    }
+
     @media screen and (max-width: @mobile-screen) {
       height: 150px;
     }
   }
-  &:hover .gallery-name {
+
+  .gallery-stats {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
     color: @white;
-    background-color: @primary-color;
+    font-size: 10px;
+    padding: 10px 0 10px 5px;
+    font-weight: 600;
+    position: absolute;
+    bottom: 0;
+    background-image: linear-gradient(to bottom, #04040e00 0%, rgba(60, 60, 60, .5) 100%);
+
+    a {
+      color: @white;
+      padding-right: 10px;
+    }
   }
-  .gallery-name {
+
+  .gallery-info {
     font-family: @primary-font-bold;
-    color: #323232;
+    color: @primary-color;
     background-color: @light-card;
     padding: 1em;
     text-align: center;
-    border-bottom-left-radius: 0.5em;
-    border-bottom-right-radius: 0.5em;
     font-weight: 600;
-    white-space: nowrap;
+    text-transform: capitalize;
     text-overflow: ellipsis;
+    white-space: nowrap;
     overflow: hidden;
+
+    @media screen and (max-width: @mobile-screen) {
+      font-size: 11px;
+    }
+  }
+
+  &:hover {
+    .gallery-info {
+      a {
+        color: @white;
+      }
+
+      color: @white;
+      background-color: @primary-color;
+    }
+
+    .gallery-thumb {
+      background-size: 101%;
+
+      .play-ico {
+        color: @primary-color;
+      }
+    }
+  }
+
+  .gallery-price {
+    position: absolute;
+    left: 0px;
+    top: 10px;
+    z-index: 99;
+
+    .label-price {
+      color: @white;
+      background-color: @secondary-color;
+      ;
+      width: auto;
+      padding: 3px 15px;
+      clip-path: polygon(0px 0px, 0px 100%, 100% 100%, 90% 50%, 100% 0);
+      font-size: 12px;
+      font-weight: 600;
+      margin: 5px 0;
+    }
   }
 }
+
 .photo-upload-list {
   position: relative;
+
   .photo-thumb {
     margin-right: 10px;
+
     .anticon {
       font-size: 50px;
     }
+
     img {
       width: 50px;
       height: 50px;
       object-fit: cover;
     }
   }
+
   .remove-photo {
     position: absolute;
     right: 5px;
     top: 5px
   }
+
   .cover-photo {
     position: absolute;
     right: 25px;
