@@ -141,63 +141,59 @@ export class PhotoSearchService {
   }
 
   public async getModelPhotosWithGalleryCheck(req: PhotoSearchRequest, jwToken: string) {
-    try {
-      const query = {
-        performerId: req.performerId,
-        status: 'active',
-        processing: false
-      } as any;
-      if (req.galleryId) query.galleryId = req.galleryId;
-      const sort = { createdAt: -1 };
-      const [data, total] = await Promise.all([
-        this.photoModel
-          .find(query)
-          .lean()
-          .sort(sort)
-          .limit(req.limit ? parseInt(req.limit as string, 10) : 10)
-          .skip(parseInt(req.offset as string, 10)),
-        this.photoModel.countDocuments(query)
-      ]);
+    const query = {
+      performerId: req.performerId,
+      status: 'active',
+      processing: false
+    } as any;
+    if (req.galleryId) query.galleryId = req.galleryId;
+    const sort = { createdAt: -1 };
+    const [data, total] = await Promise.all([
+      this.photoModel
+        .find(query)
+        .lean()
+        .sort(sort)
+        .limit(req.limit ? parseInt(req.limit as string, 10) : 10)
+        .skip(parseInt(req.offset as string, 10)),
+      this.photoModel.countDocuments(query)
+    ]);
 
-      const fileIds = data.map((d) => d.fileId);
-      const photos = data.map((v) => new PhotoDto(v));
+    const fileIds = data.map((d) => d.fileId);
+    const photos = data.map((v) => new PhotoDto(v));
 
-      const galleryIds = data.filter((d) => d.galleryId).map((p) => p.galleryId);
-      const [galleries, files] = await Promise.all([
-        galleryIds.length ? this.galleryService.findByIds(galleryIds) : [],
-        fileIds.length ? this.fileService.findByIds(fileIds) : []
-      ]);
-      photos.forEach((v) => {
-        if (v.galleryId) {
-          const gallery = galleries.find(
-            (p) => p._id.toString() === v.galleryId.toString()
-          );
-            // eslint-disable-next-line no-param-reassign
-          if (gallery) v.gallery = gallery;
-        }
+    const galleryIds = data.filter((d) => d.galleryId).map((p) => p.galleryId);
+    const [galleries, files] = await Promise.all([
+      galleryIds.length ? this.galleryService.findByIds(galleryIds) : [],
+      fileIds.length ? this.fileService.findByIds(fileIds) : []
+    ]);
+    photos.forEach((v) => {
+      if (v.galleryId) {
+        const gallery = galleries.find(
+          (p) => p._id.toString() === v.galleryId.toString()
+        );
+        // eslint-disable-next-line no-param-reassign
+        if (gallery) v.gallery = gallery;
+      }
 
-        const file = files.find((f) => f._id.toString() === v.fileId.toString());
-        if (file) {
-          const url = file.getUrl();
-          // eslint-disable-next-line no-param-reassign
-          v.photo = {
-            size: file.size,
-            thumbnails: file.getThumbnails(),
-            url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
-            width: file.width,
-            height: file.height,
-            mimeType: file.mimeType
-          };
-        }
-      });
+      const file = files.find((f) => f._id.toString() === v.fileId.toString());
+      if (file) {
+        const url = file.getUrl();
+        // eslint-disable-next-line no-param-reassign
+        v.photo = {
+          size: file.size,
+          thumbnails: file.getThumbnails(),
+          url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
+          width: file.width,
+          height: file.height,
+          mimeType: file.mimeType
+        };
+      }
+    });
 
-      return {
-        data: photos,
-        total
-      };
-    } catch (e) {
-      console.log(e);
-    }
+    return {
+      data: photos,
+      total
+    };
   }
 
   public async searchPhotos(req: PhotoSearchRequest, jwToken: string) {
