@@ -211,24 +211,6 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
         <div className="vid-split">
           <div className="main-container">
             <div className="vid-act">
-              <div className="act-btns">
-                <button
-                  type="button"
-                  className="react-btn"
-                >
-                  <HeartOutlined />
-                </button>
-                <Tooltip title={isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
-                  <button
-                    type="button"
-                    className={isBookmarked ? 'react-btn active' : 'react-btn'}
-                    disabled={submiting}
-                    onClick={this.handleBookmark.bind(this)}
-                  >
-                    <BookOutlined />
-                  </button>
-                </Tooltip>
-              </div>
               <div className="o-w-ner">
                 <Link
                   href={{
@@ -253,6 +235,24 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   </>
                 </Link>
               </div>
+              {/* <div className="act-btns">
+                <button
+                  type="button"
+                  className="react-btn"
+                >
+                  <HeartOutlined />
+                </button>
+                <Tooltip title={isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                  <button
+                    type="button"
+                    className={isBookmarked ? 'react-btn active' : 'react-btn'}
+                    disabled={submiting}
+                    onClick={this.handleBookmark.bind(this)}
+                  >
+                    <BookOutlined />
+                  </button>
+                </Tooltip>
+              </div> */}
             </div>
           </div>
         </div>

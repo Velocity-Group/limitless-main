@@ -201,10 +201,9 @@ export class ProductService {
 
     const [performer, image] = await Promise.all([
       this.performerService.findById(product.performerId),
-      // product.digitalFileId ? this.fileService.findById(product.digitalFileId) : null,
       product.imageId ? this.fileService.findById(product.imageId) : null
     ]);
-    const bookmark = await this.reactionService.checkExisting(product._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.PRODUCT);
+    const bookmark = user && await this.reactionService.checkExisting(product._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.PRODUCT);
     const dto = new ProductDto(product);
     dto.isBookMarked = !!bookmark;
     dto.image = image ? image.getUrl() : null;
