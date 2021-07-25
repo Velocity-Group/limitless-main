@@ -323,12 +323,10 @@ export class GalleryService {
       this.galleryModel.countDocuments(query)
     ]);
 
-    const performerIds = data.map((d) => d.performerId);
     const galleries = data.map((g) => new GalleryDto(g));
     const coverPhotoIds = data.map((d) => d.coverPhotoId);
 
-    const [performers, coverPhotos] = await Promise.all([
-      performerIds.length ? this.performerService.findByIds(performerIds) : [],
+    const [coverPhotos] = await Promise.all([
       coverPhotoIds.length
         ? this.photoModel
           .find({ _id: { $in: coverPhotoIds } })
@@ -340,11 +338,6 @@ export class GalleryService {
     const files = await this.fileService.findByIds(fileIds);
 
     galleries.forEach((g) => {
-      // TODO - should get picture (thumbnail if have?)
-      const performer = performers.find(
-        (p) => p._id.toString() === g.performerId.toString()
-      );
-      g.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
       if (g.coverPhotoId) {
         const coverPhoto = coverPhotos.find(
           (c) => c._id.toString() === g.coverPhotoId.toString()
