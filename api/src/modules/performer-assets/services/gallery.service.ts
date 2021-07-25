@@ -102,11 +102,11 @@ export class GalleryService {
     if (payload.title !== gallery.title) {
       slug = StringHelper.createAlias(payload.title);
       const slugCheck = await this.galleryModel.countDocuments({
-        slug: gallery.slug,
+        slug,
         _id: { $ne: gallery._id }
       });
       if (slugCheck) {
-        slug = `${gallery.slug}-${StringHelper.randomString(8)}`;
+        slug = `${slug}-${StringHelper.randomString(8)}`;
       }
     }
     merge(gallery, payload);

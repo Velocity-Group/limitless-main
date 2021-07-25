@@ -130,11 +130,11 @@ export class ProductService {
     if (payload.name !== product.name) {
       slug = StringHelper.createAlias(payload.name);
       const slugCheck = await this.productModel.countDocuments({
-        slug: product.slug,
+        slug,
         _id: { $ne: product._id }
       });
       if (slugCheck) {
-        slug = `${product.slug}-${StringHelper.randomString(8)}`;
+        slug = `${slug}-${StringHelper.randomString(8)}`;
       }
     }
     merge(product, payload);

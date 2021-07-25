@@ -423,11 +423,11 @@ export class VideoService {
     if (payload.title !== video.title) {
       slug = StringHelper.createAlias(payload.title);
       const slugCheck = await this.PerformerVideoModel.countDocuments({
-        slug: video.slug,
+        slug,
         _id: { $ne: video._id }
       });
       if (slugCheck) {
-        slug = `${video.slug}-${StringHelper.randomString(8)}`;
+        slug = `${slug}-${StringHelper.randomString(8)}`;
       }
     }
     merge(video, payload);
