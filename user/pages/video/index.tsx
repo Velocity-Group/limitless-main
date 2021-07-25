@@ -570,9 +570,11 @@ class VideoViewPage extends PureComponent<IProps> {
                           @
                           {per?.username || 'n/a'}
                         </h5>
-                        <div className="p-bio">
-                          <Tooltip title={per?.bio}>{per?.bio}</Tooltip>
-                        </div>
+                        <Tooltip title={per?.bio}>
+                          <div className="p-bio">
+                            {per?.bio || 'No bio'}
+                          </div>
+                        </Tooltip>
                       </div>
                     </div>
                   </Link>
