@@ -17,7 +17,6 @@ import * as moment from 'moment';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { MailerService } from 'src/modules/mailer';
 import { uniq } from 'lodash';
-import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { ORDER_MODEL_PROVIDER } from '../providers';
@@ -121,7 +120,7 @@ export class OrderService {
     };
   }
 
-  public async findOne(id: string, jwToken: string) {
+  public async findOne(id: string) {
     const order = await this.findById(id);
     if (!order) {
       throw new EntityNotFoundException();
@@ -141,9 +140,6 @@ export class OrderService {
     }
     if (product) {
       newOrder.productInfo = product;
-    }
-    if (newOrder.digitalPath && jwToken && product.type === PRODUCT_TYPE.DIGITAL) {
-      newOrder.digitalPath = `${newOrder.digitalPath}?productId=${product._id}&token=${jwToken}`;
     }
     return newOrder;
   }

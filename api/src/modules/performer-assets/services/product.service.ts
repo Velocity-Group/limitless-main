@@ -1,4 +1,6 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable, Inject, forwardRef, ForbiddenException
+} from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
@@ -8,12 +10,15 @@ import { FileDto } from 'src/modules/file';
 import { FileService } from 'src/modules/file/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
-import { merge, uniq } from 'lodash';
+import { merge, uniq, pick } from 'lodash';
 import { EVENT } from 'src/kernel/constants';
 import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
+import { PaymentTokenService } from 'src/modules/purchased-item/services';
+import { PurchaseItemType } from 'src/modules/purchased-item/constants';
+import { AuthService } from 'src/modules/auth/services';
 import { PRODUCT_TYPE } from '../constants';
 import { ProductDto } from '../dtos';
 import { ProductCreatePayload, ProductUpdatePayload } from '../payloads';
@@ -26,10 +31,14 @@ export const PERFORMER_PRODUCT_CHANNEL = 'PERFORMER_PRODUCT_CHANNEL';
 @Injectable()
 export class ProductService {
   constructor(
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
+    @Inject(forwardRef(() => PaymentTokenService))
+    private readonly checkPaymentService: PaymentTokenService,
     @Inject(PERFORMER_PRODUCT_MODEL_PROVIDER)
     private readonly productModel: Model<ProductModel>,
     private readonly fileService: FileService,
@@ -236,5 +245,40 @@ export class ProductService {
         $inc: { 'stats.bookmarks': num }
       }
     );
+  }
+
+  public async generateDownloadLink(productId, userId) {
+    const product = await this.productModel.findById(productId);
+    if (!product.digitalFileId) throw new EntityNotFoundException();
+    const file = await this.fileService.findById(product.digitalFileId);
+    if (!file) throw new EntityNotFoundException();
+
+    const auth = await this.authService.findBySource({ source: 'user', type: 'email', sourceId: userId })
+      || await this.authService.findBySource({ source: 'user', type: 'username', sourceId: userId });
+    const jwToken = this.authService.generateJWT(pick(auth, ['_id', 'source', 'sourceId']), { expiresIn: 3 * 60 * 60 });
+    // TODO - should change with header download link
+    return `${new FileDto(file).getUrl()}?productId=${product._id}&token=${jwToken}`;
+  }
+
+  public async checkAuth(req: any, user: UserDto) {
+    const { query } = req;
+    if (!query.productId) {
+      throw new ForbiddenException();
+    }
+    if (user.roles && user.roles.indexOf('admin') > -1) {
+      return true;
+    }
+    // check type video
+    const product = await this.productModel.findById(query.productId);
+    if (!product) throw new EntityNotFoundException();
+    if (user._id.toString() === product.performerId.toString()) {
+      return true;
+    }
+    // check bought
+    const bought = await this.checkPaymentService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
+    if (!bought) {
+      throw new ForbiddenException();
+    }
+    return true;
   }
 }

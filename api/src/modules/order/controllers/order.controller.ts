@@ -10,8 +10,7 @@ import {
   Query,
   Param,
   Put,
-  Body,
-  Request
+  Body
 } from '@nestjs/common';
 import { AuthGuard, RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
@@ -71,12 +70,9 @@ export class OrderController {
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async update(
-    @Param('id') id: string,
-    @Request() req: any
+    @Param('id') id: string
   ): Promise<DataResponse<OrderDto>> {
-    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
-    const data = await this.orderService.findOne(id, jwToken);
+    const data = await this.orderService.findOne(id);
     return DataResponse.ok(data);
   }
 }

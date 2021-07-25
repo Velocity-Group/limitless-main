@@ -42,8 +42,6 @@ export class OrderDto {
 
   updatedAt: Date;
 
-  digitalPath: string;
-
   constructor(data?: Partial<OrderDto>) {
     data
       && Object.assign(
@@ -68,8 +66,7 @@ export class OrderDto {
           'userNote',
           'phoneNumber',
           'createdAt',
-          'updatedAt',
-          'digitalPath'
+          'updatedAt'
         ])
       );
   }

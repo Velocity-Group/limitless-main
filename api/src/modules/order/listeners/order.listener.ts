@@ -8,8 +8,6 @@ import {
 import { EVENT } from 'src/kernel/constants';
 import { ProductService } from 'src/modules/performer-assets/services';
 import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
-import { FileService } from 'src/modules/file/services';
-import { FileDto } from 'src/modules/file';
 import { OrderDto } from '../dtos';
 import { ORDER_MODEL_PROVIDER } from '../providers';
 import { OrderModel } from '../models';
@@ -22,8 +20,6 @@ export class OrderListener {
   constructor(
     @Inject(forwardRef(() => ProductService))
     private readonly productService: ProductService,
-    @Inject(forwardRef(() => FileService))
-    private readonly fileService: FileService,
     @Inject(ORDER_MODEL_PROVIDER)
     private readonly orderModel: Model<OrderModel>,
     private readonly queueEventService: QueueEventService
@@ -54,16 +50,11 @@ export class OrderListener {
     }
     let quantity = 0;
     let totalPrice = 0;
-    let digitalPath = '';
     const newProds = transaction.products.filter((p: any) => ids.includes(p.productId));
     newProds.forEach((p) => {
       quantity += p.quantity;
       totalPrice += parseFloat(p.price);
     });
-    if (products[0].digitalFileId) {
-      const file = await this.fileService.findById(products[0].digitalFileId);
-      digitalPath = (file && new FileDto(file).getUrl()) || '';
-    }
     await this.orderModel.create({
       transactionId: transaction._id,
       performerId: transaction.performerId,
@@ -72,7 +63,6 @@ export class OrderListener {
       shippingCode: '',
       postalCode: shippingInfo?.postalCode || transaction?.paymentResponseInfo?.postalCode || '',
       productId: newProds[0].productId,
-      digitalPath,
       unitPrice: products[0].price,
       quantity,
       totalPrice,

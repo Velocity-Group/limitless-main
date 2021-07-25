@@ -1,5 +1,7 @@
 import { PureComponent } from 'react';
-import { Table, Button, Tag } from 'antd';
+import {
+  Table, Button, Tag, Tooltip
+} from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
@@ -29,12 +31,33 @@ export class TableListProduct extends PureComponent<IProps> {
         title: '#',
         dataIndex: 'image',
         render(data, record) {
-          return <ImageProduct product={record} />;
+          return (
+            <Link
+              href={{ pathname: '/store', query: { id: record.slug || record._id } }}
+              as={`/store/${record.slug || record._id}`}
+            >
+              <a><ImageProduct product={record} /></a>
+            </Link>
+          );
         }
       },
       {
         title: 'Name',
-        dataIndex: 'name'
+        dataIndex: 'name',
+        render(name: string, record: any) {
+          return (
+            <Tooltip title={name}>
+              <div style={{
+                maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+              }}
+              >
+                <Link href={{ pathname: '/store', query: { id: record.slug || record._id } }} as={`/store/${record.slug || record._id}`}>
+                  <a>{name}</a>
+                </Link>
+              </div>
+            </Tooltip>
+          );
+        }
       },
       {
         title: 'Tokens',

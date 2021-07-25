@@ -6,14 +6,17 @@ import {
   Get,
   Param,
   Query,
-  UseGuards
-  // Request,
-  // HttpException
+  UseGuards,
+  HttpException,
+  Request,
+  Inject,
+  forwardRef
 } from '@nestjs/common';
 import { DataResponse } from 'src/kernel';
-import { LoadUser } from 'src/modules/auth/guards';
+import { AuthGuard, LoadUser } from 'src/modules/auth/guards';
 import { CurrentUser } from 'src/modules/auth';
-// import { AuthService } from 'src/modules/auth/services';
+import { AuthService } from 'src/modules/auth/services';
+import { UserDto } from 'src/modules/user/dtos';
 import { ProductService } from '../services/product.service';
 import { ProductSearchService } from '../services/product-search.service';
 import { ProductSearchRequest } from '../payloads';
@@ -22,7 +25,8 @@ import { ProductSearchRequest } from '../payloads';
 @Controller('user/performer-assets/products')
 export class UserProductsController {
   constructor(
-    // private readonly authService: AuthService,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
     private readonly productService: ProductService,
     private readonly productSearchService: ProductSearchService
   ) {}
@@ -46,24 +50,37 @@ export class UserProductsController {
   @HttpCode(HttpStatus.OK)
   async details(
     @Param('id') id: string,
-    @CurrentUser() user: any
+    @CurrentUser() user: UserDto
   ) {
     const details = await this.productService.getDetails(id, user);
     // TODO - filter here
     return DataResponse.ok(details.toPublic());
   }
 
-  // @Get('/auth/check')
-  // @HttpCode(HttpStatus.OK)
-  // async checkAuth(
-  //   @Request() request: any
-  // ) {
-  //   if (!request.query.token) throw new HttpException('Forbiden', 403);
-  //   const user = await this.authService.getSourceFromJWT(request.query.token as string);
-  //   if (!user) {
-  //     throw new HttpException('Forbiden', 403);
-  //   }
-  //   const valid = await this.productService.checkAuth(request, user);
-  //   return DataResponse.ok(valid);
-  // }
+  @Get('/:id/download-link')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async getDownloadLink(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDto
+  ) {
+    const downloadLink = await this.productService.generateDownloadLink(id, user._id);
+    return DataResponse.ok({
+      downloadLink
+    });
+  }
+
+  @Get('/auth/check')
+  @HttpCode(HttpStatus.OK)
+  async checkAuth(
+    @Request() request: any
+  ) {
+    if (!request.query.token) throw new HttpException('Forbiden', 403);
+    const user = await this.authService.getSourceFromJWT(request.query.token as string);
+    if (!user) {
+      throw new HttpException('Forbiden', 403);
+    }
+    const valid = await this.productService.checkAuth(request, user);
+    return DataResponse.ok(valid);
+  }
 }

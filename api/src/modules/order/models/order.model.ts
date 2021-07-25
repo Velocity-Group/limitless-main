@@ -8,33 +8,31 @@ export class OrderModel extends Document {
 
   userId: ObjectId;
 
-  orderNumber?: string;
+  orderNumber: string;
 
-  shippingCode?: string;
+  shippingCode: string;
 
-  productId?: ObjectId;
+  productId: ObjectId;
 
-  productInfo?: any;
+  productInfo: any;
 
-  quantity?: number;
+  quantity: number;
 
-  unitPrice?: number;
+  unitPrice: number;
 
-  totalPrice?: number;
+  totalPrice: number;
 
-  deliveryAddress?: string;
+  deliveryAddress: string;
 
-  deliveryStatus?: string;
+  deliveryStatus: string;
 
-  postalCode?: string;
+  postalCode: string;
 
-  userNote?: string;
+  userNote: string;
 
-  phoneNumber?: string;
+  phoneNumber: string;
 
-  createdAt?: Date;
+  createdAt: Date;
 
-  updatedAt?: Date;
-
-  digitalPath?: string;
+  updatedAt: Date;
 }

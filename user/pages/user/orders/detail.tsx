@@ -72,7 +72,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | Order #${order?.orderNumber}`}
+            {`${ui?.siteName} | Order #${order?.orderNumber || ''}`}
           </title>
         </Head>
         <div className="main-container">
@@ -102,32 +102,35 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   {(order?.totalPrice || 0).toFixed(2)}
                 </Item>
               </Descriptions>
-              <div style={{ marginBottom: '10px' }}>
-                Delivery Address:
-                {' '}
-                {order?.deliveryAddress || 'N/A'}
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                Phone Number:
-                {' '}
-                {order?.phoneNumber || 'N/A'}
-              </div>
-              <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
-                Shipping Code:
-                {' '}
-                <Tag color="blue">{order?.shippingCode || 'N/A'}</Tag>
-              </div>
-              <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
-                Delivery Status:
-                {' '}
-                <Tag color="green">{order?.deliveryStatus || 'N/A'}</Tag>
-              </div>
-              {order?.productInfo?.type === 'digital' && (
-              <div style={{ marginBottom: '10px' }}>
-                Download Link:
-                {' '}
-                <a href="#" onClick={this.downloadFile.bind(this, order)}>Click to download</a>
-              </div>
+              {order?.productInfo?.type === 'digital' ? (
+                <div style={{ marginBottom: '10px' }}>
+                  Download Link:
+                  {' '}
+                  <a href="#" onClick={this.downloadFile.bind(this, order)}>Click to download</a>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ marginBottom: '10px' }}>
+                    Delivery Address:
+                    {' '}
+                    {order?.deliveryAddress || 'N/A'}
+                  </div>
+                  <div style={{ marginBottom: '10px' }}>
+                    Phone Number:
+                    {' '}
+                    {order?.phoneNumber || 'N/A'}
+                  </div>
+                  <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
+                    Shipping Code:
+                    {' '}
+                    <Tag color="blue">{order?.shippingCode || 'N/A'}</Tag>
+                  </div>
+                  <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
+                    Delivery Status:
+                    {' '}
+                    <Tag color="green">{order?.deliveryStatus || 'N/A'}</Tag>
+                  </div>
+                </div>
               )}
               <div style={{ marginBottom: '10px' }}>
                 <Button danger onClick={() => Router.back()}>

@@ -26,7 +26,6 @@ export const OrderSchema = new Schema({
   productInfo: {
     type: Schema.Types.Mixed
   },
-  digitalPath: String,
   unitPrice: {
     type: Number,
     default: 1
