@@ -159,12 +159,12 @@ export class GalleryService {
         thumbnails: coverPhoto.getThumbnails()
       } : null;
     }
-    const bookmark = await this.reactionService.checkExisting(dto._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.GALLERY);
+    const bookmark = user && await this.reactionService.checkExisting(dto._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.GALLERY);
     dto.isBookMarked = !!bookmark;
     const subscribed = user && await this.subscriptionService.checkSubscribed(dto.performerId, user._id);
     dto.isSubscribed = !!subscribed;
-    const isBought = await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
-    dto.isBought = isBought;
+    const isBought = user && await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
+    dto.isBought = !!isBought;
     return dto;
   }
 

@@ -60,7 +60,7 @@ interface IProps {
 }
 
 class VideoViewPage extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
   static noredirect = true;
 
@@ -313,9 +313,9 @@ class VideoViewPage extends PureComponent<IProps> {
     } = this.state;
     const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/placeholder-image.jpg';
     const playSource = {
-      file: video.video.url || '',
+      file: video?.video?.url || '',
       image: thumbUrl,
-      teaser: video.teaser.url || ''
+      teaser: video?.teaser?.url || ''
     };
     const videoJsOptions = {
       key: video._id,
@@ -387,7 +387,7 @@ class VideoViewPage extends PureComponent<IProps> {
             <a>
               <HourglassOutlined />
               &nbsp;
-              {videoDuration(video.video.duration || 0)}
+              {videoDuration(video?.video?.duration || 0)}
             </a>
             <a>
               <EyeOutlined />
@@ -434,7 +434,7 @@ class VideoViewPage extends PureComponent<IProps> {
                       )}
                       {!video.isSale && !isSubscribed && (
                       <ConfirmSubscriptionPerformerForm
-                        type={video.performer.isFreeSubscription ? 'free' : 'monthly'}
+                        type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
                         performer={video.performer}
                         submiting={submiting}
                         onFinish={this.subscribe.bind(this)}
@@ -479,22 +479,22 @@ class VideoViewPage extends PureComponent<IProps> {
               <Link
                 href={{
                   pathname: '/model/profile',
-                  query: { username: video.performer.username || video.performer._id }
+                  query: { username: video?.performer?.username || video?.performer?._id }
                 }}
-                as={`/${video.performer.username || video.performer._id}`}
+                as={`/${video?.performer?.username || video?.performer?._id}`}
               >
                 <a>
                   <div className="o-w-ner">
                     <img
                       alt="performer avatar"
-                      src={video.performer.avatar || '/static/no-avatar.png'}
+                      src={video?.performer?.avatar || '/static/no-avatar.png'}
                     />
                     {' '}
                     <span className="owner-name">
-                      <div>{video.performer.name || 'N/A'}</div>
+                      <div>{video?.performer?.name || 'N/A'}</div>
                       <small>
                         @
-                        {video.performer.username || 'n/a'}
+                        {video?.performer?.username || 'n/a'}
                       </small>
                     </span>
                   </div>
