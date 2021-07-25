@@ -7,7 +7,7 @@ import withReduxSaga from '@redux/withReduxSaga';
 import { Store } from 'redux';
 import BaseLayout from '@layouts/base-layout';
 import {
-  authService, userService, settingService, utilsService
+  authService, userService, settingService, utilsService, cookieService
 } from '@services/index';
 import Router from 'next/router';
 import { NextPageContext } from 'next';
@@ -27,37 +27,6 @@ declare global {
     ReactSocketIO: any;
     __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any;
   }
-}
-
-function setCookie(cname, cvalue, exTime) {
-  const d = new Date();
-  d.setTime(d.getTime() + (exTime * 60 * 60 * 1000));
-  const expires = `expires=${d.toUTCString()}`;
-  document.cookie = `${cname}=${cvalue};${expires};path=/`;
-}
-
-function getCookie(cname) {
-  const name = `${cname}=`;
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const ca = decodedCookie.split(';');
-  for (let i = 0; i < ca.length; i += 1) {
-    let c = ca[i];
-    while (c.charAt(0) === ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) === 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return '';
-}
-
-function checkGeoCookie() {
-  const checkGeo = getCookie('checkGeoBlock');
-  if (checkGeo !== '') {
-    return true;
-  }
-  return false;
 }
 
 declare global {
@@ -200,11 +169,10 @@ class Application extends App<IApp> {
     // server side to load settings, once time only
     let settings = {};
     let geoBlocked = false;
-
-    if (process.browser && !checkGeoCookie()) {
+    if (process.browser && !!cookieService.getCookie('checkGeoBlock')) {
       const checkBlock = await userService.checkCountryBlock() as any;
       // set interval check every single hour
-      setCookie('checkGeoBlock', true, 1);
+      cookieService.setCookie('checkGeoBlock', true, 1);
       if (checkBlock && checkBlock.data && checkBlock.data.blocked) {
         geoBlocked = true;
       }

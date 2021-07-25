@@ -80,7 +80,7 @@ class PerformerProfile extends PureComponent<IProps> {
     productPage: 0,
     feedPage: 0,
     galleryPage: 0,
-    viewedVideo: true,
+    showWelcomVideo: false,
     openTipModal: false,
     submiting: false,
     isBookMarked: false,
@@ -112,15 +112,22 @@ class PerformerProfile extends PureComponent<IProps> {
     const { performer } = this.props;
     this.checkBlock();
     if (performer) {
-      this.setState({ isBookMarked: performer.isBookMarked || false });
+      const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');
+      const showWelcomVideo = !notShownWelcomeVideos || (notShownWelcomeVideos && !notShownWelcomeVideos.includes(performer._id));
+      this.setState({ isBookMarked: performer.isBookMarked, showWelcomVideo });
       this.loadItems();
     }
   }
 
   handleViewWelcomeVideo() {
-    const video = document.getElementById('welcome-video') as HTMLVideoElement;
-    video.pause();
-    this.setState({ viewedVideo: false });
+    const { performer } = this.props;
+    const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');
+    if (!notShownWelcomeVideos?.includes(performer._id)) {
+      const Ids = JSON.parse(notShownWelcomeVideos || '[]');
+      const values = Array.isArray(Ids) ? Ids.concat([performer._id]) : [performer._id];
+      localStorage.setItem('notShownWelcomeVideos', JSON.stringify(values));
+    }
+    this.setState({ showWelcomVideo: false });
   }
 
   async handleDeleteFeed(feed: IFeed) {
@@ -369,7 +376,7 @@ class PerformerProfile extends PureComponent<IProps> {
     const { items: products = [], total: totalProducts = 0, requesting: loadingPrd } = productState;
     const { items: galleries = [], total: totalGalleries = 0, requesting: loadingGallery } = galleryState;
     const {
-      viewedVideo,
+      showWelcomVideo,
       openTipModal,
       submiting,
       isBookMarked,
@@ -510,46 +517,44 @@ class PerformerProfile extends PureComponent<IProps> {
                 </h5>
               </div>
             </div>
-            {currentUser._id
-              && !currentUser.isPerformer
-              && currentUser._id !== ((performer?._id) || '') && (
-                <div className="btn-grp">
-                  <div style={{ marginBottom: '4px' }}>
-                    <button
-                      type="button"
-                      className="normal"
-                      onClick={() => this.setState({ openTipModal: true })}
-                    >
-                      <a title="Send Tip">
-                        <DollarOutlined />
-                      </a>
-                    </button>
-                    <button type="button" className="normal">
-                      <Link
-                        href={{
-                          pathname: '/messages',
-                          query: {
-                            toSource: 'performer',
-                            toId: (performer && performer?._id) || ''
-                          }
-                        }}
-                      >
-                        <a title="Message">
-                          <MessageOutlined />
-                        </a>
-                      </Link>
-                    </button>
-                    <button
-                      disabled
-                      type="button"
-                      className="normal"
-                    >
-                      <a title="Share to social media">
-                        <ShareAltOutlined />
-                      </a>
-                    </button>
-                  </div>
-                  {/* {performer?.isSubscribed && (
+            {currentUser._id && !currentUser.isPerformer && (
+            <div className="btn-grp">
+              <div style={{ marginBottom: '4px' }}>
+                <button
+                  type="button"
+                  className="normal"
+                  onClick={() => this.setState({ openTipModal: true })}
+                >
+                  <a title="Send Tip">
+                    <DollarOutlined />
+                  </a>
+                </button>
+                <button type="button" className="normal">
+                  <Link
+                    href={{
+                      pathname: '/messages',
+                      query: {
+                        toSource: 'performer',
+                        toId: (performer?._id) || ''
+                      }
+                    }}
+                  >
+                    <a title="Message">
+                      <MessageOutlined />
+                    </a>
+                  </Link>
+                </button>
+                <button
+                  disabled
+                  type="button"
+                  className="normal"
+                >
+                  <a title="Share to social media">
+                    <ShareAltOutlined />
+                  </a>
+                </button>
+              </div>
+              {/* {performer?.isSubscribed && (
                       <div className="stream-btns">
                         <Button
                           type="link"
@@ -568,13 +573,13 @@ class PerformerProfile extends PureComponent<IProps> {
                         </Button>
                       </div>
                     )} */}
-                </div>
+            </div>
             )}
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <div className="show-more">
                 <Collapse
                   bordered={false}
-                  defaultActiveKey="1"
+                  defaultActiveKey={['1']}
                   expandIconPosition="left"
                   expandIcon={({ isActive }) => <ArrowDownOutlined rotate={isActive ? 180 : 0} />}
                 >
@@ -736,19 +741,27 @@ class PerformerProfile extends PureComponent<IProps> {
           && performer?.activateWelcomeVideo && (
             <Modal
               key="welcome-video"
+              destroyOnClose
               width={768}
-              visible={viewedVideo}
-              title="Welcome video"
-              onOk={this.handleViewWelcomeVideo.bind(this)}
-              onCancel={this.handleViewWelcomeVideo.bind(this)}
-              footer={(
+              visible={showWelcomVideo}
+              title={null}
+              onCancel={() => this.setState({ showWelcomVideo: false })}
+              footer={[
                 <Button
-                  type="primary"
-                  onClick={this.handleViewWelcomeVideo.bind(this)}
+                  key="close"
+                  className="secondary"
+                  onClick={() => this.setState({ showWelcomVideo: false })}
                 >
                   Close
+                </Button>,
+                <Button
+                  key="not-show"
+                  className="primary"
+                  onClick={this.handleViewWelcomeVideo.bind(this)}
+                >
+                  Don&apos;t show me again
                 </Button>
-              )}
+              ]}
             >
               <video
                 autoPlay
