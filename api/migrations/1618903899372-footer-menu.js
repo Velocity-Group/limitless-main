@@ -8,7 +8,7 @@ module.exports.up = async function up(next) {
   const page2257 = readFileSync(join(__dirname, 'content', '2257.html')).toString();
   const pageDMCA = readFileSync(join(__dirname, 'content', 'dmca.html')).toString();
   const pageToS = readFileSync(join(__dirname, 'content', 'tos.html')).toString();
-  const privacy = readFileSync(join(__dirname, 'content', 'privacy_policy.html')).toString();
+  const privacy = readFileSync(join(__dirname, 'content', 'privacy-policy.html')).toString();
 
   const [
     page2257Content,

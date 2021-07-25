@@ -407,7 +407,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                   {' '}
                   and
                   {' '}
-                  <a href="/page/privacy_policy" target="_blank">Privacy & Policy</a>
+                  <a href="/page/privacy-policy" target="_blank">Privacy & Policy</a>
                   , and confirm that you are at least 18 years old.
                 </p>
                 <p>
@@ -419,7 +419,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                 <p>
                   Are you a fan?
                   <Link href="/auth/fan-register">
-                    <a> Register here.</a>
+                    <a> Sign up here.</a>
                   </Link>
                 </p>
               </Form.Item>

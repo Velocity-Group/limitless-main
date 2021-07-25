@@ -1,8 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  EyeOutlined,
-  LikeOutlined,
-  HourglassOutlined
+  EyeOutlined, LikeOutlined, HourglassOutlined, PlayCircleOutlined
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import Link from 'next/link';
@@ -28,7 +26,7 @@ export class VideoCard extends PureComponent<IProps> {
           <span className="vid-price">
             <div className="label-price">
               <img alt="coin" src="/static/coin-ico.png" width="15px" />
-              {video.price.toFixed(2)}
+              {(video.price || 0).toFixed(2)}
             </div>
           </span>
           )}
@@ -52,15 +50,11 @@ export class VideoCard extends PureComponent<IProps> {
                 {videoDuration(video?.video?.duration || 0)}
               </a>
             </div>
+            <span className="play-ico"><PlayCircleOutlined /></span>
           </div>
           <div className="vid-info">
             <Tooltip title={video.title}>
-              <Link
-                href={{ pathname: '/video', query: { id: video.slug || video._id } }}
-                as={`/video/${video.slug || video._id}`}
-              >
-                <span>{video.title}</span>
-              </Link>
+              <a>{video.title}</a>
             </Tooltip>
           </div>
         </div>

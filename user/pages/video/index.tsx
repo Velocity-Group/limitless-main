@@ -39,7 +39,7 @@ import {
 } from 'src/redux/comment/actions';
 import { getRelated } from 'src/redux/video/actions';
 import { formatDate } from '@lib/date';
-import './video.less';
+import './index.less';
 
 const { TabPane } = Tabs;
 
@@ -476,6 +476,30 @@ class VideoViewPage extends PureComponent<IProps> {
         <div className="vid-split">
           <div className="main-container">
             <div className="vid-act">
+              <Link
+                href={{
+                  pathname: '/model/profile',
+                  query: { username: video.performer.username || video.performer._id }
+                }}
+                as={`/${video.performer.username || video.performer._id}`}
+              >
+                <a>
+                  <div className="o-w-ner">
+                    <img
+                      alt="performer avatar"
+                      src={video.performer.avatar || '/static/no-avatar.png'}
+                    />
+                    {' '}
+                    <span className="owner-name">
+                      <div>{video.performer.name || 'N/A'}</div>
+                      <small>
+                        @
+                        {video.performer.username || 'n/a'}
+                      </small>
+                    </span>
+                  </div>
+                </a>
+              </Link>
               <div className="act-btns">
                 <button
                   type="button"
@@ -505,39 +529,14 @@ class VideoViewPage extends PureComponent<IProps> {
                   <CommentOutlined />
                 </button>
               </div>
-
-              <Link
-                href={{
-                  pathname: '/model/profile',
-                  query: { username: video.performer.username || video.performer._id }
-                }}
-                as={`/${video.performer.username || video.performer._id}`}
-              >
-                <a>
-                  <div className="o-w-ner">
-                    <img
-                      alt="performer avatar"
-                      src={video.performer.avatar || '/static/no-avatar.png'}
-                    />
-                    {' '}
-                    <span className="owner-name">
-                      <div>{video.performer.name || 'N/A'}</div>
-                      <small>
-                        @
-                        {video.performer.username || 'n/a'}
-                      </small>
-                    </span>
-                  </div>
-                </a>
-              </Link>
             </div>
           </div>
         </div>
         <div className="main-container">
-          <div style={{ marginBottom: '15px' }}>
+          <div className="vid-tags">
             {video.tags && video.tags.length > 0
                 && video.tags.map((tag) => (
-                  <a color="magenta">
+                  <a color="magenta" style={{ marginRight: 5 }}>
                     #
                     {tag}
                   </a>
@@ -618,7 +617,7 @@ class VideoViewPage extends PureComponent<IProps> {
           </Tabs>
         </div>
         <div className="main-container">
-          <div className="related-vid">
+          <div className="related-items">
             <h4 className="ttl-1">You may also like</h4>
             {relatedVideos.requesting && <div className="text-center"><Spin /></div>}
             {relatedVideos.items.length > 0 && !relatedVideos.requesting && (

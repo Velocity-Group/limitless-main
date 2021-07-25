@@ -10,6 +10,7 @@ export interface IFeed {
   performer: IPerformer;
   fromSource: string;
   title: string;
+  slug: string;
   text: string;
   fileIds: Array<string>;
   totalLike: number;
@@ -33,16 +34,4 @@ export interface IFeed {
   tagline: string;
   isPinned: boolean;
   pinnedAt: Date;
-}
-
-export interface IFeedCreate {
-  name: string;
-  description?: string;
-  status: string;
-}
-
-export interface IFeedSearch extends ISearch {
-  q: string;
-  sort: string;
-  sortBy: string;
 }

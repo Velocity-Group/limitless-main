@@ -37,10 +37,10 @@ const FeedList = ({
             href={{
               pathname: '/post',
               query: {
-                id: record._id
+                id: feed.slug || record._id
               }
             }}
-            as={`/post/${record._id}`}
+            as={`/post/${feed.slug || record._id}`}
           >
             <a style={{ fontSize: 16 }}>
               {record.type === 'photo' && (

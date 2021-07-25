@@ -23,6 +23,7 @@ import Link from 'next/link';
 import Loader from '@components/common/base/loader';
 import PageHeading from '@components/common/page-heading';
 import PhotoPreviewList from '@components/photo/photo-preview-list';
+import '../video/index.less';
 import './index.less';
 
 interface IProps {
@@ -272,21 +273,6 @@ class GalleryViewPage extends PureComponent<IProps> {
           <div className="vid-split">
             <div className="main-container">
               <div className="vid-act">
-                <div className="act-btns">
-                  <button
-                    type="button"
-                    className="react-btn"
-                  >
-                    <HeartOutlined />
-                  </button>
-                  <button
-                    type="button"
-                    className="react-btn"
-                  >
-                    <BookOutlined />
-                  </button>
-                </div>
-
                 <Link
                   href={{
                     pathname: '/model/profile',
@@ -311,6 +297,20 @@ class GalleryViewPage extends PureComponent<IProps> {
                     </div>
                   </a>
                 </Link>
+                {/* <div className="act-btns">
+                  <button
+                    type="button"
+                    className="react-btn"
+                  >
+                    <HeartOutlined />
+                  </button>
+                  <button
+                    type="button"
+                    className="react-btn"
+                  >
+                    <BookOutlined />
+                  </button>
+                </div> */}
               </div>
             </div>
           </div>

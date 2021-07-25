@@ -26,17 +26,45 @@ export class TableListGallery extends PureComponent<IProps> {
     } = this.props;
     const columns = [
       {
-        title: '',
+        title: '#',
         render(data, record) {
-          return <CoverGallery gallery={record} />;
+          return (
+            <Link
+              href={{
+                pathname: `/gallery/${record?.slug || record?._id}`,
+                query: { id: record._id }
+              }}
+              as={`/gallery/${record?.slug || record?._id}`}
+            >
+              <a><CoverGallery gallery={record} /></a>
+            </Link>
+          );
         }
       },
       {
         title: 'Title',
-        dataIndex: 'title'
+        dataIndex: 'title',
+        render(title, record) {
+          return (
+            <div style={{
+              maxWidth: 150, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden'
+            }}
+            >
+              <Link
+                href={{
+                  pathname: `/gallery/${record?.slug || record?._id}`,
+                  query: { id: record._id }
+                }}
+                as={`/gallery/${record?.slug || record?._id}`}
+              >
+                <a>{title}</a>
+              </Link>
+            </div>
+          );
+        }
       },
       {
-        title: 'For sale?',
+        title: 'PPV',
         dataIndex: 'isSale',
         render(isSale: boolean) {
           switch (isSale) {
@@ -49,16 +77,8 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Tokens',
-        dataIndex: 'price',
-        render(price: number) {
-          return (
-            <span style={{ whiteSpace: 'nowrap' }}>
-              <img src="/static/coin-ico.png" alt="coin" width="20px" />
-              {(price || 0).toFixed(2)}
-            </span>
-          );
-        }
+        title: 'Total photos',
+        dataIndex: 'numOfItems'
       },
       {
         title: 'Status',
@@ -86,19 +106,6 @@ export class TableListGallery extends PureComponent<IProps> {
         dataIndex: '_id',
         render: (data, record) => (
           <div style={{ whiteSpace: 'nowrap' }}>
-            <Button className="info">
-              <Link
-                href={{
-                  pathname: `/gallery/${record?.slug || record?._id}`,
-                  query: { id: record._id }
-                }}
-                as={`/gallery/${record?.slug || record?._id}`}
-              >
-                <a>
-                  <EyeOutlined />
-                </a>
-              </Link>
-            </Button>
             <Button className="info">
               <Link
                 href={{

@@ -5,11 +5,11 @@ import {
   Form, Button, Layout, Input, message, Col, Row
 } from 'antd';
 import Head from 'next/head';
-import '../auth/index.less';
 import { settingService } from '@services/setting.service';
 import { connect } from 'react-redux';
 // import { GoogleReCaptcha } from '@components/common';
-import { IUIConfig } from '../../src/interfaces';
+import { IUIConfig } from 'src/interfaces';
+import '../auth/index.less';
 
 const { TextArea } = Input;
 
@@ -130,7 +130,7 @@ class ContactPage extends PureComponent<IProps> {
                   className="text-center"
                   style={{ fontSize: 13, color: '#888' }}
                 >
-                  Please fill out all the info beside and we will get back to you with-in 48hrs.
+                  Please fill out all the info below and we will get back to you with-in 48hrs.
                 </h5>
                 <Form
                   layout="vertical"
@@ -149,7 +149,7 @@ class ContactPage extends PureComponent<IProps> {
                     rules={[
                       {
                         required: true,
-                        message: 'Tell us your e-mail address.'
+                        message: 'Tell us your email address.'
                       },
                       { type: 'email', message: 'Invalid email format' }
                     ]}
@@ -179,7 +179,7 @@ class ContactPage extends PureComponent<IProps> {
                       disabled={submiting || countTime < 60}
                       style={{ fontWeight: 600, width: '100%' }}
                     >
-                      {countTime < 60 ? 'Resend in' : 'Send'}
+                      {countTime < 60 ? 'RESEND IN' : 'SEND'}
                       {' '}
                       {countTime < 60 && `${countTime}s`}
                     </Button>

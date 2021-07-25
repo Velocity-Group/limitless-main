@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { useState } from 'react';
 import {
-  Form, Input, Button, Select, Upload, Switch, InputNumber
+  Form, Input, Button, Select, Upload, Switch, InputNumber, Divider
 } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
@@ -34,40 +34,39 @@ const FormGallery = ({
   const [isSale, setSale] = useState(gallery?.isSale || false);
 
   return (
-    <>
-      <Form
-        form={form}
-        name="galleryForm"
-        onFinish={onFinish.bind(this)}
-        initialValues={
+    <Form
+      form={form}
+      name="galleryForm"
+      onFinish={onFinish.bind(this)}
+      initialValues={
           gallery || {
             title: '', status: 'active', description: '', price: 4.99, isSale: false
           }
         }
-        labelCol={{ span: 24 }}
-        wrapperCol={{ span: 24 }}
-        className="account-form"
+      labelCol={{ span: 24 }}
+      wrapperCol={{ span: 24 }}
+      className="account-form"
+    >
+      <Form.Item
+        name="title"
+        rules={[{ required: true, message: 'Please input gallery title!' }]}
+        label="Title"
       >
-        <Form.Item
-          name="title"
-          rules={[{ required: true, message: 'Please input gallery title!' }]}
-          label="Title"
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          name="description"
-          label="Description"
-        >
-          <Input.TextArea rows={3} />
-        </Form.Item>
-        <Form.Item
-          name="isSale"
-          label="For sale?"
-        >
-          <Switch checkedChildren="Sale" unCheckedChildren="Free" checked={isSale} onChange={(val) => setSale(val)} />
-        </Form.Item>
-        {isSale && (
+        <Input />
+      </Form.Item>
+      <Form.Item
+        name="description"
+        label="Description"
+      >
+        <Input.TextArea rows={3} />
+      </Form.Item>
+      <Form.Item
+        name="isSale"
+        label="For sale?"
+      >
+        <Switch checkedChildren="Sale" unCheckedChildren="Free" checked={isSale} onChange={(val) => setSale(val)} />
+      </Form.Item>
+      {isSale && (
         <Form.Item
           name="price"
           rules={[{ required: true, message: 'Please input amount of tokens' }]}
@@ -75,22 +74,23 @@ const FormGallery = ({
         >
           <InputNumber min={1} />
         </Form.Item>
-        )}
-        <Form.Item
-          name="status"
-          label="Status"
-          rules={[{ required: true, message: 'Please select status!' }]}
-        >
-          <Select>
-            <Select.Option key="active" value="active">
-              Active
-            </Select.Option>
-            <Select.Option key="inactive" value="inactive">
-              Inactive
-            </Select.Option>
-          </Select>
-        </Form.Item>
-        {gallery && (
+      )}
+      <Form.Item
+        name="status"
+        label="Status"
+        rules={[{ required: true, message: 'Please select status!' }]}
+      >
+        <Select>
+          <Select.Option key="active" value="active">
+            Active
+          </Select.Option>
+          <Select.Option key="inactive" value="inactive">
+            Inactive
+          </Select.Option>
+        </Select>
+      </Form.Item>
+      {gallery && <Divider>Upload Photos</Divider>}
+      {gallery && (
         <Dragger
           accept="image/*"
           multiple
@@ -103,36 +103,35 @@ const FormGallery = ({
             <InboxOutlined />
           </p>
           <p className="ant-upload-text">
-            Drag & drop files to this area or browser to upload
+            Drag & drop photos to this area or browser to upload
           </p>
         </Dragger>
-        )}
-        {filesList && filesList.length > 0 && (
+      )}
+      {filesList && filesList.length > 0 && (
         <UploadList
           files={filesList}
           setCover={setCover && setCover.bind(this)}
           remove={removePhoto && removePhoto.bind(this)}
         />
-        )}
-        <Form.Item>
-          <Button
-            className="primary"
-            htmlType="submit"
-            loading={submiting}
-            disabled={submiting}
-            style={{ marginRight: '20px' }}
-          >
-            Submit
-          </Button>
-          <Button
-            className="secondary"
-            onClick={() => Router.push('/model/my-gallery')}
-          >
-            Cancel
-          </Button>
-        </Form.Item>
-      </Form>
-    </>
+      )}
+      <Form.Item>
+        <Button
+          className="primary"
+          htmlType="submit"
+          loading={submiting}
+          disabled={submiting}
+          style={{ marginRight: '20px' }}
+        >
+          Submit
+        </Button>
+        <Button
+          className="secondary"
+          onClick={() => Router.push('/model/my-gallery')}
+        >
+          Cancel
+        </Button>
+      </Form.Item>
+    </Form>
   );
 };
 

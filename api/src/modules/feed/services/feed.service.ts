@@ -6,7 +6,7 @@ import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
   EntityNotFoundException, AgendaService,
-  QueueEventService, QueueEvent, ForbiddenException
+  QueueEventService, QueueEvent, ForbiddenException, StringHelper
 } from 'src/kernel';
 import { uniq, difference } from 'lodash';
 import { PerformerService } from 'src/modules/performer/services';
@@ -23,6 +23,7 @@ import { SEARCH_CHANNEL } from 'src/modules/search/constants';
 import { PurchasedItemSearchService, PaymentTokenService } from 'src/modules/purchased-item/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
+import * as moment from 'moment';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
@@ -73,10 +74,10 @@ export class FeedService {
       }
     });
     this.agenda.define(CHECK_REF_REMOVE_FEED_FILE_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
-    this.agenda.every('24 hours', CHECK_REF_REMOVE_FEED_FILE_AGENDA, {});
+    this.agenda.schedule('1 hour', CHECK_REF_REMOVE_FEED_FILE_AGENDA, {});
     // schedule feed
     this.agenda.define(SCHEDULE_FEED_AGENDA, {}, this.scheduleFeed.bind(this));
-    this.agenda.every('3600 seconds', SCHEDULE_FEED_AGENDA, {});
+    this.agenda.schedule('1 hour', SCHEDULE_FEED_AGENDA, {});
   }
 
   private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
@@ -247,7 +248,8 @@ export class FeedService {
   }
 
   public async findOne(id, user, jwtToken): Promise<FeedDto> {
-    const feed = await this.feedModel.findOne({ _id: id });
+    const query = isObjectId(id) ? { _id: id } : { slug: id };
+    const feed = await this.feedModel.findOne(query);
     if (!feed) {
       throw new EntityNotFoundException();
     }
@@ -261,19 +263,25 @@ export class FeedService {
     const fromSourceId = user.roles && user.roles.includes('admin') && payload.fromSourceId ? payload.fromSourceId : user._id;
     const performer = await this.performerService.findById(fromSourceId);
     if (!performer) throw new EntityNotFoundException();
+    const data = { ...payload } as any;
+    data.slug = StringHelper.createAlias(payload.title);
+    const slugCheck = await this.feedModel.countDocuments({
+      slug: data.slug
+    });
+    if (slugCheck) {
+      data.slug = `${data.slug}-${StringHelper.randomString(8)}`;
+    }
     const feed = await this.feedModel.create({
-      ...payload,
+      ...data,
       orientation: performer.gender,
       fromSource: 'performer',
       fromSourceId
     } as any);
     if (feed.fileIds && feed.fileIds.length) {
-      await Promise.all([feed.fileIds.forEach(async (fileId) => {
-        await this.fileService.addRef((fileId as any), {
-          itemId: feed._id,
-          itemType: REF_TYPE.FEED
-        });
-      })]);
+      await Promise.all(feed.fileIds.map((fileId) => this.fileService.addRef((fileId as any), {
+        itemId: feed._id,
+        itemType: REF_TYPE.FEED
+      })));
     }
     feed.teaserId && await this.fileService.addRef((feed.teaserId as any), {
       itemId: feed._id,
@@ -310,8 +318,8 @@ export class FeedService {
 
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
 
@@ -395,8 +403,8 @@ export class FeedService {
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     if (req.ids) {
@@ -455,8 +463,8 @@ export class FeedService {
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {
@@ -482,16 +490,24 @@ export class FeedService {
     if (!feed || ((!user.roles || !user.roles.includes('admin')) && feed.fromSourceId.toString() !== user._id.toString())) throw new EntityNotFoundException();
     const data = { ...payload } as any;
     data.updatedAt = new Date();
+    if (data.title !== feed.title) {
+      const slug = StringHelper.createAlias(data.title);
+      const slugCheck = await this.feedModel.countDocuments({
+        slug,
+        _id: { $ne: feed._id }
+      });
+      if (slugCheck) {
+        data.slug = `${slug}-${StringHelper.randomString(8)}`;
+      }
+    }
     await this.feedModel.updateOne({ _id: id }, data);
     if (payload.fileIds && payload.fileIds.length) {
       const ids = feed.fileIds.map((_id) => _id.toString());
       const Ids = payload.fileIds.filter((_id) => !ids.includes(_id));
-      await Promise.all(Ids.map(async (fileId) => {
-        await this.fileService.addRef((fileId as any), {
-          itemId: feed._id,
-          itemType: REF_TYPE.FEED
-        });
-      }));
+      await Promise.all(Ids.map((fileId) => this.fileService.addRef((fileId as any), {
+        itemId: feed._id,
+        itemType: REF_TYPE.FEED
+      })));
     }
     return { updated: true };
   }

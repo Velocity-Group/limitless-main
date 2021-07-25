@@ -13,6 +13,13 @@
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+    .play-ico {
+      position: absolute;
+      color: @white;
+      font-size: 24px;
+      top: calc(50% - 12px);
+      left: calc(50% - 12px);
+    }
     @media screen and (max-width: @mobile-screen) {
       height: 150px;
     }
@@ -34,13 +41,6 @@
       padding-right: 10px;
     }
   }
-  &:hover .vid-info {
-    a {
-      color: @white!important;
-    }
-    color: @white!important;
-    background-color: @primary-color;
-  }
   .vid-info {
     font-family: @primary-font-bold;
     color: @black;
@@ -54,6 +54,22 @@
     overflow: hidden;
     @media screen and (max-width: @mobile-screen) {
       font-size: 11px;
+    }
+  }
+
+  &:hover {
+    .vid-info {
+      a {
+        color: @white!important;
+      }
+      color: @white!important;
+      background-color: @primary-color;
+    }
+    .vid-thumb {
+      background-size: 102%;
+      .play-ico { 
+        color: @primary-color;
+      }
     }
   }
   .vid-price {

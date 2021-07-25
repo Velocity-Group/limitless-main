@@ -26,8 +26,8 @@ export class FeedGridCard extends PureComponent<IProps> {
     return (
       <div className="grid-card" key={feed._id}>
         <Link
-          href={{ pathname: '/post', query: { id: feed._id } }}
-          as={`/post/${feed._id}`}
+          href={{ pathname: '/post', query: { id: feed.slug || feed._id } }}
+          as={`/post/${feed.slug || feed._id}`}
         >
           <div className="card-thumb" style={feed?.thumbnailUrl && { backgroundImage: `url(${feed?.thumbnailUrl})` }}>
             {((!feed.isSale && !feed.isSubscribed) || (feed.isSale && !feed.isBought)) ? (

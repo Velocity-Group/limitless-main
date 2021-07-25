@@ -60,6 +60,7 @@ export class GalleryDto {
         'performerId',
         'type',
         'title',
+        'slug',
         'description',
         'status',
         'coverPhotoId',

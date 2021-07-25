@@ -12,6 +12,8 @@ export class FeedModel extends Document {
 
   title: string;
 
+  slug: string;
+
   text: string;
 
   fileIds: Array<string | ObjectId>;

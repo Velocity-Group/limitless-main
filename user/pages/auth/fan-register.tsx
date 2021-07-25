@@ -160,7 +160,7 @@ class FanRegister extends PureComponent<IProps> {
                         }
                       ]}
                     >
-                      <Input placeholder="E-mail" />
+                      <Input placeholder="Email address" />
                     </Form.Item>
                     <Form.Item
                       name="username"
@@ -206,7 +206,7 @@ class FanRegister extends PureComponent<IProps> {
                           pattern: new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/g),
                           message: 'Password must have minimum 8 characters, at least one uppercase letter, one lowercase letter and one number'
                         },
-                        { required: true, message: 'Please input your password!' }
+                        { required: true, message: 'Please enter your password!' }
                       ]}
                     >
                       <Input.Password placeholder="Password" />

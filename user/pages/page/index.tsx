@@ -57,12 +57,12 @@ class PostDetail extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${post?.title}`}
+            {`${ui?.siteName} | ${post?.title || ''}`}
           </title>
         </Head>
         <div className="main-container">
           <div className="page-container">
-            <PageHeading title={post?.title} icon={<ReadOutlined />} />
+            <PageHeading title={post?.title || 'Not found'} icon={<ReadOutlined />} />
             <div
               className="page-content"
               dangerouslySetInnerHTML={{ __html: post?.content }}

@@ -15,6 +15,14 @@ export const FeedSchema = new Schema({
     index: true
   },
   title: { type: String },
+  slug: {
+    type: String,
+    index: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    sparse: true
+  },
   text: { type: String },
   fileIds: [{
     type: Schema.Types.ObjectId,

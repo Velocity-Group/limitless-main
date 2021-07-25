@@ -349,7 +349,7 @@ class FeedCard extends Component<IProps> {
     const menu = (
       <Menu key={`menu_${feed._id}`}>
         <Menu.Item key={`post_detail_${feed._id}`}>
-          <Link href={{ pathname: '/post', query: { id: feed._id } }} as={`/post/${feed._id}`}>
+          <Link href={{ pathname: '/post', query: { id: feed.slug || feed._id } }} as={`/post/${feed.slug || feed._id}`}>
             <a>
               Details
             </a>

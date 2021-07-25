@@ -34,7 +34,9 @@ interface IStates {
 }
 
 class ProductViewPage extends PureComponent<IProps, IStates> {
-  static authenticate: boolean = true;
+  static authenticate = true;
+
+  static noredirect = true;
 
   static async getInitialProps({ ctx }) {
     return ctx.query;
@@ -261,7 +263,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
             {!loading && relatedProducts.length > 0 && (
             <PerformerListProduct products={relatedProducts} />
             )}
-            {!loading && !relatedProducts.length && <p>No data was found</p>}
+            {!loading && !relatedProducts.length && <p>No product was found</p>}
             {loading && <div style={{ margin: 10, textAlign: 'center' }}><Spin /></div>}
           </div>
         </div>

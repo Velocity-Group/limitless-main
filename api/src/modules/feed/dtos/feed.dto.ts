@@ -13,6 +13,8 @@ export class FeedDto {
 
   title: string;
 
+  slug: string;
+
   text: string;
 
   fileIds: Array<string | ObjectId>;
@@ -80,6 +82,7 @@ export class FeedDto {
         'fromSourceId',
         'fromSource',
         'title',
+        'slug',
         'text',
         'fileIds',
         'pollIds',
