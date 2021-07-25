@@ -202,6 +202,8 @@ class GalleryViewPage extends PureComponent<IProps> {
             <p style={{ whiteSpace: 'pre-line' }}>{gallery.description || 'No description'}</p>
             <div className="photo-carousel">
               {!fetching && photos && photos.length > 0 && <PhotoPreviewList isBlur={!user || !user._id || !canview} photos={photos} />}
+              {!fetching && !photos.length && <p className="text-center">No photo was found.</p>}
+              {fetching && <div className="text-center"><Spin /></div>}
               {!canview && (
                 <div className="text-center" style={{ margin: '20px 0' }}>
                   {gallery.isSale && !isBought && (
@@ -218,7 +220,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                     style={{ padding: '25px 5px' }}
                     className="subscription"
                   >
-                    <h3>To view full content, subscribe me!</h3>
+                    <h3>Subscribe to view full content</h3>
                     <div style={{ marginBottom: '25px' }}>
                       {gallery?.performer?.isFreeSubscription && (
                       <Button
@@ -265,8 +267,6 @@ class GalleryViewPage extends PureComponent<IProps> {
                   )}
                 </div>
               )}
-              {!fetching && !photos.length && <p className="text-center">No photo was found.</p>}
-              {fetching && <div className="text-center"><Spin /></div>}
             </div>
           </div>
           <div className="vid-split">
@@ -275,15 +275,15 @@ class GalleryViewPage extends PureComponent<IProps> {
                 <Link
                   href={{
                     pathname: '/model/profile',
-                    query: { username: gallery.performer?.username || gallery.performer?._id }
+                    query: { username: gallery?.performer?.username || gallery?.performer?._id }
                   }}
-                  as={`/model/${gallery.performer?.username || gallery.performer?._id}`}
+                  as={`/model/${gallery?.performer?.username || gallery?.performer?._id}`}
                 >
                   <a>
                     <div className="o-w-ner">
                       <img
                         alt="performer avatar"
-                        src={gallery.performer?.avatar || '/static/no-avatar.png'}
+                        src={gallery?.performer?.avatar || '/static/no-avatar.png'}
                       />
                       {' '}
                       <div className="owner-name">

@@ -140,12 +140,11 @@ export class PhotoSearchService {
     };
   }
 
-  public async getModelPhotosWithGalleryCheck(req: PhotoSearchRequest, user: UserDto, jwToken: string) {
+  public async getModelPhotosWithGalleryCheck(req: PhotoSearchRequest, jwToken: string) {
     const query = {
       performerId: req.performerId,
       status: 'active',
       processing: false
-      // isGalleryCover: false,
     } as any;
     if (req.galleryId) query.galleryId = req.galleryId;
     const sort = { createdAt: -1 };
@@ -162,38 +161,34 @@ export class PhotoSearchService {
     const fileIds = data.map((d) => d.fileId);
     const photos = data.map((v) => new PhotoDto(v));
 
-    // check subscribe
-    const check = await this.performerService.checkSubscribed(query.performerId, user);
-    if (check.subscribed) {
-      const galleryIds = data.filter((d) => d.galleryId).map((p) => p.galleryId);
-      const [galleries, files] = await Promise.all([
-        galleryIds.length ? this.galleryService.findByIds(galleryIds) : [],
-        fileIds.length ? this.fileService.findByIds(fileIds) : []
-      ]);
-      photos.forEach((v) => {
-        if (v.galleryId) {
-          const gallery = galleries.find(
-            (p) => p._id.toString() === v.galleryId.toString()
-          );
+    const galleryIds = data.filter((d) => d.galleryId).map((p) => p.galleryId);
+    const [galleries, files] = await Promise.all([
+      galleryIds.length ? this.galleryService.findByIds(galleryIds) : [],
+      fileIds.length ? this.fileService.findByIds(fileIds) : []
+    ]);
+    photos.forEach((v) => {
+      if (v.galleryId) {
+        const gallery = galleries.find(
+          (p) => p._id.toString() === v.galleryId.toString()
+        );
           // eslint-disable-next-line no-param-reassign
-          if (gallery) v.gallery = gallery;
-        }
+        if (gallery) v.gallery = gallery;
+      }
 
-        const file = files.find((f) => f._id.toString() === v.fileId.toString());
-        if (file) {
-          const url = file.getUrl();
-          // eslint-disable-next-line no-param-reassign
-          v.photo = {
-            size: file.size,
-            thumbnails: file.getThumbnails(),
-            url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
-            width: file.width,
-            height: file.height,
-            mimeType: file.mimeType
-          };
-        }
-      });
-    }
+      const file = files.find((f) => f._id.toString() === v.fileId.toString());
+      if (file) {
+        const url = file.getUrl();
+        // eslint-disable-next-line no-param-reassign
+        v.photo = {
+          size: file.size,
+          thumbnails: file.getThumbnails(),
+          url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
+          width: file.width,
+          height: file.height,
+          mimeType: file.mimeType
+        };
+      }
+    });
 
     return {
       data: photos,

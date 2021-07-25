@@ -8,7 +8,8 @@ import {
 import { IUser } from 'src/interfaces';
 import { Emotions } from '@components/messages/emotions';
 import { FormInstance } from 'antd/lib/form';
-import { ICreateComment } from '../../interfaces/comment';
+import { ICreateComment } from 'src/interfaces/comment';
+import Router from 'next/router';
 import './comment.less';
 
 interface IProps {
@@ -35,8 +36,13 @@ export class CommentForm extends PureComponent<IProps> {
   }
 
   onFinish(values: ICreateComment) {
-    const { onSubmit: handleComment, objectId, objectType } = this.props;
+    const {
+      onSubmit: handleComment, objectId, objectType, creator
+    } = this.props;
     const data = values;
+    if (!creator || !creator._id) {
+      return Router.push('/');
+    }
     if (!data.content) {
       return message.error('Please add comment');
     }
@@ -82,7 +88,7 @@ export class CommentForm extends PureComponent<IProps> {
             <Form.Item
               name="content"
             >
-              <TextArea disabled={!creator} maxLength={250} minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
+              <TextArea disabled={!creator || !creator._id} maxLength={250} minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
             <div className="grp-emotions">
               <SmileOutlined />

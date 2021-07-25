@@ -52,12 +52,11 @@ export class UserPhotosController {
     @CurrentUser() user: UserDto,
     @Request() req: any
   ) {
-    // TODO - filter for subscriber
     // eslint-disable-next-line no-param-reassign
     query.performerId = performerId;
     const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
     const jwToken = await this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
-    const data = await this.photoSearchService.getModelPhotosWithGalleryCheck(query, user, jwToken);
+    const data = await this.photoSearchService.getModelPhotosWithGalleryCheck(query, jwToken);
     return DataResponse.ok(data);
   }
 

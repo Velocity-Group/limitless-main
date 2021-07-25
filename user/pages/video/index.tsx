@@ -14,8 +14,7 @@ import {
   videoService, reactionService, purchaseTokenService, paymentService
 } from '@services/index';
 import {
-  RelatedListVideo,
-  ThumbnailVideo
+  RelatedListVideo
 } from '@components/video';
 import { VideoPlayer } from '@components/common/video-player';
 import { ListComments, CommentForm } from '@components/comment';
@@ -380,9 +379,9 @@ class VideoViewPage extends PureComponent<IProps> {
           </div>
           <div className="vid-duration">
             <a>
-              <CalendarOutlined />
+              <EyeOutlined />
               &nbsp;
-              {formatDate(video.updatedAt, 'LL')}
+              {videoStats.views || 0}
             </a>
             <a>
               <HourglassOutlined />
@@ -390,9 +389,9 @@ class VideoViewPage extends PureComponent<IProps> {
               {videoDuration(video?.video?.duration || 0)}
             </a>
             <a>
-              <EyeOutlined />
+              <CalendarOutlined />
               &nbsp;
-              {videoStats.views || 0}
+              {formatDate(video.updatedAt, 'LL')}
             </a>
           </div>
           <div className="vid-player">
@@ -415,9 +414,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   {video.teaser && !video.teaserProcessing && <VideoPlayer {...teaserOptions} />}
                   {!video.teaser && (
                     <div className="video-thumbs">
-                      <ThumbnailVideo
-                        video={video}
-                      />
+                      <img alt="thumbnail" src={thumbUrl} />
                     </div>
                   )}
                   <div className="vid-exl-group">
@@ -524,7 +521,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   type="button"
                   className={activeTab === 'comment' ? 'react-btn active' : 'react-btn'}
                 >
-                  {isFirstLoadComment ? videoStats.comments : totalComments}
+                  {!isFirstLoadComment && !fetchingComment ? videoStats.comments : totalComments}
                   {' '}
                   <CommentOutlined />
                 </button>
