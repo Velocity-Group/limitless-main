@@ -385,7 +385,7 @@ export class VideoService {
     } : null;
     dto.video = this.getVideoForView(videoFile, dto, jwToken);
     dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
-    dto.participants = participants.map((p) => p.toSearchResponse());
+    dto.participants = participants.map((p) => p.toPublicDetailsResponse());
     await this.increaseView(dto._id);
     return dto;
   }
