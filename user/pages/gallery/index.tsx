@@ -207,7 +207,7 @@ class GalleryViewPage extends PureComponent<IProps> {
               {!canview && (
                 <div className="text-center" style={{ margin: '20px 0' }}>
                   {gallery?.isSale && !isBought && (
-                  <Button className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
+                  <Button disabled={!user || !user._id} className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
                     UNLOCK CONTENT BY
                     {' '}
                     <img alt="coin" src="/static/coin-ico.png" width="20px" />
