@@ -22,24 +22,6 @@
   padding: 15px 5px;
 }
 
-.related-items {
-  margin: 30px 0;
-
-  .ttl-1 {
-    font-size: 1.5em;
-    font-weight: 800;
-    font-family: @primary-font-bold;
-  }
-
-  .ant-col {
-    padding: 10px 12px;
-
-    @media screen and (max-width: @tablet-screen) {
-      padding: 5px
-    }
-  }
-}
-
 .discount-price {
   -webkit-text-decoration-line: line-through;
   /* Safari */
@@ -86,60 +68,6 @@
   margin: '15px 0';
   display: 'flex';
   flex-wrap: 'wrap'
-}
-
-.vid-split {
-  background-color: @offline-status-color;
-  padding: 20px 5px;
-}
-
-.vid-act {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: center;
-
-  .o-w-ner {
-    display: flex;
-    cursor: pointer;
-
-    &:hover {
-      opacity: 0.9;
-      color: @primary-color;
-    }
-
-    img {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border: 1px solid @primary-color;
-      border-radius: 50%;
-      margin-right: 5px;
-    }
-  }
-
-  .act-btns {
-    .react-btn {
-      color: @dark-grey;
-      background: @white;
-      border: none;
-      margin-left: 5px;
-      border-radius: 3px;
-      padding: 5px 13px;
-      outline: none;
-      cursor: pointer;
-
-      &.active {
-        color: @white;
-        background: @primary-color;
-      }
-    }
-  }
-}
-
-.vid-info {
-  padding: 20px 5px;
-  background-color: @offline-status-color;
 }
 
 .ant-tabs-tab {

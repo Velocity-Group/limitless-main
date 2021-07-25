@@ -23,7 +23,6 @@ import Link from 'next/link';
 import Loader from '@components/common/base/loader';
 import PageHeading from '@components/common/page-heading';
 import PhotoPreviewList from '@components/photo/photo-preview-list';
-import '../video/index.less';
 import './index.less';
 
 interface IProps {

@@ -15,7 +15,6 @@ import { PurchaseProductForm } from '@components/product/confirm-purchase';
 import { updateBalance } from '@redux/user/actions';
 import { IProduct, IUser, IUIConfig } from '../../src/interfaces';
 import './store.less';
-import '../video/video.less';
 
 interface IProps {
   user: IUser;
@@ -258,7 +257,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           </div>
         </div>
         <div className="main-container">
-          <div className="related-prod">
+          <div className="related-items">
             <h4 className="ttl-1">You may also like</h4>
             {!loading && relatedProducts.length > 0 && (
             <PerformerListProduct products={relatedProducts} />
