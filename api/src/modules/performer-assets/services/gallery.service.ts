@@ -151,13 +151,16 @@ export class GalleryService {
       dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     }
     if (gallery.coverPhotoId) {
-      const coverPhoto = await this.fileService.findById(
+      const coverPhoto = await this.photoModel.findById(
         gallery.coverPhotoId
       );
-      dto.coverPhoto = coverPhoto ? {
-        url: coverPhoto.getUrl(),
-        thumbnails: coverPhoto.getThumbnails()
-      } : null;
+      if (coverPhoto) {
+        const file = await this.fileService.findById(coverPhoto.fileId);
+        dto.coverPhoto = file ? {
+          url: file.getUrl(),
+          thumbnails: file.getThumbnails()
+        } : null;
+      }
     }
     const bookmark = user && await this.reactionService.checkExisting(dto._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.GALLERY);
     dto.isBookMarked = !!bookmark;
@@ -165,6 +168,7 @@ export class GalleryService {
     dto.isSubscribed = !!subscribed;
     const isBought = user && await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
     dto.isBought = !!isBought;
+    await this.galleryModel.updateOne({ _id: gallery._id }, { $inc: { 'stats.views': 1 } });
     return dto;
   }
 
@@ -255,9 +259,7 @@ export class GalleryService {
       );
       if (performer) {
         // eslint-disable-next-line no-param-reassign
-        g.performer = {
-          username: performer.username
-        };
+        g.performer = new PerformerDto(performer).toPublicDetailsResponse();
       }
       if (g.coverPhotoId) {
         const coverPhoto = coverPhotos.find(

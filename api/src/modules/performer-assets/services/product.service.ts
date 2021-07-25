@@ -208,6 +208,7 @@ export class ProductService {
     dto.isBookMarked = !!bookmark;
     dto.image = image ? image.getUrl() : null;
     dto.performer = new PerformerDto(performer).toPublicDetailsResponse();
+    await this.productModel.updateOne({ _id: product._id }, { $inc: { 'stats.views': 1 } });
     return dto;
   }
 

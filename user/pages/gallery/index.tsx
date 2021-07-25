@@ -116,7 +116,7 @@ class GalleryViewPage extends PureComponent<IProps> {
   async purchaseGallery() {
     const { gallery, user, updateBalance: handleUpdateBalance } = this.props;
     if (user?.balance < gallery.price) {
-      message.error('Your balance token is not enough');
+      message.error('Your token balance is not enough');
       Router.push('/token-package');
       return;
     }
@@ -174,7 +174,7 @@ class GalleryViewPage extends PureComponent<IProps> {
     const {
       fetching, photos, isBought, isSubscribed, submiting, openPurchaseModal, openSubscriptionModal
     } = this.state;
-    const canview = (gallery.isSale && isBought) || (!gallery.isSale && isSubscribed);
+    const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && isSubscribed);
     return (
       <>
         <Head>
@@ -199,23 +199,23 @@ class GalleryViewPage extends PureComponent<IProps> {
         <Layout>
           <div className="main-container">
             <PageHeading icon={<PictureOutlined />} title={gallery?.title} />
-            <p style={{ whiteSpace: 'pre-line' }}>{gallery.description || 'No description'}</p>
+            <p style={{ whiteSpace: 'pre-line' }}>{gallery?.description || 'No description'}</p>
             <div className="photo-carousel">
               {!fetching && photos && photos.length > 0 && <PhotoPreviewList isBlur={!user || !user._id || !canview} photos={photos} />}
               {!fetching && !photos.length && <p className="text-center">No photo was found.</p>}
               {fetching && <div className="text-center"><Spin /></div>}
               {!canview && (
                 <div className="text-center" style={{ margin: '20px 0' }}>
-                  {gallery.isSale && !isBought && (
+                  {gallery?.isSale && !isBought && (
                   <Button className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
                     UNLOCK CONTENT BY
                     {' '}
                     <img alt="coin" src="/static/coin-ico.png" width="20px" />
                     {' '}
-                    {(gallery.price || 0).toFixed(2)}
+                    {(gallery?.price || 0).toFixed(2)}
                   </Button>
                   )}
-                  {!gallery.isSale && !isSubscribed && (
+                  {!gallery?.isSale && !isSubscribed && (
                   <div
                     style={{ padding: '25px 5px' }}
                     className="subscription"
@@ -226,7 +226,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                       <Button
                         className="primary"
                         style={{ marginRight: '15px' }}
-                        disabled={submiting && this.subscriptionType === 'free'}
+                        disabled={!user || !user._id || (submiting && this.subscriptionType === 'free')}
                         onClick={() => {
                           this.subscriptionType = 'free';
                           this.setState({ openSubscriptionModal: true });
@@ -239,7 +239,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                       <Button
                         className="primary"
                         style={{ marginRight: '15px' }}
-                        disabled={submiting && this.subscriptionType === 'monthly'}
+                        disabled={!user || !user._id || (submiting && this.subscriptionType === 'monthly')}
                         onClick={() => {
                           this.subscriptionType = 'monthly';
                           this.setState({ openSubscriptionModal: true });
@@ -252,7 +252,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                       {!gallery?.performer?.isFreeSubscription && gallery?.performer.yearlyPrice && (
                       <Button
                         className="btn btn-yellow"
-                        disabled={submiting && this.subscriptionType === 'yearly'}
+                        disabled={!user || !user._id || (submiting && this.subscriptionType === 'yearly')}
                         onClick={() => {
                           this.subscriptionType = 'yearly';
                           this.setState({ openSubscriptionModal: true });
@@ -346,7 +346,7 @@ class GalleryViewPage extends PureComponent<IProps> {
           </Modal>
           <Modal
             key="purchase_post"
-            title={`Unlock gallery ${gallery.title}`}
+            title={`Unlock gallery ${gallery?.title}`}
             visible={openPurchaseModal}
             footer={null}
             onCancel={() => this.setState({ openPurchaseModal: false })}

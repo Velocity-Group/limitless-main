@@ -526,8 +526,7 @@ export class VideoService {
       { _id: id },
       {
         $inc: { 'stats.views': 1 }
-      },
-      { new: true }
+      }
     );
   }
 
@@ -536,8 +535,7 @@ export class VideoService {
       { _id: id },
       {
         $inc: { 'stats.comments': num }
-      },
-      { new: true }
+      }
     );
   }
 
@@ -546,8 +544,7 @@ export class VideoService {
       { _id: id },
       {
         $inc: { 'stats.likes': num }
-      },
-      { new: true }
+      }
     );
   }
 
