@@ -110,7 +110,6 @@ class VideoViewPage extends PureComponent<IProps> {
     handleGetRelated({
       performerId: video.performerId,
       excludedId: video._id,
-      status: 'active',
       limit: 24
     });
   }
@@ -124,7 +123,6 @@ class VideoViewPage extends PureComponent<IProps> {
       handleGetRelated({
         performerId: video.performerId,
         excludedId: video._id,
-        status: 'active',
         limit: 24
       });
     }

@@ -90,6 +90,7 @@ class GalleryViewPage extends PureComponent<IProps> {
   componentDidUpdate(prevProps) {
     const { gallery, getRelatedGalleries: getRelatedHandler } = this.props;
     if (prevProps?.gallery?._id !== gallery?._id) {
+      this.getPhotos();
       getRelatedHandler({
         performerId: gallery.performerId,
         excludedId: gallery._id,
