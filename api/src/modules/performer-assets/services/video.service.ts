@@ -84,10 +84,10 @@ export class VideoService {
     });
 
     this.agenda.define(SCHEDULE_VIDEO_AGENDA, {}, this.scheduleVideo.bind(this));
-    this.agenda.every('3600 seconds', SCHEDULE_VIDEO_AGENDA, {});
+    this.agenda.schedule('1 hours from now', SCHEDULE_VIDEO_AGENDA, {});
 
     this.agenda.define(CHECK_REF_REMOVE_VIDEO_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
-    this.agenda.every('24 hours', CHECK_REF_REMOVE_VIDEO_AGENDA, {});
+    this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_VIDEO_AGENDA, {});
   }
 
   private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
@@ -107,7 +107,9 @@ export class VideoService {
     } catch (e) {
       console.log('Check ref & remove files error', e);
     } finally {
-      done();
+      job.remove();
+      this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_VIDEO_AGENDA, {});
+      typeof done === 'function' && done();
     }
   }
 
@@ -145,7 +147,9 @@ export class VideoService {
     } catch (e) {
       console.log('Schedule video error', e);
     } finally {
-      done();
+      job.remove();
+      this.agenda.schedule('1 hours from now', SCHEDULE_VIDEO_AGENDA, {});
+      typeof done === 'function' && done();
     }
   }
 

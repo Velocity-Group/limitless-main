@@ -74,10 +74,10 @@ export class FeedService {
       }
     });
     this.agenda.define(CHECK_REF_REMOVE_FEED_FILE_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
-    this.agenda.schedule('1 hour', CHECK_REF_REMOVE_FEED_FILE_AGENDA, {});
+    this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_FEED_FILE_AGENDA, {});
     // schedule feed
     this.agenda.define(SCHEDULE_FEED_AGENDA, {}, this.scheduleFeed.bind(this));
-    this.agenda.schedule('1 hour', SCHEDULE_FEED_AGENDA, {});
+    this.agenda.schedule('1 hours from now', SCHEDULE_FEED_AGENDA, {});
   }
 
   private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
@@ -98,7 +98,9 @@ export class FeedService {
       // eslint-disable-next-line no-console
       console.log('Check ref & remove files error', e);
     } finally {
-      done();
+      job.remove();
+      this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_FEED_FILE_AGENDA, {});
+      typeof done === 'function' && done();
     }
   }
 
@@ -137,7 +139,9 @@ export class FeedService {
       // eslint-disable-next-line no-console
       console.log('Schedule feed error', e);
     } finally {
-      done();
+      job.remove();
+      this.agenda.schedule('1 hours from now', SCHEDULE_FEED_AGENDA, {});
+      typeof done === 'function' && done();
     }
   }
 

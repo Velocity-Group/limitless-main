@@ -68,7 +68,7 @@ export class PhotoService {
       }
     });
     this.agenda.define(CHECK_REF_REMOVE_PHOTO_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
-    this.agenda.every('24 hours', CHECK_REF_REMOVE_PHOTO_AGENDA, {});
+    this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_PHOTO_AGENDA, {});
   }
 
   private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
@@ -90,6 +90,8 @@ export class PhotoService {
     } catch (e) {
       console.log('Check ref & remove files error', e);
     } finally {
+      job.remove();
+      this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_PHOTO_AGENDA, {});
       done();
     }
   }
