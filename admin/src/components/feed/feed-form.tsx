@@ -204,7 +204,7 @@ export default class FormFeed extends PureComponent<IProps> {
       const newFileIds = [...fileIds];
       for (const newFile of fileList) {
         try {
-          if (['uploading', 'done'].includes(newFile.status) || newFile._id) return;
+          if (['uploading', 'done'].includes(newFile.status) || newFile._id) continue;
           newFile.status = 'uploading';
           const resp = (newFile.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
             newFile,
@@ -300,7 +300,7 @@ export default class FormFeed extends PureComponent<IProps> {
       await this.setState({ uploading: true });
       for (const poll of pollList) {
         try {
-          if (!poll.length) continue;
+          if (!poll.length || poll._id) continue;
           const resp = await feedService.addPoll({
             description: poll,
             expiredAt: expiredPollAt

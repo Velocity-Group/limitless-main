@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-console */
 /* eslint-disable no-param-reassign */
@@ -96,7 +97,7 @@ export default class FeedForm extends PureComponent<IProps> {
       const newFileIds = [...fileIds];
       for (const fileItem of listFile) {
         try {
-          if (['uploading', 'done'].includes(fileItem.status) || fileItem._id) return;
+          if (['uploading', 'done'].includes(fileItem.status) || fileItem._id) continue;
           fileItem.status = 'uploading';
           const resp = (fileItem.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
             fileItem,
@@ -190,7 +191,7 @@ export default class FeedForm extends PureComponent<IProps> {
       const newFileIds = [];
       for (const newFile of fileList) {
         try {
-          if (['uploading', 'done'].includes(newFile.status) || newFile._id) return;
+          if (['uploading', 'done'].includes(newFile.status) || newFile._id) continue;
           newFile.status = 'uploading';
           const resp = (newFile.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
             newFile,
@@ -296,7 +297,7 @@ export default class FeedForm extends PureComponent<IProps> {
       await this.setState({ uploading: true });
       for (const poll of pollList) {
         try {
-          if (!poll.length) return;
+          if (!poll.length || poll._id) continue;
           const resp = await feedService.addPoll({
             description: poll,
             expiredAt: expiredPollAt
