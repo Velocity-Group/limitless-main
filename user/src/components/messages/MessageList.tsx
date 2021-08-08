@@ -11,6 +11,7 @@ import Message from './Message';
 import './MessageList.less';
 
 interface IProps {
+  sendMessage: any;
   loadMoreMessages: Function;
   message: any;
   conversation: any;
@@ -28,10 +29,18 @@ class MessageList extends PureComponent<IProps> {
     if (!this.messagesRef) this.messagesRef = createRef();
   }
 
-  async componentDidUpdate(prevState) {
-    const { conversation } = this.props;
-    if (prevState && prevState.conversation && prevState.conversation._id !== conversation._id) {
-      this.setState({ offset: 0, activeConversationId: conversation._id });
+  async componentDidUpdate(prevProps) {
+    const { conversation, message, sendMessage } = this.props;
+    if (prevProps.conversation && prevProps.conversation._id !== conversation._id) {
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({ offset: 0 });
+    }
+    if ((prevProps.message.total === 0 && message.total !== 0) || (prevProps.message.total === message.total)) {
+      if (prevProps.sendMessage?.data?._id !== sendMessage?.data?._id) {
+        this.scrollToBottom(true);
+        return;
+      }
+      this.scrollToBottom(false);
     }
   }
 
@@ -112,19 +121,16 @@ class MessageList extends PureComponent<IProps> {
      // Proceed to the next message.
      i += 1;
    }
-   this.scrollToBottom();
    return tempMessages;
  };
 
- scrollToBottom() {
-   const { message } = this.props;
-   const { fetching } = message;
+ scrollToBottom(toBot = true) {
+   const { message: { fetching } } = this.props;
    const { offset } = this.state;
-   if (this.messagesRef && this.messagesRef.current) {
+   if (!fetching && this.messagesRef && this.messagesRef.current) {
      const ele = this.messagesRef.current;
-     if (fetching) return;
      window.setTimeout(() => {
-       ele.scrollTop = !offset ? ele.scrollHeight : ele.scrollHeight / (offset + 1);
+       ele.scrollTop = toBot ? ele.scrollHeight : (ele.scrollHeight / (offset + 1) - 150);
      }, 300);
    }
  }
@@ -163,7 +169,7 @@ class MessageList extends PureComponent<IProps> {
 }
 
 const mapStates = (state: any) => {
-  const { conversationMap } = state.message;
+  const { conversationMap, sendMessage } = state.message;
   const { activeConversation } = state.conversation;
   const messages = conversationMap[activeConversation._id]
     ? conversationMap[activeConversation._id].items || []
@@ -174,6 +180,7 @@ const mapStates = (state: any) => {
   const fetching = conversationMap[activeConversation._id]
     ? conversationMap[activeConversation._id].fetching || false : false;
   return {
+    sendMessage,
     message: {
       items: messages,
       total: totalMessages,

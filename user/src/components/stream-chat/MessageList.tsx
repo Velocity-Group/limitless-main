@@ -15,6 +15,7 @@ import StreamChatCompose from './Compose';
 import Message from './Message';
 
 interface IProps {
+  sendMessage: any;
   loadMoreStreamMessages: Function;
   receiveStreamMessageSuccess: Function;
   message: any;
@@ -33,6 +34,17 @@ class MessageList extends PureComponent<IProps> {
 
   async componentDidMount() {
     if (!this.messagesRef) this.messagesRef = createRef();
+  }
+
+  async componentDidUpdate(prevProps) {
+    const { message, sendMessage } = this.props;
+    if ((prevProps.message.total === 0 && message.total !== 0) || (prevProps.message.total === message.total)) {
+      if (prevProps.sendMessage?.data?._id !== sendMessage?.data?._id) {
+        this.scrollToBottom(true);
+        return;
+      }
+      this.scrollToBottom(false);
+    }
   }
 
   async handleScroll(conversation, event) {
@@ -120,7 +132,6 @@ class MessageList extends PureComponent<IProps> {
       // Proceed to the next message.
       i += 1;
     }
-    this.scrollToBottom();
     return tempMessages;
   };
 
@@ -133,13 +144,13 @@ class MessageList extends PureComponent<IProps> {
     type === 'deleted' && remove(message);
   };
 
-  scrollToBottom() {
+  scrollToBottom(toBot = true) {
     const { message: { fetching } } = this.props;
     const { offset } = this.state;
     if (!fetching && this.messagesRef && this.messagesRef.current) {
       const ele = this.messagesRef.current;
       window.setTimeout(() => {
-        ele.scrollTop = !offset ? ele.scrollHeight : ele.scrollHeight / (offset + 1);
+        ele.scrollTop = toBot ? ele.scrollHeight : (ele.scrollHeight / (offset + 1) - 150);
       }, 300);
     }
   }
@@ -174,7 +185,7 @@ class MessageList extends PureComponent<IProps> {
 }
 
 const mapStates = (state: any) => {
-  const { conversationMap, activeConversation } = state.streamMessage;
+  const { conversationMap, activeConversation, sendMessage } = state.streamMessage;
   const messages = activeConversation.data && conversationMap[activeConversation.data._id]
     ? conversationMap[activeConversation.data._id].items || []
     : [];
@@ -185,6 +196,7 @@ const mapStates = (state: any) => {
     ? conversationMap[activeConversation.data._id].fetching || false
     : false;
   return {
+    sendMessage,
     message: {
       items: messages,
       total: totalMessages,
