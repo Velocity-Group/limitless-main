@@ -85,6 +85,7 @@ export class AuthService {
     // avoid admin update
     // TODO - should listen via user event?
     let auth = await this.authModel.findOne({
+      type: data.type,
       source: data.source,
       sourceId: data.sourceId
     });
