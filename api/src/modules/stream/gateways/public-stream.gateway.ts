@@ -164,7 +164,6 @@ export class PublicStreamWsGateway {
       }
       const roomName = this.streamService.getRoomName(conversationId, type);
       await client.leave(roomName);
-
       const stream = await this.streamService.findByPerformerId(performerId, {
         type: PUBLIC_CHAT
       });

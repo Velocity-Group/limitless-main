@@ -178,7 +178,6 @@ export default class FeedForm extends PureComponent<IProps> {
   }
 
   async beforeUpload(file, fileList) {
-    await this.setState({ fileList: [] });
     if (fileList.indexOf(file) === (fileList.length - 1)) {
       const files = await Promise.all(fileList.map((f) => {
         if (f._id || f.type.includes('video')) return f;

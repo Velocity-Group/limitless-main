@@ -25,7 +25,7 @@ class Event extends PureComponent<IEventProps> {
   }
 
   componentWillUnmount() {
-    const { event, handler } = this.props;
+    const { event } = this.props;
     const socket = this.context;
 
     if (!socket) {
@@ -33,7 +33,7 @@ class Event extends PureComponent<IEventProps> {
       return;
     }
 
-    socket.off(event, handler);
+    socket.off(event);
   }
 
   render() {

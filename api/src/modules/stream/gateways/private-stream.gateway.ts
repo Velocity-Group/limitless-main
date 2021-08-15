@@ -158,7 +158,10 @@ export class PrivateStreamWsGateway {
         conversationId,
         conversation.type
       );
-
+      await this.socketUserService.removeConnectionFromRoom(
+        roomName,
+        user._id
+      );
       await this.socketUserService.emitToRoom(roomName, STREAM_LEAVED, {
         conversationId,
         streamId,
@@ -196,8 +199,6 @@ export class PrivateStreamWsGateway {
           }
         }
       }
-
-      await this.socketUserService.removeConnectionFromRoom(roomName, user._id);
       const connections = await this.socketUserService.getRoomUserConnections(
         roomName
       );
