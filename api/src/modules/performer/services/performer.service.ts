@@ -32,7 +32,6 @@ import { UserService } from 'src/modules/user/services';
 import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
-import { StripeService } from 'src/modules/payment/services';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PerformerDto } from '../dtos';
 import {
@@ -82,8 +81,6 @@ export class PerformerService {
     private readonly fileService: FileService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
-    @Inject(forwardRef(() => StripeService))
-    private readonly stripeService: StripeService,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>,
     private readonly agenda: AgendaService,
@@ -891,11 +888,6 @@ export class PerformerService {
 
   public async updatePerformerBalance(performerId: string | ObjectId, tokens: number) {
     await this.performerModel.updateOne({ _id: performerId }, { $inc: { balance: tokens } });
-    await this.changeTokenLogService.changeTokenLog({
-      source: CHANGE_TOKEN_LOG_SOURCES.PERFORMER,
-      sourceId: performerId,
-      token: tokens
-    });
   }
 
   public async checkAuthDocument(req: any, user: UserDto) {

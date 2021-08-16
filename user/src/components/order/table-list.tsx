@@ -96,7 +96,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: '#',
+      title: 'Actions',
       dataIndex: '_id',
       render(id: string) {
         return (

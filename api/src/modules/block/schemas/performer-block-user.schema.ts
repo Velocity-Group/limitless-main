@@ -3,7 +3,8 @@ import { Schema } from 'mongoose';
 export const PerformerBlockUserSchema = new Schema({
   source: {
     type: String,
-    index: true
+    index: true,
+    default: 'performer'
   },
   sourceId: {
     type: Schema.Types.ObjectId,
@@ -11,7 +12,8 @@ export const PerformerBlockUserSchema = new Schema({
   },
   target: {
     type: String,
-    index: true
+    index: true,
+    default: 'user'
   },
   targetId: {
     type: Schema.Types.ObjectId,

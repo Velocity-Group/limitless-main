@@ -8,17 +8,9 @@ import { BreadcrumbComponent } from '@components/common';
 import { FormUploadBanner } from '@components/banner/form-upload-banner';
 import Router from 'next/router';
 
-interface IResponse {
-  data: { _id: string };
-}
-
 interface IProps {}
 
 class UploadBanner extends PureComponent<IProps> {
-  static async getInitialProps({ ctx }) {
-    return ctx.query;
-  }
-
   state = {
     uploading: false,
     uploadPercentage: 0
@@ -50,36 +42,28 @@ class UploadBanner extends PureComponent<IProps> {
 
   async submit(data: any) {
     if (!this._banner) {
-      return message.error('Please select banner!');
+      message.error('Please select banner!');
+      return;
     }
 
     await this.setState({
       uploading: true
     });
     try {
-      (await bannerService.uploadBanner(this._banner, data, this.onUploading.bind(this))) as IResponse;
+      await bannerService.uploadBanner(this._banner, data, this.onUploading.bind(this));
       message.success('Banner has been uploaded');
-      // TODO - process for response data?
-      await this.setState(
+      Router.push(
         {
-          uploading: false
+          pathname: '/banner'
         },
-        () => window.setTimeout(() => {
-          Router.push(
-            {
-              pathname: '/banner'
-            },
-            '/banner'
-          );
-        }, 1000)
+        '/banner'
       );
     } catch (error) {
       message.error('An error occurred, please try again!');
-      await this.setState({
+      this.setState({
         uploading: false
       });
     }
-    return undefined;
   }
 
   render() {
@@ -90,7 +74,7 @@ class UploadBanner extends PureComponent<IProps> {
         <Head>
           <title>Upload banner</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Banners', href: '/banner' }, { title: 'Upload new banner' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Banners', href: '/banner' }, { title: 'New banner' }]} />
         <Page>
           <FormUploadBanner
             submit={this.submit.bind(this)}

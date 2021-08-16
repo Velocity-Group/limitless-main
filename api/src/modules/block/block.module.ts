@@ -7,14 +7,15 @@ import {
   PerformerBlockController, SiteBlockCountryController
 } from './controllers';
 import { UserModule } from '../user/user.module';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
   imports: [
     MongoDBModule,
     AgendaModule.register(),
-    // inject user module because we request guard from auth, need to check and fix dependencies if not needed later
     forwardRef(() => UserModule),
-    forwardRef(() => AuthModule)
+    forwardRef(() => AuthModule),
+    forwardRef(() => MailerModule)
   ],
   providers: [
     ...blockProviders,

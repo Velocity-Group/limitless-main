@@ -11,6 +11,7 @@ import { ObjectId } from 'mongodb';
 import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';
 import { uniq } from 'lodash';
+import { MailerService } from 'src/modules/mailer';
 import { PerformerBlockUserDto } from '../dtos';
 import {
   PerformerBlockCountryModel,
@@ -34,7 +35,8 @@ export class PerformerBlockService {
     @Inject(PERFORMER_BLOCK_COUNTRY_PROVIDER)
     private readonly performerBlockCountryModel: Model<PerformerBlockCountryModel>,
     @Inject(PERFORMER_BLOCK_USER_PROVIDER)
-    private readonly blockedByPerformerModel: Model<PerformerBlockUserModel>
+    private readonly blockedByPerformerModel: Model<PerformerBlockUserModel>,
+    private readonly mailService: MailerService
   ) { }
 
   public findByQuery(query) {
@@ -111,6 +113,17 @@ export class PerformerBlockService {
       createdAt: new Date(),
       updatedAt: new Date()
     });
+    const target = await this.userService.findById(payload.targetId);
+    // mailer
+    target?.email && await this.mailService.send({
+      subject: 'Model block',
+      to: target.email,
+      data: {
+        userName: target.name || target.username || `${target.firstName} ${target.lastName}` || 'there',
+        message: `${user.name || user.username || 'Model'} has blocked you`
+      },
+      template: 'block-user-notification'
+    });
     return newBlock;
   }
 
@@ -123,6 +136,17 @@ export class PerformerBlockService {
       throw new EntityNotFoundException();
     }
     await blocked.remove();
+    const target = await this.userService.findById(targetId);
+    // mailer
+    target?.email && await this.mailService.send({
+      subject: 'Model unblock',
+      to: target.email,
+      data: {
+        userName: target.name || target.username || `${target.firstName} ${target.lastName}` || 'there',
+        message: `${user.name || user.username || 'Model'} has unblocked you`
+      },
+      template: 'block-user-notification'
+    });
     return { unlocked: true };
   }
 

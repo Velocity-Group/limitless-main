@@ -77,6 +77,11 @@ const templateMap = {
     name: 'Free subscription expired',
     subject: 'Free subscription expired',
     desc: 'Email to user to nofity his free subscription expired'
+  },
+  'block-user-notification': {
+    name: 'Block user notification',
+    subject: 'Model block',
+    desc: 'Email to user when model block/unblock'
   }
 };
 

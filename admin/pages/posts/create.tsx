@@ -32,8 +32,7 @@ class PostCreate extends PureComponent<any> {
     const { type } = this.props;
 
     try {
-      this.setState({ submiting: true });
-
+      await this.setState({ submiting: true });
       const submitData = {
         ...data,
         content: this._content,
@@ -49,9 +48,7 @@ class PostCreate extends PureComponent<any> {
         '/posts'
       );
     } catch (e) {
-      // TODO - check and show error here
       message.error('Something went wrong, please try again!');
-    } finally {
       this.setState({ submiting: false });
     }
   }
@@ -65,7 +62,7 @@ class PostCreate extends PureComponent<any> {
     return (
       <>
         <Head>
-          <title>Create new post</title>
+          <title>New static page</title>
         </Head>
         <div style={{ marginBottom: '16px' }}>
           <Breadcrumb>
@@ -73,9 +70,9 @@ class PostCreate extends PureComponent<any> {
               <HomeOutlined />
             </Breadcrumb.Item>
             <Breadcrumb.Item href="/posts">
-              <span>Posts</span>
+              <span>Static pages</span>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Create new post</Breadcrumb.Item>
+            <Breadcrumb.Item>New page</Breadcrumb.Item>
           </Breadcrumb>
         </div>
 
@@ -88,19 +85,18 @@ class PostCreate extends PureComponent<any> {
               status: 'published',
               ordering: 0
             }}
-            labelCol={{ span: 4 }}
-            wrapperCol={{ span: 20 }}
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
           >
             <Form.Item name="title" rules={[{ required: true, message: 'Please input title!' }]} label="Title">
               <Input placeholder="Enter your title" />
             </Form.Item>
-
-            <Form.Item name="slug" label="Slug">
+            {/* <Form.Item name="slug" label="Slug">
               <Input placeholder="Custom friendly slug" />
             </Form.Item>
             <Form.Item name="ordering" label="Ordering">
               <InputNumber />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item name="shortDescription" label="Short description">
               <Input.TextArea rows={3} />
             </Form.Item>
@@ -114,7 +110,7 @@ class PostCreate extends PureComponent<any> {
               </Select>
             </Form.Item>
             <Form.Item wrapperCol={{ offset: 4 }}>
-              <Button type="primary" htmlType="submit" style={{ float: 'right' }} loading={submiting}>
+              <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
                 Submit
               </Button>
             </Form.Item>

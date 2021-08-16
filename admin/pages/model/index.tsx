@@ -10,7 +10,7 @@ import { performerService } from '@services/performer.service';
 import { SearchFilter } from '@components/performer/search-filter';
 import {
   EditOutlined, FireOutlined, DeleteOutlined, SkinOutlined,
-  VideoCameraOutlined, PictureOutlined, HistoryOutlined
+  VideoCameraOutlined, PictureOutlined
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import { BreadcrumbComponent, DropdownAction } from '@components/common';
@@ -118,7 +118,7 @@ export default class Performers extends PureComponent<any> {
       list, searching, pagination, isMobile, openChangeTokenLogModal
     } = this.state;
     const onDelete = this.handleDelete.bind(this);
-    const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
+    // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = !isMobile ? [
       {
         title: 'Display_name',
@@ -302,19 +302,18 @@ export default class Performers extends PureComponent<any> {
                       </a>
                     </Link>
                   )
-                },
-
-                {
-                  key: 'change-token-logs',
-                  name: 'Token balance change logs',
-                  children: (
-                    <a aria-hidden onClick={() => openChangeTokenLog(record)}>
-                      <HistoryOutlined />
-                      {' '}
-                      Token Change Logs
-                    </a>
-                  )
                 }
+                // {
+                //   key: 'change-token-logs',
+                //   name: 'Token balance change logs',
+                //   children: (
+                //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
+                //       <HistoryOutlined />
+                //       {' '}
+                //       Token Change Logs
+                //     </a>
+                //   )
+                // }
               ]}
             />
           );

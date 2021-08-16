@@ -9,8 +9,7 @@ import Page from '@components/common/layout/page';
 import { SearchFilter } from '@components/performer/search-filter';
 import {
   EditOutlined,
-  DeleteOutlined,
-  HistoryOutlined
+  DeleteOutlined
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import { BreadcrumbComponent, DropdownAction } from '@components/common';
@@ -102,7 +101,7 @@ export default class Performers extends PureComponent<any> {
       list, searching, pagination, openChangeTokenLogModal
     } = this.state;
     const onDelete = this.handleDelete.bind(this);
-    const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
+    // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = [
       {
         title: 'Real_Name',
@@ -193,18 +192,18 @@ export default class Performers extends PureComponent<any> {
                       Delete
                     </a>
                   )
-                },
-                {
-                  key: 'change-token-logs',
-                  name: 'Token balance change logs',
-                  children: (
-                    <a aria-hidden onClick={() => openChangeTokenLog(record)}>
-                      <HistoryOutlined />
-                      {' '}
-                      Token Change Logs
-                    </a>
-                  )
                 }
+                // {
+                //   key: 'change-token-logs',
+                //   name: 'Token balance change logs',
+                //   children: (
+                //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
+                //       <HistoryOutlined />
+                //       {' '}
+                //       Token Change Logs
+                //     </a>
+                //   )
+                // }
               ]}
             />
           );

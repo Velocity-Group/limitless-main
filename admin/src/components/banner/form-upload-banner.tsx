@@ -90,18 +90,18 @@ export class FormUploadBanner extends PureComponent<IProps> {
             <Select.Option key="top" value="top">
               Top
             </Select.Option>
-            <Select.Option key="bottom" value="bottom">
+            {/* <Select.Option key="bottom" value="bottom">
               Bottom
             </Select.Option>
-            {/* <Select.Option key="left" value="left">
+            <Select.Option key="left" value="left">
               Left
             </Select.Option>
             <Select.Option key="right" value="right">
               Right
-            </Select.Option> */}
+            </Select.Option>
             <Select.Option key="middle" value="middle">
               Middle
-            </Select.Option>
+            </Select.Option> */}
           </Select>
         </Form.Item>
         <Form.Item name="description" label="Description">

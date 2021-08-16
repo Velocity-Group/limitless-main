@@ -65,7 +65,7 @@ class Posts extends PureComponent<IProps> {
         sortBy,
         sort
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data,
         pagination: {
@@ -75,14 +75,14 @@ class Posts extends PureComponent<IProps> {
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
   async deletePost(id: string) {
     const { pagination } = this.state;
     if (!window.confirm('Are you sure you want to delete this post?')) {
-      return false;
+      return;
     }
     try {
       await postService.delete(id);
@@ -91,7 +91,6 @@ class Posts extends PureComponent<IProps> {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
     }
-    return undefined;
   }
 
   render() {
@@ -100,7 +99,6 @@ class Posts extends PureComponent<IProps> {
       {
         title: 'Title',
         dataIndex: 'title',
-        sorter: true,
         render(data, record) {
           return (
             <>
@@ -114,7 +112,6 @@ class Posts extends PureComponent<IProps> {
               >
                 <a style={{ fontWeight: 'bold' }}>{record.title}</a>
               </Link>
-              {/* <small>{record.shortDescription}</small> */}
             </>
           );
         }
@@ -122,26 +119,24 @@ class Posts extends PureComponent<IProps> {
       {
         title: 'Link',
         dataIndex: 'link',
-        sorter: true,
         render(data, record) {
           return (
             <>
               <a href={`${env.siteUrl}/page/${record.slug}`} target="_blank">
                 {`${env.siteUrl}/page/${record.slug}`}
               </a>
-              {/* <small>{record.shortDescription}</small> */}
             </>
           );
         }
       },
-      {
-        title: 'Ordering',
-        dataIndex: 'ordering',
-        sorter: true,
-        render(ordering: number) {
-          return <span>{ordering}</span>;
-        }
-      },
+      // {
+      //   title: 'Ordering',
+      //   dataIndex: 'ordering',
+      //   sorter: true,
+      //   render(ordering: number) {
+      //     return <span>{ordering}</span>;
+      //   }
+      // },
       {
         title: 'Status',
         dataIndex: 'status',
@@ -158,14 +153,6 @@ class Posts extends PureComponent<IProps> {
               {status === 'published' ? 'Active' : 'Inactive'}
             </Tag>
           );
-        }
-      },
-      {
-        title: 'Created at',
-        dataIndex: 'createdAt',
-        sorter: true,
-        render(date: Date) {
-          return <span>{formatDate(date)}</span>;
         }
       },
       {
