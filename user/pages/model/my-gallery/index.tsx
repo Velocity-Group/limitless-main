@@ -6,7 +6,6 @@ import { PlusOutlined, PictureOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
 import { TableListGallery } from '@components/gallery/table-list';
-import Page from '@components/common/layout/page';
 import { SearchFilter } from '@components/common/search-filter';
 import Link from 'next/link';
 import { galleryService } from '@services/gallery.service';
@@ -143,37 +142,35 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="My Galleries" icon={<PictureOutlined />} />
-            <div>
-              <Row>
-                <Col lg={20} xs={24}>
-                  <SearchFilter statuses={statuses} searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
-                </Col>
-                <Col lg={4} xs={24} style={{ display: 'flex', alignItems: 'center' }}>
-                  <Button className="secondary">
-                    <Link href="/model/my-gallery/create">
-                      <a>
-                        <PlusOutlined />
-                        {' '}
-                        Create New
-                      </a>
-                    </Link>
-                  </Button>
-                </Col>
-              </Row>
-            </div>
-            <div className="table-responsive">
-              <TableListGallery
-                dataSource={galleries}
-                rowKey="_id"
-                loading={loading}
-                pagination={pagination}
-                onChange={this.handleSorterChange.bind(this)}
-                deleteGallery={this.handleDeleteGallery.bind(this)}
-              />
-            </div>
-          </Page>
+          <PageHeading title="My Galleries" icon={<PictureOutlined />} />
+          <div>
+            <Row>
+              <Col lg={20} xs={24}>
+                <SearchFilter statuses={statuses} searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
+              </Col>
+              <Col lg={4} xs={24} style={{ display: 'flex', alignItems: 'center' }}>
+                <Button className="secondary">
+                  <Link href="/model/my-gallery/create">
+                    <a>
+                      <PlusOutlined />
+                      {' '}
+                      Create New
+                    </a>
+                  </Link>
+                </Button>
+              </Col>
+            </Row>
+          </div>
+          <div className="table-responsive">
+            <TableListGallery
+              dataSource={galleries}
+              rowKey="_id"
+              loading={loading}
+              pagination={pagination}
+              onChange={this.handleSorterChange.bind(this)}
+              deleteGallery={this.handleDeleteGallery.bind(this)}
+            />
+          </div>
         </div>
       </Layout>
     );

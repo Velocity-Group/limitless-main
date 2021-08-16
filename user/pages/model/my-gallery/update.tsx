@@ -10,7 +10,6 @@ import PageHeading from '@components/common/page-heading';
 import {
   IGallery, IGalleryCreate, IUIConfig
 } from 'src/interfaces';
-import Page from '@components/common/layout/page';
 import { galleryService } from 'src/services';
 import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
@@ -203,21 +202,19 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="Edit Gallery" icon={<PictureOutlined />} />
-            {!loading && gallery && (
-              <FormGallery
-                gallery={gallery}
-                onFinish={this.onFinish.bind(this)}
-                submiting={submiting || uploading}
-                filesList={filesList}
-                handleBeforeUpload={this.handleBeforeUpload.bind(this)}
-                removePhoto={this.removePhoto.bind(this)}
-                setCover={this.setCover.bind(this)}
-              />
-            )}
-            {loading && <div className="text-center"><Spin /></div>}
-          </Page>
+          <PageHeading title="Edit Gallery" icon={<PictureOutlined />} />
+          {!loading && gallery && (
+          <FormGallery
+            gallery={gallery}
+            onFinish={this.onFinish.bind(this)}
+            submiting={submiting || uploading}
+            filesList={filesList}
+            handleBeforeUpload={this.handleBeforeUpload.bind(this)}
+            removePhoto={this.removePhoto.bind(this)}
+            setCover={this.setCover.bind(this)}
+          />
+          )}
+          {loading && <div className="text-center"><Spin /></div>}
         </div>
       </Layout>
     );

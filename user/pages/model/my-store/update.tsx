@@ -1,7 +1,6 @@
 import { PureComponent } from 'react';
 import Head from 'next/head';
-import Page from '@components/common/layout/page';
-import { message, Spin } from 'antd';
+import { message, Spin, Layout } from 'antd';
 import { ShopOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { productService } from '@services/product.service';
@@ -110,7 +109,7 @@ class ProductUpdate extends PureComponent<IProps> {
     } = this.state;
     const { ui } = this.props;
     return (
-      <>
+      <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
@@ -119,9 +118,8 @@ class ProductUpdate extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="Edit Product" icon={<ShopOutlined />} />
-            {!fetching && product && (
+          <PageHeading title="Edit Product" icon={<ShopOutlined />} />
+          {!fetching && product && (
             <FormProduct
               product={product}
               submit={this.submit.bind(this)}
@@ -129,11 +127,10 @@ class ProductUpdate extends PureComponent<IProps> {
               beforeUpload={this.beforeUpload.bind(this)}
               uploadPercentage={uploadPercentage}
             />
-            )}
-            {fetching && <div className="text-center"><Spin /></div>}
-          </Page>
+          )}
+          {fetching && <div className="text-center"><Spin /></div>}
         </div>
-      </>
+      </Layout>
     );
   }
 }

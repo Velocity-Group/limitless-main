@@ -2,7 +2,6 @@ import { PureComponent } from 'react';
 import { Layout, message } from 'antd';
 import { PictureOutlined } from '@ant-design/icons';
 import Head from 'next/head';
-import Page from '@components/common/layout/page';
 import FormGallery from '@components/gallery/form-gallery';
 import PageHeading from '@components/common/page-heading';
 import { IGalleryCreate, IUIConfig } from 'src/interfaces';
@@ -59,13 +58,11 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="New Gallery" icon={<PictureOutlined />} />
-            <FormGallery
-              submiting={submiting}
-              onFinish={this.onFinish.bind(this)}
-            />
-          </Page>
+          <PageHeading title="New Gallery" icon={<PictureOutlined />} />
+          <FormGallery
+            submiting={submiting}
+            onFinish={this.onFinish.bind(this)}
+          />
         </div>
       </Layout>
     );

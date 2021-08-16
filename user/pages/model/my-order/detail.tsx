@@ -7,7 +7,6 @@ import { ShoppingCartOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
 import { IOrder, IUIConfig } from 'src/interfaces';
-import Page from '@components/common/layout/page';
 import { orderService } from 'src/services';
 import { connect } from 'react-redux';
 import Router from 'next/router';
@@ -94,8 +93,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            {order && (
+          {order && (
             <div className="main-container">
               <PageHeading title={`${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
               <Descriptions>
@@ -179,8 +177,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   </div>
                 )}
             </div>
-            )}
-          </Page>
+          )}
         </div>
       </Layout>
     );

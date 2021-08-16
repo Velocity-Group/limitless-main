@@ -3,7 +3,6 @@ import {
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
-import Page from '@components/common/layout/page';
 import { DollarOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import {
@@ -143,79 +142,77 @@ class EarningPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <div className="page-heading">
-              <Switch
-                checked={isToken}
-                unCheckedChildren={(
-                  <>
-                    <DollarOutlined />
-                    {' '}
-                    USD EARNING REPORT
-                  </>
+          <div className="page-heading">
+            <Switch
+              checked={isToken}
+              unCheckedChildren={(
+                <>
+                  <DollarOutlined />
+                  {' '}
+                  USD EARNING REPORT
+                </>
                 )}
-                checkedChildren={(
-                  <>
-                    <img src="/static/coin-ico.png" width="20px" alt="coin" />
-                    {' '}
-                    TOKEN EARNING REPORT
-                  </>
+              checkedChildren={(
+                <>
+                  <img src="/static/coin-ico.png" width="20px" alt="coin" />
+                  {' '}
+                  TOKEN EARNING REPORT
+                </>
                 )}
-                onChange={this.handleSwitch.bind(this)}
-              />
-            </div>
-            <SearchFilter
-              type={isToken ? [
-                { key: '', text: 'All type' },
-                { key: 'private_chat', text: 'Private Chat' },
-                { key: 'group_chat', text: 'Group Chat' },
-                { key: 'public_chat', text: 'Public Chat' },
-                { key: 'product', text: 'Product' },
-                { key: 'gallery', text: 'Gallery' },
-                { key: 'feed', text: 'Post' },
-                { key: 'video', text: 'Video' },
-                { key: 'tip', text: 'Tip' }
-                // { key: 'gift', text: 'Gift' },
-                // { key: 'message', text: 'Message' }
-              ] : [
-                { key: '', text: 'All type' },
-                { key: 'monthly_subscription', text: 'Monthly Subscription' },
-                { key: 'yearly_subscription', text: 'Yearly Subscription' }
-              ]}
-              onSubmit={this.handleFilter.bind(this)}
-              dateRange
+              onChange={this.handleSwitch.bind(this)}
             />
-            <div className="stats-earning">
-              <Statistic
-                title="Total tokens"
-                prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
-                value={stats?.totalGrossPrice || 0}
-                precision={2}
-              />
-              <Statistic
-                title="Admin earned"
-                prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
-                value={stats?.totalSiteCommission || 0}
-                precision={2}
-              />
-              <Statistic
-                title="You earned"
-                prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
-                value={stats?.totalNetPrice || 0}
-                precision={2}
-              />
-            </div>
-            <div className="table-responsive">
-              <TableListEarning
-                dataSource={earning}
-                rowKey="_id"
-                pagination={pagination}
-                loading={loading}
-                isToken={isToken}
-                onChange={this.handleTabsChange.bind(this)}
-              />
-            </div>
-          </Page>
+          </div>
+          <SearchFilter
+            type={isToken ? [
+              { key: '', text: 'All type' },
+              { key: 'private_chat', text: 'Private Chat' },
+              { key: 'group_chat', text: 'Group Chat' },
+              { key: 'public_chat', text: 'Public Chat' },
+              { key: 'product', text: 'Product' },
+              { key: 'gallery', text: 'Gallery' },
+              { key: 'feed', text: 'Post' },
+              { key: 'video', text: 'Video' },
+              { key: 'tip', text: 'Tip' }
+              // { key: 'gift', text: 'Gift' },
+              // { key: 'message', text: 'Message' }
+            ] : [
+              { key: '', text: 'All type' },
+              { key: 'monthly_subscription', text: 'Monthly Subscription' },
+              { key: 'yearly_subscription', text: 'Yearly Subscription' }
+            ]}
+            onSubmit={this.handleFilter.bind(this)}
+            dateRange
+          />
+          <div className="stats-earning">
+            <Statistic
+              title="Total tokens"
+              prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+              value={stats?.totalGrossPrice || 0}
+              precision={2}
+            />
+            <Statistic
+              title="Admin earned"
+              prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+              value={stats?.totalSiteCommission || 0}
+              precision={2}
+            />
+            <Statistic
+              title="You earned"
+              prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+              value={stats?.totalNetPrice || 0}
+              precision={2}
+            />
+          </div>
+          <div className="table-responsive">
+            <TableListEarning
+              dataSource={earning}
+              rowKey="_id"
+              pagination={pagination}
+              loading={loading}
+              isToken={isToken}
+              onChange={this.handleTabsChange.bind(this)}
+            />
+          </div>
         </div>
       </Layout>
     );

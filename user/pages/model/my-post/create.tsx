@@ -1,12 +1,9 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import Head from 'next/head';
 import { PureComponent } from 'react';
 import {
   Layout, message
 } from 'antd';
 import PageHeading from '@components/common/page-heading';
-import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import { IPerformer, IUIConfig } from '@interfaces/index';
 import FeedForm from '@components/post/form';
@@ -51,27 +48,25 @@ class CreatePost extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading icon={<FireOutlined />} title={` New ${type} Post`} />
-            <div>
-              {!chosenType ? (
-                <div className="story-switch-type">
-                  <div aria-hidden className="type-item left" onClick={() => this.setState({ type: 'photo', chosenType: true })}>
-                    <span><PictureOutlined /></span>
-                    <p>Create a Photos post</p>
-                  </div>
-                  <div aria-hidden className="type-item right" onClick={() => this.setState({ type: 'video', chosenType: true })}>
-                    <span><VideoCameraOutlined /></span>
-                    <p>Create a Video post</p>
-                  </div>
-                  <div aria-hidden className="type-item middle" onClick={() => this.setState({ type: 'text', chosenType: true })}>
-                    <span>Aa</span>
-                    <p>Create a Text post</p>
-                  </div>
+          <PageHeading icon={<FireOutlined />} title={` New ${type} Post`} />
+          <div>
+            {!chosenType ? (
+              <div className="story-switch-type">
+                <div aria-hidden className="type-item left" onClick={() => this.setState({ type: 'photo', chosenType: true })}>
+                  <span><PictureOutlined /></span>
+                  <p>Create a Photos post</p>
                 </div>
-              ) : (<FeedForm type={type} discard={() => this.setState({ chosenType: false, type: '' })} />)}
-            </div>
-          </Page>
+                <div aria-hidden className="type-item right" onClick={() => this.setState({ type: 'video', chosenType: true })}>
+                  <span><VideoCameraOutlined /></span>
+                  <p>Create a Video post</p>
+                </div>
+                <div aria-hidden className="type-item middle" onClick={() => this.setState({ type: 'text', chosenType: true })}>
+                  <span>Aa</span>
+                  <p>Create a Text post</p>
+                </div>
+              </div>
+            ) : (<FeedForm type={type} discard={() => this.setState({ chosenType: false, type: '' })} />)}
+          </div>
         </div>
       </Layout>
     );

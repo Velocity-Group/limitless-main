@@ -5,7 +5,6 @@ import {
 } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
-import Page from '@components/common/layout/page';
 import { FormInstance } from 'antd/lib/form';
 import VideoUploadList from '@components/file/video-upload-list';
 import { videoService } from '@services/video.service';
@@ -134,47 +133,45 @@ class BulkUploadVideo extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="Upload Videos" icon={<UploadOutlined />} />
-            <Form
-              {...layout}
-              onFinish={this.submit.bind(this)}
-              validateMessages={validateMessages}
-              ref={this.formRef}
-            >
-              <Form.Item>
-                <Dragger
-                  accept="video/*"
-                  beforeUpload={this.beforeUpload.bind(this)}
-                  multiple
-                  showUploadList={false}
-                  disabled={uploading}
-                  listType="picture"
-                >
-                  <p className="ant-upload-drag-icon">
-                    <UploadOutlined />
-                  </p>
-                  <p className="ant-upload-text">
-                    Click or drag & drop files to this area to upload
-                  </p>
-                </Dragger>
-              </Form.Item>
-              <VideoUploadList
-                files={fileList}
-                remove={this.remove.bind(this)}
-              />
-              <Form.Item>
-                <Button
-                  className="secondary"
-                  htmlType="submit"
-                  loading={uploading}
-                  disabled={uploading || !fileList.length}
-                >
-                  UPLOAD ALL
-                </Button>
-              </Form.Item>
-            </Form>
-          </Page>
+          <PageHeading title="Upload Videos" icon={<UploadOutlined />} />
+          <Form
+            {...layout}
+            onFinish={this.submit.bind(this)}
+            validateMessages={validateMessages}
+            ref={this.formRef}
+          >
+            <Form.Item>
+              <Dragger
+                accept="video/*"
+                beforeUpload={this.beforeUpload.bind(this)}
+                multiple
+                showUploadList={false}
+                disabled={uploading}
+                listType="picture"
+              >
+                <p className="ant-upload-drag-icon">
+                  <UploadOutlined />
+                </p>
+                <p className="ant-upload-text">
+                  Click or drag & drop files to this area to upload
+                </p>
+              </Dragger>
+            </Form.Item>
+            <VideoUploadList
+              files={fileList}
+              remove={this.remove.bind(this)}
+            />
+            <Form.Item>
+              <Button
+                className="secondary"
+                htmlType="submit"
+                loading={uploading}
+                disabled={uploading || !fileList.length}
+              >
+                UPLOAD ALL
+              </Button>
+            </Form.Item>
+          </Form>
         </div>
       </Layout>
     );

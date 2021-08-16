@@ -6,7 +6,6 @@ import {
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { feedService } from '@services/index';
-import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import { IFeed, IUIConfig } from '@interfaces/index';
 import FeedForm from '@components/post/form';
@@ -52,12 +51,10 @@ class EditPost extends PureComponent<IProps> {
               </title>
             </Head>
             <div className="main-container">
-              <Page>
-                <PageHeading icon={<ArrowLeftOutlined />} title=" Edit Post" />
-                <div>
-                  <FeedForm feed={feed} />
-                </div>
-              </Page>
+              <PageHeading icon={<ArrowLeftOutlined />} title=" Edit Post" />
+              <div>
+                <FeedForm feed={feed} />
+              </div>
             </div>
           </Layout>
         )}

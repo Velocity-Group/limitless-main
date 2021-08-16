@@ -1,7 +1,6 @@
 import { PureComponent } from 'react';
 import Head from 'next/head';
-import { message } from 'antd';
-import Page from '@components/common/layout/page';
+import { message, Layout } from 'antd';
 import { ShopOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { productService } from '@services/product.service';
@@ -101,7 +100,7 @@ class CreateProduct extends PureComponent<IProps> {
     const { uploading, uploadPercentage } = this.state;
     const { ui } = this.props;
     return (
-      <>
+      <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
@@ -110,17 +109,15 @@ class CreateProduct extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="New Product" icon={<ShopOutlined />} />
-            <FormProduct
-              submit={this.submit.bind(this)}
-              beforeUpload={this.beforeUpload.bind(this)}
-              uploading={uploading}
-              uploadPercentage={uploadPercentage}
-            />
-          </Page>
+          <PageHeading title="New Product" icon={<ShopOutlined />} />
+          <FormProduct
+            submit={this.submit.bind(this)}
+            beforeUpload={this.beforeUpload.bind(this)}
+            uploading={uploading}
+            uploadPercentage={uploadPercentage}
+          />
         </div>
-      </>
+      </Layout>
     );
   }
 }

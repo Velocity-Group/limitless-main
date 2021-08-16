@@ -1,6 +1,5 @@
 import { PureComponent } from 'react';
 import Head from 'next/head';
-import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import { videoService } from '@services/video.service';
 import { VideoCameraOutlined } from '@ant-design/icons';
@@ -128,23 +127,21 @@ class VideoUpdate extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="Edit Video" icon={<VideoCameraOutlined />} />
-            <div className="page-heading">
-              <span>Edit Video</span>
-            </div>
-            {!fetching && video && (
-              <FormUploadVideo
-                user={user}
-                video={video}
-                submit={this.submit.bind(this)}
-                uploading={uploading}
-                beforeUpload={this.beforeUpload.bind(this)}
-                uploadPercentage={uploadPercentage}
-              />
-            )}
-            {fetching && <div className="text-center"><Spin /></div>}
-          </Page>
+          <PageHeading title="Edit Video" icon={<VideoCameraOutlined />} />
+          <div className="page-heading">
+            <span>Edit Video</span>
+          </div>
+          {!fetching && video && (
+          <FormUploadVideo
+            user={user}
+            video={video}
+            submit={this.submit.bind(this)}
+            uploading={uploading}
+            beforeUpload={this.beforeUpload.bind(this)}
+            uploadPercentage={uploadPercentage}
+          />
+          )}
+          {fetching && <div className="text-center"><Spin /></div>}
         </div>
       </Layout>
     );

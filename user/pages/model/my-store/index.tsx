@@ -1,11 +1,10 @@
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import Head from 'next/head';
 import {
-  message, Button, Row, Col
+  message, Button, Row, Col, Layout
 } from 'antd';
 import { ShopOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
-import Page from '@components/common/layout/page';
 import { productService } from '@services/product.service';
 import { SearchFilter } from '@components/common/search-filter';
 import { TableListProduct } from '@components/product/table-list-product';
@@ -128,7 +127,7 @@ class Products extends PureComponent<IProps> {
     ];
 
     return (
-      <>
+      <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
@@ -136,40 +135,38 @@ class Products extends PureComponent<IProps> {
             | My Products
           </title>
         </Head>
-        <Page>
-          <div className="main-container">
-            <PageHeading title="My Products" icon={<ShopOutlined />} />
-            <div>
-              <Row>
-                <Col lg={20} xs={24}>
-                  <SearchFilter
-                    statuses={statuses}
-                    onSubmit={this.handleFilter.bind(this)}
-                    searchWithKeyword
-                  />
-                </Col>
-                <Col lg={4} xs={24} style={{ display: 'flex', alignItems: 'center' }}>
-                  <Button className="secondary">
-                    <Link href="/model/my-store/create">
-                      <a>New Product</a>
-                    </Link>
-                  </Button>
-                </Col>
-              </Row>
-            </div>
-            <div className="table-responsive">
-              <TableListProduct
-                dataSource={list}
-                rowKey="_id"
-                loading={searching}
-                pagination={pagination}
-                onChange={this.handleTableChange.bind(this)}
-                deleteProduct={this.deleteProduct.bind(this)}
-              />
-            </div>
+        <div className="main-container">
+          <PageHeading title="My Products" icon={<ShopOutlined />} />
+          <div>
+            <Row>
+              <Col lg={20} xs={24}>
+                <SearchFilter
+                  statuses={statuses}
+                  onSubmit={this.handleFilter.bind(this)}
+                  searchWithKeyword
+                />
+              </Col>
+              <Col lg={4} xs={24} style={{ display: 'flex', alignItems: 'center' }}>
+                <Button className="secondary">
+                  <Link href="/model/my-store/create">
+                    <a>New Product</a>
+                  </Link>
+                </Button>
+              </Col>
+            </Row>
           </div>
-        </Page>
-      </>
+          <div className="table-responsive">
+            <TableListProduct
+              dataSource={list}
+              rowKey="_id"
+              loading={searching}
+              pagination={pagination}
+              onChange={this.handleTableChange.bind(this)}
+              deleteProduct={this.deleteProduct.bind(this)}
+            />
+          </div>
+        </div>
+      </Layout>
     );
   }
 }
