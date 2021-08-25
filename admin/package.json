@@ -13,6 +13,7 @@
     "antd-img-crop": "^3.14.0",
     "array-move": "^3.0.1",
     "classnames": "^2.2.6",
+    "dotenv": "^10.0.0",
     "draft-js": "^0.11.5",
     "draftjs-to-html": "^0.9.1",
     "enquire-js": "^0.2.1",

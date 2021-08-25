@@ -3,9 +3,9 @@ import { LoadingOutlined, FileAddOutlined, FileDoneOutlined } from '@ant-design/
 import { PureComponent } from 'react';
 
 function beforeUpload(file) {
-  const isLt2M = file.size / 1024 / 1024 < 100;
+  const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
   if (!isLt2M) {
-    message.error('File is too large please provide an file 100MB or below');
+    message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
   }
   return isLt2M;
 }

@@ -10,9 +10,9 @@ function getBase64(img, callback) {
 }
 
 function beforeUpload(file) {
-  const isLt2M = file.size / 1024 / 1024 < 10;
+  const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isLt2M) {
-    message.error('Image is too large please provide an image 10MB or below');
+    message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
   }
   return isLt2M;
 }

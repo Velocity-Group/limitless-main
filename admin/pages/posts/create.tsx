@@ -4,7 +4,7 @@ import Page from '@components/common/layout/page';
 
 import dynamic from 'next/dynamic';
 import {
-  Form, Input, Select, Button, Breadcrumb, message, InputNumber
+  Form, Input, Select, Button, Breadcrumb, message
 } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
 import { postService } from '@services/post.service';

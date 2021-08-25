@@ -64,11 +64,22 @@ export class FormProduct extends PureComponent<IProps> {
   beforeUpload(field, file) {
     const { beforeUpload } = this.props;
     if (field === 'image') {
+      const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      if (!isLt2M) {
+        message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+        return false;
+      }
       const reader = new FileReader();
       reader.addEventListener('load', () => this.setState({ previewImageProduct: reader.result }));
       reader.readAsDataURL(file);
     }
+    const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
+    if (!isValid) {
+      message.error(`File is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
+      return false;
+    }
     beforeUpload && beforeUpload(file, field);
+    return isValid;
   }
 
   render() {

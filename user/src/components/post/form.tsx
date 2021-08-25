@@ -166,7 +166,7 @@ export default class FeedForm extends PureComponent<IProps> {
 
   onEmojiClick = (emoji) => {
     const { text } = this.state;
-    this.setState({ text: `${text} ${emoji}` });
+    this.setState({ text: `${text} ${emoji} ` });
   }
 
   async remove(file) {
@@ -218,9 +218,9 @@ export default class FeedForm extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    const isLt2M = file.size / 1024 / 1024 <= 5;
+    const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isLt2M) {
-      message.error('Image is too large please provide an image 5MB or below');
+      message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
       return;
     }
     const reader = new FileReader();
@@ -245,9 +245,9 @@ export default class FeedForm extends PureComponent<IProps> {
       return;
     }
     this.teaser = file;
-    const isLt2M = file.size / 1024 / 1024 < 100;
+    const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!isLt2M) {
-      message.error('Teaser video is too large please provide an video 100MB or below');
+      message.error(`Teaser is too large please provide an video ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
       return;
     }
     try {
@@ -353,7 +353,7 @@ export default class FeedForm extends PureComponent<IProps> {
             </div>
           </Form.Item>
           <Form.Item>
-            <Switch checkedChildren="PPV Content" unCheckedChildren="Free Content" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
+            <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
           </Form.Item>
           {isSale && (
             <Form.Item label="Amount of Tokens" name="price" rules={[{ required: isSale, message: 'Please add tokens' }]}>
@@ -458,13 +458,11 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload files">
-                  <Button type="primary">
-                    <FileAddOutlined />
-                    {' '}
-                    Add files
-                  </Button>
-                </Tooltip>
+                <Button type="primary">
+                  <FileAddOutlined />
+                  {' '}
+                  Add files
+                </Button>
               </Upload>,
               <Upload
                 key="upload_thumb"
@@ -476,13 +474,11 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload thumbnail">
-                  <Button type="primary" style={{ marginLeft: 15 }}>
-                    <PictureOutlined />
-                    {' '}
-                    Add thumbnail
-                  </Button>
-                </Tooltip>
+                <Button type="primary" style={{ marginLeft: 15 }}>
+                  <PictureOutlined />
+                  {' '}
+                  Add thumbnail
+                </Button>
               </Upload>
             ]}
             {['video'].includes(feed?.type || type) && [
@@ -496,22 +492,18 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Tooltip title="Click to upload teaser video (<100MB)">
-                  <Button type="primary" style={{ marginLeft: 15 }}>
-                    <VideoCameraAddOutlined />
-                    {' '}
-                    Add teaser
-                  </Button>
-                </Tooltip>
+                <Button type="primary" style={{ marginLeft: 15 }}>
+                  <VideoCameraAddOutlined />
+                  {' '}
+                  Add teaser
+                </Button>
               </Upload>
             ]}
-            <Tooltip title="Click to add polls">
-              <Button disabled={addPoll || (!!(feed && feed._id))} type="primary" style={{ marginLeft: '15px' }} onClick={this.onAddPoll.bind(this)}>
-                <BarChartOutlined style={{ transform: 'rotate(90deg)' }} />
-                {' '}
-                Add polls
-              </Button>
-            </Tooltip>
+            <Button disabled={addPoll || (!!(feed && feed._id))} type="primary" style={{ marginLeft: '15px' }} onClick={this.onAddPoll.bind(this)}>
+              <BarChartOutlined style={{ transform: 'rotate(90deg)' }} />
+              {' '}
+              Add polls
+            </Button>
           </div>
           <AddPollDurationForm onAddPollDuration={this.onChangePollDuration.bind(this)} openDurationPollModal={openPollDuration} />
           {feed && (

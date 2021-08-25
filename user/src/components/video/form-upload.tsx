@@ -46,6 +46,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
     previewThumbnail: null,
     previewTeaser: null,
     previewVideo: null,
+    isSelectedThumbnail: false,
     isSelectedVideo: false,
     isSelectedTeaser: false,
     isSale: false,
@@ -92,7 +93,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   getPerformers = debounce(async (q, performerIds) => {
     try {
-      const resp = await (await performerService.search({ q, performerIds: performerIds || '', limit: 99 })).data;
+      const resp = await (await performerService.search({ q, performerIds: performerIds || '', limit: 500 })).data;
       const performers = resp.data || [];
       this.setState({ performers });
     } catch (e) {
@@ -103,18 +104,26 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   beforeUpload(file: File, field: string) {
     const { beforeUpload: beforeUploadHandler } = this.props;
-    if (field === 'teaser') {
-      const isValid = file.size / 1024 / 1024 < 200;
+    if (field === 'thumbnail') {
+      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!isValid) {
-        message.error('File is too large please provide an file 200MB or below');
+        message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+        return isValid;
+      }
+      this.setState({ isSelectedTeaser: true });
+    }
+    if (field === 'teaser') {
+      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      if (!isValid) {
+        message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
         return isValid;
       }
       this.setState({ isSelectedTeaser: true });
     }
     if (field === 'video') {
-      const isValid = file.size / 1024 / 1024 < 2048;
+      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000);
       if (!isValid) {
-        message.error('File is too large please provide an file 2GB or below');
+        message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB or below`);
         return isValid;
       }
       this.setState({ isSelectedVideo: true });
@@ -134,6 +143,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
       isSale,
       isSchedule,
       scheduledAt,
+      isSelectedThumbnail,
       isSelectedTeaser,
       isSelectedVideo
     } = this.state;
@@ -235,11 +245,11 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
             <Form.Item
               name="isSale"
-              label="Pay per view?"
+              label="For sale?"
             >
               <Switch
-                checkedChildren="Sale"
-                unCheckedChildren="Free"
+                checkedChildren="Pay per view"
+                unCheckedChildren="Subscribe to view"
                 checked={isSale}
                 onChange={this.onSwitch.bind(this, 'saleVideo')}
               />
@@ -251,11 +261,11 @@ export class FormUploadVideo extends PureComponent<IProps> {
             )}
             <Form.Item
               name="isSchedule"
-              label="Scheduling?'"
+              label="Scheduling?"
             >
               <Switch
                 checkedChildren="Scheduling"
-                unCheckedChildren="Un-scheduled"
+                unCheckedChildren="Unschedule"
                 checked={isSchedule}
                 onChange={this.onSwitch.bind(this, 'scheduling')}
               />
@@ -330,11 +340,11 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 className="avatar-uploader"
                 accept="image/*"
                 multiple={false}
-                showUploadList
+                showUploadList={false}
                 disabled={uploading}
                 beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
               >
-                <CameraOutlined />
+                {isSelectedThumbnail ? <FileDoneOutlined /> : <CameraOutlined />}
               </Upload>
             </Form.Item>
           </Col>

@@ -3,7 +3,6 @@ import { Table, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
-import { ThumbnailBanner } from '@components/banner/thumbnail-banner';
 import { DropdownAction } from '@components/common/dropdown-action';
 
 interface IProps {
@@ -23,7 +22,7 @@ export class TableListBanner extends PureComponent<IProps> {
         title: '',
         dataIndex: 'thumbnail',
         render(data, record) {
-          return <ThumbnailBanner banner={record} />;
+          return <img src={record?.photo?.url || './banner-image.jpg'} style={{ width: '100%' }} alt="thumb" />;
         }
       },
       {

@@ -1,5 +1,4 @@
 import { IPerformer } from './performer';
-import { ISearch } from './utils';
 
 export interface IFeed {
   _id?: string;

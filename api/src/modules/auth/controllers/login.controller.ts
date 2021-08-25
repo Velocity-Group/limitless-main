@@ -22,9 +22,8 @@ import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { AuthGooglePayload, LoginByEmailPayload, LoginByUsernamePayload } from '../payloads';
 import { AuthService } from '../services';
 import {
-  EmailOrPasswordIncorrectException,
+  PasswordIncorrectException,
   EmailNotVerifiedException,
-  UsernameOrPasswordIncorrectException,
   AccountInactiveException
 } from '../exceptions';
 
@@ -75,10 +74,10 @@ export class LoginController {
       throw new HttpException('This account is not found. Please Sign up', 404);
     }
     if (authUser && !this.authService.verifyPassword(req.password, authUser)) {
-      throw new EmailOrPasswordIncorrectException();
+      throw new PasswordIncorrectException();
     }
     if (authPerformer && !this.authService.verifyPassword(req.password, authPerformer)) {
-      throw new EmailOrPasswordIncorrectException();
+      throw new PasswordIncorrectException();
     }
     // TODO - check for user status here
 
@@ -131,10 +130,10 @@ export class LoginController {
       throw new HttpException('This account is not found. Please Sign up', 404);
     }
     if (authUser && !this.authService.verifyPassword(req.password, authUser)) {
-      throw new UsernameOrPasswordIncorrectException();
+      throw new PasswordIncorrectException();
     }
     if (authPerformer && !this.authService.verifyPassword(req.password, authPerformer)) {
-      throw new UsernameOrPasswordIncorrectException();
+      throw new PasswordIncorrectException();
     }
     let token = null;
     // auth token expired in 30d

@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import { message } from 'antd';
 import Page from '@components/common/layout/page';
 import { bannerService } from '@services/banner.service';
@@ -11,10 +11,6 @@ import { BreadcrumbComponent } from '@components/common';
 interface IProps {}
 
 class Banners extends PureComponent<IProps> {
-  // static async getInitialProps({ ctx }) {
-  //   return ctx.query;
-  // }
-
   state = {
     pagination: {} as any,
     searching: false,

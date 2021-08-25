@@ -2,16 +2,10 @@ import { Upload, message } from 'antd';
 import { LoadingOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
 
-function getBase64(img, callback) {
-  const reader = new FileReader();
-  reader.addEventListener('load', () => callback(reader.result));
-  reader.readAsDataURL(img);
-}
-
 function beforeUpload(file) {
-  const isLt5M = file.size / 1024 / 1024 < 5;
+  const isLt5M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isLt5M) {
-    message.error('Image is too large please provide an image 5MB or below');
+    message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
   }
   return isLt5M;
 }

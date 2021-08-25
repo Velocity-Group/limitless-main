@@ -1,5 +1,4 @@
-export const EMAIL_OR_PASSWORD_INCORRECT = 'Email or password is incorrect';
-export const USERNAME_OR_PASSWORD_INCORRECT = 'Username or password is incorrect';
+export const PASSWORD_INCORRECT = 'Password is incorrect, please try again';
 export const EMAIL_NOT_VERIFIED = 'Please verify your email';
 export const ACCOUNT_EXISTED = 'This account is already exist';
 export const CANNOT_AUTHENTICATE = 'Could not authenticated';

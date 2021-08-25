@@ -14,9 +14,9 @@ function beforeUpload(file) {
   // if (!isJpgOrPng) {
   //   message.error("You can only upload JPG/PNG file!");
   // }
-  const isLt2M = file.size / 1024 / 1024 < 5;
+  const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isLt2M) {
-    message.error('Image is too large please provide an image 5MB or below');
+    message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
   }
   return isLt2M;
 }
