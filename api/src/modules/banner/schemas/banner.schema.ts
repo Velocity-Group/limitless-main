@@ -8,6 +8,7 @@ export const BannerSchema = new Schema({
     type: String
     // TODO - text index?
   },
+  link: String,
   description: { type: String },
   processing: Boolean,
   status: {

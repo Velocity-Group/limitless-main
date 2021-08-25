@@ -27,35 +27,7 @@ export class BannerService {
     private readonly queueEventService: QueueEventService,
     private readonly fileService: FileService
   ) {
-    // this.queueEventService.subscribe(
-    //   BANNER_CHANNEL,
-    //   FILE_PROCESSED_TOPIC,
-    //   this.handleFileProcessed.bind(this)
-    // );
   }
-
-  // public async handleFileProcessed(event: QueueEvent) {
-  //   try {
-  //     if ( ![EVENT.CREATED, EVENT.UPDATED].includes(event.eventName) ) return;
-  //     const bannerId = event.data.meta && event.data.meta.bannerId;
-  //     const [banner, file] = await Promise.all([
-  //       bannerId && this.bannerModel.findById(bannerId),
-  //       event.data.fileId && this.fileService.findById(event.data.fileId)
-  //     ]);
-  //     if (!banner) {
-  //       // TODO - delete file?
-  //       return;
-  //     }
-  //     banner.processing = false;
-  //     if (file.status === 'error') {
-  //       banner.status = BANNER_STATUS.FILE_ERROR;
-  //     }
-  //     await banner.save();
-  //   } catch (e) {
-  //     // TODO - log me
-  //     console.log(e);
-  //   }
-  // }
 
   public async create(
     file: FileDto,

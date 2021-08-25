@@ -22,23 +22,20 @@ export class TableListBanner extends PureComponent<IProps> {
         title: '',
         dataIndex: 'thumbnail',
         render(data, record) {
-          return <img src={record?.photo?.url || './banner-image.jpg'} style={{ width: '100%' }} alt="thumb" />;
+          return <img src={record?.photo?.url || './banner-image.jpg'} style={{ width: '100px' }} alt="thumb" />;
         }
       },
       {
         title: 'Title',
-        dataIndex: 'title',
-        sorter: true
+        dataIndex: 'title'
       },
-      {
-        title: 'Position',
-        dataIndex: 'position',
-        sorter: true
-      },
+      // {
+      //   title: 'Position',
+      //   dataIndex: 'position'
+      // },
       {
         title: 'Status',
         dataIndex: 'status',
-        sorter: true,
         render(status: string) {
           switch (status) {
             case 'active':

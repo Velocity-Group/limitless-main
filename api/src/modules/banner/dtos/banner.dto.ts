@@ -10,6 +10,8 @@ export class BannerDto {
 
   description?: string;
 
+  link?: string;
+
   status?: string;
 
   position?: string;
@@ -30,6 +32,7 @@ export class BannerDto {
         'fileId',
         'title',
         'description',
+        'link',
         'status',
         'position',
         'processing',

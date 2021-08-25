@@ -8,6 +8,8 @@ export class BannerModel extends Document {
 
   description: string;
 
+  link: string;
+
   status: string;
 
   position: string;

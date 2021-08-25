@@ -90,7 +90,7 @@ export class FormUploadBanner extends PureComponent<IProps> {
         >
           <Input />
         </Form.Item>
-        <Form.Item name="position" label="Position" rules={[{ required: true, message: 'Please select position!' }]}>
+        {/* <Form.Item name="position" label="Position" rules={[{ required: true, message: 'Please select position!' }]}>
           <Select>
             <Select.Option key="top" value="top">
               Top
@@ -101,8 +101,14 @@ export class FormUploadBanner extends PureComponent<IProps> {
             <Select.Option key="bottom" value="bottom">
               Bottom
             </Select.Option>
+              <Select.Option key="left" value="left">
+              Left
+            </Select.Option>
+              <Select.Option key="right" value="right">
+              Right
+            </Select.Option>
           </Select>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status!' }]}>
           <Select>
             <Select.Option key="active" value="active">

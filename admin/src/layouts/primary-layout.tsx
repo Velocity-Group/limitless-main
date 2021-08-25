@@ -84,18 +84,6 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
 
     const sliderMenus = [
       {
-        id: 'dashboard',
-        name: 'Dashboard',
-        icon: <PieChartOutlined />,
-        children: [
-          {
-            id: 'statistic',
-            name: 'Statistics',
-            route: '/'
-          }
-        ]
-      },
-      {
         id: 'blockCountry',
         name: 'Blacklist Country',
         icon: <BlockOutlined />,

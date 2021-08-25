@@ -34,9 +34,11 @@ class Sider extends PureComponent<ISiderProps> {
       >
         <div className="brand">
           <Link href="/">
-            <div className="logo">
-              {logo ? <img alt="logo" src={logo} /> : <h1>{siteName}</h1>}
-            </div>
+            <a>
+              <div className="logo">
+                {logo ? <img alt="logo" src={logo} /> : <h1>{siteName}</h1>}
+              </div>
+            </a>
           </Link>
         </div>
 
