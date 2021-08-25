@@ -36,7 +36,7 @@ class Header extends PureComponent<IProps> {
         >
           <Menu.Item key="settings">
             <Link href="/account/settings">
-              <span>Update profile</span>
+              <a>Update profile</a>
             </Link>
           </Menu.Item>
           <Menu.Item key="SignOut">

@@ -21,9 +21,6 @@ export default class BaseLayout extends React.PureComponent<DefaultProps> {
     const Container = layout && LayoutMap[layout] ? LayoutMap[layout] : LayoutMap.primary;
     return (
       <>
-        <Head>
-          <link href="/css/antd.min.css" rel="stylesheet" key="antd" />
-        </Head>
         <Container>{children}</Container>
       </>
     );

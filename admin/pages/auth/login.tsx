@@ -16,11 +16,6 @@ interface IProps {
   login: Function;
 }
 
-export async function getStaticProps() {
-  return {
-    props: {}
-  };
-}
 class Login extends PureComponent<IProps> {
   static layout: string = 'public';
 
