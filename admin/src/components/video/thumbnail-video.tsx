@@ -1,8 +1,8 @@
 import { PureComponent } from 'react';
-import { IVideoUpdate } from 'src/interfaces';
+import { IVideo } from 'src/interfaces';
 
 interface IProps {
-  video?: IVideoUpdate;
+  video?: IVideo;
   style?: Record<string, string>;
 }
 

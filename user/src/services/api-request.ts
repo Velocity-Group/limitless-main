@@ -2,7 +2,6 @@ import fetch from 'isomorphic-unfetch';
 import Router from 'next/router';
 import cookie from 'js-cookie';
 import { isUrl } from '@lib/string';
-import env from '../env';
 
 export interface IResponse<T> {
   status: number;
@@ -71,7 +70,7 @@ export abstract class APIRequest {
       Authorization: APIRequest.token || cookie.get(TOKEN) || null,
       ...headers || {}
     };
-    return fetch(isUrl(url) ? url : `${env.apiEndpoint}${url}`, {
+    return fetch(isUrl(url) ? url : `${process.browser ? process.env.NEXT_PUBLIC_API_ENDPOINT : process.env.API_ENDPOINT}${url}`, {
       method: verb,
       headers: updatedHeader,
       body: body ? JSON.stringify(body) : null
@@ -128,7 +127,7 @@ export abstract class APIRequest {
       method: 'POST'
     }
   ) {
-    const uploadUrl = isUrl(url) ? url : `${env.apiEndpoint}${url}`;
+    const uploadUrl = isUrl(url) ? url : `${process.browser ? process.env.NEXT_PUBLIC_API_ENDPOINT : process.env.API_ENDPOINT}${url}`;
     return new Promise((resolve, reject) => {
       const req = new XMLHttpRequest();
 

@@ -46,9 +46,9 @@ class StreamChatCompose extends PureComponent<IProps> {
     this.setState({ text: evt.target.value });
   };
 
-  onEmojiClick = (e, emojiObject) => {
+  onEmojiClick = (emoji) => {
     const { text } = this.state;
-    this.setState({ text: `${text} ${emojiObject.emoji}` });
+    this.setState({ text: `${text} ${emoji}` });
   }
 
   updateMessage() {
@@ -77,7 +77,7 @@ class StreamChatCompose extends PureComponent<IProps> {
 
   render() {
     const { text } = this.state;
-    const { sendMessageStatus: status, conversation } = this.props;
+    const { sendMessageStatus: status } = this.props;
     if (!this._input) this._input = createRef();
     return (
       <div className="compose stream">
@@ -100,7 +100,7 @@ class StreamChatCompose extends PureComponent<IProps> {
         </div>
         {/* <div className="grp-icons" style={{ padding: 0 }}>
           <div className="grp-emotions">
-            <GiftsStreamBox conversation={conversation} performerId={conversation.performerId} />
+            <GiftsStreamBox performerId={conversation.performerId} />
           </div>
         </div> */}
         <div className="grp-icons" style={{ paddingRight: 0 }}>

@@ -1,4 +1,3 @@
-import env from 'src/env';
 import { APIRequest } from './api-request';
 
 export class MessageService extends APIRequest {
@@ -35,7 +34,7 @@ export class MessageService extends APIRequest {
   }
 
   getMessageUploadUrl() {
-    return `${env.apiEndpoint}/messages/private/file`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/messages/private/file`;
   }
 
   getConversationByStreamId(streamId: string) {

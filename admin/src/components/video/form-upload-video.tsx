@@ -1,24 +1,21 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Input, InputNumber, Select, Upload, Button,
-  message, Progress, Switch, DatePicker
+  Form, Input, Select, Upload, Button, message, Progress, Switch, DatePicker,
+  Col, Row, InputNumber
 } from 'antd';
-import { IVideoCreate, IVideoUpdate } from 'src/interfaces';
-import { CameraOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
+import { IVideo } from 'src/interfaces';
+import { CameraOutlined, VideoCameraAddOutlined, FileAddOutlined } from '@ant-design/icons';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { FormInstance } from 'antd/lib/form';
-import { ThumbnailVideo } from '@components/video/thumbnail-video';
-import env from 'src/env';
 import moment from 'moment';
 
 interface IProps {
-  video?: IVideoUpdate;
-  submit?: Function;
-  beforeUpload?: Function;
-  uploading?: boolean;
-  uploadPercentage?: number;
+  video?: IVideo;
+  submit: Function;
+  beforeUpload: Function;
+  uploading: boolean;
+  uploadPercentage: number;
 }
 
 const layout = {
@@ -33,11 +30,14 @@ const validateMessages = {
 export class FormUploadVideo extends PureComponent<IProps> {
   state = {
     previewThumbnail: null,
-    previewTeaserVideo: null,
     previewVideo: null,
-    isSchedule: false,
+    previewTeaserVideo: null,
     isSale: false,
-    scheduledAt: moment()
+    isSchedule: false,
+    scheduledAt: moment().add(1, 'day'),
+    showUploadVideo: false,
+    showUploadThumbnail: false,
+    showUploadTeaser: false
   };
 
   formRef: any;
@@ -48,33 +48,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
     if (video) {
       this.setState(
         {
-          previewThumbnail: video.thumbnail ? video.thumbnail : null,
-          previewTeaserVideo: video.teaser ? video.teaser : null,
-          previewVideo: video.video && video.video.url ? video.video.url : null,
-          isSchedule: video.isSchedule,
+          previewThumbnail: video?.thumbnail?.url || video?.thumbnail?.thumbnails[0] || '',
+          previewVideo: video?.video?.url || '',
           isSale: video.isSale,
-          scheduledAt: video.scheduledAt ? moment(video.scheduledAt) : moment()
+          previewTeaserVideo: video?.teaser?.url || '',
+          isSchedule: video.isSchedule,
+          scheduledAt: video.scheduledAt || moment().add(1, 'day')
         }
       );
-    }
-  }
-
-  onSchedule(val: any) {
-    this.setState({
-      scheduledAt: val
-    });
-  }
-
-  onSwitch(field: string, checked: boolean) {
-    if (field === 'scheduling') {
-      this.setState({
-        isSchedule: checked
-      });
-    }
-    if (field === 'isSale') {
-      this.setState({
-        isSale: checked
-      });
     }
   }
 
@@ -87,31 +68,55 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   beforeUpload(file: File, field: string) {
     const { beforeUpload: beforeUploadHandler } = this.props;
-    return beforeUploadHandler(file, field);
+    let maxSize = process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100;
+    switch (field) {
+      case 'thumbnail':
+        maxSize = process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5;
+        break;
+      case 'teaser': maxSize = process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200;
+        break;
+      case 'video': maxSize = process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048;
+        break;
+      default: break;
+    }
+    const valid = file.size / 1024 / 1024 < maxSize;
+    if (!valid) {
+      // eslint-disable-next-line no-nested-ternary
+      message.error(`${field === 'thumbnail' ? 'Thumbnail' : field === 'teaser' ? 'Teaser' : 'Video'} must be smaller than ${maxSize}MB!`);
+      return false;
+    }
+    if (field === 'thumbnail') this.setState({ showUploadThumbnail: true });
+    if (field === 'teaser') this.setState({ showUploadTeaser: true });
+    if (field === 'video') this.setState({ showUploadVideo: true });
+    beforeUploadHandler(file, field);
+    return true;
   }
 
   render() {
-    const { scheduledAt, isSchedule, isSale } = this.state;
     if (!this.formRef) this.formRef = createRef();
     const {
-      video, submit, uploading, uploadPercentage
+      video, submit, uploading, uploadPercentage = 0
     } = this.props;
-    const { previewThumbnail, previewVideo, previewTeaserVideo } = this.state;
-    const haveVideo = !!(video && video.performerId);
+    const {
+      previewThumbnail, previewVideo, isSchedule, previewTeaserVideo, scheduledAt,
+      showUploadTeaser, showUploadThumbnail, showUploadVideo, isSale
+    } = this.state;
     return (
       <Form
         {...layout}
-        onFinish={(values: IVideoUpdate) => {
-          const a = values;
-          a.isSchedule = isSchedule;
-          if (a.isSchedule) {
-            a.scheduledAt = scheduledAt;
+        onFinish={(values) => {
+          const data = { ...values };
+          if (data.status === 'file-error') {
+            message.error('Video file is on error, please upload new one');
+            return;
           }
-          a.isSale = isSale;
-          if (!a.isSale) {
-            a.price = 0;
+          if (data.isSchedule) {
+            data.scheduledAt = scheduledAt;
           }
-          return submit && submit(values);
+          if (data.tags && data.tags.length) {
+            data.tags = data.tags.map((t) => t.replace(/\s+/g, '_').toLowerCase());
+          }
+          submit(data);
         }}
         onFinishFailed={() => message.error('Please complete the required fields')}
         name="form-upload"
@@ -124,17 +129,16 @@ export class FormUploadVideo extends PureComponent<IProps> {
             description: '',
             status: 'active',
             performerId: '',
+            tags: [],
+            categoryIds: [],
             isSale: false,
             participantIds: [],
-            isSchedule: false,
-            scheduledAt: null,
-            tags: []
-          } as IVideoCreate)
+            isSchedule: false
+          })
         }
       >
-        <Form.Item name="performerId" label="Performer" rules={[{ required: true }]}>
+        <Form.Item label="Performers" name="performerIds" rules={[{ required: true }]}>
           <SelectPerformerDropdown
-            disabled={haveVideo}
             defaultValue={video && video.performerId}
             onSelect={(val) => this.setFormVal('performerId', val)}
           />
@@ -142,8 +146,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
         <Form.Item name="title" rules={[{ required: true, message: 'Please input title of video!' }]} label="Title">
           <Input placeholder="Enter video title" />
         </Form.Item>
-        <Form.Item label="Tag" name="tags">
+        <Form.Item label="Tags" name="tags">
           <Select
+            defaultValue={video && video.tags}
+            onChange={(val) => this.setFormVal('tags', val)}
             mode="tags"
             style={{ width: '100%' }}
             size="middle"
@@ -155,25 +161,26 @@ export class FormUploadVideo extends PureComponent<IProps> {
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item name="isSale" label="PPV" valuePropName="checked">
-          <Switch unCheckedChildren="Free Content" checkedChildren="PPV Content" onChange={this.onSwitch.bind(this, 'isSale')} />
+        <Form.Item name="isSale" label="PPV?" valuePropName="checked">
+          <Switch unCheckedChildren="Subscribe to view" checkedChildren="Per per view" onChange={(val) => this.setState({ isSale: val })} />
         </Form.Item>
         {isSale && (
-        <Form.Item name="price" label="Amount of Tokens">
-          <InputNumber min={1} />
-        </Form.Item>
+          <Form.Item name="price" label="Amount of Tokens">
+            <InputNumber min={1} />
+          </Form.Item>
         )}
         <Form.Item name="isSchedule" label="Scheduling?" valuePropName="checked">
-          <Switch unCheckedChildren="Unscheduled" checkedChildren="Scheduling" onChange={this.onSwitch.bind(this, 'scheduling')} />
+          <Switch unCheckedChildren="Recent" checkedChildren="Upcoming" onChange={(checked) => this.setState({ isSchedule: checked })} />
         </Form.Item>
         {isSchedule && (
-        <Form.Item label="Schedule at">
-          <DatePicker
-            disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
-            defaultValue={scheduledAt}
-            onChange={this.onSchedule.bind(this)}
-          />
-        </Form.Item>
+          <Form.Item label="Upcoming at">
+            <DatePicker
+              style={{ width: '100%' }}
+              disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
+              defaultValue={video && video.scheduledAt ? moment(video.scheduledAt) : moment().add(1, 'day')}
+              onChange={(date) => this.setState({ scheduledAt: date })}
+            />
+          </Form.Item>
         )}
         <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status!' }]}>
           <Select>
@@ -185,100 +192,62 @@ export class FormUploadVideo extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Form.Item>
-        <div key="thumbnail" className="ant-row ant-form-item">
-          <div className="ant-col ant-col-4 ant-form-item-label">
-            <label>Thumbnail</label>
-          </div>
-          <div className="ant-col ant-col-16 ant-form-item-control">
-            {!haveVideo ? (
+        <Row>
+          <Col lg={8} xs={24}>
+            <Form.Item label="Video" help={previewVideo ? <a href={previewVideo} target="_blank" rel="noreferrer">Click here to preview</a> : 'Video file is 2048MB or below'}>
               <Upload
-                listType="picture-card"
-                className="avatar-uploader"
-                accept="image/*"
-                multiple={false}
-                showUploadList
-                disabled={uploading || haveVideo}
-                beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
-              >
-                {previewThumbnail ? (
-                  <img
-                    src={previewThumbnail}
-                    alt="file"
-                    style={{ width: '100px' }}
-                  />
-                ) : <CameraOutlined />}
-              </Upload>
-            ) : (
-              <ThumbnailVideo video={video} style={{ width: '250px' }} />
-            )}
-            <div className="ant-form-item-explain">
-              <div>
-                Image must smaller than
-                {' '}
-                {env.maximumSizeUploadImage || 5}
-                MB!
-              </div>
-            </div>
-          </div>
-        </div>
-        <div key="teaser-video" className="ant-row ant-form-item">
-          <div className="ant-col ant-col-4 ant-form-item-label">
-            <label>Teaser Video</label>
-          </div>
-          <div className="ant-col ant-col-16 ant-form-item-control">
-            {!previewTeaserVideo && (
-            <Upload
-              listType="picture-card"
-              className="avatar-uploader"
-              accept="video/*"
-              multiple={false}
-              showUploadList
-              disabled={uploading || haveVideo}
-              beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
-            >
-              <VideoCameraAddOutlined />
-            </Upload>
-            )}
-            {previewTeaserVideo && <p><a href={previewTeaserVideo} target="_blank" rel="noreferrer">Click to view</a></p>}
-          </div>
-        </div>
-        <div key="video" className="ant-row ant-form-item">
-          <div className="ant-col ant-col-4 ant-form-item-label">
-            <label>Video</label>
-          </div>
-          <div className="ant-col ant-col-16 ant-form-item-control">
-            {!previewVideo && (
-              <Upload
+                customRequest={() => false}
                 listType="picture-card"
                 className="avatar-uploader"
                 accept="video/*"
                 multiple={false}
-                showUploadList
-                disabled={uploading || haveVideo}
+                showUploadList={false}
+                disabled={uploading}
                 beforeUpload={(file) => this.beforeUpload(file, 'video')}
               >
-                <VideoCameraAddOutlined />
+                {showUploadVideo ? <FileAddOutlined /> : <VideoCameraAddOutlined />}
               </Upload>
-            )}
-            {previewVideo && <p><a href={previewVideo} target="_blank" rel="noreferrer">Click to view</a></p>}
-            <div className="ant-form-item-explain">
-              <div>
-                Video must smaller than
-                {' '}
-                {env.maximumSizeUploadVideo || 2000}
-                MB!
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          {uploadPercentage ? (
-            <Progress percent={Math.round(uploadPercentage)} />
-          ) : null}
-        </div>
+            </Form.Item>
+          </Col>
+          <Col lg={8} xs={24}>
+            <Form.Item label="Thumbnail" help={previewThumbnail ? <p><a href={previewThumbnail} target="_blank" rel="noreferrer">Click here to preview</a></p> : 'Thumbnail is 5MB or below'}>
+              <Upload
+                customRequest={() => false}
+                listType="picture-card"
+                className="avatar-uploader"
+                accept="image/*"
+                multiple={false}
+                showUploadList={false}
+                disabled={uploading}
+                beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
+              >
+                {showUploadThumbnail ? <FileAddOutlined /> : <CameraOutlined />}
+              </Upload>
+            </Form.Item>
+          </Col>
+          <Col lg={8} xs={24}>
+            <Form.Item label="Teaser" help={previewTeaserVideo ? <p><a href={previewTeaserVideo} target="_blank" rel="noreferrer">Click here to preview</a></p> : 'Teaser is 200MB or below'}>
+              <Upload
+                customRequest={() => false}
+                listType="picture-card"
+                className="avatar-uploader"
+                accept="video/*"
+                multiple={false}
+                showUploadList={false}
+                disabled={uploading}
+                beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
+              >
+                {showUploadTeaser ? <FileAddOutlined /> : <VideoCameraAddOutlined />}
+              </Upload>
+            </Form.Item>
+          </Col>
+        </Row>
+        {uploadPercentage > 0 && (
+          <Progress percent={Math.round(uploadPercentage)} />
+        )}
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button type="primary" htmlType="submit" loading={uploading}>
-            {haveVideo ? 'Update' : 'Upload'}
+            {video ? 'Update' : 'Upload'}
           </Button>
         </Form.Item>
       </Form>

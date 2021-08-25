@@ -5,7 +5,6 @@ import {
 } from 'antd';
 import { IUser, ICountry } from 'src/interfaces';
 import { AvatarUpload } from '@components/user/avatar-upload';
-import env from 'src/env';
 
 const layout = {
   labelCol: { span: 24 },
@@ -202,7 +201,7 @@ export class AccountForm extends PureComponent<IProps> {
           <Col xs={12} md={12}>
             <Form.Item
               label="Avatar"
-              help={`Avatar must be smaller than ${env.maximumSizeUploadImage || 5}MB!`}
+              help={`Avatar must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`}
             >
               <AvatarUpload
                 headers={uploadHeaders}

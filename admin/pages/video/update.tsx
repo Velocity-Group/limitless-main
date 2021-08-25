@@ -1,9 +1,9 @@
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import Page from '@components/common/layout/page';
 import { message } from 'antd';
 import { videoService } from '@services/video.service';
-import { IVideoUpdate } from 'src/interfaces';
+import { IVideo } from 'src/interfaces';
 import Loader from '@components/common/base/loader';
 import { BreadcrumbComponent } from '@components/common';
 import { FormUploadVideo } from '@components/video/form-upload-video';
@@ -28,7 +28,7 @@ class VideoUpdate extends PureComponent<IProps> {
     fetching: true,
     uploading: false,
     uploadPercentage: 0,
-    video: {} as IVideoUpdate
+    video: {} as IVideo
   };
 
   _files: {
@@ -61,7 +61,7 @@ class VideoUpdate extends PureComponent<IProps> {
     this._files[field] = file;
   }
 
-  async submit(data: IVideoUpdate) {
+  async submit(data: IVideo) {
     if (!this._files.video) {
       message.error('Please select video!');
       return;

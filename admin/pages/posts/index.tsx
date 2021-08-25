@@ -1,6 +1,3 @@
-/* eslint-disable react/jsx-no-target-blank */
-/* eslint-disable default-case */
-/* eslint-disable no-nested-ternary */
 import Head from 'next/head';
 import Link from 'next/link';
 import { PureComponent, Fragment } from 'react';
@@ -14,7 +11,6 @@ import Page from '@components/common/layout/page';
 import { postService } from '@services/post.service';
 import { formatDate } from '@lib/date';
 import { SearchFilter } from '@components/post/search-filter';
-import env from 'src/env';
 
 interface IProps {}
 
@@ -39,6 +35,7 @@ class Posts extends PureComponent<IProps> {
     this.setState({
       pagination: pager,
       sortBy: sorter.field || '',
+      // eslint-disable-next-line no-nested-ternary
       sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : ''
     });
     this.search(pager.current);
@@ -122,8 +119,8 @@ class Posts extends PureComponent<IProps> {
         render(data, record) {
           return (
             <>
-              <a href={`${env.siteUrl}/page/${record.slug}`} target="_blank">
-                {`${env.siteUrl}/page/${record.slug}`}
+              <a href={`${process.env.NEXT_PUBLIC_SITE_URL}/page/${record.slug}`} target="_blank" rel="noreferrer">
+                {`${process.env.NEXT_PUBLIC_SITE_URL}/page/${record.slug}`}
               </a>
             </>
           );
@@ -140,16 +137,9 @@ class Posts extends PureComponent<IProps> {
       {
         title: 'Status',
         dataIndex: 'status',
-        sorter: true,
         render(status: string) {
-          let color = 'default';
-          switch (status) {
-            case 'published':
-              color = 'green';
-              break;
-          }
           return (
-            <Tag color={color} key={status}>
+            <Tag color={status === 'published' ? 'green' : 'default'} key={status}>
               {status === 'published' ? 'Active' : 'Inactive'}
             </Tag>
           );

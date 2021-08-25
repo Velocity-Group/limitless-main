@@ -80,7 +80,7 @@ export class PurchaseProductForm extends PureComponent<IProps> {
               loading={submiting}
               disabled={submiting}
             >
-              Confirm to purchase at &nbsp;
+              Confirm to purchase by &nbsp;
               <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 3px' }} />
               {(product?.price || 0).toFixed(2)}
             </Button>

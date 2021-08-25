@@ -1,6 +1,5 @@
 import { IUser } from 'src/interfaces';
 import { APIRequest, IResponse } from './api-request';
-import env from '../env';
 
 export class UserService extends APIRequest {
   me(headers?: { [key: string]: string }): Promise<IResponse<IUser>> {
@@ -21,9 +20,9 @@ export class UserService extends APIRequest {
 
   getAvatarUploadUrl(userId?: string) {
     if (userId) {
-      return `${env.apiEndpoint}/admin/users/${userId}/avatar/upload`;
+      return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/users/${userId}/avatar/upload`;
     }
-    return `${env.apiEndpoint}/users/avatar/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/avatar/upload`;
   }
 
   uploadAvatarUser(file: File, userId?: string) {

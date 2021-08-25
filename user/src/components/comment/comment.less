@@ -30,25 +30,6 @@
       height: 50px;
       min-height: unset;
     }
-    .grp-emotions {
-      position: absolute;
-      right: 25px;
-      top: 15px;
-      .anticon-smile {
-        font-size: 22px;
-        color: @primary-color;
-      }
-      aside.emoji-picker-react {
-        display: none;
-        position: absolute;
-        right: 0;
-        bottom: 50%;
-        z-index: 9999;
-      }
-      &:hover aside.emoji-picker-react {
-        display: flex;
-      }
-    }
   }
   .submit-btn {
     background-image: linear-gradient(0deg,@theme-color,@primary-color);
@@ -136,13 +117,6 @@
   .comment-form .cmt-area .ant-input {
     background: @light-grey;
     height: 40px;
-  }
-  .comment-form .cmt-area .grp-emotions {
-    top: 10px
-  }
-  .comment-form .cmt-area .grp-emotions aside.emoji-picker-react {
-    bottom: unset;
-    top: 50%
   }
 }
 .reply-bl-list {

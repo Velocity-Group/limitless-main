@@ -1,42 +1,55 @@
 export interface IVideo {
   _id: string;
-  title: string;
-  performerId: string;
-  price: number;
-  status: string;
-  description: string;
-  tagline: string;
-}
 
-export interface IVideoCreate {
-  tags: string[];
-  title: string;
   performerId: string;
-  price: number;
-  status: string;
-  description: string;
-  isSale: boolean;
-  isSchedule: boolean;
-  scheduledAt: any;
-  tagline: string;
-  participantIds: string[];
-}
 
-export interface IVideoUpdate {
-  _id: string;
-  performerId: string;
-  title?: string;
-  price?: number;
-  status?: string;
-  description?: string;
-  thumbnail?: string;
-  teaser?: string;
-  isSale: boolean;
-  participantIds: string[];
-  video?: { url: string; thumbnails: string[] };
-  performer?: { username: string };
-  isSchedule: boolean;
+  categoryIds: string[];
+
+  fileId: string;
+
+  title: string;
+
+  description: string;
+
+  status: string;
+
   tags: string[];
+
+  teaserId: string;
+
+  teaser: any;
+
+  teaserProcessing: boolean;
+
+  processing: boolean;
+
+  thumbnailId: string;
+
+  isSale: boolean;
+
+  price: number;
+
+  thumbnail: any;
+
+  video: any;
+
+  participantIds: string[];
+
+  stats: {
+    views: number;
+    likes: number;
+    comments: number;
+  };
+
+  isSchedule: boolean;
+
   scheduledAt: any;
-  tagline?: string;
+
+  createdBy: string;
+
+  updatedBy: string;
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }

@@ -2,7 +2,9 @@ import next from 'next';
 import express from 'express';
 import routes from './routes';
 
-const port = parseInt(process.env.PORT || '3000', 10);
+require('dotenv');
+
+const port = parseInt(process.env.PORT || '8081', 10);
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev: process.env.NODE_ENV !== 'production' });
 const handler = routes.getRequestHandler(app, ({

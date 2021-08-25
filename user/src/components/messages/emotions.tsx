@@ -1,23 +1,26 @@
-/* eslint-disable react/destructuring-assignment */
 import { PureComponent } from 'react';
-import dynamic from 'next/dynamic';
-import './Compose.less';
-
-const Picker = dynamic(() => import('emoji-picker-react'), { ssr: false });
+import { Picker } from 'emoji-mart';
+import 'emoji-mart/css/emoji-mart.css';
 
 interface IProps {
   onEmojiClick: Function;
+  siteName?: string;
 }
 
 export class Emotions extends PureComponent<IProps> {
-  render() {
+  handleClickEmoji = (emoji) => {
     const { onEmojiClick } = this.props;
+    onEmojiClick(emoji.native);
+  }
+
+  render() {
+    const { siteName } = this.props;
+
     return (
       <Picker
-        onEmojiClick={onEmojiClick.bind(this)}
-        disableAutoFocus
-        disableSearchBar
-        disableSkinTonePicker
+        onClick={this.handleClickEmoji.bind(this)}
+        showSkinTones
+        title={siteName || ''}
       />
     );
   }

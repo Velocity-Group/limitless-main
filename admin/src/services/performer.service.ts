@@ -1,5 +1,4 @@
 import { APIRequest } from './api-request';
-import env from '../env';
 
 export class PerformerService extends APIRequest {
   create(payload: any) {
@@ -23,15 +22,15 @@ export class PerformerService extends APIRequest {
   }
 
   getUploadDocumentUrl() {
-    return `${env.apiEndpoint}/admin/performers/documents/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/documents/upload`;
   }
 
   getAvatarUploadUrl() {
-    return `${env.apiEndpoint}/admin/performers/avatar/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/avatar/upload`;
   }
 
   getCoverUploadUrl() {
-    return `${env.apiEndpoint}/admin/performers/cover/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/cover/upload`;
   }
 
   updatePaymentGatewaySetting(id: string, payload: any) {

@@ -489,12 +489,12 @@ export class AuthService {
   }
 
   async sendVerificationEmail(source: any): Promise<void> {
-    const verification = await this.verificationModel.findOne({
+    const verifications = await this.verificationModel.find({
       sourceId: source._id,
-      value: source.email
+      value: source.email.toLowerCase()
     });
     const token = StringHelper.randomString(15);
-    if (!verification) {
+    if (!verifications.length) {
       await this.verificationModel.create({
         sourceId: source._id,
         sourceType: 'user',
@@ -507,6 +507,12 @@ export class AuthService {
         value: source.email,
         token
       });
+    }
+    if (verifications.length) {
+      await Promise.all(verifications.map((verification) => {
+        verification.token = token;
+        return verification.save();
+      }));
     }
     const verificationLink = resolve(
       this.config.get('app.baseUrl'),

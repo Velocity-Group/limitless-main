@@ -1,11 +1,4 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable no-console */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-continue */
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import { PureComponent, createRef } from 'react';
 import {
   Upload, message, Button, Tooltip, Select,
@@ -101,8 +94,10 @@ export default class FormFeed extends PureComponent<IProps> {
         uploading: true
       });
       const newFileIds = [...fileIds];
+      // eslint-disable-next-line no-restricted-syntax
       for (const fileItem of listFile) {
         try {
+          // eslint-disable-next-line no-continue
           if (['uploading', 'done'].includes(fileItem.status) || fileItem._id) continue;
           fileItem.status = 'uploading';
           const resp = (fileItem.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
@@ -125,14 +120,16 @@ export default class FormFeed extends PureComponent<IProps> {
   }
 
   onUploading(file, resp: any) {
+    // eslint-disable-next-line no-param-reassign
     file.percent = resp.percentage;
+    // eslint-disable-next-line no-param-reassign
     if (file.percent === 100) file.status = 'done';
     this.forceUpdate();
   }
 
   async onAddPoll() {
     const { addPoll } = this.state;
-    await this.setState({ addPoll: !addPoll });
+    this.setState({ addPoll: !addPoll });
     if (!addPoll) {
       this.pollIds = [];
       this.setState({ pollList: [] });
@@ -141,7 +138,7 @@ export default class FormFeed extends PureComponent<IProps> {
 
   async onChangePoll(index, e) {
     const { value } = e.target;
-    await this.setState((prevState: any) => {
+    this.setState((prevState: any) => {
       const newItems = [...prevState.pollList];
       newItems[index] = value;
       return { pollList: newItems };
@@ -156,7 +153,6 @@ export default class FormFeed extends PureComponent<IProps> {
       Router.replace('/feed');
     } catch {
       message.success('Something went wrong, please try again later');
-    } finally {
       this.setState({ uploading: false });
     }
   }
@@ -196,14 +192,17 @@ export default class FormFeed extends PureComponent<IProps> {
       const files = await Promise.all(fileList.map((f) => {
         if (f._id || f.type.includes('video')) return f;
         const reader = new FileReader();
+        // eslint-disable-next-line no-param-reassign
         reader.addEventListener('load', () => { f.thumbnail = reader.result; });
         reader.readAsDataURL(f);
         return f;
       }));
       await this.setState({ fileList: files, uploading: true });
       const newFileIds = [...fileIds];
+      // eslint-disable-next-line no-restricted-syntax
       for (const newFile of fileList) {
         try {
+          // eslint-disable-next-line no-continue
           if (['uploading', 'done'].includes(newFile.status) || newFile._id) continue;
           newFile.status = 'uploading';
           const resp = (newFile.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
@@ -229,6 +228,11 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!file) {
       return;
     }
+    const valid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    if (!valid) {
+      message.error(`Thumbnail must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+      return;
+    }
     const reader = new FileReader();
     reader.addEventListener('load', () => { this.setState({ thumbnail: reader.result }); });
     reader.readAsDataURL(file);
@@ -251,9 +255,9 @@ export default class FormFeed extends PureComponent<IProps> {
       return;
     }
     this.teaser = file;
-    const isLt2M = file.size / 1024 / 1024 < 100;
-    if (!isLt2M) {
-      message.error('Teaser must be smaller than 100MB!');
+    const valid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    if (!valid) {
+      message.error(`Thumbnail must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB`);
       return;
     }
     try {
@@ -270,12 +274,13 @@ export default class FormFeed extends PureComponent<IProps> {
     }
   }
 
-  async submit(formValues: any) {
+  async submit(payload: any) {
     const { feed } = this.props;
     const {
       pollList, addPoll, isSale, expiredPollAt, fileIds, type
     } = this.state;
-    if (!formValues.text.trim()) {
+    const formValues = payload;
+    if (!formValues.text || !formValues.text.trim()) {
       return message.error('Please add a description');
     }
     if (formValues.price < 1) {
@@ -288,18 +293,20 @@ export default class FormFeed extends PureComponent<IProps> {
       formValues.thumbnailId = this.thumbnailId;
     }
     formValues.isSale = isSale;
+    formValues.fileIds = fileIds;
     if (['video', 'photo'].includes(feed?.type || type) && !fileIds.length) {
       return message.error(`Please add ${feed?.type || type} file`);
     }
 
     // create polls
-    let i = 0;
     if (addPoll && pollList.length < 2) {
       return message.error('Polls must have at least 2 options');
     } if (addPoll && pollList.length >= 2) {
       await this.setState({ uploading: true });
+      // eslint-disable-next-line no-restricted-syntax
       for (const poll of pollList) {
         try {
+          // eslint-disable-next-line no-continue
           if (!poll.length || poll._id) continue;
           const resp = await feedService.addPoll({
             description: poll,
@@ -309,16 +316,13 @@ export default class FormFeed extends PureComponent<IProps> {
             this.pollIds = [...this.pollIds, resp.data._id];
           }
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.log('err_create_poll', await e);
-        } finally {
-          i += 1;
-          if (i === pollList.length) {
-            formValues.pollIds = this.pollIds;
-            formValues.pollExpiredAt = expiredPollAt;
-            this.onsubmit(feed, formValues);
-          }
         }
       }
+      formValues.pollIds = this.pollIds;
+      formValues.pollExpiredAt = expiredPollAt;
+      this.onsubmit(feed, formValues);
     } else {
       await this.setState({ uploading: true });
       this.onsubmit(feed, formValues);
@@ -330,7 +334,7 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!this.formRef) this.formRef = createRef();
     const { feed, onDelete } = this.props;
     const {
-      uploading, fileList, fileIds, isSale, pollList, type,
+      uploading, fileList, isSale, pollList, type,
       addPoll, openPollDuration, expirePollTime, thumbnail
     } = this.state;
     return (
@@ -339,8 +343,6 @@ export default class FormFeed extends PureComponent<IProps> {
           {...layout}
           ref={this.formRef}
           onFinish={(values) => {
-            values.fileIds = fileIds;
-            values.type = 'feed';
             this.submit(values);
           }}
           validateMessages={validateMessages}
@@ -454,11 +456,14 @@ export default class FormFeed extends PureComponent<IProps> {
                         </span>
                       )}
                   </div>
+                  {/* eslint-disable-next-line no-nested-ternary */}
                   <Input disabled={!!feed?._id} className="poll-input" value={pollList && pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
+                  {/* eslint-disable-next-line no-nested-ternary */}
                   <Input disabled={!!feed?._id || !pollList.length} className="poll-input" value={pollList && pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
 
                   {pollList.map((poll, index) => {
                     if (index === 0 || index === 1) return null;
+                    // eslint-disable-next-line react/no-array-index-key
                     return <Input disabled={!!feed?._id} key={`poll_${index}`} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
                   })}
                   {!feed && pollList.length > 1 && (

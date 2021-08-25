@@ -1,12 +1,11 @@
 import { Upload, message } from 'antd';
 import { LoadingOutlined, FileAddOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
-import env from 'src/env';
 
 function beforeUpload(file) {
-  const isLt2M = file.size / 1024 / 1024 < (env.maximumSizeUploadFile || 20);
+  const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
   if (!isLt2M) {
-    message.error(`File must smaller than ${env.maximumSizeUploadFile || 20}MB!`);
+    message.error(`File must smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB!`);
   }
   return isLt2M;
 }

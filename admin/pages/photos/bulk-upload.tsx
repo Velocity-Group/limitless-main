@@ -10,7 +10,6 @@ import { UploadOutlined } from '@ant-design/icons';
 import { photoService } from '@services/photo.service';
 import { SelectGalleryDropdown } from '@components/gallery/common/select-gallery-dropdown';
 import Router from 'next/router';
-import env from 'src/env';
 
 const layout = {
   labelCol: { span: 24 },
@@ -54,11 +53,11 @@ class BulkUploadPhoto extends PureComponent<IProps> {
   }
 
   async beforeUpload(file, fileList) {
-    if (file.size / 1024 / 1024 > (env.maximumSizeUploadImage || 5)) {
-      message.error(`${file.name} is over ${env.maximumSizeUploadImage || 5}MB`);
+    if (file.size / 1024 / 1024 > (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
+      message.error(`${file.name} is over ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
     }
     this.setState({
-      fileList: fileList.filter((f) => f.size / 1024 / 1024 < (env.maximumSizeUploadImage || 5))
+      fileList: fileList.filter((f) => f.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5))
     });
   }
 

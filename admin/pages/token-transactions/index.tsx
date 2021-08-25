@@ -120,18 +120,18 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       //   key: 'message',
       //   text: 'Message'
       // },
-      {
-        key: 'public_chat',
-        text: 'Public Chat'
-      },
-      {
-        key: 'group_chat',
-        text: 'Group Chat'
-      },
-      {
-        key: 'private_chat',
-        text: 'Private Chat'
-      },
+      // {
+      //   key: 'public_chat',
+      //   text: 'Public Chat'
+      // },
+      // {
+      //   key: 'group_chat',
+      //   text: 'Group Chat'
+      // },
+      // {
+      //   key: 'private_chat',
+      //   text: 'Private Chat'
+      // },
       {
         key: 'video',
         text: 'Video'

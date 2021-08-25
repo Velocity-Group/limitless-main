@@ -2,12 +2,10 @@
 /* eslint-disable camelcase */
 import React from 'react';
 import Router from 'next/router';
-// import { connect } from 'react-redux';
 import { IPerformer, StreamSettings } from 'src/interfaces';
 import { SETTING_KEYS } from 'src/constants';
 import { message as _message } from 'antd';
 import { generateUuid } from 'src/lib';
-import env from '../env';
 import { WEBRTC_ADAPTOR_INFORMATIONS } from './constants';
 import { WebRTCAdaptorConfigs } from './interfaces/WebRTCAdaptorConfigs';
 import { warning } from './utils';
@@ -109,7 +107,6 @@ export default function withAntmedia(Component) {
         configs, settings, autoRepublishDisabled, callback
       } = this.props;
       const { isPlayMode } = configs;
-      const { debug } = env;
       const publisherURL = isPlayMode
         ? settings[SETTING_KEYS.SUBSCRIBER_URL]
         : settings[SETTING_KEYS.PUBLISHER_URL];
@@ -151,10 +148,10 @@ export default function withAntmedia(Component) {
       this.webRTCAdaptor = new window['WebRTCAdaptor']({
         websocket_url: websocketURL,
         mediaConstraints,
-        debug,
+        debug: process.env.NODE_ENV === 'development',
         peerconnection_config: pc_config,
         sdp_constraints: sdpConstraints,
-        bandwidth: env?.maxVideoBitrateKbps || 900,
+        bandwidth: process.env.NEXT_PUBLIC_MAX_STREAM_BITRATE || 900,
         isPlayMode: false,
         ...configs,
         callback: (info: WEBRTC_ADAPTOR_INFORMATIONS, obj: any) => {

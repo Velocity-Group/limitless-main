@@ -55,15 +55,15 @@ export class CommentForm extends PureComponent<IProps> {
     return handleComment(data);
   }
 
-  async onEmojiClick(e, value) {
+  async onEmojiClick(emoji) {
     const { creator } = this.props;
     if (!creator) return;
     const { text } = this.state;
     const instance = this.formRef.current as FormInstance;
     instance.setFieldsValue({
-      content: `${instance.getFieldValue('content')} ${value?.emoji} `
+      content: `${instance.getFieldValue('content')} ${emoji} `
     });
-    this.setState({ text: `${text} ${value?.emoji} ` });
+    this.setState({ text: `${text} ${emoji} ` });
   }
 
   render() {

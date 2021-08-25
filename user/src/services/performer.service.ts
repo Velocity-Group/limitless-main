@@ -4,7 +4,6 @@ import {
   IBlockedByPerformer
 } from '../interfaces/performer';
 import { APIRequest, IResponse } from './api-request';
-import env from '../env';
 
 export class PerformerService extends APIRequest {
   search(query?: { [key: string]: any }) {
@@ -24,19 +23,19 @@ export class PerformerService extends APIRequest {
   }
 
   getAvatarUploadUrl() {
-    return `${env.apiEndpoint}/performers/avatar/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/performers/avatar/upload`;
   }
 
   getCoverUploadUrl() {
-    return `${env.apiEndpoint}/performers/cover/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/performers/cover/upload`;
   }
 
   getVideoUploadUrl() {
-    return `${env.apiEndpoint}/performers/welcome-video/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/performers/welcome-video/upload`;
   }
 
   getDocumentUploadUrl() {
-    return `${env.apiEndpoint}/performers/documents/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/performers/documents/upload`;
   }
 
   updateMe(id: string, payload: any) {

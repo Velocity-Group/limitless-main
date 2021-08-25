@@ -1,6 +1,5 @@
 import { ISetting } from 'src/interfaces';
 import { APIRequest, IResponse } from './api-request';
-import env from '../env';
 
 export class SettingService extends APIRequest {
   private _settings = {} as any;
@@ -24,7 +23,7 @@ export class SettingService extends APIRequest {
   }
 
   getFileUploadUrl() {
-    return `${env.apiEndpoint}/admin/settings/files/upload`;
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/settings/files/upload`;
   }
 
   verifyMailer() {

@@ -12,7 +12,6 @@ import { payoutRequestService } from 'src/services';
 import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
 import { formatDate } from 'src/lib/date';
-import env from 'src/env';
 import './index.less';
 
 const { Content } = Layout;
@@ -212,11 +211,10 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     Amount: $
                     {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
                   </p>
-                  <form action={env.paypalPayoutUrl} method="post" className="paypal-payout">
+                  <form action={process.env.NEXT_PUBLIC_PAYPAY_PAYOUT_URL || 'https://www.paypal.com/cgi-bin/webscr'} method="post" className="paypal-payout">
                     <input type="hidden" name="cmd" value="_xclick" />
                     <input type="hidden" name="return" value={window.location.href} />
                     <input type="hidden" name="cancel_return" value={window.location.href} />
-                    {/* <input type="hidden" name="notify_url" value={`${env.apiEndpoint}/payout-requests/webhooks/paypal`} /> */}
                     <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
                     <input type="hidden" name="item_number" value={request._id} />
                     <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />

@@ -1,5 +1,4 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-import { PureComponent, createRef, Fragment } from 'react';
+import { PureComponent, createRef } from 'react';
 import {
   Form, Input, Select, Upload, Button, message, Progress
 } from 'antd';
@@ -7,7 +6,6 @@ import { IBannerUpdate, IBannerCreate } from 'src/interfaces';
 import { UploadOutlined } from '@ant-design/icons';
 import { FormInstance } from 'antd/lib/form';
 import { ThumbnailBanner } from '@components/banner/thumbnail-banner';
-import env from 'src/env';
 
 interface IProps {
   banner?: IBannerUpdate;
@@ -46,9 +44,9 @@ export class FormUploadBanner extends PureComponent<IProps> {
 
   beforeUpload(file) {
     const { beforeUpload: handleUpload } = this.props;
-    const isMaxSize = file.size / 1024 / 1024 < (env.maximumSizeUploadImage || 5);
+    const isMaxSize = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isMaxSize) {
-      message.error(`Image must be smaller than ${env.maximumSizeUploadImage || 5}MB!`);
+      message.error(`Image must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
       return false;
     }
     const reader = new FileReader();
@@ -117,7 +115,7 @@ export class FormUploadBanner extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Form.Item>
-        <>
+        <Form.Item>
           <div key="thumbnail" className="ant-row ant-form-item">
             <div className="ant-col ant-col-4 ant-form-item-label">
               <label>Banner </label>
@@ -152,14 +150,14 @@ export class FormUploadBanner extends PureComponent<IProps> {
                 <div>
                   Image must smaller than
                   {' '}
-                  {env.maximumSizeUploadImage || 5}
+                  {process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}
                   {' '}
                   MB!
                 </div>
               </div>
             </div>
           </div>
-        </>
+        </Form.Item>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button type="primary" htmlType="submit" loading={uploading}>
             {haveBanner ? 'Update' : 'Upload'}

@@ -8,7 +8,7 @@ import { videoService } from '@services/video.service';
 import Router from 'next/router';
 import { BreadcrumbComponent } from '@components/common';
 import { FormUploadVideo } from '@components/video/form-upload-video';
-import { IVideoUpdate } from 'src/interfaces';
+import { IVideo } from 'src/interfaces';
 
 interface IFiles {
   fieldname: string;
@@ -39,7 +39,7 @@ class UploadVideo extends PureComponent {
     this._files[field] = file;
   }
 
-  async submit(data: IVideoUpdate) {
+  async submit(data: IVideo) {
     if (!this._files.video) {
       message.error('Please select video!');
       return;

@@ -50,9 +50,9 @@ class Compose extends PureComponent<IProps> {
     this.setState({ text: evt.target.value });
   };
 
-  onEmojiClick = (emojiObject) => {
+  onEmojiClick = (emoji) => {
     const { text } = this.state;
-    this.setState({ text: text + emojiObject.emoji });
+    this.setState({ text: `${text} ${emoji} ` });
   }
 
   onPhotoUploaded = (data: any) => {

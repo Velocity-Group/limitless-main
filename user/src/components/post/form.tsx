@@ -164,9 +164,9 @@ export default class FeedForm extends PureComponent<IProps> {
     this.pollIds = [];
   }
 
-  onEmojiClick = (e, emojiObject) => {
+  onEmojiClick = (emoji) => {
     const { text } = this.state;
-    this.setState({ text: `${text} ${emojiObject.emoji}` });
+    this.setState({ text: `${text} ${emoji}` });
   }
 
   async remove(file) {

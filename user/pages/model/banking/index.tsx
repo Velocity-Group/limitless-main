@@ -79,7 +79,7 @@ class BankingSettings extends PureComponent<IProps> {
             {' '}
           </title>
         </Head>
-        <div className="main-container user-account">
+        <div className="main-container">
           <PageHeading icon={<BankOutlined />} title="Stripe Banking" />
           <PerformerBankingForm stripeAccount={stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
         </div>
