@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import Head from 'next/head';
 import { login } from '@redux/auth/actions';
 import { getResponseError } from '@lib/utils';
+import Link from 'next/link';
 import './index.less';
 
 const FormItem = Form.Item;
@@ -101,6 +102,11 @@ class Login extends PureComponent<IProps> {
               </Row>
             </Form>
           )}
+          <p>
+            <Link href="/auth/forgot">
+              <a>Forgot password?</a>
+            </Link>
+          </p>
         </div>
         <div className="footer" style={{ padding: '15px' }}>
           Version
