@@ -1,5 +1,5 @@
 import {
-  IsString, IsOptional, IsIn, IsUrl
+  IsString, IsOptional, IsIn
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { BANNER_POSITION } from '../constants';
@@ -15,7 +15,7 @@ export class BannerUpdatePayload {
   description: string;
 
   @ApiProperty()
-  @IsUrl()
+  @IsString()
   @IsOptional()
   link: string;
 
