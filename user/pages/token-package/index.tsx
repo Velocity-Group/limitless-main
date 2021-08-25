@@ -50,7 +50,7 @@ class TokenPackages extends PureComponent<IProps> {
     try {
       await this.setState({ searching: true });
       const resp = await tokenPackageService.search({
-        limit: 99
+        limit: 200
       });
       this.setState({
         searching: false,

@@ -39,7 +39,8 @@ class CreateProduct extends PureComponent {
 
   async submit(data: any) {
     if (data.type === 'digital' && !this._files.digitalFile) {
-      return message.error('Please select digital file!');
+      message.error('Please select digital file!');
+      return;
     } if (data.type === 'physical') {
       this._files.digitalFile = null;
     }
@@ -64,33 +65,13 @@ class CreateProduct extends PureComponent {
         this.onUploading.bind(this)
       )) as IResponse;
       message.success('Product has been created');
-      // TODO - process for response data?
-      await this.setState(
-        {
-          uploading: false
-        },
-        () => window.setTimeout(() => {
-          Router.push(
-            {
-              pathname: '/product/update',
-              query: {
-                id: resp.data._id
-              }
-            },
-            `/product/update?id=${resp.data._id}`,
-            {
-              shallow: true
-            }
-          );
-        }, 1000)
-      );
+      Router.push(`/product/update?id=${resp.data._id}`);
     } catch (error) {
       message.error('An error occurred, please try again!');
-      await this.setState({
+      this.setState({
         uploading: false
       });
     }
-    return undefined;
   }
 
   render() {

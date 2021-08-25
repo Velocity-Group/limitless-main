@@ -1,49 +1,63 @@
 import {
-  Form, Input, Button, Row
+  Form, Input, Button, Row, message
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-
-import './index.less';
 import Head from 'next/head';
 import Link from 'next/link';
+import { authService } from '@services/auth.service';
+import Router from 'next/router';
+import './index.less';
 
 const FormItem = Form.Item;
 
 interface IProps {
-  auth: any;
   ui: any;
 }
 
-class Forgot extends PureComponent<IProps> {
+class ForgotPassword extends PureComponent<IProps> {
   static layout: string = 'public';
 
   static authenticate: boolean = false;
 
   state = {
-    loading: false
+    submiting: false
+  };
+
+  handleReset = async (data) => {
+    await this.setState({ submiting: true });
+    try {
+      await authService.resetPassword({
+        ...data
+      });
+      message.success('An email has been sent to you to reset your password');
+      Router.push('/auth/login');
+    } catch (e) {
+      const error = await e;
+      message.error(error?.message || 'Error occured, please try again later');
+    } finally {
+      this.setState({ submiting: false });
+    }
   };
 
   render() {
     const { ui } = this.props;
-    const { siteName, logo } = ui;
-    const { loading } = this.state;
+    const { submiting } = this.state;
     return (
       <>
         <Head>
           <title>Forgot password</title>
         </Head>
-        <div className="form" style={{ height: '240px' }}>
+        <div className="form">
           <div className="logo">
-            <img alt="logo" src={logo} />
-            <span>{siteName}</span>
+            {ui.logo ? <div><img alt="logo" src={ui && ui.logo} /></div> : ui.siteName}
+            <h2>Forgot Password</h2>
           </div>
           <Form
-            onFinish={null}
+            onFinish={this.handleReset}
           >
             <FormItem
               hasFeedback
-              // label="Username"
               name="email"
               rules={[
                 { required: true, message: 'Please input your email!' },
@@ -51,15 +65,14 @@ class Forgot extends PureComponent<IProps> {
               ]}
             >
               <Input
-                onPressEnter={null}
                 placeholder="youremail@example.com"
               />
             </FormItem>
             <Row>
               <Button
                 type="primary"
-                onClick={null}
-                loading={loading}
+                loading={submiting}
+                disabled={submiting}
                 htmlType="submit"
               >
                 Submit
@@ -72,7 +85,15 @@ class Forgot extends PureComponent<IProps> {
             </Link>
           </p>
         </div>
-        <div className="footer">Copy right</div>
+        <div className="footer" style={{ padding: '15px' }}>
+          Version
+          {' '}
+          {process.env.NEXT_PUBLIC_BUILD_VERSION}
+          {' '}
+          - Copy right
+          {' '}
+          {new Date().getFullYear()}
+        </div>
       </>
     );
   }
@@ -81,4 +102,5 @@ class Forgot extends PureComponent<IProps> {
 const mapStates = (state: any) => ({
   ui: state.ui
 });
-export default connect(mapStates)(Forgot);
+const mapDispatch = { };
+export default connect(mapStates, mapDispatch)(ForgotPassword);

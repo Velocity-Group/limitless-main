@@ -139,6 +139,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
       >
         <Form.Item label="Performers" name="performerIds" rules={[{ required: true }]}>
           <SelectPerformerDropdown
+            showAll
             defaultValue={video && video.performerId}
             onSelect={(val) => this.setFormVal('performerId', val)}
           />

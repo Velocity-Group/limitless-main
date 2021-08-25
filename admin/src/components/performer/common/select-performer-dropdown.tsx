@@ -9,6 +9,7 @@ interface IProps {
   onSelect: Function;
   defaultValue?: string;
   disabled?: boolean;
+  showAll?: boolean;
 }
 
 export class SelectPerformerDropdown extends PureComponent<IProps> {
@@ -38,7 +39,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
 
   render() {
     const {
-      style, onSelect, defaultValue, disabled
+      style, onSelect, defaultValue, disabled, showAll
     } = this.props;
     const { data, loading } = this.state;
     return (
@@ -54,7 +55,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
         disabled={disabled}
       >
         <Select.Option value="" key="default">
-          All models
+          {showAll ? 'Select a model' : 'All models'}
         </Select.Option>
         {data && data.length > 0 && data.map((u) => (
           <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>

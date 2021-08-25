@@ -53,7 +53,7 @@ export class FormGallery extends PureComponent<IProps> {
       >
         <Form.Item name="performerId" label="Model" rules={[{ required: true }]}>
           <SelectPerformerDropdown
-            disabled={!!(gallery && gallery.performerId)}
+            showAll
             defaultValue={gallery && gallery.performerId}
             onSelect={(val) => this.setFormVal('performerId', val)}
           />
@@ -61,8 +61,8 @@ export class FormGallery extends PureComponent<IProps> {
         <Form.Item name="title" rules={[{ required: true, message: 'Please input title of gallery!' }]} label="Gallery Title">
           <Input />
         </Form.Item>
-        <Form.Item name="isSale" label="PPV" valuePropName="checked">
-          <Switch unCheckedChildren="Free Content" checkedChildren="PPV Content" checked={isSale} onChange={(val) => this.setState({ isSale: val })} />
+        <Form.Item name="isSale" label="For sale?" valuePropName="checked">
+          <Switch unCheckedChildren="Subscribe to view" checkedChildren="Pay per view" checked={isSale} onChange={(val) => this.setState({ isSale: val })} />
         </Form.Item>
         {isSale && (
         <Form.Item name="price" label="Amount of Tokens">

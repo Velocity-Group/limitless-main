@@ -40,6 +40,9 @@ export class EarningService {
     if (req.sourceType) {
       query.sourceType = req.sourceType;
     }
+    if (req.type) {
+      query.type = req.type;
+    }
     if (req.isToken) {
       query.isToken = req.isToken === 'true';
     }

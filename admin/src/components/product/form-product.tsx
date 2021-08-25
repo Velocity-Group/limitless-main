@@ -101,6 +101,8 @@ export class FormProduct extends PureComponent<IProps> {
       >
         <Form.Item name="performerId" label="Model" rules={[{ required: true }]}>
           <SelectPerformerDropdown
+            showAll
+            placeholder="Select model"
             disabled={haveProduct}
             defaultValue={product && product.performerId}
             onSelect={(val) => this.setFormVal('performerId', val)}

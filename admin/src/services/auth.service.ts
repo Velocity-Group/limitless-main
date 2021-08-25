@@ -32,6 +32,10 @@ export class AuthService extends APIRequest {
     const url = userId ? '/auth/users/password' : '/auth/me/password';
     return this.put(url, { userId, password, source });
   }
+
+  resetPassword(data) {
+    return this.post('/auth/users/forgot', data);
+  }
 }
 
 export const authService = new AuthService();

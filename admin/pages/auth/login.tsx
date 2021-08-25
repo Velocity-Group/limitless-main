@@ -1,5 +1,5 @@
 import {
-  Form, Input, Button, Row, Alert
+  Form, Input, Button, Row, Alert, Layout
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -37,14 +37,14 @@ class Login extends PureComponent<IProps> {
       loginAuth = { requesting: false, error: null, success: false }
     } = this.props;
     return (
-      <>
+      <Layout>
         <Head>
           <title>Login</title>
         </Head>
         <div className="form">
           <div className="logo">
             {ui.logo ? <div><img alt="logo" src={ui && ui.logo} /></div> : ui.siteName}
-            <div><span>Login</span></div>
+            <h2>Admin Panel</h2>
           </div>
           {loginAuth.error && (
             <Alert
@@ -108,11 +108,15 @@ class Login extends PureComponent<IProps> {
           )}
         </div>
         <div className="footer" style={{ padding: '15px' }}>
-          Copy right
+          Version
+          {' '}
+          {process.env.NEXT_PUBLIC_BUILD_VERSION}
+          {' '}
+          - Copy right
           {' '}
           {new Date().getFullYear()}
         </div>
-      </>
+      </Layout>
     );
   }
 }

@@ -23,7 +23,7 @@ export class TokenPackageSearchService {
     }
     if (req.isActive) query.isActive = req.isActive;
     const sort = {
-      [req.sortBy || 'updatedAt']: req.sort
+      [req.sortBy || 'ordering']: req.sort || 1
     };
     const [data, total] = await Promise.all([
       this.tokenPackageModel
@@ -51,7 +51,7 @@ export class TokenPackageSearchService {
     }
     query.isActive = true;
     const sort = {
-      [req.sortBy || 'updatedAt']: req.sort
+      [req.sortBy || 'ordering']: req.sort || 1
     };
     const [data, total] = await Promise.all([
       this.tokenPackageModel
