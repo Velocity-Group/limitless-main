@@ -121,7 +121,7 @@ export class UserDto {
       username: this.username,
       isOnline: this.isOnline,
       stats: this.stats,
-      isPerformer: this.isPerformer,
+      isPerformer: false,
       country: this.country,
       isBlocked: this.isBlocked,
       twitterConnected: this.twitterConnected,
