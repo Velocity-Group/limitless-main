@@ -103,14 +103,10 @@ const performerSchema = new mongoose.Schema({
   studioId: mongoose.Schema.Types.ObjectId,
   categoryIds: [
     {
-      type: mongoose.Schema.Types.ObjectId
+      type: mongoose.Schema.Types.ObjectId,
+      _id: false
     }
   ],
-  schedule: {
-    type: mongoose.Schema.Types.Mixed
-  },
-  timezone: String,
-  noteForUser: String,
   height: {
     type: String,
     index: true
