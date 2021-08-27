@@ -119,9 +119,7 @@ export class PerformerService {
         const Ids = performers.map((v) => v._id.toString());
         const difIds = difference(performerIds, Ids);
         const difFileIds = files.filter((file) => difIds.includes(file.refItems[0].itemId.toString()));
-        await Promise.all(difFileIds.map(async (fileId) => {
-          await this.fileService.remove(fileId);
-        }));
+        await Promise.all(difFileIds.map(async (fileId) => this.fileService.remove(fileId)));
       }
     } catch (e) {
       console.log('Check ref & remove files error', e);

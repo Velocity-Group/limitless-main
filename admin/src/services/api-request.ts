@@ -11,10 +11,10 @@ export interface IResponse<T> {
 export const TOKEN = 'token';
 
 export abstract class APIRequest {
-  protected token: string = null;
+  static token: string = '';
 
   setAuthHeaderToken(token: string) {
-    this.token = token;
+    APIRequest.token = token;
   }
 
   /**
@@ -67,11 +67,10 @@ export abstract class APIRequest {
     const updatedHeader = {
       'Content-Type': 'application/json',
       // TODO - check me
-      Authorization:
-          this.token || (process.browser ? localStorage.getItem(TOKEN) : ''),
+      Authorization: APIRequest.token || cookie.get(TOKEN) || null,
       ...headers || {}
     };
-    return fetch(isUrl(url) ? url : `${process.browser ? process.env.NEXT_PUBLIC_API_ENDPOINT : process.env.API_ENDPOINT}${url}`, {
+    return fetch(isUrl(url) ? url : `${!process.browser ? process.env.API_ENDPOINT : process.env.NEXT_PUBLIC_API_ENDPOINT}${url}`, {
       method: verb,
       headers: updatedHeader,
       body: body ? JSON.stringify(body) : null
@@ -88,7 +87,7 @@ export abstract class APIRequest {
     const queryString = Object.keys(params)
       .map((k) => {
         if (Array.isArray(params[k])) {
-          return params[k].length > 0 && params[k].map((param) => `${encodeURIComponent(k)}=${encodeURIComponent(param)}`)
+          return params[k].map((param) => `${encodeURIComponent(k)}=${encodeURIComponent(param)}`)
             .join('&');
         }
         return `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`;
@@ -115,22 +114,20 @@ export abstract class APIRequest {
 
   upload(
     url: string,
-    files: [
-      {
-        file: File;
-        fieldname: string;
-      }
-    ],
+    files: {
+      file: File;
+      fieldname: string;
+    }[],
     options: {
       onProgress: Function;
-      customData?: Record<string, any>;
+      customData?: Record<any, any>;
       method?: string;
     } = {
-      onProgress() {},
+      onProgress() { },
       method: 'POST'
     }
   ) {
-    const uploadUrl = isUrl(url) ? url : `${process.browser ? process.env.NEXT_PUBLIC_API_ENDPOINT : process.env.API_ENDPOINT}${url}`;
+    const uploadUrl = isUrl(url) ? url : `${!process.browser ? process.env.API_ENDPOINT : process.env.NEXT_PUBLIC_API_ENDPOINT}${url}`;
     return new Promise((resolve, reject) => {
       const req = new XMLHttpRequest();
 
@@ -158,21 +155,25 @@ export abstract class APIRequest {
       const formData = new FormData();
       files.forEach((f) => formData.append(f.fieldname, f.file, f.file.name));
       options.customData
-      && Object.keys(options.customData).forEach(
-        (fieldname) => {
-          if (typeof options.customData[fieldname] !== 'undefined' && !Array.isArray(options.customData[fieldname])) formData.append(fieldname, options.customData[fieldname]);
-          if (typeof options.customData[fieldname] !== 'undefined' && Array.isArray(options.customData[fieldname])) {
-            for (let i = 0; i < options.customData[fieldname].length; i += 1) {
-              formData.append(fieldname, options.customData[fieldname][i]);
+        && Object.keys(options.customData).forEach(
+          (fieldname) => {
+            if (typeof options.customData[fieldname] !== 'undefined' && !Array.isArray(options.customData[fieldname])) formData.append(fieldname, options.customData[fieldname]);
+            if (typeof options.customData[fieldname] !== 'undefined' && Array.isArray(options.customData[fieldname])) {
+              if (options.customData[fieldname].length) {
+                for (let i = 0; i < options.customData[fieldname].length; i += 1) {
+                  formData.append(fieldname, options.customData[fieldname][i]);
+                }
+              } else {
+                formData.append(fieldname, '');
+              }
             }
           }
-        }
-      );
+        );
 
       req.responseType = 'json';
       req.open(options.method || 'POST', uploadUrl);
 
-      let token: any = cookie.get(TOKEN);
+      let token: any = APIRequest.token || cookie.get(TOKEN);
       if (!token) {
         token = process.browser ? localStorage.getItem(TOKEN) : '';
       }

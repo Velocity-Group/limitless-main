@@ -70,7 +70,7 @@ export abstract class APIRequest {
       Authorization: APIRequest.token || cookie.get(TOKEN) || null,
       ...headers || {}
     };
-    return fetch(isUrl(url) ? url : `${process.browser ? process.env.NEXT_PUBLIC_API_ENDPOINT : process.env.API_ENDPOINT}${url}`, {
+    return fetch(isUrl(url) ? url : `${!process.browser ? process.env.API_ENDPOINT : process.env.NEXT_PUBLIC_API_ENDPOINT}${url}`, {
       method: verb,
       headers: updatedHeader,
       body: body ? JSON.stringify(body) : null
@@ -127,7 +127,7 @@ export abstract class APIRequest {
       method: 'POST'
     }
   ) {
-    const uploadUrl = isUrl(url) ? url : `${process.browser ? process.env.NEXT_PUBLIC_API_ENDPOINT : process.env.API_ENDPOINT}${url}`;
+    const uploadUrl = isUrl(url) ? url : `${!process.browser ? process.env.API_ENDPOINT : process.env.NEXT_PUBLIC_API_ENDPOINT}${url}`;
     return new Promise((resolve, reject) => {
       const req = new XMLHttpRequest();
 
@@ -159,8 +159,12 @@ export abstract class APIRequest {
           (fieldname) => {
             if (typeof options.customData[fieldname] !== 'undefined' && !Array.isArray(options.customData[fieldname])) formData.append(fieldname, options.customData[fieldname]);
             if (typeof options.customData[fieldname] !== 'undefined' && Array.isArray(options.customData[fieldname])) {
-              for (let i = 0; i < options.customData[fieldname].length; i += 1) {
-                formData.append(fieldname, options.customData[fieldname][i]);
+              if (options.customData[fieldname].length) {
+                for (let i = 0; i < options.customData[fieldname].length; i += 1) {
+                  formData.append(fieldname, options.customData[fieldname][i]);
+                }
+              } else {
+                formData.append(fieldname, '');
               }
             }
           }
@@ -169,7 +173,7 @@ export abstract class APIRequest {
       req.responseType = 'json';
       req.open(options.method || 'POST', uploadUrl);
 
-      let token: any = cookie.get(TOKEN);
+      let token: any = APIRequest.token || cookie.get(TOKEN);
       if (!token) {
         token = process.browser ? localStorage.getItem(TOKEN) : '';
       }

@@ -253,10 +253,7 @@ export const createAlias = (str: string) => {
   if (!str || typeof str !== 'string') {
     return '';
   }
-  const replaceBy = '-';
-  // replace white space & special characters to _
-  return str.toLowerCase().replace(/[^a-zA-Z0-9_-]/g, replaceBy);
-  /* eslint-enable */
+  return str.toLowerCase().replace(/[&\/\\#,+()$~%.'":*?<>{}\s]/g, '-');
 };
 
 export const truncate = (str: string, length = 100) => (str.length > length ? `${str.substring(0, length - 3)}...` : str);
