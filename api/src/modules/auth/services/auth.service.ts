@@ -13,14 +13,13 @@ import { UserService } from 'src/modules/user/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { SettingService } from 'src/modules/settings';
 import {
-  StringHelper, EntityNotFoundException, QueueEventService, QueueEvent
+  StringHelper, EntityNotFoundException, QueueEventService, QueueEvent, getConfig
 } from 'src/kernel';
 import { MailerService } from 'src/modules/mailer';
 import { ConfigService } from 'nestjs-config';
 import {
   STATUS_ACTIVE, ROLE_USER, GENDER_MALE, DELETE_USER_CHANNEL
 } from 'src/modules/user/constants';
-import { resolve } from 'url';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { AuthErrorException } from '../exceptions';
@@ -233,8 +232,7 @@ export class AuthService {
       updatedAt: new Date()
     });
 
-    const forgotLink = resolve(this.config.get('app.baseUrl'), `auth/password-change?token=${token}`);
-
+    const forgotLink = new URL(`auth/password-change?token=${token}`, getConfig('app').baseUrl).href;
     await this.mailService.send({
       subject: 'Recover password',
       to: source.email,
@@ -514,10 +512,7 @@ export class AuthService {
         return verification.save();
       }));
     }
-    const verificationLink = resolve(
-      this.config.get('app.baseUrl'),
-      `auth/email-verification?token=${token}`
-    );
+    const verificationLink = new URL(`auth/email-verification?token=${token}`, getConfig('app').baseUrl).href;
     const siteName = await SettingService.getValueByKey(SETTING_KEYS.SITE_NAME) || process.env.DOMAIN;
     await this.mailService.send({
       to: source.email,

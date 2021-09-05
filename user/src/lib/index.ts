@@ -5,3 +5,4 @@ export * from './date';
 export * from './message';
 export * from './duration';
 export * from './utils';
+export * from './number';

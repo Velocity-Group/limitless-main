@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
+import {
+  IsString, IsEmail, IsNotEmpty, IsOptional
+} from 'class-validator';
 
 export class ForgotPayload {
   @ApiProperty()
@@ -10,6 +12,6 @@ export class ForgotPayload {
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   type: string;
 }

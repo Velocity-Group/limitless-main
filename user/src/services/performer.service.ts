@@ -19,7 +19,7 @@ export class PerformerService extends APIRequest {
   }
 
   findOne(id: string, headers?: { [key: string]: string }) {
-    return this.get(`/performers/${id}`, headers);
+    return this.get(`/performers/${encodeURI(id)}`, headers);
   }
 
   getAvatarUploadUrl() {
@@ -42,14 +42,6 @@ export class PerformerService extends APIRequest {
     return this.put(`/performers/${id}`, payload);
   }
 
-  increaseView(id: string) {
-    return this.post(`/performers/${id}/inc-view`);
-  }
-
-  checkSubscribe(id: string) {
-    return this.post(`/performers/${id}/check-subscribe`);
-  }
-
   getTopPerformer(query?: { [key: string]: any }) {
     return this.get(this.buildUrl('/performers/top', query));
   }
@@ -62,24 +54,8 @@ export class PerformerService extends APIRequest {
     return this.put(`/performers/${id}/payment-gateway-settings`, payload);
   }
 
-  blockUser(payload: IBlockedByPerformer) {
-    return this.post('/performers/blocked-users', payload);
-  }
-
-  unblockUser(userId: string) {
-    return this.del(`/performers/blocked-users/${userId}`);
-  }
-
   getBookmarked(payload) {
     return this.get(this.buildUrl('/reactions/performers/bookmark', payload));
-  }
-
-  trendingProfiles(query) {
-    return this.get(this.buildUrl('/performers-trending/search', query));
-  }
-
-  randomTrendingProfiles(query) {
-    return this.get(this.buildUrl('/performers-trending/random-search', query));
   }
 
   uploadDocuments(documents: {

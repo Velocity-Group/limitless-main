@@ -137,7 +137,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
           })
         }
       >
-        <Form.Item label="Model">
+        <Form.Item name="performerId" label="Model">
           <SelectPerformerDropdown
             showAll
             defaultValue={video && video.performerId}

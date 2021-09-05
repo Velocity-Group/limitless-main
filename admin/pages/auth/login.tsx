@@ -65,7 +65,6 @@ class Login extends PureComponent<IProps> {
             >
               <FormItem
                 hasFeedback
-                // label="Username"
                 name="email"
                 rules={[
                   { required: true, message: 'Please input your email!' },
@@ -79,7 +78,6 @@ class Login extends PureComponent<IProps> {
               </FormItem>
               <FormItem
                 hasFeedback
-                // label="Password"
                 name="password"
                 rules={[
                   { required: true, message: 'Please input your password!' }

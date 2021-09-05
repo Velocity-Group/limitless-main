@@ -10,9 +10,7 @@ import {
   Alert,
   Select
 } from 'antd';
-import {
-  PayoutRequestInterface
-} from 'src/interfaces';
+import { PayoutRequestInterface } from 'src/interfaces';
 import Router from 'next/router';
 
 interface Props {
@@ -53,19 +51,19 @@ const PayoutRequestForm = ({
       <div>
         <Space size="large">
           <Statistic
-            title="Total earned tokens"
+            title="Total tokens"
             value={statsPayout?.totalEarnedTokens || 0}
             precision={2}
             prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}
           />
           <Statistic
-            title="Previous paid out tokens"
+            title="Paid out tokens"
             value={statsPayout?.previousPaidOutTokens || 0}
             precision={2}
             prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}
           />
           <Statistic
-            title="Remaining unpaid tokens"
+            title="Balance"
             value={statsPayout?.remainingUnpaidTokens || 0}
             precision={2}
             prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}

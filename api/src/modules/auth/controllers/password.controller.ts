@@ -73,8 +73,6 @@ export class PasswordController {
   public async forgotPassword(
     @Body() req: ForgotPayload
   ): Promise<DataResponse<{ success: boolean }>> {
-    // TODO - should query from auth service only
-    // need to fix
     const [user, performer] = await Promise.all([
       this.userService.findByEmail(req.email),
       this.performerService.findByEmail(req.email)

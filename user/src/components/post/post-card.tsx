@@ -14,7 +14,7 @@ import { CommentForm, ListComments } from '@components/comment';
 import {
   getComments, moreComment, createComment, deleteComment
 } from '@redux/comment/actions';
-import { formatDateShort, videoDuration } from '@lib/index';
+import { formatDateShort, videoDuration, shortenLargeNumber } from '@lib/index';
 import {
   reactionService, feedService, purchaseTokenService, paymentService, reportService
 } from '@services/index';
@@ -46,11 +46,6 @@ interface IProps {
   deleteComment: Function;
   commentMapping: any;
   comment: any;
-}
-
-function thoudsandToK(value: number) {
-  if (value < 1000) return value;
-  return (`${(value / 1000).toFixed(1)}K`);
 }
 
 class FeedCard extends Component<IProps> {
@@ -114,22 +109,21 @@ class FeedCard extends Component<IProps> {
         await reactionService.create({
           objectId: feed._id,
           action: 'like',
-          objectType: `feed_${feed.type}`
+          objectType: 'feed'
         });
-        this.setState({ isLiked: true, totalLike: totalLike + 1 });
+        this.setState({ isLiked: true, totalLike: totalLike + 1, requesting: false });
       } else {
         await reactionService.delete({
           objectId: feed._id,
           action: 'like',
-          objectType: `feed_${feed.type}`
+          objectType: 'feed'
         });
-        this.setState({ isLiked: false, totalLike: totalLike - 1 });
+        this.setState({ isLiked: false, totalLike: totalLike - 1, requesting: false });
       }
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
-    } finally {
-      await this.setState({ requesting: false });
+      this.setState({ requesting: false });
     }
   }
 
@@ -504,7 +498,7 @@ class FeedCard extends Component<IProps> {
               <span>
                 Total
                 {' '}
-                {totalVote}
+                {shortenLargeNumber(totalVote)}
                 {' '}
                 votes
               </span>
@@ -523,12 +517,12 @@ class FeedCard extends Component<IProps> {
               <span aria-hidden className={isLiked ? 'action-ico liked' : 'action-ico'} onClick={this.handleLike.bind(this)}>
                 <HeartOutlined />
                 {' '}
-                {thoudsandToK(totalLike) || '0'}
+                {shortenLargeNumber(totalLike)}
               </span>
               <span aria-hidden className={isOpenComment ? 'action-ico active' : 'action-ico'} onClick={this.onOpenComment.bind(this)}>
                 <CommentOutlined />
                 {' '}
-                {totalComment > 0 && thoudsandToK(totalComment)}
+                {totalComment > 0 && shortenLargeNumber(totalComment)}
               </span>
               {performer && (
                 <span aria-hidden className="action-ico" onClick={() => this.setState({ openTipModal: true })}>

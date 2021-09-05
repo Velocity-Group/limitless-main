@@ -1,7 +1,5 @@
-/* eslint-disable no-nested-ternary */
 import {
-  Layout, Tabs, Button, Menu, Collapse,
-  message, Modal, Tooltip, Dropdown
+  Layout, Tabs, Button, Menu, message, Modal, Tooltip, Dropdown
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -15,7 +13,7 @@ import {
 } from 'src/services';
 import Head from 'next/head';
 import {
-  CheckCircleOutlined, ArrowLeftOutlined, FireOutlined, ArrowDownOutlined,
+  CheckCircleOutlined, ArrowLeftOutlined, FireOutlined,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined,
   HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, ShareAltOutlined, BookOutlined
 } from '@ant-design/icons';
@@ -34,6 +32,7 @@ import Loader from '@components/common/base/loader';
 import {
   IPerformer, IUser, IUIConfig, IFeed, StreamSettings
 } from 'src/interfaces';
+import { shortenLargeNumber } from '@lib/index';
 import '@components/performer/performer.less';
 
 interface IProps {
@@ -160,19 +159,18 @@ class PerformerProfile extends PureComponent<IProps> {
           action: 'book_mark',
           objectType: 'performer'
         });
-        this.setState({ isBookMarked: true });
+        this.setState({ isBookMarked: true, requesting: false });
       } else {
         await reactionService.delete({
           objectId: performer?._id,
           action: 'book_mark',
           objectType: 'performer'
         });
-        this.setState({ isBookMarked: false });
+        this.setState({ isBookMarked: false, requesting: false });
       }
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ requesting: false });
     }
   }
@@ -428,42 +426,42 @@ class PerformerProfile extends PureComponent<IProps> {
                 <div className="tab-stat">
                   <div className="tab-item">
                     <span>
-                      {performer?.stats?.totalFeeds || 0}
+                      {shortenLargeNumber(performer?.stats?.totalFeeds || 0)}
                       {' '}
                       <FireOutlined />
                     </span>
                   </div>
                   <div className="tab-item">
                     <span>
-                      {performer?.stats?.totalVideos || 0}
+                      {shortenLargeNumber(performer?.stats?.totalVideos || 0)}
                       {' '}
                       <VideoCameraOutlined />
                     </span>
                   </div>
                   <div className="tab-item">
                     <span>
-                      {performer?.stats?.totalPhotos || 0}
+                      {shortenLargeNumber(performer?.stats?.totalPhotos || 0)}
                       {' '}
                       <PictureOutlined />
                     </span>
                   </div>
                   <div className="tab-item">
                     <span>
-                      {performer?.stats?.totalProducts || 0}
+                      {shortenLargeNumber(performer?.stats?.totalProducts || 0)}
                       {' '}
                       <ShopOutlined />
                     </span>
                   </div>
                   <div className="tab-item">
                     <span>
-                      {performer?.stats?.likes || 0}
+                      {shortenLargeNumber(performer?.stats?.likes || 0)}
                       {' '}
                       <HeartOutlined />
                     </span>
                   </div>
                   <div className="tab-item">
                     <span>
-                      {performer?.stats?.subscribers || 0}
+                      {shortenLargeNumber(performer?.stats?.subscribers || 0)}
                       {' '}
                       <UsergroupAddOutlined />
                     </span>
@@ -577,16 +575,7 @@ class PerformerProfile extends PureComponent<IProps> {
             )}
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <div className="show-more">
-                <Collapse
-                  bordered={false}
-                  defaultActiveKey={['1']}
-                  expandIconPosition="left"
-                  expandIcon={({ isActive }) => <ArrowDownOutlined rotate={isActive ? 180 : 0} />}
-                >
-                  <Collapse.Panel header="BIO" key="1">
-                    <p>{performer?.bio || 'No bio'}</p>
-                  </Collapse.Panel>
-                </Collapse>
+                <p>{performer?.bio || 'No bio'}</p>
                 {performer && <PerformerInfo countries={ui?.countries || []} performer={performer} />}
               </div>
             </div>

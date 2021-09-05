@@ -72,7 +72,6 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
     } catch (e) {
       const error = await Promise.resolve(e);
       message.error(error?.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ submiting: false });
     }
   }

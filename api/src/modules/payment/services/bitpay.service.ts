@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from 'nestjs-config';
-import { resolve } from 'url';
+import { getConfig } from 'src/kernel';
 import { PaymentDto } from 'src/modules/purchased-item/dtos';
 import axios from 'axios';
 
@@ -22,7 +22,7 @@ export class BitpayService {
       const {
         bitpayApiToken, bitpayProductionMode, transaction, currency
       } = options;
-      const webHookLink = resolve(this.config.get('app.baseUrl'), 'payment/bitpay/callhook');
+      const webHookLink = new URL('payment/bitpay/callhook', getConfig('app').baseUrl).href;
       const redirectUrl = `${process.env.USER_URL}/home`;
       let resourceUrl = '';
       switch (bitpayProductionMode) {

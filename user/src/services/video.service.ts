@@ -18,11 +18,11 @@ export class VideoService extends APIRequest {
   }
 
   findById(id: string, headers?: { [key: string]: string }) {
-    return this.get(`/performer/performer-assets/videos/${id}/view`, headers);
+    return this.get(`/performer/performer-assets/videos/${encodeURI(id)}/view`, headers);
   }
 
   findOne(id: string, headers?: { [key: string]: string }) {
-    return this.get(`/user/performer-assets/videos/${id}`, headers);
+    return this.get(`/user/performer-assets/videos/${encodeURI(id)}`, headers);
   }
 
   update(id: string, files: [{ fieldname: string; file: File }], payload: any, onProgress?: Function) {
@@ -30,10 +30,6 @@ export class VideoService extends APIRequest {
       onProgress,
       customData: payload
     });
-  }
-
-  increaseView(id: string) {
-    return this.post(`/user/performer-assets/videos/${id}/inc-view`);
   }
 
   uploadVideo(

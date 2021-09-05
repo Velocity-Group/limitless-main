@@ -38,11 +38,11 @@ export class ProductService extends APIRequest {
   }
 
   userView(productId: string) {
-    return this.get(`/user/performer-assets/products/${productId}`);
+    return this.get(`/user/performer-assets/products/${encodeURI(productId)}`);
   }
 
   findById(id: string) {
-    return this.get(`/performer/performer-assets/products/${id}/view`);
+    return this.get(`/performer/performer-assets/products/${encodeURI(id)}/view`);
   }
 
   delete(id: string) {

@@ -13,7 +13,6 @@ import {
   writeFileSync, unlinkSync, existsSync, createReadStream
 } from 'fs';
 import { join } from 'path';
-import { resolve } from 'url';
 import * as jwt from 'jsonwebtoken';
 import { FILE_MODEL_PROVIDER } from '../providers';
 import { FileModel } from '../models';
@@ -627,7 +626,7 @@ export class FileService {
    * @param param1
    */
   public async generateDownloadLink(fileId: string | ObjectId) {
-    const newUrl = new URL(resolve(getConfig('app').baseUrl, 'files/download'));
+    const newUrl = new URL('files/download', getConfig('app').baseUrl);
     newUrl.searchParams.append('key', this.generateJwt(fileId));
     return newUrl.href;
   }

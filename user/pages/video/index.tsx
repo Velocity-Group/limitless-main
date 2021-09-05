@@ -20,7 +20,7 @@ import { VideoPlayer } from '@components/common/video-player';
 import { ListComments, CommentForm } from '@components/comment';
 import Link from 'next/link';
 import Router from 'next/router';
-import { videoDuration } from '@lib/index';
+import { videoDuration, shortenLargeNumber } from '@lib/index';
 import { updateBalance } from '@redux/user/actions';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import Loader from '@components/common/base/loader';
@@ -379,7 +379,7 @@ class VideoViewPage extends PureComponent<IProps> {
             <a>
               <EyeOutlined />
               &nbsp;
-              {videoStats.views || 0}
+              {shortenLargeNumber(videoStats.views || 0)}
             </a>
             <a>
               <HourglassOutlined />
@@ -501,7 +501,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   className={isLiked ? 'react-btn active' : 'react-btn'}
                   onClick={this.onReaction.bind(this, 'like')}
                 >
-                  {videoStats.likes || 0}
+                  {shortenLargeNumber(videoStats.likes || 0)}
                   {' '}
                   <LikeOutlined />
                 </button>
@@ -510,7 +510,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   className={isBookmarked ? 'react-btn active' : 'react-btn'}
                   onClick={this.onReaction.bind(this, 'book_mark')}
                 >
-                  {videoStats.bookmarks || 0}
+                  {shortenLargeNumber(videoStats.bookmarks || 0)}
                   {' '}
                   <BookOutlined />
                 </button>
@@ -519,7 +519,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   type="button"
                   className={activeTab === 'comment' ? 'react-btn active' : 'react-btn'}
                 >
-                  {!isFirstLoadComment && !fetchingComment ? videoStats.comments : totalComments}
+                  {!isFirstLoadComment && !fetchingComment ? shortenLargeNumber(videoStats.comments || 0) : shortenLargeNumber(totalComments)}
                   {' '}
                   <CommentOutlined />
                 </button>

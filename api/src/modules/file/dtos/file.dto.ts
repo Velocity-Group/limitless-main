@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import { getConfig } from 'src/kernel';
-import { resolve } from 'url';
 import { isUrl } from 'src/kernel/helpers/string.helper';
 import { FileModel } from '../models';
 
@@ -87,7 +86,10 @@ export class FileDto {
     if (!this.path) return '';
     if (isUrl(this.path)) return this.path;
 
-    return resolve(getConfig('app').baseUrl, this.path);
+    return new URL(
+      this.path,
+      getConfig('app').baseUrl
+    ).href;
   }
 
   public getThumbnails(): string[] {
@@ -98,14 +100,17 @@ export class FileDto {
     return this.thumbnails.map((t) => {
       if (isUrl(t.path)) return t.path;
 
-      return resolve(getConfig('app').baseUrl, t.path);
+      return new URL(
+        t.path,
+        getConfig('app').baseUrl
+      ).href;
     });
   }
 
   static getPublicUrl(filePath: string): string {
     if (!filePath) return '';
     if (isUrl(filePath)) return filePath;
-    return resolve(getConfig('app').baseUrl, filePath);
+    return new URL(filePath, getConfig('app').baseUrl).href;
   }
 
   public isVideo() {

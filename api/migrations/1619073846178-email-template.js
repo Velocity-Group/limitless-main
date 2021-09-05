@@ -68,10 +68,15 @@ const templateMap = {
     subject: 'New payment success',
     desc: 'Email to user after user purchased website products'
   },
-  'payout-request': {
+  'admin-payout-request': {
     name: 'New payout request',
     subject: 'New payout request',
     desc: 'Email will be sent to admin to notify new payout request'
+  },
+  'admin-payout-status': {
+    name: 'Payout request update',
+    subject: 'Payout request status update',
+    desc: 'Email will be sent to model to notify once admin update status'
   },
   'free-subscription-expired': {
     name: 'Free subscription expired',

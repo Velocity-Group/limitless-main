@@ -4,8 +4,8 @@ import {
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import Link from 'next/link';
-import { videoDuration } from '@lib/index';
-import { IVideo } from '../../interfaces';
+import { videoDuration, shortenLargeNumber } from '@lib/index';
+import { IVideo } from 'src/interfaces';
 import './video.less';
 
 interface IProps {
@@ -36,12 +36,12 @@ export class VideoCard extends PureComponent<IProps> {
                 <a>
                   <EyeOutlined />
                   {' '}
-                  {video?.stats?.views || 0}
+                  {shortenLargeNumber(video?.stats?.views || 0)}
                 </a>
                 <a>
                   <LikeOutlined />
                   {' '}
-                  {video?.stats?.likes || 0}
+                  {shortenLargeNumber(video?.stats?.likes || 0)}
                 </a>
               </span>
               <a>

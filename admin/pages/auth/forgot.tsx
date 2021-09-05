@@ -25,8 +25,8 @@ class ForgotPassword extends PureComponent<IProps> {
   };
 
   handleReset = async (data) => {
-    await this.setState({ submiting: true });
     try {
+      await this.setState({ submiting: true });
       await authService.resetPassword({
         ...data
       });
@@ -35,7 +35,6 @@ class ForgotPassword extends PureComponent<IProps> {
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ submiting: false });
     }
   };

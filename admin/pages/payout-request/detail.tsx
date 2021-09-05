@@ -194,7 +194,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   {formatDate(request.createdAt)}
                 </p>
                 <p>
-                  User Note:
+                  Model Note:
                   {' '}
                   {request.requestNote}
                 </p>
