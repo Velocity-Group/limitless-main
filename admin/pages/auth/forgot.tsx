@@ -1,5 +1,5 @@
 import {
-  Form, Input, Button, Row, message
+  Layout, Form, Input, Button, Row, message
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -43,48 +43,50 @@ class ForgotPassword extends PureComponent<IProps> {
     const { ui } = this.props;
     const { submiting } = this.state;
     return (
-      <>
+      <Layout>
         <Head>
           <title>Forgot password</title>
         </Head>
-        <div className="form">
-          <div className="logo">
-            {ui.logo ? <div><img alt="logo" src={ui && ui.logo} /></div> : ui.siteName}
-            <h2>Forgot Password</h2>
-          </div>
-          <Form
-            onFinish={this.handleReset}
-          >
-            <FormItem
-              hasFeedback
-              name="email"
-              rules={[
-                { required: true, message: 'Please input your email!' },
-                { type: 'email' }
-              ]}
+        <div className="form-body">
+          <div className="form">
+            <div className="logo">
+              {ui.logo ? <div><img alt="logo" src={ui && ui.logo} /></div> : ui.siteName}
+              <h2>Forgot Password</h2>
+            </div>
+            <Form
+              onFinish={this.handleReset}
             >
-              <Input
-                placeholder="youremail@example.com"
-              />
-            </FormItem>
-            <Row>
-              <Button
-                type="primary"
-                loading={submiting}
-                disabled={submiting}
-                htmlType="submit"
+              <FormItem
+                hasFeedback
+                name="email"
+                rules={[
+                  { required: true, message: 'Please input your email!' },
+                  { type: 'email' }
+                ]}
               >
-                Submit
-              </Button>
-            </Row>
-          </Form>
-          <p>
-            <Link href="/auth/login">
-              <a style={{ float: 'right' }}>Login</a>
-            </Link>
-          </p>
+                <Input
+                  placeholder="youremail@example.com"
+                />
+              </FormItem>
+              <Row>
+                <Button
+                  type="primary"
+                  loading={submiting}
+                  disabled={submiting}
+                  htmlType="submit"
+                >
+                  Submit
+                </Button>
+              </Row>
+            </Form>
+            <p>
+              <Link href="/auth/login">
+                <a style={{ float: 'right' }}>Login</a>
+              </Link>
+            </p>
+          </div>
         </div>
-        <div className="footer" style={{ padding: '15px' }}>
+        <div className="footer">
           Version
           {' '}
           {process.env.NEXT_PUBLIC_BUILD_VERSION}
@@ -93,7 +95,7 @@ class ForgotPassword extends PureComponent<IProps> {
           {' '}
           {new Date().getFullYear()}
         </div>
-      </>
+      </Layout>
     );
   }
 }

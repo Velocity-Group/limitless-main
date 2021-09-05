@@ -1,12 +1,15 @@
 @import '../../style/vars';
 
+.form-body {
+  min-height: calc(100vh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .form {
-  position: absolute;
-  top: 45%;
-  left: 50%;
-  margin: -160px 0 0 -160px;
+  margin: auto;
   width: 320px;
-  height: 320px;
   padding: 36px;
   box-shadow: 0 0 100px rgba(0, 0, 0, 0.08);
 
@@ -29,7 +32,7 @@
   margin-bottom: 15px;
 
   img {
-    height: 70px;
+    height: auto;
     width: 100%;
   }
 
@@ -50,7 +53,6 @@
 }
 
 .footer {
-  position: absolute;
-  width: 100%;
-  bottom: 0;
+  text-align: center;
+  padding: 15px;
 }

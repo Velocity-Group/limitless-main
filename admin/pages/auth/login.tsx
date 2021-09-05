@@ -37,76 +37,78 @@ class Login extends PureComponent<IProps> {
         <Head>
           <title>Login</title>
         </Head>
-        <div className="form">
-          <div className="logo">
-            {ui.logo ? <div><img alt="logo" src={ui && ui.logo} /></div> : ui.siteName}
-            <h2>Admin Panel</h2>
-          </div>
-          {loginAuth.error && (
+        <div className="form-body">
+          <div className="form">
+            <div className="logo">
+              {ui.logo ? <div><img alt="logo" src={ui && ui.logo} /></div> : ui.siteName}
+              <h2>Admin Panel</h2>
+            </div>
+            {loginAuth.error && (
             <Alert
               message="Error"
               description={getResponseError(loginAuth.error)}
               type="error"
             />
-          )}
-          {loginAuth.success ? (
-            <Alert
-              message="Login success"
-              type="success"
-              description="Redirecting..."
-            />
-          ) : (
-            <Form
-              onFinish={this.handleOk}
-              initialValues={{
-                email: '',
-                password: ''
-              }}
-            >
-              <FormItem
-                hasFeedback
-                name="email"
-                rules={[
-                  { required: true, message: 'Please input your email!' },
-                  { type: 'email' }
-                ]}
+            )}
+            {loginAuth.success ? (
+              <Alert
+                message="Login success"
+                type="success"
+                description="Redirecting..."
+              />
+            ) : (
+              <Form
+                onFinish={this.handleOk}
+                initialValues={{
+                  email: '',
+                  password: ''
+                }}
               >
-                <Input
-                  onPressEnter={this.handleOk}
-                  placeholder="youremail@example.com"
-                />
-              </FormItem>
-              <FormItem
-                hasFeedback
-                name="password"
-                rules={[
-                  { required: true, message: 'Please input your password!' }
-                ]}
-              >
-                <Input.Password
-                  onPressEnter={this.handleOk}
-                  placeholder="Password"
-                />
-              </FormItem>
-              <Row>
-                <Button
-                  type="primary"
-                  onClick={this.handleOk}
-                  loading={loginAuth.requesting}
-                  htmlType="submit"
+                <FormItem
+                  hasFeedback
+                  name="email"
+                  rules={[
+                    { required: true, message: 'Please input your email!' },
+                    { type: 'email' }
+                  ]}
                 >
-                  Sign in
-                </Button>
-              </Row>
-            </Form>
-          )}
-          <p>
-            <Link href="/auth/forgot">
-              <a>Forgot password?</a>
-            </Link>
-          </p>
+                  <Input
+                    onPressEnter={this.handleOk}
+                    placeholder="youremail@example.com"
+                  />
+                </FormItem>
+                <FormItem
+                  hasFeedback
+                  name="password"
+                  rules={[
+                    { required: true, message: 'Please input your password!' }
+                  ]}
+                >
+                  <Input.Password
+                    onPressEnter={this.handleOk}
+                    placeholder="Password"
+                  />
+                </FormItem>
+                <Row>
+                  <Button
+                    type="primary"
+                    onClick={this.handleOk}
+                    loading={loginAuth.requesting}
+                    htmlType="submit"
+                  >
+                    Sign in
+                  </Button>
+                </Row>
+              </Form>
+            )}
+            <p>
+              <Link href="/auth/forgot">
+                <a>Forgot password?</a>
+              </Link>
+            </p>
+          </div>
         </div>
-        <div className="footer" style={{ padding: '15px' }}>
+        <div className="footer">
           Version
           {' '}
           {process.env.NEXT_PUBLIC_BUILD_VERSION}

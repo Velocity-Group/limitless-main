@@ -97,7 +97,7 @@ class Settings extends PureComponent {
       const err = await Promise.resolve(e);
       message.error(getResponseError(err) || 'An error occurred, please try again!');
     } finally {
-      await this.setState({ loading: false });
+      this.setState({ loading: false });
     }
   }
 
@@ -125,7 +125,7 @@ class Settings extends PureComponent {
       const err = await Promise.resolve(e);
       return message.error(getResponseError(err));
     } finally {
-      await this.setState({ updating: false });
+      this.setState({ updating: false });
     }
   }
 
@@ -303,8 +303,8 @@ class Settings extends PureComponent {
       updating, selectedTab, list, loading
     } = this.state;
     const layout = {
-      labelCol: { span: 6 },
-      wrapperCol: { span: 16 }
+      labelCol: { span: 24 },
+      wrapperCol: { span: 24 }
     };
 
     const initialValues = {} as any;
@@ -321,11 +321,10 @@ class Settings extends PureComponent {
             <Menu onClick={this.onMenuChange.bind(this)} selectedKeys={[selectedTab]} mode="horizontal">
               <Menu.Item key="general">General</Menu.Item>
               <Menu.Item key="email">Email</Menu.Item>
+              <Menu.Item key="mailer">SMTP</Menu.Item>
               <Menu.Item key="custom">SEO</Menu.Item>
               <Menu.Item key="commission">Commission</Menu.Item>
               <Menu.Item key="stripe">Stripe</Menu.Item>
-              {/* <Menu.Item key="ccbill">CCbill</Menu.Item> */}
-              <Menu.Item key="mailer">SMTP</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>
               {/* <Menu.Item key="recaptcha">Re-Captcha</Menu.Item> */}
@@ -338,14 +337,14 @@ class Settings extends PureComponent {
           ) : (
             <Form
               {...layout}
-              layout={selectedTab === 'commission' ? 'vertical' : 'horizontal'}
+              layout="horizontal"
               name="setting-frm"
               onFinish={this.submit.bind(this)}
               initialValues={initialValues}
               ref={this.formRef}
             >
               {list.map((setting) => this.renderFormItem(setting))}
-              <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }} style={{ textAlign: 'right' }}>
+              <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
                 <Button type="primary" htmlType="submit" disabled={updating} loading={updating}>
                   Submit
                 </Button>

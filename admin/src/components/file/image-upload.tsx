@@ -70,17 +70,6 @@ export class ImageUpload extends PureComponent<IProps, IState> {
     const {
       options = {}, image, headers, uploadUrl
     } = this.props;
-
-    const uploadButton = (
-      <div>
-        {loading ? <LoadingOutlined /> : <CameraOutlined />}
-      </div>
-    );
-    const imageGr = (
-      <div>
-        {loading ? <LoadingOutlined /> : <img src={imageUrl || image} alt="file" style={{ width: '100%' }} />}
-      </div>
-    );
     return (
       <Upload
         accept={'image/*'}
@@ -93,7 +82,8 @@ export class ImageUpload extends PureComponent<IProps, IState> {
         onChange={this.handleChange}
         headers={headers}
       >
-        {imageUrl || image ? imageGr : uploadButton}
+        {(imageUrl || image) && <img src={imageUrl || image} alt="file" style={{ width: '100%' }} />}
+        {loading ? <LoadingOutlined /> : <CameraOutlined />}
       </Upload>
     );
   }
