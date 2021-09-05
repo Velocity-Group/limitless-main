@@ -60,20 +60,13 @@ async function auth(ctx: NextPageContext) {
 }
 
 async function updateSettingsStore(ctx: NextPageContext, settings) {
-  try {
-    const { store } = ctx;
-    store.dispatch(
-      updateUIValue({
-        logo: settings.logoUrl,
-        siteName: settings.siteName
-      })
-    );
-
-    // TODO - update others like meta data
-  } catch (e) {
-    // TODO - implement me
-    console.log(e);
-  }
+  const { store } = ctx;
+  store.dispatch(
+    updateUIValue({
+      logo: settings.logoUrl,
+      siteName: settings.siteName
+    })
+  );
 }
 
 interface AppComponent extends NextPageContext {
@@ -122,11 +115,8 @@ class Application extends App<IApp> {
     return (
       <Provider store={store}>
         <Head>
-          <link
-            rel="icon"
-            href={settings && settings.favicon}
-            sizes="64x64"
-          />
+          <title>{settings?.siteName}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         </Head>
         <BaseLayout layout={layout}>
           <Component {...pageProps} />
