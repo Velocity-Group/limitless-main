@@ -89,7 +89,7 @@ export class MenuService {
     let sort = {};
     if (req.sort && req.sortBy) {
       sort = {
-        [req.sortBy]: req.sort
+        [req.sortBy || 'ordering']: req.sort || 1
       };
     }
     const [data, total] = await Promise.all([
@@ -118,7 +118,7 @@ export class MenuService {
     let sort = {};
     if (req.sort && req.sortBy) {
       sort = {
-        [req.sortBy]: req.sort
+        [req.sortBy || 'ordering']: req.sort || 1
       };
     }
     const [data, total] = await Promise.all([
@@ -137,6 +137,6 @@ export class MenuService {
   }
 
   public async getPublicMenus() {
-    return this.menuModel.find({});
+    return this.menuModel.find({}).sort({ ordering: 1 });
   }
 }

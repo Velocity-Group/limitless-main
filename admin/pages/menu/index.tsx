@@ -82,14 +82,14 @@ class Menus extends PureComponent<IProps> {
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
   async deleteMenu(id: string) {
     const { pagination } = this.state;
     if (!window.confirm('Are you sure you want to delete this menu?')) {
-      return false;
+      return;
     }
     try {
       await menuService.delete(id);
@@ -99,7 +99,6 @@ class Menus extends PureComponent<IProps> {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
     }
-    return undefined;
   }
 
   render() {

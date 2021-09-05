@@ -31,7 +31,7 @@ module.exports.up = async function up(next) {
 
   const pages = [
     {
-      title: 'TERMS OF SERVICE',
+      title: 'Terms of Service',
       type: 'post',
       status: 'published',
       authorId: null,
@@ -40,7 +40,7 @@ module.exports.up = async function up(next) {
       slug: KEYS.TOS
     },
     {
-      title: 'PRIVACY & POLICY',
+      title: 'Privacy & Policy',
       type: 'post',
       status: 'published',
       authorId: null,
@@ -83,7 +83,7 @@ module.exports.up = async function up(next) {
       console.log(`Created post ${p.title}`);
       // eslint-disable-next-line no-await-in-loop
       await DB.collection(COLLECTION.MENU).insertOne({
-        internal: true,
+        internal: false,
         isNewTab: true,
         parentId: null,
         path: `/page/${p.slug}`,
