@@ -264,7 +264,6 @@ const mapDispatch = {
   updatePerformer,
   updateCurrentUserAvatar,
   updateBanking,
-  updateCurrentUserCover,
-  updateBlockCountries
+  updateCurrentUserCover
 };
 export default connect(mapStates, mapDispatch)(AccountSettings);
