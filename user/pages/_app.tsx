@@ -171,8 +171,8 @@ class Application extends App<IApp> {
     let geoBlocked = false;
     if (process.browser && !!cookieService.getCookie('checkGeoBlock')) {
       const checkBlock = await userService.checkCountryBlock() as any;
-      // set interval check every single hour
-      cookieService.setCookie('checkGeoBlock', true, 1);
+      // set interval check every 5 minutes
+      cookieService.setCookie('checkGeoBlock', true, 5);
       if (checkBlock && checkBlock.data && checkBlock.data.blocked) {
         geoBlocked = true;
       }
