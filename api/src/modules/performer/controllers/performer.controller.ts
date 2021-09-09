@@ -25,7 +25,7 @@ import {
   ForbiddenException
 } from 'src/kernel';
 import { AuthService } from 'src/modules/auth/services';
-import { AuthGuard, LoadUser, RoleGuard } from 'src/modules/auth/guards';
+import { LoadUser, RoleGuard } from 'src/modules/auth/guards';
 import { CurrentUser, Roles } from 'src/modules/auth/decorators';
 import {
   FileUploadInterceptor, FileUploaded, FileDto
@@ -192,21 +192,6 @@ export class PerformerController {
     });
   }
 
-  @Post('/:id/check-subscribe')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
-  async checkSubscribe(
-    @Param('id') id: string,
-    @CurrentUser() currentUser: UserDto
-  ): Promise<any> {
-    const subscribe = await this.performerService.checkSubscribed(
-      id,
-      currentUser
-    );
-    // TODO - check roles or other to response info
-    return DataResponse.ok(subscribe);
-  }
-
   @Post('/avatar/upload')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
@@ -263,7 +248,7 @@ export class PerformerController {
   )
   async uploadPerformerVideo(
     @FileUploaded() file: FileDto,
-    @CurrentUser() performer: UserDto
+    @CurrentUser() performer: PerformerDto
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
     await this.performerService.updateWelcomeVideo(performer, file);

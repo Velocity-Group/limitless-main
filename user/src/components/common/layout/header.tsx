@@ -330,7 +330,7 @@ class Header extends PureComponent<IProps> {
                   <div className={router.pathname === '/model/block-user' ? 'menu-item active' : 'menu-item'}>
                     <BlockOutlined />
                     {' '}
-                    Backlist
+                    Black List
                   </div>
                 </Link>
                 <Link href={{ pathname: '/model/banking' }} as="/model/banking">

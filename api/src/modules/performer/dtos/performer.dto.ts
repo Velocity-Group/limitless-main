@@ -492,6 +492,7 @@ export class PerformerDto {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       isOnline: this.isOnline,
+      welcomeVideoId: this.welcomeVideoId,
       welcomeVideoPath: FileDto.getPublicUrl(this.welcomeVideoPath),
       activateWelcomeVideo: this.activateWelcomeVideo,
       verifiedAccount: this.verifiedAccount,

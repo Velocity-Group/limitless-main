@@ -55,17 +55,9 @@ class Footer extends PureComponent<IProps> {
               && menus.length > 0
               && menus.map((item) => (
                 <li key={item._id} className={router.pathname === item.path ? 'active' : ''}>
-                  {!item.internal ? (
-                    <a rel="noreferrer" href={item.path} target={item.isNewTab ? '_blank' : ''}>
-                      {item.title}
-                    </a>
-                  ) : (
-                    <Link
-                      href={item.path}
-                    >
-                      <a target={item.isNewTab ? '_blank' : ''}>{item.title}</a>
-                    </Link>
-                  )}
+                  <a rel="noreferrer" href={item.path} target={item.isNewTab ? '_blank' : ''}>
+                    {item.title}
+                  </a>
                 </li>
               ))}
           </ul>

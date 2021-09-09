@@ -128,9 +128,6 @@ class VideoUpdate extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <PageHeading title="Edit Video" icon={<VideoCameraOutlined />} />
-          <div className="page-heading">
-            <span>Edit Video</span>
-          </div>
           {!fetching && video && (
           <FormUploadVideo
             user={user}

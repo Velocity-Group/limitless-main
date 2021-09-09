@@ -584,15 +584,11 @@ export class PerformerService {
 
   public async selfUpdate(
     id: string | ObjectId,
-    payload: SelfUpdatePayload,
-    welcomeVideo?: FileDto
+    payload: SelfUpdatePayload
   ): Promise<boolean> {
     const performer = await this.performerModel.findById(id);
     if (!performer) {
       throw new EntityNotFoundException();
-    }
-    if (welcomeVideo && !welcomeVideo.mimeType.toLowerCase().includes('video')) {
-      await this.fileService.remove(welcomeVideo._id);
     }
     const data = { ...payload } as any;
     if (!data.name) {
@@ -694,7 +690,7 @@ export class PerformerService {
     return file;
   }
 
-  public async updateWelcomeVideo(user: UserDto, file: FileDto) {
+  public async updateWelcomeVideo(user: PerformerDto, file: FileDto) {
     await this.performerModel.updateOne(
       { _id: user._id },
       {
@@ -707,9 +703,10 @@ export class PerformerService {
       itemId: user._id,
       itemType: REF_TYPE.PERFORMER
     });
-
+    if (user.welcomeVideoId) {
+      await this.fileService.remove(user.welcomeVideoId);
+    }
     await this.fileService.queueProcessVideo(file._id);
-
     return file;
   }
 
@@ -718,14 +715,6 @@ export class PerformerService {
       performerId
     });
     return data;
-  }
-
-  public async checkSubscribed(performerId: string | ObjectId, user: UserDto) {
-    const count = performerId && user ? await this.subscriptionService.checkSubscribed(
-      performerId,
-      user._id
-    ) : 0;
-    return { subscribed: count > 0 };
   }
 
   public async increaseViewStats(id: string | ObjectId) {

@@ -15,8 +15,7 @@ import {
   updatePerformer,
   updateCurrentUserAvatar,
   updateBanking,
-  updateCurrentUserCover,
-  updateBlockCountries
+  updateCurrentUserCover
 } from 'src/redux/user/actions';
 import {
   authService, blockService, performerService, utilsService
@@ -37,7 +36,6 @@ interface IProps {
   ui: IUIConfig;
   updateCurrentUserCover: Function;
   countries: ICountry[];
-  updateBlockCountries: Function;
   heights?: IHeight[];
   weights?: IWeight[];
 }
@@ -84,11 +82,9 @@ class AccountSettings extends PureComponent<IProps> {
   }
 
   async handleUpdateBlockCountries(data: IBlockCountries) {
-    const { updateBlockCountries: handleBlockCountry } = this.props;
     try {
-      const resp = await blockService.blockCountries(data);
+      await blockService.blockCountries(data);
       message.success('Changes saved');
-      handleBlockCountry(resp.data);
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try againl later');

@@ -1,58 +1,34 @@
-/* eslint-disable react/no-danger */
 import { PureComponent } from 'react';
 import Head from 'next/head';
-import { Layout, message, Spin } from 'antd';
+import { Layout } from 'antd';
 import { ReadOutlined } from '@ant-design/icons';
 import { postService } from '@services/post.service';
 import { connect } from 'react-redux';
+import Router from 'next/router';
+import { IPostResponse } from '@interfaces/post';
 import PageHeading from '@components/common/page-heading';
 
 interface IProps {
   ui: any;
-  id: string;
+  post: IPostResponse;
 }
 class PostDetail extends PureComponent<IProps> {
-  static authenticate = true;
+  static authenticate: boolean = true;
 
-  static noredirect = true;
-
-  state = {
-    fetching: false,
-    post: null
-  };
+  static noredirect: boolean = true;
 
   static async getInitialProps({ ctx }: any) {
     const { query } = ctx;
-    return query;
-  }
-
-  async componentDidMount() {
-    this.getPost();
-  }
-
-  async componentDidUpdate(prevProps: IProps) {
-    const { id } = this.props;
-    if (prevProps.id !== id) {
-      this.getPost();
-    }
-  }
-
-  async getPost() {
-    const { id } = this.props;
     try {
-      await this.setState({ fetching: true });
-      const resp = await postService.findById(id as string);
-      this.setState({ post: resp.data });
+      const post = await (await postService.findById(query.id)).data;
+      return { post };
     } catch (e) {
-      message.error('Page not found!');
-    } finally {
-      this.setState({ fetching: false });
+      return Router.replace('/404');
     }
   }
 
   render() {
-    const { post, fetching } = this.state;
-    const { ui } = this.props;
+    const { ui, post } = this.props;
     return (
       <Layout>
         <Head>
@@ -65,9 +41,9 @@ class PostDetail extends PureComponent<IProps> {
             <PageHeading title={post?.title || 'Not found'} icon={<ReadOutlined />} />
             <div
               className="page-content"
+              // eslint-disable-next-line react/no-danger
               dangerouslySetInnerHTML={{ __html: post?.content }}
             />
-            {fetching && <div><Spin /></div>}
           </div>
         </div>
       </Layout>
@@ -75,7 +51,7 @@ class PostDetail extends PureComponent<IProps> {
   }
 }
 const mapProps = (state: any) => ({
-  ui: { ...state.ui }
+  ui: state.ui
 });
 
 export default connect(mapProps)(PostDetail);

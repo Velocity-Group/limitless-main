@@ -24,7 +24,7 @@ import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
 import { PerformerInfo } from '@components/performer/table-info';
 import Link from 'next/link';
 import Router from 'next/router';
-import { redirectToErrorPage } from '@redux/system/actions';
+import Error from 'next/error';
 import { TipPerformerForm } from '@components/performer/tip-form';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import SearchPostBar from '@components/post/search-bar';
@@ -37,6 +37,7 @@ import '@components/performer/performer.less';
 
 interface IProps {
   ui: IUIConfig;
+  error: any;
   currentUser: IUser;
   performer: IPerformer;
   query: any;
@@ -49,8 +50,6 @@ interface IProps {
   getGalleries: Function;
   moreGalleries: Function;
   galleryState: any;
-  error: any;
-  redirectToErrorPage: Function;
   feedState: any;
   getFeeds: Function;
   moreFeeds: Function;
@@ -109,7 +108,6 @@ class PerformerProfile extends PureComponent<IProps> {
 
   async componentDidMount() {
     const { performer } = this.props;
-    this.checkBlock();
     if (performer) {
       const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');
       const showWelcomVideo = !notShownWelcomeVideos || (notShownWelcomeVideos && !notShownWelcomeVideos.includes(performer._id));
@@ -282,19 +280,6 @@ class PerformerProfile extends PureComponent<IProps> {
     }
   }
 
-  checkBlock() {
-    const { error, redirectToErrorPage: handleRedirect } = this.props;
-    if (error && process.browser) {
-      handleRedirect({
-        url: '/error',
-        error: {
-          ...error,
-          message: error?.message || 'You have been blocked by this model'
-        }
-      });
-    }
-  }
-
   async loadMoreItem() {
     const {
       feedPage, videoPage, productPage, itemPerPage, galleryPage,
@@ -361,6 +346,7 @@ class PerformerProfile extends PureComponent<IProps> {
 
   render() {
     const {
+      error,
       performer,
       ui,
       currentUser,
@@ -369,6 +355,9 @@ class PerformerProfile extends PureComponent<IProps> {
       productState,
       galleryState
     } = this.props;
+    if (error) {
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Page not found'} />;
+    }
     const { items: feeds = [], total: totalFeed = 0, requesting: loadingFeed } = feedState;
     const { items: videos = [], total: totalVideos = 0, requesting: loadingVideo } = videoState;
     const { items: products = [], total: totalProducts = 0, requesting: loadingPrd } = productState;
@@ -818,7 +807,6 @@ const mapDispatch = {
   moreProduct,
   getGalleries,
   moreGalleries,
-  redirectToErrorPage,
   removeFeedSuccess,
   updateBalance
 };

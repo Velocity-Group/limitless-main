@@ -41,36 +41,23 @@ export default class FeedSlider extends PureComponent<IProps> {
         {!processing && feed.files && feed.files.length && (
           <>
             {images && images.length > 0 && (
-            <Carousel swipeToSlide arrows dots={false}>
-              {images.map((img, index) => (
-                <Image
-                  key={img._id}
-                  src={img.url}
-                  preview={{ visible: false }}
-                  fallback="/static/no-image.jpg"
-                  title={img.name}
-                  width="100%"
-                  alt="img"
-                  onClick={() => this.setState({ openPreviewImage: true, previewIndex: index })}
-                />
-              ))}
-            </Carousel>
-            )}
-            <div style={{ display: 'none' }}>
-              <Image.PreviewGroup preview={{ current: previewIndex, visible: openPreviewImage, onVisibleChange: (vis) => this.setState({ openPreviewImage: vis }) }}>
+            <Image.PreviewGroup>
+              <Carousel effect="fade" draggable swipeToSlide arrows dots={false} infinite={false}>
                 {images.map((img) => (
                   <Image
+                    preview={{ maskClosable: false }}
                     key={img._id}
                     src={img.url}
-                    preview={{ visible: false }}
+                    placeholder
                     fallback="/static/no-image.jpg"
                     title={img.name}
                     width="100%"
                     alt="img"
                   />
                 ))}
-              </Image.PreviewGroup>
-            </div>
+              </Carousel>
+            </Image.PreviewGroup>
+            )}
             {videos && videos.length > 0 && videos.map((vid) => (
               <VideoPlayer
                 key={vid._id}
