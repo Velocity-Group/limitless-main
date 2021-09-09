@@ -270,14 +270,14 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   </Select>
                 </div>
                 <div style={{ marginBottom: '10px' }}>
-                  <p>Note to user: </p>
+                  <p>Note to model: </p>
                   <Input.TextArea
                     defaultValue={adminNote}
                     style={{ width: '100%' }}
                     onChange={(v) => {
                       this.setState({ adminNote: v.target.value });
                     }}
-                    placeholder="Text something to user"
+                    placeholder="Note something to model"
                     autoSize={{ minRows: 3 }}
                   />
                 </div>
