@@ -23,10 +23,6 @@ export class UserService extends APIRequest {
   findById(id: string) {
     return this.get(`/users/view/${id}`);
   }
-
-  checkCountryBlock() {
-    return this.get('/country-block/check');
-  }
 }
 
 export const userService = new UserService();

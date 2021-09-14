@@ -1,5 +1,5 @@
 import { PureComponent } from 'react';
-import { Carousel } from 'antd';
+import { Carousel, Image } from 'antd';
 
 interface IProps {
   banners?: any;
@@ -15,7 +15,7 @@ export class Banner extends PureComponent<IProps> {
         <Carousel effect="fade" autoplay swipeToSlide arrows dots={false}>
           {banners.map((item) => (
             // eslint-disable-next-line jsx-a11y/control-has-associated-label
-            <a href={(item.link || '#')} target="_.blank"><img src={item.photo && item.photo.url} alt="" key={item._id} /></a>
+            <a href={(item.link || null)} target="_.blank"><Image preview={false} placeholder src={item?.photo?.url} alt="" key={item._id} /></a>
           ))}
         </Carousel>
         )}

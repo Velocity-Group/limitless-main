@@ -182,11 +182,11 @@ export class AccountForm extends PureComponent<IProps> {
               label="Username"
               rules={[{ required: true },
                 {
-                  pattern: new RegExp(/^[a-zA-Z0-9]+$/g),
-                  message: 'Username must contain only Alphabets & Numbers'
+                  pattern: new RegExp(/^[a-z0-9]+$/g),
+                  message: 'Username must contain lowercase alphanumerics only'
                 }, { min: 3 }]}
             >
-              <Input placeholder="Unique, lowercase and number, no space or special chars" />
+              <Input placeholder="Unique, lowercase alphanumerics only" />
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>

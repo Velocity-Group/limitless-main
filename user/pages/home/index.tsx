@@ -160,12 +160,6 @@ class HomePage extends PureComponent<IProps> {
         <div className="home-page">
           <Banner banners={topBanners} />
           <div style={{ position: 'relative' }}>
-            {/* <div className="banner-left">
-                  {leftBanners && leftBanners.length > 0 && <Banner banners={leftBanners} />}
-                </div>
-                <div className="banner-right">
-                  {rightBanners && rightBanners.length > 0 && <Banner banners={rightBanners} />}
-                </div> */}
             <div className="main-container">
               <div className="home-heading">
                 <h3>HOME</h3>
@@ -188,7 +182,7 @@ class HomePage extends PureComponent<IProps> {
               <div className="home-container">
                 <div className="left-container">
                   {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
-                  <div className="visit-history">
+                  {/* <div className="visit-history">
                     <div className="top-story">
                       <a>Story</a>
                       <a href="/model"><small>View all</small></a>
@@ -204,7 +198,7 @@ class HomePage extends PureComponent<IProps> {
                       ))}
                       {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No visited profile was found.</p>}
                     </div>
-                  </div>
+                  </div> */}
                   {/* <div className="filter-feed">
                     <FilterOutlined />
                     <Button disabled={loadingFeed} className={orientation === '' ? 'active' : ''} onClick={() => this.onFilterFeed('')}>All</Button>

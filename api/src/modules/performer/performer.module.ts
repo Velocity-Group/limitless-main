@@ -6,16 +6,10 @@ import { SubscriptionModule } from '../subscription/subscription.module';
 import { SettingModule } from '../settings/setting.module';
 import { performerProviders } from './providers';
 import {
-  CategoryService,
-  CategorySearchService,
-  PerformerService,
-  PerformerSearchService
+  CategoryService, CategorySearchService, PerformerService, PerformerSearchService
 } from './services';
 import {
-  CategoryController,
-  AdminCategoryController,
-  AdminPerformerController,
-  PerformerController
+  CategoryController, AdminCategoryController, AdminPerformerController, PerformerController
 } from './controllers';
 import { UserModule } from '../user/user.module';
 import { FileModule } from '../file/file.module';

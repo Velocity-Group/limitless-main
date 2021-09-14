@@ -223,13 +223,13 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 {
                   pattern: new RegExp(/^[a-z0-9]+$/g),
                   message:
-                    'Username must contain alphanumeric only'
+                    'Username must contain lowercase alphanumerics only'
                 },
                 { min: 3, message: 'Username must containt at least 3 characters' }
               ]}
               hasFeedback
             >
-              <Input placeholder="injoker33, shadowfiend99, etc..." />
+              <Input placeholder="user1, john99,..." />
             </Form.Item>
           </Col>
           <Col lg={24} md={24} xs={24}>

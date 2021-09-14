@@ -1,9 +1,9 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Row, Col, Spin, Button, Modal
+  Layout, message, Row, Col, Spin, Button, Modal, Tabs
 } from 'antd';
 import {
-  HeartOutlined, BookOutlined, PictureOutlined
+  EyeOutlined, PictureOutlined, CalendarOutlined
 } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
@@ -20,6 +20,8 @@ import { PurchaseGalleryForm } from '@components/gallery/confirm-purchase';
 import GalleryCard from '@components/gallery/gallery-card';
 import Router from 'next/router';
 import Link from 'next/link';
+import Error from 'next/error';
+import { shortenLargeNumber, formatDate } from '@lib/index';
 import Loader from '@components/common/base/loader';
 import PageHeading from '@components/common/page-heading';
 import PhotoPreviewList from '@components/photo/photo-preview-list';
@@ -27,7 +29,7 @@ import './index.less';
 
 interface IProps {
   gallery: IGallery;
-  query: any;
+  error: any;
   user: IUser;
   ui: IUIConfig;
   getRelatedGalleries: Function;
@@ -50,18 +52,17 @@ class GalleryViewPage extends PureComponent<IProps> {
           Authorization: ctx.token
         })
       ).data) as IGallery;
-      if (gallery) {
-        return {
-          gallery
-        };
-      }
+      return {
+        gallery
+      };
     } catch (e) {
-      return { };
+      return { error: await e };
     }
-    return { };
   }
 
   state = {
+    offset: 0,
+    total: 0,
     fetching: false,
     photos: [],
     isBought: false,
@@ -102,16 +103,32 @@ class GalleryViewPage extends PureComponent<IProps> {
 
   async getPhotos() {
     const { gallery } = this.props;
+    const { offset, photos } = this.state;
     try {
       await this.setState({ fetching: true });
-      const resp = await (await photoService.userSearch(gallery.performerId, { galleryId: gallery._id, limit: 999 })).data;
-      this.setState({ photos: resp.data });
+      const resp = await (await photoService.userSearch({
+        galleryId: gallery._id,
+        limit: 40,
+        offset: offset * 40
+      })).data;
+      this.setState({ photos: photos.concat(resp.data), total: resp.total });
+      // preload image
+      resp.data.forEach((img) => {
+        setTimeout(() => { new Image().src = img?.photo?.url; }, 1000);
+        return img;
+      });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error on getting photos, please try again later');
     } finally {
       this.setState({ fetching: false });
     }
+  }
+
+  async getMorePhotos() {
+    const { offset } = this.state;
+    await this.setState({ offset: offset + 1 });
+    this.getPhotos();
   }
 
   async purchaseGallery() {
@@ -163,6 +180,7 @@ class GalleryViewPage extends PureComponent<IProps> {
   render() {
     const {
       ui,
+      error,
       gallery,
       user,
       relatedGalleries = {
@@ -172,8 +190,11 @@ class GalleryViewPage extends PureComponent<IProps> {
         items: []
       }
     } = this.props;
+    if (error) {
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
+    }
     const {
-      fetching, photos, isBought, isSubscribed, submiting, openPurchaseModal, openSubscriptionModal
+      fetching, photos, total, isBought, isSubscribed, submiting, openPurchaseModal, openSubscriptionModal
     } = this.state;
     const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && isSubscribed);
     return (
@@ -199,12 +220,24 @@ class GalleryViewPage extends PureComponent<IProps> {
         </Head>
         <Layout>
           <div className="main-container">
-            <PageHeading icon={<PictureOutlined />} title={gallery?.title} />
-            <p style={{ whiteSpace: 'pre-line' }}>{gallery?.description || 'No description'}</p>
+            <PageHeading icon={<PictureOutlined />} title={gallery?.title || 'Gallery'} />
+            <div className="gal-stats">
+              <a>
+                <EyeOutlined />
+              &nbsp;
+                {shortenLargeNumber(gallery?.stats.views || 0)}
+              </a>
+              <a>
+                <CalendarOutlined />
+              &nbsp;
+                {formatDate(gallery?.updatedAt, 'LL')}
+              </a>
+            </div>
             <div className="photo-carousel">
               {!fetching && photos && photos.length > 0 && <PhotoPreviewList isBlur={!user || !user._id || !canview} photos={photos} />}
               {!fetching && !photos.length && <p className="text-center">No photo was found.</p>}
               {fetching && <div className="text-center"><Spin /></div>}
+              {!fetching && total > photos.length && <div className="text-center" style={{ margin: 10 }}><Button type="link" onClick={this.getMorePhotos.bind(this)}>More photos ...</Button></div>}
               {!canview && (
                 <div className="text-center" style={{ margin: '20px 0' }}>
                   {gallery?.isSale && !isBought && (
@@ -315,6 +348,13 @@ class GalleryViewPage extends PureComponent<IProps> {
             </div>
           </div>
           <div className="main-container">
+            <Tabs
+              defaultActiveKey="description"
+            >
+              <Tabs.TabPane tab="Description" key="description">
+                <p>{gallery?.description || 'No description...'}</p>
+              </Tabs.TabPane>
+            </Tabs>
             <div className="related-items">
               <h4 className="ttl-1">You may also like</h4>
               {relatedGalleries.requesting && <div className="text-center"><Spin /></div>}

@@ -53,8 +53,7 @@ class FanRegister extends PureComponent<IProps> {
   }
 
   async onGoogleLogin(resp: any) {
-    if (!resp.tokenId) {
-      message.error('Google login authenticated fail');
+    if (!resp?.tokenId) {
       return;
     }
     const { loginSocial: handleLogin } = this.props;
@@ -203,8 +202,8 @@ class FanRegister extends PureComponent<IProps> {
                       hasFeedback
                       rules={[
                         {
-                          pattern: new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/g),
-                          message: 'Password must have minimum 8 characters, at least one uppercase letter, one lowercase letter and one number'
+                          pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                          message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
                         },
                         { required: true, message: 'Please enter your password!' }
                       ]}

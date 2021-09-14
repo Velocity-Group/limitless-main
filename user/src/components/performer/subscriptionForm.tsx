@@ -80,7 +80,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
               <InputNumber min={1} />
             </Form.Item>
           </Col>
-          <Col xl={12} md={12} xs={24}>
+          {/* <Col xl={12} md={12} xs={24}>
             <Form.Item
               name="publicChatPrice"
               label="Tokens per minute Public Chat"
@@ -110,7 +110,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             >
               <InputNumber min={1} />
             </Form.Item>
-          </Col>
+          </Col> */}
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>

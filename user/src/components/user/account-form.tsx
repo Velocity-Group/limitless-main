@@ -90,7 +90,7 @@ export const UserAccountForm = ({
             {
               pattern: new RegExp(/^[a-z0-9]+$/g),
               message:
-                'Username must contain alphanumeric only'
+                'Username must contain lowercase alphanumerics only'
             },
             { min: 3, message: 'Username must containt at least 3 characters' }
           ]}
@@ -212,7 +212,7 @@ export const UserAccountForm = ({
       <Button htmlType="submit" className="primary" disabled={updating} loading={updating}>
         Update Profile
       </Button>
-      <Button style={{ margin: '0 5px' }} className="secondary" onClick={() => onSwitchToPerformer()}>Become a Model</Button>
+      {/* <Button style={{ margin: '0 5px' }} className="secondary" onClick={() => onSwitchToPerformer()}>Become a Model</Button> */}
     </Form.Item>
   </Form>
 );

@@ -1,7 +1,3 @@
-/* eslint-disable linebreak-style */
-/* eslint-disable react/no-unused-state */
-/* eslint-disable linebreak-style */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import Head from 'next/head';
 import { PureComponent, Fragment, createRef } from 'react';
 import { message, Tabs } from 'antd';

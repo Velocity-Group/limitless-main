@@ -118,7 +118,6 @@ class Dashboard extends PureComponent<IProps> {
                         {ui && ui.modelBenefit
                           ? <div dangerouslySetInnerHTML={{ __html: ui.modelBenefit }} />
                           : (
-
                             <ul>
                               <li>Lightning fast uploading</li>
                               <li>Multi-video uploading</li>

@@ -4,23 +4,16 @@ import {
 } from 'antd';
 import { VideoPlayer } from '@components/common/video-player';
 import { AudioPlayer } from '@components/common/audio-player';
-// import { FileImageOutlined, VideoCameraOutlined, AudioOutlined } from '@ant-design/icons';
-import './index.less';
 import { IFeed } from '@interfaces/feed';
+import './index.less';
 
 interface IProps {
   feed: IFeed;
 }
 
 export default class FeedSlider extends PureComponent<IProps> {
-  state = {
-    openPreviewImage: false,
-    previewIndex: 0
-  }
-
   render() {
     const { feed } = this.props;
-    const { openPreviewImage, previewIndex } = this.state;
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     const audios = feed.files && feed.files.filter((f) => f.type === 'feed-audio');

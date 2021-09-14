@@ -43,22 +43,6 @@ export class UserPhotosController {
     return DataResponse.ok(data);
   }
 
-  @Get('/:performerId')
-  @UseGuards(LoadUser)
-  @HttpCode(HttpStatus.OK)
-  async list(
-    @Param('performerId') performerId: string,
-    @Query() query: PhotoSearchRequest,
-    @Request() req: any
-  ) {
-    // eslint-disable-next-line no-param-reassign
-    query.performerId = performerId;
-    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = auth && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
-    const data = await this.photoSearchService.getModelPhotosWithGalleryCheck(query, jwToken);
-    return DataResponse.ok(data);
-  }
-
   @Get('/:id/view')
   @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)

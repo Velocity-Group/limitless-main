@@ -20,30 +20,26 @@ import { VideoPlayer } from '@components/common/video-player';
 import { ListComments, CommentForm } from '@components/comment';
 import Link from 'next/link';
 import Router from 'next/router';
-import { videoDuration, shortenLargeNumber } from '@lib/index';
+import Error from 'next/error';
+import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
 import { updateBalance } from '@redux/user/actions';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import PageHeading from '@components/common/page-heading';
 import Loader from '@components/common/base/loader';
 import {
-  IVideoResponse,
-  IUser,
-  IUIConfig,
-  IPerformer
+  IVideoResponse, IUser, IUIConfig, IPerformer
 } from 'src/interfaces';
 import {
-  getComments,
-  moreComment,
-  createComment,
-  deleteComment
+  getComments, moreComment, createComment, deleteComment
 } from 'src/redux/comment/actions';
 import { getRelated } from 'src/redux/video/actions';
-import { formatDate } from '@lib/date';
 import './index.less';
 
 const { TabPane } = Tabs;
 
 interface IProps {
   query: any;
+  error: any;
   user: IUser;
   relatedVideos: any;
   commentMapping: any;
@@ -73,12 +69,9 @@ class VideoViewPage extends PureComponent<IProps> {
           Authorization: ctx.token
         })
       ).data) as IVideoResponse;
-      if (!video) {
-        return Router.push('/404');
-      }
       return { video };
     } catch (e) {
-      return Router.push('/404');
+      return { error: await e };
     }
   }
 
@@ -283,6 +276,7 @@ class VideoViewPage extends PureComponent<IProps> {
   render() {
     const {
       user,
+      error,
       ui,
       video,
       relatedVideos = {
@@ -294,6 +288,9 @@ class VideoViewPage extends PureComponent<IProps> {
       commentMapping,
       comment
     } = this.props;
+    if (error) {
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
+    }
     const { requesting: commenting } = comment;
     const fetchingComment = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].requesting : false;
     const comments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].items : [];
@@ -370,11 +367,7 @@ class VideoViewPage extends PureComponent<IProps> {
           />
         </Head>
         <div className="main-container">
-          <div className="vid-title">
-            <VideoCameraOutlined />
-            {' '}
-            {video.title}
-          </div>
+          <PageHeading icon={<VideoCameraOutlined />} title={video.title || 'Video'} />
           <div className="vid-duration">
             <a>
               <EyeOutlined />
@@ -612,8 +605,6 @@ class VideoViewPage extends PureComponent<IProps> {
               )}
             </TabPane>
           </Tabs>
-        </div>
-        <div className="main-container">
           <div className="related-items">
             <h4 className="ttl-1">You may also like</h4>
             {relatedVideos.requesting && <div className="text-center"><Spin /></div>}

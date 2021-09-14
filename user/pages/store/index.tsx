@@ -1,5 +1,5 @@
 import {
-  Layout, Button, message, Spin, Modal, Tooltip
+  Layout, Button, message, Spin, Modal
 } from 'antd';
 import PageHeading from '@components/common/page-heading';
 import {
@@ -219,7 +219,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   }}
                   as={`/model/${product?.performer?.username || product?.performer?._id}`}
                 >
-                  <>
+                  <a>
                     <img
                       alt="performer avatar"
                       src={product?.performer?.avatar || '/static/no-avatar.png'}
@@ -232,7 +232,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                         {product?.performer?.username || 'n/a'}
                       </small>
                     </div>
-                  </>
+                  </a>
                 </Link>
               </div>
               {/* <div className="act-btns">

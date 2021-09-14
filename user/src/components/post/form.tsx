@@ -73,8 +73,19 @@ export default class FeedForm extends PureComponent<IProps> {
 
   async onAddMore(file, listFile) {
     const { fileList, fileIds } = this.state;
-    if (!listFile.length) {
-      return;
+    if (file.type.includes('image')) {
+      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      if (!valid) {
+        message.error(`Image ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+        return false;
+      }
+    }
+    if (file.type.includes('video')) {
+      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      if (!valid) {
+        message.error(`Video ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
+        return false;
+      }
     }
     if (listFile.indexOf(file) === (listFile.length - 1)) {
       const files = await Promise.all(listFile.map((f) => {
@@ -113,6 +124,7 @@ export default class FeedForm extends PureComponent<IProps> {
       }
       this.setState({ uploading: false, fileIds: newFileIds });
     }
+    return true;
   }
 
   onUploading(file, resp: any) {
@@ -178,6 +190,20 @@ export default class FeedForm extends PureComponent<IProps> {
   }
 
   async beforeUpload(file, fileList) {
+    if (file.type.includes('image')) {
+      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      if (!valid) {
+        message.error(`Image ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+        return false;
+      }
+    }
+    if (file.type.includes('video')) {
+      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      if (!valid) {
+        message.error(`Video ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
+        return false;
+      }
+    }
     if (fileList.indexOf(file) === (fileList.length - 1)) {
       const files = fileList.map((f) => {
         if (f._id || f.type.includes('video')) return f;
@@ -212,6 +238,7 @@ export default class FeedForm extends PureComponent<IProps> {
       }
       this.setState({ uploading: false, fileIds: newFileIds });
     }
+    return true;
   }
 
   async beforeUploadThumbnail(file) {

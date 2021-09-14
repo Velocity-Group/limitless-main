@@ -24,8 +24,8 @@ export const UpdatePaswordForm = ({ onFinish, updating = false }: IProps) => (
           rules={[
             { required: true, message: 'Please input your password!' },
             {
-              pattern: new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/g),
-              message: 'Password must have minimum 8 characters, at least one uppercase letter, one lowercase letter and one number'
+              pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+              message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
             }
           ]}
         >

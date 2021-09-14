@@ -46,8 +46,8 @@ export class PhotoService extends APIRequest {
     return this.get(this.buildUrl('/performer/performer-assets/photos/search', payload));
   }
 
-  userSearch(performerId, payload) {
-    return this.get(this.buildUrl(`/user/performer-assets/photos/${performerId}`, payload));
+  userSearch(payload) {
+    return this.get(this.buildUrl('/user/performer-assets/photos', payload));
   }
 }
 

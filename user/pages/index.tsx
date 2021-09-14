@@ -79,7 +79,7 @@ class Login extends PureComponent<IProps> {
   }
 
   async onGoogleLogin(resp: any) {
-    if (!resp.tokenId) {
+    if (!resp?.tokenId) {
       return;
     }
     const { loginSocial: handleLogin } = this.props;

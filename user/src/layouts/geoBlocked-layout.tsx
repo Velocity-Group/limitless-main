@@ -14,7 +14,7 @@ const GEOLayout: FunctionComponent<any> = () => (
     }}
     >
       <h1 style={{ fontSize: '30px' }}>We've sorry.</h1>
-      <h3 style={{ fontSize: '27px' }}>Website content is not available on your country</h3>
+      <h3 style={{ fontSize: '27px' }}>Website is not allowed in your country</h3>
     </div>
   </main>
 );

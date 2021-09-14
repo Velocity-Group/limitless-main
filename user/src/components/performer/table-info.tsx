@@ -1,7 +1,6 @@
-import { Descriptions, Tag } from 'antd';
+import { Descriptions, Collapse } from 'antd';
 import { PureComponent } from 'react';
 import { ICountry, IPerformer } from 'src/interfaces';
-import './performer.less';
 import { formatDateNoTime } from '@lib/date';
 
 interface IProps {
@@ -14,7 +13,12 @@ export class PerformerInfo extends PureComponent<IProps> {
     const { performer, countries = [] } = this.props;
     const country = countries.length && countries.find((c) => c.code === performer?.country);
     return (
-      <>
+      <div className="per-infor">
+        <Collapse className="bio" defaultActiveKey={['1']} bordered={false} accordion>
+          <Collapse.Panel header="BIO" key="1">
+            {performer?.bio || 'No bio yet'}
+          </Collapse.Panel>
+        </Collapse>
         <Descriptions className="performer-info">
           {performer?.country && (
           <Descriptions.Item key="country" label="Country">
@@ -41,7 +45,7 @@ export class PerformerInfo extends PureComponent<IProps> {
           {performer?.bust && <Descriptions.Item label="Bust size">{performer?.bust}</Descriptions.Item>}
           {performer?.sexualOrientation && <Descriptions.Item label="Sexual reference">{performer?.sexualOrientation}</Descriptions.Item>}
         </Descriptions>
-      </>
+      </div>
     );
   }
 }

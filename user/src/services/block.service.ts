@@ -16,6 +16,10 @@ export class BlockService extends APIRequest {
   getBlockListUsers(query: any) {
     return this.get(this.buildUrl('/performer-blocks/users', query));
   }
+
+  checkCountryBlock() {
+    return this.get('/country-block/check');
+  }
 }
 
 export const blockService = new BlockService();

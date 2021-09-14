@@ -77,7 +77,7 @@ export class SubscriptionForm extends PureComponent<IProps> {
             </>
             )}
           </Col>
-          <Col xs={24} md={12}>
+          {/* <Col xs={24} md={12}>
             <Form.Item
               key="publicChatPrice"
               name="publicChatPrice"
@@ -110,7 +110,7 @@ export class SubscriptionForm extends PureComponent<IProps> {
             >
               <InputNumber min={1} />
             </Form.Item>
-          </Col>
+          </Col> */}
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>

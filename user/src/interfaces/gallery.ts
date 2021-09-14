@@ -16,6 +16,11 @@ export interface IGallery {
   isSubscribed: boolean;
   isBought: boolean;
   numOfItems: number;
+  stats: {
+    views: number;
+  }
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IGalleryCreate {

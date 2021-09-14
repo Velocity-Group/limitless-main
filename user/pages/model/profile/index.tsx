@@ -563,10 +563,7 @@ class PerformerProfile extends PureComponent<IProps> {
             </div>
             )}
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
-              <div className="show-more">
-                <p>{performer?.bio || 'No bio'}</p>
-                {performer && <PerformerInfo countries={ui?.countries || []} performer={performer} />}
-              </div>
+              <PerformerInfo countries={ui?.countries || []} performer={performer} />
             </div>
             {!performer?.isSubscribed && (
               <div className="subscription-bl">

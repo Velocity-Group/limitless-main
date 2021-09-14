@@ -7,7 +7,7 @@ import withReduxSaga from '@redux/withReduxSaga';
 import { Store } from 'redux';
 import BaseLayout from '@layouts/base-layout';
 import {
-  authService, userService, settingService, utilsService, cookieService
+  authService, userService, settingService, utilsService
 } from '@services/index';
 import Router from 'next/router';
 import { NextPageContext } from 'next';
@@ -87,56 +87,48 @@ async function auth(
 }
 
 async function updateSettingsStore(ctx: NextPageContext, settings) {
-  try {
-    const { store } = ctx;
-    store.dispatch(
-      updateUIValue({
-        logo: settings.logoUrl || '',
-        siteName: settings.siteName || '',
-        favicon: settings.favicon || '',
-        loginPlaceholderImage: settings.loginPlaceholderImage || '',
-        menus: settings.menus || [],
-        footerContent: settings.footerContent || '',
-        countries: settings.countries || [],
-        userBenefit: settings.userBenefit || '',
-        modelBenefit: settings.modelBenefit || ''
-      })
-    );
-    store.dispatch(
-      updateLiveStreamSettings(
-        pick(settings, [
-          SETTING_KEYS.VIEWER_URL,
-          SETTING_KEYS.PUBLISHER_URL,
-          SETTING_KEYS.SUBSCRIBER_URL,
-          SETTING_KEYS.OPTION_FOR_BROADCAST,
-          SETTING_KEYS.OPTION_FOR_PRIVATE,
-          SETTING_KEYS.SECURE_OPTION,
-          SETTING_KEYS.ANT_MEDIA_APPNAME
-        ])
-      )
-    );
+  const { store } = ctx;
+  store.dispatch(
+    updateUIValue({
+      logo: settings.logoUrl || '',
+      siteName: settings.siteName || '',
+      favicon: settings.favicon || '',
+      loginPlaceholderImage: settings.loginPlaceholderImage || '',
+      menus: settings.menus || [],
+      footerContent: settings.footerContent || '',
+      countries: settings.countries || [],
+      userBenefit: settings.userBenefit || '',
+      modelBenefit: settings.modelBenefit || ''
+    })
+  );
+  store.dispatch(
+    updateLiveStreamSettings(
+      pick(settings, [
+        SETTING_KEYS.VIEWER_URL,
+        SETTING_KEYS.PUBLISHER_URL,
+        SETTING_KEYS.SUBSCRIBER_URL,
+        SETTING_KEYS.OPTION_FOR_BROADCAST,
+        SETTING_KEYS.OPTION_FOR_PRIVATE,
+        SETTING_KEYS.SECURE_OPTION,
+        SETTING_KEYS.ANT_MEDIA_APPNAME
+      ])
+    )
+  );
 
-    store.dispatch(
-      updateSettings(
-        pick(settings, [
-          SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
-          SETTING_KEYS.TOKEN_CONVERSION_RATE,
-          SETTING_KEYS.STRIPE_PUBLISHABLE_KEY,
-          SETTING_KEYS.STRIPE_ENABLE,
-          SETTING_KEYS.GOOGLE_RECAPTCHA_SITE_KEY,
-          SETTING_KEYS.ENABLE_GOOGLE_RECAPTCHA,
-          SETTING_KEYS.GOOGLE_CLIENT_ID,
-          SETTING_KEYS.CCBILL_ENABLE
-        ])
-      )
-    );
-
-    // TODO - update others like meta data
-  } catch (e) {
-    // TODO - implement me
-    // eslint-disable-next-line no-console
-    console.log(e);
-  }
+  store.dispatch(
+    updateSettings(
+      pick(settings, [
+        SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
+        SETTING_KEYS.TOKEN_CONVERSION_RATE,
+        SETTING_KEYS.STRIPE_PUBLISHABLE_KEY,
+        SETTING_KEYS.STRIPE_ENABLE,
+        SETTING_KEYS.GOOGLE_RECAPTCHA_SITE_KEY,
+        SETTING_KEYS.ENABLE_GOOGLE_RECAPTCHA,
+        SETTING_KEYS.GOOGLE_CLIENT_ID,
+        SETTING_KEYS.CCBILL_ENABLE
+      ])
+    )
+  );
 }
 
 interface AppComponent extends NextPageContext {
@@ -146,15 +138,11 @@ interface AppComponent extends NextPageContext {
 interface IApp {
   store: Store;
   layout: string;
-  authenticate: boolean;
   Component: AppComponent;
   settings: any;
-  geoBlocked: boolean;
 }
 
 class Application extends App<IApp> {
-  static settingQuery = false;
-
   // TODO - consider if we need to use get static props in children component instead?
   // or check in render?
   static async getInitialProps({ Component, ctx }) {
@@ -168,15 +156,6 @@ class Application extends App<IApp> {
     ctx.token = token || '';
     // server side to load settings, once time only
     let settings = {};
-    let geoBlocked = false;
-    if (process.browser && !!cookieService.getCookie('checkGeoBlock')) {
-      const checkBlock = await userService.checkCountryBlock() as any;
-      // set interval check every 5 minutes
-      cookieService.setCookie('checkGeoBlock', true, 5);
-      if (checkBlock && checkBlock.data && checkBlock.data.blocked) {
-        geoBlocked = true;
-      }
-    }
     if (!process.browser) {
       const [setting, countryList] = await Promise.all([
         settingService.all('all', true),
@@ -190,7 +169,6 @@ class Application extends App<IApp> {
       pageProps = await Component.getInitialProps({ ctx });
     }
     return {
-      geoBlocked,
       settings,
       pageProps,
       layout: Component.layout
@@ -199,7 +177,7 @@ class Application extends App<IApp> {
 
   render() {
     const {
-      Component, pageProps, store, settings, geoBlocked
+      Component, pageProps, store, settings
     } = this.props;
     const { layout } = Component;
     return (
@@ -209,7 +187,7 @@ class Application extends App<IApp> {
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         </Head>
         <Socket>
-          <BaseLayout layout={layout} maintenance={settings.maintenanceMode} geoBlocked={geoBlocked}>
+          <BaseLayout layout={layout} maintenance={settings.maintenanceMode}>
             <Component {...pageProps} />
           </BaseLayout>
         </Socket>
