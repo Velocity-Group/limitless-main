@@ -18,6 +18,7 @@ import { AuthGuard, RoleGuard } from 'src/modules/auth/guards';
 import { toObjectId } from 'src/kernel/helpers/string.helper';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
+import { CountryService } from 'src/modules/utils/services';
 import { ConversationDto } from '../dtos';
 import { ConversationService } from '../services/conversation.service';
 import { ConversationCreatePayload, ConversationSearchPayload, ConversationUpdatePayload } from '../payloads';
@@ -25,7 +26,10 @@ import { ConversationCreatePayload, ConversationSearchPayload, ConversationUpdat
 @Injectable()
 @Controller('conversations')
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly countryService: CountryService
+  ) {}
 
   @Get('/')
   @HttpCode(HttpStatus.OK)
@@ -34,10 +38,24 @@ export class ConversationController {
     @Query() query: ConversationSearchPayload,
     @Request() req: any
   ): Promise<DataResponse<ConversationDto[]>> {
+    let ipClient = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    if (ipClient.substr(0, 7) === '::ffff:') {
+      ipClient = ipClient.substr(7);
+    }
+    // const ipClient = '115.75.211.252';
+    const whiteListIps = ['127.0.0.1', '0.0.0.1'];
+    let countryCode = null;
+    if (whiteListIps.indexOf(ipClient) === -1) {
+      const userCountry = await this.countryService.findCountryByIP(ipClient) as any;
+      if (userCountry?.status === 'success' && userCountry?.countryCode) {
+        countryCode = userCountry.countryCode;
+      }
+    }
     const items = await this.conversationService.getList(query, {
       source: req.authUser.source,
       sourceId: req.authUser.sourceId
-    });
+    }, countryCode);
     return DataResponse.ok(items);
   }
 

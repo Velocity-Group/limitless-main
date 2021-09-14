@@ -12,6 +12,7 @@ import { ConversationService, MessageService, NotificationMessageService } from 
 import { ConversationController } from './controllers/conversation.controller';
 import { MessageController } from './controllers/message.controller';
 import { BlockModule } from '../block/block.module';
+import { UtilsModule } from '../utils/utils.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { BlockModule } from '../block/block.module';
     forwardRef(() => UserModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => AuthModule),
+    forwardRef(() => UtilsModule),
     forwardRef(() => FileModule),
     forwardRef(() => SubscriptionModule),
     forwardRef(() => BlockModule)
