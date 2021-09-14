@@ -1,10 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { ObjectId } from 'mongodb';
-import { EntityNotFoundException } from 'src/kernel';
-import { UserDto } from 'src/modules/user/dtos';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
-import { ConversationService } from './conversation.service';
+import { UserDto } from 'src/modules/user/dtos';
 import { NotificationMessageModel } from '../models';
 import { NOTIFICATION_MESSAGE_MODEL_PROVIDER } from '../providers';
 
@@ -13,62 +10,23 @@ export class NotificationMessageService {
   constructor(
     @Inject(NOTIFICATION_MESSAGE_MODEL_PROVIDER)
     private readonly notificationMessageModel: Model<NotificationMessageModel>,
-    private readonly conversationService: ConversationService,
     private readonly socketUserService: SocketUserService
   ) { }
 
-  public async recipientReadAllMessageInConversation(recipientId: string | ObjectId, conversationId: string | ObjectId): Promise<any> {
-    const conversation = await this.conversationService.findById(
+  public async recipientReadAllMessageInConversation(user: UserDto, conversationId: string): Promise<any> {
+    await this.notificationMessageModel.updateOne({
+      recipientId: user._id,
       conversationId
-    );
-    if (!conversation) {
-      throw new EntityNotFoundException();
-    }
-
-    const found = conversation.recipients.find(
-      (recipient) => recipient.sourceId.toString() === recipientId.toString()
-    );
-    if (!found) {
-      throw new EntityNotFoundException();
-    }
-
-    const notification = await this.notificationMessageModel.findOne({
-      recipientId,
-      conversationId
-    });
-    if (!notification) {
-      return { ok: false };
-    }
-    notification.totalNotReadMessage = 0;
-    await notification.save();
-
-    const totalNotReadMessage = await this.notificationMessageModel.aggregate([
-      {
-        $match: { recipientId }
-      },
-      {
-        $group: {
-          _id: '$conversationId',
-          total: {
-            $sum: '$totalNotReadMessage'
-          }
-        }
-      }
-    ]);
-    let total = 0;
-    totalNotReadMessage && totalNotReadMessage.length && totalNotReadMessage.forEach((data) => {
-      if (data.total) {
-        total += 1;
-      }
-    });
-    this.socketUserService.emitToUsers([recipientId] as any, 'nofify_read_messages_in_conversation', { total });
+    }, { totalNotReadMessage: 0 });
+    const total = await this.countTotalNotReadMessage(user._id.toString());
+    await this.socketUserService.emitToUsers(user._id, 'nofify_read_messages_in_conversation', total);
     return { ok: true };
   }
 
-  public async countTotalNotReadMessage(user: UserDto): Promise<any> {
-    const totalNotReadMessage = await this.notificationMessageModel.aggregate([
+  public async countTotalNotReadMessage(userId: string): Promise<any> {
+    const totalNotReadMessage = await this.notificationMessageModel.aggregate<any>([
       {
-        $match: { recipientId: user._id }
+        $match: { recipientId: userId }
       },
       {
         $group: {

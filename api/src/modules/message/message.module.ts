@@ -11,6 +11,7 @@ import { MessageListener, DeleteUserMessageListener } from './listeners';
 import { ConversationService, MessageService, NotificationMessageService } from './services';
 import { ConversationController } from './controllers/conversation.controller';
 import { MessageController } from './controllers/message.controller';
+import { BlockModule } from '../block/block.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { MessageController } from './controllers/message.controller';
     forwardRef(() => PerformerModule),
     forwardRef(() => AuthModule),
     forwardRef(() => FileModule),
-    forwardRef(() => SubscriptionModule)
+    forwardRef(() => SubscriptionModule),
+    forwardRef(() => BlockModule)
   ],
   providers: [
     ...messageProviders,

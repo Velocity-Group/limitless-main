@@ -1,8 +1,4 @@
 import { IPerformer } from 'src/interfaces';
-import {
-  IBanking,
-  IBlockedByPerformer
-} from '../interfaces/performer';
 import { APIRequest, IResponse } from './api-request';
 
 export class PerformerService extends APIRequest {
@@ -46,7 +42,7 @@ export class PerformerService extends APIRequest {
     return this.get(this.buildUrl('/performers/top', query));
   }
 
-  updateBanking(id: string, payload: IBanking) {
+  updateBanking(id: string, payload) {
     return this.put(`/performers/${id}/banking-settings`, payload);
   }
 

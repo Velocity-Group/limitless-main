@@ -14,7 +14,7 @@ export class ConversationDto {
 
   lastMessage: string;
 
-  lastSenderId: string | ObjectId;
+  lastSenderId: ObjectId;
 
   lastMessageCreatedAt: Date;
 
@@ -24,17 +24,19 @@ export class ConversationDto {
 
   updatedAt: Date;
 
-  recipientInfo?: IUserResponse;
+  recipientInfo: IUserResponse;
 
-  totalNotSeenMessages?: number;
+  totalNotSeenMessages: number;
 
-  isSubscribed?: boolean;
+  isSubscribed: boolean;
+
+  isBlocked: boolean;
 
   streamId: ObjectId;
 
   performerId: ObjectId;
 
-  constructor(data?: Partial<ConversationDto>) {
+  constructor(data: Partial<ConversationDto>) {
     Object.assign(
       this,
       pick(data, [
@@ -51,6 +53,7 @@ export class ConversationDto {
         'recipientInfo',
         'totalNotSeenMessages',
         'isSubscribed',
+        'isBlocked',
         'streamId',
         'performerId'
       ])

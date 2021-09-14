@@ -288,7 +288,7 @@ export class PerformerService {
     //   performerId: id
     // });
 
-    dto.blockCountries = await this.performerBlockService.findByQuery({
+    dto.blockCountries = await this.performerBlockService.findOneBlockCountriesByQuery({
       sourceId: id
     });
     return dto;

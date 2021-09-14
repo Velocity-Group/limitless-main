@@ -50,7 +50,7 @@ Thumbs.db
 
 .env
 .next
-user/.env
-admin/.env
-api/.env
 public
+
+package-lock.json
+obfuscator

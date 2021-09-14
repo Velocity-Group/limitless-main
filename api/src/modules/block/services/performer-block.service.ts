@@ -39,7 +39,11 @@ export class PerformerBlockService {
     private readonly mailService: MailerService
   ) { }
 
-  public findByQuery(query) {
+  public findBlockCountriesByQuery(query) {
+    return this.performerBlockCountryModel.find(query);
+  }
+
+  public findOneBlockCountriesByQuery(query) {
     return this.performerBlockCountryModel.findOne(query);
   }
 

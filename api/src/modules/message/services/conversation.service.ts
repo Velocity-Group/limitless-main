@@ -15,6 +15,7 @@ import { StreamDto } from 'src/modules/stream/dtos';
 import { PerformerSearchPayload } from 'src/modules/performer/payloads';
 import { UserSearchRequestPayload } from 'src/modules/user/payloads';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
+import { PerformerBlockService } from 'src/modules/block/services';
 import { ConversationSearchPayload, ConversationUpdatePayload } from '../payloads';
 import { ConversationDto } from '../dtos';
 import { CONVERSATION_TYPE } from '../constants';
@@ -42,6 +43,8 @@ export class ConversationService {
     private readonly performerSearchService: PerformerSearchService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
+    @Inject(forwardRef(() => PerformerBlockService))
+    private readonly performerBlockService: PerformerBlockService,
     @Inject(CONVERSATION_MODEL_PROVIDER)
     private readonly conversationModel: Model<ConversationModel>,
     private readonly socketService: SocketUserService,
@@ -136,7 +139,8 @@ export class ConversationService {
 
   public async getList(
     req: ConversationSearchPayload,
-    sender: IRecipient
+    sender: IRecipient,
+    countryCode?: string
   ): Promise<any> {
     let query = {
       recipients: {
@@ -190,7 +194,6 @@ export class ConversationService {
       this.conversationModel.countDocuments(query)
     ]);
 
-    // find recipient info
     const conversations = data.map((d) => new ConversationDto(d));
     const recipientIds = conversations.map((c) => {
       const re = c.recipients.find(
@@ -199,84 +202,67 @@ export class ConversationService {
       if (re) {
         return re.sourceId;
       }
-      return undefined;
+      return null;
     });
     const conversationIds = data.map((d) => d._id);
-    let users = [];
-    let performers = [];
     let subscriptions = [];
-    const notifications = conversationIds.length
-      ? await this.notiticationMessageModel.find({
-        conversationId: { $in: conversationIds }
+    let blockedUsers = null;
+    let blockCountries = [];
+    const [notifications] = await Promise.all([
+      this.notiticationMessageModel.find({
+        conversationId: { $in: conversationIds },
+        recipientId: sender.sourceId
       })
-      : [];
+    ]);
+    const recipients = (sender.source === 'user' ? await this.performerService.findByIds(recipientIds) : await this.userService.findByIds(recipientIds)) as any || [];
     if (sender.source === 'user') {
-      performers = recipientIds.length ? await this.performerService.findByIds(recipientIds) : [];
-      if (performers.length) {
-        const pIds = performers.map((p) => p._id);
+      if (recipients) {
+        const pIds = recipients.map((p) => p._id);
         subscriptions = await this.subscriptionService.findSubscriptionList({
           performerId: { $in: pIds },
           userId: sender.sourceId,
           expiredAt: { $gt: new Date() },
           status: SUBSCRIPTION_STATUS.ACTIVE
         });
+        blockCountries = await this.performerBlockService.findBlockCountriesByQuery({ sourceId: { $in: pIds } });
+        blockedUsers = await this.performerBlockService.listByQuery({ sourceId: { $in: pIds }, targetId: sender.sourceId });
       }
-    }
-    if (sender.source === 'performer') {
-      users = recipientIds.length
-        ? await this.userService.findByIds(recipientIds)
-        : [];
     }
 
     conversations.forEach((conversation: ConversationDto) => {
-      const recipient = conversation.recipients.find(
-        (rep) => rep.sourceId.toString() !== sender.sourceId.toString()
-      );
-      let recipientInfo = null;
+      const recipient = conversation.recipients.find((rep) => `${rep.sourceId}` !== `${sender.sourceId}`);
       if (recipient) {
         // eslint-disable-next-line no-param-reassign
         conversation.isSubscribed = sender.source === 'performer';
-        if (users.length) {
-          recipientInfo = users.find(
-            (u) => u._id.toString() === recipient.sourceId.toString()
-          );
-        }
-        if (performers.length) {
-          recipientInfo = performers.find(
-            (p) => p._id.toString() === recipient.sourceId.toString()
-          );
-        }
+        const recipientInfo = recipients.find((r) => `${r._id}` === `${recipient.sourceId}`);
         if (recipientInfo) {
           // eslint-disable-next-line no-param-reassign
-          conversation.recipientInfo = new UserDto(recipientInfo).toResponse(
-            false
-          );
-          if (subscriptions.length && sender.source === 'user') {
-            const subscribed = subscriptions.filter(
-              (sub) => sub.performerId.toString() === recipient.sourceId.toString()
-                && sub.userId.toString() === sender.sourceId.toString()
-            );
-            if (subscribed.length) {
-              // eslint-disable-next-line no-param-reassign
-              conversation.isSubscribed = true;
+          conversation.recipientInfo = new UserDto(recipientInfo).toResponse();
+          if (sender.source === 'user') {
+            let isBlocked = false;
+            if (blockedUsers.length) {
+              const isBlockedUser = blockedUsers.find((s) => `${s.sourceId}` === `${recipient.sourceId}`);
+              isBlocked = !!isBlockedUser;
             }
+            if (countryCode && !isBlocked) {
+              const isBlockeCountry = blockCountries.find((b) => `${b.sourceId}` === `${recipient.sourceId}` && b.countryCodes.includes(countryCode));
+              isBlocked = !!isBlockeCountry;
+            }
+            const isSubscribed = subscriptions.find((s) => `${s.userId}` === `${sender.sourceId}`);
+            // eslint-disable-next-line no-param-reassign
+            conversation.isSubscribed = !!isSubscribed;
+            // eslint-disable-next-line no-param-reassign
+            conversation.isBlocked = !!isBlocked;
           }
         }
         // eslint-disable-next-line no-param-reassign
         conversation.totalNotSeenMessages = 0;
         if (notifications.length) {
-          const conversationNotifications = notifications.filter(
-            (noti) => noti.conversationId.toString() === conversation._id.toString()
+          const conversationNotifications = notifications.find(
+            (n) => n.conversationId.toString() === conversation._id.toString()
           );
-          if (conversationNotifications) {
-            const recipientNoti = conversationNotifications.find(
-              (c) => c.recipientId.toString() === sender.sourceId.toString()
-            );
-            // eslint-disable-next-line no-param-reassign
-            conversation.totalNotSeenMessages = recipientNoti
-              ? recipientNoti.totalNotReadMessage
-              : 0;
-          }
+          // eslint-disable-next-line no-param-reassign
+          conversation.totalNotSeenMessages = conversationNotifications?.totalNotReadMessage || 0;
         }
       }
     });

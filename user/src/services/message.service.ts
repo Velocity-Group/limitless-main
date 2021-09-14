@@ -29,8 +29,8 @@ export class MessageService extends APIRequest {
     return this.get('/messages/counting-not-read-messages');
   }
 
-  readAllInConversation(conversationId: string, recipientId: string) {
-    return this.post('/messages/read-all', { conversationId, recipientId });
+  readAllInConversation(conversationId: string) {
+    return this.post(`/messages/read-all/${conversationId}`);
   }
 
   getMessageUploadUrl() {

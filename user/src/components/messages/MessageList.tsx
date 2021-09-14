@@ -1,5 +1,3 @@
-/* eslint-disable react/no-did-update-set-state */
-/* eslint-disable react/no-unused-state */
 import { PureComponent, createRef } from 'react';
 import { Spin } from 'antd';
 import { connect } from 'react-redux';
@@ -157,9 +155,9 @@ class MessageList extends PureComponent<IProps> {
                  <div className="sub-text">Please subscribe to this model to start the conversation</div>
                </Link>
                )}
+               {conversation.isBlocked && <div className="sub-text">This model has blocked you!</div>}
              </div>
-
-             {conversation.isSubscribed && <Compose conversation={conversation} />}
+             <Compose disabled={!conversation.isSubscribed || conversation.isBlocked} conversation={conversation} />
            </>
          )
          : <p className="text-center">Click on conversation to start</p>}

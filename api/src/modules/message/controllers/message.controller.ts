@@ -36,33 +36,6 @@ export class MessageController {
     private readonly notificationMessageService: NotificationMessageService
   ) { }
 
-  @Post('/private')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
-  @UseInterceptors(
-  )
-  async createPrivateMessage(
-    @Body() payload: PrivateMessageCreatePayload,
-    @Request() req: any
-  ): Promise<DataResponse<MessageDto>> {
-    if (req.authUser.sourceId.toString() === payload.recipientId.toString()) {
-      throw new ForbiddenException();
-    }
-
-    const message = await this.messageService.createPrivateMessage(
-      {
-        source: req.authUser.source,
-        sourceId: req.authUser.sourceId
-      },
-      {
-        source: payload.recipientType,
-        sourceId: payload.recipientId
-      },
-      payload
-    );
-    return DataResponse.ok(message);
-  }
-
   @Post('/private/file')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
@@ -103,18 +76,15 @@ export class MessageController {
     return DataResponse.ok(message);
   }
 
-  @Post('/read-all')
+  @Post('/read-all/:conversationId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async readAllMessage(
-    @Body() payload: NotificationMessageReadPayload,
-    @Request() req: any
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<MessageDto>> {
-    if (req.authUser.sourceId.toString() !== payload.recipientId.toString()) {
-      throw new ForbiddenException();
-    }
-    const message = await this.notificationMessageService.recipientReadAllMessageInConversation(req.authUser.sourceId, payload.conversationId);
+    const message = await this.notificationMessageService.recipientReadAllMessageInConversation(user, conversationId);
     return DataResponse.ok(message);
   }
 
@@ -125,7 +95,7 @@ export class MessageController {
   async countTotalNotReadMessage(
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
-    const data = await this.notificationMessageService.countTotalNotReadMessage(user);
+    const data = await this.notificationMessageService.countTotalNotReadMessage(user._id.toString());
     return DataResponse.ok(data);
   }
 
@@ -153,7 +123,7 @@ export class MessageController {
     @Param('conversationId') conversationId: string,
     @Request() req: any
   ): Promise<DataResponse<any>> {
-    const data = await this.messageService.createPrivateMessageFromConversation(
+    const data = await this.messageService.createPrivateMessage(
       conversationId,
       payload,
       {

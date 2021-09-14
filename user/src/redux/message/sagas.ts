@@ -58,24 +58,20 @@ const conversationSagas = [
     * worker(data: IReduxAction<Record<string, string>>) {
       try {
         const {
-          source, sourceId, conversationId, recipientId
+          source, sourceId, conversationId
         } = data.payload;
         const conversationMapping = yield select((state) => state.conversation.mapping);
         if (conversationId) {
-          // todo - check me later
-
           if (conversationMapping[conversationId]) {
             yield put(
               setActiveConversationSuccess(conversationMapping[conversationId])
             );
 
-            const readAllMessages = yield messageService.readAllInConversation(conversationId, recipientId);
+            const readAllMessages = yield messageService.readAllInConversation(conversationId);
             if (readAllMessages) {
               yield put(readMessages(conversationId));
             }
             yield put(loadMessages({ conversationId, limit: 25, offset: 0 }));
-          } else {
-            // TODO - check me later, query to DB and update here
           }
         } else {
           const resp = yield messageService.createConversation({
@@ -91,7 +87,7 @@ const conversationSagas = [
           yield put(loadMessages({ conversationId: conversation._id, limit: 25, offset: 0 }));
         }
       } catch (e) {
-        console.log(e);
+        message.error('Error occured, please try again later');
       }
     }
   },
@@ -129,8 +125,7 @@ const messageSagas = [
           })
         );
       } catch (e) {
-        // load error
-        console.log('err', e);
+        message.error('Error occured, please try again later');
       }
     }
   },
@@ -154,9 +149,8 @@ const messageSagas = [
           })
         );
       } catch (e) {
-        // load error
         message.error('Error occured, please try again later');
-        console.log('err', e);
+        // console.log('err', e);
       }
     }
   },

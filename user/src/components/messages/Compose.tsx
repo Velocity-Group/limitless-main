@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-autofocus */
 import { PureComponent, createRef } from 'react';
 import { connect } from 'react-redux'; import {
   Modal, message
@@ -20,6 +19,7 @@ interface IProps {
   sendMessageStatus: any;
   conversation: any;
   currentUser: any
+  disabled?: boolean;
 }
 
 class Compose extends PureComponent<IProps> {
@@ -52,6 +52,8 @@ class Compose extends PureComponent<IProps> {
 
   onEmojiClick = (emoji) => {
     const { text } = this.state;
+    const { disabled } = this.props;
+    if (disabled) return;
     this.setState({ text: `${text} ${emoji} ` });
   }
 
@@ -66,8 +68,8 @@ class Compose extends PureComponent<IProps> {
 
   send() {
     const { text } = this.state;
-    const { sendMessage: handleSendMessage } = this.props;
-    if (!text) return;
+    const { disabled, sendMessage: handleSendMessage } = this.props;
+    if (!text || disabled) return;
     const { conversation } = this.props;
     handleSendMessage({
       conversationId: conversation._id,
@@ -97,7 +99,9 @@ class Compose extends PureComponent<IProps> {
 
   render() {
     const { text, openTipModal, submiting } = this.state;
-    const { sendMessageStatus: status, conversation, currentUser } = this.props;
+    const {
+      disabled, sendMessageStatus: status, conversation, currentUser
+    } = this.props;
     const uploadHeaders = {
       authorization: authService.getToken()
     };
@@ -110,8 +114,7 @@ class Compose extends PureComponent<IProps> {
           placeholder="Write your message..."
           onKeyDown={this.onKeyDown}
           onChange={this.onChange}
-          disabled={status.sending || !conversation._id}
-          autoFocus
+          disabled={disabled || status.sending || !conversation._id}
           ref={(c) => { this._input = c; }}
         />
         <div className="grp-icons">
