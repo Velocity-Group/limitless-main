@@ -1,7 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Layout, Badge, message,
-  Tooltip, Drawer, Divider, Switch
+  Layout, Badge, message, Tooltip, Drawer, Divider
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
@@ -11,8 +10,8 @@ import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
   MessageOutlined, VideoCameraOutlined, FireOutlined, NotificationOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
-  HomeOutlined, LogoutOutlined, UsergroupAddOutlined, VideoCameraAddOutlined,
-  HeartOutlined, PlusSquareOutlined, BulbOutlined, WalletOutlined, BlockOutlined
+  HomeOutlined, LogoutOutlined, HeartOutlined, PlusSquareOutlined,
+  WalletOutlined, BlockOutlined
 } from '@ant-design/icons';
 import { withRouter, Router as RouterEvent } from 'next/router';
 import {
@@ -224,7 +223,7 @@ class Header extends PureComponent<IProps> {
                   <li key="model" className={router.pathname === '/model' ? 'active' : ''}>
                     <Link href="/model">
                       <a>
-                        <UserOutlined />
+                        <StarOutlined />
                       </a>
                     </Link>
                   </li>

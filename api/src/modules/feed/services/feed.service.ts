@@ -448,7 +448,7 @@ export class FeedService {
     ]);
     const performerIds = subscriptions.map((s) => s.performerId);
     query.fromSourceId = { $in: performerIds };
-    if (!user || (user && user.roles && user.roles.includes('admin')) || (user && user.isPerformer)) delete query.fromSourceId;
+    if (!user || !performerIds.length || (user && user.roles && user.roles.includes('admin')) || (user && user.isPerformer)) delete query.fromSourceId;
     if (req.q) {
       query.$or = [
         {
