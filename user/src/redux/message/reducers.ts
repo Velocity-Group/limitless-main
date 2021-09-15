@@ -1,4 +1,4 @@
-import { merge } from 'lodash';
+import { merge, uniq } from 'lodash';
 import { createReducers } from '@lib/redux';
 import { IReduxAction } from 'src/interfaces';
 import {
@@ -81,7 +81,7 @@ const conversationReducer = [
       const { list, mapping } = nextState;
       const { data: items, total } = data.payload;
       const Ids = items.map((c) => c._id);
-      list.data = list.data.concat(Ids);
+      list.data = uniq(list.data.concat(Ids));
       list.total = total;
       list.success = true;
       list.requesting = false;

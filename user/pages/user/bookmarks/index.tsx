@@ -268,7 +268,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         <div className="main-container">
           <Page>
             <PageHeading title="BookMarks" icon={<BookOutlined />} />
-            <div style={{ marginBottom: 25 }} />
+            <div className="user-account" />
             <Tabs
               defaultActiveKey={tab || 'feeds'}
               size="large"

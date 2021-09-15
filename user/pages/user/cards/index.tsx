@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import {
   message, Layout, Spin, Button
 } from 'antd';
-import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, DeleteOutlined, CreditCardOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
 import {
@@ -80,7 +80,11 @@ class CardsPage extends PureComponent<IProps> {
         <div className="main-container">
           <Page>
             <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>My Card</span>
+              <span>
+                <CreditCardOutlined />
+                {' '}
+                My Card
+              </span>
               {(!cards.length && !loading) && (
               <Link href="/user/cards/add-card">
                 <a>

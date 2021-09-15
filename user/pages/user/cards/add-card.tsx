@@ -42,7 +42,6 @@ class NewCardPage extends PureComponent<IProps> {
     } catch (error) {
       const e = await error;
       message.error(e?.message || 'An error occured. Please try again.');
-    } finally {
       this.setState({ submiting: false });
     }
   }
@@ -62,9 +61,6 @@ class NewCardPage extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <Page>
-            <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>Add New Card</span>
-            </div>
             <PageHeading title="Add new Card" icon={<CreditCardOutlined />} />
             <div className="card-form">
               <Elements stripe={loadStripe(settings.stripePublishableKey || '')}>

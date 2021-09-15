@@ -7,18 +7,18 @@ import { feedService } from '@services/index';
 import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import {
-  IFeed, IUIConfig, IUser
+  IFeed, IUIConfig, IUser, IError
 } from '@interfaces/index';
 import FeedCard from '@components/post/post-card';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Router from 'next/router';
-import { redirectToErrorPage } from '@redux/system/actions';
+import Error from 'next/error';
 
 interface IProps {
+  error: IError;
   ui: IUIConfig;
   feed: IFeed;
   user: IUser;
-  redirectToErrorPage: Function;
 }
 
 class PostDetails extends PureComponent<IProps> {
@@ -31,20 +31,7 @@ class PostDetails extends PureComponent<IProps> {
       const feed = await (await feedService.findOne(ctx.query.id, { Authorization: ctx.token })).data;
       return { feed };
     } catch (e) {
-      return { ctx };
-    }
-  }
-
-  async componentDidMount() {
-    const { feed, redirectToErrorPage: handleRedirect } = this.props;
-    if (!feed) {
-      handleRedirect({
-        url: '/error',
-        error: {
-          statusCode: 404,
-          message: 'Your requested link does not exist!'
-        }
-      });
+      return { error: await e };
     }
   }
 
@@ -65,7 +52,10 @@ class PostDetails extends PureComponent<IProps> {
   }
 
   render() {
-    const { feed, ui } = this.props;
+    const { feed, ui, error } = this.props;
+    if (error) {
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
+    }
     const { performer } = feed;
     return (
       <Layout>
@@ -118,7 +108,5 @@ const mapStates = (state) => ({
   ui: { ...state.ui },
   user: state.user.current
 });
-const dispatch = {
-  redirectToErrorPage
-};
+const dispatch = { };
 export default connect(mapStates, dispatch)(PostDetails);
