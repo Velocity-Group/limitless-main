@@ -1,21 +1,18 @@
 import { PureComponent } from 'react';
 import {
-  Row, Col, Layout, Pagination, Spin
+  Row, Col, Layout, Pagination, Spin, message
 } from 'antd';
-import { StarOutlined } from '@ant-design/icons';
+import { ModelIcon } from '@components/icons';
 import { connect } from 'react-redux';
-import { getList } from '@redux/performer/actions';
 import PerformerGridCard from '@components/performer/grid-card';
 import Head from 'next/head';
 import { PerformerAdvancedFilter } from '@components/common/base/performer-advanced-filter';
 import PageHeading from '@components/common/page-heading';
 import { IUIConfig } from 'src/interfaces/';
-import { DropOption } from '@components/common/base/drop-option';
+import { performerService } from '@services/index';
 import '@components/performer/performer.less';
 
 interface IProps {
-  getList: Function;
-  performerState: any;
   ui: IUIConfig;
 }
 
@@ -27,71 +24,54 @@ class Performers extends PureComponent<IProps> {
   state = {
     offset: 0,
     limit: 12,
-    filter: {} as any
+    filter: {
+      sortBy: 'popular'
+    } as any,
+    performers: [],
+    total: 0,
+    fetching: true
   };
 
-  async componentDidMount() {
-    const { getList: getListHandler } = this.props;
-    const { limit, offset } = this.state;
-    getListHandler({
-      limit,
-      offset
-    });
+  componentDidMount() {
+    this.getPerformers();
   }
 
   async handleFilter(values: any) {
-    const { getList: getListHandler } = this.props;
-    const { limit, filter } = this.state;
-    await this.setState({ filter: { ...filter, ...values }, limit: 0 });
-    getListHandler({
-      limit,
-      offset: 0,
-      ...filter
-    });
+    const { filter } = this.state;
+    await this.setState({ offset: 0, filter: { ...filter, ...values } });
+    this.getPerformers();
   }
 
-  async handleSort(values: any) {
-    const sort = {
-      sort: values.key
-    };
-    const { getList: getListHandler } = this.props;
-    const { limit, filter } = this.state;
-    await this.setState({ offset: 0 });
-    getListHandler({
-      limit,
-      offset: 0,
-      ...filter,
-      ...sort
-    });
+  async getPerformers() {
+    const {
+      limit, offset, filter
+    } = this.state;
+    try {
+      await this.setState({ fetching: true });
+      const resp = await performerService.search({
+        limit,
+        offset: limit * offset,
+        ...filter
+      });
+      this.setState({ performers: resp.data.data, total: resp.data.total, fetching: false });
+    } catch {
+      message.error('Error occured, please try again later');
+      this.setState({ fetching: false });
+    }
   }
 
-  pageChanged = async (page: number) => {
-    const { getList: getListHandler } = this.props;
-    const { limit, filter } = this.state;
-    this.setState({ offset: page - 1 });
-    getListHandler({
-      limit,
-      offset: (page - 1) * limit,
-      ...filter
-    });
-  };
+  async pageChanged(page: number) {
+    await this.setState({ offset: page - 1 });
+    this.getPerformers();
+  }
 
   render() {
     const {
-      performerState = {
-        requesting: false,
-        error: null,
-        success: false,
-        data: null
-      },
       ui
     } = this.props;
     const {
-      limit, offset
+      limit, offset, performers, fetching, total
     } = this.state;
-    const performers = performerState?.data?.data || [];
-    const total = performerState?.data?.total || 0;
-    const { requesting: isLoading } = performerState;
 
     return (
       <>
@@ -104,52 +84,35 @@ class Performers extends PureComponent<IProps> {
         </Head>
         <Layout>
           <div className="main-container">
-            <div className="main-background">
-              <PageHeading title="Models" icon={<StarOutlined />} />
-              <div className="md-below-heading">
-                <PerformerAdvancedFilter
-                  onSubmit={this.handleFilter.bind(this)}
-                  countries={ui?.countries || []}
-                />
-                <span className="sort-model">
-                  <DropOption
-                    menuOptions={[
-                      { key: 'latest', name: 'Latest' },
-                      { key: 'oldest', name: 'Oldest' },
-                      { key: 'popular', name: 'Popular' }
-                    ]}
-                    onMenuClick={(v: string) => this.handleSort(v)}
-                  />
-                </span>
-              </div>
-              <Row>
-                {performers && performers.length > 0
-                    && !isLoading
+            <PageHeading title="Models" icon={<ModelIcon />} />
+            <PerformerAdvancedFilter
+              onSubmit={this.handleFilter.bind(this)}
+              countries={ui?.countries || []}
+            />
+            <Row>
+              {performers && performers.length > 0
+                    && !fetching
                     && performers.map((p: any) => (
                       <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
                         <PerformerGridCard performer={p} />
                       </Col>
                     ))}
-
-              </Row>
-              {!total && !isLoading && <p>No model profile was found.</p>}
-              {isLoading && (
-                <div className="text-center">
-                  <Spin />
-                </div>
-              )}
-              {total && total > limit && !isLoading ? (
-                <div className="paging">
-                  <Pagination
-                    showQuickJumper
-                    defaultCurrent={offset + 1}
-                    total={total}
-                    pageSize={limit}
-                    onChange={this.pageChanged}
-                  />
-                </div>
-              ) : null}
+            </Row>
+            {!total && !fetching && <p>No model profile was found.</p>}
+            {fetching && (
+            <div className="text-center">
+              <Spin />
             </div>
+            )}
+            {total && total > limit && !fetching ? (
+              <Pagination
+                showQuickJumper
+                defaultCurrent={offset + 1}
+                total={total}
+                pageSize={limit}
+                onChange={this.pageChanged}
+              />
+            ) : null}
           </div>
         </Layout>
       </>
@@ -158,9 +121,8 @@ class Performers extends PureComponent<IProps> {
 }
 
 const mapStates = (state: any) => ({
-  performerState: { ...state.performer.performerListing },
   ui: { ...state.ui }
 });
 
-const mapDispatch = { getList };
+const mapDispatch = { };
 export default connect(mapStates, mapDispatch)(Performers);

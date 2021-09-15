@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Layout, Badge, message, Tooltip, Drawer, Divider
+  Layout, Badge, message, Drawer, Divider, Avatar
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
@@ -8,11 +8,13 @@ import { IUser, StreamSettings } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
-  MessageOutlined, VideoCameraOutlined, FireOutlined, NotificationOutlined,
+  VideoCameraOutlined, FireOutlined, NotificationOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
-  HomeOutlined, LogoutOutlined, HeartOutlined, PlusSquareOutlined,
-  WalletOutlined, BlockOutlined
+  LogoutOutlined, HeartOutlined, WalletOutlined, BlockOutlined
 } from '@ant-design/icons';
+import {
+  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon
+} from '@components/icons';
 import { withRouter, Router as RouterEvent } from 'next/router';
 import {
   messageService, authService, streamService
@@ -65,13 +67,9 @@ class Header extends PureComponent<IProps> {
   };
 
   async handleCountNotificationMessage() {
-    try {
-      const data = await (await messageService.countTotalNotRead()).data;
-      if (data) {
-        this.setState({ totalNotReadMessage: data.total });
-      }
-    } catch (e) {
-      console.log(e);
+    const data = await (await messageService.countTotalNotRead()).data;
+    if (data) {
+      this.setState({ totalNotReadMessage: data.total });
     }
   }
 
@@ -153,32 +151,28 @@ class Header extends PureComponent<IProps> {
             <div className="nav-bar">
               <ul className={currentUser._id ? 'nav-icons' : 'nav-icons custom'}>
                 {currentUser._id && currentUser.isPerformer && (
-                  <Tooltip key="profile" title="Profile">
-                    <li className={router.asPath === `/${currentUser.username || currentUser._id}` ? 'active' : ''}>
-                      <Link
-                        href={{
-                          pathname: '/model/profile',
-                          query: { username: currentUser.username || currentUser._id }
-                        }}
-                        as={`/${currentUser.username || currentUser._id}`}
-                      >
-                        <a>
-                          <HomeOutlined />
-                        </a>
-                      </Link>
-                    </li>
-                  </Tooltip>
+                <li className={router.asPath === `/${currentUser.username || currentUser._id}` ? 'active' : ''}>
+                  <Link
+                    href={{
+                      pathname: '/model/profile',
+                      query: { username: currentUser.username || currentUser._id }
+                    }}
+                    as={`/${currentUser.username || currentUser._id}`}
+                  >
+                    <a>
+                      <HomeIcon />
+                    </a>
+                  </Link>
+                </li>
                 )}
                 {currentUser._id && !currentUser.isPerformer && (
-                  <Tooltip key="home" title="Home">
-                    <li className={router.pathname === '/home' ? 'active' : ''}>
-                      <Link href="/home">
-                        <a>
-                          <HomeOutlined />
-                        </a>
-                      </Link>
-                    </li>
-                  </Tooltip>
+                <li className={router.pathname === '/home' ? 'active' : ''}>
+                  <Link href="/home">
+                    <a>
+                      <HomeIcon />
+                    </a>
+                  </Link>
+                </li>
                 )}
                 {currentUser && currentUser._id && currentUser.isPerformer && (
                   <>
@@ -191,60 +185,38 @@ class Header extends PureComponent<IProps> {
                         </Link>
                       </li>
                     </Tooltip> */}
-                    {/* <Tooltip key="story" title="Add a story">
-                        <li
-                          aria-hidden
-                          onClick={() => {
-                            if (!currentUser.verifiedDocument) {
-                              message.warning('Your account hasn\'t been verified ID documents yet! You could not post any content right now. If you have any question, please contact our admin to get more information.');
-                              return;
-                            }
-                            this.setState({ openAddStory: true });
-                          }}
-                        >
-                          <a>
-                            <HistoryOutlined />
-                          </a>
-                        </li>
-                      </Tooltip> */}
-                    <Tooltip key="new_post" title="Compose new post">
-                      <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
-                        <Link href="/model/my-post/create">
-                          <a>
-                            <PlusSquareOutlined />
-                          </a>
-                        </Link>
-                      </li>
-                    </Tooltip>
-                  </>
-                )}
-                {currentUser._id && !currentUser.isPerformer && (
-                <Tooltip key="model" title="Models">
-                  <li key="model" className={router.pathname === '/model' ? 'active' : ''}>
-                    <Link href="/model">
-                      <a>
-                        <StarOutlined />
-                      </a>
-                    </Link>
-                  </li>
-                </Tooltip>
-                )}
-                {currentUser._id && [
-                  <Tooltip key="messenger" title="Messenger">
-                    <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
-                      <Link href="/messages">
+                    <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
+                      <Link href="/model/my-post/create">
                         <a>
-                          <MessageOutlined />
-                          <Badge
-                            className="cart-total"
-                            count={totalNotReadMessage}
-                            showZero
-                          />
+                          <PlusIcon />
                         </a>
                       </Link>
                     </li>
-                  </Tooltip>
-                ]}
+                  </>
+                )}
+                {currentUser._id && !currentUser.isPerformer && (
+                  <li key="model" className={router.pathname === '/model' ? 'active' : ''}>
+                    <Link href="/model">
+                      <a>
+                        <ModelIcon />
+                      </a>
+                    </Link>
+                  </li>
+                )}
+                {currentUser._id && (
+                <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
+                  <Link href="/messages">
+                    <a>
+                      <MessageIcon />
+                      <Badge
+                        className="cart-total"
+                        count={totalNotReadMessage}
+                        showZero
+                      />
+                    </a>
+                  </Link>
+                </li>
+                )}
                 {!currentUser._id && [
                   <li key="logo" className="logo-nav">
                     <Link href="/">
@@ -264,7 +236,7 @@ class Header extends PureComponent<IProps> {
                 ]}
                 {currentUser._id && (
                   <li key="avatar" aria-hidden onClick={() => this.setState({ openProfile: true })}>
-                    <UserOutlined />
+                    {currentUser?.avatar ? <Avatar src={currentUser?.avatar || '/static/no-avatar.png'} /> : <UserIcon />}
                   </li>
                 )}
               </ul>

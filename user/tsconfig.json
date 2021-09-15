@@ -27,7 +27,8 @@
       "@redux/*": ["./src/redux/*"],
       "@services/*": ["./src/services/*"],
       "@interfaces/*": ["./src/interfaces/*"],
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
+      "static/*": ["./static/*"]
     }
   },
   "exclude": [

@@ -3,7 +3,7 @@ import {
   Input, Button, Select
 } from 'antd';
 import { omit } from 'lodash';
-import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { ArrowUpOutlined, ArrowDownOutlined, FilterOutlined } from '@ant-design/icons';
 import { ICountry } from '@interfaces/index';
 import { utilsService } from '@services/index';
 
@@ -133,17 +133,34 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
     const { showMore, heights, weights } = this.state;
     return (
       <div style={{ width: '100%' }}>
-        <div className="filter-block">
-          <div className="filter-item">
+        <div className="filter-block custom">
+          <div className="filter-item custom">
             <Input
               placeholder="Enter keyword"
               onChange={(evt) => this.setState({ q: evt.target.value })}
               onPressEnter={this.handleSubmit.bind(this)}
             />
           </div>
-          <div>
+          <div className="filter-item">
+            <Select style={{ width: '100%' }} defaultValue="" onChange={(val) => this.setState({ sortBy: val }, () => this.handleSubmit())}>
+              <Select.Option value="" disabled>
+                <FilterOutlined />
+                {' '}
+                Sort By
+              </Select.Option>
+              <Select.Option value="popular">
+                Popular
+              </Select.Option>
+              <Select.Option label="" value="latest">
+                Latest
+              </Select.Option>
+              <Select.Option value="oldest">
+                Oldest
+              </Select.Option>
+            </Select>
+          </div>
+          <div className="filter-item">
             <Button
-              type="primary"
               className="primary"
               style={{ width: '100%' }}
               onClick={() => this.setState({ showMore: !showMore })}

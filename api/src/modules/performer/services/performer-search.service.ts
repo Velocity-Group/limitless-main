@@ -70,15 +70,6 @@ export class PerformerSearchService {
         [req.sortBy]: req.sort
       };
     }
-    if (req.sort === 'latest') {
-      sort = '-createdAt';
-    }
-    if (req.sort === 'oldest') {
-      sort = 'createdAt';
-    }
-    if (req.sort === 'popular') {
-      sort = '-stats.views';
-    }
     const [data, total] = await Promise.all([
       this.performerModel
         .find(query)
@@ -171,19 +162,19 @@ export class PerformerSearchService {
         [req.sortBy]: req.sort
       };
     }
-    if (req.sort === 'online') {
+    if (req.sortBy === 'online') {
       sort = '-isOnline';
     }
-    if (req.sort === 'live') {
+    if (req.sortBy === 'live') {
       sort = '-live';
     }
-    if (req.sort === 'latest') {
+    if (req.sortBy === 'latest') {
       sort = '-createdAt';
     }
-    if (req.sort === 'oldest') {
+    if (req.sortBy === 'oldest') {
       sort = 'createdAt';
     }
-    if (req.sort === 'popular') {
+    if (req.sortBy === 'popular') {
       sort = '-score';
     }
     const [data, total] = await Promise.all([

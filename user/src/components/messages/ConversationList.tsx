@@ -1,20 +1,17 @@
-/* eslint-disable react/destructuring-assignment */
 import { PureComponent, createRef } from 'react';
 import { Spin } from 'antd';
 import { connect } from 'react-redux';
-import './ConversationList.less';
+import { MessageIcon } from '@components/icons';
 import {
-  searchConversations,
-  getConversations,
-  setActiveConversation,
-  getConversationDetail,
-  receiveMessageSuccess
+  searchConversations, getConversations, setActiveConversation,
+  getConversationDetail, receiveMessageSuccess
 } from '@redux/message/actions';
 import { Event } from 'src/socket';
 import { debounce } from 'lodash';
-import { IUser, IPerformer } from 'src/interfaces';
+import { IUser } from 'src/interfaces';
 import ConversationSearch from './ConversationSearch';
 import ConversationListItem from './ConversationListItem';
+import './ConversationList.less';
 
 interface IProps {
   searchConversations: Function;
@@ -39,7 +36,7 @@ interface IProps {
     conversationMap: {};
     sendMessage: {};
   };
-  user: IUser | IPerformer;
+  user: IUser;
 }
 class ConversationList extends PureComponent<IProps> {
   conversationsRef: any;
@@ -129,7 +126,7 @@ class ConversationList extends PureComponent<IProps> {
   };
 
   render() {
-    const { conversation, user } = this.props;
+    const { conversation } = this.props;
     const { data: conversations, requesting } = conversation.list;
     const { mapping, activeConversation = {} } = conversation;
     if (!this.conversationsRef) this.conversationsRef = createRef();
@@ -137,9 +134,9 @@ class ConversationList extends PureComponent<IProps> {
       <div className="conversation-list" ref={this.conversationsRef} onScroll={this.handleScroll.bind(this)}>
         <Event event="message_created" handler={this.onMessage} />
         <div className="user-bl">
-          <img alt="avatar" src={user.avatar || '/static/no-avatar.png'} />
+          <MessageIcon />
           {' '}
-          {user?.name || user.username || 'N/A'}
+          Chats
         </div>
         <ConversationSearch
           onSearch={(e) => {

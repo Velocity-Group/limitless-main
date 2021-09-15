@@ -1,5 +1,5 @@
 import { PureComponent, createRef } from 'react';
-import { Spin } from 'antd';
+import { Spin, Avatar } from 'antd';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import { loadMoreMessages } from '@redux/message/actions';
@@ -144,12 +144,13 @@ class MessageList extends PureComponent<IProps> {
            <>
              <div className="message-list-container">
                <div className="mess-recipient">
-                 <img alt="" src={conversation?.recipientInfo?.avatar || '/static/no-avatar.png'} />
+                 <Avatar alt="avatar" src={conversation?.recipientInfo?.avatar || '/static/no-avatar.png'} />
                  {' '}
                  {conversation?.recipientInfo?.name || conversation?.recipientInfo?.username || 'N/A'}
                </div>
                {fetching && <div className="text-center"><Spin /></div>}
                {this.renderMessages()}
+               {!fetching && !message.items.length && <p className="text-center">Let&apos;s talking</p>}
                {!conversation.isSubscribed && (
                <Link href={{ pathname: '/model/profile', query: { username: conversation?.recipientInfo?.username || conversation?.recipientInfo?._id } }} as={`/${conversation?.recipientInfo?.username || conversation?.recipientInfo?._id}`}>
                  <div className="sub-text">Please subscribe to this model to start the conversation</div>

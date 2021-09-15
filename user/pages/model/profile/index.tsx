@@ -1,5 +1,5 @@
 import {
-  Layout, Tabs, Button, Menu, message, Modal, Tooltip, Dropdown
+  Layout, Tabs, Button, Menu, message, Modal, Dropdown
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -636,7 +636,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 this.setState({ tab: t, filter: initialFilter, isGrid: false }, () => this.loadItems());
               }}
             >
-              <TabPane tab={<Tooltip title="Feeds"><FireOutlined /></Tooltip>} key="post">
+              <TabPane tab={<FireOutlined />} key="post">
                 <div className="heading-tab">
                   <h4>
                     {totalFeed}
@@ -656,7 +656,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   />
                 </div>
               </TabPane>
-              <TabPane tab={<Tooltip title="Videos"><VideoCameraOutlined /></Tooltip>} key="video">
+              <TabPane tab={<VideoCameraOutlined />} key="video">
                 <div className="heading-tab">
                   <h4>
                     {totalVideos}
@@ -674,7 +674,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   />
                 </div>
               </TabPane>
-              <TabPane tab={<Tooltip title="Galleries"><PictureOutlined /></Tooltip>} key="photo">
+              <TabPane tab={<PictureOutlined />} key="photo">
                 <div className="heading-tab">
                   <h4>
                     {totalGalleries}
@@ -692,7 +692,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   />
                 </div>
               </TabPane>
-              <TabPane tab={<Tooltip title="Shop"><ShopOutlined /></Tooltip>} key="store">
+              <TabPane tab={<ShopOutlined />} key="store">
                 <div className="heading-tab">
                   <h4>
                     {totalProducts}

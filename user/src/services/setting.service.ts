@@ -1,10 +1,9 @@
-import { ISetting, IContact } from 'src/interfaces';
-import { APIRequest, IResponse } from './api-request';
+import { APIRequest } from './api-request';
 
 export class SettingService extends APIRequest {
   private _settings = {} as any;
 
-  async all(group = '', forceReload = false): Promise<IResponse<ISetting>> {
+  async all(group = '', forceReload = false) {
     const settingGroup = group || 'all';
     if (this._settings[settingGroup] && !forceReload) {
       return this._settings[settingGroup];
@@ -14,7 +13,7 @@ export class SettingService extends APIRequest {
     return resp;
   }
 
-  contact(data: IContact) {
+  contact(data) {
     return this.post('/contact', data);
   }
 }
