@@ -8,7 +8,7 @@ import { FeedModel } from '../models';
 import { FEED_PROVIDER } from '../providers';
 import { PERFORMER_FEED_CHANNEL } from '../constants';
 
-const DELETE_PERFORMER_MESSAGE_TOPIC = 'DELETE_PERFORMER_MESSAGE_TOPIC';
+const DELETE_PERFORMER_FEED_TOPIC = 'DELETE_PERFORMER_FEED_TOPIC';
 
 @Injectable()
 export class DeletePerformerFeedListener {
@@ -19,7 +19,7 @@ export class DeletePerformerFeedListener {
   ) {
     this.queueEventService.subscribe(
       DELETE_PERFORMER_CHANNEL,
-      DELETE_PERFORMER_MESSAGE_TOPIC,
+      DELETE_PERFORMER_FEED_TOPIC,
       this.handleDeleteData.bind(this)
     );
   }

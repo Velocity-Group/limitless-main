@@ -520,7 +520,7 @@ export class PaymentService {
       default: break;
     }
     await transaction.save();
-    redirectUrl && !livemode && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
+    redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { ok: true };
   }
 
