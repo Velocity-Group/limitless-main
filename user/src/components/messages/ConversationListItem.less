@@ -1,12 +1,16 @@
 @import '../../../style/vars.less';
+
 .conversation-list-item {
   display: flex;
   align-items: center;
   padding: 10px;
   position: relative;
   color: @white;
-  &.active {
+  &:hover, &.active {
     background: @background-conversation;
+    cursor: pointer;
+  }
+  &.active {
     pointer-events: none;
   }
 }
@@ -23,6 +27,7 @@
 .conversation-left-corner span {
   font-size: 10px;
 }
+
 .online {
   position: absolute;
   left: -5px;
@@ -32,6 +37,7 @@
   border-radius: 50%;
   background-color: @success-color;
 }
+
 .offline {
   position: absolute;
   left: -5px;
@@ -41,42 +47,52 @@
   border-radius: 50%;
   background-color: @gray;
 }
-.conversation-list-item:hover {
-  background: @primary-color;
-  cursor: pointer;
-}
 
 .conversation-photo {
   width: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+  height: 40px;
 }
 
-.conversation-title {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: capitalize;
-  margin: 0;
-  color: @grey-color
-}
+.conversation-info {
+  width: 100%;
 
-.conversation-snippet {
-  font-size: 12px;
-  color: @gray;
-  margin: 0;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
+  .conversation-title {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: capitalize;
+    margin: 0;
+    color: @grey-color;
 
-.conversation-time {
-  font-size: 10px;
-  color: #888;
-  margin: 0;
-}
+    .re-name {
+      max-width: 70%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-.notification-badge {
-  position: absolute;
-  top: 40px;
-  left: 10px;
+    .conversation-time {
+      max-width: 30%;
+      overflow: auto;
+      font-size: 10px;
+      margin-left: 10px;
+      text-transform: lowercase;
+    }
+  }
+
+  .conversation-snippet {
+    font-size: 12px;
+    color: @gray;
+    margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: 40px;
+    left: 10px;
+  }
 }

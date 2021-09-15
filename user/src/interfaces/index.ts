@@ -21,3 +21,4 @@ export * from './photo';
 export * from './gallery';
 export * from './token-package';
 export * from './setting';
+export * from './message';

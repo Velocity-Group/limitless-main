@@ -18,7 +18,7 @@ export class MessageListener {
     @Inject(CONVERSATION_MODEL_PROVIDER)
     private readonly conversationModel: Model<ConversationModel>,
     @Inject(NOTIFICATION_MESSAGE_MODEL_PROVIDER)
-    private readonly notificationMessageModel: Model<NotificationMessageModel>
+    private readonly NotificationModel: Model<NotificationMessageModel>
   ) {
     this.queueEventService.subscribe(
       MESSAGE_CHANNEL,
@@ -36,11 +36,11 @@ export class MessageListener {
       .lean()
       .exec();
     if (!conversation) return;
-    const receiverIds = (conversation.recipients || [])
-      .map((r) => r.sourceId)
-      .filter((r) => r.toString() !== message.senderId.toString());
-    await this.updateNotification(conversation, receiverIds, 1);
-    await this.handleNotify(receiverIds, message);
+    const recipient = conversation.recipients.find(
+      (r) => r.sourceId.toString() !== message.senderId.toString()
+    );
+    await this.updateNotification(conversation, recipient);
+    await this.handleSent(recipient.sourceId, message);
     await this.updateLastMessage(conversation, message);
   }
 
@@ -58,77 +58,49 @@ export class MessageListener {
   }
 
   // eslint-disable-next-line consistent-return
-  private async updateNotification(conversation, receiverIds, num = 1): Promise<void> {
-    const availableData = await this.notificationMessageModel.find({
-      conversationId: conversation._id,
-      recipientId: { $in: receiverIds }
+  private async updateNotification(conversation, recipient): Promise<void> {
+    let notification = await this.NotificationModel.findOne({
+      recipientId: recipient.sourceId,
+      conversationId: conversation._id
     });
-    if (availableData && availableData.length) {
-      const Ids = availableData.map((a) => a._id);
-      await this.notificationMessageModel.updateMany({ _id: { $in: Ids } }, {
-        $inc: { totalNotReadMessage: num }, updatedAt: new Date()
-      });
-      await Promise.all(receiverIds.map(async (receiverId) => {
-        const totalNotReadMessage = await this.notificationMessageModel.aggregate([
-          {
-            $match: { recipientId: receiverId }
-          },
-          {
-            $group: {
-              _id: '$conversationId',
-              total: {
-                $sum: '$totalNotReadMessage'
-              }
-            }
-          }
-        ]);
-        let total = 0;
-        totalNotReadMessage && totalNotReadMessage.length && totalNotReadMessage.forEach((data) => {
-          if (data.total) {
-            total += 1;
-          }
-        });
-        await this.notifyCountingNotReadMessageInConversation(receiverId, total);
-      }));
-      return;
-    }
-    await Promise.all(receiverIds.map(async (rId) => {
-      // eslint-disable-next-line new-cap
-      await new this.notificationMessageModel({
+    if (!notification) {
+      notification = new this.NotificationModel({
+        recipientId: recipient.sourceId,
         conversationId: conversation._id,
-        recipientId: rId,
-        totalNotReadMessage: num,
-        updatedAt: new Date(),
-        createdAt: new Date()
-      }).save();
-      const totalNotReadMessage = await this.notificationMessageModel.aggregate([
-        {
-          $match: { recipientId: rId }
-        },
-        {
-          $group: {
-            _id: '$conversationId',
-            total: {
-              $sum: '$totalNotReadMessage'
-            }
+        totalNotReadMessage: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
+    notification.totalNotReadMessage += 1;
+    await notification.save();
+    const totalNotReadMessage = await this.NotificationModel.aggregate<any>([
+      {
+        $match: { recipientId: recipient.sourceId }
+      },
+      {
+        $group: {
+          _id: '$conversationId',
+          total: {
+            $sum: '$totalNotReadMessage'
           }
         }
-      ]);
-      let total = 0;
-      totalNotReadMessage && totalNotReadMessage.length && totalNotReadMessage.forEach((data) => {
-        if (data.total) {
-          total += 1;
-        }
-      });
-      await this.notifyCountingNotReadMessageInConversation(rId, total);
-    }));
+      }
+    ]);
+    let total = 0;
+    totalNotReadMessage && totalNotReadMessage.length && totalNotReadMessage.forEach((data) => {
+      if (data.total) {
+        total += 1;
+      }
+    });
+    await this.notifyCountingNotReadMessageInConversation(recipient.sourceId, total);
   }
 
   private async notifyCountingNotReadMessageInConversation(receiverId, total): Promise<void> {
     await this.socketUserService.emitToUsers(new ObjectId(receiverId), 'nofify_read_messages_in_conversation', { total });
   }
 
-  private async handleNotify(receiverIds, message): Promise<void> {
-    await this.socketUserService.emitToUsers(receiverIds, 'message_created', message);
+  private async handleSent(recipientId, message): Promise<void> {
+    await this.socketUserService.emitToUsers(recipientId, 'message_created', message);
   }
 }
