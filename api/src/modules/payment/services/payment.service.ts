@@ -214,6 +214,13 @@ export class PaymentService {
         }, plan.id);
       }
       if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: TRANSACTION_SUCCESS_CHANNEL,
+            eventName: EVENT.CREATED,
+            data: new PaymentDto(transaction)
+          })
+        );
         await this.socketUserService.emitToUsers(
           transaction.sourceId,
           'payment_status_callback',
