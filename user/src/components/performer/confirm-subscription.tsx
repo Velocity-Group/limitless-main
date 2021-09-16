@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { PureComponent } from 'react';
 import {
-  Button
+  Button, Avatar
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import {
@@ -23,6 +23,9 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
     } = this.props;
     return (
       <div className="confirm-subscription-form">
+        <div className="text-center">
+          <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
+        </div>
         <div className="info-body">
           <p>
             SUBSCRIBE & GET THIS BENEFITS
@@ -54,7 +57,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
           {' '}
           {type !== 'free' ? (
             <>
-              by $
+              for $
               {' '}
               {type === 'monthly' ? performer.monthlyPrice.toFixed(2) : type === 'monthly' ? performer.yearlyPrice.toFixed(2) : ''}
             </>
