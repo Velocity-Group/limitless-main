@@ -5,14 +5,9 @@ import {
 } from '@ant-design/icons';
 import { Popover } from 'antd';
 import Link from 'next/link';
-import { videoDuration } from '@lib/index';
+import { videoDuration, shortenLargeNumber } from '@lib/index';
 import { IFeed } from '../../interfaces';
 import './index.less';
-
-function thoudsandToK(value: number) {
-  if (value < 1000) return value;
-  return (`${(value / 1000).toFixed(1)}K`);
-}
 
 interface IProps {
   feed: IFeed;
@@ -49,12 +44,12 @@ export class FeedGridCard extends PureComponent<IProps> {
                 <a>
                   <HeartOutlined />
                   {' '}
-                  {feed.totalLike > 0 ? thoudsandToK(feed.totalLike) : 0}
+                  {feed.totalLike > 0 ? shortenLargeNumber(feed.totalLike) : 0}
                 </a>
                 <a>
                   <CommentOutlined />
                   {' '}
-                  {feed.totalComment > 0 ? thoudsandToK(feed.totalComment) : 0}
+                  {feed.totalComment > 0 ? shortenLargeNumber(feed.totalComment) : 0}
                 </a>
               </div>
 

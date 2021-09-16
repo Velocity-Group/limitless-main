@@ -213,9 +213,16 @@ export class PaymentService {
           transactionId: transaction._id
         }, plan.id);
       }
+      if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+        await this.socketUserService.emitToUsers(
+          transaction.sourceId,
+          'payment_status_callback',
+          { redirectUrl: `/payment/success?transactionId=${transaction._id.toString().slice(16, 24)}` }
+        );
+      }
       return new PaymentDto(transaction).toResponse();
     }
-    throw new MissingConfigPaymentException();
+    return new PaymentDto(transaction).toResponse();
   }
 
   public async createTokenPaymentTransaction(
