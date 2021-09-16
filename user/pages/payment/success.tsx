@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import Head from 'next/head';
 import { withRouter } from 'next/router';
 import { clearCart } from '@redux/cart/actions';
-import { IUser, IUIConfig } from '../../src/interfaces';
+import { IUser, IUIConfig } from 'src/interfaces';
 
 interface IProps {
   clearCart: Function;

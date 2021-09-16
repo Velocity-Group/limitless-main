@@ -1,14 +1,12 @@
 import { Table, Tag, Button } from 'antd';
 import { ISubscription } from 'src/interfaces';
-import { formatDate, formatDateNoTime } from '@lib/date';
+import { formatDate } from '@lib/date';
 import Link from 'next/link';
 
 interface IProps {
   dataSource: ISubscription[];
-  // eslint-disable-next-line react/require-default-props
-  pagination?: any;
-  // eslint-disable-next-line react/require-default-props
-  rowKey?: string;
+  pagination: any;
+  rowKey: string;
   onChange: any;
   loading: boolean;
   cancelSubscription: Function;
@@ -27,7 +25,7 @@ export const TableListSubscription = ({
   const onCancel = (value) => {
     if (
       !window.confirm(
-        'By aggree to cancel this model subscription, your will not able to access his contents immediately '
+        'Confirm to cancel this model subscription?'
       )
     ) {
       return;
@@ -48,7 +46,7 @@ export const TableListSubscription = ({
             as={`/model/${records?.performerInfo?.username || records?.performerInfo?._id}`}
           >
             <a>
-              {records?.performerInfo?.username || 'N/A'}
+              {records?.performerInfo?.name || records?.performerInfo?.username || 'N/A'}
             </a>
           </Link>
         );
@@ -60,39 +58,42 @@ export const TableListSubscription = ({
       render(subscriptionType: string) {
         switch (subscriptionType) {
           case 'monthly':
-            return <Tag color="orange">Monthly Subscription</Tag>;
+            return <Tag color="blue">Monthly Subscription</Tag>;
           case 'yearly':
-            return <Tag color="orange">Yearly Subscription</Tag>;
+            return <Tag color="red">Yearly Subscription</Tag>;
           case 'free':
             return <Tag color="orange">Free Subscription</Tag>;
           default:
-            return null;
+            return <Tag color="orange">{subscriptionType}</Tag>;
         }
       }
     },
     {
-      title: 'Expire_at',
+      title: 'Expiry Date',
       dataIndex: 'expiredAt',
+      sorter: true,
       render(date: Date) {
-        return <span>{formatDate(date)}</span>;
+        return <span>{formatDate(date, 'LL')}</span>;
       }
     },
     {
-      title: 'Start_recurring_at',
+      title: 'Start Recurring Date',
       dataIndex: 'startRecurringDate',
+      sorter: true,
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date)}</span>;
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
       }
     },
     {
-      title: 'Next_recurring_at',
+      title: 'Next Recurring Date',
       dataIndex: 'nextRecurringDate',
+      sorter: true,
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date)}</span>;
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
       }
     },
     {
-      title: 'Last_updated_at',
+      title: 'Updated At',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
@@ -100,21 +101,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      render(status: string) {
-        switch (status) {
-          case 'active':
-            return <Tag color="success">Active</Tag>;
-          case 'deactivated':
-            return <Tag color="red">Inactive</Tag>;
-          default:
-            return <Tag color="default">{status}</Tag>;
-        }
-      }
-    },
-    {
-      title: 'PM_Gateway',
+      title: 'PM Gateway',
       dataIndex: 'paymentGateway',
       render(paymentGateway: string) {
         switch (paymentGateway) {
@@ -128,6 +115,20 @@ export const TableListSubscription = ({
             return <Tag color="orange">CCbill</Tag>;
           default:
             return <Tag color="default">{paymentGateway}</Tag>;
+        }
+      }
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      render(status: string) {
+        switch (status) {
+          case 'active':
+            return <Tag color="success">Active</Tag>;
+          case 'deactivated':
+            return <Tag color="red">Inactive</Tag>;
+          default:
+            return <Tag color="default">{status}</Tag>;
         }
       }
     },
@@ -146,7 +147,7 @@ export const TableListSubscription = ({
                   </Button>
                 ) : (
                   <Button type="primary" onClick={() => activeSubscription(record)}>
-                    Re-active subscription
+                    Activate subscription
                   </Button>
                 )}
               </>

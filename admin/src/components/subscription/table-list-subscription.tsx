@@ -1,7 +1,7 @@
 import { Table, Tag, Button } from 'antd';
 import { StopOutlined } from '@ant-design/icons';
 import { ISubscription } from 'src/interfaces';
-import { formatDate, formatDateNoTime } from '@lib/date';
+import { formatDate } from '@lib/date';
 
 interface IProps {
   dataSource: ISubscription[];
@@ -59,19 +59,45 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Expired Date',
+      title: 'Expiry Date',
       dataIndex: 'expiredAt',
       sorter: true,
       render(date: Date) {
-        return <span>{formatDateNoTime(date)}</span>;
+        return <span>{formatDate(date, 'LL')}</span>;
       }
     },
     {
-      title: 'Next Reccuring Date',
+      title: 'Start Recurring Date',
+      dataIndex: 'startRecurringDate',
       sorter: true,
-      dataIndex: 'expiredAt',
-      render(data, records) {
-        return <span>{records?.expiredAt ? formatDateNoTime(records.expiredAt) : 'N/A'}</span>;
+      render(date: Date, record) {
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+      }
+    },
+    {
+      title: 'Next Recurring Date',
+      dataIndex: 'nextRecurringDate',
+      sorter: true,
+      render(date: Date, record) {
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+      }
+    },
+    {
+      title: 'PM Gateway',
+      dataIndex: 'paymentGateway',
+      render(paymentGateway: string) {
+        switch (paymentGateway) {
+          case 'stripe':
+            return <Tag color="blue">Stripe</Tag>;
+          case 'bitpay':
+            return <Tag color="pink">Bitpay</Tag>;
+          case 'paypal':
+            return <Tag color="violet">Paypal</Tag>;
+          case 'ccbill':
+            return <Tag color="orange">CCbill</Tag>;
+          default:
+            return <Tag color="default">{paymentGateway}</Tag>;
+        }
       }
     },
     {
@@ -105,7 +131,7 @@ export const TableListSubscription = ({
               <Button type="primary" onClick={() => onCancelSubscription(records)}>
                 <StopOutlined />
                 {' '}
-                De-activate
+                Cancel subscription
               </Button>
             ) : null}
           </span>

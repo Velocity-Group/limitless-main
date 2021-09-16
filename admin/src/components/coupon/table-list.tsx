@@ -73,7 +73,7 @@ export class TableListCoupon extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Expired Date',
+        title: 'Expiry Date',
         dataIndex: 'expiredDate',
         sorter: true,
         render(date: Date) {

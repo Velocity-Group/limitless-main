@@ -22,7 +22,7 @@ export const TableListSubscription = ({
       title: 'User',
       dataIndex: 'userInfo',
       render(data, records) {
-        return <span>{records?.userInfo.username || 'N/A'}</span>;
+        return <span>{records?.userInfo?.name || records?.userInfo?.username || 'N/A'}</span>;
       }
     },
     {
@@ -31,45 +31,37 @@ export const TableListSubscription = ({
       render(subscriptionType: string) {
         switch (subscriptionType) {
           case 'monthly':
-            return <Tag color="#936dc9">Monthly Subscription</Tag>;
+            return <Tag color="blue">Monthly Subscription</Tag>;
           case 'yearly':
-            return <Tag color="#00dcff">Yearly Subscription</Tag>;
+            return <Tag color="red">Yearly Subscription</Tag>;
           case 'free':
-            return <Tag color="#FFCF00">Free Subscription</Tag>;
+            return <Tag color="orange">Free Subscription</Tag>;
           case 'system':
-            return <Tag color="#FFCF00">System</Tag>;
+            return <Tag color="green">System</Tag>;
           default:
-            return null;
+            return <Tag color="#FFCF00">{subscriptionType}</Tag>;
         }
       }
     },
     {
-      title: 'Expired Date',
+      title: 'Expiry date',
       dataIndex: 'expiredAt',
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date)}</span>;
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
       }
     },
     {
-      title: 'Start Recurring Date',
+      title: 'Start recurring date',
       dataIndex: 'startRecurringDate',
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date)}</span>;
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
       }
     },
     {
-      title: 'Next Recurring Date',
+      title: 'Next recurring date',
       dataIndex: 'nextRecurringDate',
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date)}</span>;
-      }
-    },
-    {
-      title: 'Last updated at',
-      dataIndex: 'updatedAt',
-      sorter: true,
-      render(date: Date) {
-        return <span>{formatDate(date)}</span>;
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
       }
     },
     {
@@ -88,6 +80,14 @@ export const TableListSubscription = ({
           default:
             return <Tag color="default">{paymentGateway}</Tag>;
         }
+      }
+    },
+    {
+      title: 'Updated at',
+      dataIndex: 'updatedAt',
+      sorter: true,
+      render(date: Date) {
+        return <span>{formatDate(date)}</span>;
       }
     },
     {
