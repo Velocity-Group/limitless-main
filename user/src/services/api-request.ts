@@ -163,8 +163,6 @@ export abstract class APIRequest {
                 for (let i = 0; i < options.customData[fieldname].length; i += 1) {
                   formData.append(fieldname, options.customData[fieldname][i]);
                 }
-              } else {
-                formData.append(fieldname, '');
               }
             }
           }
