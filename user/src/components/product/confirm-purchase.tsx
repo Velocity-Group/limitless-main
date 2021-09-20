@@ -18,7 +18,7 @@ const layout = {
 export class PurchaseProductForm extends PureComponent<IProps> {
   render() {
     const { product, onFinish, submiting } = this.props;
-    const image = product?.image || '/static/placeholder-image.jpg';
+    const image = product?.image || '/static/no-image.jpg';
 
     return (
       <div className="text-center">

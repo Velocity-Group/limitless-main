@@ -1,7 +1,6 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/destructuring-assignment */
 import { PureComponent } from 'react';
-import { CheckCircleOutlined } from '@ant-design/icons';
+import { Avatar } from 'antd';
+import { TickIcon } from 'src/icons';
 import { IPerformer, IUIConfig } from 'src/interfaces';
 import Link from 'next/link';
 import { connect } from 'react-redux';
@@ -49,18 +48,14 @@ class PerformerCard extends PureComponent<IProps> {
                 {moment().diff(moment(performer.dateOfBirth), 'years') > 0 && `${moment().diff(moment(performer.dateOfBirth), 'years')}+`}
               </span>
               <div className="card-img">
-                <img alt="" src={performer?.avatar || '/static/no-avatar.png'} />
+                <Avatar alt="avatar" src={performer?.avatar || '/static/no-avatar.png'} />
               </div>
-              {performer?.isOnline ? (
-                <span className="online-status" />
-              ) : (
-                <span className="online-status off" />
-              )}
+              <span className={performer?.isOnline > 0 ? 'online-status' : 'online-status off'} />
               <div className="model-name">
-                <div>
+                <div className="name">
                   {performer?.name || 'N/A'}
                   {' '}
-                  {performer?.verifiedAccount && <CheckCircleOutlined />}
+                  {performer?.verifiedAccount && <TickIcon />}
                 </div>
                 <p>
                   {`@${performer?.username || 'n/a'}`}

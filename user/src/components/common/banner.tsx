@@ -15,7 +15,7 @@ export class Banner extends PureComponent<IProps> {
         <Carousel effect="fade" autoplay swipeToSlide arrows dots={false}>
           {banners.map((item) => (
             // eslint-disable-next-line jsx-a11y/control-has-associated-label
-            <a href={(item.link || null)} target="_.blank"><Image preview={false} placeholder src={item?.photo?.url} alt="" key={item._id} /></a>
+            <a key={item._id} href={(item.link || null)} target="_.blank"><Image preview={false} placeholder src={item?.photo?.url} alt="" key={item._id} /></a>
           ))}
         </Carousel>
         )}

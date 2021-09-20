@@ -12,7 +12,6 @@ import { ISettings, IUIConfig } from 'src/interfaces';
 // import { GoogleReCaptcha } from '@components/common';
 import { TwitterOutlined } from '@ant-design/icons';
 import { authService } from '@services/auth.service';
-import Loader from '@components/common/base/loader';
 import GoogleLogin from 'react-google-login';
 import './index.less';
 
@@ -102,155 +101,165 @@ class FanRegister extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <div className="login-box">
+          <div className="login-box" style={{ marginTop: 0 }}>
+            <p className="text-center">
+              <small>
+                Do not create an account on this page if you are a model. Models must create an account on
+                {' '}
+                <a href="/auth/model-register">this link</a>
+              </small>
+            </p>
             <Row>
               <Col
                 xs={24}
                 sm={24}
                 md={6}
                 lg={12}
-                className="login-content left fixed"
-                style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
-              />
+              >
+                <div
+                  className="login-content left"
+                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
+                />
+              </Col>
               <Col
                 xs={24}
                 sm={24}
                 md={18}
                 lg={12}
-                className="login-content right"
               >
-                <div className="title">FAN SIGN UP</div>
-                <p className="text-center"><small>Sign up to interact with your idols!</small></p>
-                <div className="social-login">
-                  <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
-                    <TwitterOutlined />
-                    {' '}
-                    SIGN UP WITH TWITTER
-                  </button>
-                  <GoogleLogin
-                    className="google-button"
-                    clientId={settings.googleClientId}
-                    buttonText="SIGN UP WITH GOOGLE"
-                    onSuccess={this.onGoogleLogin.bind(this)}
-                    onFailure={this.onGoogleLogin.bind(this)}
-                    cookiePolicy="single_host_origin"
-                  />
-                </div>
-                <Divider>Or</Divider>
-                <div className="login-form">
-                  <Form
-                    labelCol={{ span: 24 }}
-                    name="member_register"
-                    initialValues={{ remember: true, gender: 'male' }}
-                    onFinish={this.handleRegister.bind(this)}
-                  >
-                    <Form.Item
-                      name="email"
-                      validateTrigger={['onChange', 'onBlur']}
-                      hasFeedback
-                      rules={[
-                        {
-                          type: 'email',
-                          message: 'Invalid email address!'
-                        },
-                        {
-                          required: true,
-                          message: 'Please input your email address!'
-                        }
-                      ]}
+                <div className="login-content right">
+                  <div className="title">FAN SIGN UP</div>
+                  <p className="text-center"><small>Sign up to interact with your idols!</small></p>
+                  <div className="social-login">
+                    <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
+                      <TwitterOutlined />
+                      {' '}
+                      SIGN UP WITH TWITTER
+                    </button>
+                    <GoogleLogin
+                      className="google-button"
+                      clientId={settings.googleClientId}
+                      buttonText="SIGN UP WITH GOOGLE"
+                      onSuccess={this.onGoogleLogin.bind(this)}
+                      onFailure={this.onGoogleLogin.bind(this)}
+                      cookiePolicy="single_host_origin"
+                    />
+                  </div>
+                  <Divider>Or</Divider>
+                  <div className="login-form">
+                    <Form
+                      labelCol={{ span: 24 }}
+                      name="member_register"
+                      initialValues={{ remember: true, gender: 'male' }}
+                      onFinish={this.handleRegister.bind(this)}
                     >
-                      <Input placeholder="Email address" />
-                    </Form.Item>
-                    <Form.Item
-                      name="username"
-                      validateTrigger={['onChange', 'onBlur']}
-                      rules={[
-                        { required: true, message: 'Please input your username!' },
-                        {
-                          pattern: new RegExp(/^[a-z0-9]+$/g),
-                          message:
-                                'Username must contain lowercase alphanumerics only'
-                        },
-                        { min: 3, message: 'Username must containt at least 3 characters' }
-                      ]}
-                      hasFeedback
-                    >
-                      <Input placeholder="Username" />
-                    </Form.Item>
-                    <Form.Item
-                      name="name"
-                      validateTrigger={['onChange', 'onBlur']}
-                      rules={[
-                        { required: true, message: 'Please input your display name!' },
-                        {
-                          pattern: new RegExp(/^(?=.*\S).+$/g),
-                          message:
-                                'Display name can not contain only whitespace'
-                        },
-                        {
-                          min: 3,
-                          message: 'Display name must containt at least 3 characters'
-                        }
-                      ]}
-                      hasFeedback
-                    >
-                      <Input placeholder="Display name" />
-                    </Form.Item>
-                    <Form.Item
-                      name="password"
-                      validateTrigger={['onChange', 'onBlur']}
-                      hasFeedback
-                      rules={[
-                        {
-                          pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
-                          message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
-                        },
-                        { required: true, message: 'Please enter your password!' }
-                      ]}
-                    >
-                      <Input.Password placeholder="Password" />
-                    </Form.Item>
-                    {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
-                    <Form.Item style={{ textAlign: 'center' }}>
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        className="login-form-button"
-                        disabled={submiting}
-                        loading={submiting}
+                      <Form.Item
+                        name="email"
+                        validateTrigger={['onChange', 'onBlur']}
+                        hasFeedback
+                        rules={[
+                          {
+                            type: 'email',
+                            message: 'Invalid email address!'
+                          },
+                          {
+                            required: true,
+                            message: 'Please input your email address!'
+                          }
+                        ]}
                       >
-                        SIGN UP
-                      </Button>
-                      <p>
-                        By signing up you agree to our
-                        {' '}
-                        <a href="/page/tos" target="_blank">Terms of Service</a>
-                        {' '}
-                        and
-                        {' '}
-                        <a href="/page/privacy_policy" target="_blank">Privacy & Policy</a>
-                        , and confirm that you are at least 18 years old.
-                      </p>
-                      <p>
-                        Have an account already?
-                        <Link href="/">
-                          <a> Login.</a>
-                        </Link>
-                      </p>
-                      <p>
-                        Are you a model?
-                        <Link href="/auth/model-register">
-                          <a> Sign up here.</a>
-                        </Link>
-                      </p>
-                    </Form.Item>
-                  </Form>
+                        <Input placeholder="Email address" />
+                      </Form.Item>
+                      <Form.Item
+                        name="username"
+                        validateTrigger={['onChange', 'onBlur']}
+                        rules={[
+                          { required: true, message: 'Please input your username!' },
+                          {
+                            pattern: new RegExp(/^[a-z0-9]+$/g),
+                            message:
+                                'Username must contain lowercase alphanumerics only'
+                          },
+                          { min: 3, message: 'Username must containt at least 3 characters' }
+                        ]}
+                        hasFeedback
+                      >
+                        <Input placeholder="Username" />
+                      </Form.Item>
+                      <Form.Item
+                        name="name"
+                        validateTrigger={['onChange', 'onBlur']}
+                        rules={[
+                          { required: true, message: 'Please input your display name!' },
+                          {
+                            pattern: new RegExp(/^(?=.*\S).+$/g),
+                            message:
+                                'Display name can not contain only whitespace'
+                          },
+                          {
+                            min: 3,
+                            message: 'Display name must containt at least 3 characters'
+                          }
+                        ]}
+                        hasFeedback
+                      >
+                        <Input placeholder="Display name" />
+                      </Form.Item>
+                      <Form.Item
+                        name="password"
+                        validateTrigger={['onChange', 'onBlur']}
+                        hasFeedback
+                        rules={[
+                          {
+                            pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                            message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                          },
+                          { required: true, message: 'Please enter your password!' }
+                        ]}
+                      >
+                        <Input.Password placeholder="Password" />
+                      </Form.Item>
+                      {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
+                      <Form.Item style={{ textAlign: 'center' }}>
+                        <Button
+                          type="primary"
+                          htmlType="submit"
+                          className="login-form-button"
+                          disabled={submiting || isLoading}
+                          loading={submiting || isLoading}
+                        >
+                          SIGN UP
+                        </Button>
+                        <p>
+                          By signing up you agree to our
+                          {' '}
+                          <a href="/page/terms-of-service" target="_blank">Terms of Service</a>
+                          {' '}
+                          and
+                          {' '}
+                          <a href="/page/privacy-policy" target="_blank">Privacy & Policy</a>
+                          , and confirm that you are at least 18 years old.
+                        </p>
+                        <p>
+                          Have an account already?
+                          <Link href="/">
+                            <a> Login.</a>
+                          </Link>
+                        </p>
+                        <p>
+                          Are you a model?
+                          <Link href="/auth/model-register">
+                            <a> Sign up here.</a>
+                          </Link>
+                        </p>
+                      </Form.Item>
+                    </Form>
+                  </div>
                 </div>
               </Col>
             </Row>
           </div>
         </div>
-        {isLoading && <Loader />}
       </Layout>
     );
   }

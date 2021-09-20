@@ -33,7 +33,7 @@ const UserPerformerBookmarks = ({
           ))}
       </Row>
     </InfiniteScroll>
-    {!performers.length && !loading && <div className="main-container custom text-center"><Alert type="info" message="No profile was found" /></div>}
+    {!performers.length && !loading && <div className="main-container custom text-center"><Alert type="info" message="No model was found" /></div>}
     {loading && (
     <div className="text-center">
       <Spin />

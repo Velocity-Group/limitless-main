@@ -1,12 +1,13 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-prototype-builtins */
 import {
-  Layout, Tabs, message, Button, Spin, Tooltip
+  Layout, Tabs, message, Button, Spin, Tooltip, Avatar
 } from 'antd';
 import {
   BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined,
   CalendarOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
+import { TickIcon } from 'src/icons';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
@@ -305,7 +306,7 @@ class VideoViewPage extends PureComponent<IProps> {
       activeTab,
       isFirstLoadComment
     } = this.state;
-    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/placeholder-image.jpg';
+    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const playSource = {
       file: video?.video?.url || '',
       image: thumbUrl,
@@ -325,7 +326,7 @@ class VideoViewPage extends PureComponent<IProps> {
       ]
     };
     const teaserOptions = {
-      key: video._id,
+      key: `${video._id}_teaser`,
       autoplay: true,
       controls: true,
       poster: thumbUrl,
@@ -382,7 +383,7 @@ class VideoViewPage extends PureComponent<IProps> {
             <a>
               <CalendarOutlined />
               &nbsp;
-              {formatDate(video.updatedAt, 'LL')}
+              {formatDate(video.updatedAt, 'll')}
             </a>
           </div>
           <div className="vid-player">
@@ -433,7 +434,7 @@ class VideoViewPage extends PureComponent<IProps> {
                     <h4>
                       Main video will be premiered at
                       {' '}
-                      {formatDate(video.scheduledAt, 'LL')}
+                      {formatDate(video.scheduledAt, 'll')}
                     </h4>
                     )}
                   </div>
@@ -473,18 +474,20 @@ class VideoViewPage extends PureComponent<IProps> {
               >
                 <a>
                   <div className="o-w-ner">
-                    <img
+                    <Avatar
                       alt="performer avatar"
                       src={video?.performer?.avatar || '/static/no-avatar.png'}
                     />
-                    {' '}
-                    <span className="owner-name">
-                      <div>{video?.performer?.name || 'N/A'}</div>
+                    <div className="owner-name">
+                      <div className="name">
+                        {video?.performer?.name || 'N/A'}
+                        {video?.performer?.verifiedAccount && <TickIcon />}
+                      </div>
                       <small>
                         @
                         {video?.performer?.username || 'n/a'}
                       </small>
-                    </span>
+                    </div>
                   </div>
                 </a>
               </Link>
@@ -526,7 +529,7 @@ class VideoViewPage extends PureComponent<IProps> {
                 && video.tags.map((tag) => (
                   <a color="magenta" style={{ marginRight: 5 }}>
                     #
-                    {tag}
+                    {tag || 'tag'}
                   </a>
                 ))}
           </div>

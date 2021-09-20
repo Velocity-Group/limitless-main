@@ -101,7 +101,7 @@ export class PerformerRegisterController {
       // TODO - check and verify me!
       performer.email && await this.authService.sendVerificationEmail(performer);
 
-      return DataResponse.ok({ message: 'We have sent you a verification email please check your email account you registered with' });
+      return DataResponse.ok({ message: `Your application will be processed withing 24 to 48 hours, most times sooner. You will get an email notification sent to ${performer.email || 'your email address'} with the status update.` });
     } catch (e) {
       files.idVerification
         && (await this.fileService.remove(files.idVerification._id));

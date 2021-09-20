@@ -1,7 +1,6 @@
 import { PureComponent } from 'react';
 import Head from 'next/head';
-import { message } from 'antd';
-import Page from '@components/common/layout/page';
+import { message, Layout } from 'antd';
 import {
   ShoppingCartOutlined
 } from '@ant-design/icons';
@@ -93,7 +92,7 @@ class UserOrderPage extends PureComponent<IProps> {
     const { list, searching, pagination } = this.state;
     const { ui, user } = this.props;
     return (
-      <>
+      <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
@@ -101,23 +100,21 @@ class UserOrderPage extends PureComponent<IProps> {
             | My Orders
           </title>
         </Head>
-        <Page>
-          <div className="main-container">
-            <PageHeading title="My Orders" icon={<ShoppingCartOutlined />} />
-            <OrderSearchFilter
-              onSubmit={this.handleFilter.bind(this)}
-            />
-            <OrderTableList
-              user={user}
-              dataSource={list}
-              rowKey="_id"
-              loading={searching}
-              pagination={pagination}
-              onChange={this.handleTableChange.bind(this)}
-            />
-          </div>
-        </Page>
-      </>
+        <div className="main-container">
+          <PageHeading title="My Orders" icon={<ShoppingCartOutlined />} />
+          <OrderSearchFilter
+            onSubmit={this.handleFilter.bind(this)}
+          />
+          <OrderTableList
+            user={user}
+            dataSource={list}
+            rowKey="_id"
+            loading={searching}
+            pagination={pagination}
+            onChange={this.handleTableChange.bind(this)}
+          />
+        </div>
+      </Layout>
     );
   }
 }

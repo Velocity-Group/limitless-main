@@ -1,10 +1,11 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Row, Col, Spin, Button, Modal, Tabs
+  Layout, message, Row, Col, Spin, Button, Modal, Tabs, Avatar
 } from 'antd';
 import {
   EyeOutlined, PictureOutlined, CalendarOutlined
 } from '@ant-design/icons';
+import { TickIcon } from 'src/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import {
@@ -230,7 +231,7 @@ class GalleryViewPage extends PureComponent<IProps> {
               <a>
                 <CalendarOutlined />
               &nbsp;
-                {formatDate(gallery?.updatedAt, 'LL')}
+                {formatDate(gallery?.updatedAt, 'll')}
               </a>
             </div>
             <div className="photo-carousel">
@@ -279,7 +280,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                           this.setState({ openSubscriptionModal: true });
                         }}
                       >
-                        MONTHLY SUBSCRIPTION BY $
+                        MONTHLY SUBSCRIPTION FOR $
                         {(gallery?.performer?.monthlyPrice || 0).toFixed(2)}
                       </Button>
                       )}
@@ -292,7 +293,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                           this.setState({ openSubscriptionModal: true });
                         }}
                       >
-                        YEARLY SUBSCRIPTON BY
+                        YEARLY SUBSCRIPTON FOR
                         {(gallery?.performer?.yearlyPrice || 0).toFixed(2)}
                       </Button>
                       )}
@@ -315,13 +316,16 @@ class GalleryViewPage extends PureComponent<IProps> {
                 >
                   <a>
                     <div className="o-w-ner">
-                      <img
+                      <Avatar
                         alt="performer avatar"
                         src={gallery?.performer?.avatar || '/static/no-avatar.png'}
                       />
-                      {' '}
                       <div className="owner-name">
-                        <div>{gallery?.performer?.name || 'N/A'}</div>
+                        <div className="name">
+                          {gallery?.performer?.name || 'N/A'}
+                          {' '}
+                          {gallery?.performer?.verifiedAccount && <TickIcon />}
+                        </div>
                         <small>
                           @
                           {gallery?.performer?.username || 'n/a'}

@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import {
   Row, Col, Layout, Pagination, Spin, message
 } from 'antd';
-import { ModelIcon } from '@components/icons';
+import { ModelIcon } from 'src/icons';
 import { connect } from 'react-redux';
 import PerformerGridCard from '@components/performer/grid-card';
 import Head from 'next/head';
@@ -74,7 +74,7 @@ class Performers extends PureComponent<IProps> {
     } = this.state;
 
     return (
-      <>
+      <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
@@ -82,40 +82,38 @@ class Performers extends PureComponent<IProps> {
             | Models
           </title>
         </Head>
-        <Layout>
-          <div className="main-container">
-            <PageHeading title="Models" icon={<ModelIcon />} />
-            <PerformerAdvancedFilter
-              onSubmit={this.handleFilter.bind(this)}
-              countries={ui?.countries || []}
-            />
-            <Row>
-              {performers && performers.length > 0
+        <div className="main-container">
+          <PageHeading title="Models" icon={<ModelIcon />} />
+          <PerformerAdvancedFilter
+            onSubmit={this.handleFilter.bind(this)}
+            countries={ui?.countries || []}
+          />
+          <Row>
+            {performers && performers.length > 0
                     && !fetching
                     && performers.map((p: any) => (
                       <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
                         <PerformerGridCard performer={p} />
                       </Col>
                     ))}
-            </Row>
-            {!total && !fetching && <p>No model profile was found.</p>}
-            {fetching && (
+          </Row>
+          {!total && !fetching && <p>No model profile was found.</p>}
+          {fetching && (
             <div className="text-center">
               <Spin />
             </div>
-            )}
-            {total && total > limit && !fetching ? (
-              <Pagination
-                showQuickJumper
-                defaultCurrent={offset + 1}
-                total={total}
-                pageSize={limit}
-                onChange={this.pageChanged}
-              />
-            ) : null}
-          </div>
-        </Layout>
-      </>
+          )}
+          {total && total > limit && !fetching ? (
+            <Pagination
+              showQuickJumper
+              defaultCurrent={offset + 1}
+              total={total}
+              pageSize={limit}
+              onChange={this.pageChanged}
+            />
+          ) : null}
+        </div>
+      </Layout>
     );
   }
 }

@@ -1,16 +1,11 @@
-/* eslint-disable no-template-curly-in-string */
 import { PureComponent } from 'react';
 import {
   Form, Button, Row, Col, message, Progress
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import { ImageUpload } from '@components/file';
-import './performer.less';
 import { performerService, authService } from '@services/index';
-import { enquireScreen, unenquireScreen } from 'enquire-js';
-// import dynamic from 'next/dynamic';
-
-// const FaceImage = dynamic(() => import('../face-detect/index'), { ssr: false });
+import './performer.less';
 
 const layout = {
   labelCol: { span: 24 },
@@ -28,27 +23,16 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
 
   documentVerificationFileId: string;
 
-  enquireHandler: any;
-
   state = {
     idImage: '',
     documentImage: '',
     isUploading: false,
     idImgProgress: 0,
-    documentImgProgress: 0,
-    isMobile: false
+    documentImgProgress: 0
   }
 
   componentDidMount() {
     const { user } = this.props;
-    this.enquireHandler = enquireScreen((mobile) => {
-      const { isMobile } = this.state;
-      if (isMobile !== mobile) {
-        this.setState({
-          isMobile: mobile
-        });
-      }
-    });
     if (user.documentVerification) {
       this.documentVerificationFileId = user?.documentVerification?._id;
       this.setState({ documentImage: user?.documentVerification?.url });
@@ -59,10 +43,6 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
     }
   }
 
-  componentWillUnmount() {
-    unenquireScreen(this.enquireHandler);
-  }
-
   onFileUploaded(type, file) {
     if (file && type === 'idFile') {
       this.idVerificationFileId = file?.response?.data?._id;
@@ -71,30 +51,6 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
     if (file && type === 'documentFile') {
       this.documentVerificationFileId = file?.response?.data?._id;
       this.setState({ documentImage: file?.response?.data.url });
-    }
-  }
-
-  async onFaceSelect(type, data) {
-    const { file } = data;
-    try {
-      await this.setState({ isUploading: true });
-      const resp = await performerService.uploadDocuments([{ file, fieldname: 'file' }], (progress) => {
-        type === 'idFile' && progress.percentage && this.setState({ idImgProgress: progress.percentage });
-        type === 'documentFile' && progress.percentage && this.setState({ documentImgProgress: progress.percentage });
-      }) as any;
-      if (type === 'idFile' && resp.data) {
-        this.idVerificationFileId = resp.data._id;
-        this.setState({ idImage: resp.data.url });
-      }
-      if (type === 'documentFile' && resp.data) {
-        this.documentVerificationFileId = resp?.data?._id;
-        this.setState({ documentImage: resp.data.url });
-      }
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'Error occured, pleasey try again later');
-    } finally {
-      this.setState({ isUploading: false });
     }
   }
 
@@ -136,12 +92,11 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'idFile')} />
-                {idImage && (
-                <a title="Click to view" href={idImage} rel="noreferrer" target="_blank">
-                  <img alt="id-img" src={idImage} style={{ margin: 5, width: '100px' }} />
-                  <p className="text-center"><small>Click to view</small></p>
-                </a>
-                )}
+                {idImage ? (
+                  <a title="Click to view" href={idImage} rel="noreferrer" target="_blank">
+                    <img alt="id-img" src={idImage} style={{ margin: 5, height: '140px' }} />
+                  </a>
+                ) : <img src="/static/front-id.jpeg" height="140px" alt="id-img" />}
               </div>
               {idImgProgress > 0 && <Progress percent={idImgProgress} />}
             </Form.Item>
@@ -156,12 +111,11 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'documentFile')} />
-                {documentImage && (
-                <a title="Click to view" href={documentImage} rel="noreferrer" target="_blank">
-                  <img alt="id-img" src={documentImage} style={{ margin: 5, width: '100px' }} />
-                  <p className="text-center"><small>Click to view</small></p>
-                </a>
-                )}
+                {documentImage ? (
+                  <a title="Click to view" href={documentImage} rel="noreferrer" target="_blank">
+                    <img alt="id-img" src={documentImage} style={{ margin: 5, height: '140px' }} />
+                  </a>
+                ) : <img src="/static/img-id-man.png" height="140px" alt="id-img" />}
               </div>
               {documentImgProgress > 0 && <Progress percent={documentImgProgress} />}
             </Form.Item>

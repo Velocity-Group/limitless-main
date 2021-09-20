@@ -1,6 +1,6 @@
 import React from 'react';
-import { Tooltip } from 'antd';
-import { PictureOutlined } from '@ant-design/icons';
+import { Tooltip, Button } from 'antd';
+import { PictureOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Link from 'next/link';
 import './gallery.less';
@@ -10,7 +10,8 @@ interface GalleryCardIProps {
 }
 
 const GalleryCard = ({ gallery }: GalleryCardIProps) => {
-  const thumbUrl = (gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]) || '/static/placeholder-image.jpg';
+  const canView = (!gallery.isSale && gallery.isSubscribed) || (gallery.isSale && gallery.isBought);
+  const thumbUrl = (gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]) || '/static/no-image.jpg';
   return (
     <Link
       href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
@@ -25,7 +26,8 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
           </div>
         </span>
         )}
-        <div className="gallery-thumb" style={{ backgroundImage: `url(${thumbUrl})` }}>
+        <div className="gallery-thumb">
+          <div className="card-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: 'blur(15px)' }} />
           <div className="gallery-stats">
             <a>
               <PictureOutlined />
@@ -33,15 +35,15 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
               {gallery?.numOfItems || 0}
             </a>
           </div>
+          <div className="lock-middle">
+            {canView ? <UnlockOutlined /> : <LockOutlined />}
+            {(!gallery.isSale && !gallery.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}
+            {(gallery.isSale && !gallery.isBought) && <Button type="link">Pay now to unlock</Button>}
+          </div>
         </div>
         <div className="gallery-info">
           <Tooltip title={gallery?.title}>
-            <Link
-              href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
-              as={`/gallery/${gallery?.slug || gallery?._id}`}
-            >
-              <span>{gallery?.title}</span>
-            </Link>
+            <span>{gallery?.title}</span>
           </Tooltip>
         </div>
       </div>

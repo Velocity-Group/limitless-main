@@ -22,11 +22,11 @@ export default function ConversationListItem(props: IProps) {
     <div aria-hidden className={className} onClick={() => setActive(_id)}>
       <div className="conversation-left-corner">
         <Avatar className="conversation-photo" src={recipientInfo?.avatar || '/static/no-avatar.png'} alt="avatar" />
-        <span className={recipientInfo?.isOnline ? 'online' : 'offline'} />
+        <span className={recipientInfo?.isOnline > 0 ? 'online-status active' : 'online-status'} />
       </div>
       <div className="conversation-info">
         <h1 className="conversation-title">
-          <span className="re-name">{recipientInfo?.name || recipientInfo?.username || 'N/A'}</span>
+          <span className="re-name" title={recipientInfo?.name || recipientInfo?.username || 'N/A'}>{recipientInfo?.name || recipientInfo?.username || 'N/A'}</span>
           <span className="conversation-time">{formatDateFromnow(lastMessageCreatedAt || updatedAt)}</span>
         </h1>
         <p className="conversation-snippet">{lastMessage}</p>

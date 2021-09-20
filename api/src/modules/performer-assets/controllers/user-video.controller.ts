@@ -33,9 +33,10 @@ export class UserVideosController {
   @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)
   async search(
-    @Query() req: VideoSearchRequest
+    @Query() req: VideoSearchRequest,
+    @CurrentUser() user: UserDto
   ) {
-    const resp = await this.videoSearchService.userSearch(req);
+    const resp = await this.videoSearchService.userSearch(req, user);
     return DataResponse.ok(resp);
   }
 

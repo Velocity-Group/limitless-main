@@ -86,13 +86,13 @@
 
     //model
     &.left {
+      height: 100%;
       background-image: url('/static/auth-img.png');
       background-size: 85%;
       background-repeat: no-repeat;
       background-position: center;
-
       &.fixed {
-        background-size: 65%;
+        background-size: 70%;
       }
 
       @media (max-width: @mobile-screen) {
@@ -112,7 +112,7 @@
         height: 48px;
         border-radius: 25px;
         font-size: 16px;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
       }
 
       .title {
@@ -132,6 +132,9 @@
       }
       p a {
         font-size: 12px;
+        &.sub-text {
+          font-size: 10px;
+        }
       }
 
       .ant-checkbox-wrapper .ant-checkbox-inner,
@@ -191,58 +194,6 @@
   }
 }
 
-.ant-spin-container,
-.ant-spin-nested-loading {
-  height: 100%;
-}
-
-.error-message {
-  color: @error-color;
-}
-
-.forgot-box {
-  background-color: @black;
-  color: @white;
-  margin: 80px 30px;
-  padding: 20px;
-
-  h2,
-  h4 {
-    color: @white;
-  }
-
-  @media (max-width: @mobile-screen) {
-    .forgot-password {
-      margin: 40px auto 0;
-    }
-
-    .forgot-form {
-      .ant-form-item {
-        width: 300px;
-      }
-    }
-  }
-}
-
-.forgot-form {
-  display: flex;
-  flex-direction: column;
-  min-height: 300px;
-  padding: 70px 0;
-  align-items: center;
-  justify-content: center;
-
-  .ant-form-item {
-    margin-bottom: 10px;
-    width: 400px;
-  }
-
-  Button {
-    width: 100%;
-    color: @black;
-  }
-}
-
 .switch-btn {
   display: flex;
   justify-content: center;
@@ -292,6 +243,58 @@
 
   .ant-switch-checked .ant-switch-handle {
     left: calc(100% - 38px - 1px);
+  }
+}
+
+.ant-spin-container,
+.ant-spin-nested-loading {
+  height: 100%;
+}
+
+.error-message {
+  color: @error-color;
+}
+
+.forgot-box {
+  background-color: @black;
+  color: @white;
+  margin: 80px 30px;
+  padding: 20px;
+
+  h2,
+  h4 {
+    color: @white;
+  }
+
+  @media (max-width: @mobile-screen) {
+    .forgot-password {
+      margin: 40px auto 0;
+    }
+
+    .forgot-form {
+      .ant-form-item {
+        width: 300px;
+      }
+    }
+  }
+}
+
+.forgot-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  padding: 70px 0;
+  align-items: center;
+  justify-content: center;
+
+  .ant-form-item {
+    margin-bottom: 10px;
+    width: 400px;
+  }
+
+  button {
+    width: 100%;
+    color: @black;
   }
 }
 
@@ -382,7 +385,6 @@
   }
 
   .img-id {
-    width: 140px;
     height: 140px;
     object-fit: cover;
   }

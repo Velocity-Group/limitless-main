@@ -13,10 +13,11 @@ import {
 } from 'src/services';
 import Head from 'next/head';
 import {
-  CheckCircleOutlined, ArrowLeftOutlined, FireOutlined,
+  ArrowLeftOutlined, FireOutlined, BookOutlined,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined,
-  HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, ShareAltOutlined, BookOutlined
+  HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, ShareAltOutlined
 } from '@ant-design/icons';
+import { TickIcon } from 'src/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
@@ -187,45 +188,33 @@ class PerformerProfile extends PureComponent<IProps> {
     const {
       itemPerPage, filter, tab
     } = this.state;
+    const query = {
+      limit: itemPerPage,
+      offset: 0,
+      performerId: performer?._id,
+      q: filter.q || '',
+      fromDate: filter.fromDate || '',
+      toDate: filter.toDate || ''
+    };
     switch (tab) {
       case 'post':
         this.setState({ feedPage: 0 }, () => handleGetFeeds({
-          limit: itemPerPage,
-          offset: 0,
-          performerId: performer?._id,
-          q: filter.q || '',
-          fromDate: filter.fromDate || '',
-          toDate: filter.toDate || ''
+          ...query
         }));
         break;
       case 'photo':
         this.setState({ galleryPage: 0 }, () => handleGetGalleries({
-          limit: itemPerPage,
-          offset: 0,
-          performerId: performer?._id,
-          q: filter.q || '',
-          fromDate: filter.fromDate || '',
-          toDate: filter.toDate || ''
+          ...query
         }));
         break;
       case 'video':
         this.setState({ videoPage: 0 }, () => handleGetVids({
-          limit: itemPerPage,
-          offset: 0,
-          performerId: performer?._id,
-          q: filter.q || '',
-          fromDate: filter.fromDate || '',
-          toDate: filter.toDate || ''
+          ...query
         }));
         break;
       case 'store':
         this.setState({ productPage: 0 }, () => handleGetProducts({
-          limit: itemPerPage,
-          offset: 0,
-          performerId: performer?._id,
-          q: filter.q || '',
-          fromDate: filter.fromDate || '',
-          toDate: filter.toDate || ''
+          ...query
         }));
         break;
       default: break;
@@ -292,28 +281,27 @@ class PerformerProfile extends PureComponent<IProps> {
       moreGalleries: getMoreGallery,
       performer
     } = this.props;
+    const query = {
+      limit: itemPerPage,
+      performerId: performer._id,
+      q: filter.q || '',
+      fromDate: filter.fromDate || '',
+      toDate: filter.toDate || ''
+    };
     if (tab === 'post') {
       this.setState({
         feedPage: feedPage + 1
       }, () => getMoreFeed({
-        limit: itemPerPage,
-        offset: feedPage * itemPerPage,
-        performerId: performer._id,
-        q: filter.q || '',
-        fromDate: filter.fromDate || '',
-        toDate: filter.toDate || ''
+        ...query,
+        offset: feedPage * itemPerPage
       }));
     }
     if (tab === 'video') {
       this.setState({
         videoPage: videoPage + 1
       }, () => getMoreVids({
-        limit: itemPerPage,
-        offset: videoPage * itemPerPage,
-        performerId: performer._id,
-        q: filter.q || '',
-        fromDate: filter.fromDate || '',
-        toDate: filter.toDate || ''
+        ...query,
+        offset: videoPage * itemPerPage
       }));
     }
     if (tab === 'photo') {
@@ -321,12 +309,8 @@ class PerformerProfile extends PureComponent<IProps> {
         galleryPage: galleryPage + 1
       }, () => {
         getMoreGallery({
-          limit: itemPerPage,
-          offset: (galleryPage + 1) * itemPerPage,
-          performerId: performer._id,
-          q: filter.q || '',
-          fromDate: filter.fromDate || '',
-          toDate: filter.toDate || ''
+          ...query,
+          offset: (galleryPage + 1) * itemPerPage
         });
       });
     }
@@ -334,12 +318,8 @@ class PerformerProfile extends PureComponent<IProps> {
       this.setState({
         productPage: productPage + 1
       }, () => getMoreProd({
-        limit: itemPerPage,
-        offset: productPage * itemPerPage,
-        performerId: performer._id,
-        q: filter.q || '',
-        fromDate: filter.fromDate || '',
-        toDate: filter.toDate || ''
+        ...query,
+        offset: productPage * itemPerPage
       }));
     }
   }
@@ -409,7 +389,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   {performer?.name || 'N/A'}
                   {' '}
                   {performer?.verifiedAccount && (
-                    <CheckCircleOutlined className="theme-color" />
+                    <TickIcon />
                   )}
                 </div>
                 <div className="tab-stat">
@@ -459,24 +439,24 @@ class PerformerProfile extends PureComponent<IProps> {
               </div>
             </div>
             {!currentUser.isPerformer && (
-            <div className="drop-actions">
-              <Dropdown overlay={(
-                <Menu key="menu_actions">
-                  <Menu.Item key="book_mark">
-                    <a aria-hidden onClick={this.handleBookmark.bind(this)}>
-                      <BookOutlined />
-                      {' '}
-                      {!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}
-                    </a>
-                  </Menu.Item>
-                </Menu>
-              )}
-              >
-                <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
-                  <MoreOutlined />
-                </a>
-              </Dropdown>
-            </div>
+              <div className="drop-actions">
+                <Dropdown overlay={(
+                  <Menu key="menu_actions">
+                    <Menu.Item key="book_mark">
+                      <a aria-hidden onClick={this.handleBookmark.bind(this)}>
+                        <BookOutlined />
+                        {' '}
+                        {!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}
+                      </a>
+                    </Menu.Item>
+                  </Menu>
+                )}
+                >
+                  <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
+                    <MoreOutlined />
+                  </a>
+                </Dropdown>
+              </div>
             )}
           </div>
         </div>
@@ -487,15 +467,15 @@ class PerformerProfile extends PureComponent<IProps> {
                 alt="main-avt"
                 src={performer?.avatar || '/static/no-avatar.png'}
               />
-              {currentUser?._id !== performer?._id && <span className={performer?.isOnline ? 'online-status' : 'online-status off'} />}
+              {currentUser?._id !== performer?._id && <span className={performer?.isOnline > 0 ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
                 <h4>
                   {performer?.name || 'N/A'}
-                    &nbsp;
+                  &nbsp;
                   {performer?.verifiedAccount && (
-                  <CheckCircleOutlined className="theme-color" />
+                    <TickIcon />
                   )}
-                      &nbsp;
+                  &nbsp;
                   {currentUser._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
                 </h4>
                 <h5 style={{ textTransform: 'none' }}>
@@ -505,43 +485,43 @@ class PerformerProfile extends PureComponent<IProps> {
               </div>
             </div>
             {currentUser._id && !currentUser.isPerformer && (
-            <div className="btn-grp">
-              <div style={{ marginBottom: '4px' }}>
-                <button
-                  type="button"
-                  className="normal"
-                  onClick={() => this.setState({ openTipModal: true })}
-                >
-                  <a title="Send Tip">
-                    <DollarOutlined />
-                  </a>
-                </button>
-                <button type="button" className="normal">
-                  <Link
-                    href={{
-                      pathname: '/messages',
-                      query: {
-                        toSource: 'performer',
-                        toId: (performer?._id) || ''
-                      }
-                    }}
+              <div className="btn-grp">
+                <div style={{ marginBottom: '4px' }}>
+                  <button
+                    type="button"
+                    className="normal"
+                    onClick={() => this.setState({ openTipModal: true })}
                   >
-                    <a title="Message">
-                      <MessageOutlined />
+                    <a title="Send Tip">
+                      <DollarOutlined />
                     </a>
-                  </Link>
-                </button>
-                <button
-                  disabled
-                  type="button"
-                  className="normal"
-                >
-                  <a title="Share to social media">
-                    <ShareAltOutlined />
-                  </a>
-                </button>
-              </div>
-              {/* {performer?.isSubscribed && (
+                  </button>
+                  <button type="button" className="normal">
+                    <Link
+                      href={{
+                        pathname: '/messages',
+                        query: {
+                          toSource: 'performer',
+                          toId: (performer?._id) || ''
+                        }
+                      }}
+                    >
+                      <a title="Message">
+                        <MessageOutlined />
+                      </a>
+                    </Link>
+                  </button>
+                  <button
+                    disabled
+                    type="button"
+                    className="normal"
+                  >
+                    <a title="Share to social media">
+                      <ShareAltOutlined />
+                    </a>
+                  </button>
+                </div>
+                {/* {performer?.isSubscribed && (
                       <div className="stream-btns">
                         <Button
                           type="link"
@@ -560,7 +540,7 @@ class PerformerProfile extends PureComponent<IProps> {
                         </Button>
                       </div>
                     )} */}
-            </div>
+              </div>
             )}
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={ui?.countries || []} performer={performer} />

@@ -3,7 +3,6 @@ import { CardElement } from '@stripe/react-stripe-js';
 import {
   message
 } from 'antd';
-import { } from '@ant-design/icons';
 
 interface IProps {
   submit: Function;
@@ -46,6 +45,7 @@ class CardForm extends PureComponent<IProps> {
         <div className="stripe-card-form">
           <CardElement
             options={{
+              hidePostalCode: true,
               style: {
                 base: {
                   fontSize: '16px',

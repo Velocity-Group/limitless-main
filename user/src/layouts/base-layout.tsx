@@ -46,9 +46,7 @@ export default class BaseLayout extends PureComponent<DefaultProps> {
     // eslint-disable-next-line no-nested-ternary
     const Container = maintenance ? LayoutMap.maintenance : geoBlocked ? LayoutMap.geoBlock : layout && LayoutMap[layout] ? LayoutMap[layout] : LayoutMap.primary;
     return (
-      <>
-        <Container>{children}</Container>
-      </>
+      <Container>{children}</Container>
     );
   }
 }

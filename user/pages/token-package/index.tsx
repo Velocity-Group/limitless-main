@@ -12,7 +12,6 @@ import {
   IUIConfig, IPackageToken, IUser, ISettings
 } from '@interfaces/index';
 import { connect } from 'react-redux';
-import Page from '@components/common/layout/page';
 import Router from 'next/router';
 import Loader from '@components/common/base/loader';
 import './index.less';
@@ -115,42 +114,40 @@ class TokenPackages extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="Token Packages" icon={<WalletOutlined />} />
-            <Row>
-              {!searching && list.length > 0 && list.map((item: IPackageToken) => (
-                <Col md={6} sm={12} xs={24} key={item._id}>
-                  <Card title={item.name} className="site-card-wrapper">
-                    <p className="price-style">
-                      $
-                      {(item.price || 0).toFixed(2)}
-                      {' '}
-                      /
-                      {' '}
-                      <img alt="token" src="/static/coin-ico.png" height="20px" />
-                      {' '}
-                      {item.tokens || 0}
-                    </p>
-                    <div className="scrollbar" id="style-3">
-                      <div className="force-overflow">{item.description}</div>
-                    </div>
-                    <Button
-                      className="buy-btn"
-                      onClick={() => this.setState({
-                        openPurchaseModal: true,
-                        selectedPackage: item,
-                        couponCode: '',
-                        coupon: null,
-                        isApliedCode: false
-                      })}
-                    >
-                      Buy now
-                    </Button>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </Page>
+          <PageHeading title="Token Packages" icon={<WalletOutlined />} />
+          <Row>
+            {!searching && list.length > 0 && list.map((item: IPackageToken) => (
+              <Col md={6} sm={12} xs={24} key={item._id}>
+                <Card title={item.name} className="site-card-wrapper">
+                  <p className="price-style">
+                    $
+                    {(item.price || 0).toFixed(2)}
+                    {' '}
+                    /
+                    {' '}
+                    <img alt="token" src="/static/coin-ico.png" height="20px" />
+                    {' '}
+                    {item.tokens || 0}
+                  </p>
+                  <div className="scrollbar" id="style-3">
+                    <div className="force-overflow">{item.description}</div>
+                  </div>
+                  <Button
+                    className="buy-btn"
+                    onClick={() => this.setState({
+                      openPurchaseModal: true,
+                      selectedPackage: item,
+                      couponCode: '',
+                      coupon: null,
+                      isApliedCode: false
+                    })}
+                  >
+                    Buy now
+                  </Button>
+                </Card>
+              </Col>
+            ))}
+          </Row>
           <Modal
             key={`token_package_${selectedPackage?._id}`}
             title={`Purchase Token Package ${selectedPackage?.name}`}

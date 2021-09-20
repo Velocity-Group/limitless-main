@@ -3,7 +3,6 @@ import { message, Layout, Modal } from 'antd';
 import PageHeading from '@components/common/page-heading';
 import { HeartOutlined } from '@ant-design/icons';
 import Head from 'next/head';
-import Page from '@components/common/layout/page';
 import { TableListSubscription } from '@components/subscription/table-list-subscription';
 import {
   ISubscription, IUIConfig, IUser
@@ -163,39 +162,37 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="My Subscriptions" icon={<HeartOutlined />} />
-            <SearchFilter
-              searchWithPerformer
-              onSubmit={this.handleFilter.bind(this)}
+          <PageHeading title="My Subscriptions" icon={<HeartOutlined />} />
+          <SearchFilter
+            searchWithPerformer
+            onSubmit={this.handleFilter.bind(this)}
+          />
+          <div className="table-responsive">
+            <TableListSubscription
+              dataSource={subscriptionList}
+              pagination={pagination}
+              loading={loading}
+              onChange={this.handleTabChange.bind(this)}
+              rowKey="_id"
+              cancelSubscription={this.cancelSubscription.bind(this)}
+              activeSubscription={this.activeSubscription.bind(this)}
             />
-            <div className="table-responsive">
-              <TableListSubscription
-                dataSource={subscriptionList}
-                pagination={pagination}
-                loading={loading}
-                onChange={this.handleTabChange.bind(this)}
-                rowKey="_id"
-                cancelSubscription={this.cancelSubscription.bind(this)}
-                activeSubscription={this.activeSubscription.bind(this)}
-              />
-            </div>
-            <Modal
-              key="subscribe_performer"
-              title={`Confirm ${selectedSubscription?.subscriptionType} subscription ${selectedSubscription?.performerInfo?.name}`}
-              visible={openSubscriptionModal}
-              confirmLoading={submiting}
-              footer={null}
-              onCancel={() => this.setState({ openSubscriptionModal: false })}
-            >
-              <ConfirmSubscriptionPerformerForm
-                type={selectedSubscription?.subscriptionType || 'monthly'}
-                performer={selectedSubscription?.performerInfo}
-                submiting={submiting}
-                onFinish={this.subscribe.bind(this)}
-              />
-            </Modal>
-          </Page>
+          </div>
+          <Modal
+            key="subscribe_performer"
+            title={`Confirm ${selectedSubscription?.subscriptionType} subscription ${selectedSubscription?.performerInfo?.name}`}
+            visible={openSubscriptionModal}
+            confirmLoading={submiting}
+            footer={null}
+            onCancel={() => this.setState({ openSubscriptionModal: false })}
+          >
+            <ConfirmSubscriptionPerformerForm
+              type={selectedSubscription?.subscriptionType || 'monthly'}
+              performer={selectedSubscription?.performerInfo}
+              submiting={submiting}
+              onFinish={this.subscribe.bind(this)}
+            />
+          </Modal>
           {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
         </div>
       </Layout>

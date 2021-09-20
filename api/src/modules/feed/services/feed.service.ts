@@ -8,7 +8,7 @@ import {
   EntityNotFoundException, AgendaService,
   QueueEventService, QueueEvent, ForbiddenException, StringHelper
 } from 'src/kernel';
-import { uniq, difference } from 'lodash';
+import { uniq } from 'lodash';
 import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
@@ -33,8 +33,6 @@ import {
 import { FeedCreatePayload, FeedSearchRequest, PollCreatePayload } from '../payloads';
 import { FeedModel, PollModel, VoteModel } from '../models';
 import { FEED_PROVIDER, POLL_PROVIDER, VOTE_PROVIDER } from '../providers';
-
-const CHECK_REF_REMOVE_FEED_FILE_AGENDA = 'CHECK_REF_REMOVE_FEED_FILE_AGENDA';
 
 @Injectable()
 export class FeedService {
@@ -68,40 +66,13 @@ export class FeedService {
     await collection.deleteMany({
       name: {
         $in: [
-          CHECK_REF_REMOVE_FEED_FILE_AGENDA,
           SCHEDULE_FEED_AGENDA
         ]
       }
     });
-    this.agenda.define(CHECK_REF_REMOVE_FEED_FILE_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
-    this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_FEED_FILE_AGENDA, {});
     // schedule feed
     this.agenda.define(SCHEDULE_FEED_AGENDA, {}, this.scheduleFeed.bind(this));
     this.agenda.schedule('1 hours from now', SCHEDULE_FEED_AGENDA, {});
-  }
-
-  private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
-    try {
-      const total = await this.fileService.countByRefType(REF_TYPE.FEED);
-      for (let i = 0; i <= total / 99; i += 1) {
-        const files = await this.fileService.findByRefType(REF_TYPE.FEED, 99, i);
-        const feedIds = files.map((f) => f.refItems[0].itemId.toString());
-        const videos = await this.feedModel.find({ _id: { $in: feedIds } });
-        const Ids = videos.map((v) => v._id.toString());
-        const difIds = difference(feedIds, Ids);
-        const difFileIds = files.filter((file) => difIds.includes(file.refItems[0].itemId.toString()));
-        await Promise.all(
-          difFileIds.map((fileId) => this.fileService.remove(fileId))
-        );
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('Check ref & remove files error', e);
-    } finally {
-      job.remove();
-      this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_FEED_FILE_AGENDA, {});
-      typeof done === 'function' && done();
-    }
   }
 
   private async scheduleFeed(job: any, done: any) {

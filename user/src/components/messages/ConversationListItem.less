@@ -28,17 +28,7 @@
   font-size: 10px;
 }
 
-.online {
-  position: absolute;
-  left: -5px;
-  top: 2px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: @success-color;
-}
-
-.offline {
+.online-status {
   position: absolute;
   left: -5px;
   top: 2px;
@@ -46,6 +36,9 @@
   height: 10px;
   border-radius: 50%;
   background-color: @gray;
+  &.active {
+    background-color: @success-color;
+  }
 }
 
 .conversation-photo {

@@ -438,10 +438,6 @@ export class GalleryService {
       // TODO - should get picture (thumbnail if have?)
       const performer = performers.find((p) => p._id.toString() === g.performerId.toString());
       g.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
-      const subscribed = subscriptions.find((s) => `${s.performerId}` === `${g.performerId}`);
-      g.isSubscribed = !!subscribed;
-      const isBought = transactions.find((t) => `${t.targetId}` === `${g._id}`);
-      g.isBought = !!isBought;
       const bookmarked = reactions.find((l) => l.objectId.toString() === g._id.toString() && l.action === REACTION.BOOK_MARK);
       g.isBookMarked = !!bookmarked;
       if (g.coverPhotoId) {
@@ -461,10 +457,10 @@ export class GalleryService {
           }
         }
       }
-      if (user && `${user._id}` === `${g.performerId}`) {
-        g.isSubscribed = true;
-        g.isBought = true;
-      }
+      const isSubscribed = subscriptions.find((s) => `${s.performerId}` === `${g.performerId}`);
+      g.isSubscribed = !!((isSubscribed || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${g._id}`);
+      g.isBought = !!((bought || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
     });
 
     return {

@@ -151,26 +151,32 @@
     overflow: auto;
     width: 100%;
     padding: 5px;
+    margin-bottom: 15px;
     display: flex;
+    border-bottom: 1px solid @light-grey;
+    &::-webkit-scrollbar-thumb {
+      background-color: @light-grey;
+    }
+    
+    &::-webkit-scrollbar {
+      width: 2px;
+      height: 2px;
+    }
     .story-per-card {
       cursor: pointer;
-      margin-right: 1em;
-      width: 6em;
+      margin-right: 15px;
       text-align: center;
-      img {
-        width: 4.5em;
-        height: 4.5em;
-        object-fit: cover;
-        border-radius: 4em;
-        border: 2px solid #b6c6cc;
-        padding: 0.2em;
-        margin-top: 0.5em;
+      .per-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        padding: 2px;
+        border: 2px solid @grey-color;
       }
-      p {
-        font-weight: 500;
-        font-size: 0.8em;
+      .per-name {
+        width: 65px;
+        font-size: 12px;
         opacity: 0.8;
-        margin-top: 0.4em;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

@@ -13,7 +13,7 @@ interface IProps {
 export class PurchaseGalleryForm extends PureComponent<IProps> {
   render() {
     const { gallery, onFinish, submiting } = this.props;
-    const image = gallery?.coverPhoto?.thumbnails[0] || '/static/placeholder-image.jpg';
+    const image = gallery?.coverPhoto?.thumbnails[0] || '/static/no-image.jpg';
 
     return (
       <div className="text-center">

@@ -1,7 +1,6 @@
 import { PureComponent } from 'react';
 import { Layout, message } from 'antd';
 import Head from 'next/head';
-import Page from '@components/common/layout/page';
 import { HistoryOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { purchaseTokenService } from 'src/services';
@@ -139,22 +138,19 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="Token Transactions History" icon={<HistoryOutlined />} />
-            <SearchFilter
-              type={type}
-              onSubmit={this.handleFilter.bind(this)}
-              dateRange
-            />
-
-            <PaymentTableList
-              dataSource={paymentList}
-              pagination={pagination}
-              onChange={this.handleTableChange.bind(this)}
-              rowKey="_id"
-              loading={loading}
-            />
-          </Page>
+          <PageHeading title="Token Transactions History" icon={<HistoryOutlined />} />
+          <SearchFilter
+            type={type}
+            onSubmit={this.handleFilter.bind(this)}
+            dateRange
+          />
+          <PaymentTableList
+            dataSource={paymentList}
+            pagination={pagination}
+            onChange={this.handleTableChange.bind(this)}
+            rowKey="_id"
+            loading={loading}
+          />
         </div>
       </Layout>
     );

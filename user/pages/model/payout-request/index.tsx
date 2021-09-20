@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { Button, message } from 'antd';
 import { NotificationOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
@@ -53,14 +53,14 @@ class PerformerPayoutRequestPage extends PureComponent<IProps> {
         offset: (pagination.current - 1) * pagination.pageSize
       });
       await this.setState({
+        loading: false,
         items: resp.data.data,
         pagination: { ...pagination, total: resp.data.total }
       });
     } catch (error) {
       message.error(
-        getResponseError(error) || 'An error occured. Please try again.'
+        getResponseError(await error) || 'An error occured. Please try again.'
       );
-    } finally {
       this.setState({ loading: false });
     }
   }

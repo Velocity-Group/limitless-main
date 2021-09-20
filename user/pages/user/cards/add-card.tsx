@@ -5,7 +5,6 @@ import {
 import PageHeading from '@components/common/page-heading';
 import { CreditCardOutlined } from '@ant-design/icons';
 import Head from 'next/head';
-import Page from '@components/common/layout/page';
 import {
   ISettings, IUIConfig
 } from 'src/interfaces';
@@ -60,19 +59,17 @@ class NewCardPage extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="Add new Card" icon={<CreditCardOutlined />} />
-            <div className="card-form">
-              <Elements stripe={loadStripe(settings.stripePublishableKey || '')}>
-                <ElementsConsumer>
-                  {({ stripe, elements }) => (
-                    <StripeCardForm submit={this.handleAddCard.bind(this)} stripe={stripe} elements={elements} submiting={submiting} />
-                  )}
-                </ElementsConsumer>
+          <PageHeading title="Add new Card" icon={<CreditCardOutlined />} />
+          <div className="card-form">
+            <Elements stripe={loadStripe(settings.stripePublishableKey || '')}>
+              <ElementsConsumer>
+                {({ stripe, elements }) => (
+                  <StripeCardForm submit={this.handleAddCard.bind(this)} stripe={stripe} elements={elements} submiting={submiting} />
+                )}
+              </ElementsConsumer>
 
-              </Elements>
-            </div>
-          </Page>
+            </Elements>
+          </div>
         </div>
       </Layout>
     );

@@ -1,14 +1,12 @@
-/* eslint-disable no-nested-ternary */
-import { flatten } from 'lodash';
+import { flatten, pick } from 'lodash';
 import { put } from 'redux-saga/effects';
 import { createSagas } from '@lib/redux';
 import Router from 'next/router';
 import { authService, userService } from 'src/services';
 import {
-  ILogin, IFanRegister, IForgot, IPerformerRegister
+  ILogin, IFanRegister, IForgot
 } from 'src/interfaces';
 import { message } from 'antd';
-import * as _ from 'lodash';
 import { updateCurrentUser } from '../user/actions';
 import {
   loginSocial,
@@ -103,11 +101,9 @@ const authSagas = [
           fieldname: 'documentVerification',
           file: data.payload.documentVerificationFile
         }];
-        const payload = _.pick(data.payload, ['name', 'username', 'password',
-          'gender', 'email', 'firstName', 'lastName', 'country', 'dateOfBirth']) as IPerformerRegister;
+        const payload = pick(data.payload, ['name', 'username', 'password',
+          'gender', 'email', 'firstName', 'lastName', 'country', 'dateOfBirth']);
         const resp = (yield authService.registerPerformer(verificationFiles, payload, () => {})).data;
-        message.success(resp.message || 'Your register success!');
-        Router.push('/');
         yield put(registerPerformerSuccess(resp));
       } catch (e) {
         const error = yield Promise.resolve(e);
@@ -119,12 +115,8 @@ const authSagas = [
   {
     on: logout,
     * worker() {
-      try {
-        yield authService.removeToken();
-        Router.replace('/');
-      } catch (e) {
-        message.error('Something went wrong.');
-      }
+      yield authService.removeToken();
+      Router.replace('/');
     }
   },
   {
@@ -153,6 +145,7 @@ const authSagas = [
         yield put(updateCurrentUser(userResp.data));
       } catch (e) {
         const error = yield Promise.resolve(e);
+        // eslint-disable-next-line no-console
         console.log(error);
       }
     }

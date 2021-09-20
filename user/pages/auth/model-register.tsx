@@ -15,6 +15,7 @@ import { TwitterOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
+import Router from 'next/router';
 import { connect } from 'react-redux';
 import { registerPerformer, loginSocial } from '@redux/auth/actions';
 import { ISettings, IUIConfig } from 'src/interfaces';
@@ -47,6 +48,20 @@ class RegisterPerformer extends PureComponent<IProps> {
     selectedGender: 'male',
     isLoading: false
   };
+
+  componentDidUpdate(prevProps) {
+    const { registerPerformerData, ui } = this.props;
+    if (!prevProps?.registerPerformerData?.success && prevProps?.registerPerformerData?.success !== registerPerformerData?.success) {
+      message.success(
+        <div>
+          <h4>{`Thank you for applying to be an ${ui?.siteName || 'Fanso'} creator!`}</h4>
+          <p>{registerPerformerData?.data?.message || 'Your application will be processed withing 24 to 48 hours, most times sooner. You will get an email notification sent to your email address with the status update.'}</p>
+        </div>,
+        15
+      );
+      Router.push('/');
+    }
+  }
 
   onFileReaded = (type, file: File) => {
     if (file && type === 'idFile') {
@@ -111,7 +126,6 @@ class RegisterPerformer extends PureComponent<IProps> {
         case 'male': return '/static/img-id-man.png';
         case 'female': return '/static/img-id-woman.png';
         case 'transgender': return '/static/img-id-man.png';
-        case 'couple': return '/static/img-id-couple.png';
         default: return '/static/img-id-man.png';
       }
     };
@@ -367,7 +381,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                     >
                       <div className="id-block">
                         <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} />
-                        <img alt="identity-img" className="img-id" src="/static/id-document.png" />
+                        <img alt="identity-img" className="img-id" src="/static/front-id.jpeg" />
                       </div>
                     </Form.Item>
                     <Form.Item
@@ -390,19 +404,14 @@ class RegisterPerformer extends PureComponent<IProps> {
                   htmlType="submit"
                   disabled={registerPerformerData.requesting || isLoading}
                   loading={registerPerformerData.requesting || isLoading}
-                  style={{
-                    marginBottom: 15,
-                    fontWeight: 600,
-                    padding: '5px 25px',
-                    height: '42px'
-                  }}
+                  className="login-form-button"
                 >
                   CREATE YOUR ACCOUNT
                 </Button>
                 <p>
                   By signing up you agree to our
                   {' '}
-                  <a href="/page/tos" target="_blank">Terms of Service</a>
+                  <a href="/page/term-of-service" target="_blank">Terms of Service</a>
                   {' '}
                   and
                   {' '}

@@ -8,7 +8,6 @@ import {
 import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
 import { IOrder, IUIConfig } from 'src/interfaces';
-import Page from '@components/common/layout/page';
 import { orderService } from 'src/services';
 import { connect } from 'react-redux';
 import Router from 'next/router';
@@ -50,19 +49,23 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       await this.setState({ loading: true });
       const order = await orderService.findById(id);
       await this.setState({
-        order: order?.data
+        order: order?.data,
+        loading: false
       });
     } catch (e) {
       message.error('Can not find order!');
       Router.back();
-    } finally {
-      this.setState({ loading: false });
     }
   }
 
-  async downloadFile(order) {
-    const resp = await orderService.getDownloadLinkDigital(order.productId);
-    window.open(resp.data.downloadLink, '_blank');
+  async downloadFile() {
+    const { order } = this.state;
+    try {
+      const resp = await orderService.getDownloadLinkDigital(order.productId);
+      window.open(resp?.data?.downloadLink, '_blank');
+    } catch {
+      message.error('Error occured, please try again later');
+    }
   }
 
   render() {
@@ -76,8 +79,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            {!loading && order && (
+          {!loading && order && (
             <div className="main-container">
               <PageHeading title={`#${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
               <Descriptions>
@@ -106,7 +108,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 <div style={{ marginBottom: '10px' }}>
                   Download Link:
                   {' '}
-                  <a href="#" onClick={this.downloadFile.bind(this, order)}>Click to download</a>
+                  <a aria-hidden onClick={this.downloadFile.bind(this)}>Click to download</a>
                 </div>
               ) : (
                 <div>
@@ -139,9 +141,8 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 </Button>
               </div>
             </div>
-            )}
-            {loading && <div><Spin /></div>}
-          </Page>
+          )}
+          {loading && <div><Spin /></div>}
         </div>
       </Layout>
     );

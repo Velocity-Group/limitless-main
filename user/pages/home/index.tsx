@@ -60,11 +60,8 @@ class HomePage extends PureComponent<IProps> {
   }
 
   async onDeleteFeed(feed: IFeed) {
-    const { user, removeFeedSuccess: handleRemoveFeed } = this.props;
-    if (user._id !== feed.fromSourceId) {
-      return message.error('Permission denied');
-    }
-    if (!window.confirm('Are you sure to delete this post?')) return false;
+    const { removeFeedSuccess: handleRemoveFeed } = this.props;
+    if (!window.confirm('Are you sure to delete this post?')) return;
     try {
       await feedService.delete(feed._id);
       message.success('Removed post successfully');
@@ -72,7 +69,6 @@ class HomePage extends PureComponent<IProps> {
     } catch (e) {
       message.error('Something went wrong, please try again later');
     }
-    return undefined;
   }
 
   async onFilterFeed(value: string) {
@@ -94,7 +90,7 @@ class HomePage extends PureComponent<IProps> {
       q: keyword,
       orientation,
       limit: itemPerPage,
-      offset: feedPage,
+      offset: itemPerPage * feedPage,
       isHome: !!user.verifiedEmail
     });
   }
@@ -182,23 +178,23 @@ class HomePage extends PureComponent<IProps> {
               <div className="home-container">
                 <div className="left-container">
                   {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
-                  {/* <div className="visit-history">
+                  <div className="visit-history">
                     <div className="top-story">
-                      <a>Story</a>
+                      <a>Suggested Models</a>
                       <a href="/model"><small>View all</small></a>
                     </div>
                     <div className="story-list">
                       {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
                         <Link key={per._id} href={{ pathname: '/model/profile', query: { username: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
-                          <div className="story-per-card">
-                            <img alt="avatr" src={per?.avatar || '/static/no-avatar.png'} />
-                            <p>{per?.name || per?.username || 'N/A'}</p>
+                          <div className="story-per-card" title={per?.name || per?.username || 'N/A'}>
+                            <img className="per-avatar" alt="avatar" src={per?.avatar || '/static/no-avatar.png'} />
+                            <div className="per-name">{per?.name || per?.username || 'N/A'}</div>
                           </div>
                         </Link>
                       ))}
-                      {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No visited profile was found.</p>}
+                      {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found.</p>}
                     </div>
-                  </div> */}
+                  </div>
                   {/* <div className="filter-feed">
                     <FilterOutlined />
                     <Button disabled={loadingFeed} className={orientation === '' ? 'active' : ''} onClick={() => this.onFilterFeed('')}>All</Button>
@@ -214,6 +210,7 @@ class HomePage extends PureComponent<IProps> {
                     onDelete={this.onDeleteFeed.bind(this)}
                     loadMore={this.loadmoreFeeds.bind(this)}
                   />
+                  {!loadingFeed && !totalFeeds && <Alert message={<a href="/model">Find someone to follow</a>} />}
                 </div>
                 <div className="right-container">
                   <div className="suggestion-bl">

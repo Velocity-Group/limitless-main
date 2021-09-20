@@ -74,7 +74,7 @@ export class VideoFileService {
         folder: options.toFolder,
         filename: `${StringHelper.randomString(5)}-%s.png`,
         count: options.count || 3,
-        size: options.size || '320x240'
+        size: options.size || '640x480'
       }));
   }
 }

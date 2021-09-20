@@ -8,7 +8,7 @@ export interface IUser {
   username: string;
   roles: string[];
   isPerformer: boolean;
-  isOnline: boolean;
+  isOnline: number;
   verifiedEmail: boolean;
   verifiedAccount: boolean;
   twitterConnected: boolean;

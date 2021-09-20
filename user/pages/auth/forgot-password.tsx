@@ -120,7 +120,7 @@ class Forgot extends PureComponent<IProps, IState> {
                   sm={24}
                   md={6}
                   lg={12}
-                  className="login-content left fixed"
+                  className="login-content left"
                   style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui?.loginPlaceholderImage})` } : null}
                 />
                 <Col

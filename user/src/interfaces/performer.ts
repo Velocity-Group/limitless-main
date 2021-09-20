@@ -54,7 +54,7 @@ export interface IPerformer {
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
-  isOnline: boolean;
+  isOnline: number;
   verifiedAccount: boolean;
   verifiedEmail: boolean;
   verifiedDocument: boolean;

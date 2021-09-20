@@ -35,7 +35,7 @@ export default class UploadList extends PureComponent<IProps> {
                   <span className="f-thumb-vid">
                     <PlayCircleOutlined />
                   </span>
-                ) : <img alt="img" src="/static/placeholder-image.jpg" width="100%" />}
+                ) : <img alt="img" src="/static/no-image.jpg" width="100%" />}
             </div>
             <div className="f-upload-name">
               <Tooltip title={file.name}>{file.name}</Tooltip>

@@ -4,7 +4,6 @@ import {
   message, Layout
 } from 'antd';
 import { feedService } from '@services/index';
-import Page from '@components/common/layout/page';
 import { connect } from 'react-redux';
 import {
   IFeed, IUIConfig, IUser, IError
@@ -87,18 +86,16 @@ class PostDetails extends PureComponent<IProps> {
           />
         </Head>
         <div className="main-container">
-          <Page>
-            <div className="page-heading">
-              <a aria-hidden onClick={() => Router.back()}>
-                <ArrowLeftOutlined />
-                {' '}
-                Back
-              </a>
-            </div>
-            <div className="main-container custom">
-              <FeedCard feed={feed} onDelete={this.onDelete.bind(this)} />
-            </div>
-          </Page>
+          <div className="page-heading">
+            <a aria-hidden onClick={() => Router.back()}>
+              <ArrowLeftOutlined />
+              {' '}
+              Back
+            </a>
+          </div>
+          <div className="main-container custom">
+            <FeedCard feed={feed} onDelete={this.onDelete.bind(this)} />
+          </div>
         </div>
       </Layout>
     );

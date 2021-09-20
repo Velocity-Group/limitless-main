@@ -1,8 +1,8 @@
 import { PureComponent } from 'react';
 import {
-  EyeOutlined, LikeOutlined, HourglassOutlined, PlayCircleOutlined
+  EyeOutlined, LikeOutlined, HourglassOutlined, LockOutlined, UnlockOutlined
 } from '@ant-design/icons';
-import { Tooltip } from 'antd';
+import { Tooltip, Button } from 'antd';
 import Link from 'next/link';
 import { videoDuration, shortenLargeNumber } from '@lib/index';
 import { IVideo } from 'src/interfaces';
@@ -15,7 +15,8 @@ interface IProps {
 export class VideoCard extends PureComponent<IProps> {
   render() {
     const { video } = this.props;
-    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/placeholder-image.jpg';
+    const canView = (!video.isSale && video.isSubscribed) || (video.isSale && video.isBought);
+    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     return (
       <Link
         href={{ pathname: '/video', query: { id: video.slug || video._id } }}
@@ -30,7 +31,8 @@ export class VideoCard extends PureComponent<IProps> {
             </div>
           </span>
           )}
-          <div className="vid-thumb" style={{ backgroundImage: `url(${thumbUrl})` }}>
+          <div className="vid-thumb">
+            <div className="card-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: 'blur(15px)' }} />
             <div className="vid-stats">
               <span>
                 <a>
@@ -50,7 +52,11 @@ export class VideoCard extends PureComponent<IProps> {
                 {videoDuration(video?.video?.duration || 0)}
               </a>
             </div>
-            <span className="play-ico"><PlayCircleOutlined /></span>
+            <div className="lock-middle">
+              {canView ? <UnlockOutlined /> : <LockOutlined />}
+              {(!video.isSale && !video.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}
+              {(video.isSale && !video.isBought) && <Button type="link">Pay now to unlock</Button>}
+            </div>
           </div>
           <div className="vid-info">
             <Tooltip title={video.title}>

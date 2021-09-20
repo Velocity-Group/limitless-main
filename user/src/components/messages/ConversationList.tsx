@@ -1,7 +1,7 @@
 import { PureComponent, createRef } from 'react';
 import { Spin } from 'antd';
 import { connect } from 'react-redux';
-import { MessageIcon } from '@components/icons';
+import { MessageIcon } from 'src/icons';
 import {
   searchConversations, getConversations, setActiveConversation,
   getConversationDetail, receiveMessageSuccess

@@ -48,7 +48,7 @@ const PayoutRequestList = ({
       render: (requestTokens: number) => (
         <span>
           <img alt="token" src="/static/coin-ico.png" width="20px" />
-          {requestTokens || 0}
+          {requestTokens.toFixed(2)}
         </span>
       )
     },
@@ -59,7 +59,7 @@ const PayoutRequestList = ({
       render: (tokenConversionRate: number, record) => (
         <span>
           $
-          {(tokenConversionRate || 1) * record.requestTokens}
+          {((tokenConversionRate || 1) * record.requestTokens).toFixed(2)}
         </span>
       )
     },

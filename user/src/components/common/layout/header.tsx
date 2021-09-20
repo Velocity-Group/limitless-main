@@ -8,13 +8,13 @@ import { IUser, StreamSettings } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
-  VideoCameraOutlined, FireOutlined, NotificationOutlined,
+  VideoCameraOutlined, FireOutlined, NotificationOutlined, BookOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
   LogoutOutlined, HeartOutlined, WalletOutlined, BlockOutlined
 } from '@ant-design/icons';
 import {
   HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon
-} from '@components/icons';
+} from 'src/icons';
 import { withRouter, Router as RouterEvent } from 'next/router';
 import {
   messageService, authService, streamService
@@ -396,7 +396,7 @@ class Header extends PureComponent<IProps> {
                 <Divider />
                 <Link href="/user/bookmarks" as="/user/bookmarks">
                   <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
-                    <StarOutlined />
+                    <BookOutlined />
                     {' '}
                     Bookmarks
                   </div>

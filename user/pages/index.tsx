@@ -1,12 +1,5 @@
 import {
-  Form,
-  Input,
-  Button,
-  Row,
-  Col,
-  Divider,
-  Layout,
-  message
+  Form, Input, Button, Row, Col, Divider, Layout, message
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -91,7 +84,7 @@ class Login extends PureComponent<IProps> {
       response.token && handleLogin({ token: response.token });
     } catch (e) {
       const error = await e;
-      message.error(error && error.message ? error.message : 'Google login authenticated fail');
+      message.error(error?.message || 'Google authentication login fail');
     } finally {
       this.setState({ isLoading: false });
     }
@@ -122,7 +115,7 @@ class Login extends PureComponent<IProps> {
       // eslint-disable-next-line no-console
       console.log(await e);
     } finally {
-      await this.setState({ isLoading: false });
+      this.setState({ isLoading: false });
     }
   }
 
@@ -144,7 +137,7 @@ class Login extends PureComponent<IProps> {
       auth.data && auth.data.token && handleLogin({ token: auth.data.token });
     } catch (e) {
       const error = await e;
-      message.error(error && error.message ? error.message : 'Something went wrong, please try again later');
+      message.error(error?.message || 'Twitter authentication login fail');
     } finally {
       this.setState({ isLoading: false });
     }
@@ -161,7 +154,7 @@ class Login extends PureComponent<IProps> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Something went wrong, please try again later');
+      message.error(error?.message || 'Twitter authentication login fail');
     } finally {
       this.setState({ isLoading: false });
     }
@@ -171,7 +164,7 @@ class Login extends PureComponent<IProps> {
     const { ui, settings, loginAuth } = this.props;
     const { isLoading } = this.state;
     return (
-      <>
+      <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
@@ -179,104 +172,115 @@ class Login extends PureComponent<IProps> {
             | Login
           </title>
         </Head>
-        <Layout>
-          <div className="main-container">
-            <div className="login-box">
-              <Row>
-                <Col
-                  xs={24}
-                  sm={24}
-                  md={12}
-                  lg={12}
-                >
-                  <div className="login-content left fixed" style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null} />
-                </Col>
-                <Col
-                  xs={24}
-                  sm={24}
-                  md={12}
-                  lg={12}
-                >
-                  <div className="login-content right">
-                    {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
-                    <div className="social-login">
-                      <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
-                        <TwitterOutlined />
-                        {' '}
-                        SIGN IN/ SIGN UP WITH TWITTER
-                      </button>
-                      <GoogleLogin
-                        className="google-button"
-                        clientId={settings.googleClientId}
-                        buttonText="SIGN IN/ SIGN UP WITH GOOGLE"
-                        onSuccess={this.onGoogleLogin.bind(this)}
-                        onFailure={this.onGoogleLogin.bind(this)}
-                        cookiePolicy="single_host_origin"
-                      />
-                    </div>
-                    <Divider>Or</Divider>
-                    <div className="login-form">
-                      <Form
-                        name="normal_login"
-                        className="login-form"
-                        initialValues={{ remember: true }}
-                        onFinish={this.handleLogin.bind(this)}
+        <div className="main-container">
+          <div className="login-box">
+            <Row>
+              <Col
+                xs={24}
+                sm={24}
+                md={12}
+                lg={12}
+              >
+                <div className="login-content left" style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null} />
+              </Col>
+              <Col
+                xs={24}
+                sm={24}
+                md={12}
+                lg={12}
+              >
+                <div className="login-content right">
+                  {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
+                  <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
+                  <div className="social-login">
+                    <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
+                      <TwitterOutlined />
+                      {' '}
+                      SIGN IN/ SIGN UP WITH TWITTER
+                    </button>
+                    <GoogleLogin
+                      className="google-button"
+                      clientId={settings.googleClientId}
+                      buttonText="SIGN IN/ SIGN UP WITH GOOGLE"
+                      onSuccess={this.onGoogleLogin.bind(this)}
+                      onFailure={this.onGoogleLogin.bind(this)}
+                      cookiePolicy="single_host_origin"
+                    />
+                  </div>
+                  <Divider>Or</Divider>
+                  <div className="login-form">
+                    <Form
+                      name="normal_login"
+                      className="login-form"
+                      initialValues={{ remember: true }}
+                      onFinish={this.handleLogin.bind(this)}
+                    >
+                      <Form.Item
+                        hasFeedback
+                        validateTrigger={['onChange', 'onBlur']}
+                        rules={[
+                          { required: true, message: 'Email or Username is missing' }
+                        ]}
                       >
-                        <Form.Item
-                          hasFeedback
-                          validateTrigger={['onChange', 'onBlur']}
-                          rules={[
-                            { required: true, message: 'Email or Username is missing' }
-                          ]}
+                        <Input disabled={loginAuth.requesting || isLoading} onChange={this.onInputChange.bind(this)} placeholder="Email or Username" />
+                      </Form.Item>
+                      <Form.Item
+                        name="password"
+                        hasFeedback
+                        validateTrigger={['onChange', 'onBlur']}
+                        rules={[
+                          { required: true, message: 'Please enter your password!' }
+                        ]}
+                      >
+                        <Input.Password disabled={loginAuth.requesting || isLoading} placeholder="Password" />
+                      </Form.Item>
+                      <p style={{ padding: '0 20px' }}>
+                        <Link
+                          href={{
+                            pathname: '/auth/forgot-password'
+                          }}
                         >
-                          <Input disabled={loginAuth.requesting || isLoading} onChange={this.onInputChange.bind(this)} placeholder="Email or Username" />
-                        </Form.Item>
-                        <Form.Item
-                          name="password"
-                          hasFeedback
-                          validateTrigger={['onChange', 'onBlur']}
-                          rules={[
-                            { required: true, message: 'Please enter your password!' }
-                          ]}
-                        >
-                          <Input.Password disabled={loginAuth.requesting || isLoading} placeholder="Password" />
-                        </Form.Item>
-                        <p style={{ padding: '0 5px' }}>
-                          <Link
-                            href={{
-                              pathname: '/auth/forgot-password'
-                            }}
-                          >
-                            <a className="login-form-forgot">Forgot password?</a>
+                          <a className="sub-text">Forgot password?</a>
+                        </Link>
+                      </p>
+                      {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
+                      <Form.Item style={{ textAlign: 'center' }}>
+                        <Button disabled={loginAuth.requesting || isLoading} loading={loginAuth.requesting || isLoading} type="primary" htmlType="submit" className="login-form-button">
+                          LOGIN
+                        </Button>
+                        <p style={{ fontSize: 11 }}>
+                          Visit
+                          {' '}
+                          <a href="/page/help">Help Center</a>
+                          {' '}
+                          for any help if you are not able to login with your existing
+                          {' '}
+                          {ui?.siteName || 'Fanso'}
+                          {' '}
+                          account
+                        </p>
+                        <Divider style={{ margin: '15px 0' }} />
+                        <p style={{ marginBottom: 5 }}>
+                          Don&apos;t have an account yet?
+                        </p>
+                        <p>
+                          <Link href="/auth/register">
+                            <a>
+                              Sign up for
+                              {' '}
+                              {ui?.siteName}
+                            </a>
                           </Link>
                         </p>
-                        {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
-                        <Form.Item style={{ textAlign: 'center' }}>
-                          <Button disabled={loginAuth.requesting || isLoading} loading={loginAuth.requesting || isLoading} type="primary" htmlType="submit" className="login-form-button">
-                            LOGIN
-                          </Button>
-                          <p>
-                            Don&apos;t have an account yet?
-                          </p>
-                          <p>
-                            <Link href="/auth/register">
-                              <a>
-                                Sign up for
-                                {' '}
-                                {ui?.siteName}
-                              </a>
-                            </Link>
-                          </p>
-                        </Form.Item>
-                      </Form>
-                    </div>
+                      </Form.Item>
+                    </Form>
                   </div>
-                </Col>
-              </Row>
-            </div>
+                </div>
+              </Col>
+            </Row>
           </div>
-        </Layout>
-      </>
+        </div>
+      </Layout>
     );
   }
 }

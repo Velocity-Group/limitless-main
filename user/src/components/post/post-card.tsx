@@ -9,6 +9,7 @@ import {
   FileImageOutlined, VideoCameraOutlined, CaretDownOutlined,
   UnlockOutlined, CheckCircleOutlined, EyeOutlined
 } from '@ant-design/icons';
+import { TickIcon } from 'src/icons';
 import Link from 'next/link';
 import { CommentForm, ListComments } from '@components/comment';
 import {
@@ -334,6 +335,7 @@ class FeedCard extends Component<IProps> {
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
       shareUrl, openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
+    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && feed.isBought);
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     let totalVote = 0;
@@ -396,7 +398,7 @@ class FeedCard extends Component<IProps> {
                 <h4>
                   {performer?.name || 'N/A'}
                   {' '}
-                  {performer?.verifiedAccount && <CheckCircleOutlined className="theme-color" />}
+                  {performer?.verifiedAccount && <TickIcon />}
                 </h4>
                 <h5>
                   @
@@ -424,13 +426,15 @@ class FeedCard extends Component<IProps> {
               </Collapse.Panel>
             </Collapse>
           </div>
-          {((!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought)) && (
+          {canView && (
             <div className="feed-content">
               <FeedSlider feed={feed} />
             </div>
           )}
-          {((!feed.isSale && !feed.isSubscribed) || (feed.isSale && !isBought)) && (
-            <div className="lock-content" style={feed.thumbnailUrl && { backgroundImage: `url(${feed.thumbnailUrl})` }}>
+          {!canView && (
+            <div className="lock-content">
+              {/* eslint-disable-next-line no-nested-ternary */}
+              <div className="feed-bg" style={feed.thumbnailUrl && canView ? { backgroundImage: `url(${feed.thumbnailUrl})` } : feed.thumbnailUrl && !canView ? { backgroundImage: `url(${feed.thumbnailUrl})`, filter: 'blur(15px)' } : { backgroundImage: '/static/leaf.jpg', filter: 'blur(2px)' }} />
               <div
                 className="text-center"
                 style={{ cursor: 'pointer' }}
@@ -438,52 +442,52 @@ class FeedCard extends Component<IProps> {
                 onMouseLeave={() => this.setState({ isHovered: false })}
               >
                 {!isHovered ? <LockOutlined /> : <UnlockOutlined />}
-                {!feed.isSale && !feed.isSubscribed && performer && (
-                  <p aria-hidden onClick={() => this.setState({ openSubscriptionModal: true })}>
-                    Subcribe to see model post
-                  </p>
+                {!feed.isSale && !feed.isSubscribed && (
+                <p aria-hidden onClick={() => this.setState({ openSubscriptionModal: true })}>
+                  Subcribe to see model post
+                </p>
                 )}
-                {feed.isSale && !isBought && performer && (
-                  <p aria-hidden onClick={() => this.setState({ openPurchaseModal: true })}>
-                    Unlock post by
-                    {' '}
-                    <img alt="coin" src="/static/coin-ico.png" width="15px" />
-                    {feed.price || 0}
-                  </p>
+                {feed.isSale && !isBought && (
+                <p aria-hidden onClick={() => this.setState({ openPurchaseModal: true })}>
+                  Unlock post by
+                  {' '}
+                  <img alt="coin" src="/static/coin-ico.png" width="15px" />
+                  {feed.price || 0}
+                </p>
                 )}
                 {feed.teaser && (
-                  <div className="text-center">
-                    <Button type="primary" onClick={() => this.setState({ openTeaser: true })}>
-                      <EyeOutlined />
-                      View teaser video
-                    </Button>
-                  </div>
+                <div className="text-center">
+                  <Button type="primary" onClick={() => this.setState({ openTeaser: true })}>
+                    <EyeOutlined />
+                    View teaser video
+                  </Button>
+                </div>
                 )}
               </div>
-              {feed.files && feed.files.length > 0 && (
-                <div className="count-media">
-                  <span className="count-media-item">
-                    {images.length > 0 && (
-                      <span>
-                        {images.length > 1 && images.length}
-                        {' '}
-                        <FileImageOutlined />
-                        {' '}
-                      </span>
-                    )}
-                    {videos.length > 0 && images.length > 0 && '|'}
-                    {videos.length > 0 && (
-                      <span>
-                        {videos.length > 1 && videos.length}
-                        {' '}
-                        <VideoCameraOutlined />
-                        {' '}
-                        {videos.length === 1 && videoDuration(videos[0].duration)}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              )}
+                {feed.files && feed.files.length > 0 && (
+                  <div className="count-media">
+                    <span className="count-media-item">
+                      {images.length > 0 && (
+                        <span>
+                          {images.length}
+                          {' '}
+                          <FileImageOutlined />
+                          {' '}
+                        </span>
+                      )}
+                      {videos.length > 0 && images.length > 0 && '|'}
+                      {videos.length > 0 && (
+                        <span>
+                          {videos.length > 1 && videos.length}
+                          {' '}
+                          <VideoCameraOutlined />
+                          {' '}
+                          {videos.length === 1 && videoDuration(videos[0].duration)}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                )}
             </div>
           )}
           {polls && polls.length > 0 && polls.map((poll) => (
@@ -494,21 +498,21 @@ class FeedCard extends Component<IProps> {
             </div>
           ))}
           {polls && polls.length > 0 && (
-            <div className="total-vote">
+          <div className="total-vote">
+            <span>
+              Total
+              {' '}
+              {shortenLargeNumber(totalVote)}
+              {' '}
+              votes
+            </span>
+            {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
               <span>
-                Total
-                {' '}
-                {shortenLargeNumber(totalVote)}
-                {' '}
-                votes
+                {`${moment(feed.pollExpiredAt).diff(moment(), 'days')} days `}
+                <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
               </span>
-              {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
-                <span>
-                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')} days `}
-                  <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
-                </span>
-              ) : <span>Expired</span>}
-            </div>
+            ) : <span>Expired</span>}
+          </div>
           )}
         </div>
         <div className="feed-bottom">

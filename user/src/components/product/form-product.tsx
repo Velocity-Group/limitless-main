@@ -46,7 +46,7 @@ export class FormProduct extends PureComponent<IProps> {
     if (product) {
       this.setState({
         isDigitalProduct: product.type === 'digital',
-        previewImageProduct: product?.image || '/static/placeholder-image.jpg'
+        previewImageProduct: product?.image || '/static/no-image.jpg'
       });
     }
   }

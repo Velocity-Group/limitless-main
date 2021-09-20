@@ -44,7 +44,7 @@ export class RequestPayoutTable extends PureComponent<IProps> {
           return (
             <span>
               <img src="/coin-ico.png" width="15px" alt="coin" />
-              {requestTokens}
+              {requestTokens.toFixed(2)}
             </span>
           );
         }
@@ -57,7 +57,7 @@ export class RequestPayoutTable extends PureComponent<IProps> {
           return (
             <span>
               $
-              {(tokenConversionRate || 1) * record.requestTokens}
+              {((tokenConversionRate || 1) * record.requestTokens).toFixed(2)}
             </span>
           );
         }

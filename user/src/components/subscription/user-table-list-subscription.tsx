@@ -47,25 +47,25 @@ export const TableListSubscription = ({
       title: 'Expiry date',
       dataIndex: 'expiredAt',
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
       }
     },
     {
       title: 'Start recurring date',
       dataIndex: 'startRecurringDate',
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
       }
     },
     {
       title: 'Next recurring date',
       dataIndex: 'nextRecurringDate',
       render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
       }
     },
     {
-      title: 'PM_Gateway',
+      title: 'PM Gateway',
       dataIndex: 'paymentGateway',
       render(paymentGateway: string) {
         switch (paymentGateway) {

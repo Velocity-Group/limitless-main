@@ -9,24 +9,28 @@ module.exports.up = async function up(next) {
   const pageDMCA = readFileSync(join(__dirname, 'content', 'dmca.html')).toString();
   const pageToS = readFileSync(join(__dirname, 'content', 'tos.html')).toString();
   const privacy = readFileSync(join(__dirname, 'content', 'privacy-policy.html')).toString();
+  const help = readFileSync(join(__dirname, 'content', 'help.html')).toString();
 
   const [
     page2257Content,
     pageDMCAContent,
     pageToSContent,
-    privacyContent
+    privacyContent,
+    helpContent
   ] = await Promise.all([
     replace(page2257, regExp, process.env.DOMAIN),
     replace(pageDMCA, regExp, process.env.DOMAIN),
     replace(pageToS, regExp, process.env.DOMAIN),
-    replace(privacy, regExp, process.env.DOMAIN)
+    replace(privacy, regExp, process.env.DOMAIN),
+    replace(help, regExp, process.env.DOMAIN)
   ]);
 
   const KEYS = {
     TOS: 'terms-of-service',
     USC2257: 'u.s.c-2257',
     DMCA: 'dmca',
-    PRIVACY: 'privacy-policy'
+    PRIVACY: 'privacy-policy',
+    HELP: 'help'
   };
 
   const pages = [
@@ -47,6 +51,15 @@ module.exports.up = async function up(next) {
       shortDescription: 'Privacy and Policy',
       content: privacyContent,
       slug: KEYS.PRIVACY
+    },
+    {
+      title: 'Help & Support',
+      type: 'post',
+      status: 'published',
+      authorId: null,
+      shortDescription: 'Help',
+      content: helpContent,
+      slug: KEYS.HELP
     },
     {
       title: 'U.S.C 2257',

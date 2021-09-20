@@ -15,7 +15,7 @@ interface IStates {
 export class ProductCard extends PureComponent<IProps, IStates> {
   render() {
     const { product } = this.props;
-    const image = product?.image || '/static/placeholder-image.jpg';
+    const image = product?.image || '/static/no-image.jpg';
     return (
 
       <Link

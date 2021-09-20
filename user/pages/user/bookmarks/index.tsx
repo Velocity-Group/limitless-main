@@ -3,7 +3,6 @@ import {
 } from 'antd';
 import { PureComponent } from 'react';
 import PageHeading from '@components/common/page-heading';
-import Page from '@components/common/layout/page';
 import {
   IUIConfig, IFeed, IUser
 } from 'src/interfaces';
@@ -18,8 +17,9 @@ import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
 import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
 import {
-  FireOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, StarOutlined, BookOutlined
+  FireOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, BookOutlined
 } from '@ant-design/icons';
+import { ModelIcon } from 'src/icons';
 import '../index.less';
 
 interface IProps {
@@ -266,9 +266,8 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <Page>
-            <PageHeading title="BookMarks" icon={<BookOutlined />} />
-            <div className="user-account" />
+          <PageHeading title="BookMarks" icon={<BookOutlined />} />
+          <div className="user-account">
             <Tabs
               defaultActiveKey={tab || 'feeds'}
               size="large"
@@ -311,7 +310,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   )}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Models"><StarOutlined /></Tooltip>} key="performers">
+              <Tabs.TabPane tab={<Tooltip title="Models"><ModelIcon /></Tooltip>} key="performers">
                 <UserPerformerBookmarks
                   loading={loading}
                   performers={performers.map((p) => p.objectInfo)}
@@ -323,7 +322,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                 />
               </Tabs.TabPane>
             </Tabs>
-          </Page>
+          </div>
         </div>
       </Layout>
     );

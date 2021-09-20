@@ -8,12 +8,13 @@ export interface IVideo {
   isSale: boolean;
   price: number;
   status: string;
+  processing: boolean;
   description: string;
   thumbnail: {
     url: string;
     thumbnails: any[]
   };
-  teaser:{
+  teaser: {
     url: string;
     thumbnails: any[]
   };
@@ -28,17 +29,16 @@ export interface IVideo {
     comments: number;
     bookmarks: number;
   };
-  performer: {
-    username: string;
-    name: string;
-    avatarPath: string;
-    _id: string;
-    avatar: string;
-  };
-  userReaction: {
-    liked: boolean;
-    bookmarked: boolean;
-  };
+  performer: IPerformer;
+  isBought: boolean;
+  isSubscribed: boolean;
+  isBookmarked: boolean;
+  isLiked: boolean;
+  tagline: string;
+  isSchedule: boolean;
+  scheduledAt: Date;
+  updatedAt: Date;
+  createdAt: Date;
 }
 
 export interface IVideoResponse {

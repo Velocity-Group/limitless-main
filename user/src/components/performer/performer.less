@@ -84,6 +84,8 @@
           margin: 0;
           white-space: nowrap;
           color: @white;
+          display: inline-flex;
+          align-items: center;
 
           @media screen and (max-width: @tablet-screen) {
             margin: 0;
@@ -97,7 +99,7 @@
         }
 
         .anticon {
-          color: @secondary-color;
+          color: @primary-color;
           font-size: 18px;
         }
       }
@@ -189,10 +191,12 @@
   background: linear-gradient(180deg,
       rgba(66, 66, 66, 0.25) 20%,
       rgba(255, 255, 255, 0.1) 80%);
+
   .drop-actions {
     position: absolute;
     right: 20px;
     top: 20px;
+
     .ant-dropdown-trigger.dropdown-options {
       color: @white;
       font-size: 22px;
@@ -222,7 +226,6 @@
     position: absolute;
     bottom: 25px;
     left: 89px;
-    opacity: 0.8;
 
     &.off {
       background-color: @gray;
@@ -247,6 +250,8 @@
       font-size: 16px;
       font-weight: 700;
       margin: 0;
+      display: inline-flex;
+      align-items: center;
 
       @media screen and (max-width: @tablet-screen) {
         margin: 0;
@@ -261,7 +266,7 @@
 
     .anticon {
       color: @primary-color;
-      font-size: 18px;
+      font-size: 22px;
     }
 
     .live-icon {
@@ -317,9 +322,9 @@
     color: @primary-color;
     font-weight: 500;
     background-color: transparent;
-    box-shadow: inset 0 0 0 1px rgba(138,150,163,0.25);
+    box-shadow: inset 0 0 0 1px rgba(138, 150, 163, 0.25);
     border: 1px solid @light-grey;
-    transition: color .15s,background-color .15s,box-shadow .15s;
+    transition: color .15s, background-color .15s, box-shadow .15s;
     position: relative;
     width: 48px;
     height: 48px;
@@ -334,8 +339,10 @@
     border-radius: 50%;
     font-size: 25px;
     cursor: pointer;
+
     &:hover {
       background: @theme-color;
+
       .anticon {
         color: @white;
       }
@@ -365,12 +372,15 @@
     .ant-collapse-header {
       padding: 12px 0;
     }
+
     .ant-collapse-content-box {
       padding: 0 0 12px;
     }
+
     .ant-collapse-item {
       border: none;
     }
+
     .ant-collapse-borderless {
       background-color: transparent;
     }
@@ -403,11 +413,13 @@
     justify-content: space-between;
     align-items: center;
     position: relative;
+
     h4 {
       white-space: nowrap;
       font-size: 20px;
     }
   }
+
   .ant-tabs {
     .ant-tabs-tab.ant-tabs-tab-active {
       border-right: 1px solid;
@@ -456,10 +468,11 @@
 
       @media screen and (max-width: @mobile-screen) {
         padding: 0;
+
         &::before {
           opacity: 0;
         }
-  
+
         &::after {
           opacity: 0;
         }
@@ -536,18 +549,11 @@
     left: 30px;
     overflow: hidden;
 
-    img {
-      width: 80px !important;
+    .ant-avatar {
+      width: 80px;
       height: 80px;
-      padding: 2px;
-      border-radius: 50%;
       border: 1px solid @theme-color;
-      object-fit: cover;
     }
-
-    // @media screen and (max-width: @tablet-screen) {
-    //   height: 160px;
-    //  }
   }
 
   .online-status {
@@ -569,9 +575,10 @@
     position: absolute;
     top: 5px;
     left: 5px;
+
     img {
-      height: 15px!important;
-      width: unset!important;
+      height: 15px !important;
+      width: unset !important;
     }
   }
 
@@ -622,13 +629,23 @@
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    font-family: @primary-font-bold;
-    line-height: normal;
     padding: 15px 5px;
-    background-color: rgba(0,0,0,.25);
+    background-color: rgba(0, 0, 0, .25);
+
+    .name {
+      display: inline-flex;
+      align-items: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      font-family: @primary-font-bold;
+      line-height: normal;
+    }
+
+    .anticon {
+      color: @primary-color;
+      font-size: 18px;
+    }
 
     p {
       font-size: 10px;
@@ -676,6 +693,7 @@
     .model-name {
       font-size: 10px;
       padding: 5px;
+
       p {
         font-size: 8px;
       }
@@ -717,12 +735,35 @@
     font-size: 10px;
     padding: 2px 10px;
     font-weight: 600;
-    background-image: linear-gradient(to bottom, #04040e00 0%, @theme-color 100%);
+    background-image: linear-gradient(to bottom, #04040e00 0%, @gray 100%);
+  }
+
+  .online-status {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: @gray;
+
+    &.active {
+      animation-name: twinkle;
+      animation-duration: 2s;
+      animation-timing-function: ease-out;
+      animation-delay: 0s;
+      animation-direction: alternate;
+      animation-iteration-count: infinite;
+      animation-fill-mode: none;
+      animation-play-state: running;
+      background-color: @success-color;
+    }
   }
 
   .model-name {
     position: absolute;
     top: 100%;
+    left: 0;
     width: 100%;
     color: @white;
     background-color: @primary-color;
@@ -736,6 +777,14 @@
     white-space: nowrap;
     overflow: hidden;
     font-family: @primary-font-bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    .anticon {
+      margin-bottom: -3px;
+      margin-left: 2px;
+      font-size: 18px;
+    }
   }
 
   &:hover {
@@ -844,6 +893,7 @@
   display: flex;
   color: @white;
   align-items: center;
+  background-image: linear-gradient(to top, #04040e00 0%, rgba(60, 60, 60, .5) 100%);
 
   .arrow-back {
     font-size: 22px;
@@ -851,8 +901,15 @@
   }
 
   .t-user-name {
+    display: inline-flex;
+    align-items: center;
     font-weight: 600;
     text-transform: capitalize;
+
+    .anticon {
+      font-size: 16px;
+      color: @primary-color;
+    }
   }
 
   .stats-row {
@@ -915,49 +972,60 @@
 .document-upload {
   display: flex;
   justify-content: space-between;
+
   .ant-upload-picture-card-wrapper.avatar-uploader {
     width: 50%;
   }
 }
+
 .subscription-modal {
   border-radius: 5px;
   overflow: hidden;
+
   .ant-modal-body {
     padding: 0 0 15px;
   }
 }
+
 .confirm-subscription-form {
   text-align: center;
   padding: 15px;
+
   .info-body {
     text-align: left;
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
+
     p {
       font-size: 16px;
       font-family: @primary-font-bold;
       color: @secondary-color;
       margin-bottom: 5px;
     }
+
     ul {
       padding: 0;
+
       li {
-       font-size: 14px;
-       margin: 0 5px;
-       color: @secondary-color;
+        font-size: 14px;
+        margin: 0 5px;
+        color: @secondary-color;
       }
     }
   }
+
   .tip-grps {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
+
     .ant-btn {
       margin-bottom: 5px;
     }
   }
+
   .ant-avatar {
     width: 100px;
     height: 100px;
