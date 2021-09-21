@@ -244,6 +244,14 @@ export class VideoSearchService {
         .skip(parseInt(req.offset as string, 10)),
       this.videoModel.countDocuments(query)
     ]);
+    const videos = await this.mapArrayInfo(data, user);
+    return {
+      data: videos,
+      total
+    };
+  }
+
+  public async mapArrayInfo(data, user: UserDto) {
     const fileIds = [];
     data.forEach((v) => {
       v.thumbnailId && fileIds.push(v.thumbnailId);
@@ -267,7 +275,6 @@ export class VideoSearchService {
         status: PURCHASE_ITEM_STATUS.SUCCESS
       }) : []
     ]);
-
     const videos = data.map((v) => new VideoDto(v));
     videos.forEach((vid) => {
       const v = vid;
@@ -304,11 +311,8 @@ export class VideoSearchService {
       v.isSubscribed = !!((isSubscribed || (`${user._id}` === `${v.performerId}`) || (user.roles && user.roles.includes('admin'))));
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${v._id}`);
       v.isBought = !!((bought || (`${user._id}` === `${v.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      return v;
     });
-
-    return {
-      data: videos,
-      total
-    };
+    return videos;
   }
 }

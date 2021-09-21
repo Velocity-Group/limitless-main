@@ -137,6 +137,65 @@ export class GalleryService {
     return new GalleryDto(gallery);
   }
 
+  public async mapArrayInfo(data, user: UserDto) {
+    const performerIds = data.map((d) => d.performerId);
+    const galleries = data.map((g) => new GalleryDto(g));
+    const coverPhotoIds = data.map((d) => d.coverPhotoId);
+    const galleryIds = data.map((d) => d._id);
+
+    const [performers, coverPhotos, reactions, subscriptions, transactions] = await Promise.all([
+      performerIds.length ? this.performerService.findByIds(performerIds) : [],
+      coverPhotoIds.length
+        ? this.photoModel
+          .find({ _id: { $in: coverPhotoIds } })
+          .lean()
+          .exec()
+        : [],
+      user && user._id ? this.reactionService.findByQuery({
+        objectType: REACTION_TYPE.GALLERY, objectId: { $in: galleryIds }, createdBy: user._id
+      }) : [],
+      user && user._id ? this.subscriptionService.findSubscriptionList({
+        userId: user._id, performerId: { $in: performerIds }, expiredAt: { $gt: new Date() }
+      }) : [],
+      user && user._id ? this.purchasedItemSearchService.findByQuery({
+        sourceId: user._id,
+        targetId: { $in: galleryIds },
+        target: PURCHASE_ITEM_TARTGET_TYPE.GALLERY,
+        status: PURCHASE_ITEM_STATUS.SUCCESS
+      }) : []
+    ]);
+    const fileIds = coverPhotos.map((c) => c.fileId);
+    const files = await this.fileService.findByIds(fileIds);
+    galleries.forEach((g) => {
+      const performer = performers.find((p) => p._id.toString() === g.performerId.toString());
+      g.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
+      const bookmarked = reactions.find((l) => l.objectId.toString() === g._id.toString() && l.action === REACTION.BOOK_MARK);
+      g.isBookMarked = !!bookmarked;
+      if (g.coverPhotoId) {
+        const coverPhoto = coverPhotos.find(
+          (c) => c._id.toString() === g.coverPhotoId.toString()
+        );
+        if (coverPhoto) {
+          const file = files.find(
+            (f) => f._id.toString() === coverPhoto.fileId.toString()
+          );
+          if (file) {
+            // eslint-disable-next-line no-param-reassign
+            g.coverPhoto = {
+              url: file.getUrl(),
+              thumbnails: file.getThumbnails()
+            };
+          }
+        }
+      }
+      const isSubscribed = subscriptions.find((s) => `${s.performerId}` === `${g.performerId}`);
+      g.isSubscribed = !!((isSubscribed || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${g._id}`);
+      g.isBought = !!((bought || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
+    });
+    return galleries;
+  }
+
   public async details(id: string, user: UserDto) {
     const query = isObjectId(id) ? { _id: id } : { slug: id };
     const gallery = await this.galleryModel.findOne(query);
@@ -404,65 +463,7 @@ export class GalleryService {
         .skip(parseInt(req.offset as string, 10)),
       this.galleryModel.countDocuments(query)
     ]);
-
-    const performerIds = data.map((d) => d.performerId);
-    const galleries = data.map((g) => new GalleryDto(g));
-    const coverPhotoIds = data.map((d) => d.coverPhotoId);
-    const galleryIds = data.map((d) => d._id);
-
-    const [performers, coverPhotos, reactions, subscriptions, transactions] = await Promise.all([
-      performerIds.length ? this.performerService.findByIds(performerIds) : [],
-      coverPhotoIds.length
-        ? this.photoModel
-          .find({ _id: { $in: coverPhotoIds } })
-          .lean()
-          .exec()
-        : [],
-      user && user._id ? this.reactionService.findByQuery({
-        objectType: REACTION_TYPE.GALLERY, objectId: { $in: galleryIds }, createdBy: user._id
-      }) : [],
-      user && user._id ? this.subscriptionService.findSubscriptionList({
-        userId: user._id, performerId: { $in: performerIds }, expiredAt: { $gt: new Date() }
-      }) : [],
-      user && user._id ? this.purchasedItemSearchService.findByQuery({
-        sourceId: user._id,
-        targetId: { $in: galleryIds },
-        target: PURCHASE_ITEM_TARTGET_TYPE.GALLERY,
-        status: PURCHASE_ITEM_STATUS.SUCCESS
-      }) : []
-    ]);
-    const fileIds = coverPhotos.map((c) => c.fileId);
-    const files = await this.fileService.findByIds(fileIds);
-
-    galleries.forEach((g) => {
-      // TODO - should get picture (thumbnail if have?)
-      const performer = performers.find((p) => p._id.toString() === g.performerId.toString());
-      g.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
-      const bookmarked = reactions.find((l) => l.objectId.toString() === g._id.toString() && l.action === REACTION.BOOK_MARK);
-      g.isBookMarked = !!bookmarked;
-      if (g.coverPhotoId) {
-        const coverPhoto = coverPhotos.find(
-          (c) => c._id.toString() === g.coverPhotoId.toString()
-        );
-        if (coverPhoto) {
-          const file = files.find(
-            (f) => f._id.toString() === coverPhoto.fileId.toString()
-          );
-          if (file) {
-            // eslint-disable-next-line no-param-reassign
-            g.coverPhoto = {
-              url: file.getUrl(),
-              thumbnails: file.getThumbnails()
-            };
-          }
-        }
-      }
-      const isSubscribed = subscriptions.find((s) => `${s.performerId}` === `${g.performerId}`);
-      g.isSubscribed = !!((isSubscribed || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
-      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${g._id}`);
-      g.isBought = !!((bought || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
-    });
-
+    const galleries = await this.mapArrayInfo(data, user);
     return {
       data: galleries,
       total

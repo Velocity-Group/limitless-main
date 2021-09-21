@@ -24,7 +24,6 @@ import { ReactionService } from '../services/reaction.service';
 import { ReactionCreatePayload, ReactionSearchRequestPayload } from '../payloads';
 import { ReactionDto } from '../dtos/reaction.dto';
 import { UserDto } from '../../user/dtos';
-import { REACTION } from '../constants';
 
 @Injectable()
 @Controller('reactions')
@@ -68,8 +67,6 @@ export class ReactionController {
     @CurrentUser() user: UserDto,
     @Request() req: any
   ): Promise<DataResponse<PageableData<ReactionDto>>> {
-    query.action = REACTION.BOOK_MARK;
-    query.createdBy = user._id;
     const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
     const jwToken = await this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
     const data = await this.reactionService.getListFeeds(query, user, jwToken);
@@ -84,9 +81,7 @@ export class ReactionController {
     @Query() query: ReactionSearchRequestPayload,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<PageableData<ReactionDto>>> {
-    query.action = REACTION.BOOK_MARK;
-    query.createdBy = user._id;
-    const data = await this.reactionService.getListProduct(query);
+    const data = await this.reactionService.getListProduct(query, user);
     return DataResponse.ok(data);
   }
 
@@ -98,9 +93,7 @@ export class ReactionController {
     @Query() query: ReactionSearchRequestPayload,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<PageableData<ReactionDto>>> {
-    query.action = REACTION.BOOK_MARK;
-    query.createdBy = user._id;
-    const data = await this.reactionService.getListVideo(query);
+    const data = await this.reactionService.getListVideo(query, user);
     return DataResponse.ok(data);
   }
 
@@ -112,9 +105,7 @@ export class ReactionController {
     @Query() query: ReactionSearchRequestPayload,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<PageableData<ReactionDto>>> {
-    query.action = REACTION.BOOK_MARK;
-    query.createdBy = user._id;
-    const data = await this.reactionService.getListGallery(query);
+    const data = await this.reactionService.getListGallery(query, user);
     return DataResponse.ok(data);
   }
 
@@ -126,9 +117,7 @@ export class ReactionController {
     @Query() req: ReactionSearchRequestPayload,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<PageableData<ReactionDto>>> {
-    req.action = REACTION.BOOK_MARK;
-    req.createdBy = user._id;
-    const data = await this.reactionService.getListPerformer(req);
+    const data = await this.reactionService.getListPerformer(req, user);
     return DataResponse.ok(data);
   }
 }

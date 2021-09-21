@@ -1,17 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-param-reassign */
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { PageableData, QueueEventService, QueueEvent } from 'src/kernel';
 import { EVENT } from 'src/kernel/constants';
-import { VideoService, GalleryService, ProductService } from 'src/modules/performer-assets/services';
+import {
+  VideoService, GalleryService, ProductService, VideoSearchService
+} from 'src/modules/performer-assets/services';
 import { ObjectId } from 'mongodb';
 import { FeedService } from 'src/modules/feed/services';
 import { uniq } from 'lodash';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { FeedDto } from 'src/modules/feed/dtos';
 import {
-  GalleryDto, IVideoResponse, ProductDto, VideoDto
+  ProductDto
 } from 'src/modules/performer-assets/dtos';
 import { FileService } from 'src/modules/file/services';
 import { ReactionModel } from '../models/reaction.model';
@@ -23,7 +23,7 @@ import { UserDto } from '../../user/dtos';
 import { ReactionDto } from '../dtos/reaction.dto';
 import { UserService } from '../../user/services';
 import { PerformerService } from '../../performer/services';
-import { REACTION_CHANNEL, REACTION_TYPE } from '../constants';
+import { REACTION, REACTION_CHANNEL, REACTION_TYPE } from '../constants';
 
 @Injectable()
 export class ReactionService {
@@ -36,6 +36,8 @@ export class ReactionService {
     private readonly productService: ProductService,
     @Inject(forwardRef(() => VideoService))
     private readonly videoService: VideoService,
+    @Inject(forwardRef(() => VideoSearchService))
+    private readonly videoSearchService: VideoSearchService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     @Inject(forwardRef(() => FeedService))
@@ -146,9 +148,11 @@ export class ReactionService {
     };
   }
 
-  public async getListProduct(req: ReactionSearchRequestPayload) {
+  public async getListProduct(req: ReactionSearchRequestPayload, user: UserDto) {
     const query = {
-      objectType: REACTION_TYPE.PRODUCT
+      objectType: REACTION_TYPE.PRODUCT,
+      action: REACTION.BOOK_MARK,
+      createdBy: user._id
     } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
@@ -177,6 +181,7 @@ export class ReactionService {
         const p = new ProductDto(product);
         const image = images.find((f) => f._id.toString() === p.imageId.toString());
         p.image = image ? image.getUrl() : null;
+        // eslint-disable-next-line no-param-reassign
         item.objectInfo = p;
       }
     });
@@ -187,9 +192,11 @@ export class ReactionService {
     };
   }
 
-  public async getListVideo(req: ReactionSearchRequestPayload) {
+  public async getListVideo(req: ReactionSearchRequestPayload, user: UserDto) {
     const query = {
-      objectType: REACTION_TYPE.VIDEO
+      objectType: REACTION_TYPE.VIDEO,
+      action: REACTION.BOOK_MARK,
+      createdBy: user._id
     } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
@@ -208,13 +215,13 @@ export class ReactionService {
     ]);
     const videoIds = uniq(items.map((i) => i.objectId));
     const videos = videoIds.length > 0 ? await this.videoService.findByIds(videoIds) : [];
+    const mapVideos = await this.videoSearchService.mapArrayInfo(videos, user);
     const reactions = items.map((v) => new ReactionDto(v));
-    reactions.forEach((item) => {
-      const video = videos.find((p) => `${p._id}` === `${item.objectId}`);
-      if (video) {
-        const p = new VideoDto(video);
-        item.objectInfo = p;
-      }
+    reactions.forEach((r) => {
+      const item = r;
+      const video = mapVideos.find((v) => `${v._id}` === `${item.objectId}`);
+      item.objectInfo = video;
+      return item;
     });
 
     return {
@@ -223,9 +230,11 @@ export class ReactionService {
     };
   }
 
-  public async getListGallery(req: ReactionSearchRequestPayload) {
+  public async getListGallery(req: ReactionSearchRequestPayload, user: UserDto) {
     const query = {
-      objectType: REACTION_TYPE.GALLERY
+      objectType: REACTION_TYPE.GALLERY,
+      action: REACTION.BOOK_MARK,
+      createdBy: user._id
     } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
@@ -245,13 +254,13 @@ export class ReactionService {
 
     const galleryIds = uniq(items.map((i) => i.objectId));
     const galleries = galleryIds.length > 0 ? await this.galleryService.findByIds(galleryIds) : [];
+    const mapGalleries = await this.galleryService.mapArrayInfo(galleries, user);
     const reactions = items.map((v) => new ReactionDto(v));
-    reactions.forEach((item) => {
-      const gallery = galleries.find((p) => `${p._id}` === `${item.objectId}`);
-      if (gallery) {
-        const p = new GalleryDto(gallery);
-        item.objectInfo = p;
-      }
+    reactions.forEach((r) => {
+      const item = r;
+      const gallery = mapGalleries.find((p) => `${p._id}` === `${item.objectId}`);
+      item.objectInfo = gallery;
+      return item;
     });
 
     return {
@@ -260,9 +269,11 @@ export class ReactionService {
     };
   }
 
-  public async getListPerformer(req: ReactionSearchRequestPayload) {
+  public async getListPerformer(req: ReactionSearchRequestPayload, user: UserDto) {
     const query = {
-      objectType: REACTION_TYPE.PERFORMER
+      objectType: REACTION_TYPE.PERFORMER,
+      action: REACTION.BOOK_MARK,
+      createdBy: user._id
     } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
@@ -285,41 +296,8 @@ export class ReactionService {
     const reactions = items.map((v) => new ReactionDto(v));
     reactions.forEach((item) => {
       const performer = performers.find((p) => `${p._id}` === `${item.objectId}`);
+      // eslint-disable-next-line no-param-reassign
       item.objectInfo = performer ? new PerformerDto(performer).toSearchResponse() : null;
-    });
-
-    return {
-      data: reactions,
-      total
-    };
-  }
-
-  public async getListUser(req: ReactionSearchRequestPayload, user: UserDto) {
-    const query = {
-      objectType: REACTION_TYPE.PERFORMER
-    } as any;
-    if (req.action) query.action = req.action;
-    query.objectId = user._id;
-
-    const sort = {
-      [req.sortBy || 'createdAt']: req.sort === 'desc' ? -1 : 1
-    };
-    const [items, total] = await Promise.all([
-      this.reactionModel
-        .find(query)
-        .sort(sort)
-        .lean()
-        .limit(parseInt(req.limit as string, 10))
-        .skip(parseInt(req.offset as string, 10)),
-      this.reactionModel.countDocuments(query)
-    ]);
-
-    const userIds = uniq(items.map((i) => i.createdBy));
-    const users = await this.userService.findByIds(userIds);
-    const reactions = items.map((v) => new ReactionDto(v));
-    reactions.forEach((item) => {
-      const u = users.find((p) => `${p._id}` === `${item.createdBy}`);
-      item.objectInfo = u ? new UserDto(u).toResponse() : null;
     });
 
     return {
@@ -330,7 +308,9 @@ export class ReactionService {
 
   public async getListFeeds(req: ReactionSearchRequestPayload, user: UserDto, jwToken: string) {
     const query = {
-      objectType: REACTION_TYPE.FEED
+      objectType: REACTION_TYPE.FEED,
+      action: REACTION.BOOK_MARK,
+      createdBy: user._id
     } as any;
     if (req.createdBy) query.createdBy = req.createdBy;
     if (req.action) query.action = req.action;
@@ -356,6 +336,7 @@ export class ReactionService {
     const reactions = items.map((v) => new ReactionDto(v));
     reactions.forEach((item) => {
       const feed = feeds.find((p) => `${p._id}` === `${item.objectId}`);
+      // eslint-disable-next-line no-param-reassign
       item.objectInfo = feed ? new FeedDto(feed) : null;
     });
 
