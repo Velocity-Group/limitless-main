@@ -52,7 +52,7 @@ export default class FeedSlider extends PureComponent<IProps> {
             </Image.PreviewGroup>
             )}
             {videos && videos.length > 0 && videos.map((vid) => {
-              const thumbnailUrl = (vid?.thumbnails && vid?.thumbnails[0]) || feed?.thumbnailUrl;
+              const thumbnailUrl = feed?.thumbnailUrl || (vid?.thumbnails && vid?.thumbnails[0]);
               return (
                 <VideoPlayer
                   key={vid._id}
