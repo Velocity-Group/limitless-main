@@ -51,5 +51,5 @@ export interface IMessage {
 
   imageUrl: string;
 
-  senderInfo: any
+  senderInfo: IUser
 }

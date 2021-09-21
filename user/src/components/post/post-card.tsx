@@ -405,7 +405,7 @@ class FeedCard extends Component<IProps> {
                   {performer?.username || 'n/a'}
                 </h5>
               </div>
-              {performer?.isOnline ? <span className="online-status" /> : <span className="online-status off" />}
+              {!performer?.isOnline ? <span className="online-status" /> : <span className="online-status active" />}
             </div>
           </Link>
           <div className="feed-top-right">

@@ -76,6 +76,8 @@ export class UserDto {
 
   stripeCustomerId?: string;
 
+  verifiedAccount?: boolean;
+
   constructor(data?: Partial<UserDto>) {
     data
       && Object.assign(
@@ -96,6 +98,7 @@ export class UserDto {
           'balance',
           'country',
           'verifiedEmail',
+          'verifiedAccount',
           'isOnline',
           'stats',
           'twitterConnected',
@@ -124,6 +127,7 @@ export class UserDto {
       isPerformer: false,
       country: this.country,
       isBlocked: this.isBlocked,
+      verifiedAccount: this.verifiedAccount,
       twitterConnected: this.twitterConnected,
       googleConnected: this.googleConnected
     };
