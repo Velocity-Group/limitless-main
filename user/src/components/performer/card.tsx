@@ -50,7 +50,7 @@ class PerformerCard extends PureComponent<IProps> {
               <div className="card-img">
                 <Avatar alt="avatar" src={performer?.avatar || '/static/no-avatar.png'} />
               </div>
-              <span className={performer?.isOnline > 0 ? 'online-status' : 'online-status off'} />
+              <span className={performer?.isOnline > 0 ? 'online-status active' : 'online-status'} />
               <div className="model-name">
                 <div className="name">
                   {performer?.name || 'N/A'}

@@ -1,5 +1,6 @@
 import { PureComponent, createRef } from 'react';
 import { Spin, Avatar } from 'antd';
+import { TickIcon } from 'src/icons';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import { loadMoreMessages } from '@redux/message/actions';
@@ -147,6 +148,8 @@ class MessageList extends PureComponent<IProps> {
                  <Avatar alt="avatar" src={conversation?.recipientInfo?.avatar || '/static/no-avatar.png'} />
                  {' '}
                  {conversation?.recipientInfo?.name || conversation?.recipientInfo?.username || 'N/A'}
+                 {' '}
+                 {conversation?.recipientInfo?.verifiedAccount && <TickIcon />}
                </div>
                {fetching && <div className="text-center"><Spin /></div>}
                {this.renderMessages()}

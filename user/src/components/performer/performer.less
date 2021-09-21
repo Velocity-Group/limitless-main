@@ -559,15 +559,23 @@
   .online-status {
     width: 12px;
     height: 12px;
-    background-color: @success-color;
+    background-color: @gray;
     border-radius: 50%;
     position: absolute;
     bottom: 30px;
     left: 35px;
     opacity: 0.8;
 
-    &.off {
-      background-color: @gray;
+    &.active {
+      animation-name: twinkle;
+      animation-duration: 2s;
+      animation-timing-function: ease-out;
+      animation-delay: 0s;
+      animation-direction: alternate;
+      animation-iteration-count: infinite;
+      animation-fill-mode: none;
+      animation-play-state: running;
+      background-color: @success-color;
     }
   }
 
@@ -643,6 +651,7 @@
     }
 
     .anticon {
+      margin-left: 2px;
       color: @primary-color;
       font-size: 18px;
     }

@@ -8,8 +8,7 @@ import {
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import {
-  EntityNotFoundException, AgendaService,
-  ForbiddenException, QueueEventService, QueueEvent, StringHelper
+  EntityNotFoundException, ForbiddenException, QueueEventService, QueueEvent, StringHelper
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
 import { FileService } from 'src/modules/file/services';
@@ -25,7 +24,6 @@ import { REF_TYPE } from 'src/modules/file/constants';
 import {
   PERFORMER_UPDATE_STATUS_CHANNEL, PERFORMER_UPDATE_GENDER_CHANNEL, DELETE_PERFORMER_CHANNEL
 } from 'src/modules/performer/constants';
-import { difference } from 'lodash';
 import { MailerService } from 'src/modules/mailer';
 import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';
@@ -35,8 +33,7 @@ import { PerformerBlockService } from 'src/modules/block/services';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PerformerDto } from '../dtos';
 import {
-  UsernameExistedException,
-  EmailExistedException
+  UsernameExistedException, EmailExistedException
 } from '../exceptions';
 import {
   PerformerModel,
@@ -60,8 +57,6 @@ import {
   PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER
 } from '../providers';
 
-const CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA = 'CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA';
-
 @Injectable()
 export class PerformerService {
   constructor(
@@ -83,7 +78,6 @@ export class PerformerService {
     private readonly subscriptionService: SubscriptionService,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>,
-    private readonly agenda: AgendaService,
     private readonly queueEventService: QueueEventService,
     private readonly mailService: MailerService,
     @Inject(PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER)
@@ -93,39 +87,6 @@ export class PerformerService {
     @Inject(PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER)
     private readonly commissionSettingModel: Model<CommissionSettingModel>
   ) {
-    this.defineJobs();
-  }
-
-  private async defineJobs() {
-    const collection = (this.agenda as any)._collection;
-    await collection.deleteMany({
-      name: {
-        $in: [
-          CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA
-        ]
-      }
-    });
-    this.agenda.define(CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA, { }, this.checkRefAndRemoveFile.bind(this));
-    this.agenda.every('24 hours', CHECK_REF_REMOVE_PERFORMER_FILE_AGENDA, {});
-  }
-
-  private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
-    try {
-      const total = await this.fileService.countByRefType(REF_TYPE.PERFORMER);
-      for (let i = 0; i <= total / 99; i += 1) {
-        const files = await this.fileService.findByRefType(REF_TYPE.PERFORMER, 99, i);
-        const performerIds = files.map((f) => f.refItems[0].itemId.toString());
-        const performers = await this.performerModel.find({ _id: { $in: performerIds } });
-        const Ids = performers.map((v) => v._id.toString());
-        const difIds = difference(performerIds, Ids);
-        const difFileIds = files.filter((file) => difIds.includes(file.refItems[0].itemId.toString()));
-        await Promise.all(difFileIds.map(async (fileId) => this.fileService.remove(fileId)));
-      }
-    } catch (e) {
-      console.log('Check ref & remove files error', e);
-    } finally {
-      done();
-    }
   }
 
   public async checkExistedEmailorUsername(payload) {

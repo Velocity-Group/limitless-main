@@ -1,17 +1,14 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-console */
 import {
   Injectable, Inject, forwardRef, HttpException
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
-  QueueEventService, QueueEvent, EntityNotFoundException,
-  ForbiddenException, AgendaService
+  QueueEventService, QueueEvent, EntityNotFoundException, ForbiddenException
 } from 'src/kernel';
 import { FileDto } from 'src/modules/file';
 import { FileService, FILE_EVENT } from 'src/modules/file/services';
-import { merge, difference } from 'lodash';
+import { merge } from 'lodash';
 import { PerformerService } from 'src/modules/performer/services';
 import { EVENT } from 'src/kernel/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
@@ -30,7 +27,6 @@ export const PERFORMER_PHOTO_CHANNEL = 'PERFORMER_PHOTO_CHANNEL';
 const PHOTO_CONVERT_CHANNEL = 'PHOTO_CONVERT_CHANNEL';
 
 const FILE_PROCESSED_TOPIC = 'FILE_PROCESSED';
-const CHECK_REF_REMOVE_PHOTO_AGENDA = 'CHECK_REF_REMOVE_PHOTO_AGENDA';
 
 @Injectable()
 export class PhotoService {
@@ -46,8 +42,7 @@ export class PhotoService {
     @Inject(PERFORMER_PHOTO_MODEL_PROVIDER)
     private readonly photoModel: Model<PhotoModel>,
     private readonly queueEventService: QueueEventService,
-    private readonly fileService: FileService,
-    private readonly agenda: AgendaService
+    private readonly fileService: FileService
 
   ) {
     this.queueEventService.subscribe(
@@ -55,45 +50,6 @@ export class PhotoService {
       FILE_PROCESSED_TOPIC,
       this.handleFileProcessed.bind(this)
     );
-    this.defineJobs();
-  }
-
-  private async defineJobs() {
-    const collection = (this.agenda as any)._collection;
-    await collection.deleteMany({
-      name: {
-        $in: [
-          CHECK_REF_REMOVE_PHOTO_AGENDA
-        ]
-      }
-    });
-    this.agenda.define(CHECK_REF_REMOVE_PHOTO_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
-    this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_PHOTO_AGENDA, {});
-  }
-
-  private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
-    try {
-      const total = await this.fileService.countByRefType(REF_TYPE.PHOTO);
-      for (let i = 0; i <= total / 99; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        const files = await this.fileService.findByRefType(REF_TYPE.PHOTO, 99, i);
-        const photoIds = files.map((f) => f.refItems[0].itemId.toString());
-        // eslint-disable-next-line no-await-in-loop
-        const photos = await this.photoModel.find({ _id: { $in: photoIds } });
-        const Ids = photos.map((v) => v._id.toString());
-        const difIds = difference(photoIds, Ids);
-        const difFileIds = files.filter((file) => difIds.includes(file.refItems[0].itemId.toString()));
-        await Promise.all(difFileIds.map(async (fileId) => {
-          await this.fileService.remove(fileId);
-        }));
-      }
-    } catch (e) {
-      console.log('Check ref & remove files error', e);
-    } finally {
-      job.remove();
-      this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_PHOTO_AGENDA, {});
-      done();
-    }
   }
 
   public async handleFileProcessed(event: QueueEvent) {

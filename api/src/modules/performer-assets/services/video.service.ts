@@ -17,7 +17,7 @@ import { FileDto } from 'src/modules/file';
 import { FileService, FILE_EVENT } from 'src/modules/file/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
 import { PerformerService } from 'src/modules/performer/services';
-import { merge, difference } from 'lodash';
+import { merge } from 'lodash';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { PaymentTokenService } from 'src/modules/purchased-item/services';
 import { EVENT } from 'src/kernel/constants';
@@ -35,12 +35,12 @@ import { VideoModel } from '../models';
 import { PERFORMER_VIDEO_MODEL_PROVIDER } from '../providers';
 
 export const PERFORMER_VIDEO_CHANNEL = 'PERFORMER_VIDEO_CHANNEL';
-export const PERFORMER_VIDEO_TEASER_CHANNEL = 'PERFORMER_VIDEO_TEASER_CHANNEL';
+export const CONVERT_VIDEO_CHANNEL = 'CONVERT_VIDEO_CHANNEL';
+export const CONVERT_TEASER_CHANNEL = 'CONVERT_TEASER_CHANNEL';
 export const PERFORMER_COUNT_VIDEO_CHANNEL = 'PERFORMER_COUNT_VIDEO_CHANNEL';
 const FILE_PROCESSED_TOPIC = 'FILE_PROCESSED';
 const TEASER_PROCESSED_TOPIC = 'TEASER_PROCESSED_TOPIC';
 const SCHEDULE_VIDEO_AGENDA = 'SCHEDULE_VIDEO_AGENDA';
-const CHECK_REF_REMOVE_VIDEO_AGENDA = 'CHECK_REF_REMOVE_VIDEO_AGENDA';
 
 @Injectable()
 export class VideoService {
@@ -60,12 +60,12 @@ export class VideoService {
     private readonly agenda: AgendaService
   ) {
     this.queueEventService.subscribe(
-      PERFORMER_VIDEO_TEASER_CHANNEL,
+      CONVERT_TEASER_CHANNEL,
       TEASER_PROCESSED_TOPIC,
       this.handleTeaserProcessed.bind(this)
     );
     this.queueEventService.subscribe(
-      PERFORMER_VIDEO_CHANNEL,
+      CONVERT_VIDEO_CHANNEL,
       FILE_PROCESSED_TOPIC,
       this.handleFileProcessed.bind(this)
     );
@@ -77,40 +77,13 @@ export class VideoService {
     await collection.deleteMany({
       name: {
         $in: [
-          SCHEDULE_VIDEO_AGENDA,
-          CHECK_REF_REMOVE_VIDEO_AGENDA
+          SCHEDULE_VIDEO_AGENDA
         ]
       }
     });
 
     this.agenda.define(SCHEDULE_VIDEO_AGENDA, {}, this.scheduleVideo.bind(this));
     this.agenda.schedule('1 hours from now', SCHEDULE_VIDEO_AGENDA, {});
-
-    this.agenda.define(CHECK_REF_REMOVE_VIDEO_AGENDA, {}, this.checkRefAndRemoveFile.bind(this));
-    this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_VIDEO_AGENDA, {});
-  }
-
-  private async checkRefAndRemoveFile(job: any, done: any): Promise<void> {
-    try {
-      const total = await this.fileService.countByRefType(REF_TYPE.VIDEO);
-      for (let i = 0; i <= total / 99; i += 1) {
-        const files = await this.fileService.findByRefType(REF_TYPE.VIDEO, 99, i);
-        const videoIds = files.map((f) => f.refItems[0].itemId.toString());
-        const videos = await this.PerformerVideoModel.find({ _id: { $in: videoIds } });
-        const Ids = videos.map((v) => v._id.toString());
-        const difIds = difference(videoIds, Ids);
-        const difFileIds = files.filter((file) => difIds.includes(file.refItems[0].itemId.toString()));
-        await Promise.all(difFileIds.map(async (fileId) => {
-          await this.fileService.remove(fileId);
-        }));
-      }
-    } catch (e) {
-      console.log('Check ref & remove files error', e);
-    } finally {
-      job.remove();
-      this.agenda.schedule('1 hours from now', CHECK_REF_REMOVE_VIDEO_AGENDA, {});
-      typeof done === 'function' && done();
-    }
   }
 
   private async scheduleVideo(job: any, done: any): Promise<void> {
@@ -310,14 +283,14 @@ export class VideoService {
     }
     // covert video file
     await this.fileService.queueProcessVideo(model.fileId, {
-      publishChannel: PERFORMER_VIDEO_CHANNEL,
+      publishChannel: CONVERT_VIDEO_CHANNEL,
       meta: {
         videoId: model._id
       }
     });
     // convert teaser file
     model.teaserId && await this.fileService.queueProcessVideo(model.teaserId, {
-      publishChannel: PERFORMER_VIDEO_TEASER_CHANNEL,
+      publishChannel: CONVERT_TEASER_CHANNEL,
       meta: {
         videoId: model._id
       }
@@ -469,7 +442,7 @@ export class VideoService {
         }),
         fileId && this.fileService.remove(fileId),
         this.fileService.queueProcessVideo(video.fileId, {
-          publishChannel: PERFORMER_VIDEO_CHANNEL,
+          publishChannel: CONVERT_VIDEO_CHANNEL,
           meta: {
             videoId: video._id
           }
@@ -485,7 +458,7 @@ export class VideoService {
         }),
         teaserId && this.fileService.remove(teaserId),
         this.fileService.queueProcessVideo(video.teaserId, {
-          publishChannel: PERFORMER_VIDEO_TEASER_CHANNEL,
+          publishChannel: CONVERT_TEASER_CHANNEL,
           meta: {
             videoId: video._id
           }

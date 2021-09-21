@@ -1,4 +1,5 @@
 import { Badge, Avatar } from 'antd';
+import { TickIcon } from 'src/icons';
 import { formatDateFromnow } from '@lib/index';
 import { IConversation } from '@interfaces/message';
 import './ConversationListItem.less';
@@ -26,7 +27,10 @@ export default function ConversationListItem(props: IProps) {
       </div>
       <div className="conversation-info">
         <h1 className="conversation-title">
-          <span className="re-name" title={recipientInfo?.name || recipientInfo?.username || 'N/A'}>{recipientInfo?.name || recipientInfo?.username || 'N/A'}</span>
+          <span className="re-name" title={recipientInfo?.name || recipientInfo?.username || 'N/A'}>
+            {recipientInfo?.name || recipientInfo?.username || 'N/A'}
+            {recipientInfo?.verifiedAccount && <TickIcon />}
+          </span>
           <span className="conversation-time">{formatDateFromnow(lastMessageCreatedAt || updatedAt)}</span>
         </h1>
         <p className="conversation-snippet">{lastMessage}</p>

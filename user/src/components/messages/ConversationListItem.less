@@ -6,12 +6,29 @@
   padding: 10px;
   position: relative;
   color: @white;
-  &:hover, &.active {
+
+  &:hover,
+  &.active {
     background: @background-conversation;
     cursor: pointer;
   }
+
   &.active {
     pointer-events: none;
+  }
+
+  .online-status {
+    position: absolute;
+    left: -5px;
+    top: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: @gray;
+
+    &.active {
+      background-color: @success-color;
+    }
   }
 }
 
@@ -26,19 +43,6 @@
 
 .conversation-left-corner span {
   font-size: 10px;
-}
-
-.online-status {
-  position: absolute;
-  left: -5px;
-  top: 2px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: @gray;
-  &.active {
-    background-color: @success-color;
-  }
 }
 
 .conversation-photo {
@@ -63,6 +67,9 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      .anticon {
+        font-size: 18px;
+      }
     }
 
     .conversation-time {

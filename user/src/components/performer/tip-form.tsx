@@ -1,11 +1,8 @@
 import { PureComponent } from 'react';
 import {
-  InputNumber, Button
+  InputNumber, Button, Avatar
 } from 'antd';
 import { IPerformer } from '@interfaces/index';
-import {
-  CheckCircleOutlined
-} from '@ant-design/icons';
 import './performer.less';
 
 interface IProps {
@@ -30,25 +27,8 @@ export class TipPerformerForm extends PureComponent<IProps> {
     const { price } = this.state;
     return (
       <div className="confirm-subscription-form">
-        <div className="profile-cover" style={{ backgroundImage: 'url(\'/static/banner-image.jpg\')' }} />
-        <div className="profile-info">
-          <img
-            alt="main-avt"
-            src={performer?.avatar || '/static/no-avatar.png'}
-          />
-          <div className="m-user-name">
-            <h4>
-              {performer?.name || 'N/A'}
-                  &nbsp;
-              {performer?.verifiedAccount && (
-                <CheckCircleOutlined className="theme-color" />
-              )}
-            </h4>
-            <h5 style={{ textTransform: 'none' }}>
-              @
-              {performer?.username || 'n/a'}
-            </h5>
-          </div>
+        <div className="text-center">
+          <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
         </div>
         <div className="tip-grps">
           <Button type={price === 10 ? 'primary' : 'default'} onClick={() => this.onChangeValue(10)}>
