@@ -67,7 +67,6 @@ class GalleryViewPage extends PureComponent<IProps> {
     fetching: false,
     photos: [],
     isBought: false,
-    isSubscribed: false,
     submiting: false,
     openPurchaseModal: false,
     openSubscriptionModal: false
@@ -79,7 +78,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       Router.back();
       return;
     }
-    this.setState({ isBought: gallery.isBought, isSubscribed: gallery.isSubscribed });
+    this.setState({ isBought: gallery.isBought });
     this.getPhotos();
     getRelatedHandler({
       performerId: gallery.performerId,
@@ -195,9 +194,9 @@ class GalleryViewPage extends PureComponent<IProps> {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
     }
     const {
-      fetching, photos, total, isBought, isSubscribed, submiting, openPurchaseModal, openSubscriptionModal
+      fetching, photos, total, isBought, submiting, openPurchaseModal, openSubscriptionModal
     } = this.state;
-    const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && isSubscribed);
+    const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && gallery?.isSubscribed);
     return (
       <>
         <Head>
@@ -250,7 +249,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                     {(gallery?.price || 0).toFixed(2)}
                   </Button>
                   )}
-                  {!gallery?.isSale && !isSubscribed && (
+                  {!gallery?.isSale && !gallery?.isSubscribed && (
                   <div
                     style={{ padding: '25px 5px' }}
                     className="subscription"

@@ -27,7 +27,7 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
         </span>
         )}
         <div className="gallery-thumb">
-          <div className="card-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: 'blur(15px)' }} />
+          <div className="card-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: 'blur(20px)' }} />
           <div className="gallery-stats">
             <a>
               <PictureOutlined />

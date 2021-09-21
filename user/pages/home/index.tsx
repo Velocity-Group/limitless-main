@@ -1,5 +1,5 @@
 import {
-  Layout, message, Tooltip, Alert, Input
+  Layout, message, Tooltip, Alert, Input, Spin
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -192,6 +192,7 @@ class HomePage extends PureComponent<IProps> {
                           </div>
                         </Link>
                       ))}
+                      {loadingPerformer && <p className="text-center"><Spin /></p>}
                       {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found.</p>}
                     </div>
                   </div>

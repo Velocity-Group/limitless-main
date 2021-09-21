@@ -4,10 +4,9 @@ import {
   Menu, Dropdown, Divider, message, Modal, Tooltip, Button, Collapse
 } from 'antd';
 import {
-  HeartOutlined, CommentOutlined, BookOutlined,
+  HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined, EyeOutlined,
   MoreOutlined, DollarOutlined, LockOutlined, FlagOutlined,
-  FileImageOutlined, VideoCameraOutlined, CaretDownOutlined,
-  UnlockOutlined, CheckCircleOutlined, EyeOutlined
+  FileImageOutlined, VideoCameraOutlined, CaretDownOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import Link from 'next/link';
@@ -140,20 +139,19 @@ class FeedCard extends Component<IProps> {
           action: 'book_mark',
           objectType: 'feed'
         });
-        this.setState({ isBookMarked: true });
+        this.setState({ isBookMarked: true, requesting: false });
       } else {
         await reactionService.delete({
           objectId: feed._id,
           action: 'book_mark',
           objectType: 'feed'
         });
-        this.setState({ isBookMarked: false });
+        this.setState({ isBookMarked: false, requesting: false });
       }
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
-    } finally {
-      await this.setState({ requesting: false });
+      this.setState({ requesting: false });
     }
   }
 
@@ -164,7 +162,7 @@ class FeedCard extends Component<IProps> {
       return;
     }
     try {
-      await this.setState({ submiting: true });
+      await this.setState({ requesting: true });
       await reportService.create({
         target: 'feed', targetId: feed._id, performerId: feed.fromSourceId, description: reason
       });
@@ -173,7 +171,7 @@ class FeedCard extends Component<IProps> {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
-      this.setState({ submiting: false, openReportModal: false });
+      this.setState({ requesting: false, openReportModal: false });
     }
   }
 
@@ -335,7 +333,7 @@ class FeedCard extends Component<IProps> {
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
       shareUrl, openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
-    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && feed.isBought);
+    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought);
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     let totalVote = 0;
@@ -434,7 +432,7 @@ class FeedCard extends Component<IProps> {
           {!canView && (
             <div className="lock-content">
               {/* eslint-disable-next-line no-nested-ternary */}
-              <div className="feed-bg" style={feed.thumbnailUrl && canView ? { backgroundImage: `url(${feed.thumbnailUrl})` } : feed.thumbnailUrl && !canView ? { backgroundImage: `url(${feed.thumbnailUrl})`, filter: 'blur(15px)' } : { backgroundImage: '/static/leaf.jpg', filter: 'blur(2px)' }} />
+              <div className="feed-bg" style={feed.thumbnailUrl && canView ? { backgroundImage: `url(${feed.thumbnailUrl})` } : feed.thumbnailUrl && !canView ? { backgroundImage: `url(${feed.thumbnailUrl})`, filter: 'blur(20px)' } : { backgroundImage: '/static/leaf.jpg', filter: 'blur(2px)' }} />
               <div
                 className="text-center"
                 style={{ cursor: 'pointer' }}
@@ -457,7 +455,7 @@ class FeedCard extends Component<IProps> {
                 )}
                 {feed.teaser && (
                 <div className="text-center">
-                  <Button type="primary" onClick={() => this.setState({ openTeaser: true })}>
+                  <Button type="link" onClick={() => this.setState({ openTeaser: true })}>
                     <EyeOutlined />
                     View teaser video
                   </Button>
@@ -526,7 +524,7 @@ class FeedCard extends Component<IProps> {
               <span aria-hidden className={isOpenComment ? 'action-ico active' : 'action-ico'} onClick={this.onOpenComment.bind(this)}>
                 <CommentOutlined />
                 {' '}
-                {totalComment > 0 && shortenLargeNumber(totalComment)}
+                {shortenLargeNumber(totalComment)}
               </span>
               {performer && (
                 <span aria-hidden className="action-ico" onClick={() => this.setState({ openTipModal: true })}>

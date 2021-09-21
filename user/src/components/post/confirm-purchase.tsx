@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Button
+  Button, Avatar
 } from 'antd';
 import {
   CheckCircleOutlined
@@ -23,25 +23,11 @@ export class PurchaseFeedForm extends PureComponent<IProps> {
 
     return (
       <div className="confirm-subscription-form">
-        <div className="profile-cover" style={{ backgroundImage: 'url(\'/static/banner-image.jpg\')' }} />
-        <div className="profile-info">
-          <img
+        <div className="text-center">
+          <Avatar
             alt="main-avt"
             src={feed?.performer?.avatar || '/static/no-avatar.png'}
           />
-          <div className="m-user-name">
-            <h4>
-              {feed?.performer?.name || 'N/A'}
-                 &nbsp;
-              {feed?.performer?.verifiedAccount && (
-              <CheckCircleOutlined className="theme-color" />
-              )}
-            </h4>
-            <h5 style={{ textTransform: 'none' }}>
-              @
-              {feed?.performer?.username || 'n/a'}
-            </h5>
-          </div>
         </div>
         <div className="info-body">
           <p style={{ fontSize: 12 }}>{feed?.text}</p>
