@@ -306,7 +306,7 @@ class VideoViewPage extends PureComponent<IProps> {
       activeTab,
       isFirstLoadComment
     } = this.state;
-    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
+    const thumbUrl = video?.thumbnail?.url || (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const playSource = {
       file: video?.video?.url || '',
       image: thumbUrl,
@@ -314,7 +314,6 @@ class VideoViewPage extends PureComponent<IProps> {
     };
     const videoJsOptions = {
       key: video._id,
-      autoplay: true,
       controls: true,
       playsinline: true,
       poster: thumbUrl,
@@ -329,7 +328,6 @@ class VideoViewPage extends PureComponent<IProps> {
       key: `${video._id}_teaser`,
       autoplay: true,
       controls: true,
-      poster: thumbUrl,
       playsinline: true,
       sources: [
         {
@@ -414,11 +412,13 @@ class VideoViewPage extends PureComponent<IProps> {
                     <div className="text-center">
                       {video.isSale && !isBought && (
                       <Button type="primary" loading={submiting} disabled={submiting} onClick={this.purchaseVideo.bind(this)}>
-                        UNLOCK VIDEO BY
+                        PAY
                         {' '}
                         {video.price.toFixed(2)}
                         {' '}
                         <img alt="token" src="/static/coin-ico.png" height="25px" />
+                        {' '}
+                        TO UNLOCK
                       </Button>
                       )}
                       {!video.isSale && !isSubscribed && (

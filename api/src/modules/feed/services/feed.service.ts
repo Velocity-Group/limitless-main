@@ -79,8 +79,7 @@ export class FeedService {
     try {
       const feeds = await this.feedModel.find({
         isSchedule: true,
-        scheduleAt: { $lte: new Date() },
-        status: STATUS.INACTIVE
+        scheduleAt: { $lte: new Date() }
       }).lean();
       await Promise.all(feeds.map((feed) => {
         const v = new FeedDto(feed);

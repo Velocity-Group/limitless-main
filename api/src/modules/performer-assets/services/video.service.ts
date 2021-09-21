@@ -90,8 +90,7 @@ export class VideoService {
     try {
       const videos = await this.PerformerVideoModel.find({
         isSchedule: true,
-        scheduledAt: { $lte: new Date() },
-        status: { $ne: VIDEO_STATUS.ACTIVE }
+        scheduledAt: { $lte: new Date() }
       }).lean();
       await Promise.all(videos.map((video) => {
         const v = new VideoDto(video);
