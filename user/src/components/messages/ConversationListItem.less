@@ -63,18 +63,16 @@
     color: @grey-color;
 
     .re-name {
-      max-width: 60%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      max-width: 150px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
       .anticon {
         font-size: 18px;
+        color: @primary-color;
       }
     }
 
     .conversation-time {
-      max-width: 40%;
-      overflow: auto;
       font-size: 10px;
       margin-left: 10px;
       text-transform: lowercase;
