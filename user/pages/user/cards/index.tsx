@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import {
   message, Layout, Spin, Button
 } from 'antd';
-import { PlusCircleOutlined, DeleteOutlined, CreditCardOutlined } from '@ant-design/icons';
+import { DeleteOutlined, CreditCardOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import {
   IUIConfig
@@ -83,21 +83,17 @@ class CardsPage extends PureComponent<IProps> {
               {' '}
               My Card
             </span>
-            {(!cards.length && !loading) && (
-              <Link href="/user/cards/add-card">
-                <a>
-                  {' '}
-                  <PlusCircleOutlined />
-                  {' '}
-                  Add Card
-                </a>
-              </Link>
-            )}
           </div>
           <div className="card-list">
             {!loading && !cards.length && (
               <p>
-                No authorised card was found, please add a payment card.
+                No authorised card was found,
+                {' '}
+                <Link href="/user/cards/add-card">
+                  <a>
+                    click here to add a payment card
+                  </a>
+                </Link>
               </p>
             )}
             {!loading && cards.length > 0 && cards.map((card) => (
