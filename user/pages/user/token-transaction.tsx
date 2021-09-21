@@ -100,23 +100,23 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     const type = [
       {
         key: '',
-        text: 'All'
+        text: 'All type'
+      },
+      {
+        key: 'tip',
+        text: 'Tip'
       },
       {
         key: 'product',
         text: 'Product'
       },
       {
+        key: 'gallery',
+        text: 'Gallery'
+      },
+      {
         key: 'video',
         text: 'Video'
-      },
-      {
-        key: 'monthly_subscription',
-        text: 'Monthly Subscription'
-      },
-      {
-        key: 'yearly_subscription',
-        text: 'Yearly Subscription'
       },
       {
         key: 'feed',
@@ -134,11 +134,11 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
             {' '}
             {ui && ui.siteName}
             {' '}
-            | Token Transactions History
+            | Token Transactions
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Token Transactions History" icon={<HistoryOutlined />} />
+          <PageHeading title="Token Transactions" icon={<HistoryOutlined />} />
           <SearchFilter
             type={type}
             onSubmit={this.handleFilter.bind(this)}

@@ -102,7 +102,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     const type = [
       {
         key: '',
-        text: 'All'
+        text: 'All type'
       },
       {
         key: 'tip',
@@ -141,12 +141,8 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         text: 'Product'
       },
       {
-        key: 'monthly_subscription',
-        text: 'Monthly Subscription'
-      },
-      {
-        key: 'yearly_subscription',
-        text: 'Yearly Subscription'
+        key: 'gallery',
+        text: 'Gallery'
       }
     ];
     return (
@@ -170,7 +166,6 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
                 onSubmit={this.handleFilter.bind(this)}
                 dateRange
               />
-              <div style={{ margin: 20 }} />
               <div className="table-responsive">
                 <PaymentTableList
                   dataSource={paymentList}

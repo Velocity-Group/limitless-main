@@ -129,6 +129,8 @@ const PaymentTableList = ({
             return <Tag color="violet">Gallery</Tag>;
           case 'message':
             return <Tag color="red">Message</Tag>;
+          case 'tip':
+            return <Tag color="green">Tip</Tag>;
           default: return <Tag color="default">{type}</Tag>;
         }
       }

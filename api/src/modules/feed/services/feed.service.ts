@@ -72,7 +72,7 @@ export class FeedService {
     });
     // schedule feed
     this.agenda.define(SCHEDULE_FEED_AGENDA, {}, this.scheduleFeed.bind(this));
-    this.agenda.schedule('1 hours from now', SCHEDULE_FEED_AGENDA, {});
+    this.agenda.schedule('1 hour from now', SCHEDULE_FEED_AGENDA, {});
   }
 
   private async scheduleFeed(job: any, done: any) {
@@ -111,7 +111,7 @@ export class FeedService {
       console.log('Schedule feed error', e);
     } finally {
       job.remove();
-      this.agenda.schedule('1 hours from now', SCHEDULE_FEED_AGENDA, {});
+      this.agenda.schedule('1 hour from now', SCHEDULE_FEED_AGENDA, {});
       typeof done === 'function' && done();
     }
   }
@@ -192,12 +192,8 @@ export class FeedService {
       const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
       if (feedFiles.length) {
         feed.files = feedFiles.map((file) => {
-          let fileUrl = null;
-          const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed);
-          if (canView) {
-            fileUrl = file.getUrl();
-          }
-          if (canView && feed && jwtToken) {
+          let fileUrl = file.getUrl();
+          if (jwtToken) {
             fileUrl = `${fileUrl}?feedId=${feed._id}&token=${jwtToken}`;
           }
           return {

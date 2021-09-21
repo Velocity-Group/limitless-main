@@ -379,66 +379,67 @@ class PerformerProfile extends PureComponent<IProps> {
           />
         </Head>
         <div className="top-profile">
-          <div className="main-container bg-2nd" style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}>
-            <div className="top-banner">
-              <a aria-hidden className="arrow-back" onClick={() => Router.back()}>
-                <ArrowLeftOutlined />
-              </a>
-              <div className="stats-row">
-                <div className="t-user-name">
-                  {performer?.name || 'N/A'}
-                  {' '}
-                  {performer?.verifiedAccount && (
+          <div className="main-container">
+            <div className="bg-2nd" style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}>
+              <div className="top-banner">
+                <a aria-hidden className="arrow-back" onClick={() => Router.back()}>
+                  <ArrowLeftOutlined />
+                </a>
+                <div className="stats-row">
+                  <div className="t-user-name">
+                    {performer?.name || 'N/A'}
+                    {' '}
+                    {performer?.verifiedAccount && (
                     <TickIcon />
-                  )}
-                </div>
-                <div className="tab-stat">
-                  <div className="tab-item">
-                    <span>
-                      {shortenLargeNumber(performer?.stats?.totalFeeds || 0)}
-                      {' '}
-                      <FireOutlined />
-                    </span>
+                    )}
                   </div>
-                  <div className="tab-item">
-                    <span>
-                      {shortenLargeNumber(performer?.stats?.totalVideos || 0)}
-                      {' '}
-                      <VideoCameraOutlined />
-                    </span>
-                  </div>
-                  <div className="tab-item">
-                    <span>
-                      {shortenLargeNumber(performer?.stats?.totalPhotos || 0)}
-                      {' '}
-                      <PictureOutlined />
-                    </span>
-                  </div>
-                  <div className="tab-item">
-                    <span>
-                      {shortenLargeNumber(performer?.stats?.totalProducts || 0)}
-                      {' '}
-                      <ShopOutlined />
-                    </span>
-                  </div>
-                  <div className="tab-item">
-                    <span>
-                      {shortenLargeNumber(performer?.stats?.likes || 0)}
-                      {' '}
-                      <HeartOutlined />
-                    </span>
-                  </div>
-                  <div className="tab-item">
-                    <span>
-                      {shortenLargeNumber(performer?.stats?.subscribers || 0)}
-                      {' '}
-                      <UsergroupAddOutlined />
-                    </span>
+                  <div className="tab-stat">
+                    <div className="tab-item">
+                      <span>
+                        {shortenLargeNumber(performer?.stats?.totalFeeds || 0)}
+                        {' '}
+                        <FireOutlined />
+                      </span>
+                    </div>
+                    <div className="tab-item">
+                      <span>
+                        {shortenLargeNumber(performer?.stats?.totalVideos || 0)}
+                        {' '}
+                        <VideoCameraOutlined />
+                      </span>
+                    </div>
+                    <div className="tab-item">
+                      <span>
+                        {shortenLargeNumber(performer?.stats?.totalPhotos || 0)}
+                        {' '}
+                        <PictureOutlined />
+                      </span>
+                    </div>
+                    <div className="tab-item">
+                      <span>
+                        {shortenLargeNumber(performer?.stats?.totalProducts || 0)}
+                        {' '}
+                        <ShopOutlined />
+                      </span>
+                    </div>
+                    <div className="tab-item">
+                      <span>
+                        {shortenLargeNumber(performer?.stats?.likes || 0)}
+                        {' '}
+                        <HeartOutlined />
+                      </span>
+                    </div>
+                    <div className="tab-item">
+                      <span>
+                        {shortenLargeNumber(performer?.stats?.subscribers || 0)}
+                        {' '}
+                        <UsergroupAddOutlined />
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            {!currentUser.isPerformer && (
+              {!currentUser.isPerformer && (
               <div className="drop-actions">
                 <Dropdown overlay={(
                   <Menu key="menu_actions">
@@ -457,7 +458,8 @@ class PerformerProfile extends PureComponent<IProps> {
                   </a>
                 </Dropdown>
               </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
         <div className="main-profile">

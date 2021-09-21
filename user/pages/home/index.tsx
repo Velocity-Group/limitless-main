@@ -192,7 +192,7 @@ class HomePage extends PureComponent<IProps> {
                         </Link>
                       ))}
                     </div>
-                    {loadingPerformer && <p className="text-center"><Spin /></p>}
+                    {loadingPerformer && <div className="text-center"><Spin /></div>}
                     {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found.</p>}
                   </div>
                   {/* <div className="filter-feed">

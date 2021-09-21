@@ -279,16 +279,16 @@ class FeedCard extends Component<IProps> {
       return;
     }
     try {
-      await this.setState({ submiting: true });
+      await this.setState({ requesting: true });
       await purchaseTokenService.purchaseFeed(feed._id, {});
-      message.success('Unlocked!');
+      message.success('Unlocked successfully!');
       this.setState({ isBought: true });
       handleUpdateBalance({ token: -feed.price });
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
     } finally {
-      this.setState({ submiting: false, openPurchaseModal: false });
+      this.setState({ requesting: false, openPurchaseModal: false });
     }
   }
 
