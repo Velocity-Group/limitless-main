@@ -437,7 +437,7 @@ class FeedCard extends Component<IProps> {
                 onMouseEnter={() => this.setState({ isHovered: true })}
                 onMouseLeave={() => this.setState({ isHovered: false })}
               >
-                {(!isHovered || !canView) ? <LockOutlined /> : <UnlockOutlined />}
+                {(isHovered || canView) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
                 <Button className="secondary" onClick={() => this.setState({ openSubscriptionModal: true })}>
                   Subcribe to unlock
