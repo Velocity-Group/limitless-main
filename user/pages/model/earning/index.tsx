@@ -147,7 +147,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
               checked={isToken}
               unCheckedChildren={(
                 <>
-                  <DollarOutlined />
+                  <DollarOutlined style={{ fontSize: 14 }} />
                   {' '}
                   USD EARNING REPORT
                 </>
@@ -185,7 +185,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
           />
           <div className="stats-earning">
             <Statistic
-              title="Total tokens"
+              title="Total"
               prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
               value={stats?.totalGrossPrice || 0}
               precision={2}

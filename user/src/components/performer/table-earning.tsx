@@ -50,7 +50,7 @@ export class TableListEarning extends PureComponent<IProps> {
             case 'message':
               return <Tag color="pink">Message</Tag>;
           }
-          return <Tag color="#936dc9">{type}</Tag>;
+          return <Tag color="success">{type}</Tag>;
         }
       },
       {
@@ -66,16 +66,13 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Site_Commission',
+        title: 'Commission',
         dataIndex: 'siteCommission',
-        render(commission: number, record: any) {
+        render(commission: number) {
           return (
-            <span style={{ whiteSpace: 'nowrap' }}>
+            <span>
               {commission * 100}
-              % -
-              {' '}
-              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
-              {commission ? (commission * record.grossPrice).toFixed(2) : '0.00'}
+              %
             </span>
           );
         }
@@ -94,7 +91,7 @@ export class TableListEarning extends PureComponent<IProps> {
       },
       {
         title: 'Date',
-        dataIndex: 'updatedAt',
+        dataIndex: 'createdAt',
         sorter: true,
         render(date: Date) {
           return <span style={{ whiteSpace: 'nowrap' }}>{formatDate(date)}</span>;
@@ -138,21 +135,6 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Site_Commission',
-        dataIndex: 'siteCommission',
-        render(commission: number, record: any) {
-          return (
-            <span style={{ whiteSpace: 'nowrap' }}>
-              {commission * 100}
-              % -
-              {' '}
-              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
-              {commission ? (commission * record.grossPrice).toFixed(2) : '0.00'}
-            </span>
-          );
-        }
-      },
-      {
         title: 'NET',
         dataIndex: 'netPrice',
         render(netPrice: number, record: any) {
@@ -165,8 +147,20 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Commission',
+        dataIndex: 'siteCommission',
+        render(commission: number) {
+          return (
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {commission * 100}
+              %
+            </span>
+          );
+        }
+      },
+      {
         title: 'Date',
-        dataIndex: 'updatedAt',
+        dataIndex: 'createdAt',
         sorter: true,
         render(date: Date) {
           return <span>{formatDate(date)}</span>;

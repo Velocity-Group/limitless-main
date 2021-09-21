@@ -168,7 +168,6 @@ class HomePage extends PureComponent<IProps> {
                       e.persist();
                       this.onSearchFeed(e.target.value);
                     }}
-                    allowClear
                   />
                   <a aria-hidden className="open-search" onClick={() => this.setState({ openSearch: !openSearch })}>
                     {!openSearch ? <SearchOutlined /> : <CloseOutlined />}
@@ -192,9 +191,9 @@ class HomePage extends PureComponent<IProps> {
                           </div>
                         </Link>
                       ))}
-                      {loadingPerformer && <p className="text-center"><Spin /></p>}
-                      {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found.</p>}
                     </div>
+                    {loadingPerformer && <p className="text-center"><Spin /></p>}
+                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found.</p>}
                   </div>
                   {/* <div className="filter-feed">
                     <FilterOutlined />

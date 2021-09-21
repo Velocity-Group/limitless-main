@@ -34,17 +34,13 @@ export class EarningDto {
 
   createdAt: Date;
 
-  paidAt?: Date;
+  updatedAt: Date;
+
+  paidAt: Date;
 
   transactionStatus?: string;
 
   isToken?: boolean;
-
-  agentId?: ObjectId | string;
-
-  agentCommission?: number;
-
-  agentPrice?: number;
 
   constructor(data?: Partial<EarningDto>) {
     Object.assign(
@@ -66,6 +62,7 @@ export class EarningDto {
         'siteCommission',
         'referralCommission',
         'createdAt',
+        'updatedAt',
         'paidAt',
         'transactionStatus',
         'isToken'
