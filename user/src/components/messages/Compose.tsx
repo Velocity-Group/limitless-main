@@ -131,6 +131,7 @@ class Compose extends PureComponent<IProps> {
         <div className="grp-icons">
           <div className="grp-file-icon">
             <ImageMessageUpload
+              disabled={disabled}
               headers={uploadHeaders}
               uploadUrl={messageService.getMessageUploadUrl()}
               onUploaded={this.onPhotoUploaded}

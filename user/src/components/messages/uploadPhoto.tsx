@@ -21,6 +21,7 @@ interface IProps {
   onUploaded: Function;
   options?: any;
   messageData?: any;
+  disabled?: boolean;
 }
 
 export class ImageMessageUpload extends PureComponent<IProps, IState> {
@@ -43,7 +44,7 @@ export class ImageMessageUpload extends PureComponent<IProps, IState> {
   };
 
   render() {
-    const { options = {} } = this.props;
+    const { disabled, options = {} } = this.props;
     const { loading } = this.state;
 
     const uploadButton = (
@@ -54,7 +55,7 @@ export class ImageMessageUpload extends PureComponent<IProps, IState> {
     const { headers, uploadUrl, messageData } = this.props;
     return (
       <Upload
-        disabled={loading}
+        disabled={loading || disabled}
         accept={'image/*'}
         name={options.fieldName || 'file'}
         listType="picture-card"

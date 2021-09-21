@@ -156,7 +156,7 @@ class MessageList extends PureComponent<IProps> {
                {!fetching && !message.items.length && <p className="text-center">Let&apos;s talking</p>}
                {!conversation.isSubscribed && (
                <Link href={{ pathname: '/model/profile', query: { username: conversation?.recipientInfo?.username || conversation?.recipientInfo?._id } }} as={`/${conversation?.recipientInfo?.username || conversation?.recipientInfo?._id}`}>
-                 <div className="sub-text">Please subscribe to this model to start the conversation</div>
+                 <div className="sub-text">Please subscribe to this model to start the conversation!</div>
                </Link>
                )}
                {conversation.isBlocked && <div className="sub-text">This model has blocked you!</div>}
