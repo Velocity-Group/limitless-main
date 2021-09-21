@@ -1,10 +1,11 @@
 import {
-  Layout, Button, message, Spin, Modal
+  Layout, Button, message, Spin, Modal, Avatar
 } from 'antd';
 import PageHeading from '@components/common/page-heading';
 import {
   BookOutlined, DollarOutlined, HeartOutlined, ShopOutlined
 } from '@ant-design/icons';
+import { TickIcon } from 'src/icons';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
@@ -220,13 +221,16 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   as={`/model/${product?.performer?.username || product?.performer?._id}`}
                 >
                   <a>
-                    <img
+                    <Avatar
                       alt="performer avatar"
                       src={product?.performer?.avatar || '/static/no-avatar.png'}
                     />
-                    {' '}
                     <div className="owner-name">
-                      <div>{product?.performer?.name || 'N/A'}</div>
+                      <div className="name">
+                        {product?.performer?.name || 'N/A'}
+                        {' '}
+                        {product?.performer?.verifiedAccount && <TickIcon />}
+                      </div>
                       <small>
                         @
                         {product?.performer?.username || 'n/a'}
