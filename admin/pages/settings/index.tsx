@@ -328,7 +328,7 @@ class Settings extends PureComponent {
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>
               {/* <Menu.Item key="recaptcha">Re-Captcha</Menu.Item> */}
-              <Menu.Item key="ant">Ant Media</Menu.Item>
+              {/* <Menu.Item key="ant">Ant Media</Menu.Item> */}
             </Menu>
           </div>
 
