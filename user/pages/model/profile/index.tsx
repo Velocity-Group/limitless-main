@@ -257,7 +257,7 @@ class PerformerProfile extends PureComponent<IProps> {
       return;
     }
     try {
-      await this.setState({ submiting: true });
+      await this.setState({ requesting: true });
       await purchaseTokenService.sendTip(performer?._id, { performerId: performer?._id, price });
       message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
@@ -265,7 +265,7 @@ class PerformerProfile extends PureComponent<IProps> {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
-      this.setState({ submiting: false, openTipModal: false });
+      this.setState({ requesting: false, openTipModal: false });
     }
   }
 

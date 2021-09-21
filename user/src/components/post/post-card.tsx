@@ -35,7 +35,6 @@ import { IFeed, IUser } from '../../interfaces';
 import './index.less';
 
 interface IProps {
-  logo: string;
   feed: IFeed;
   onDelete?: Function;
   user: IUser;
@@ -260,7 +259,7 @@ class FeedCard extends Component<IProps> {
       return;
     }
     try {
-      await this.setState({ submiting: true });
+      await this.setState({ requesting: true });
       await purchaseTokenService.sendTip(feed?.performer?._id, { performerId: feed?.performer?._id, price });
       message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
@@ -268,7 +267,7 @@ class FeedCard extends Component<IProps> {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
     } finally {
-      this.setState({ submiting: false, openTipModal: false });
+      this.setState({ requesting: false, openTipModal: false });
     }
   }
 
@@ -321,7 +320,7 @@ class FeedCard extends Component<IProps> {
 
   render() {
     const {
-      logo, feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment
+      feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment
     } = this.props;
     const { performer } = feed;
     const { requesting: commenting } = comment;
@@ -434,32 +433,31 @@ class FeedCard extends Component<IProps> {
               {/* eslint-disable-next-line no-nested-ternary */}
               <div className="feed-bg" style={feed.thumbnailUrl && canView ? { backgroundImage: `url(${feed.thumbnailUrl})` } : feed.thumbnailUrl && !canView ? { backgroundImage: `url(${feed.thumbnailUrl})`, filter: 'blur(20px)' } : { backgroundImage: '/static/leaf.jpg', filter: 'blur(2px)' }} />
               <div
-                className="text-center"
-                style={{ cursor: 'pointer' }}
+                className="lock-middle"
                 onMouseEnter={() => this.setState({ isHovered: true })}
                 onMouseLeave={() => this.setState({ isHovered: false })}
               >
-                {!isHovered ? <LockOutlined /> : <UnlockOutlined />}
+                {(!isHovered || !canView) ? <LockOutlined /> : <UnlockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
-                <p aria-hidden onClick={() => this.setState({ openSubscriptionModal: true })}>
-                  Subcribe to see model post
-                </p>
+                <Button className="secondary" onClick={() => this.setState({ openSubscriptionModal: true })}>
+                  Subcribe to unlock
+                </Button>
                 )}
                 {feed.isSale && !isBought && (
-                <p aria-hidden onClick={() => this.setState({ openPurchaseModal: true })}>
-                  Unlock post by
+                <Button className="secondary" onClick={() => this.setState({ openPurchaseModal: true })}>
+                  Pay
                   {' '}
                   <img alt="coin" src="/static/coin-ico.png" width="15px" />
-                  {feed.price || 0}
-                </p>
+                  {feed.price.toFixed(2)}
+                  {' '}
+                  to unlock
+                </Button>
                 )}
                 {feed.teaser && (
-                <div className="text-center">
                   <Button type="link" onClick={() => this.setState({ openTeaser: true })}>
                     <EyeOutlined />
-                    View teaser video
+                    View teaser
                   </Button>
-                </div>
                 )}
               </div>
                 {feed.files && feed.files.length > 0 && (
@@ -632,10 +630,9 @@ class FeedCard extends Component<IProps> {
           <VideoPlayer
             key={feed?.teaser?._id}
             {...{
-              autoplay: false,
+              autoplay: true,
               controls: true,
               playsinline: true,
-              poster: feed?.thumbnailUrl || logo,
               sources: [
                 {
                   src: feed?.teaser?.url,
@@ -654,7 +651,6 @@ class FeedCard extends Component<IProps> {
 const mapStates = (state: any) => {
   const { commentMapping, comment } = state.comment;
   return {
-    logo: state.ui.logo,
     user: state.user.current,
     commentMapping,
     comment

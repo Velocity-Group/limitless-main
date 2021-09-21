@@ -3,9 +3,10 @@ import {
   HeartOutlined, CommentOutlined, LockOutlined, UnlockOutlined,
   FileImageOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
+import { Button } from 'antd';
 import Link from 'next/link';
 import { videoDuration, shortenLargeNumber } from '@lib/index';
-import { IFeed } from '../../interfaces';
+import { IFeed } from 'src/interfaces';
 import './index.less';
 
 interface IProps {
@@ -29,6 +30,8 @@ export class FeedGridCard extends PureComponent<IProps> {
             <div className="card-bg" style={feed.thumbnailUrl && canView ? { backgroundImage: `url(${feed.thumbnailUrl})` } : feed.thumbnailUrl && !canView ? { backgroundImage: `url(${feed.thumbnailUrl})`, filter: 'blur(20px)' } : { backgroundImage: '/static/leaf.jpg', filter: 'blur(2px)' }} />
             <div className="card-middle">
               {canView ? <UnlockOutlined /> : <LockOutlined />}
+              {(!feed.isSale && !feed.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}
+              {(feed.isSale && !feed.isBought) && <Button type="link">Pay now to unlock</Button>}
             </div>
             <div className="card-bottom">
               <div className="stats">
