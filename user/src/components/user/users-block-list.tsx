@@ -29,7 +29,7 @@ const UsersBlockList = ({
       dataIndex: 'targetInfo',
       key: 'targetInfo',
       render: (targetInfo: any) => (
-        <span>{targetInfo.name || targetInfo.username || 'N/A'}</span>
+        <span>{targetInfo?.name || targetInfo?.username || 'N/A'}</span>
       )
     },
     {
@@ -48,7 +48,7 @@ const UsersBlockList = ({
       )
     },
     {
-      title: 'Blocked at',
+      title: 'Date',
       key: 'createdAt',
       dataIndex: 'createdAt',
       render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>,

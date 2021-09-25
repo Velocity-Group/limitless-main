@@ -203,6 +203,20 @@ class HomePage extends PureComponent<IProps> {
                     <Button disabled={loadingFeed} className={orientation === 'couple' ? 'active' : ''} onClick={() => this.onFilterFeed('couple')}>Couples</Button>
                     <Button disabled={loadingFeed} className={orientation === 'transgender' ? 'active' : ''} onClick={() => this.onFilterFeed('transgender')}>Trans</Button>
                   </div> */}
+                  {!loadingFeed && !totalFeeds && (
+                    <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
+                      <Alert
+                        type="warning"
+                        message={(
+                          <a href="/model">
+                            <SearchOutlined />
+                            {' '}
+                            Find someone to follow
+                          </a>
+                        )}
+                      />
+                    </div>
+                  )}
                   <ScrollListFeed
                     items={feeds}
                     canLoadmore={feeds && feeds.length < totalFeeds}
@@ -210,7 +224,6 @@ class HomePage extends PureComponent<IProps> {
                     onDelete={this.onDeleteFeed.bind(this)}
                     loadMore={this.loadmoreFeeds.bind(this)}
                   />
-                  {!loadingFeed && !totalFeeds && <Alert message={<a href="/model">Find someone to follow</a>} />}
                 </div>
                 <div className="right-container">
                   <div className="suggestion-bl">

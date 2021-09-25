@@ -3,7 +3,7 @@ import { connect } from 'react-redux'; import {
   Modal, message
 } from 'antd';
 import { sendMessage, sentFileSuccess } from '@redux/message/actions';
-import { SmileOutlined, SendOutlined, DollarOutlined } from '@ant-design/icons';
+import { SmileOutlined, SendOutlined } from '@ant-design/icons';
 import { ImageMessageUpload } from '@components/messages/uploadPhoto';
 import { authService, messageService, purchaseTokenService } from '@services/index';
 import { TipPerformerForm } from '@components/performer/tip-form';
@@ -123,11 +123,11 @@ class Compose extends PureComponent<IProps> {
             <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
           </div>
         </div>
-        <div className="grp-icons">
+        {/* <div className="grp-icons">
           <div aria-hidden className="grp-emotions" onClick={() => this.setState({ openTipModal: true })}>
             <DollarOutlined />
           </div>
-        </div>
+        </div> */}
         <div className="grp-icons">
           <div className="grp-file-icon">
             <ImageMessageUpload

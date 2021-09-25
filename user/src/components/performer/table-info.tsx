@@ -20,7 +20,7 @@ export class PerformerInfo extends PureComponent<IProps> {
             <Descriptions className="performer-info">
               {performer?.country && (
                 <Descriptions.Item key="country" label={null}>
-                  <img alt="performer-country" src={country?.flag} height="20px" />
+                  <img alt="flag" src={country?.flag} width="25px" />
                   &nbsp;
                   {country?.name}
                 </Descriptions.Item>

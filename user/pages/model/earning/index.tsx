@@ -165,9 +165,9 @@ class EarningPage extends PureComponent<IProps, IStates> {
           <SearchFilter
             type={isToken ? [
               { key: '', text: 'All type' },
-              { key: 'private_chat', text: 'Private Chat' },
-              { key: 'group_chat', text: 'Group Chat' },
-              { key: 'public_chat', text: 'Public Chat' },
+              // { key: 'private_chat', text: 'Private Chat' },
+              // { key: 'group_chat', text: 'Group Chat' },
+              // { key: 'public_chat', text: 'Public Chat' },
               { key: 'product', text: 'Product' },
               { key: 'gallery', text: 'Gallery' },
               { key: 'feed', text: 'Post' },

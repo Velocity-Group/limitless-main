@@ -23,8 +23,7 @@ import { CurrentUser, Roles } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
 import { MessageService, NotificationMessageService } from '../services';
 import {
-  MessageListRequest, NotificationMessageReadPayload,
-  MessageCreatePayload, PrivateMessageCreatePayload
+  MessageListRequest, MessageCreatePayload, PrivateMessageCreatePayload
 } from '../payloads';
 import { MessageDto } from '../dtos';
 

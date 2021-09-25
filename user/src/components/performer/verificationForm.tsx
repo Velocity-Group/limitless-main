@@ -115,7 +115,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
                   <a title="Click to view" href={documentImage} rel="noreferrer" target="_blank">
                     <img alt="id-img" src={documentImage} style={{ margin: 5, height: '140px' }} />
                   </a>
-                ) : <img src="/static/img-id-man.png" height="140px" alt="id-img" />}
+                ) : <img src="/static/holding-id.jpeg" height="140px" alt="holding-id" />}
               </div>
               {documentImgProgress > 0 && <Progress percent={documentImgProgress} />}
             </Form.Item>

@@ -45,7 +45,6 @@ class RegisterPerformer extends PureComponent<IProps> {
   documentVerificationFile = null;
 
   state = {
-    selectedGender: 'male',
     isLoading: false
   };
 
@@ -119,16 +118,7 @@ class RegisterPerformer extends PureComponent<IProps> {
 
   render() {
     const { registerPerformerData = { requesting: false }, ui, settings } = this.props;
-    const { selectedGender, isLoading } = this.state;
-
-    const placeholderIdImg = () => {
-      switch (selectedGender) {
-        case 'male': return '/static/img-id-man.png';
-        case 'female': return '/static/img-id-woman.png';
-        case 'transgender': return '/static/img-id-man.png';
-        default: return '/static/img-id-man.png';
-      }
-    };
+    const { isLoading } = this.state;
 
     return (
       <Layout>
@@ -317,7 +307,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                         rules={[{ required: true, message: 'Please select your gender' }]}
                         hasFeedback
                       >
-                        <Select onChange={(val) => this.setState({ selectedGender: val })}>
+                        <Select>
                           <Option value="male" key="male">Male</Option>
                           <Option value="female" key="female">Female</Option>
                           <Option value="transgender" key="trans">Trans</Option>
@@ -381,7 +371,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                     >
                       <div className="id-block">
                         <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} />
-                        <img alt="identity-img" className="img-id" src="/static/front-id.jpeg" />
+                        <img alt="id-img" className="img-id" src="/static/front-id.jpeg" />
                       </div>
                     </Form.Item>
                     <Form.Item
@@ -392,7 +382,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                     >
                       <div className="id-block">
                         <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'documentFile')} />
-                        <img alt="identity-img" className="img-id" src={placeholderIdImg()} />
+                        <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpeg" />
                       </div>
                     </Form.Item>
                   </div>

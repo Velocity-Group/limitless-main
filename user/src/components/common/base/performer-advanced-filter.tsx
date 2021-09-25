@@ -73,7 +73,7 @@ const bodyTypes = [
 
 const ages = [
   { key: '', text: 'All ages' },
-  { key: '14_16', text: '14 to 16' },
+  { key: '1_16', text: 'Under 17' },
   { key: '17_19', text: '17 to 19' },
   { key: '20_22', text: '20 to 22' },
   { key: '23_25', text: '23 to 25' },
@@ -109,23 +109,13 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
   }
 
   async getHeights() {
-    try {
-      const resp = await (await utilsService.heightList()).data;
-      resp && this.setState({ heights: resp });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
-    }
+    const resp = await (await utilsService.heightList()).data;
+    resp && this.setState({ heights: resp });
   }
 
   async getWeights() {
-    try {
-      const resp = await (await utilsService.weightList()).data;
-      resp && this.setState({ weights: resp });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
-    }
+    const resp = await (await utilsService.weightList()).data;
+    resp && this.setState({ weights: resp });
   }
 
   render() {

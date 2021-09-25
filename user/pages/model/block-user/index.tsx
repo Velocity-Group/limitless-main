@@ -110,7 +110,7 @@ class blockPage extends PureComponent<IProps> {
           <PageHeading icon={<BlockOutlined />} title="Blacklist" />
           <div className="block-user">
             <Button className="" type="primary" onClick={() => this.setState({ openBlockModal: true })}>
-              Click here to block
+              Wanna block someone, click here!
             </Button>
           </div>
           <div className="users-blocked-list">

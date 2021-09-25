@@ -60,7 +60,7 @@ class Performers extends PureComponent<IProps> {
     }
   }
 
-  async pageChanged(page: number) {
+  pageChanged = async (page: number) => {
     await this.setState({ offset: page - 1 });
     this.getPerformers();
   }

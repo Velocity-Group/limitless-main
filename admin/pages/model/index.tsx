@@ -14,13 +14,10 @@ import {
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import { BreadcrumbComponent, DropdownAction } from '@components/common';
-import { enquireScreen, unenquireScreen } from 'enquire-js';
 import { IPerformer } from 'src/interfaces';
 import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
 
 export default class Performers extends PureComponent<any> {
-  enquireHandler: any;
-
   _selectedUser: IPerformer;
 
   state = {
@@ -31,24 +28,11 @@ export default class Performers extends PureComponent<any> {
     filter: {} as any,
     sortBy: 'updatedAt',
     sort: 'desc',
-    isMobile: false,
     openChangeTokenLogModal: false
   };
 
   componentDidMount() {
-    this.enquireHandler = enquireScreen((mobile) => {
-      const { isMobile } = this.state;
-      if (isMobile !== mobile) {
-        this.setState({
-          isMobile: mobile
-        });
-      }
-    });
     this.search();
-  }
-
-  componentWillUnmount() {
-    unenquireScreen(this.enquireHandler);
   }
 
   async handleTableChange(pagination, filters, sorter) {
@@ -115,25 +99,21 @@ export default class Performers extends PureComponent<any> {
 
   render() {
     const {
-      list, searching, pagination, isMobile, openChangeTokenLogModal
+      list, searching, pagination, openChangeTokenLogModal
     } = this.state;
     const onDelete = this.handleDelete.bind(this);
     // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
-    const columns = !isMobile ? [
+    const columns = [
       {
-        title: 'Display_name',
+        title: 'Display name',
         dataIndex: 'name',
         render(name: string) {
-          return <span style={{ width: '60px' }}>{name}</span>;
+          return <span>{name}</span>;
         }
       },
       {
         title: 'Username',
         dataIndex: 'username'
-      },
-      {
-        title: 'Email',
-        dataIndex: 'email'
       },
       {
         title: 'Status',
@@ -145,13 +125,13 @@ export default class Performers extends PureComponent<any> {
             case 'inactive':
               return <Tag color="red">Deactive</Tag>;
             case 'pending-email-confirmation':
-              return <Tag color="default">Pending Email</Tag>;
+              return <Tag color="default">Pending email verification</Tag>;
             default: return <Tag color="default">{status}</Tag>;
           }
         }
       },
       {
-        title: 'Verified_ID',
+        title: 'Verified ID',
         dataIndex: 'verifiedDocument',
         render(verifiedDocument) {
           switch (verifiedDocument) {
@@ -164,8 +144,8 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'CreatedAt',
-        dataIndex: 'createdAt',
+        title: 'Last update',
+        dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
           return <span>{formatDate(date)}</span>;
@@ -319,115 +299,8 @@ export default class Performers extends PureComponent<any> {
           );
         }
       }
-    ] : [
-      {
-        title: 'Display name',
-        dataIndex: 'name'
-      },
-      {
-        title: 'Username',
-        dataIndex: 'username'
-      },
-      {
-        title: 'Email',
-        dataIndex: 'email'
-      },
-      {
-        title: 'Status',
-        dataIndex: 'status',
-        render(status) {
-          switch (status) {
-            case 'active':
-              return <Tag color="green">Active</Tag>;
-            case 'inactive':
-              return <Tag color="red">Deactive</Tag>;
-            case 'pending-email-confirmation':
-              return <Tag color="default">Pending Email</Tag>;
-            default: return <Tag color="default">{status}</Tag>;
-          }
-        }
-      },
-      {
-        title: '#',
-        dataIndex: '_id',
-        render(id: string, record) {
-          return (
-            <DropdownAction
-              menuOptions={[
-                {
-                  key: 'update',
-                  name: 'Update',
-                  children: (
-                    <Link
-                      href={{
-                        pathname: '/model/update',
-                        query: { id }
-                      }}
-                      as={`/model/update?id=${id}`}
-                    >
-                      <a>
-                        <EditOutlined />
-                        {' '}
-                        Update
-                      </a>
-                    </Link>
-                  )
-                },
-                {
-                  key: 'delete',
-                  name: 'Delete',
-                  children: (
-                    <a aria-hidden onClick={() => onDelete(record)}>
-                      <DeleteOutlined />
-                      {' '}
-                      Delete
-                    </a>
-                  )
-                },
-                {
-                  key: 'posts',
-                  name: 'Posts',
-                  children: (
-                    <Link
-                      href={{
-                        pathname: '/feed',
-                        query: { performerId: id }
-                      }}
-                      as={`/feed?performerId=${id}`}
-                    >
-                      <a>
-                        <FireOutlined />
-                        {' '}
-                        All Posts
-                      </a>
-                    </Link>
-                  )
-                },
-                {
-                  key: 'product',
-                  name: 'Products',
-                  children: (
-                    <Link
-                      href={{
-                        pathname: '/product',
-                        query: { performerId: id }
-                      }}
-                      as={`/product?performerId=${id}`}
-                    >
-                      <a>
-                        <SkinOutlined />
-                        {' '}
-                        Products
-                      </a>
-                    </Link>
-                  )
-                }
-              ]}
-            />
-          );
-        }
-      }
     ];
+
     return (
       <>
         <Head>

@@ -59,7 +59,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
             <>
               for $
               {' '}
-              {type === 'monthly' ? performer.monthlyPrice.toFixed(2) : type === 'monthly' ? performer.yearlyPrice.toFixed(2) : ''}
+              {type === 'monthly' ? performer.monthlyPrice.toFixed(2) : performer.yearlyPrice.toFixed(2)}
             </>
           ) : (
             <>
