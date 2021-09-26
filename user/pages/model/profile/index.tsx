@@ -379,7 +379,7 @@ class PerformerProfile extends PureComponent<IProps> {
           />
         </Head>
         <div className="top-profile">
-          <div className="main-container">
+          <div className="main-container" style={{ height: '100%' }}>
             <div className="bg-2nd" style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}>
               <div className="top-banner">
                 <a aria-hidden className="arrow-back" onClick={() => Router.back()}>
