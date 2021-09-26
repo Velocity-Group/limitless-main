@@ -232,7 +232,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
               <Input placeholder="user1, john99,..." />
             </Form.Item>
           </Col>
-          <Col lg={24} md={24} xs={24}>
+          <Col lg={12} md={12} xs={12}>
             <Form.Item
               name="email"
               label={(
@@ -356,6 +356,11 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 format="DD/MM/YYYY"
                 disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(14, 'year').endOf('day')}
               />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item name="bio" label="Bio">
+              <TextArea rows={3} placeholder="Tell people something about you..." />
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
@@ -520,11 +525,6 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                   Small
                 </Option>
               </Select>
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item name="bio" label="Bio">
-              <TextArea rows={3} placeholder="Tell user something about you..." />
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
