@@ -69,7 +69,7 @@ export default class UploadList extends PureComponent<IProps> {
           >
             <PlusOutlined />
             {' '}
-            Add files
+            {type === 'photo' ? 'photos' : type === 'video' ? 'video' : 'files'}
           </Upload>
         </div>
       </div>
