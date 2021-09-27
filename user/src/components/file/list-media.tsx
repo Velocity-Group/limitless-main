@@ -1,7 +1,7 @@
 import { PureComponent } from 'react';
 import { DeleteOutlined, PlusOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import {
-  Progress, Button, Upload, Tooltip
+  Progress, Button, Upload, Tooltip, Image
 } from 'antd';
 import '../post/index.less';
 
@@ -28,8 +28,8 @@ export default class UploadList extends PureComponent<IProps> {
           <div className="f-upload-item" key={file._id || file.uid}>
             <div className="f-upload-thumb">
               {/* eslint-disable-next-line no-nested-ternary */}
-              {(file.type.includes('feed-photo') || file.type.includes('blog-photo') || file.type.includes('image'))
-                ? <img alt="img" src={file.url ? file.url : file.thumbnail} width="100%" />
+              {(file.type.includes('feed-photo') || file.type.includes('image'))
+                ? <Image placeholder preview={false} alt="img" src={file.url ? file.url : file.thumbnail} width="100%" />
                 : file.type.includes('video') ? (
                   <span className="f-thumb-vid">
                     <PlayCircleOutlined />
@@ -67,7 +67,10 @@ export default class UploadList extends PureComponent<IProps> {
           >
             <PlusOutlined />
             {' '}
-            Add files
+            Add
+            {' '}
+            {/* eslint-disable-next-line no-nested-ternary */}
+            {type === 'photo' ? 'photos' : type === 'video' ? 'video' : 'files'}
           </Upload>
         </div>
       </div>

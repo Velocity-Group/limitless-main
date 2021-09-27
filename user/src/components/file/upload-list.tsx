@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import {
   DeleteOutlined, PictureOutlined
 } from '@ant-design/icons';
-import { Progress } from 'antd';
+import { Progress, Image } from 'antd';
 
 interface IProps {
   remove: Function;
@@ -54,7 +54,7 @@ export default class UploadList extends PureComponent<IProps> {
             <div className="photo-upload-list">
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <div className="photo-thumb">
-                  {file._id ? <img src={file?.photo?.thumbnails[0]} alt="thumb" /> : file.uid ? <img alt="thumb" src={previews[file?.uid]} /> : <PictureOutlined />}
+                  {file._id ? <Image preview={false} placeholder src={file?.photo?.thumbnails[0]} alt="thumb" /> : file.uid ? <Image preview={false} placeholder alt="thumb" src={previews[file?.uid]} /> : <PictureOutlined />}
                 </div>
                 <div>
                   <p>{`${file?.name || file?.title} | ${((file?.size || file?.photo?.size) / (1024 * 1024)).toFixed(2)} MB`}</p>
