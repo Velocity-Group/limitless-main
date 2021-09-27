@@ -1,6 +1,6 @@
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { IPerformer } from 'src/interfaces';
-import PerformerCard from '@components/performer/card';
+import PerformerCard from '@components/performer/grid-card';
 import {
   Row, Col, Alert, Spin
 } from 'antd';
@@ -27,7 +27,7 @@ const UserPerformerBookmarks = ({
       <Row>
         {performers.length > 0
           && performers.map((p: any) => (
-            <Col xs={12} sm={12} md={8} lg={8} key={p._id}>
+            <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
               <PerformerCard performer={p} />
             </Col>
           ))}

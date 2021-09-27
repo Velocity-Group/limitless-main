@@ -1,15 +1,15 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Row, Col, Spin, Button, Modal, Tabs, Avatar
+  Layout, message, Row, Col, Spin, Button, Modal, Tabs, Avatar, Tooltip
 } from 'antd';
 import {
-  EyeOutlined, PictureOutlined, CalendarOutlined
+  EyeOutlined, PictureOutlined, CalendarOutlined, BookOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import {
-  galleryService, paymentService, photoService, purchaseTokenService
+  galleryService, paymentService, photoService, purchaseTokenService, reactionService
 } from '@services/index';
 import { getRelatedGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
@@ -67,7 +67,9 @@ class GalleryViewPage extends PureComponent<IProps> {
     fetching: false,
     photos: [],
     isBought: false,
+    isBookmarked: false,
     submiting: false,
+    requesting: false,
     openPurchaseModal: false,
     openSubscriptionModal: false
   };
@@ -78,8 +80,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       Router.back();
       return;
     }
-    this.setState({ isBought: gallery.isBought });
-    this.getPhotos();
+    this.handleUpdateState();
     getRelatedHandler({
       performerId: gallery.performerId,
       excludedId: gallery._id,
@@ -91,7 +92,7 @@ class GalleryViewPage extends PureComponent<IProps> {
   componentDidUpdate(prevProps) {
     const { gallery, getRelatedGalleries: getRelatedHandler } = this.props;
     if (prevProps?.gallery?._id !== gallery?._id) {
-      this.getPhotos();
+      this.handleUpdateState();
       getRelatedHandler({
         performerId: gallery.performerId,
         excludedId: gallery._id,
@@ -99,6 +100,39 @@ class GalleryViewPage extends PureComponent<IProps> {
         limit: 24
       });
     }
+  }
+
+  async handleBookmark() {
+    const { isBookmarked } = this.state;
+    const { gallery } = this.props;
+    try {
+      await this.setState({ requesting: true });
+      if (!isBookmarked) {
+        await reactionService.create({
+          objectId: gallery._id,
+          action: 'book_mark',
+          objectType: 'gallery'
+        });
+        this.setState({ isBookmarked: true, requesting: false });
+      } else {
+        await reactionService.delete({
+          objectId: gallery._id,
+          action: 'book_mark',
+          objectType: 'gallery'
+        });
+        this.setState({ isBookmarked: false, requesting: false });
+      }
+    } catch (e) {
+      const error = await e;
+      message.error(error.message || 'Error occured, please try again later');
+      this.setState({ requesting: false });
+    }
+  }
+
+  handleUpdateState() {
+    const { gallery } = this.props;
+    this.setState({ isBought: gallery.isBought, isBookmarked: gallery.isBookMarked });
+    this.getPhotos();
   }
 
   async getPhotos() {
@@ -139,13 +173,15 @@ class GalleryViewPage extends PureComponent<IProps> {
       return;
     }
     try {
+      await this.setState({ requesting: true });
       await (await purchaseTokenService.purchaseGallery(gallery._id, { })).data;
       message.success('Gallery is unlocked!');
       handleUpdateBalance({ token: gallery.price });
-      this.setState({ isBought: true, openPurchaseModal: false });
+      this.setState({ isBought: true, openPurchaseModal: false, requesting: false });
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
+      this.setState({ requesting: false });
     }
   }
 
@@ -194,7 +230,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
     }
     const {
-      fetching, photos, total, isBought, submiting, openPurchaseModal, openSubscriptionModal
+      fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal, isBookmarked
     } = this.state;
     const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && gallery?.isSubscribed);
     return (
@@ -241,12 +277,13 @@ class GalleryViewPage extends PureComponent<IProps> {
               {!canview && (
                 <div className="text-center" style={{ margin: '20px 0' }}>
                   {gallery?.isSale && !isBought && (
-                  <Button disabled={!user || !user._id} className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
-                    UNLOCK CONTENT BY
-                    {' '}
+                  <Button disabled={!user || !user._id || requesting} className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
+                    PAY&nbsp;
                     <img alt="coin" src="/static/coin-ico.png" width="20px" />
                     {' '}
                     {(gallery?.price || 0).toFixed(2)}
+                    {' '}
+                    TO UNLOCK
                   </Button>
                   )}
                   {!gallery?.isSale && !gallery?.isSubscribed && (
@@ -311,7 +348,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                     pathname: '/model/profile',
                     query: { username: gallery?.performer?.username || gallery?.performer?._id }
                   }}
-                  as={`/model/${gallery?.performer?.username || gallery?.performer?._id}`}
+                  as={`/${gallery?.performer?.username || gallery?.performer?._id}`}
                 >
                   <a>
                     <div className="o-w-ner">
@@ -322,7 +359,6 @@ class GalleryViewPage extends PureComponent<IProps> {
                       <div className="owner-name">
                         <div className="name">
                           {gallery?.performer?.name || 'N/A'}
-                          {' '}
                           {gallery?.performer?.verifiedAccount && <TickIcon />}
                         </div>
                         <small>
@@ -333,20 +369,18 @@ class GalleryViewPage extends PureComponent<IProps> {
                     </div>
                   </a>
                 </Link>
-                {/* <div className="act-btns">
-                  <button
-                    type="button"
-                    className="react-btn"
-                  >
-                    <HeartOutlined />
-                  </button>
-                  <button
-                    type="button"
-                    className="react-btn"
-                  >
-                    <BookOutlined />
-                  </button>
-                </div> */}
+                <div className="act-btns">
+                  <Tooltip title={isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                    <button
+                      type="button"
+                      className={isBookmarked ? 'react-btn active' : 'react-btn'}
+                      disabled={submiting}
+                      onClick={this.handleBookmark.bind(this)}
+                    >
+                      <BookOutlined />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
             </div>
           </div>

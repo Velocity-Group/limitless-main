@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable no-prototype-builtins */
 import {
   Layout, Tabs, message, Button, Spin, Tooltip, Avatar
@@ -408,6 +407,7 @@ class VideoViewPage extends PureComponent<IProps> {
                     </div>
                   )}
                   <div className="vid-exl-group">
+                    {/* eslint-disable-next-line no-nested-ternary */}
                     <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
                     <div className="text-center">
                       {video.isSale && !isBought && (

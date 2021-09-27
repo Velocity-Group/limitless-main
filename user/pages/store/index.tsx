@@ -1,9 +1,9 @@
 import {
-  Layout, Button, message, Spin, Modal, Avatar
+  Layout, Button, message, Spin, Modal, Avatar, Tooltip
 } from 'antd';
 import PageHeading from '@components/common/page-heading';
 import {
-  BookOutlined, DollarOutlined, HeartOutlined, ShopOutlined
+  BookOutlined, DollarOutlined, ShopOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { PureComponent } from 'react';
@@ -239,13 +239,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   </a>
                 </Link>
               </div>
-              {/* <div className="act-btns">
-                <button
-                  type="button"
-                  className="react-btn"
-                >
-                  <HeartOutlined />
-                </button>
+              <div className="act-btns">
                 <Tooltip title={isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
                   <button
                     type="button"
@@ -256,7 +250,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                     <BookOutlined />
                   </button>
                 </Tooltip>
-              </div> */}
+              </div>
             </div>
           </div>
         </div>
