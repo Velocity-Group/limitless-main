@@ -1,12 +1,10 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { PureComponent, Fragment } from 'react';
 import { Layout, Menu, Avatar } from 'antd';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import './header.less';
 import { IUser } from 'src/interfaces';
+import './header.less';
 
 interface IProps {
   collapsed?: boolean;
@@ -28,9 +26,8 @@ class Header extends PureComponent<IProps> {
               <span style={{ color: '#999', marginRight: 4 }}>
                 <span>Hi,</span>
               </span>
-              {currentUser.firstName && currentUser.lastName ? <span>{`${currentUser.firstName} ${currentUser.lastName}`}</span>
-                : <span>{currentUser.name}</span>}
-              <Avatar style={{ marginLeft: 8 }} src={currentUser.avatar} />
+              <span>{currentUser?.name || currentUser?.username || 'Admin'}</span>
+              <Avatar style={{ marginLeft: 8 }} src={currentUser?.avatar} />
             </>
           )}
         >
@@ -51,6 +48,7 @@ class Header extends PureComponent<IProps> {
     return (
       <Layout.Header className="header" id="layoutHeader">
         <div
+          aria-hidden
           className="button"
           onClick={onCollapseChange.bind(this, !collapsed)}
         >

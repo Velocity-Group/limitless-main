@@ -204,15 +204,9 @@ class Settings extends PureComponent {
         );
       case 'boolean':
         return (
-          <div className="ant-row ant-form-item ant-form-item-with-help" key={setting._id}>
-            <div className="ant-col ant-col-4 ant-form-item-label">
-              <label>{setting.name}</label>
-            </div>
-            <div className="ant-col ant-col-16 ant-form-item-control">
-              <Switch defaultChecked={setting.value} onChange={(val) => this.setVal(setting.key, val)} />
-              <div className="ant-form-item-explain">{setting.description}</div>
-            </div>
-          </div>
+          <Form.Item label={setting.name} key={setting._id} help={setting.description} extra={setting.extra} valuePropName="checked">
+            <Switch defaultChecked={setting.value} onChange={(val) => this.setVal(setting.key, val)} />
+          </Form.Item>
         );
       case 'mixed':
         return (
