@@ -67,10 +67,10 @@ export class AccountForm extends PureComponent<IProps> {
         {...layout}
         name="form-performer"
         onFinish={onFinish.bind(this)}
-        onFinishFailed={() => message.error('Please complete the required fields in tab basic info')}
+        onFinishFailed={() => message.error('Please complete the required fields')}
         validateMessages={validateMessages}
         initialValues={
-          performer ? { ...performer, dateOfBirth: moment(performer?.dateOfBirth) || '' } : ({
+          performer ? { ...performer, dateOfBirth: moment(performer?.dateOfBirth) || '' } : {
             country: 'US',
             status: 'active',
             gender: 'male',
@@ -81,7 +81,7 @@ export class AccountForm extends PureComponent<IProps> {
             verifiedEmail: false,
             verifiedAccount: false,
             verifiedDocument: false
-          })
+          }
         }
       >
         <Row>
@@ -285,7 +285,12 @@ export class AccountForm extends PureComponent<IProps> {
         )} */}
           {!performer && [
             <Col xs={12} md={12}>
-              <Form.Item key="password" name="password" label="Password" rules={[{ required: true }, { min: 6 }]}>
+              <Form.Item
+                key="password"
+                name="password"
+                label="Password"
+                rules={[{ required: true, message: 'Please enter your password' }, { min: 6, message: 'Password must be at least 6 characters' }]}
+              >
                 <Input.Password placeholder="Password" />
               </Form.Item>
             </Col>,
@@ -294,7 +299,7 @@ export class AccountForm extends PureComponent<IProps> {
                 key="rePassword"
                 name="rePassword"
                 label="Confirm password"
-                rules={[{ required: true }, { min: 6 }]}
+                rules={[{ required: true, message: 'Please confirm your password' }, { min: 6, message: 'Password must be at least 6 characters' }]}
               >
                 <Input.Password placeholder="Confirm password" />
               </Form.Item>
