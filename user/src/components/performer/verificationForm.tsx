@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Form, Button, Row, Col, message, Progress
+  Form, Button, Row, Col, message, Progress, Image
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import { ImageUpload } from '@components/file';
@@ -93,9 +93,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'idFile')} />
                 {idImage ? (
-                  <a title="Click to view" href={idImage} rel="noreferrer" target="_blank">
-                    <img alt="id-img" src={idImage} style={{ margin: 5, height: '140px' }} />
-                  </a>
+                  <Image alt="id-img" src={idImage} style={{ margin: 5, height: '140px' }} />
                 ) : <img src="/static/front-id.jpeg" height="140px" alt="id-img" />}
               </div>
               {idImgProgress > 0 && <Progress percent={idImgProgress} />}
@@ -112,9 +110,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'documentFile')} />
                 {documentImage ? (
-                  <a title="Click to view" href={documentImage} rel="noreferrer" target="_blank">
-                    <img alt="id-img" src={documentImage} style={{ margin: 5, height: '140px' }} />
-                  </a>
+                  <Image alt="id-img" src={documentImage} style={{ margin: 5, height: '140px' }} />
                 ) : <img src="/static/holding-id.jpeg" height="140px" alt="holding-id" />}
               </div>
               {documentImgProgress > 0 && <Progress percent={documentImgProgress} />}
