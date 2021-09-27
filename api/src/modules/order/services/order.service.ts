@@ -150,7 +150,7 @@ export class OrderService {
     if (!order) {
       throw new EntityNotFoundException();
     }
-    await this.orderModel.updateOne({ _id: id }, data, { new: true });
+    await this.orderModel.updateOne({ _id: id }, data);
     if (data.deliveryStatus !== ORDER_STATUS.PROCESSING) {
       const user = await this.performerService.findById(order.userId);
       if (user) {

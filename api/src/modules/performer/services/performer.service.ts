@@ -485,7 +485,7 @@ export class PerformerService {
     if (data.dateOfBirth) {
       data.dateOfBirth = new Date(data.dateOfBirth);
     }
-    await this.performerModel.updateOne({ _id: id }, data, { new: true });
+    await this.performerModel.updateOne({ _id: id }, data);
     const newPerformer = await this.performerModel.findById(performer._id);
     const oldStatus = performer.status;
     const oldGender = performer.gender;
@@ -578,7 +578,7 @@ export class PerformerService {
     if (data.dateOfBirth) {
       data.dateOfBirth = new Date(data.dateOfBirth);
     }
-    await this.performerModel.updateOne({ _id: id }, data, { new: true });
+    await this.performerModel.updateOne({ _id: id }, data);
     const newPerformer = await this.performerModel.findById(id);
     const oldGender = performer.gender;
     // fire event that updated performer gender

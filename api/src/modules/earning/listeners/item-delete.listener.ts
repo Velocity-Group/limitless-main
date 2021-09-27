@@ -108,10 +108,10 @@ export class HandleDeleteItemListener {
         this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
         earnings.length > 0 && earnings.forEach(async (earning) => {
           // refund token to user
-          await this.performerModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } }, { new: true });
+          await this.performerModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
           await this.notifyPerformerBalance(earning);
           // reduce performer balance
-          await this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } }, { new: true });
+          await this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
           await this.notifyUserBalance(earning);
           // remove earning;
           await earning.remove();
