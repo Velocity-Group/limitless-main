@@ -237,13 +237,6 @@ export class FormUploadVideo extends PureComponent<IProps> {
           </Col>
           <Col md={12} xs={24}>
             <Form.Item
-              name="description"
-              label="Description"
-            >
-              <Input.TextArea rows={3} />
-            </Form.Item>
-
-            <Form.Item
               name="isSale"
               label="For sale?"
             >
@@ -279,6 +272,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 />
               </Form.Item>
             )}
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              name="description"
+              label="Description"
+            >
+              <Input.TextArea rows={3} />
+            </Form.Item>
           </Col>
           <Col xs={24} md={8}>
             <Form.Item
