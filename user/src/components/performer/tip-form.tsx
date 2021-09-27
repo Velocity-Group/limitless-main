@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import {
   InputNumber, Button, Avatar
 } from 'antd';
+import { TickIcon } from 'src/icons';
 import { IPerformer } from '@interfaces/index';
 import './performer.less';
 
@@ -29,6 +30,11 @@ export class TipPerformerForm extends PureComponent<IProps> {
       <div className="confirm-subscription-form">
         <div className="text-center">
           <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
+          <p>
+            {performer?.name || performer?.username || 'N/A'}
+            {' '}
+            {performer?.verifiedAccount && <TickIcon className="primary-color" />}
+          </p>
         </div>
         <div className="tip-grps">
           <Button type={price === 10 ? 'primary' : 'default'} onClick={() => this.onChangeValue(10)}>

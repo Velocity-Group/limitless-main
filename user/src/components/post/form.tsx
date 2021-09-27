@@ -5,7 +5,7 @@ import {
   Input, Form, InputNumber, Switch, Progress
 } from 'antd';
 import {
-  FileAddOutlined, BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
+  BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
   PlayCircleOutlined, SmileOutlined
 } from '@ant-design/icons';
 import UploadList from '@components/file/list-media';
@@ -19,18 +19,21 @@ import AddPollDurationForm from './add-poll-duration';
 import './index.less';
 
 const { TextArea } = Input;
+
 const layout = {
   labelCol: { span: 24 },
   wrapperCol: { span: 24 }
 };
+
+const validateMessages = {
+  required: 'This field is required!'
+};
+
 interface IProps {
   type?: string;
   discard?: Function;
   feed?: IFeed
 }
-const validateMessages = {
-  required: 'This field is required!'
-};
 
 export default class FeedForm extends PureComponent<IProps> {
   pollIds = [];
@@ -69,62 +72,6 @@ export default class FeedForm extends PureComponent<IProps> {
       });
       this.teaser = feed.teaser;
     }
-  }
-
-  async onAddMore(file, listFile) {
-    const { fileList, fileIds } = this.state;
-    if (file.type.includes('image')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
-      if (!valid) {
-        message.error(`Image ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
-        return false;
-      }
-    }
-    if (file.type.includes('video')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
-      if (!valid) {
-        message.error(`Video ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
-        return false;
-      }
-    }
-    if (listFile.indexOf(file) === (listFile.length - 1)) {
-      const files = await Promise.all(listFile.map((f) => {
-        const newFile = f;
-        if (newFile.type.includes('video')) return f;
-        const reader = new FileReader();
-        reader.addEventListener('load', () => { newFile.thumbnail = reader.result; });
-        reader.readAsDataURL(newFile);
-        return newFile;
-      }));
-      await this.setState({
-        fileList: [...fileList, ...files],
-        uploading: true
-      });
-      const newFileIds = [...fileIds];
-      // eslint-disable-next-line no-restricted-syntax
-      for (const fileItem of listFile) {
-        try {
-          // eslint-disable-next-line no-continue
-          if (['uploading', 'done'].includes(fileItem.status) || fileItem._id) continue;
-          fileItem.status = 'uploading';
-          const resp = (fileItem.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
-            fileItem,
-            {},
-            this.onUploading.bind(this, fileItem)
-          ) : await feedService.uploadVideo(
-            fileItem,
-            {},
-            this.onUploading.bind(this, fileItem)
-          )) as any;
-          newFileIds.push(resp.data._id);
-          fileItem._id = resp.data._id;
-        } catch (e) {
-          message.error(`File ${fileItem.name} error!`);
-        }
-      }
-      this.setState({ uploading: false, fileIds: newFileIds });
-    }
-    return true;
   }
 
   onUploading(file, resp: any) {
@@ -189,7 +136,8 @@ export default class FeedForm extends PureComponent<IProps> {
     });
   }
 
-  async beforeUpload(file, fileList) {
+  async beforeUpload(file, listFile) {
+    const { fileList, fileIds } = this.state;
     if (file.type.includes('image')) {
       const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!valid) {
@@ -204,36 +152,39 @@ export default class FeedForm extends PureComponent<IProps> {
         return false;
       }
     }
-    if (fileList.indexOf(file) === (fileList.length - 1)) {
-      const files = fileList.map((f) => {
-        if (f._id || f.type.includes('video')) return f;
+    if (listFile.indexOf(file) === (listFile.length - 1)) {
+      const files = await Promise.all(listFile.map((f) => {
+        const newFile = f;
+        if (newFile.type.includes('video')) return f;
         const reader = new FileReader();
-        // eslint-disable-next-line no-param-reassign
-        reader.addEventListener('load', () => { f.thumbnail = reader.result; });
-        reader.readAsDataURL(f);
-        return f;
+        reader.addEventListener('load', () => { newFile.thumbnail = reader.result; });
+        reader.readAsDataURL(newFile);
+        return newFile;
+      }));
+      await this.setState({
+        fileList: [...fileList, ...files],
+        uploading: true
       });
-      await this.setState({ fileList: files, uploading: true });
-      const newFileIds = [];
+      const newFileIds = [...fileIds];
       // eslint-disable-next-line no-restricted-syntax
-      for (const newFile of fileList) {
+      for (const fileItem of listFile) {
         try {
           // eslint-disable-next-line no-continue
-          if (['uploading', 'done'].includes(newFile.status) || newFile._id) continue;
-          newFile.status = 'uploading';
-          const resp = (newFile.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
-            newFile,
+          if (['uploading', 'done'].includes(fileItem.status) || fileItem._id) continue;
+          fileItem.status = 'uploading';
+          const resp = (fileItem.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
+            fileItem,
             {},
-            this.onUploading.bind(this, newFile)
+            this.onUploading.bind(this, fileItem)
           ) : await feedService.uploadVideo(
-            newFile,
+            fileItem,
             {},
-            this.onUploading.bind(this, newFile)
+            this.onUploading.bind(this, fileItem)
           )) as any;
           newFileIds.push(resp.data._id);
-          newFile._id = resp.data._id;
+          fileItem._id = resp.data._id;
         } catch (e) {
-          message.error(`File ${newFile.name} error!`);
+          message.error(`File ${fileItem.name} error!`);
         }
       }
       this.setState({ uploading: false, fileIds: newFileIds });
@@ -367,8 +318,9 @@ export default class FeedForm extends PureComponent<IProps> {
           initialValues={feed || ({
             text: '',
             price: 4.99,
-            isSale: false
-          } as IFeed)}
+            isSale: false,
+            status: 'active'
+          })}
         >
           <Form.Item rules={[{ required: true, message: 'Please add a description' }]}>
             <div className="input-f-desc">
@@ -379,22 +331,38 @@ export default class FeedForm extends PureComponent<IProps> {
               </span>
             </div>
           </Form.Item>
+          {['video', 'photo'].includes(feed?.type || type) && (
           <Form.Item>
             <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
           </Form.Item>
+          )}
           {isSale && (
             <Form.Item label="Amount of Tokens" name="price" rules={[{ required: isSale, message: 'Please add tokens' }]}>
               <InputNumber min={1} />
             </Form.Item>
           )}
+          <Form.Item
+            name="status"
+            label="Status"
+          >
+            <Select>
+              <Select.Option key="active" value="active">
+                Active
+              </Select.Option>
+              <Select.Option key="inactive" value="inactive">
+                Inactive
+              </Select.Option>
+            </Select>
+          </Form.Item>
+          {['video', 'photo'].includes(feed?.type || type) && (
           <UploadList
-            canAddMore={feed?.type === 'photo' || type === 'photo'}
             type={feed?.type || type}
             files={fileList}
             remove={this.remove.bind(this)}
-            onAddMore={this.onAddMore.bind(this)}
+            onAddMore={this.beforeUpload.bind(this)}
             uploading={uploading}
           />
+          )}
           <Row>
             {addPoll
               && (
@@ -469,28 +437,11 @@ export default class FeedForm extends PureComponent<IProps> {
                     </div>
                   </div>
                 </Form.Item>
-
               </Col>
             )}
           </Row>
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: 'flex', margin: '15px 0' }}>
             {['video', 'photo'].includes(feed?.type || type) && [
-              <Upload
-                key="upload_media_file"
-                customRequest={() => true}
-                accept={(feed?.type === 'video' || type === 'video') ? 'video/*' : 'image/*'}
-                beforeUpload={this.beforeUpload.bind(this)}
-                multiple={feed?.type === 'photo' || type === 'photo'}
-                showUploadList={false}
-                disabled={uploading}
-                listType="picture"
-              >
-                <Button type="primary">
-                  <FileAddOutlined />
-                  {' '}
-                  Add files
-                </Button>
-              </Upload>,
               <Upload
                 key="upload_thumb"
                 customRequest={() => true}
@@ -533,21 +484,6 @@ export default class FeedForm extends PureComponent<IProps> {
             </Button>
           </div>
           <AddPollDurationForm onAddPollDuration={this.onChangePollDuration.bind(this)} openDurationPollModal={openPollDuration} />
-          {feed && (
-            <Form.Item
-              name="status"
-              label="Status"
-            >
-              <Select>
-                <Select.Option key="active" value="active">
-                  Active
-                </Select.Option>
-                <Select.Option key="inactive" value="inactive">
-                  Inactive
-                </Select.Option>
-              </Select>
-            </Form.Item>
-          )}
           <div className="submit-btns">
             <Button
               className="primary"

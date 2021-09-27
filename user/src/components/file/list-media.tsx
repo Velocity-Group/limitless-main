@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import { PureComponent } from 'react';
 import { DeleteOutlined, PlusOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import {
@@ -11,7 +10,6 @@ interface IProps {
   files: any[];
   onAddMore: Function;
   uploading: boolean;
-  canAddMore?: boolean;
   type?: string;
 }
 export default class UploadList extends PureComponent<IProps> {
@@ -22,13 +20,14 @@ export default class UploadList extends PureComponent<IProps> {
 
   render() {
     const {
-      files, remove: handleRemove, uploading, canAddMore = true, type
+      files, remove: handleRemove, uploading, type
     } = this.props;
     return (
       <div className="f-upload-list">
         {files && files.map((file) => (
           <div className="f-upload-item" key={file._id || file.uid}>
             <div className="f-upload-thumb">
+              {/* eslint-disable-next-line no-nested-ternary */}
               {(file.type.includes('feed-photo') || file.type.includes('blog-photo') || file.type.includes('image'))
                 ? <img alt="img" src={file.url ? file.url : file.thumbnail} width="100%" />
                 : file.type.includes('video') ? (
@@ -56,7 +55,6 @@ export default class UploadList extends PureComponent<IProps> {
             {file.percent && <Progress percent={Math.round(file.percent)} />}
           </div>
         ))}
-        {files && files.length > 0 && canAddMore && (
         <div className="add-more">
           <Upload
             customRequest={() => true}
@@ -68,9 +66,10 @@ export default class UploadList extends PureComponent<IProps> {
             listType="picture"
           >
             <PlusOutlined />
+            {' '}
+            Add files
           </Upload>
         </div>
-        )}
       </div>
     );
   }

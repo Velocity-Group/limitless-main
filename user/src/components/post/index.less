@@ -27,8 +27,12 @@
           font-size: 14px;
           margin: 0;
           text-transform: capitalize;
+          display: inline-flex;
+          align-items: center;
 
           .anticon {
+            margin-left: 2px;
+            margin-bottom: -5px;
             font-size: 18px;
             color: @primary-color;
           }
@@ -341,7 +345,7 @@
     height: 130px;
     align-self: center;
     justify-content: center;
-    width: 65px;
+    padding: 10px;
     background-color: @light-grey;
     border-radius: 5px;
 
@@ -352,15 +356,12 @@
     cursor: pointer;
 
     .ant-upload {
-      height: 130px;
-      width: 65px;
+      height: 100%;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-
-      .anticon.anticon-plus {
-        font-size: 20px;
-      }
+      font-size: 16px;
     }
   }
 }

@@ -7,6 +7,7 @@ import { IPerformer } from 'src/interfaces';
 import {
   CheckSquareOutlined
 } from '@ant-design/icons';
+import { TickIcon } from 'src/icons';
 import './performer.less';
 
 interface IProps {
@@ -25,6 +26,11 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
       <div className="confirm-subscription-form">
         <div className="text-center">
           <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
+          <p>
+            {performer?.name || performer?.username || 'N/A'}
+            {' '}
+            {performer?.verifiedAccount && <TickIcon className="primary-color" />}
+          </p>
         </div>
         <div className="info-body">
           <p>

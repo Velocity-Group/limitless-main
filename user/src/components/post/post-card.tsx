@@ -230,6 +230,7 @@ class FeedCard extends Component<IProps> {
       Router.push('/auth/login');
       return;
     }
+    if (user.isPerformer) return;
     if (!user.stripeCardIds || !user.stripeCardIds.length) {
       message.error('Please add payment card');
       Router.push('/user/cards');
@@ -335,6 +336,7 @@ class FeedCard extends Component<IProps> {
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought);
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
+    const thumbUrl = feed?.thumbnailUrl || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0]) || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0]) || '/static/leaf.jpg';
     let totalVote = 0;
     polls && polls.forEach((poll) => {
       totalVote += poll.totalVote;
@@ -431,7 +433,7 @@ class FeedCard extends Component<IProps> {
           {!canView && (
             <div className="lock-content">
               {/* eslint-disable-next-line no-nested-ternary */}
-              <div className="feed-bg" style={feed.thumbnailUrl && canView ? { backgroundImage: `url(${feed.thumbnailUrl})` } : feed.thumbnailUrl && !canView ? { backgroundImage: `url(${feed.thumbnailUrl})`, filter: 'blur(20px)' } : { backgroundImage: '/static/leaf.jpg', filter: 'blur(2px)' }} />
+              <div className="feed-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
               <div
                 className="lock-middle"
                 onMouseEnter={() => this.setState({ isHovered: true })}
@@ -439,14 +441,13 @@ class FeedCard extends Component<IProps> {
               >
                 {(isHovered || canView) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
-                <Button className="secondary" onClick={() => this.setState({ openSubscriptionModal: true })}>
+                <Button disabled={user.isPerformer} className="secondary" onClick={() => this.setState({ openSubscriptionModal: true })}>
                   Subcribe to unlock
                 </Button>
                 )}
                 {feed.isSale && !isBought && (
-                <Button className="secondary" onClick={() => this.setState({ openPurchaseModal: true })}>
-                  Pay
-                  {' '}
+                <Button disabled={user.isPerformer} className="secondary" onClick={() => this.setState({ openPurchaseModal: true })}>
+                  Pay&nbsp;
                   <img alt="coin" src="/static/coin-ico.png" width="15px" />
                   {feed.price.toFixed(2)}
                   {' '}

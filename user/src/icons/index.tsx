@@ -6,6 +6,7 @@ interface IIcons {
   style?: CSSProperties;
   rotate?: number;
   spin?: boolean;
+  className?: string;
 }
 
 const ModelSvg = () => (
@@ -45,37 +46,37 @@ const TickSvg = () => (
 );
 
 export const ModelIcon = ({
-  style, rotate, spin
+  style, rotate, spin, className
 }: IIcons) => (
-  <Icon component={ModelSvg} className="anticon-custom" {...{ style, rotate, spin }} />
+  <Icon component={ModelSvg} className={className ? `${className} anticon-custom` : 'anticon-custom'} {...{ style, rotate, spin }} />
 );
 
 export const HomeIcon = ({
-  style, rotate, spin
+  style, rotate, spin, className
 }: IIcons) => (
-  <Icon component={HomeSvg} className="anticon-custom" {...{ style, rotate, spin }} />
+  <Icon component={HomeSvg} className={className ? `${className} anticon-custom` : 'anticon-custom'} {...{ style, rotate, spin }} />
 );
 
 export const PlusIcon = ({
-  style, rotate, spin
+  style, rotate, spin, className
 }: IIcons) => (
-  <Icon component={PlusSvg} className="anticon-custom" {...{ style, rotate, spin }} />
+  <Icon component={PlusSvg} className={className ? `${className} anticon-custom` : 'anticon-custom'} {...{ style, rotate, spin }} />
 );
 
 export const MessageIcon = ({
-  style, rotate, spin
+  style, rotate, spin, className
 }: IIcons) => (
-  <Icon component={MessageSvg} className="anticon-custom" {...{ style, rotate, spin }} />
+  <Icon component={MessageSvg} className={className ? `${className} anticon-custom` : 'anticon-custom'} {...{ style, rotate, spin }} />
 );
 
 export const UserIcon = ({
-  style, rotate, spin
+  style, rotate, spin, className
 }: IIcons) => (
-  <Icon component={UserSvg} className="anticon-custom" {...{ style, rotate, spin }} />
+  <Icon component={UserSvg} className={className ? `${className} anticon-custom` : 'anticon-custom'} {...{ style, rotate, spin }} />
 );
 
 export const TickIcon = ({
-  style, rotate, spin
+  style, rotate, spin, className
 }: IIcons) => (
-  <Icon component={TickSvg} className="anticon-custom" {...{ style, rotate, spin }} />
+  <Icon component={TickSvg} className={className ? `${className} anticon-custom` : 'anticon-custom'} {...{ style, rotate, spin }} />
 );

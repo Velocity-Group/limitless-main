@@ -75,50 +75,6 @@ export default class FormFeed extends PureComponent<IProps> {
     }
   }
 
-  async onAddMore(file, listFile) {
-    const { fileList, fileIds } = this.state;
-    if (!listFile.length) {
-      return;
-    }
-    if (listFile.indexOf(file) === (listFile.length - 1)) {
-      const files = await Promise.all(listFile.map((f) => {
-        const newFile = f;
-        if (newFile.type.includes('video')) return f;
-        const reader = new FileReader();
-        reader.addEventListener('load', () => { newFile.thumbnail = reader.result; });
-        reader.readAsDataURL(newFile);
-        return newFile;
-      }));
-      await this.setState({
-        fileList: [...fileList, ...files],
-        uploading: true
-      });
-      const newFileIds = [...fileIds];
-      // eslint-disable-next-line no-restricted-syntax
-      for (const fileItem of listFile) {
-        try {
-          // eslint-disable-next-line no-continue
-          if (['uploading', 'done'].includes(fileItem.status) || fileItem._id) continue;
-          fileItem.status = 'uploading';
-          const resp = (fileItem.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
-            fileItem,
-            {},
-            this.onUploading.bind(this, fileItem)
-          ) : await feedService.uploadVideo(
-            fileItem,
-            {},
-            this.onUploading.bind(this, fileItem)
-          )) as any;
-          newFileIds.push(resp.data._id);
-          fileItem._id = resp.data._id;
-        } catch (e) {
-          message.error(`File ${fileItem.name} error!`);
-        }
-      }
-      this.setState({ uploading: false, fileIds: newFileIds });
-    }
-  }
-
   onUploading(file, resp: any) {
     // eslint-disable-next-line no-param-reassign
     file.percent = resp.percentage;
@@ -182,46 +138,60 @@ export default class FormFeed extends PureComponent<IProps> {
     });
   }
 
-  async beforeUpload(file, fileList) {
-    const { fileIds } = this.state;
-    if (!fileList.length) {
-      this.setState({ fileList: [] });
-      return;
+  async beforeUpload(file, listFile) {
+    const { fileList, fileIds } = this.state;
+    if (file.type.includes('image')) {
+      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      if (!valid) {
+        message.error(`Image ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+        return false;
+      }
     }
-    if (fileList.indexOf(file) === (fileList.length - 1)) {
-      const files = await Promise.all(fileList.map((f) => {
-        if (f._id || f.type.includes('video')) return f;
+    if (file.type.includes('video')) {
+      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      if (!valid) {
+        message.error(`Video ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
+        return false;
+      }
+    }
+    if (listFile.indexOf(file) === (listFile.length - 1)) {
+      const files = await Promise.all(listFile.map((f) => {
+        const newFile = f;
+        if (newFile.type.includes('video')) return f;
         const reader = new FileReader();
-        // eslint-disable-next-line no-param-reassign
-        reader.addEventListener('load', () => { f.thumbnail = reader.result; });
-        reader.readAsDataURL(f);
-        return f;
+        reader.addEventListener('load', () => { newFile.thumbnail = reader.result; });
+        reader.readAsDataURL(newFile);
+        return newFile;
       }));
-      await this.setState({ fileList: files, uploading: true });
+      await this.setState({
+        fileList: [...fileList, ...files],
+        uploading: true
+      });
       const newFileIds = [...fileIds];
       // eslint-disable-next-line no-restricted-syntax
-      for (const newFile of fileList) {
+      for (const fileItem of listFile) {
         try {
           // eslint-disable-next-line no-continue
-          if (['uploading', 'done'].includes(newFile.status) || newFile._id) continue;
-          newFile.status = 'uploading';
-          const resp = (newFile.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
-            newFile,
+          if (['uploading', 'done'].includes(fileItem.status) || fileItem._id) continue;
+          fileItem.status = 'uploading';
+          const resp = (fileItem.type.indexOf('image') > -1 ? await feedService.uploadPhoto(
+            fileItem,
             {},
-            this.onUploading.bind(this, newFile)
+            this.onUploading.bind(this, fileItem)
           ) : await feedService.uploadVideo(
-            newFile,
+            fileItem,
             {},
-            this.onUploading.bind(this, newFile)
+            this.onUploading.bind(this, fileItem)
           )) as any;
           newFileIds.push(resp.data._id);
-          newFile._id = resp.data._id;
+          fileItem._id = resp.data._id;
         } catch (e) {
-          message.error(`File ${newFile.name} error!`);
+          message.error(`File ${fileItem.name} error!`);
         }
       }
       this.setState({ uploading: false, fileIds: newFileIds });
     }
+    return true;
   }
 
   async beforeUploadThumbnail(file) {
@@ -257,7 +227,7 @@ export default class FormFeed extends PureComponent<IProps> {
     this.teaser = file;
     const valid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!valid) {
-      message.error(`Thumbnail must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB`);
+      message.error(`Teaser must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB`);
       return;
     }
     try {
@@ -297,12 +267,10 @@ export default class FormFeed extends PureComponent<IProps> {
     if (['video', 'photo'].includes(feed?.type || type) && !fileIds.length) {
       return message.error(`Please add ${feed?.type || type} file`);
     }
-
-    // create polls
+    await this.setState({ uploading: true });
     if (addPoll && pollList.length < 2) {
       return message.error('Polls must have at least 2 options');
     } if (addPoll && pollList.length >= 2) {
-      await this.setState({ uploading: true });
       // eslint-disable-next-line no-restricted-syntax
       for (const poll of pollList) {
         try {
@@ -324,7 +292,6 @@ export default class FormFeed extends PureComponent<IProps> {
       formValues.pollExpiredAt = expiredPollAt;
       this.onsubmit(feed, formValues);
     } else {
-      await this.setState({ uploading: true });
       this.onsubmit(feed, formValues);
     }
     return false;
@@ -374,27 +341,9 @@ export default class FormFeed extends PureComponent<IProps> {
           <Form.Item label="Add description" name="text" rules={[{ required: true, message: 'Please add a description' }]}>
             <TextArea className="feed-input" rows={3} placeholder="Add a description" allowClear />
           </Form.Item>
+          {['photo', 'video'].includes(type) && (
           <Form.Item>
             <Switch checkedChildren="PPV Content" unCheckedChildren="Free Content" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
-          </Form.Item>
-          {['photo', 'video'].includes(type) && (
-          <Form.Item label={type === 'video' ? 'Video file' : 'Photo files'}>
-            {fileList.length ? (
-              <UploadList
-                canAddMore={feed?.type === 'photo' || type === 'photo'}
-                type={feed?.type || type}
-                files={fileList}
-                remove={this.remove.bind(this)}
-                onAddMore={this.onAddMore.bind(this)}
-                uploading={uploading}
-              />
-            ) : (
-              <p>
-                Please upload
-                {' '}
-                {type === 'video' ? 'video file' : 'photo files'}
-              </p>
-            )}
           </Form.Item>
           )}
           {isSale && (
@@ -477,24 +426,19 @@ export default class FormFeed extends PureComponent<IProps> {
                 </div>
               </Form.Item>
             )}
-          <div style={{ display: 'flex' }}>
+          {['photo', 'video'].includes(type) && (
+          <Form.Item label={type === 'video' ? 'Video file' : 'Photo files'}>
+            <UploadList
+              type={feed?.type || type}
+              files={fileList}
+              remove={this.remove.bind(this)}
+              onAddMore={this.beforeUpload.bind(this)}
+              uploading={uploading}
+            />
+          </Form.Item>
+          )}
+          <div style={{ display: 'flex', margin: '15px 0' }}>
             {['video', 'photo'].includes(feed?.type || type) && [
-              <Upload
-                key="upload_media_file"
-                customRequest={() => true}
-                accept={(feed?.type === 'video' || type === 'video') ? 'video/*' : 'image/*'}
-                beforeUpload={this.beforeUpload.bind(this)}
-                multiple={feed?.type === 'photo' || type === 'photo'}
-                showUploadList={false}
-                disabled={uploading}
-                listType="picture"
-              >
-                <Button type="primary">
-                  <FileAddOutlined />
-                  {' '}
-                  Add Files
-                </Button>
-              </Upload>,
               <Upload
                 key="upload_thumb"
                 customRequest={() => true}

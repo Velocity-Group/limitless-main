@@ -11,7 +11,6 @@ interface IProps {
   files: any[];
   onAddMore: Function;
   uploading: boolean;
-  canAddMore?: boolean;
   type?: string;
 }
 export default class UploadList extends PureComponent<IProps> {
@@ -22,7 +21,7 @@ export default class UploadList extends PureComponent<IProps> {
 
   render() {
     const {
-      files, remove: handleRemove, uploading, canAddMore = true, type
+      files, remove: handleRemove, uploading, type
     } = this.props;
     return (
       <div className="f-upload-list">
@@ -58,7 +57,6 @@ export default class UploadList extends PureComponent<IProps> {
             {file.percent && <Progress percent={Math.round(file.percent)} />}
           </div>
         ))}
-        {files && files.length > 0 && canAddMore && (
         <div className="add-more">
           <Upload
             customRequest={() => true}
@@ -70,9 +68,10 @@ export default class UploadList extends PureComponent<IProps> {
             listType="picture"
           >
             <PlusOutlined />
+            {' '}
+            Add files
           </Upload>
         </div>
-        )}
       </div>
     );
   }
