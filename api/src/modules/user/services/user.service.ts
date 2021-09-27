@@ -162,8 +162,8 @@ export class UserService {
       data.verifiedEmail = false;
     }
     await this.userModel.updateOne({ _id: id }, data);
-    if (data.email && data.email.toLowerCase() !== user.email) {
-      await this.authService.sendVerificationEmail(user);
+    if (data.email && data.email.toLowerCase() !== eUser.email) {
+      await this.authService.sendVerificationEmail({ _id: eUser._id, email: data?.email.toLowerCase() });
       await this.authService.updateKey({
         source: 'user',
         sourceId: user._id,
@@ -171,7 +171,7 @@ export class UserService {
       });
     }
     // update auth key if username or email has changed
-    if (data.username && data.username.trim() !== user.username) {
+    if (data.username && data.username.trim() !== eUser.username) {
       await this.authService.updateKey({
         source: 'user',
         sourceId: user._id,
@@ -240,7 +240,7 @@ export class UserService {
       });
     }
     if (data.email && data.email.toLowerCase() !== user.email) {
-      await this.authService.sendVerificationEmail(user);
+      await this.authService.sendVerificationEmail({ _id: user._id, email: data.email.toLowerCase() });
       await this.authService.updateKey({
         source: 'user',
         sourceId: user._id,

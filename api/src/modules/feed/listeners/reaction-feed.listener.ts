@@ -36,14 +36,14 @@ export class ReactionFeedListener {
     if (REACTION.LIKE && event.eventName === EVENT.CREATED) {
       const feed = await this.feedModel.findById(objectId);
       if (feed) {
-        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: 1 } }, { new: true });
+        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: 1 } });
         await this.performerService.updateLikeStat(feed.fromSourceId, 1);
       }
     }
     if (REACTION.LIKE && event.eventName === EVENT.DELETED) {
       const feed = await this.feedModel.findById(objectId);
       if (feed) {
-        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: -1 } }, { new: true });
+        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: -1 } });
         await this.performerService.updateLikeStat(feed.fromSourceId, -1);
       }
     }
