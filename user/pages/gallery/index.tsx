@@ -131,7 +131,7 @@ class GalleryViewPage extends PureComponent<IProps> {
 
   handleUpdateState() {
     const { gallery } = this.props;
-    this.setState({ isBought: gallery.isBought, isBookmarked: gallery.isBookMarked });
+    this.setState({ isBought: gallery.isBought, isBookmarked: gallery.isBookMarked, photos: [] });
     this.getPhotos();
   }
 
