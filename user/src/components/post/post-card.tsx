@@ -333,7 +333,7 @@ class FeedCard extends Component<IProps> {
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
       shareUrl, openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
-    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought);
+    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text' || !feed?.fileIds?.length;
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     const thumbUrl = feed?.thumbnailUrl || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0]) || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0]) || '/static/leaf.jpg';

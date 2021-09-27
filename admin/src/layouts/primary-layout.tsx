@@ -23,12 +23,6 @@ interface DefaultProps extends IUIConfig {
   loadUIValue: Function;
 }
 
-export async function getStaticProps() {
-  return {
-    props: {}
-  };
-}
-
 class PrimaryLayout extends PureComponent<DefaultProps> {
   state = {
     isMobile: false,
