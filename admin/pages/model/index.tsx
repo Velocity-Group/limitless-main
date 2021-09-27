@@ -309,7 +309,6 @@ export default class Performers extends PureComponent<any> {
         <BreadcrumbComponent breadcrumbs={[{ title: 'Models' }]} />
         <Page>
           <SearchFilter onSubmit={this.handleFilter.bind(this)} />
-          <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive custom">
             <Table
               dataSource={list}

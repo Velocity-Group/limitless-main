@@ -70,7 +70,7 @@ export class AccountForm extends PureComponent<IProps> {
         onFinishFailed={() => message.error('Please complete the required fields in tab basic info')}
         validateMessages={validateMessages}
         initialValues={
-          { ...performer, dateOfBirth: moment(performer?.dateOfBirth) || '' } || ({
+          performer ? { ...performer, dateOfBirth: moment(performer?.dateOfBirth) || '' } : ({
             country: 'US',
             status: 'active',
             gender: 'male',
@@ -215,11 +215,11 @@ export class AccountForm extends PureComponent<IProps> {
               label="Token balance"
               name="balance"
             >
-              <InputNumber style={{ width: '100%' }} />
+              <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
-            <Form.Item name="gender" label="Gender">
+            <Form.Item name="gender" label="Gender" required>
               <Select>
                 <Select.Option key="male" value="male">
                   Male

@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import {
-  Button, Input, Row, Col, Select
+  Input, Row, Col, Select
 } from 'antd';
 
 interface IProps {
@@ -18,18 +18,18 @@ export class SearchFilter extends PureComponent<IProps> {
     const { onSubmit } = this.props;
     return (
       <Row gutter={24}>
-        <Col xl={{ span: 4 }} md={{ span: 8 }}>
+        <Col lg={8} xs={24}>
           <Input
             placeholder="Enter keyword"
             onChange={(evt) => this.setState({ q: evt.target.value })}
-            onPressEnter={() => onSubmit(this.state)}
+            onPressEnter={() => onSubmit(this.state, () => onSubmit(this.state))}
           />
         </Col>
-        <Col xl={{ span: 4 }} md={{ span: 8 }}>
+        <Col lg={8} xs={24}>
           <Select
             defaultValue=""
             style={{ width: '100%' }}
-            onChange={(status) => this.setState({ status })}
+            onChange={(status) => this.setState({ status }, () => onSubmit(this.state))}
           >
             <Select.Option value="">Status</Select.Option>
             <Select.Option value="active">Active</Select.Option>
@@ -39,11 +39,11 @@ export class SearchFilter extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Col>
-        <Col xl={{ span: 4 }} md={{ span: 8 }}>
+        <Col lg={8} xs={24}>
           <Select
             defaultValue=""
             style={{ width: '100%' }}
-            onChange={(gender) => this.setState({ gender })}
+            onChange={(gender) => this.setState({ gender }, () => onSubmit(this.state))}
           >
             <Select.Option value="">Gender</Select.Option>
             <Select.Option key="male" value="male">
@@ -56,14 +56,6 @@ export class SearchFilter extends PureComponent<IProps> {
               Transgender
             </Select.Option>
           </Select>
-        </Col>
-        <Col xl={{ span: 4 }} md={{ span: 8 }}>
-          <Button
-            type="primary"
-            onClick={() => onSubmit(this.state)}
-          >
-            Search
-          </Button>
         </Col>
       </Row>
     );

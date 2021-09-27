@@ -135,7 +135,7 @@ class PerformerUpdate extends PureComponent<IProps> {
   async updateCommissionSetting(data: any) {
     const { id } = this.props;
     try {
-      this.setState({ settingUpdating: true });
+      await this.setState({ settingUpdating: true });
       await performerService.updateCommissionSetting(id, { ...data, performerId: id });
       message.success('Commission settings has been updated!');
     } catch (error) {
@@ -143,7 +143,6 @@ class PerformerUpdate extends PureComponent<IProps> {
     } finally {
       this.setState({ settingUpdating: false });
     }
-    return undefined;
   }
 
   async updateBankingSetting(data: any) {
@@ -167,7 +166,7 @@ class PerformerUpdate extends PureComponent<IProps> {
       if (data.status === 'pending-email-confirmation') {
         newData = omit(data, ['status']);
       }
-      this.setState({ updating: true });
+      await this.setState({ updating: true });
       const updated = await performerService.update(id, {
         ...performer,
         ...newData,

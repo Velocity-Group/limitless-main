@@ -64,18 +64,14 @@ class PerformerCreate extends PureComponent<IProps> {
   async submit(data: any) {
     try {
       if (data.password !== data.rePassword) {
-        return message.error('Confirm password mismatch!');
+        message.error('Confirm password mismatch!');
+        return;
       }
 
-      if (!validateUsername(data.username)) {
-        return message.error('Username must contain only Alphabets & Numbers');
-      }
-
-      this.setState({ creating: true });
+      await this.setState({ creating: true });
       const resp = await performerService.create({
         ...data,
         ...this.customFields
-        // schedule: this.scheduleValue
       });
       message.success('Created successfully');
       Router.push(
@@ -88,10 +84,8 @@ class PerformerCreate extends PureComponent<IProps> {
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
       message.error(getResponseError(err) || 'An error occurred, please try again!');
-    } finally {
       this.setState({ creating: false });
     }
-    return undefined;
   }
 
   render() {
