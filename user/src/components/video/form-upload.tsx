@@ -110,7 +110,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
         message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
         return isValid;
       }
-      this.setState({ isSelectedTeaser: true });
+      this.setState({ isSelectedThumbnail: true });
     }
     if (field === 'teaser') {
       const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);

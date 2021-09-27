@@ -5,7 +5,7 @@ import {
   Input, Form, InputNumber, Switch, Progress
 } from 'antd';
 import {
-  FileAddOutlined, BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
+  BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
   PlayCircleOutlined
 } from '@ant-design/icons';
 import UploadList from '@components/file/list-media';
