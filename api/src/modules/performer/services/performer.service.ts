@@ -552,6 +552,7 @@ export class PerformerService {
       throw new EntityNotFoundException();
     }
     const data = { ...payload } as any;
+    delete data.balance;
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
@@ -825,8 +826,7 @@ export class PerformerService {
       {
         _id: userId
       },
-      { status: STATUS.INACTIVE, verifiedEmail: true },
-      { new: true }
+      { status: STATUS.ACTIVE, verifiedEmail: true }
     );
   }
 

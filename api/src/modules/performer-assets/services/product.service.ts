@@ -215,8 +215,7 @@ export class ProductService {
   public async updateStock(id: string | ObjectId, num = -1) {
     return this.productModel.updateOne(
       { _id: id },
-      { $inc: { stock: num } },
-      { new: true }
+      { $inc: { stock: num } }
     );
   }
 
