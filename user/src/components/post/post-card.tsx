@@ -66,7 +66,6 @@ class FeedCard extends Component<IProps> {
     submiting: false,
     polls: [],
     requesting: false,
-    shareUrl: '',
     openSubscriptionModal: false,
     openReportModal: false
   }
@@ -80,8 +79,7 @@ class FeedCard extends Component<IProps> {
         isBought: feed.isBought,
         totalLike: feed.totalLike,
         totalComment: feed.totalComment,
-        polls: feed.polls ? feed.polls : [],
-        shareUrl: `${window.location.origin}/post/${feed._id}`
+        polls: feed.polls ? feed.polls : []
       });
       this.subscriptionType = feed?.performer?.isFreeSubscription ? 'free' : 'monthly';
     }
@@ -330,7 +328,7 @@ class FeedCard extends Component<IProps> {
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
-      shareUrl, openTeaser, openSubscriptionModal, openReportModal
+      openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought);
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
