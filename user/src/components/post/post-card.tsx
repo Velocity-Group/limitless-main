@@ -22,7 +22,6 @@ import { connect } from 'react-redux';
 import { TipPerformerForm } from '@components/performer/tip-form';
 import ReactMomentCountDown from 'react-moment-countdown';
 import moment from 'moment';
-// import { Twitter, Facebook } from 'react-social-sharing';
 import { VideoPlayer } from '@components/common/video-player';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { ReportForm } from '@components/report/report-form';
@@ -534,8 +533,6 @@ class FeedCard extends Component<IProps> {
               )}
             </div>
             <div className="action-item">
-              {/* <Twitter link={shareUrl} />
-              <Facebook link={shareUrl} /> */}
               <span aria-hidden className={openReportModal ? 'action-ico active' : 'action-ico'} onClick={() => this.setState({ openReportModal: true })}>
                 <Tooltip title="Report"><FlagOutlined /></Tooltip>
               </span>

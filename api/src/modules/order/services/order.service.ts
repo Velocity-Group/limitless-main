@@ -9,7 +9,7 @@ import {
   ProductService
 } from 'src/modules/performer-assets/services';
 import {
-  EntityNotFoundException
+  EntityNotFoundException, QueueEvent, QueueEventService
 } from 'src/kernel';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
@@ -19,13 +19,14 @@ import { MailerService } from 'src/modules/mailer';
 import { uniq } from 'lodash';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
+import { EVENT } from 'src/kernel/constants';
 import { ORDER_MODEL_PROVIDER } from '../providers';
 import { OrderModel } from '../models';
 import {
   OrderSearchPayload, OrderUpdatePayload
 } from '../payloads';
 import {
-  ORDER_STATUS
+  ORDER_STATUS, REFUND_ORDER_CHANNEL
 } from '../constants';
 import { OrderDto } from '../dtos';
 
@@ -40,7 +41,8 @@ export class OrderService {
     private readonly productService: ProductService,
     @Inject(ORDER_MODEL_PROVIDER)
     private readonly orderModel: Model<OrderModel>,
-    private readonly mailService: MailerService
+    private readonly mailService: MailerService,
+    private readonly queueEventService: QueueEventService
   ) { }
 
   public async findById(id: string | ObjectId) {
@@ -165,6 +167,15 @@ export class OrderService {
           template: 'update-order-status'
         });
       }
+    }
+    if (data.deliveryStatus === ORDER_STATUS.REFUNDED) {
+      await this.queueEventService.publish(
+        new QueueEvent({
+          channel: REFUND_ORDER_CHANNEL,
+          eventName: EVENT.CREATED,
+          data: new OrderDto(order)
+        })
+      );
     }
     return { success: true };
   }

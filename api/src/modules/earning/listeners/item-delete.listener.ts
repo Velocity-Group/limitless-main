@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 import { QueueEvent, QueueEventService } from 'src/kernel';
 import { Injectable, Inject } from '@nestjs/common';
@@ -9,22 +8,23 @@ import { Model } from 'mongoose';
 import { PERFORMER_MODEL_PROVIDER } from 'src/modules/performer/providers';
 import { PerformerModel } from 'src/modules/performer/models';
 import {
-  PURCHASE_ITEM_STATUS,
-  PURCHASE_ITEM_TARTGET_TYPE
+  PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE
 } from 'src/modules/purchased-item/constants';
 import { PAYMENT_TOKEN_MODEL_PROVIDER } from 'src/modules/purchased-item/providers';
 import { PaymentTokenModel } from 'src/modules/purchased-item/models';
-// import { MailerService } from 'src/modules/mailer';
 import { MESSAGE_CHANNEL } from 'src/modules/message/constants';
 import { MessageModel } from 'src/modules/message/models';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { USER_MODEL_PROVIDER } from 'src/modules/user/providers';
 import { UserModel } from 'src/modules/user/models';
+import { REFUND_ORDER_CHANNEL } from 'src/modules/order/constants';
+import { OrderDto } from 'src/modules/order/dtos';
 import { EARNING_MODEL_PROVIDER } from '../providers/earning.provider';
 import { EarningModel } from '../models/earning.model';
 
 const HANDLE_DELETE_FEED_TOPIC = 'HANDLE_DELETE_FEED_TOPIC';
 const HANDLE_DELETE_MESSAGE_TOPIC = 'HANDLE_DELETE_MESSAGE_TOPIC';
+const HANDLE_REFUND_ORDER_EARNING_TOPIC = 'HANDLE_REFUND_ORDER_EARNING_TOPIC';
 
 @Injectable()
 export class HandleDeleteItemListener {
@@ -39,7 +39,6 @@ export class HandleDeleteItemListener {
     private readonly paymentTokenModel: Model<PaymentTokenModel>,
     private readonly queueEventService: QueueEventService,
     private readonly socketUserService: SocketUserService
-    // private readonly mailerService: MailerService
   ) {
     this.queueEventService.subscribe(
       PERFORMER_FEED_CHANNEL,
@@ -51,9 +50,14 @@ export class HandleDeleteItemListener {
       HANDLE_DELETE_MESSAGE_TOPIC,
       this.handleDeleteMessage.bind(this)
     );
+    this.queueEventService.subscribe(
+      REFUND_ORDER_CHANNEL,
+      HANDLE_REFUND_ORDER_EARNING_TOPIC,
+      this.handleRefundOrder.bind(this)
+    );
   }
 
-  public async handleDeleteFeed(event: QueueEvent) {
+  private async handleDeleteFeed(event: QueueEvent) {
     if (![EVENT.DELETED].includes(event.eventName)) {
       return;
     }
@@ -74,6 +78,7 @@ export class HandleDeleteItemListener {
         transactionId: { $in: transactionIds }
       });
       await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
+      // eslint-disable-next-line no-restricted-syntax
       for (const earning of earnings) {
         await this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
         // reduce performer balance
@@ -84,7 +89,7 @@ export class HandleDeleteItemListener {
     }
   }
 
-  public async handleDeleteMessage(event: QueueEvent) {
+  private async handleDeleteMessage(event: QueueEvent) {
     if (![EVENT.DELETED].includes(event.eventName)) {
       return;
     }
@@ -104,21 +109,41 @@ export class HandleDeleteItemListener {
       const earnings = await this.earningModel.find({
         transactionId: { $in: transactionIds }
       });
-      await Promise.all([
-        this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
-        earnings.length > 0 && earnings.forEach(async (earning) => {
-          // refund token to user
-          await this.performerModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
-          await this.notifyPerformerBalance(earning);
-          // reduce performer balance
-          await this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
-          await this.notifyUserBalance(earning);
-          // remove earning;
-          await earning.remove();
-        })
-      ]);
-      // TODO mailer
+      await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
+      await Promise.all(earnings.map(async (earning) => {
+        // refund token to user
+        this.performerModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
+        this.notifyPerformerBalance(earning);
+        // reduce performer balance
+        this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
+        this.notifyUserBalance(earning);
+        // remove earning;
+        return earning.remove();
+      }));
     }
+  }
+
+  private async handleRefundOrder(event: QueueEvent) {
+    if (![EVENT.DELETED].includes(event.eventName)) {
+      return;
+    }
+    const { transactionId }: OrderDto = event.data;
+    const earning = await this.earningModel.findOne({
+      transactionId
+    });
+    if (!earning) return;
+    await Promise.all([
+      this.paymentTokenModel.updateOne({ _id: transactionId }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
+      // refund token to user
+      this.performerModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } }),
+      this.notifyPerformerBalance(earning),
+      // reduce performer balance
+      this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } }),
+      this.notifyUserBalance(earning),
+      // remove earning;
+      earning.remove()
+    ]);
+    // TODO mailer
   }
 
   private async notifyPerformerBalance(earning: EarningModel) {

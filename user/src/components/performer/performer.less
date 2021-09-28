@@ -3,7 +3,7 @@
 .top-profile {
   background-size: cover;
   background-repeat: no-repeat;
-  height: 25vh;
+  height: 188px;
 
   .tab-stat {
     color: @white;
@@ -29,158 +29,7 @@
   }
 
   @media screen and (max-width: @tablet-screen) {
-    height: 18vh;
-  }
-}
-
-.trending-card {
-  background-size: cover;
-  background-repeat: no-repeat;
-  height: 25vh;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  .bg-2nd {
-    background: linear-gradient(0deg, rgba(29, 163, 41, .5) 20%, rgba(255, 255, 255, 0.1) 80%);
-  }
-
-  .trending-profile {
-    display: flex;
-    height: 100%;
-
-    .profile-left {
-      width: 50%;
-      position: relative;
-
-      .trending-avatar {
-        width: 130px;
-        height: 130px;
-        object-fit: cover;
-        padding: 2px;
-        border: 2px solid @primary-color;
-        border-radius: 50%;
-        position: absolute;
-        left: 100px;
-        bottom: 10px;
-      }
-
-      .m-user-name {
-        margin-left: 15px;
-        font-family: @primary-font-bold;
-        text-transform: capitalize;
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        line-height: normal;
-        left: 230px;
-        bottom: 50px;
-
-        h4 {
-          font-size: 16px;
-          font-weight: 700;
-          margin: 0;
-          white-space: nowrap;
-          color: @white;
-          display: inline-flex;
-          align-items: center;
-
-          @media screen and (max-width: @tablet-screen) {
-            margin: 0;
-          }
-        }
-
-        h5 {
-          color: @white;
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        .anticon {
-          color: @primary-color;
-          font-size: 18px;
-        }
-      }
-    }
-
-    .profile-right {
-      width: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      line-height: normal;
-      flex-direction: column;
-
-      .ordering {
-        font-size: 20px;
-        color: @white;
-
-        img {
-          width: 50px;
-        }
-
-        span {
-          display: flex;
-          align-items: center;
-        }
-      }
-
-      .bio {
-        color: @white;
-        font-size: 13px;
-        text-shadow: 1px 1px @grey-color;
-        max-height: 80px;
-        overflow: auto;
-        padding: 5px 10px;
-      }
-    }
-  }
-
-  @media screen and (max-width: @tablet-screen) {
-    height: 18vh;
-  }
-
-  @media screen and (max-width: @mobile-screen) {
-    .trending-profile {
-      .profile-left {
-        width: 40%;
-
-        .trending-avatar {
-          width: 60px;
-          height: 60px;
-          left: 40px;
-          bottom: 40px;
-        }
-
-        .m-user-name {
-          left: 25px;
-          bottom: 0;
-          margin: 0;
-
-          h4 {
-            font-size: 13px;
-          }
-
-          h5 {
-            font-size: 11px;
-          }
-        }
-      }
-
-      .profile-right {
-        width: 60%;
-
-        .ordering {
-          font-size: 14px;
-        }
-
-        .bio {
-          font-size: 11px;
-        }
-      }
-    }
+    height: 132px;
   }
 }
 
@@ -311,7 +160,7 @@
 .btn-grp {
   display: flex;
   flex-direction: column;
-  margin-top: -45px;
+  margin-top: -55px;
   padding: 0 5px;
   position: relative;
   float: right;
@@ -386,6 +235,12 @@
     .ant-collapse-borderless {
       background-color: transparent;
     }
+  }
+
+  .bio {
+    white-space: pre-line;
+    font-size: 12px;
+    color: @dark-grey;
   }
 
   .performer-info {
@@ -966,16 +821,6 @@
   border-bottom: 1px solid @theme-color;
 }
 
-.trending-carousel {
-  .ant-carousel .slick-slide {
-    height: 25vh;
-
-    @media screen and (max-width: @tablet-screen) {
-      height: 18vh;
-    }
-  }
-}
-
 .document-upload {
   display: flex;
   justify-content: space-between;
@@ -1037,5 +882,15 @@
   .ant-avatar {
     width: 100px;
     height: 100px;
+  }
+}
+
+.social-share-btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  .react-share__ShareButton {
+    margin: 0 5px;
   }
 }

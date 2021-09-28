@@ -1,5 +1,4 @@
 /* eslint-disable no-nested-ternary */
-/* eslint-disable no-await-in-loop */
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import {
   EntityNotFoundException,
@@ -22,12 +21,10 @@ import { FeedDto } from 'src/modules/feed/dtos';
 import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { toObjectId, generateUuid } from 'src/kernel/helpers/string.helper';
-// import { ConversationService } from 'src/modules/message/services';
 import { StreamService } from 'src/modules/stream/services';
 import { StreamModel } from 'src/modules/stream/models';
 import { GROUP_CHAT, PRIVATE_CHAT, PUBLIC_CHAT } from 'src/modules/stream/constant';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
-// import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { PAYMENT_TOKEN_MODEL_PROVIDER } from '../providers';
 import { PaymentTokenModel } from '../models';
@@ -67,12 +64,6 @@ export class PurchaseItemService {
     private readonly feedService: FeedService,
     @Inject(forwardRef(() => StreamService))
     private readonly streamService: StreamService
-    // @Inject(forwardRef(() => ConversationService))
-    // private readonly conversationService: ConversationService,
-    // @Inject(forwardRef(() => MessageService))
-    // private readonly messageService: MessageService,
-    // @Inject(forwardRef(() => FileService))
-    // private readonly fileService: FileService
   ) { }
 
   public async findById(id: string | ObjectId) {

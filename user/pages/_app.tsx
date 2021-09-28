@@ -1,4 +1,3 @@
-/* eslint-disable react/no-danger */
 import App from 'next/app';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -191,8 +190,8 @@ class Application extends App<IApp> {
             <Component {...pageProps} />
           </BaseLayout>
         </Socket>
-        {/* extra script */}
         {settings && settings.afterBodyScript && (
+          // eslint-disable-next-line react/no-danger
           <div dangerouslySetInnerHTML={{ __html: settings.afterBodyScript }} />
         )}
       </Provider>

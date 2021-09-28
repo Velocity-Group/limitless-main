@@ -1,5 +1,5 @@
 import {
-  Layout, Tabs, Button, Menu, message, Modal, Dropdown
+  Layout, Tabs, Button, Menu, message, Modal, Dropdown, Image, Popover, Tooltip
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -13,9 +13,9 @@ import {
 } from 'src/services';
 import Head from 'next/head';
 import {
-  ArrowLeftOutlined, FireOutlined, BookOutlined,
+  ArrowLeftOutlined, FireOutlined, EditOutlined, ShareAltOutlined,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined,
-  HeartOutlined, DollarOutlined, MessageOutlined, EditOutlined, ShareAltOutlined
+  HeartOutlined, DollarOutlined, MessageOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
@@ -26,8 +26,8 @@ import { PerformerInfo } from '@components/performer/table-info';
 import Link from 'next/link';
 import Router from 'next/router';
 import Error from 'next/error';
-import { TipPerformerForm } from '@components/performer/tip-form';
-import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import { ConfirmSubscriptionPerformerForm, TipPerformerForm } from '@components/performer';
+import ShareButtons from '@components/performer/share-profile';
 import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
 import {
@@ -445,8 +445,6 @@ class PerformerProfile extends PureComponent<IProps> {
                   <Menu key="menu_actions">
                     <Menu.Item key="book_mark">
                       <a aria-hidden onClick={this.handleBookmark.bind(this)}>
-                        <BookOutlined />
-                        {' '}
                         {!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}
                       </a>
                     </Menu.Item>
@@ -465,9 +463,10 @@ class PerformerProfile extends PureComponent<IProps> {
         <div className="main-profile">
           <div className="main-container">
             <div className="fl-col">
-              <img
+              <Image
                 alt="main-avt"
                 src={performer?.avatar || '/static/no-avatar.png'}
+                fallback="/static/no-avatar.png"
               />
               {currentUser?._id !== performer?._id && <span className={performer?.isOnline > 0 ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
@@ -489,39 +488,36 @@ class PerformerProfile extends PureComponent<IProps> {
             {currentUser._id && !currentUser.isPerformer && (
               <div className="btn-grp">
                 <div style={{ marginBottom: '4px' }}>
-                  <button
-                    type="button"
-                    className="normal"
-                    onClick={() => this.setState({ openTipModal: true })}
-                  >
-                    <a title="Send Tip">
-                      <DollarOutlined />
-                    </a>
-                  </button>
-                  <button type="button" className="normal">
-                    <Link
-                      href={{
-                        pathname: '/messages',
-                        query: {
-                          toSource: 'performer',
-                          toId: (performer?._id) || ''
-                        }
-                      }}
+                  <Tooltip title="Send Tip">
+                    <Button
+                      className="normal"
+                      onClick={() => this.setState({ openTipModal: true })}
                     >
-                      <a title="Message">
+                      <DollarOutlined />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Send Message">
+                    <Button className="normal">
+                      <Link
+                        href={{
+                          pathname: '/messages',
+                          query: {
+                            toSource: 'performer',
+                            toId: (performer?._id) || ''
+                          }
+                        }}
+                      >
                         <MessageOutlined />
-                      </a>
-                    </Link>
-                  </button>
-                  <button
-                    disabled
-                    type="button"
-                    className="normal"
-                  >
-                    <a title="Share to social media">
+                      </Link>
+                    </Button>
+                  </Tooltip>
+                  <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
+                    <Button
+                      className="normal"
+                    >
                       <ShareAltOutlined />
-                    </a>
-                  </button>
+                    </Button>
+                  </Popover>
                 </div>
                 {/* {performer?.isSubscribed && (
                       <div className="stream-btns">
