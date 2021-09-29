@@ -1,7 +1,7 @@
 import { PureComponent } from 'react';
 import { Alert, Spin } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { IProduct } from '../../interfaces';
+import { IProduct } from 'src/interfaces';
 import { PerformerListProduct } from './performer-list-product';
 
 interface IProps {

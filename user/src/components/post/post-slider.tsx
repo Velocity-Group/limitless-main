@@ -35,7 +35,7 @@ export default class FeedSlider extends PureComponent<IProps> {
           <>
             {images && images.length > 0 && (
             <Image.PreviewGroup>
-              <Carousel effect="fade" draggable swipeToSlide arrows dots={false} infinite={false}>
+              <Carousel effect="fade" draggable swipeToSlide arrows dots={false} infinite>
                 {images.map((img) => (
                   <Image
                     preview={{ maskClosable: false }}

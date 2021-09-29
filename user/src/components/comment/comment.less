@@ -14,21 +14,35 @@
       border-radius: 50%;
       object-fit: cover;
     }
+    @media screen and (max-width: @mobile-screen) {
+      display: none;
+    }
   }
   .cmt-area {
-    padding: 0 10px;
+    padding: 0 5px 0 5px;
     width: 100%;
     position: relative;
     .ant-form-item {
-      margin: 0
+      margin: 0;
+      .ant-form-item-control {
+        padding: 0;
+      }
     }
-    .ant-input {
-      background: @light-grey;
-      padding: 5px 15px;
-      padding-right: 30px;
-      border: none;
-      height: 50px;
-      min-height: unset;
+    .ant-input-textarea  {
+      &::after {
+        font-size: 9px;
+      }
+      .ant-input {
+        background: @light-grey;
+        padding: 5px 15px;
+        padding-right: 30px;
+        border: none;
+        height: 50px;
+        min-height: unset;
+      }
+    }
+    @media screen and (max-width: @mobile-screen) {
+      padding: 0 5px 0 0;
     }
   }
   .submit-btn {
@@ -51,7 +65,7 @@
   border-radius: 5px;
   .cmt-item {
     display: flex;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     padding: 5px;
     img {
       width: 45px;
@@ -109,22 +123,27 @@
 }
 
 .reply-bl-form {
-  transition: all 0.3 ease-in-out;
-  .comment-form .cmt-user img {
-    width: 20px;
-    height: 20px;
+  display: none;
+  transition: all 0.3s ease-in-out;
+  .feed-comment {
+    .comment-form .cmt-user {
+      display: none;
+    }
+    .comment-form .cmt-area .ant-input {
+      background: @light-grey;
+      height: 40px;
+    }
   }
-  .comment-form .cmt-area .ant-input {
-    background: @light-grey;
-    height: 40px;
+  &.active {
+    display: block;
   }
 }
 .reply-bl-list {
   padding-left: 45px;
   transition: all 0.3 ease-in-out;
   .cmt-list .cmt-item img {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
   }
 }
 .view-cmt {
