@@ -48,7 +48,8 @@ export class StockProductListener {
     const products = await this.productService.findByIds(prodIds);
     products.forEach((prod) => {
       if (prod.type === PRODUCT_TYPE.PHYSICAL) {
-        this.productService.updateStock(prod._id, -1);
+        const p = transaction.products.find((produ) => `${produ.productId}` === `${prod._id}`);
+        this.productService.updateStock(prod._id, -(p.quantity || 1));
       }
       if (prod.type === PRODUCT_TYPE.DIGITAL && prod.digitalFileId) {
         this.sendDigitalProductLink(
