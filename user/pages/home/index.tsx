@@ -107,11 +107,8 @@ class HomePage extends PureComponent<IProps> {
       const performers = await (
         await performerService.randomSearch({ isFreeSubscription })
       ).data.data;
-      this.setState({ randomPerformers: performers });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('err_load_newest', await e);
-    } finally {
+      this.setState({ randomPerformers: performers, loadingPerformer: false });
+    } catch {
       this.setState({ loadingPerformer: false });
     }
   }
@@ -192,8 +189,7 @@ class HomePage extends PureComponent<IProps> {
                         </Link>
                       ))}
                     </div>
-                    {loadingPerformer && <div className="text-center"><Spin /></div>}
-                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found.</p>}
+                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
                   </div>
                   {/* <div className="filter-feed">
                     <FilterOutlined />
@@ -237,7 +233,7 @@ class HomePage extends PureComponent<IProps> {
                     {!loadingPerformer && randomPerformers && randomPerformers.length > 0 && (
                       <HomePerformers performers={randomPerformers} />
                     )}
-                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found.</p>}
+                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
                   </div>
                 </div>
               </div>

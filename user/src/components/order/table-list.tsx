@@ -43,13 +43,13 @@ const OrderTableList = ({
       key: 'productInfo',
       render(product) {
         return (
-          <Tooltip title={product.name}>
+          <Tooltip title={product?.name}>
             <div style={{
               maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
             }}
             >
-              <Link href={{ pathname: '/store', query: { id: product.slug || product._id } }} as={`/store/${product.slug || product._id}`}>
-                <a>{product.name}</a>
+              <Link href={{ pathname: '/store', query: { id: product?.slug || product?._id } }} as={`/store/${product?.slug || product?._id}`}>
+                <a>{product?.name}</a>
               </Link>
             </div>
           </Tooltip>

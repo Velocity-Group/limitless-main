@@ -78,14 +78,13 @@ export class HandleDeleteItemListener {
         transactionId: { $in: transactionIds }
       });
       await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
-      // eslint-disable-next-line no-restricted-syntax
-      for (const earning of earnings) {
-        await this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
-        // reduce performer balance
-        await this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
-        // remove earning;
-        await earning.remove();
-      }
+      await Promise.all(earnings.map((earning) => {
+        this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
+        this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
+        this.notifyPerformerBalance(earning);
+        this.notifyUserBalance(earning);
+        return earning.remove();
+      }));
     }
   }
 
@@ -111,20 +110,17 @@ export class HandleDeleteItemListener {
       });
       await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
       await Promise.all(earnings.map(async (earning) => {
-        // refund token to user
-        this.performerModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
+        this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
         this.notifyPerformerBalance(earning);
-        // reduce performer balance
         this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
         this.notifyUserBalance(earning);
-        // remove earning;
         return earning.remove();
       }));
     }
   }
 
   private async handleRefundOrder(event: QueueEvent) {
-    if (![EVENT.DELETED].includes(event.eventName)) {
+    if (![EVENT.CREATED].includes(event.eventName)) {
       return;
     }
     const { transactionId }: OrderDto = event.data;
@@ -134,26 +130,22 @@ export class HandleDeleteItemListener {
     if (!earning) return;
     await Promise.all([
       this.paymentTokenModel.updateOne({ _id: transactionId }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
-      // refund token to user
-      this.performerModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } }),
-      this.notifyPerformerBalance(earning),
-      // reduce performer balance
+      this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } }),
       this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } }),
       this.notifyUserBalance(earning),
-      // remove earning;
+      this.notifyPerformerBalance(earning),
       earning.remove()
     ]);
-    // TODO mailer
   }
 
   private async notifyPerformerBalance(earning: EarningModel) {
-    this.socketUserService.emitToUsers([earning.performerId], 'update_balance', {
+    this.socketUserService.emitToUsers(earning.performerId, 'update_balance', {
       token: -earning.netPrice
     });
   }
 
   private async notifyUserBalance(earning: EarningModel) {
-    this.socketUserService.emitToUsers([earning.userId], 'update_balance', {
+    this.socketUserService.emitToUsers(earning.userId, 'update_balance', {
       token: earning.grossPrice
     });
   }
