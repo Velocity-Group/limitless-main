@@ -1,18 +1,21 @@
-import { Layout, Alert, Button } from 'antd';
 import { PureComponent } from 'react';
-import { TransactionOutlined } from '@ant-design/icons';
-import PageHeading from '@components/common/page-heading';
+import { Layout, Button, Result } from 'antd';
+import { HomeIcon } from 'src/icons';
+import { HistoryOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { withRouter } from 'next/router';
 import { clearCart } from '@redux/cart/actions';
+import { updateCurrentUser } from '@redux/user/actions';
+import { authService } from '@services/auth.service';
+import { userService } from '@services/user.service';
 import { IUser, IUIConfig } from 'src/interfaces';
+import Router from 'next/router';
 
 interface IProps {
-  clearCart: Function;
   user: IUser;
+  clearCart: Function;
+  updateCurrentUser: Function;
   ui: IUIConfig;
-  router: any
 }
 
 class PaymentSuccess extends PureComponent<IProps> {
@@ -22,38 +25,52 @@ class PaymentSuccess extends PureComponent<IProps> {
 
   componentDidMount() {
     const { clearCart: clearCartHandler } = this.props;
+    this.updateCurrentUser();
     setTimeout(() => { clearCartHandler(); }, 1000);
     localStorage.setItem('cart', JSON.stringify([]));
   }
 
+  async updateCurrentUser() {
+    const { updateCurrentUser: handleUpdateUser } = this.props;
+    const token = authService.getToken();
+    if (token) {
+      const user = await userService.me({
+        Authorization: token
+      });
+      if (!user.data._id) {
+        return;
+      }
+      handleUpdateUser(user.data);
+    }
+  }
+
   render() {
-    const { ui, user, router } = this.props;
+    const { ui, user } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Payment Success
+            | Payment success
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Payment Success" icon={<TransactionOutlined />} />
-          {router?.query?.transactionId && (
-          <h4>
-            <a>
-              #
-              {router?.query?.transactionId}
-            </a>
-          </h4>
-          )}
-          <Alert
-            message="Payment success"
-            description={`Hi ${user.name || user.username || 'there'}, your payment has been successfully!`}
-            type="success"
-            showIcon
+          <Result
+            status="success"
+            title="Payment Success"
+            subTitle={`Hi ${user?.name || user?.username || 'there'}, your payment has been successfully processed`}
+            extra={[
+              <Button className="secondary" key="console" onClick={() => Router.push('/home')}>
+                <HomeIcon />
+                BACK HOME
+              </Button>,
+              <Button key="buy" className="primary" onClick={() => Router.push('/user/payment-history')}>
+                <HistoryOutlined />
+                PAYMENT HISTORY
+              </Button>
+            ]}
           />
-          <h4 className="text-center"><Button type="link" onClick={() => window.history.back()}>Click here to back</Button></h4>
         </div>
       </Layout>
     );
@@ -62,8 +79,8 @@ class PaymentSuccess extends PureComponent<IProps> {
 
 const mapStates = (state: any) => ({
   user: state.user.current,
-  ui: { ...state.ui }
+  ui: state.ui
 });
 
-const mapDispatch = { clearCart };
-export default connect(mapStates, mapDispatch)(withRouter(PaymentSuccess));
+const mapDispatch = { clearCart, updateCurrentUser };
+export default connect(mapStates, mapDispatch)(PaymentSuccess);

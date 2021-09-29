@@ -1,16 +1,14 @@
-import { Layout, Alert, Button } from 'antd';
-import { PayCircleOutlined } from '@ant-design/icons';
-import PageHeading from '@components/common/page-heading';
 import { PureComponent } from 'react';
+import { Layout, Result, Button } from 'antd';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import { withRouter } from 'next/router';
-import { IUser, IUIConfig } from '../../src/interfaces';
+import { IUser, IUIConfig } from 'src/interfaces';
+import { HomeOutlined, PhoneOutlined } from '@ant-design/icons';
+import Router from 'next/router';
 
 interface IProps {
   user: IUser;
   ui: IUIConfig;
-  router: any;
 }
 
 class PaymentCancel extends PureComponent<IProps> {
@@ -19,33 +17,32 @@ class PaymentCancel extends PureComponent<IProps> {
   static noredirect: boolean = true;
 
   render() {
-    const { user, ui, router } = this.props;
+    const { user, ui } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Payment Fail
+            | Payment fail
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Payment Fail" icon={<PayCircleOutlined />} />
-          {router?.query?.transactionId && (
-          <h4>
-            <a>
-              #
-              {router?.query?.transactionId}
-            </a>
-          </h4>
-          )}
-          <Alert
-            message="Payment fail"
-            description={`Hi ${user?.name || user?.username || 'there'}, your payment has been fail! Please contact us for more information.`}
-            type="error"
-            showIcon
+          <Result
+            status="error"
+            title="Payment Fail"
+            subTitle={`Hi ${user?.name || user?.username || 'there'}, your payment has been fail. Please contact us for more information.`}
+            extra={[
+              <Button className="secondary" key="console" onClick={() => Router.push('/home')}>
+                <HomeOutlined />
+                BACK HOME
+              </Button>,
+              <Button key="buy" className="primary" onClick={() => Router.push('/contact')}>
+                <PhoneOutlined />
+                CONTACT US
+              </Button>
+            ]}
           />
-          <h4 className="text-center"><Button type="link" onClick={() => window.history.back()}>Click here to back</Button></h4>
         </div>
       </Layout>
     );
@@ -54,8 +51,8 @@ class PaymentCancel extends PureComponent<IProps> {
 
 const mapStates = (state: any) => ({
   user: state.user.current,
-  ui: { ...state.ui }
+  ui: state.ui
 });
 
 const mapDispatch = {};
-export default connect(mapStates, mapDispatch)(withRouter(PaymentCancel));
+export default connect(mapStates, mapDispatch)(PaymentCancel);

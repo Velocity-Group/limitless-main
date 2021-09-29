@@ -23,11 +23,7 @@ export class ScrollListProduct extends PureComponent<IProps> {
           hasMore={canLoadmore}
           loader={null}
           next={loadMore}
-          endMessage={(
-            <p style={{ textAlign: 'center' }}>
-              {/* <b>Yay! No more video.</b> */}
-            </p>
-          )}
+          endMessage={null}
           scrollThreshold={0.9}
         >
           <PerformerListProduct products={items} />

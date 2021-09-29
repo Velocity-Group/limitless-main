@@ -1,64 +1,36 @@
 @import '../../../style/vars.less';
 
 .prd-card {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   position: relative;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
-  border-radius: 5px;
-  overflow: hidden;
-  border-radius: 0.5em;
-  .prd-thumb {
-    position: relative;
-    height: 220px;
-    img {
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
-    }
-    .bookmark-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      padding: 4px 8px;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 100;
-      &:hover {
-        .icon {
-          color: @theme-color;
-        }
-      }
-      .icon-active {
-        color: @theme-color;
-      }
-    }
-    @media screen and (max-width: @tablet-screen) {
-      height: 150px;
-    }
-  }
-  &:hover .prd-info {
-    color: @white;
-    background-color: @primary-color;
-    a {
-      color: @white;
-    }
-  }
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  height: 220px;
+  margin-bottom: 40px;
+
   .prd-info {
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
     text-transform: capitalize;
     font-family: @primary-font-bold;
-    color: @black;
+    color: @primary-color;
     background-color: @light-card;
-    padding: 1em;
+    padding: 5px 10px;
     text-align: center;
     font-weight: 600;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    a {
-      color: @black;
-    }
   }
+
   .label-wrapper {
     position: absolute;
     right: auto;
@@ -67,6 +39,7 @@
     display: flex;
     flex-direction: column;
     z-index: 1;
+
     .label-wrapper-price {
       color: @white;
       line-height: 2em;
@@ -78,6 +51,7 @@
       font-weight: 600;
       margin: 5px 0;
     }
+
     .label-wrapper-digital {
       color: @white;
       line-height: 2em;
@@ -89,5 +63,14 @@
       font-weight: 600;
       margin: 5px 0;
     }
+  }
+
+  &:hover .prd-info {
+    color: @white;
+    background-color: @primary-color;
+  }
+
+  @media screen and (max-width: @tablet-screen) {
+    height: 150px;
   }
 }
