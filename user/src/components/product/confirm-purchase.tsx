@@ -16,8 +16,23 @@ const layout = {
 };
 
 export class PurchaseProductForm extends PureComponent<IProps> {
+  state = {
+    quantity: 1
+  }
+
+  handleChangeQuantity = (quantity: number) => {
+    const { product } = this.props;
+    if (quantity < 1) return;
+    if (product.stock < quantity) {
+      this.setState({ quantity: product.stock });
+      return;
+    }
+    this.setState({ quantity });
+  }
+
   render() {
     const { product, onFinish, submiting } = this.props;
+    const { quantity } = this.state;
     const image = product?.image || '/static/no-image.jpg';
 
     return (
@@ -25,9 +40,9 @@ export class PurchaseProductForm extends PureComponent<IProps> {
         <div className="tip-performer">
           <img alt="p-avt" src={image} style={{ width: '100px', borderRadius: '5px' }} />
           <h4>
-            {product?.name}
+            {product.name}
           </h4>
-          <p>{product?.description}</p>
+          <p>{product.description || 'No description yet'}</p>
         </div>
         <Form
           {...layout}
@@ -49,7 +64,7 @@ export class PurchaseProductForm extends PureComponent<IProps> {
               rules={[{ required: true, message: 'Please input quantity' }]}
               label="Quantity"
             >
-              <InputNumber min={1} style={{ width: '100%' }} />
+              <InputNumber onChange={this.handleChangeQuantity} min={1} style={{ width: '100%' }} />
             </Form.Item>
             <Form.Item
               name="deliveryAddress"
@@ -82,7 +97,7 @@ export class PurchaseProductForm extends PureComponent<IProps> {
             >
               Confirm to purchase by &nbsp;
               <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 3px' }} />
-              {(product?.price || 0).toFixed(2)}
+              {(quantity * product.price).toFixed(2)}
             </Button>
           </div>
         </Form>

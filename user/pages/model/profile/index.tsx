@@ -42,7 +42,6 @@ interface IProps {
   error: any;
   currentUser: IUser;
   performer: IPerformer;
-  query: any;
   listProducts: Function;
   getVideos: Function;
   moreVideo: Function;
@@ -294,7 +293,7 @@ class PerformerProfile extends PureComponent<IProps> {
         feedPage: feedPage + 1
       }, () => getMoreFeed({
         ...query,
-        offset: feedPage * itemPerPage
+        offset: (feedPage + 1) * itemPerPage
       }));
     }
     if (tab === 'video') {
@@ -302,7 +301,7 @@ class PerformerProfile extends PureComponent<IProps> {
         videoPage: videoPage + 1
       }, () => getMoreVids({
         ...query,
-        offset: videoPage * itemPerPage
+        offset: (videoPage + 1) * itemPerPage
       }));
     }
     if (tab === 'photo') {
@@ -320,7 +319,7 @@ class PerformerProfile extends PureComponent<IProps> {
         productPage: productPage + 1
       }, () => getMoreProd({
         ...query,
-        offset: productPage * itemPerPage
+        offset: (productPage + 1) * itemPerPage
       }));
     }
   }

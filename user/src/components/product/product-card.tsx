@@ -17,13 +17,12 @@ export class ProductCard extends PureComponent<IProps, IStates> {
     const { product } = this.props;
     const image = product?.image || '/static/no-image.jpg';
     return (
-
       <Link
         href={{ pathname: '/store', query: { id: product.slug || product._id } }}
         as={`/store/${product.slug || product._id}`}
       >
         <a>
-          <div className="prd-card">
+          <div className="prd-card" style={{ backgroundImage: `url(${image})` }}>
             <div className="label-wrapper">
               {product.price && (
               <span className="label-wrapper-price">
@@ -46,14 +45,11 @@ export class ProductCard extends PureComponent<IProps, IStates> {
               <span className="label-wrapper-digital">Digital</span>
               )}
             </div>
-            <div className="prd-thumb">
-              <img alt="img" src={image} />
-            </div>
-            <div className="prd-info">
-              <Tooltip title={product.name}>
-                <a>{product.name}</a>
-              </Tooltip>
-            </div>
+            <Tooltip title={product.name}>
+              <div className="prd-info">
+                {product.name}
+              </div>
+            </Tooltip>
           </div>
         </a>
       </Link>

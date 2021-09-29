@@ -14,7 +14,6 @@ export interface IProduct {
   performer: any;
   createdAt: Date;
   updatedAt: Date;
-  quantity: number;
   isBookMarked: boolean;
 }
 
