@@ -88,7 +88,7 @@
 
     .lock-content {
       position: relative;
-      height: 450px;
+      height: 400px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -125,20 +125,24 @@
         align-items: center;
         justify-content: center;
         flex-direction: column;
+
         .anticon {
           font-size: 32px;
           color: @white;
         }
+
         .ant-btn {
           &.secondary {
             border-radius: 25px;
             font-size: 14px;
             font-family: @primary-font-bold;
           }
+
           &.ant-btn-link {
             .anticon {
               font-size: 14px;
             }
+
             font-size: 12px;
           }
         }
@@ -162,13 +166,12 @@
       }
 
       @media screen and (max-width: @mobile-screen) {
-        height: 300px;
+        height: 215px;
       }
     }
 
     .feed-text {
-      font-size: 14px;
-      margin-bottom: 15px;
+      margin-bottom: 5px;
 
       .ant-collapse {
         background-color: transparent;
@@ -177,7 +180,9 @@
           border: none;
 
           .ant-collapse-header {
-            padding-left: 0;
+            padding: 5px;
+            font-size: 12px;
+            color: @dark-grey;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -187,6 +192,15 @@
             .ant-collapse-header {
               display: none;
             }
+          }
+
+          .ant-collapse-content {
+            font-size: 12px;
+            color: @dark-grey;
+          }
+
+          .ant-collapse-arrow {
+            right: 0;
           }
         }
 
@@ -249,7 +263,7 @@
     width: 100%;
 
     .video-js {
-      height: 450px;
+      height: 400px;
       width: 100%;
 
       .vjs-big-play-button {
@@ -263,7 +277,7 @@
       }
 
       @media screen and (max-width: @mobile-screen) {
-        height: 300px;
+        height: 215px;
       }
     }
   }
@@ -354,7 +368,7 @@
     border-radius: 5px;
 
     .slick-slide {
-      height: 450px;
+      height: 400px;
 
       &>div {
         height: 100%;
@@ -368,7 +382,7 @@
       }
 
       @media screen and (max-width: @mobile-screen) {
-        height: 300px;
+        height: 215px;
       }
     }
   }
@@ -404,7 +418,7 @@
     font-weight: 600;
 
     @media screen and (max-width: @mobile-screen) {
-      height: 300px;
+      height: 215px;
     }
   }
 }
@@ -680,10 +694,12 @@
         display: inline-flex;
         justify-content: center;
         flex-direction: column;
+
         .anticon {
           font-size: 32px;
           color: @white;
         }
+
         .ant-btn {
           font-size: 11px;
           font-family: @primary-font-bold;

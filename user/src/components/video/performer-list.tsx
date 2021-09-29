@@ -1,7 +1,7 @@
 import { PureComponent } from 'react';
 import { Row, Col } from 'antd';
+import { IVideo } from 'src/interfaces/video';
 import { VideoCard } from '.';
-import { IVideo } from '../../interfaces/video';
 
 interface IProps {
   videos: any;

@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import { Alert, Spin } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PerformerListVideo } from '@components/video';
-import { IVideo } from '../../interfaces/video';
+import { IVideo } from 'src/interfaces';
 
 interface IProps {
   items: IVideo[];

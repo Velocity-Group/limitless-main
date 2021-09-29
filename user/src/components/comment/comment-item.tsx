@@ -9,8 +9,7 @@ import { CommentForm, ListComments } from '@components/comment';
 import {
   getComments, moreComment, createComment, deleteComment
 } from '@redux/comment/actions';
-import { IUser } from '@interfaces/user';
-import { IComment } from '../../interfaces/comment';
+import { IUser, IComment } from 'src/interfaces/index';
 
 interface IProps {
   item: IComment;
@@ -164,20 +163,18 @@ class CommentItem extends PureComponent<IProps> {
               </a>
               {canReply && <a aria-hidden className={!isReply ? 'cmt-reply' : 'cmt-reply active'} onClick={() => this.setState({ isReply: !isReply })}>Reply</a>}
             </div>
-            {isReply && (
-              <div className="reply-bl-form">
-                <div className="feed-comment">
-                  <CommentForm
-                    creator={user}
-                    onSubmit={this.handleComment.bind(this)}
-                    objectId={item._id}
-                    objectType="comment"
-                    requesting={commenting}
-                    isReply
-                  />
-                </div>
+            <div className={isReply ? 'reply-bl-form active' : 'reply-bl-form'}>
+              <div className="feed-comment">
+                <CommentForm
+                  creator={user}
+                  onSubmit={this.handleComment.bind(this)}
+                  objectId={item._id}
+                  objectType="comment"
+                  requesting={commenting}
+                  isReply
+                />
               </div>
-            )}
+            </div>
             {canReply && totalReply > 0 && (
               <div className="view-cmt">
                 <a aria-hidden onClick={this.onOpenComment.bind(this)}>

@@ -46,8 +46,8 @@ export class CommentForm extends PureComponent<IProps> {
     if (!data.content) {
       return message.error('Please add comment');
     }
-    if (data.content.length > 250) {
-      return message.error('Comment is over 250 characters');
+    if (data.content.length > 150) {
+      return message.error('Comment is over 150 characters');
     }
     data.objectId = objectId;
     data.objectType = objectType || 'video';
@@ -82,13 +82,13 @@ export class CommentForm extends PureComponent<IProps> {
       >
         <div className="comment-form">
           <div className="cmt-user">
-            <img alt="creator-img" src={creator && creator.avatar ? creator.avatar : '/static/no-avatar.png'} />
+            <img alt="creator-img" src={creator?.avatar || '/static/no-avatar.png'} />
           </div>
           <div className="cmt-area">
             <Form.Item
               name="content"
             >
-              <TextArea disabled={!creator || !creator._id} maxLength={250} minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
+              <TextArea disabled={!creator || !creator._id} maxLength={150} showCount minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
             <div className="grp-emotions">
               <SmileOutlined />

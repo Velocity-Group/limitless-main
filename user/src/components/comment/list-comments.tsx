@@ -1,8 +1,7 @@
 import { PureComponent } from 'react';
 import { Spin } from 'antd';
-import { IUser } from '@interfaces/index';
 import CommentItem from '@components/comment/comment-item';
-import { IComment } from '../../interfaces/comment';
+import { IComment, IUser } from 'src/interfaces/index';
 
 interface IProps {
   comments: IComment[];
@@ -21,8 +20,9 @@ export class ListComments extends PureComponent<IProps> {
 
     return (
       <div className="cmt-list">
-        {comments.length > 0 && comments.map((comment: IComment) => <CommentItem canReply={canReply} key={comment._id} item={comment} user={user} onDelete={onDelete} />)}
-        {requesting && <div className="text-center" style={{ margin: 10 }}><Spin /></div>}
+        {comments.map((comment: IComment) => <CommentItem canReply={canReply} key={comment._id} item={comment} user={user} onDelete={onDelete} />)}
+        {requesting && <div className="text-center" style={{ margin: 20 }}><Spin /></div>}
+        {!requesting && !comments.length && <div className="text-center" style={{ padding: '15px 5px' }}>Being the first to comment</div>}
       </div>
     );
   }

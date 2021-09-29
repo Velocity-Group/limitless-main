@@ -28,9 +28,9 @@ import { ReportForm } from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
 import Loader from '@components/common/base/loader';
+import { IFeed, IUser } from 'src/interfaces';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
-import { IFeed, IUser } from '../../interfaces';
 import './index.less';
 
 interface IProps {
@@ -295,7 +295,7 @@ class FeedCard extends Component<IProps> {
     const { polls } = this.state;
     const isExpired = new Date(feed.pollExpiredAt) < new Date();
     if (isExpired) {
-      message.error('Poll has already expired to vote');
+      message.error('Poll was expired to vote');
       return;
     }
     if (!window.confirm('Vote it?')) return;
@@ -306,12 +306,11 @@ class FeedCard extends Component<IProps> {
       await this.setState((prevState: any) => {
         const newItems = [...prevState.polls];
         newItems[index].totalVote += 1;
-        return { polls: newItems };
+        return { polls: newItems, requesting: false };
       });
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Something went wrong, please try again later');
-    } finally {
       this.setState({ requesting: false });
     }
   }

@@ -3,7 +3,7 @@ import {
   Alert, Spin, Row, Col
 } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { IPerformer } from '../../interfaces';
+import { IPerformer } from 'src/interfaces';
 import PerformerCard from './card';
 
 interface IProps {
