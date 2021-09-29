@@ -38,7 +38,7 @@ class Messages extends PureComponent<IProps> {
           </title>
         </Head>
         <Layout>
-          <div className="main-container" style={{ marginBottom: '70px' }}>
+          <div className="main-container">
             <Messenger toSource={query.toSource} toId={query.toId} />
           </div>
         </Layout>
