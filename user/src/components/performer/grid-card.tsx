@@ -22,7 +22,7 @@ export default class PerformerGridCard extends PureComponent<IProps> {
         as={`/${performer?.username || performer?._id}`}
       >
         <a>
-          <div className="grid-card" style={{ backgroundImage: `url(${performer?.avatar || '/no-avatar.png'})` }}>
+          <div className="grid-card" style={{ backgroundImage: `url(${performer?.avatar || '/static/no-avatar.png'})` }}>
             {performer?.isFreeSubscription && <span className="free-status">Free</span>}
             <span className={performer?.isOnline > 0 ? 'online-status active' : 'online-status'} />
             <div className="card-stat">
