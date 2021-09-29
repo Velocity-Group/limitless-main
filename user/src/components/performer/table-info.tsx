@@ -14,9 +14,9 @@ export class PerformerInfo extends PureComponent<IProps> {
     const country = countries.length && countries.find((c) => c.code === performer?.country);
     return (
       <div className="per-infor">
-        <Collapse className="bio" defaultActiveKey={['1']} bordered={false} accordion>
+        <Collapse defaultActiveKey={['1']} bordered={false} accordion>
           <Collapse.Panel header="BIO" key="1">
-            <p>{performer?.bio || 'No bio yet'}</p>
+            <p className="bio">{performer?.bio || 'No bio yet'}</p>
             <Descriptions className="performer-info">
               {performer?.country && (
                 <Descriptions.Item key="country" label={null}>

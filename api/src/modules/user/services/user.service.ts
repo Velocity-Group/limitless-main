@@ -128,6 +128,7 @@ export class UserService {
 
   public async update(id: string | ObjectId, payload: UserUpdatePayload, user?: UserDto): Promise<any> {
     const data = { ...payload } as any;
+    delete data.balance;
     const eUser = await this.userModel.findById(id);
     if (!eUser) {
       throw new EntityNotFoundException();

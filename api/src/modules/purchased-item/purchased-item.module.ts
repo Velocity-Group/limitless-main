@@ -1,7 +1,6 @@
 import { MongoDBModule, QueueModule } from 'src/kernel';
 import { Module, forwardRef } from '@nestjs/common';
 import { FeedModule } from 'src/modules/feed/feed.module';
-import { MessageModule } from 'src/modules/message/message.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
 import { PerformerAssetsModule } from '../performer-assets/performer-assets.module';
@@ -39,7 +38,6 @@ import { UserModule } from '../user/user.module';
     forwardRef(() => TokenPackageModule),
     forwardRef(() => SocketModule),
     forwardRef(() => FeedModule),
-    forwardRef(() => MessageModule),
     forwardRef(() => SubscriptionModule),
     forwardRef(() => StreamModule)
   ],

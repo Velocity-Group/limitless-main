@@ -20,6 +20,7 @@ interface IStates {
   order: IOrder;
   shippingCode: string;
   deliveryStatus: string;
+  submiting: boolean;
 }
 
 class OrderDetailPage extends PureComponent<IProps, IStates> {
@@ -32,7 +33,8 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
     this.state = {
       order: null,
       shippingCode: '',
-      deliveryStatus: ''
+      deliveryStatus: '',
+      submiting: false
     };
   }
 
@@ -48,11 +50,13 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       return;
     }
     try {
+      await this.setState({ submiting: true });
       await orderService.update(id, { deliveryStatus, shippingCode });
       message.success('Changes saved.');
       Router.push('/order');
     } catch (e) {
       message.error(getResponseError(e));
+      this.setState({ submiting: false });
     }
   }
 
@@ -71,7 +75,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
   }
 
   render() {
-    const { order } = this.state;
+    const { order, submiting } = this.state;
     return (
       <Layout>
         <Head>
@@ -159,7 +163,11 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 <div style={{ marginBottom: '10px' }}>
                   <strong>Delivery Status:</strong>
                   {' '}
-                  <Select onChange={(e) => this.setState({ deliveryStatus: e })} defaultValue={order.deliveryStatus}>
+                  <Select
+                    onChange={(e) => this.setState({ deliveryStatus: e })}
+                    defaultValue={order.deliveryStatus}
+                    disabled={submiting || order.deliveryStatus === 'refunded'}
+                  >
                     <Select.Option key="processing" value="processing" disabled>
                       Processing
                     </Select.Option>

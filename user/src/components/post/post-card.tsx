@@ -22,7 +22,6 @@ import { connect } from 'react-redux';
 import { TipPerformerForm } from '@components/performer/tip-form';
 import ReactMomentCountDown from 'react-moment-countdown';
 import moment from 'moment';
-// import { Twitter, Facebook } from 'react-social-sharing';
 import { VideoPlayer } from '@components/common/video-player';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { ReportForm } from '@components/report/report-form';
@@ -67,7 +66,6 @@ class FeedCard extends Component<IProps> {
     submiting: false,
     polls: [],
     requesting: false,
-    shareUrl: '',
     openSubscriptionModal: false,
     openReportModal: false
   }
@@ -81,8 +79,7 @@ class FeedCard extends Component<IProps> {
         isBought: feed.isBought,
         totalLike: feed.totalLike,
         totalComment: feed.totalComment,
-        polls: feed.polls ? feed.polls : [],
-        shareUrl: `${window.location.origin}/post/${feed._id}`
+        polls: feed.polls ? feed.polls : []
       });
       this.subscriptionType = feed?.performer?.isFreeSubscription ? 'free' : 'monthly';
     }
@@ -331,7 +328,7 @@ class FeedCard extends Component<IProps> {
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
-      shareUrl, openTeaser, openSubscriptionModal, openReportModal
+      openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought);
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
@@ -534,8 +531,6 @@ class FeedCard extends Component<IProps> {
               )}
             </div>
             <div className="action-item">
-              {/* <Twitter link={shareUrl} />
-              <Facebook link={shareUrl} /> */}
               <span aria-hidden className={openReportModal ? 'action-ico active' : 'action-ico'} onClick={() => this.setState({ openReportModal: true })}>
                 <Tooltip title="Report"><FlagOutlined /></Tooltip>
               </span>

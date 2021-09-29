@@ -62,7 +62,6 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       Router.back();
     } catch (e) {
       message.error(getResponseError(e));
-    } finally {
       this.setState({ submiting: false });
     }
   }
@@ -143,7 +142,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                           this.setState({ deliveryStatus: e });
                         }}
                         defaultValue={order.deliveryStatus}
-                        disabled={submiting}
+                        disabled={submiting || order.deliveryStatus === 'refunded'}
                         style={{ minWidth: '120px' }}
                       >
                         <Select.Option key="processing" value="processing">
@@ -161,7 +160,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                       </Select>
                     </div>
                     <div style={{ marginBottom: '10px' }}>
-                      <Button className="primary" onClick={this.onUpdate.bind(this)} disabled={submiting}>
+                      <Button className="primary" onClick={this.onUpdate.bind(this)} loading={submiting} disabled={submiting}>
                         Update
                       </Button>
                       <Button className="secondary" onClick={() => Router.back()} disabled={submiting}>
@@ -173,7 +172,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   <div style={{ marginBottom: '10px' }}>
                     Delivery Status:
                     {' '}
-                    <Tag color="green">Deliveried</Tag>
+                    <Tag color="green">Delivered</Tag>
                   </div>
                 )}
             </div>
