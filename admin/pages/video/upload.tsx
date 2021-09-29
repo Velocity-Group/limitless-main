@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import { message } from 'antd';
 import Page from '@components/common/layout/page';
 import { videoService } from '@services/video.service';

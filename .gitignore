@@ -52,6 +52,7 @@ Thumbs.db
 .next
 public
 
+*.lock
 package-lock.json
 obfuscator
 

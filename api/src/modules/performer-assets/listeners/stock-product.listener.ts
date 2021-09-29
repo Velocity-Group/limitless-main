@@ -46,12 +46,12 @@ export class StockProductListener {
     const performer = await this.performerService.findById(transaction.performerId);
     const user = await this.userService.findById(transaction.sourceId);
     const products = await this.productService.findByIds(prodIds);
-    products.forEach(async (prod) => {
+    products.forEach((prod) => {
       if (prod.type === PRODUCT_TYPE.PHYSICAL) {
-        await this.productService.updateStock(prod._id, -1);
+        this.productService.updateStock(prod._id, -1);
       }
       if (prod.type === PRODUCT_TYPE.DIGITAL && prod.digitalFileId) {
-        await this.sendDigitalProductLink(
+        this.sendDigitalProductLink(
           transaction,
           performer,
           user,

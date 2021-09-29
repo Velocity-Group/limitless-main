@@ -10,7 +10,7 @@ interface IProps{
 class CustomDocument extends Document<IProps> {
   static async getInitialProps(ctx) {
     const initialProps = await Document.getInitialProps(ctx);
-    const resp = await settingService.public();
+    const resp = await settingService.public('all', true);
     const settings = resp.data;
     return {
       ...initialProps,

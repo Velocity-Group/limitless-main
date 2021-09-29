@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import {
   message, Statistic, Row, Col
 } from 'antd';

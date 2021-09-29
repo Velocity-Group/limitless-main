@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import { message, Checkbox, Table } from 'antd';
 import Page from '@components/common/layout/page';
 import { utilsService, blockCountryService } from '@services/index';

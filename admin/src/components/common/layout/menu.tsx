@@ -1,5 +1,5 @@
 /* eslint-disable no-multiple-empty-lines */
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import { Menu } from 'antd';
 import Link from 'next/link';
 import Router from 'next/router';
