@@ -124,7 +124,9 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
         SETTING_KEYS.GOOGLE_RECAPTCHA_SITE_KEY,
         SETTING_KEYS.ENABLE_GOOGLE_RECAPTCHA,
         SETTING_KEYS.GOOGLE_CLIENT_ID,
-        SETTING_KEYS.CCBILL_ENABLE
+        SETTING_KEYS.CCBILL_ENABLE,
+        SETTING_KEYS.META_KEYWORDS,
+        SETTING_KEYS.META_DESCRIPTION
       ])
     )
   );
