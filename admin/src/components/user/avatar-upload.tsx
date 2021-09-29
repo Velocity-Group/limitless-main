@@ -75,10 +75,10 @@ export class AvatarUpload extends PureComponent<IProps, IState> {
 
   beforeUpload(file) {
     const { onBeforeUpload } = this.props;
-    const isLt2M = file.size / 1024 / 1024 < 5;
+    const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isLt2M) {
-      message.error('Image must smaller than 5MB!');
-      return true;
+      message.error(`Avatar must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+      return false;
     }
     onBeforeUpload && onBeforeUpload(file);
     return true;

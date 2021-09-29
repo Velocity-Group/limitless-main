@@ -378,9 +378,9 @@ class PerformerProfile extends PureComponent<IProps> {
           <meta name="twitter:image" content={performer?.avatar || '/static/no-avatar.png'} />
           <meta name="twitter:description" content={performer?.bio} />
         </Head>
-        <div className="top-profile">
-          <div className="main-container" style={{ height: '100%' }}>
-            <div className="bg-2nd" style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}>
+        <div className="main-container">
+          <div className="top-profile" style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}>
+            <div className="bg-2nd">
               <div className="top-banner">
                 <a aria-hidden className="arrow-back" onClick={() => Router.back()}>
                   <ArrowLeftOutlined />
@@ -390,7 +390,7 @@ class PerformerProfile extends PureComponent<IProps> {
                     {performer?.name || 'N/A'}
                     {' '}
                     {performer?.verifiedAccount && (
-                    <TickIcon />
+                      <TickIcon />
                     )}
                   </div>
                   <div className="tab-stat">
@@ -440,22 +440,22 @@ class PerformerProfile extends PureComponent<IProps> {
                 </div>
               </div>
               {!currentUser.isPerformer && (
-              <div className="drop-actions">
-                <Dropdown overlay={(
-                  <Menu key="menu_actions">
-                    <Menu.Item key="book_mark">
-                      <a aria-hidden onClick={this.handleBookmark.bind(this)}>
-                        {!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}
-                      </a>
-                    </Menu.Item>
-                  </Menu>
+                <div className="drop-actions">
+                  <Dropdown overlay={(
+                    <Menu key="menu_actions">
+                      <Menu.Item key="book_mark">
+                        <a aria-hidden onClick={this.handleBookmark.bind(this)}>
+                          {!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}
+                        </a>
+                      </Menu.Item>
+                    </Menu>
                 )}
-                >
-                  <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
-                    <MoreOutlined />
-                  </a>
-                </Dropdown>
-              </div>
+                  >
+                    <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
+                      <MoreOutlined />
+                    </a>
+                  </Dropdown>
+                </div>
               )}
             </div>
           </div>

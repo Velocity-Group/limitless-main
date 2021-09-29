@@ -177,7 +177,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                     <Select.Option key="delivered" value="delivered">
                       Delivered
                     </Select.Option>
-                    <Select.Option key="refunded" value="refunded">
+                    <Select.Option key="refunded" value="refunded" disabled={order.deliveryStatus !== 'delivered'}>
                       Refunded
                     </Select.Option>
                   </Select>

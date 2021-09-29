@@ -1,5 +1,5 @@
 import {
-  Layout, Button, message, Spin, Modal, Avatar, Tooltip
+  Layout, Button, message, Spin, Modal, Avatar, Tooltip, Image
 } from 'antd';
 import PageHeading from '@components/common/page-heading';
 import {
@@ -17,8 +17,9 @@ import { PurchaseProductForm } from '@components/product/confirm-purchase';
 import { updateBalance } from '@redux/user/actions';
 import {
   IProduct, IUser, IUIConfig, IError
-} from '../../src/interfaces';
+} from 'src/interfaces';
 import './store.less';
+import Router from 'next/router';
 
 interface IProps {
   user: IUser;
@@ -137,12 +138,12 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     try {
       await this.setState({ submiting: true });
       await purchaseTokenService.purchaseProduct(product._id, payload);
-      message.success('Payment success, please check on Order page for newest product status');
+      message.success('Payment success');
       handleUpdateBalance({ token: -product.price });
+      Router.replace('/user/token-transaction');
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ submiting: false, openPurchaseModal: false });
     }
   }
@@ -194,9 +195,10 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
             <div className="prod-card">
               {product && !loading ? (
                 <div className="prod-img">
-                  <img
+                  <Image
                     alt="product-img"
                     src={product?.image || '/static/empty_product.svg'}
+                    placeholder
                   />
                   {product.stock && product.type === 'physical' && (
                   <span className="prod-stock">

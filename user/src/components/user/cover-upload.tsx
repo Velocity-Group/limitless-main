@@ -12,7 +12,7 @@ function getBase64(img, callback) {
 function beforeUpload(file) {
   const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isLt2M) {
-    message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+    message.error(`Cover must be less than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
   }
   return isLt2M;
 }
@@ -74,7 +74,7 @@ export class CoverUpload extends PureComponent<IProps, IState> {
     const { loading } = this.state;
     const { headers, uploadUrl, options } = this.props;
     return (
-      <ImgCrop aspect={5 / 1} shape="rect" quality={1} modalTitle="Edit cover image (size dimension 7/1)" modalWidth={768}>
+      <ImgCrop aspect={6 / 1} shape="rect" quality={1} modalTitle="Edit cover image" modalWidth={768}>
         <Upload
           accept="image/*"
           name={options.fieldName || 'file'}
