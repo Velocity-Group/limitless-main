@@ -80,7 +80,8 @@ export class AccountForm extends PureComponent<IProps> {
             dateOfBirth: '',
             verifiedEmail: false,
             verifiedAccount: false,
-            verifiedDocument: false
+            verifiedDocument: false,
+            balance: 0
           }
         }
       >
@@ -207,7 +208,12 @@ export class AccountForm extends PureComponent<IProps> {
                 }
               ]}
             >
-              <DatePicker style={{ width: '100%' }} />
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="DD/MM/YYYY"
+                format="DD/MM/YYYY"
+                disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(14, 'year').endOf('day')}
+              />
             </Form.Item>
           </Col>
           <Col md={12} xs={12}>
@@ -310,6 +316,7 @@ export class AccountForm extends PureComponent<IProps> {
               <Select showSearch>
                 {countries.map((country) => (
                   <Select.Option key={country.code} value={country.code}>
+                    <img src={country.flag} alt="flag" width="20px" />
                     {country.name}
                   </Select.Option>
                 ))}
@@ -317,8 +324,8 @@ export class AccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
-            <Form.Item name="state" label="State/County/Province">
-              <Input placeholder="Enter the state (county)" />
+            <Form.Item name="state" label="State">
+              <Input />
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
@@ -342,20 +349,20 @@ export class AccountForm extends PureComponent<IProps> {
                 <Option key="white" value="white">
                   White
                 </Option>
-                <Option key="black" value="black">
-                  Black
-                </Option>
-                <Option key="asian" value="asian">
+                <Option key="Asian" value="asian">
                   Asian
                 </Option>
-                <Option key="latin" value="latin">
-                  Latin
+                <Option key="hispanic" value="hispanic">
+                  Hispanic
                 </Option>
-                <Option key="indian" value="indian">
-                  Indian
+                <Option key="latino" value="latino">
+                  Latino
                 </Option>
-                <Option key="" value="">
-                  Others
+                <Option key="blackOrAfricanAmerican" value="blackOrAfricanAmerican">
+                  Black or African American
+                </Option>
+                <Option key="nativeHawaiianOrOtherPacificIslander" value="nativeHawaiianOrOtherPacificIslander">
+                  Native Hawaiian or Other Pacific Islander
                 </Option>
               </Select>
             </Form.Item>
@@ -381,6 +388,9 @@ export class AccountForm extends PureComponent<IProps> {
                 <Option key="fit" value="fit">
                   Fit
                 </Option>
+                <Option key="gymBody" value="gymBody">
+                  Gym Body
+                </Option>
                 <Option key="muscular" value="muscular">
                   Muscular
                 </Option>
@@ -389,6 +399,12 @@ export class AccountForm extends PureComponent<IProps> {
                 </Option>
                 <Option key="tanned" value="tanned">
                   Tanned
+                </Option>
+                <Option key="runner" value="runner">
+                  Runner
+                </Option>
+                <Option key="swimmer" value="swimmer">
+                  Swimmer
                 </Option>
               </Select>
             </Form.Item>
@@ -429,6 +445,18 @@ export class AccountForm extends PureComponent<IProps> {
                 <Option key="green" value="green">
                   Green
                 </Option>
+                <Option key="amber" value="amber">
+                  Amber
+                </Option>
+                <Option key="gray" value="gray">
+                  Gray
+                </Option>
+                <Option key="hazel" value="hazel">
+                  Hazel
+                </Option>
+                <Option key="red" value="red">
+                  Red
+                </Option>
               </Select>
             </Form.Item>
           </Col>
@@ -436,16 +464,37 @@ export class AccountForm extends PureComponent<IProps> {
             <Form.Item name="hair" label="Hair">
               <Select>
                 <Option key="blonde" value="blonde">
-                  Blonde
+                  Blond
                 </Option>
                 <Option key="brown" value="brown">
                   Brown
+                </Option>
+                <Option key="brunet" value="brunet">
+                  Brunet
                 </Option>
                 <Option key="black" value="black">
                   Black
                 </Option>
                 <Option key="red" value="red">
-                  Red
+                  Red Head
+                </Option>
+                <Option key="blue" value="blue">
+                  Blue
+                </Option>
+                <Option key="green" value="green">
+                  Green
+                </Option>
+                <Option key="pink" value="pink">
+                  Pink
+                </Option>
+                <Option key="white" value="white">
+                  White
+                </Option>
+                <Option key="ginger" value="ginger">
+                  Ginger
+                </Option>
+                <Option key="multiColored" value="multiColored">
+                  MultiColored
                 </Option>
               </Select>
             </Form.Item>

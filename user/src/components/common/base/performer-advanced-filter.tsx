@@ -35,10 +35,16 @@ const eyeColors = [
 const hairColors = [
   { key: '', text: 'All hair colors' },
   { key: 'blond', text: 'Blond' },
-  { key: 'black', text: 'Black' },
   { key: 'brown', text: 'Brown' },
+  { key: 'brunet', text: 'Brunet' },
+  { key: 'black', text: 'Black' },
   { key: 'red', text: 'Red' },
-  { key: 'white', text: 'White' }
+  { key: 'blue', text: 'Blue' },
+  { key: 'green', text: 'Green' },
+  { key: 'pink', text: 'Pink' },
+  { key: 'white', text: 'White' },
+  { key: 'ginger', text: 'Ginger' },
+  { key: 'multiColored', text: 'MultiColored' }
 ];
 
 const buttSizes = [
@@ -50,12 +56,12 @@ const buttSizes = [
 
 const ethnicities = [
   { key: '', text: 'All ethnicities' },
-  { key: 'americanIndianOrAlaskaNative', text: 'American Indian or Alaska Native' },
+  { key: 'white', text: 'White' },
   { key: 'blackOrAfricanAmerican', text: 'Black or African American' },
-  { key: 'hispanicOrLatino', text: 'Hispanic or Latino' },
-  { key: 'nativeHawaiianOrOtherPacificIslander', text: 'Native Hawaiian or Other Pacific Islander' },
   { key: 'asian', text: 'Asian' },
-  { key: 'white', text: 'White' }
+  { key: 'hispanic', text: 'Hispanic' },
+  { key: 'latino', text: 'Latino' },
+  { key: 'nativeHawaiianOrOtherPacificIslander', text: 'Native Hawaiian or Other Pacific Islander' }
 ];
 
 const bodyTypes = [
@@ -66,9 +72,12 @@ const bodyTypes = [
   { key: 'large', text: 'Large' },
   { key: 'toned', text: 'Toned' },
   { key: 'fit', text: 'Fit' },
+  { key: 'gymBody', text: 'Gym Body' },
   { key: 'muscular', text: 'Muscular' },
   { key: 'ripped', text: 'Ripped' },
-  { key: 'tanned', text: 'Tanned' }
+  { key: 'tanned', text: 'Tanned' },
+  { key: 'runner', text: 'Runner' },
+  { key: 'swimmer', text: 'Swimmer' }
 ];
 
 const ages = [
