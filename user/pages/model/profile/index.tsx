@@ -355,28 +355,28 @@ class PerformerProfile extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${performer?.name || performer?.username || 'N/A'}`}
+            {`${ui?.siteName} | ${performer?.name || performer?.username}`}
           </title>
           <meta
             name="keywords"
             content={`${performer?.username}, ${performer?.name}`}
           />
           <meta name="description" content={performer?.bio} />
-          {/* OG tags */}
           <meta
             property="og:title"
-            content={`${ui?.siteName} | ${performer?.username}`}
-            key="title"
+            content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
           />
           <meta property="og:image" content={performer?.avatar || '/static/no-avatar.png'} />
-          <meta
-            property="og:keywords"
-            content={`${performer?.username}, ${performer?.name}`}
-          />
           <meta
             property="og:description"
             content={performer?.bio}
           />
+          <meta
+            name="twitter:title"
+            content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
+          />
+          <meta name="twitter:image" content={performer?.avatar || '/static/no-avatar.png'} />
+          <meta name="twitter:description" content={performer?.bio} />
         </Head>
         <div className="top-profile">
           <div className="main-container" style={{ height: '100%' }}>

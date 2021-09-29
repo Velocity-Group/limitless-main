@@ -13,7 +13,7 @@ const SocialSharePerformer = ({ performer, siteName }: IProps) => {
   const shareUrl = `${window.location.origin}/${performer?.username || performer?._id}`;
   return (
     <div className="social-share-btns">
-      <FacebookShareButton url={shareUrl} quote={performer?.bio || ''} hashtag={`#${performer?.username || performer?.name}`}>
+      <FacebookShareButton url={shareUrl} quote={performer?.bio || ''} hashtag={`#${performer?.username} #${performer?.name}`}>
         <FacebookIcon size={40} round />
       </FacebookShareButton>
       <TwitterShareButton url={shareUrl} title={performer?.bio || ''} hashtags={[siteName, performer?.username, performer?.name]}>
