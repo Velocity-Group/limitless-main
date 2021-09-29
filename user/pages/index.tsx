@@ -168,9 +168,32 @@ class Login extends PureComponent<IProps> {
         <Head>
           <title>
             {ui && ui.siteName}
-            {' '}
-            | Login
           </title>
+          <meta name="keywords" content={settings && settings.metaKeywords} />
+          <meta
+            name="description"
+            content={settings && settings.metaDescription}
+          />
+          {/* OG tags */}
+          <meta
+            property="og:title"
+            content={ui && ui.siteName}
+          />
+          <meta property="og:image" content={ui && ui.logo} />
+          <meta
+            property="og:description"
+            content={settings && settings.metaDescription}
+          />
+          {/* Twitter tags */}
+          <meta
+            name="twitter:title"
+            content={ui && ui.siteName}
+          />
+          <meta name="twitter:image" content={ui && ui.logo} />
+          <meta
+            name="twitter:description"
+            content={settings && settings.metaDescription}
+          />
         </Head>
         <div className="main-container">
           <div className="login-box">

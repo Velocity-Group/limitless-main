@@ -10,23 +10,26 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import Link from 'next/link';
+import Error from 'next/error';
 import { productService, purchaseTokenService, reactionService } from '@services/index';
 import { PerformerListProduct } from '@components/product/performer-list-product';
 import { PurchaseProductForm } from '@components/product/confirm-purchase';
 import { updateBalance } from '@redux/user/actions';
-import { IProduct, IUser, IUIConfig } from '../../src/interfaces';
+import {
+  IProduct, IUser, IUIConfig, IError
+} from '../../src/interfaces';
 import './store.less';
 
 interface IProps {
   user: IUser;
   ui: IUIConfig;
-  id: string;
+  error: IError;
   updateBalance: Function;
+  product: IProduct;
 }
 
 interface IStates {
   isBookmarked: boolean;
-  product: IProduct;
   relatedProducts: IProduct[];
   loading: boolean;
   submiting: boolean;
@@ -39,13 +42,24 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
   static noredirect = true;
 
   static async getInitialProps({ ctx }) {
-    return ctx.query;
+    const { query } = ctx;
+    try {
+      const product = (await (
+        await productService.userView(query.id, {
+          Authorization: ctx.token
+        })
+      ).data);
+      return {
+        product
+      };
+    } catch (e) {
+      return { error: await e };
+    }
   }
 
   constructor(props: IProps) {
     super(props);
     this.state = {
-      product: null,
       relatedProducts: [],
       loading: false,
       submiting: false,
@@ -54,19 +68,20 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     };
   }
 
-  async componentDidMount() {
-    await this.getProduct();
+  componentDidMount() {
+    this.updateProductShallowRoute();
   }
 
   async componentDidUpdate(prevProps) {
-    const { id } = this.props;
-    if (prevProps.id !== id) {
-      this.getProduct();
+    const { product } = this.props;
+    if (prevProps?.product?._id !== product?._id) {
+      this.updateProductShallowRoute();
     }
   }
 
   async handleBookmark() {
-    const { isBookmarked, product } = this.state;
+    const { isBookmarked } = this.state;
+    const { product } = this.props;
     try {
       await this.setState({ submiting: true });
       if (!isBookmarked) {
@@ -92,38 +107,29 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async getProduct() {
-    const { id } = this.props;
+  async updateProductShallowRoute() {
+    const { product } = this.props;
     try {
       await this.setState({ loading: true });
-      const product = (await (await productService.userView(id))
-        .data) as IProduct;
-      if (product) {
-        await this.setState({ product });
-        if (product.isBookMarked) {
-          await this.setState({ isBookmarked: true });
-        }
-        const relatedProducts = await (await productService.userSearch({
-          limit: 24,
-          excludedId: product._id,
-          performerId: product.performerId
-        })
-        ).data;
-        this.setState({
-          relatedProducts: relatedProducts.data
-        });
-      }
+      const relatedProducts = await (await productService.userSearch({
+        limit: 24,
+        excludedId: product._id,
+        performerId: product.performerId
+      })).data;
+      this.setState({
+        isBookmarked: product.isBookMarked,
+        relatedProducts: relatedProducts.data,
+        loading: false
+      });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ loading: false });
     }
   }
 
   async purchaseProduct(payload: any) {
-    const { user, updateBalance: handleUpdateBalance } = this.props;
-    const { product } = this.state;
+    const { user, updateBalance: handleUpdateBalance, product } = this.props;
     if (user.balance < product.price) {
       message.error('Your token balance is not enough');
       return;
@@ -142,9 +148,11 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
   }
 
   render() {
-    const { ui } = this.props;
+    const { ui, product, error } = this.props;
+    if (error) {
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
+    }
     const {
-      product,
       relatedProducts,
       isBookmarked,
       loading,
@@ -155,12 +163,31 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {ui && ui.siteName}
-            {' '}
-            |
-            {' '}
-            {product && product.name}
+            {`${ui?.siteName} | ${product?.name || 'Product'}`}
           </title>
+          <meta name="keywords" content={product?.description} />
+          <meta name="description" content={product?.description} />
+          {/* OG tags */}
+          <meta
+            property="og:title"
+            content={`${ui?.siteName} | ${product?.name || 'Product'}`}
+            key="title"
+          />
+          <meta property="og:image" content={product?.image || '/static/empty_product.svg'} />
+          <meta
+            property="og:description"
+            content={product?.description}
+          />
+          {/* Twitter tags */}
+          <meta
+            name="twitter:title"
+            content={`${ui.siteName} | ${product.name || 'Product'}`}
+          />
+          <meta name="twitter:image" content={product?.image || '/static/empty_product.svg'} />
+          <meta
+            name="twitter:description"
+            content={product.description}
+          />
         </Head>
         <div className="prod-main">
           <div className="main-container">

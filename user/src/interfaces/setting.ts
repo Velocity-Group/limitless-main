@@ -19,4 +19,6 @@ export interface ISettings {
   stripeEnable: boolean;
   ccbillEnable: boolean;
   bitpayEnable: boolean;
+  metaKeywords: string;
+  metaDescription: string;
 }

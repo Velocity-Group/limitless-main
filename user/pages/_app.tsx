@@ -124,7 +124,9 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
         SETTING_KEYS.GOOGLE_RECAPTCHA_SITE_KEY,
         SETTING_KEYS.ENABLE_GOOGLE_RECAPTCHA,
         SETTING_KEYS.GOOGLE_CLIENT_ID,
-        SETTING_KEYS.CCBILL_ENABLE
+        SETTING_KEYS.CCBILL_ENABLE,
+        SETTING_KEYS.META_KEYWORDS,
+        SETTING_KEYS.META_DESCRIPTION
       ])
     )
   );
@@ -184,6 +186,26 @@ class Application extends App<IApp> {
         <Head>
           <title>{settings?.siteName}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+          {/* GA code */}
+          {settings && settings.gaCode && [
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${settings.gaCode}`} />,
+            <script
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{
+                __html: `
+                 window.dataLayer = window.dataLayer || [];
+                 function gtag(){dataLayer.push(arguments);}
+                 gtag('js', new Date());
+                 gtag('config', '${settings.gaCode}');
+             `
+              }}
+            />
+          ]}
+          {/* extra script */}
+          {settings && settings.headerScript && (
+            // eslint-disable-next-line react/no-danger
+            <div dangerouslySetInnerHTML={{ __html: settings.headerScript }} />
+          )}
         </Head>
         <Socket>
           <BaseLayout layout={layout} maintenance={settings.maintenanceMode}>

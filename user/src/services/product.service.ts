@@ -37,8 +37,8 @@ export class ProductService extends APIRequest {
     );
   }
 
-  userView(productId: string) {
-    return this.get(`/user/performer-assets/products/${encodeURI(productId)}`);
+  userView(productId: string, headers?: any) {
+    return this.get(`/user/performer-assets/products/${encodeURI(productId)}`, headers);
   }
 
   findById(id: string) {

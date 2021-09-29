@@ -73,15 +73,21 @@ class PostDetails extends PureComponent<IProps> {
           {/* OG tags */}
           <meta
             property="og:title"
-            content={`${performer?.name}, ${performer?.username}`}
-            key="title"
+            content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
           />
-          <meta
-            property="og:keywords"
-            content={`${performer?.name}, ${performer?.username}, ${feed?.text}`}
-          />
+          <meta property="og:image" content={performer?.avatar || '/static/no-avatar.png'} />
           <meta
             property="og:description"
+            content={feed?.text}
+          />
+          {/* Twitter tags */}
+          <meta
+            name="twitter:title"
+            content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
+          />
+          <meta name="twitter:image" content={performer?.avatar || '/static/no-avatar.png'} />
+          <meta
+            name="twitter:description"
             content={feed?.text}
           />
         </Head>

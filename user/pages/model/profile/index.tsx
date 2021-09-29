@@ -23,17 +23,18 @@ import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
 import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
 import { PerformerInfo } from '@components/performer/table-info';
-import Link from 'next/link';
-import Router from 'next/router';
-import Error from 'next/error';
 import { ConfirmSubscriptionPerformerForm, TipPerformerForm } from '@components/performer';
 import ShareButtons from '@components/performer/share-profile';
 import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
+import { VideoPlayer } from '@components/common';
 import {
   IPerformer, IUser, IUIConfig, IFeed, StreamSettings
 } from 'src/interfaces';
 import { shortenLargeNumber } from '@lib/index';
+import Link from 'next/link';
+import Router from 'next/router';
+import Error from 'next/error';
 import '@components/performer/performer.less';
 
 interface IProps {
@@ -355,28 +356,28 @@ class PerformerProfile extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${performer?.name || performer?.username || 'N/A'}`}
+            {`${ui?.siteName} | ${performer?.name || performer?.username}`}
           </title>
           <meta
             name="keywords"
             content={`${performer?.username}, ${performer?.name}`}
           />
           <meta name="description" content={performer?.bio} />
-          {/* OG tags */}
           <meta
             property="og:title"
-            content={`${ui?.siteName} | ${performer?.username}`}
-            key="title"
+            content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
           />
           <meta property="og:image" content={performer?.avatar || '/static/no-avatar.png'} />
-          <meta
-            property="og:keywords"
-            content={`${performer?.username}, ${performer?.name}`}
-          />
           <meta
             property="og:description"
             content={performer?.bio}
           />
+          <meta
+            name="twitter:title"
+            content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
+          />
+          <meta name="twitter:image" content={performer?.avatar || '/static/no-avatar.png'} />
+          <meta name="twitter:description" content={performer?.bio} />
         </Head>
         <div className="top-profile">
           <div className="main-container" style={{ height: '100%' }}>
@@ -595,7 +596,9 @@ class PerformerProfile extends PureComponent<IProps> {
                   {' '}
                   {performer?.durationFreeSubscriptionDays || 1}
                   {' '}
-                  DAYS THEN $
+                  {performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
+                  {' '}
+                  THEN $
                   {performer?.monthlyPrice.toFixed(2)}
                   {' '}
                   MONTHLY LATER
@@ -617,7 +620,7 @@ class PerformerProfile extends PureComponent<IProps> {
               <TabPane tab={<FireOutlined />} key="post">
                 <div className="heading-tab">
                   <h4>
-                    {totalFeed}
+                    {totalFeed > 0 && totalFeed}
                     {' '}
                     POST
                   </h4>
@@ -637,7 +640,7 @@ class PerformerProfile extends PureComponent<IProps> {
               <TabPane tab={<VideoCameraOutlined />} key="video">
                 <div className="heading-tab">
                   <h4>
-                    {totalVideos}
+                    {totalVideos > 0 && totalVideos}
                     {' '}
                     VIDEO
                   </h4>
@@ -655,7 +658,7 @@ class PerformerProfile extends PureComponent<IProps> {
               <TabPane tab={<PictureOutlined />} key="photo">
                 <div className="heading-tab">
                   <h4>
-                    {totalGalleries}
+                    {totalGalleries > 0 && totalGalleries}
                     {' '}
                     GALLERY
                   </h4>
@@ -673,7 +676,7 @@ class PerformerProfile extends PureComponent<IProps> {
               <TabPane tab={<ShopOutlined />} key="store">
                 <div className="heading-tab">
                   <h4>
-                    {totalProducts}
+                    {totalProducts > 0 && totalProducts}
                     {' '}
                     PRODUCT
                   </h4>
@@ -716,12 +719,18 @@ class PerformerProfile extends PureComponent<IProps> {
                 </Button>
               ]}
             >
-              <video
-                autoPlay
-                src={performer?.welcomeVideoPath}
-                controls
-                id="welcome-video"
-                style={{ width: '100%' }}
+              <VideoPlayer {...{
+                key: `${performer._id}`,
+                autoplay: true,
+                controls: true,
+                playsinline: true,
+                sources: [
+                  {
+                    src: performer?.welcomeVideoPath,
+                    type: 'video/mp4'
+                  }
+                ]
+              }}
               />
             </Modal>
         )}

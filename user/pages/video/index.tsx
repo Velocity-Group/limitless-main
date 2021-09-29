@@ -92,7 +92,33 @@ class VideoViewPage extends PureComponent<IProps> {
   };
 
   componentDidMount() {
-    const { video, getRelated: handleGetRelated } = this.props;
+    this.onShallowRouteChange();
+  }
+
+  componentDidUpdate(prevProps) {
+    const {
+      video, commentMapping, comment
+    } = this.props;
+    const { totalComment } = this.state;
+    if (prevProps.video._id !== video._id) {
+      this.onShallowRouteChange();
+    }
+    if (
+      (!prevProps.comment.data
+        && comment.data
+        && comment.data.objectId === video._id)
+      || (prevProps.commentMapping[video._id]
+        && totalComment !== commentMapping[video._id].total)
+    ) {
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({ totalComment: commentMapping[video._id].total });
+    }
+  }
+
+  onShallowRouteChange() {
+    const {
+      video, getRelated: handleGetRelated
+    } = this.props;
     this.setState({
       videoStats: video.stats,
       isLiked: video.isLiked,
@@ -105,30 +131,6 @@ class VideoViewPage extends PureComponent<IProps> {
       excludedId: video._id,
       limit: 24
     });
-  }
-
-  componentDidUpdate(prevProps) {
-    const {
-      video, commentMapping, comment, getRelated: handleGetRelated
-    } = this.props;
-    const { totalComment } = this.state;
-    if (prevProps.video._id !== video._id) {
-      handleGetRelated({
-        performerId: video.performerId,
-        excludedId: video._id,
-        limit: 24
-      });
-    }
-    if (
-      (!prevProps.comment.data
-        && comment.data
-        && comment.data.objectId === video._id)
-      || (prevProps.commentMapping[video._id]
-        && totalComment !== commentMapping[video._id].total)
-    ) {
-      // eslint-disable-next-line react/no-did-update-set-state
-      this.setState({ totalComment: commentMapping[video._id].total });
-    }
   }
 
   onChangeTab(tab: string) {
@@ -346,21 +348,25 @@ class VideoViewPage extends PureComponent<IProps> {
             {' '}
             {video.title || 'Video'}
           </title>
-          <meta name="keywords" content={video.description} />
           <meta name="description" content={video.description} />
           {/* OG tags */}
           <meta
             property="og:title"
-            content={
-              ui
-              && `${ui.siteName} | ${video.title || 'Video'}`
-            }
-            key="title"
+            content={`${ui.siteName} | ${video.title || 'Video'}`}
           />
           <meta property="og:image" content={thumbUrl} />
-          <meta property="og:keywords" content={video.description} />
           <meta
             property="og:description"
+            content={video.description}
+          />
+          {/* Twitter tags */}
+          <meta
+            name="twitter:title"
+            content={`${ui.siteName} | ${video.title || 'Video'}`}
+          />
+          <meta name="twitter:image" content={thumbUrl} />
+          <meta
+            name="twitter:description"
             content={video.description}
           />
         </Head>
