@@ -38,8 +38,6 @@ async function auth(ctx: NextPageContext) {
     // TODO - move to a service
     const { token } = nextCookie(ctx);
     if (!token) {
-      // log out and redirect to login page
-      // TODO - reset app state?
       redirectLogin(ctx);
       return;
     }

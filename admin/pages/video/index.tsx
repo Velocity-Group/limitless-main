@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
-import { message } from 'antd';
+import { PureComponent } from 'react';
+import { message, Layout } from 'antd';
 import Page from '@components/common/layout/page';
 import { videoService } from '@services/video.service';
 import { SearchFilter } from '@components/common/search-filter';
@@ -41,10 +41,10 @@ class Videos extends PureComponent<IProps> {
     this.search();
   }
 
-  handleTableChange = (pagination, filters, sorter) => {
+  handleTableChange = async (pagination, filters, sorter) => {
     const pager = { ...pagination };
     pager.current = pagination.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
       sortBy: sorter.field || 'createdAt',
       sort: sorter.order
@@ -112,7 +112,7 @@ class Videos extends PureComponent<IProps> {
     const statuses = [
       {
         key: '',
-        text: 'All'
+        text: 'All status'
       },
       {
         key: 'active',
@@ -125,7 +125,7 @@ class Videos extends PureComponent<IProps> {
     ];
 
     return (
-      <>
+      <Layout>
         <Head>
           <title>Videos</title>
         </Head>
@@ -137,7 +137,6 @@ class Videos extends PureComponent<IProps> {
             onSubmit={this.handleFilter.bind(this)}
             performerId={performerId || ''}
           />
-          <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
             <TableListVideo
               dataSource={list}
@@ -149,7 +148,7 @@ class Videos extends PureComponent<IProps> {
             />
           </div>
         </Page>
-      </>
+      </Layout>
     );
   }
 }

@@ -1,11 +1,9 @@
-import * as React from 'react';
-import { IAppConfig } from 'src/interfaces';
+import { PureComponent } from 'react';
 import PrimaryLayout from './primary-layout';
 import PublicLayout from './public-layout';
 
 interface DefaultProps {
   children: any;
-  appConfig?: IAppConfig;
   layout?: string;
 }
 
@@ -14,14 +12,12 @@ const LayoutMap = {
   public: PublicLayout
 };
 
-export default class BaseLayout extends React.PureComponent<DefaultProps> {
+export default class BaseLayout extends PureComponent<DefaultProps> {
   render() {
     const { children, layout } = this.props;
     const Container = layout && LayoutMap[layout] ? LayoutMap[layout] : LayoutMap.primary;
     return (
-      <>
-        <Container>{children}</Container>
-      </>
+      <Container>{children}</Container>
     );
   }
 }

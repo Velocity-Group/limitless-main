@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import Page from '@components/common/layout/page';
 import { message } from 'antd';
 import { bannerService } from '@services/banner.service';

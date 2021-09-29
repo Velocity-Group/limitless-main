@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import Head from 'next/head';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import { message } from 'antd';
 import Page from '@components/common/layout/page';
 import { orderService } from '@services/index';

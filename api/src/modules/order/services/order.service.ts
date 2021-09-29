@@ -94,7 +94,7 @@ export class OrderService {
     ]);
 
     const orders = data.map((v) => new OrderDto(v));
-    orders.forEach(async (order) => {
+    orders.forEach((order) => {
       if (order.performerId) {
         const performerInfo = performers.find(
           (t) => t._id.toString() === order.performerId.toString()
@@ -211,7 +211,7 @@ export class OrderService {
       this.productService.findByIds(productIds)
     ]);
     const orders = data.map((v) => new OrderDto(v));
-    orders.forEach(async (order) => {
+    orders.forEach((order) => {
       if (order.performerId) {
         const performerInfo = performers.find(
           (t) => t._id.toString() === order.performerId.toString()

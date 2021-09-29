@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { PureComponent, createRef } from 'react';
 import {
   Form, Input, Select, Upload, Button, message, Progress, Switch, DatePicker,
@@ -48,7 +47,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
     if (video) {
       this.setState(
         {
-          previewThumbnail: video?.thumbnail?.url || video?.thumbnail?.thumbnails[0] || '',
+          previewThumbnail: video?.thumbnail?.url || '',
           previewVideo: video?.video?.url || '',
           isSale: video.isSale,
           previewTeaserVideo: video?.teaser?.url || '',

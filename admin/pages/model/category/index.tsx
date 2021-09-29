@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import Head from 'next/head';
 import Link from 'next/link';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import {
   Table, message, Breadcrumb, Dropdown, Menu, Button
 } from 'antd';

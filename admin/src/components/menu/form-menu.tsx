@@ -1,5 +1,5 @@
 /* eslint-disable prefer-promise-reject-errors */
-import { PureComponent, createRef, Fragment } from 'react';
+import { PureComponent, createRef } from 'react';
 import {
   Form, Input, Button, Select, Switch, InputNumber, Popover
 } from 'antd';

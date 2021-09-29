@@ -1,5 +1,5 @@
 import { PureComponent } from 'react';
-import { Table, Tag } from 'antd';
+import { Table, Tag, Tooltip } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
@@ -38,7 +38,19 @@ export class TableListVideo extends PureComponent<IProps> {
       },
       {
         title: 'Title',
-        dataIndex: 'title'
+        dataIndex: 'title',
+        render(title) {
+          return (
+            <Tooltip title={title}>
+              <div style={{
+                maxWidth: 150, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'
+              }}
+              >
+                {title}
+              </div>
+            </Tooltip>
+          );
+        }
       },
       {
         title: 'PPV?',

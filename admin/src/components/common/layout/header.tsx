@@ -1,4 +1,4 @@
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import { Layout, Menu, Avatar } from 'antd';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';

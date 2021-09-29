@@ -2,7 +2,7 @@ import { message } from 'antd';
 import Head from 'next/head';
 import { BreadcrumbComponent } from '@components/common/breadcrumb';
 import Page from '@components/common/layout/page';
-import { PureComponent, Fragment } from 'react';
+import { PureComponent } from 'react';
 import { SearchFilter } from '@components/common/search-filter';
 import { TableListSubscription } from '@components/subscription/table-list-subscription';
 import { ISubscription } from 'src/interfaces';
