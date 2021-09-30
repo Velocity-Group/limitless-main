@@ -429,7 +429,7 @@ export class PaymentService {
       await subscription.save();
       await Promise.all([
         this.performerService.updateSubscriptionStat(subscription.performerId, -1),
-        this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
+        this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
       ]);
       return { success: true };
     }
@@ -451,7 +451,7 @@ export class PaymentService {
         await subscription.save();
         await Promise.all([
           this.performerService.updateSubscriptionStat(subscription.performerId, -1),
-          this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
+          this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
         ]);
         return { success: true };
       }
@@ -551,7 +551,7 @@ export class PaymentService {
       await subscription.save();
       await Promise.all([
         this.performerService.updateSubscriptionStat(subscription.performerId, -1),
-        this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
+        this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
       ]);
       return { success: true };
     }
@@ -561,7 +561,7 @@ export class PaymentService {
     await subscription.save();
     await Promise.all([
       this.performerService.updateSubscriptionStat(subscription.performerId, -1),
-      this.userService.updateStats(subscription.userId, { totalSubscriptions: -1 })
+      this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
     ]);
     return { success: true };
   }

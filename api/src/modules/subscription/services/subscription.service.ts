@@ -149,7 +149,7 @@ export class SubscriptionService {
       await existSubscription.save();
       await Promise.all([
         this.performerService.updateSubscriptionStat(existSubscription.performerId, 1),
-        this.userService.updateStats(existSubscription.userId, { totalSubscriptions: 1 })
+        this.userService.updateStats(existSubscription.userId, { 'stats.totalSubscriptions': 1 })
       ]);
       return new SubscriptionDto(existSubscription);
     }
@@ -159,7 +159,7 @@ export class SubscriptionService {
     const newSubscription = await this.subscriptionModel.create(payload);
     await Promise.all([
       this.performerService.updateSubscriptionStat(newSubscription.performerId, 1),
-      this.userService.updateStats(newSubscription.userId, { totalSubscriptions: 1 })
+      this.userService.updateStats(newSubscription.userId, { 'stats.totalSubscriptions': 1 })
     ]);
     return new SubscriptionDto(newSubscription);
   }
