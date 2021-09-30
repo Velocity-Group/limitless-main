@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-console */
 import {
   Injectable,
   Inject,
@@ -744,13 +742,14 @@ export class PerformerService {
 
   public async updateSubscriptionStat(performerId: string | ObjectId, num = 1) {
     const performer = await this.performerModel.findById(performerId);
-    if (!performer) return false;
+    if (!performer) return;
     const minimumVerificationNumber = await this.settingService.getKeyValue(SETTING_KEYS.PERFORMER_VERIFY_NUMBER) || 5;
-    return this.performerModel.updateOne(
+    const verifiedAccount = num === 1 ? performer.stats.subscribers >= (minimumVerificationNumber - 1) : (performer.stats.subscribers - 1) < minimumVerificationNumber;
+    await this.performerModel.updateOne(
       { _id: performerId },
       {
         $inc: { 'stats.subscribers': num },
-        verifiedAccount: (performer.stats.subscribers === (minimumVerificationNumber - 1)) && num === 1
+        verifiedAccount
       }
     );
   }

@@ -68,6 +68,12 @@ export class TransactionSubscriptionListener {
     const startRecurringDate = expiredAt;
     const nextRecurringDate = expiredAt;
     if (existSubscription) {
+      if (existSubscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) {
+        await Promise.all([
+          this.performerService.updateSubscriptionStat(existSubscription.performerId, 1),
+          this.userService.updateStats(existSubscription.userId, { 'stats.totalSubscriptions': 1 })
+        ]);
+      }
       existSubscription.paymentGateway = transaction.paymentGateway;
       existSubscription.expiredAt = new Date(expiredAt);
       existSubscription.updatedAt = new Date();
@@ -101,7 +107,7 @@ export class TransactionSubscriptionListener {
     });
     await Promise.all([
       this.performerService.updateSubscriptionStat(newSubscription.performerId, 1),
-      this.userService.updateStats(newSubscription.userId, { totalSubscriptions: 1 })
+      this.userService.updateStats(newSubscription.userId, { 'stats.totalSubscriptions': 1 })
     ]);
   }
 }
