@@ -511,7 +511,7 @@ class FeedCard extends Component<IProps> {
         <div className="feed-bottom">
           <div className="feed-actions">
             <div className="action-item">
-              <span aria-hidden className={isLiked ? 'action-ico liked' : 'action-ico'} onClick={this.handleLike.bind(this)}>
+              <span aria-hidden className={isLiked ? 'action-ico active' : 'action-ico'} onClick={this.handleLike.bind(this)}>
                 <HeartOutlined />
                 {' '}
                 {shortenLargeNumber(totalLike)}
