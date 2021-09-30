@@ -1,5 +1,5 @@
 import { PureComponent } from 'react';
-import { cookieService, blockService } from '@services/index';
+import { blockService } from '@services/index';
 import BlankLayout from './blank-layout';
 import PrimaryLayout from './primary-layout';
 import MaintenaceLayout from './maintenance-layout';
@@ -26,15 +26,9 @@ export default class BaseLayout extends PureComponent<DefaultProps> {
   }
 
   async componentDidMount() {
-    const checkGeo = cookieService.getCookie('checkGeoBlock');
-    checkGeo === 'true' && this.setState({ geoBlocked: true });
-    if (!checkGeo) {
-      const checkBlock = await blockService.checkCountryBlock();
-      // set timout check every 5 minutes
-      if (checkBlock?.data?.blocked) {
-        cookieService.setCookie('checkGeoBlock', 'true', 5);
-        this.setState({ geoBlocked: true });
-      }
+    const checkBlock = await blockService.checkCountryBlock();
+    if (checkBlock?.data?.blocked) {
+      this.setState({ geoBlocked: true });
     }
   }
 
