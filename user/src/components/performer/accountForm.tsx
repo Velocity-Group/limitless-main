@@ -232,7 +232,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
               <Input placeholder="user1, john99,..." />
             </Form.Item>
           </Col>
-          <Col lg={12} md={12} xs={12}>
+          <Col lg={24} md={24} xs={24}>
             <Form.Item
               name="email"
               label={(

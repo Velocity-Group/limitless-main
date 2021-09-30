@@ -518,7 +518,7 @@ export class AuthService {
       to: source.email,
       subject: 'Verify your email address',
       data: {
-        source,
+        name: source?.name || source?.username || 'there',
         verificationLink,
         siteName
       },
