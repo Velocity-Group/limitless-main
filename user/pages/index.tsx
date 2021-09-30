@@ -16,6 +16,7 @@ import Router from 'next/router';
 import { TwitterOutlined } from '@ant-design/icons';
 import GoogleLogin from 'react-google-login';
 import { isEmail } from '@lib/string';
+import Loader from '@components/common/base/loader';
 // import { GoogleReCaptcha } from '@components/common';
 
 interface IProps {
@@ -303,6 +304,7 @@ class Login extends PureComponent<IProps> {
             </Row>
           </div>
         </div>
+        {isLoading && <Loader />}
       </Layout>
     );
   }
