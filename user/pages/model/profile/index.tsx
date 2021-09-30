@@ -13,11 +13,10 @@ import {
 } from 'src/services';
 import Head from 'next/head';
 import {
-  ArrowLeftOutlined, FireOutlined, EditOutlined, ShareAltOutlined,
-  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined,
-  HeartOutlined, DollarOutlined, MessageOutlined
+  ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined,
+  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined
 } from '@ant-design/icons';
-import { TickIcon } from 'src/icons';
+import { TickIcon, ShareIcon, MessageIcon } from 'src/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
@@ -497,25 +496,24 @@ class PerformerProfile extends PureComponent<IProps> {
                     </Button>
                   </Tooltip>
                   <Tooltip title="Send Message">
-                    <Button className="normal">
-                      <Link
-                        href={{
-                          pathname: '/messages',
-                          query: {
-                            toSource: 'performer',
-                            toId: (performer?._id) || ''
-                          }
-                        }}
-                      >
-                        <MessageOutlined />
-                      </Link>
+                    <Button
+                      className="normal"
+                      onClick={() => Router.push({
+                        pathname: '/messages',
+                        query: {
+                          toSource: 'performer',
+                          toId: (performer?._id) || ''
+                        }
+                      })}
+                    >
+                      <MessageIcon />
                     </Button>
                   </Tooltip>
                   <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
                     <Button
                       className="normal"
                     >
-                      <ShareAltOutlined />
+                      <ShareIcon />
                     </Button>
                   </Popover>
                 </div>

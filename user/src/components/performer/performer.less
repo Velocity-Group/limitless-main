@@ -385,7 +385,7 @@
 }
 
 .model-card {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-shadow: 1px 1px 2px 0px rgba(0,0,0,0.75);
   position: relative;
   transition: all 0.3s ease-in-out;
   height: 130px;
@@ -393,14 +393,14 @@
   background-position: center;
   background-repeat: no-repeat;
   border-radius: 5px;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
   overflow: hidden;
 
   .card-img {
     position: absolute;
     top: calc(50% - 40px);
     left: 30px;
-    overflow: hidden;
+    z-index: 1;
 
     .ant-avatar {
       width: 80px;
@@ -418,6 +418,7 @@
     bottom: 30px;
     left: 35px;
     opacity: 0.8;
+    z-index: 1;
 
     &.active {
       animation-name: twinkle;
@@ -506,7 +507,7 @@
     .anticon {
       margin-left: 2px;
       color: @primary-color;
-      font-size: 18px;
+      font-size: 16px;
     }
 
     p {

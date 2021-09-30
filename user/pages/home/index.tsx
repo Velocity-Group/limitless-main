@@ -1,5 +1,5 @@
 import {
-  Layout, message, Tooltip, Alert, Input, Spin
+  Layout, message, Tooltip, Alert, Input
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -184,7 +184,7 @@ class HomePage extends PureComponent<IProps> {
                         <Link key={per._id} href={{ pathname: '/model/profile', query: { username: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
                           <div className="story-per-card" title={per?.name || per?.username || 'N/A'}>
                             <img className="per-avatar" alt="avatar" src={per?.avatar || '/static/no-avatar.png'} />
-                            <div className="per-name">{per?.name || per?.username || 'N/A'}</div>
+                            <Tooltip key={per._id} title={per?.name || per?.username}><div className="per-name">{per?.name || per?.username || 'N/A'}</div></Tooltip>
                           </div>
                         </Link>
                       ))}
