@@ -55,7 +55,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Original_price',
+      title: 'Original price',
       dataIndex: 'originalPrice',
       key: 'originalPrice',
       render(originalPrice) {
@@ -84,7 +84,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'End_price',
+      title: 'End price',
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
@@ -120,7 +120,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Last_updated_at',
+      title: 'Update at',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
@@ -130,8 +130,8 @@ const PaymentTableList = ({
     {
       title: 'Actions',
       render(record) {
-        if (record.status === 'require_authentication' && record.stripeConfirmUrl && !record.liveMode) {
-          return <Link href={record.stripeConfirmUrl}><a>Confirm</a></Link>;
+        if (record.status === 'require_authentication' && record.stripeConfirmUrl) {
+          return <Link href={record.stripeConfirmUrl}><a>Confirm payment</a></Link>;
         }
         return null;
       }

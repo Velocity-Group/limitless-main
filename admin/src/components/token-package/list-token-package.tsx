@@ -50,7 +50,8 @@ export const TableListToken = ({
     },
     {
       title: 'Ordering',
-      dataIndex: 'ordering'
+      dataIndex: 'ordering',
+      sorter: true
     },
     {
       title: 'Status',
@@ -66,6 +67,7 @@ export const TableListToken = ({
     {
       title: 'Created At',
       dataIndex: 'createdAt',
+      sorter: true,
       render(date) {
         return <span>{formatDate(date)}</span>;
       }
