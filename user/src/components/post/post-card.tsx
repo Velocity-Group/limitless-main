@@ -187,8 +187,9 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  copyLink(feedId: string) {
-    const str = `${window.location.origin}/post/${feedId}`;
+  copyLink() {
+    const { feed } = this.props;
+    const str = `${window.location.origin}/post/${feed?.slug || feed?._id}`;
     const el = document.createElement('textarea');
     el.value = str;
     el.setAttribute('readonly', '');
@@ -355,7 +356,7 @@ class FeedCard extends Component<IProps> {
             </Link>
           </Menu.Item>
         )}
-        <Menu.Item key={`copy_link_${feed._id}`} onClick={this.copyLink.bind(this, feed._id)}>
+        <Menu.Item key={`copy_link_${feed._id}`} onClick={() => this.copyLink()}>
           <a>
             Copy link to clipboard
           </a>
