@@ -370,11 +370,10 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 5px;
 
   .filter-item {
     width: 100%;
-    padding-right: 5px
+    padding: 5px
   }
 
   &.hide {
@@ -385,8 +384,8 @@
     flex-wrap: wrap;
 
     .filter-item {
+      padding: 2px 5px;
       width: 33.33%;
-      padding: 0 5px 5px 0
     }
   }
 
@@ -550,7 +549,7 @@
     opacity: 0.6;
     padding: 15px;
     border-radius: 50%;
-    z-index: 999;
+    z-index: 1;
 
     &:hover {
       opacity: 0.9;
@@ -577,7 +576,7 @@
     opacity: 0.6;
     padding: 15px;
     border-radius: 50%;
-    z-index: 999;
+    z-index: 1;
 
     &:hover {
       opacity: 0.9;
@@ -710,6 +709,9 @@
 }
 
 .search-filter {
+  margin-left: -5px;
+  margin-right: -5px;
+  width: auto;
   .ant-select-single:not(.ant-select-customize-input) .ant-select-selector, .ant-select-selector, .ant-picker.ant-picker-range, .ant-input {
     height: 38px;
   }

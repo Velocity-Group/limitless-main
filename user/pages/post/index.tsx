@@ -53,7 +53,7 @@ class PostDetails extends PureComponent<IProps> {
   render() {
     const { feed, ui, error } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Post was not found'} />;
     }
     const { performer } = feed;
     return (

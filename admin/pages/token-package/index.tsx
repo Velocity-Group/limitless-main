@@ -1,7 +1,6 @@
-/* eslint-disable no-nested-ternary */
 import Head from 'next/head';
 import { PureComponent } from 'react';
-import { message } from 'antd';
+import { message, Layout } from 'antd';
 import Page from '@components/common/layout/page';
 import { tokenService } from '@services/index';
 import { TableListToken } from '@components/token-package/list-token-package';
@@ -10,30 +9,27 @@ import { BreadcrumbComponent } from '@components/common';
 interface IProps { }
 
 class Tokens extends PureComponent<IProps> {
-  static async getInitialProps({ ctx }) {
-    return ctx.query;
-  }
-
   state = {
     pagination: {} as any,
     searching: false,
     list: [] as any,
     limit: 10,
     filter: {} as any,
-    sortBy: 'createdAt',
-    sort: 'desc'
+    sortBy: 'ordering',
+    sort: 'asc'
   };
 
   async componentDidMount() {
     this.search();
   }
 
-  handleTableChange = (pagination, filters, sorter) => {
+  handleTableChange = async (pagination, filters, sorter) => {
     const pager = { ...pagination };
     pager.current = pagination.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
       sortBy: sorter.field || 'createdAt',
+      // eslint-disable-next-line no-nested-ternary
       sort: sorter.order
         ? sorter.order === 'descend'
           ? 'desc'
@@ -73,14 +69,14 @@ class Tokens extends PureComponent<IProps> {
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
   async deleteToken(id: string) {
     const { pagination } = this.state;
     if (!window.confirm('Are you sure you want to delete this token package?')) {
-      return false;
+      return;
     }
     try {
       await tokenService.delete(id);
@@ -90,14 +86,13 @@ class Tokens extends PureComponent<IProps> {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
     }
-    return undefined;
   }
 
   render() {
     const { list, searching, pagination } = this.state;
 
     return (
-      <>
+      <Layout>
         <Head>
           <title>Token Packages</title>
         </Head>
@@ -114,7 +109,7 @@ class Tokens extends PureComponent<IProps> {
             />
           </div>
         </Page>
-      </>
+      </Layout>
     );
   }
 }

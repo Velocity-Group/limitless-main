@@ -10,12 +10,12 @@ import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
   VideoCameraOutlined, FireOutlined, NotificationOutlined, BookOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
-  LogoutOutlined, HeartOutlined, WalletOutlined, BlockOutlined
+  LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined
 } from '@ant-design/icons';
 import {
   HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon
 } from 'src/icons';
-import { withRouter, Router as RouterEvent } from 'next/router';
+import Router, { withRouter, Router as RouterEvent } from 'next/router';
 import {
   messageService, authService, streamService
 } from 'src/services';
@@ -151,28 +151,28 @@ class Header extends PureComponent<IProps> {
             <div className="nav-bar">
               <ul className={currentUser._id ? 'nav-icons' : 'nav-icons custom'}>
                 {currentUser._id && currentUser.isPerformer && (
-                <li className={router.asPath === `/${currentUser.username || currentUser._id}` ? 'active' : ''}>
-                  <Link
-                    href={{
-                      pathname: '/model/profile',
-                      query: { username: currentUser.username || currentUser._id }
-                    }}
-                    as={`/${currentUser.username || currentUser._id}`}
-                  >
-                    <a>
-                      <HomeIcon />
-                    </a>
-                  </Link>
-                </li>
+                  <li className={router.asPath === `/${currentUser.username || currentUser._id}` ? 'active' : ''}>
+                    <Link
+                      href={{
+                        pathname: '/model/profile',
+                        query: { username: currentUser.username || currentUser._id }
+                      }}
+                      as={`/${currentUser.username || currentUser._id}`}
+                    >
+                      <a>
+                        <HomeIcon />
+                      </a>
+                    </Link>
+                  </li>
                 )}
                 {currentUser._id && !currentUser.isPerformer && (
-                <li className={router.pathname === '/home' ? 'active' : ''}>
-                  <Link href="/home">
-                    <a>
-                      <HomeIcon />
-                    </a>
-                  </Link>
-                </li>
+                  <li className={router.pathname === '/home' ? 'active' : ''}>
+                    <Link href="/home">
+                      <a>
+                        <HomeIcon />
+                      </a>
+                    </Link>
+                  </li>
                 )}
                 {currentUser && currentUser._id && currentUser.isPerformer && (
                   <>
@@ -204,18 +204,18 @@ class Header extends PureComponent<IProps> {
                   </li>
                 )}
                 {currentUser._id && (
-                <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
-                  <Link href="/messages">
-                    <a>
-                      <MessageIcon />
-                      <Badge
-                        className="cart-total"
-                        count={totalNotReadMessage}
-                        showZero
-                      />
-                    </a>
-                  </Link>
-                </li>
+                  <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
+                    <Link href="/messages">
+                      <a>
+                        <MessageIcon />
+                        <Badge
+                          className="cart-total"
+                          count={totalNotReadMessage}
+                          showZero
+                        />
+                      </a>
+                    </Link>
+                  </li>
                 )}
                 {!currentUser._id && [
                   <li key="logo" className="logo-nav">
@@ -257,22 +257,21 @@ class Header extends PureComponent<IProps> {
           </Drawer> */}
           <Drawer
             title={(
-              <>
-                <div className="profile-user">
-                  <img src={currentUser?.avatar || '/static/no-avatar.png'} alt="logo" />
-                  <a className="profile-name">
-                    {currentUser?.name || 'N/A'}
-                    <span>
-                      @
-                      {currentUser?.username || 'n/a'}
-                    </span>
-                    <span className="user-balance">
-                      <img src="/static/coin-ico.png" alt="gem" />
-                      {(currentUser?.balance || 0).toFixed(2)}
-                    </span>
+              <div className="profile-user">
+                <img className="avatar" src={currentUser?.avatar || '/static/no-avatar.png'} alt="avatar" />
+                <span className="profile-name">
+                  {currentUser?.name || 'N/A'}
+                  <span className="sub-name">
+                    @
+                    {currentUser?.username || 'n/a'}
+                  </span>
+                  <a aria-hidden className="user-balance" onClick={() => !currentUser?.isPerformer && Router.push('/token-package')}>
+                    <img src="/static/coin-ico.png" alt="gem" />
+                    {(currentUser?.balance || 0).toFixed(2)}
+                    {!currentUser?.isPerformer && <PlusCircleOutlined />}
                   </a>
-                </div>
-              </>
+                </span>
+              </div>
             )}
             closable
             onClose={() => this.setState({ openProfile: false })}
@@ -326,18 +325,18 @@ class Header extends PureComponent<IProps> {
                     Videos
                   </div>
                 </Link>
-                <Link href="/model/my-gallery" as="/model/my-gallery">
-                  <div className={router.pathname === '/model/my-gallery' ? 'menu-item active' : 'menu-item'}>
-                    <PictureOutlined />
-                    {' '}
-                    Galleries
-                  </div>
-                </Link>
                 <Link href="/model/my-store" as="/model/my-store">
                   <div className={router.pathname === '/model/my-store' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingOutlined />
                     {' '}
                     Store
+                  </div>
+                </Link>
+                <Link href="/model/my-gallery" as="/model/my-gallery">
+                  <div className={router.pathname === '/model/my-gallery' ? 'menu-item active' : 'menu-item'}>
+                    <PictureOutlined />
+                    {' '}
+                    Galleries
                   </div>
                 </Link>
                 <Divider />
@@ -379,13 +378,6 @@ class Header extends PureComponent<IProps> {
                     Edit Profile
                   </div>
                 </Link>
-                <Link href="/token-package" as="/token-package">
-                  <div className={router.pathname === '/token-package' ? 'menu-item active' : 'menu-item'}>
-                    <WalletOutlined />
-                    {' '}
-                    Add Tokens
-                  </div>
-                </Link>
                 <Link href="/user/cards" as="/user/cards">
                   <div className={router.pathname === '/user/cards' ? 'menu-item active' : 'menu-item'}>
                     <CreditCardOutlined />
@@ -416,18 +408,18 @@ class Header extends PureComponent<IProps> {
                     Orders
                   </div>
                 </Link>
-                <Link href="/user/token-transaction" as="/user/token-transaction">
-                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
-                    <DollarOutlined />
-                    {' '}
-                    Token Transactions
-                  </div>
-                </Link>
                 <Link href="/user/payment-history" as="/user/payment-history">
                   <div className={router.pathname === '/user/payment-history' ? 'menu-item active' : 'menu-item'}>
                     <HistoryOutlined />
                     {' '}
                     Payment History
+                  </div>
+                </Link>
+                <Link href="/user/token-transaction" as="/user/token-transaction">
+                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
+                    <DollarOutlined />
+                    {' '}
+                    Token Transactions
                   </div>
                 </Link>
                 <Divider />

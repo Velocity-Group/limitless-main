@@ -216,7 +216,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       }
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Galley was not found'} />;
     }
     const {
       fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal, isBookmarked

@@ -38,7 +38,7 @@ class PostDetail extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <div className="page-container">
-            <PageHeading title={post?.title || 'Not found'} icon={<ReadOutlined />} />
+            <PageHeading title={post?.title || 'Page was not found'} icon={<ReadOutlined />} />
             <div
               className="page-content"
               // eslint-disable-next-line react/no-danger

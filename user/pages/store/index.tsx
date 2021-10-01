@@ -151,7 +151,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
   render() {
     const { ui, product, error } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Product was not found'} />;
     }
     const {
       relatedProducts,

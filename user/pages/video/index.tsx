@@ -14,25 +14,23 @@ import {
   videoService, reactionService, purchaseTokenService, paymentService
 } from '@services/index';
 import {
-  RelatedListVideo
-} from '@components/video';
-import { VideoPlayer } from '@components/common/video-player';
-import { ListComments, CommentForm } from '@components/comment';
-import Link from 'next/link';
-import Router from 'next/router';
-import Error from 'next/error';
-import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
+  getComments, moreComment, createComment, deleteComment
+} from 'src/redux/comment/actions';
 import { updateBalance } from '@redux/user/actions';
-import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import { getRelated } from 'src/redux/video/actions';
+import { RelatedListVideo } from '@components/video';
 import PageHeading from '@components/common/page-heading';
 import Loader from '@components/common/base/loader';
+import { VideoPlayer } from '@components/common/video-player';
+import { ListComments, CommentForm } from '@components/comment';
+import { ConfirmSubscriptionPerformerForm } from '@components/performer';
+import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
 import {
   IVideoResponse, IUser, IUIConfig, IPerformer
 } from 'src/interfaces';
-import {
-  getComments, moreComment, createComment, deleteComment
-} from 'src/redux/comment/actions';
-import { getRelated } from 'src/redux/video/actions';
+import Link from 'next/link';
+import Router from 'next/router';
+import Error from 'next/error';
 import './index.less';
 
 const { TabPane } = Tabs;
@@ -291,7 +289,7 @@ class VideoViewPage extends PureComponent<IProps> {
       comment
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Not found'} />;
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Video was not found'} />;
     }
     const { requesting: commenting } = comment;
     const fetchingComment = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].requesting : false;

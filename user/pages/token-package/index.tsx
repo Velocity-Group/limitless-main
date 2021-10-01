@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import Head from 'next/head';
 import {
   Layout, message, Row, Col, Card, Button, Modal, Input, Spin
@@ -164,7 +163,6 @@ class TokenPackages extends PureComponent<IProps> {
                 </div>
               </div>
               <div style={{ margin: '20px 0' }}>
-                {/* <p className="text-center">Please select payment gateway</p> */}
                 <div className="payment-gateway">
                   {/* {settings.ccbillEnable && (
                   <div aria-hidden onClick={() => this.onChangepaymentGateway('ccbill')} className={paymentGateway === 'ccbill' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
@@ -176,11 +174,11 @@ class TokenPackages extends PureComponent<IProps> {
                     <a><img src="/static/stripe-card.png" alt="stripe" width="100%" /></a>
                   </div>
                   )}
-                  {settings.bitpayEnable && (
+                  {/* {settings.bitpayEnable && (
                   <div aria-hidden onClick={() => this.onChangepaymentGateway('bitpay')} className={paymentGateway === 'bitpay' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
                     <a><img src="/static/bitpay-ico.png" alt="bitpay" width="65px" /></a>
                   </div>
-                  )}
+                  )} */}
                 </div>
                 <Row>
                   <Col span={18}>
@@ -217,7 +215,7 @@ class TokenPackages extends PureComponent<IProps> {
             </div>
           </Modal>
           {searching && <div><Spin /></div>}
-          {!searching && !list.length && <p className="text-center" style={{ margin: '30px 0' }}>No token package found.</p>}
+          {!searching && !list.length && <p className="text-center" style={{ margin: '30px 0' }}>No token package was found</p>}
           {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
         </div>
       </Layout>

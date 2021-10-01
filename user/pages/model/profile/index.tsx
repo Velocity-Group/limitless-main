@@ -14,7 +14,7 @@ import {
 import Head from 'next/head';
 import {
   ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined,
-  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, MoreOutlined
+  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, MoreOutlined
 } from '@ant-design/icons';
 import { TickIcon, ShareIcon, MessageIcon } from 'src/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
@@ -335,7 +335,7 @@ class PerformerProfile extends PureComponent<IProps> {
       galleryState
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Page not found'} />;
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Model profile was not found'} />;
     }
     const { items: feeds = [], total: totalFeed = 0, requesting: loadingFeed } = feedState;
     const { items: videos = [], total: totalVideos = 0, requesting: loadingVideo } = videoState;
@@ -418,7 +418,7 @@ class PerformerProfile extends PureComponent<IProps> {
                       <span>
                         {shortenLargeNumber(performer?.stats?.totalProducts || 0)}
                         {' '}
-                        <ShopOutlined />
+                        <ShoppingOutlined />
                       </span>
                     </div>
                     <div className="tab-item">
@@ -670,7 +670,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   />
                 </div>
               </TabPane>
-              <TabPane tab={<ShopOutlined />} key="store">
+              <TabPane tab={<ShoppingOutlined />} key="store">
                 <div className="heading-tab">
                   <h4>
                     {totalProducts > 0 && totalProducts}
