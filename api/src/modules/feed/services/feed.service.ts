@@ -234,12 +234,12 @@ export class FeedService {
     const performer = await this.performerService.findById(fromSourceId);
     if (!performer) throw new EntityNotFoundException();
     const data = { ...payload } as any;
-    data.slug = StringHelper.createAlias(payload.title);
+    data.slug = `post-${StringHelper.randomString(8, '0123456789')}`;
     const slugCheck = await this.feedModel.countDocuments({
       slug: data.slug
     });
     if (slugCheck) {
-      data.slug = `${data.slug}-${StringHelper.randomString(8)}`;
+      data.slug = `${data.slug}${StringHelper.randomString(8, '0123456789')}`;
     }
     const feed = await this.feedModel.create({
       ...data,
@@ -460,14 +460,14 @@ export class FeedService {
     if (!feed || ((!user.roles || !user.roles.includes('admin')) && feed.fromSourceId.toString() !== user._id.toString())) throw new EntityNotFoundException();
     const data = { ...payload } as any;
     data.updatedAt = new Date();
-    if (data.title !== feed.title) {
-      const slug = StringHelper.createAlias(data.title);
+    if (!feed.slug) {
+      data.slug = `post-${StringHelper.randomString(8, '0123456789')}`;
       const slugCheck = await this.feedModel.countDocuments({
-        slug,
+        slug: data.slug,
         _id: { $ne: feed._id }
       });
       if (slugCheck) {
-        data.slug = `${slug}-${StringHelper.randomString(8)}`;
+        data.slug = `${data.slug}${StringHelper.randomString(8, '0123456789')}`;
       }
     }
     await this.feedModel.updateOne({ _id: id }, data);
