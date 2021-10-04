@@ -15,12 +15,10 @@ interface IFiles {
   file: File;
 }
 
-interface IResponse {
-  data: { _id: string };
-}
 interface IProps {
   ui: IUIConfig;
 }
+
 class CreateProduct extends PureComponent<IProps> {
   static authenticate = true;
 
@@ -49,10 +47,12 @@ class CreateProduct extends PureComponent<IProps> {
 
   async submit(data: any) {
     if (!this._files.image) {
-      return message.error('Please upload product image!');
+      message.error('Please upload product image!');
+      return;
     }
     if (data.type === 'digital' && !this._files.digitalFile) {
-      return message.error('Please select digital file!');
+      message.error('Please select digital file!');
+      return;
     }
     if (data.type === 'physical') {
       this._files.digitalFile = null;
@@ -72,28 +72,21 @@ class CreateProduct extends PureComponent<IProps> {
       uploading: true
     });
     try {
-      (await productService.createProduct(
+      await productService.createProduct(
         files,
         data,
         this.onUploading.bind(this)
-      )) as IResponse;
-      message.success('Product has been created');
-      // TODO - process for response data?
-      await this.setState(
-        {
-          uploading: false
-        },
-        () => Router.push('/model/my-store')
       );
+      message.success('Product was created');
+      Router.push('/model/my-store');
     } catch (error) {
       message.error(
         getResponseError(error) || 'Something went wrong, please try again!'
       );
-      await this.setState({
+      this.setState({
         uploading: false
       });
     }
-    return undefined;
   }
 
   render() {

@@ -205,7 +205,7 @@ class FeedCard extends Component<IProps> {
   async moreComment() {
     const { feed, moreComment: handleLoadMore } = this.props;
     const { commentPage, itemPerPage } = this.state;
-    await this.setState({
+    this.setState({
       commentPage: commentPage + 1
     });
     handleLoadMore({

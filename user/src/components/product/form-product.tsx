@@ -122,18 +122,8 @@ export class FormProduct extends PureComponent<IProps> {
             >
               <Input />
             </Form.Item>
-            <Form.Item
-              name="price"
-              label="Amount of tokens"
-              rules={[{ required: true, message: 'Amount of tokens is required!' }]}
-            >
-              <InputNumber style={{ width: '100%' }} min={1} />
-            </Form.Item>
-            {!isDigitalProduct && (
-            <Form.Item name="stock" label="Stock" rules={[{ required: true, message: 'Stock is required!' }]}>
-              <InputNumber style={{ width: '100%' }} min={1} />
-            </Form.Item>
-            )}
+          </Col>
+          <Col md={12} xs={12}>
             <Form.Item
               name="type"
               label="Type"
@@ -148,6 +138,24 @@ export class FormProduct extends PureComponent<IProps> {
                 </Select.Option>
               </Select>
             </Form.Item>
+          </Col>
+          <Col md={12} xs={12}>
+            <Form.Item
+              name="price"
+              label="Amount of tokens"
+              rules={[{ required: true, message: 'Amount of tokens is required!' }]}
+            >
+              <InputNumber style={{ width: '100%' }} min={1} />
+            </Form.Item>
+          </Col>
+          {!isDigitalProduct && (
+          <Col md={12} xs={12}>
+            <Form.Item name="stock" label="Stock" rules={[{ required: true, message: 'Stock is required!' }]}>
+              <InputNumber style={{ width: '100%' }} min={1} />
+            </Form.Item>
+          </Col>
+          )}
+          <Col md={!isDigitalProduct ? 24 : 12} xs={!isDigitalProduct ? 24 : 12}>
             <Form.Item
               name="status"
               label="Status"
@@ -163,54 +171,54 @@ export class FormProduct extends PureComponent<IProps> {
               </Select>
             </Form.Item>
           </Col>
-          <Col md={12} xs={24}>
+          <Col span={24}>
             <Form.Item name="description" label="Description">
               <Input.TextArea rows={3} />
             </Form.Item>
+          </Col>
+          <Col md={12} xs={12}>
             <Form.Item label="Image">
+              <Upload
+                accept="image/*"
+                listType="picture-card"
+                className="avatar-uploader"
+                multiple={false}
+                showUploadList={false}
+                disabled={uploading}
+                beforeUpload={this.beforeUpload.bind(this, 'image')}
+              >
+                {previewImageProduct && (
+                  <img
+                    src={previewImageProduct}
+                    alt="file"
+                    style={{ width: '100px' }}
+                  />
+                )}
+                <CameraOutlined />
+              </Upload>
+            </Form.Item>
+          </Col>
+          {isDigitalProduct && (
+          <Col md={12} xs={12}>
+            <Form.Item label="Digital file" help={product?.digitalFileId ? 'File was existed' : null}>
               <div>
                 <Upload
-                  accept="image/*"
                   listType="picture-card"
                   className="avatar-uploader"
                   multiple={false}
-                  showUploadList={false}
-                  disabled={uploading}
-                  beforeUpload={this.beforeUpload.bind(this, 'image')}
+                  showUploadList
+                  disabled={uploading || !!product?.digitalFileId}
+                  beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
                 >
-                  {previewImageProduct && (
-                    <img
-                      src={previewImageProduct}
-                      alt="file"
-                      style={{ width: '100px' }}
-                    />
-                  )}
-                  <CameraOutlined />
+                  <FileOutlined />
                 </Upload>
+                {uploadPercentage ? (
+                  <Progress percent={Math.round(uploadPercentage)} />
+                ) : null}
               </div>
             </Form.Item>
-            {isDigitalProduct && (
-              <Form.Item label="Digital file">
-                <div>
-                  <Upload
-                    listType="picture-card"
-                    className="avatar-uploader"
-                    multiple={false}
-                    showUploadList
-                    disabled={uploading || !!product.digitalFileId}
-                    beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
-                  >
-                    <FileOutlined />
-                    {' '}
-                    {product.digitalFileId && 'File existed'}
-                  </Upload>
-                  {uploadPercentage ? (
-                    <Progress percent={Math.round(uploadPercentage)} />
-                  ) : null}
-                </div>
-              </Form.Item>
-            )}
           </Col>
+          )}
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button
