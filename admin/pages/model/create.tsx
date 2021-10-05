@@ -8,7 +8,7 @@ import {
 import Router from 'next/router';
 import { performerService } from '@services/index';
 import { utilsService } from '@services/utils.service';
-import { validateUsername, getResponseError } from '@lib/utils';
+import { getResponseError } from '@lib/utils';
 import { AccountForm } from '@components/performer/AccountForm';
 import { BreadcrumbComponent } from '@components/common';
 
@@ -78,8 +78,7 @@ class PerformerCreate extends PureComponent<IProps> {
         {
           pathname: '/model',
           query: { id: resp.data._id }
-        },
-        '/model'
+        }
       );
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};

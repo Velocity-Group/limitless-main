@@ -6,7 +6,6 @@ import { AccountForm } from '@components/performer/AccountForm';
 import { PerformerDocument } from '@components/performer/Document';
 import { SubscriptionForm } from '@components/performer/Subcription';
 import { PerformerPaypalForm } from '@components/performer/paypalForm';
-// import { BankingForm } from '@components/performer/BankingForm';
 import { CommissionSettingForm } from '@components/performer/commission-setting';
 import {
   ICountry,
@@ -17,7 +16,7 @@ import {
   IHeight,
   IWeight
 } from 'src/interfaces';
-import { authService, performerService, performerCategoryService } from '@services/index';
+import { authService, performerService } from '@services/index';
 import Loader from '@components/common/base/loader';
 import { utilsService } from '@services/utils.service';
 import { UpdatePaswordForm } from '@components/user/update-password-form';
@@ -35,17 +34,17 @@ interface IProps {
 }
 class PerformerUpdate extends PureComponent<IProps> {
   static async getInitialProps({ ctx }) {
-    const [countries, languages, phoneCodes, heights, weights, categories] = await Promise.all([
+    const [countries, languages, phoneCodes, heights, weights] = await Promise.all([
       utilsService.countriesList(),
       utilsService.languagesList(),
       utilsService.phoneCodesList(),
       utilsService.heightList(),
-      utilsService.weightList(),
-      performerCategoryService.search({
-        sortBy: 'ordering',
-        sort: 'asc',
-        limit: 100
-      })
+      utilsService.weightList()
+      // performerCategoryService.search({
+      //   sortBy: 'ordering',
+      //   sort: 'asc',
+      //   limit: 100
+      // })
     ]);
     return {
       countries: countries && countries.data ? countries.data : [],
@@ -53,7 +52,7 @@ class PerformerUpdate extends PureComponent<IProps> {
       phoneCodes: phoneCodes && phoneCodes.data ? phoneCodes.data : [],
       heights: heights && heights.data ? heights.data : [],
       weights: weights && weights.data ? weights.data : [],
-      categories: categories && categories.data && categories.data.data ? categories.data.data : [],
+      // categories: categories && categories.data && categories.data.data ? categories.data.data : [],
       ...ctx.query
     };
   }
