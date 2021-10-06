@@ -8,7 +8,6 @@ import { IPaymentTokenHistory, IUIConfig } from 'src/interfaces';
 import { SearchFilter } from '@components/common/search-filter';
 import PaymentTableList from '@components/purchase-item/payment-token-history-table';
 import { getResponseError } from '@lib/utils';
-import { connect } from 'react-redux';
 import { BreadcrumbComponent } from '@components/common';
 
 interface IProps {
@@ -80,7 +79,8 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         limit: pagination.pageSize,
         offset: (pagination.current - 1) * pagination.pageSize
       });
-      return await this.setState({
+      this.setState({
+        loading: false,
         paymentList: resp.data.data,
         pagination: {
           ...pagination,
@@ -88,8 +88,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         }
       });
     } catch (error) {
-      return message.error(getResponseError(error));
-    } finally {
+      message.error(getResponseError(error));
       this.setState({ loading: false });
     }
   }
@@ -98,7 +97,6 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     const {
       loading, paymentList, searching, pagination
     } = this.state;
-    const { ui } = this.props;
     const type = [
       {
         key: '',
@@ -148,12 +146,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     return (
       <Layout>
         <Head>
-          <title>
-            {' '}
-            {ui && ui.siteName}
-            {' '}
-            | Token Transactions
-          </title>
+          <title>Token Transactions</title>
         </Head>
         <div className="main-container">
           {loading ? (
@@ -182,7 +175,5 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     );
   }
 }
-const mapStates = (state: any) => ({
-  ui: state.ui
-});
-export default connect(mapStates)(PurchasedItemHistoryPage);
+
+export default PurchasedItemHistoryPage;

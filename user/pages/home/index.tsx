@@ -36,6 +36,8 @@ interface IProps {
 class HomePage extends PureComponent<IProps> {
   static authenticate = true;
 
+  static noredirect = true;
+
   state = {
     itemPerPage: 12,
     feedPage: 0,
