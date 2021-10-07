@@ -79,7 +79,7 @@ export class PerformerSearchService {
         .skip(parseInt(req.offset as string, 10)),
       this.performerModel.countDocuments(query)
     ]);
-    const performers = data.map((d) => new PerformerDto(d).toResponse());
+    const performers = data.map((d) => new PerformerDto(d).toResponse(true));
     return {
       data: performers,
       total
