@@ -150,30 +150,13 @@ class Header extends PureComponent<IProps> {
           <Layout.Header className="header" id="layoutHeader">
             <div className="nav-bar">
               <ul className={currentUser._id ? 'nav-icons' : 'nav-icons custom'}>
-                {currentUser._id && currentUser.isPerformer && (
-                  <li className={router.asPath === `/${currentUser.username || currentUser._id}` ? 'active' : ''}>
-                    <Link
-                      href={{
-                        pathname: '/model/profile',
-                        query: { username: currentUser.username || currentUser._id }
-                      }}
-                      as={`/${currentUser.username || currentUser._id}`}
-                    >
-                      <a>
-                        <HomeIcon />
-                      </a>
-                    </Link>
-                  </li>
-                )}
-                {currentUser._id && !currentUser.isPerformer && (
-                  <li className={router.pathname === '/home' ? 'active' : ''}>
-                    <Link href="/home">
-                      <a>
-                        <HomeIcon />
-                      </a>
-                    </Link>
-                  </li>
-                )}
+                <li className={router.pathname === '/home' ? 'active' : ''}>
+                  <Link href="/home">
+                    <a>
+                      <HomeIcon />
+                    </a>
+                  </Link>
+                </li>
                 {currentUser && currentUser._id && currentUser.isPerformer && (
                   <>
                     {/* <Tooltip key="live" title="Go Live">
@@ -282,6 +265,13 @@ class Header extends PureComponent<IProps> {
           >
             {currentUser.isPerformer && (
               <div className="profile-menu-item">
+                <Link href={{ pathname: '/model/profile', query: { username: currentUser.username || currentUser._id } }} as={`/model/${currentUser.username || currentUser._id}`}>
+                  <div className={router.pathname === `/model/${currentUser.username || currentUser._id}` ? 'menu-item active' : 'menu-item'}>
+                    <HomeIcon />
+                    {' '}
+                    My Profile
+                  </div>
+                </Link>
                 <Link href="/model/account" as="/model/account">
                   <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
                     <UserOutlined />

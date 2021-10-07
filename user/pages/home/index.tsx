@@ -1,5 +1,5 @@
 import {
-  Layout, message, Tooltip, Alert, Input
+  Layout, message, Tooltip, Alert, Input, Spin
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -191,7 +191,8 @@ class HomePage extends PureComponent<IProps> {
                         </Link>
                       ))}
                     </div>
-                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
+                    {loadingPerformer && <div className="text-center" style={{ margin: 32 }}><Spin /></div>}
+                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center" style={{ margin: '30px 0' }}>No profile was found</p>}
                   </div>
                   {/* <div className="filter-feed">
                     <FilterOutlined />
@@ -232,9 +233,7 @@ class HomePage extends PureComponent<IProps> {
                         <a aria-hidden className="reload-btn" onClick={this.getPerformers.bind(this)}><Tooltip title="Refresh"><SyncOutlined spin={loadingPerformer} /></Tooltip></a>
                       </span>
                     </div>
-                    {!loadingPerformer && randomPerformers && randomPerformers.length > 0 && (
-                      <HomePerformers performers={randomPerformers} />
-                    )}
+                    <HomePerformers performers={randomPerformers} />
                     {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
                   </div>
                 </div>
