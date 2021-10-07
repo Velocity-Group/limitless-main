@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import {
   Form, Input, Button, Row, Col, Divider, Layout, message
 } from 'antd';
@@ -10,13 +11,13 @@ import {
 import { updateCurrentUser } from '@redux/user/actions';
 import { authService, userService } from '@services/index';
 import Link from 'next/link';
-import './auth/index.less';
 import { ISettings, IUIConfig } from 'src/interfaces';
 import Router from 'next/router';
 import { TwitterOutlined } from '@ant-design/icons';
 import GoogleLogin from 'react-google-login';
 import { isEmail } from '@lib/string';
 import Loader from '@components/common/base/loader';
+import './auth/index.less';
 // import { GoogleReCaptcha } from '@components/common';
 
 interface IProps {
@@ -26,7 +27,8 @@ interface IProps {
   loginSuccess: Function;
   loginSocial: Function;
   ui: IUIConfig;
-  settings: ISettings
+  settings: ISettings;
+  oauth_verifier: string;
 }
 
 class Login extends PureComponent<IProps> {
@@ -36,9 +38,13 @@ class Login extends PureComponent<IProps> {
 
   recaptchaSuccess = false;
 
+  static async getInitialProps({ ctx }) {
+    return ctx.query;
+  }
+
   state = {
     loginAs: 'user',
-    isLoading: false,
+    isLoading: true,
     loginInput: ''
   }
 
@@ -100,6 +106,7 @@ class Login extends PureComponent<IProps> {
     const { loginSuccess: handleLogin, updateCurrentUser: handleUpdateUser } = this.props;
     const token = authService.getToken();
     if (!token || token === 'null') {
+      this.setState({ isLoading: false });
       return;
     }
     authService.setToken(token);
@@ -111,26 +118,21 @@ class Login extends PureComponent<IProps> {
       if (!user || !user.data || !user.data._id) return;
       handleLogin();
       handleUpdateUser(user.data);
-      user.data.isPerformer && user.data.username ? Router.push({ pathname: '/model/profile', query: { username: user.data.username || user.data._id } }, `/${user.data.username || user.data._id}`) : Router.push('/home');
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(await e);
-    } finally {
+      user.data.isPerformer ? Router.push({ pathname: '/model/profile', query: { username: user.data.username || user.data._id } }, `/${user.data.username || user.data._id}`) : Router.push('/home');
+    } catch {
       this.setState({ isLoading: false });
     }
   }
 
   async callbackTwitter() {
-    const { loginSocial: handleLogin } = this.props;
-    const oauthVerifier = Router.router.query && Router.router.query.oauth_verifier;
+    const { oauth_verifier, loginSocial: handleLogin } = this.props;
     const twitterInfo = authService.getTwitterToken();
-    if (!oauthVerifier || !twitterInfo.oauthToken || !twitterInfo.oauthTokenSecret) {
+    if (!oauth_verifier || !twitterInfo.oauthToken || !twitterInfo.oauthTokenSecret) {
       return;
     }
     try {
-      await this.setState({ isLoading: true });
       const auth = await authService.callbackLoginTwitter({
-        oauth_verifier: oauthVerifier,
+        oauth_verifier,
         oauthToken: twitterInfo.oauthToken,
         oauthTokenSecret: twitterInfo.oauthTokenSecret,
         role: twitterInfo.role || 'user'
@@ -139,8 +141,6 @@ class Login extends PureComponent<IProps> {
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Twitter authentication login fail');
-    } finally {
-      this.setState({ isLoading: false });
     }
   }
 
@@ -319,4 +319,4 @@ const mapStatesToProps = (state: any) => ({
 const mapDispatchToProps = {
   login, loginSocial, loginSuccess, updateCurrentUser
 };
-export default connect(mapStatesToProps, mapDispatchToProps)(Login) as any;
+export default connect(mapStatesToProps, mapDispatchToProps)(Login);
