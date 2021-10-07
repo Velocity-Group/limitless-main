@@ -118,6 +118,8 @@ export class FormUploadPhoto extends PureComponent<IProps> {
           {!havePhoto ? (
             <Upload
               accept={'image/*'}
+              listType="picture-card"
+              className="avatar-uploader"
               multiple={false}
               showUploadList
               disabled={uploading || havePhoto}

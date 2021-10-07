@@ -11,8 +11,8 @@ import {
   Row,
   Col
 } from 'antd';
-import { IProduct, IProductCreate } from 'src/interfaces';
-import { FileOutlined, CameraOutlined } from '@ant-design/icons';
+import { IProduct } from 'src/interfaces';
+import { FileAddOutlined, CameraOutlined } from '@ant-design/icons';
 import { FormInstance } from 'antd/lib/form';
 
 interface IProps {
@@ -75,7 +75,7 @@ export class FormProduct extends PureComponent<IProps> {
     }
     const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
     if (!isValid) {
-      message.error(`File is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
+      message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
       return false;
     }
     beforeUpload && beforeUpload(file, field);
@@ -109,7 +109,7 @@ export class FormProduct extends PureComponent<IProps> {
             performerId: '',
             stock: 1,
             type: 'physical'
-          } as IProductCreate)
+          })
         }
         className="account-form"
       >
@@ -200,22 +200,21 @@ export class FormProduct extends PureComponent<IProps> {
           </Col>
           {isDigitalProduct && (
           <Col md={12} xs={12}>
-            <Form.Item label="Digital file" help={product?.digitalFileId ? 'File was existed' : null}>
-              <div>
-                <Upload
-                  listType="picture-card"
-                  className="avatar-uploader"
-                  multiple={false}
-                  showUploadList
-                  disabled={uploading || !!product?.digitalFileId}
-                  beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
-                >
-                  <FileOutlined />
-                </Upload>
-                {uploadPercentage ? (
-                  <Progress percent={Math.round(uploadPercentage)} />
-                ) : null}
-              </div>
+            <Form.Item label="Digital file">
+              <Upload
+                listType="picture-card"
+                className="avatar-uploader"
+                multiple={false}
+                showUploadList
+                disabled={uploading || !!product?.digitalFileId}
+                beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
+              >
+                <FileAddOutlined />
+              </Upload>
+              {product?.digitalFileId && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a download href={product?.digitalFileUrl}>Click to download</a></div>}
+              {uploadPercentage ? (
+                <Progress percent={Math.round(uploadPercentage)} />
+              ) : null}
             </Form.Item>
           </Col>
           )}

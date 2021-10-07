@@ -1,17 +1,14 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { PureComponent, createRef } from 'react';
 import {
   Form, Input, InputNumber, Select, Upload, Button, message, Progress
 } from 'antd';
-import { IProductCreate, IProductUpdate } from 'src/interfaces';
-import { UploadOutlined, FileOutlined } from '@ant-design/icons';
+import { IProduct } from 'src/interfaces';
+import { UploadOutlined } from '@ant-design/icons';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { FormInstance } from 'antd/lib/form';
-import { ImageProduct } from '@components/product/image-product';
 
 interface IProps {
-  product?: IProductUpdate;
+  product?: IProduct;
   submit?: Function;
   beforeUpload?: Function;
   uploading?: boolean;
@@ -39,9 +36,10 @@ export class FormProduct extends PureComponent<IProps> {
   componentDidMount() {
     if (!this.formRef) this.formRef = createRef();
     const { product } = this.props;
-    if (product && product.type === 'digital') {
+    if (product) {
       this.setState({
-        isDigitalProduct: true
+        previewImageProduct: product?.image || '',
+        isDigitalProduct: product.type === 'digital'
       });
     }
   }
@@ -96,7 +94,7 @@ export class FormProduct extends PureComponent<IProps> {
             performerId: '',
             stock: 99,
             type: 'physical'
-          } as IProductCreate)
+          })
         }
       >
         <Form.Item name="performerId" label="Model" rules={[{ required: true }]}>
@@ -132,70 +130,35 @@ export class FormProduct extends PureComponent<IProps> {
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
         </Form.Item>
-        <div key="image" className="ant-row ant-form-item">
-          <div className="ant-col ant-col-24 ant-form-item-label">
-            <label>Image</label>
-          </div>
-          <div className="ant-col ant-col-24 ant-form-item-control">
-            <Upload
-              accept="image/*"
-              multiple={false}
-              showUploadList={false}
-              disabled={uploading}
-              beforeUpload={(file) => this.beforeUpload(file, 'image')}
-            >
-              {previewImageProduct ? (
-                <img src={previewImageProduct} alt="file" style={{ width: '250px', marginBottom: '10px' }} />
-              ) : product ? (
-                <ImageProduct product={product} style={{ width: '250px', marginBottom: '10px' }} />
-              ) : null}
-              <div style={{ clear: 'both' }} />
-              <Button>
-                <UploadOutlined />
-                {' '}
-                Select File
-              </Button>
-            </Upload>
-          </div>
-        </div>
+        <Form.Item label="Image">
+          <Upload
+            accept="image/*"
+            multiple={false}
+            showUploadList={false}
+            disabled={uploading}
+            beforeUpload={(file) => this.beforeUpload(file, 'image')}
+          >
+            {previewImageProduct && (
+              <img src={previewImageProduct} alt="file" width="100%" />
+            )}
+            <UploadOutlined />
+          </Upload>
+        </Form.Item>
         {isDigitalProduct && (
-        <div key="digital-product" className="ant-row ant-form-item">
-          <div className="ant-col ant-col-24 ant-form-item-label">
-            <label>Digital File</label>
-          </div>
-          <div className="ant-col ant-col-24 ant-form-item-control">
+          <Form.Item label="Digital file" help={digitalProductName || null}>
             <Upload
               multiple={false}
-              showUploadList={false}
+              listType="picture-card"
+              className="avatar-uploader"
+              showUploadList
               disabled={uploading || haveProduct}
               beforeUpload={(file) => this.beforeUpload(file, 'digitalFile')}
             >
-              {digitalProductName && (
-              <div className="ant-upload-list ant-upload-list-picture" style={{ marginBottom: 10 }}>
-                <div className="ant-upload-list-item ant-upload-list-item-done ant-upload-list-item-list-type-picture">
-                  <div className="ant-upload-list-item-info">
-                    <span>
-                      <a className="ant-upload-list-item-thumbnail">
-                        <FileOutlined />
-                      </a>
-                      <a className="ant-upload-list-item-name ant-upload-list-item-name-icon-count-1">
-                        {digitalProductName}
-                      </a>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              )}
-              <div style={{ clear: 'both' }} />
-              <Button>
-                <UploadOutlined />
-                {' '}
-                Select File
-              </Button>
+              <UploadOutlined />
             </Upload>
+            {product?.digitalFileId && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a download href={product?.digitalFileUrl}>Click to download</a></div>}
             {uploadPercentage ? <Progress percent={uploadPercentage} /> : null}
-          </div>
-        </div>
+          </Form.Item>
         )}
         <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status!' }]}>
           <Select>

@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import {
-  Row, Col, Statistic, Card
+  Row, Col, Statistic, Card, Layout
 } from 'antd';
 import { PureComponent } from 'react';
 import { utilsService } from '@services/utils.service';
@@ -43,25 +43,20 @@ export default class Dashboard extends PureComponent<any> {
   }
 
   async componentDidMount() {
-    try {
-      const stats = await (await utilsService.statistics()).data;
-      if (stats) {
-        this.setState({ stats });
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(await e);
+    const stats = await (await utilsService.statistics()).data;
+    if (stats) {
+      this.setState({ stats });
     }
   }
 
   render() {
     const { stats } = this.state;
     return (
-      <>
+      <Layout>
         <Head>
           <title>Dashboard</title>
         </Head>
-        <Row gutter={24} className="dashboard-stats">
+        <Row className="dashboard-stats">
           <Col md={8} xs={12}>
             <Link href="/users">
               <a>
@@ -386,7 +381,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
         </Row>
-      </>
+      </Layout>
     );
   }
 }

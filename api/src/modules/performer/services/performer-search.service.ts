@@ -21,7 +21,7 @@ export class PerformerSearchService {
 
   public async adminSearch(
     req: PerformerSearchPayload
-  ): Promise<PageableData<PerformerDto>> {
+  ): Promise<PageableData<IPerformerResponse>> {
     const query = {} as any;
     if (req.q) {
       const regexp = new RegExp(
@@ -79,7 +79,7 @@ export class PerformerSearchService {
         .skip(parseInt(req.offset as string, 10)),
       this.performerModel.countDocuments(query)
     ]);
-    const performers = data.map((d) => new PerformerDto(d));
+    const performers = data.map((d) => new PerformerDto(d).toResponse());
     return {
       data: performers,
       total

@@ -1,8 +1,8 @@
 import { PureComponent } from 'react';
-import { IProductUpdate } from 'src/interfaces';
+import { IProduct } from 'src/interfaces';
 
 interface IProps {
-  product?: IProductUpdate;
+  product?: IProduct;
   style?: Record<string, string>;
 }
 

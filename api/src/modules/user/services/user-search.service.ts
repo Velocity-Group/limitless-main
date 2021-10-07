@@ -4,7 +4,7 @@ import { PageableData } from 'src/kernel/common';
 import { PerformerBlockService } from 'src/modules/block/services';
 import { UserModel } from '../models';
 import { USER_MODEL_PROVIDER } from '../providers';
-import { UserDto } from '../dtos';
+import { UserDto, IUserResponse } from '../dtos';
 import { UserSearchRequestPayload } from '../payloads';
 import { ROLE_ADMIN, STATUS_ACTIVE } from '../constants';
 
@@ -20,7 +20,7 @@ export class UserSearchService {
   // TODO - should create new search service?
   public async search(
     req: UserSearchRequestPayload
-  ): Promise<PageableData<UserDto>> {
+  ): Promise<PageableData<IUserResponse>> {
     const query = {} as any;
     if (req.q) {
       const regexp = new RegExp(
@@ -60,7 +60,7 @@ export class UserSearchService {
       this.userModel.countDocuments(query)
     ]);
     return {
-      data: data.map((item) => new UserDto(item)),
+      data: data.map((item) => new UserDto(item).toResponse()),
       total
     };
   }

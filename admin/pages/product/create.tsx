@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { PureComponent } from 'react';
-import { message } from 'antd';
+import { message, Layout } from 'antd';
 import Page from '@components/common/layout/page';
 import { productService } from '@services/product.service';
 import Router from 'next/router';
@@ -77,7 +77,7 @@ class CreateProduct extends PureComponent {
   render() {
     const { uploading, uploadPercentage } = this.state;
     return (
-      <>
+      <Layout>
         <Head>
           <title>New product</title>
         </Head>
@@ -95,7 +95,7 @@ class CreateProduct extends PureComponent {
             uploadPercentage={uploadPercentage}
           />
         </Page>
-      </>
+      </Layout>
     );
   }
 }

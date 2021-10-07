@@ -89,21 +89,19 @@ class Performers extends PureComponent<IProps> {
             countries={ui?.countries || []}
           />
           <Row>
-            {performers && performers.length > 0
-                    && !fetching
-                    && performers.map((p: any) => (
-                      <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
-                        <PerformerGridCard performer={p} />
-                      </Col>
-                    ))}
+            {performers && performers.length > 0 && performers.map((p) => (
+              <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
+                <PerformerGridCard performer={p} />
+              </Col>
+            ))}
           </Row>
-          {!total && !fetching && <p>No model profile was found.</p>}
+          {!total && !fetching && <p>No model profile was found</p>}
           {fetching && (
-            <div className="text-center">
+            <div className="text-center" style={{ margin: 30 }}>
               <Spin />
             </div>
           )}
-          {total && total > limit && !fetching ? (
+          {total && total > limit ? (
             <Pagination
               showQuickJumper
               defaultCurrent={offset + 1}

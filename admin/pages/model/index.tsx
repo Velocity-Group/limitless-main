@@ -1,9 +1,8 @@
-/* eslint-disable no-nested-ternary */
 import Head from 'next/head';
 import Link from 'next/link';
 import { PureComponent } from 'react';
 import {
-  Table, message, Tag, Modal
+  Table, message, Tag, Modal, Avatar
 } from 'antd';
 import Page from '@components/common/layout/page';
 import { performerService } from '@services/performer.service';
@@ -41,6 +40,7 @@ export default class Performers extends PureComponent<any> {
     await this.setState({
       pagination: pager,
       sortBy: sorter.field || '',
+      // eslint-disable-next-line no-nested-ternary
       sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : ''
     });
     this.search(pager.current);
@@ -75,7 +75,6 @@ export default class Performers extends PureComponent<any> {
     } = this.state;
     try {
       await this.setState({ searching: true });
-
       const resp = await performerService.search({
         limit,
         offset: (page - 1) * limit,
@@ -83,7 +82,7 @@ export default class Performers extends PureComponent<any> {
         sort,
         sortBy
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data,
         pagination: {
@@ -105,6 +104,11 @@ export default class Performers extends PureComponent<any> {
     // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = [
       {
+        title: '#',
+        dataIndex: 'avatar',
+        render: (avatar) => <Avatar src={avatar || '/no-avatar.png'} />
+      },
+      {
         title: 'Display name',
         dataIndex: 'name',
         render(name: string) {
@@ -114,6 +118,10 @@ export default class Performers extends PureComponent<any> {
       {
         title: 'Username',
         dataIndex: 'username'
+      },
+      {
+        title: 'Email',
+        dataIndex: 'email'
       },
       {
         title: 'Status',
@@ -131,10 +139,36 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Verified ID',
+        title: 'Email verification',
+        dataIndex: 'verifiedEmail',
+        render(verifiedEmail) {
+          switch (verifiedEmail) {
+            case true:
+              return <Tag color="green">Y</Tag>;
+            case false:
+              return <Tag color="red">N</Tag>;
+            default: return <Tag color="red">N</Tag>;
+          }
+        }
+      },
+      {
+        title: 'ID verification',
         dataIndex: 'verifiedDocument',
         render(verifiedDocument) {
           switch (verifiedDocument) {
+            case true:
+              return <Tag color="green">Y</Tag>;
+            case false:
+              return <Tag color="red">N</Tag>;
+            default: return <Tag color="red">N</Tag>;
+          }
+        }
+      },
+      {
+        title: 'Account verification',
+        dataIndex: 'verifiedAccount',
+        render(verifiedAccount) {
+          switch (verifiedAccount) {
             case true:
               return <Tag color="green">Y</Tag>;
             case false:
@@ -283,17 +317,17 @@ export default class Performers extends PureComponent<any> {
                     </Link>
                   )
                 }
-                // {
-                //   key: 'change-token-logs',
-                //   name: 'Token balance change logs',
-                //   children: (
-                //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
-                //       <HistoryOutlined />
-                //       {' '}
-                //       Token Change Logs
-                //     </a>
-                //   )
-                // }
+              // {
+              //   key: 'change-token-logs',
+              //   name: 'Token balance change logs',
+              //   children: (
+              //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
+              //       <HistoryOutlined />
+              //       {' '}
+              //       Token Change Logs
+              //     </a>
+              //   )
+              // }
               ]}
             />
           );
