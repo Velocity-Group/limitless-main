@@ -285,7 +285,7 @@ export class PerformerSearchService {
     }
     const data = await this.performerModel.aggregate([
       { $match: query },
-      { $sample: { size: 99 } }
+      { $sample: { size: 50 } }
     ]);
     return {
       data: data.map((item) => new PerformerDto(item).toSearchResponse())
