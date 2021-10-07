@@ -8,6 +8,8 @@ export class ProductDto {
 
   digitalFileId?: ObjectId;
 
+  digitalFileUrl?: string;
+
   imageId?: ObjectId;
 
   image?: any;
@@ -52,6 +54,7 @@ export class ProductDto {
         '_id',
         'performerId',
         'digitalFileId',
+        'digitalFileUrl',
         'imageId',
         'image',
         'type',

@@ -199,15 +199,22 @@ export class ProductService {
       throw new EntityNotFoundException();
     }
 
-    const [performer, image] = await Promise.all([
+    const [performer, image, digitalFile] = await Promise.all([
       this.performerService.findById(product.performerId),
-      product.imageId ? this.fileService.findById(product.imageId) : null
+      product.imageId ? this.fileService.findById(product.imageId) : null,
+      product.digitalFileId ? this.fileService.findById(product.digitalFileId) : null
     ]);
     const bookmark = user && await this.reactionService.checkExisting(product._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.PRODUCT);
     const dto = new ProductDto(product);
     dto.isBookMarked = !!bookmark;
     dto.image = image ? image.getUrl() : null;
-    dto.performer = new PerformerDto(performer).toPublicDetailsResponse();
+    if (digitalFile) {
+      const auth = await this.authService.findBySource({ source: 'user', type: 'email', sourceId: user._id })
+      || await this.authService.findBySource({ source: 'user', type: 'username', sourceId: user._id });
+      const jwToken = this.authService.generateJWT(pick(auth, ['_id', 'source', 'sourceId']), { expiresIn: 3 * 60 * 60 });
+      dto.digitalFileUrl = digitalFile ? `${new FileDto(digitalFile).getUrl()}?productId=${product._id}&token=${jwToken}` : null;
+    }
+    dto.performer = new PerformerDto(performer).toResponse();
     await this.productModel.updateOne({ _id: product._id }, { $inc: { 'stats.views': 1 } });
     return dto;
   }

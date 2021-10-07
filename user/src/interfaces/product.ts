@@ -2,6 +2,7 @@ export interface IProduct {
   _id: string;
   performerId: string;
   digitalFileId: string;
+  digitalFileUrl: string;
   imageId: string;
   image: any;
   type: string;
@@ -15,13 +16,4 @@ export interface IProduct {
   createdAt: Date;
   updatedAt: Date;
   isBookMarked: boolean;
-}
-
-export interface IProductCreate {
-  name: string;
-  description: string;
-  status: string;
-  type: string;
-  price: number;
-  stock: number;
 }

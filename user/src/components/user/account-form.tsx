@@ -106,7 +106,7 @@ export const UserAccountForm = ({
               {'  '}
               {user.verifiedEmail ? (
                 <Popover title="Your email address is verified" content={null}>
-                  <a style={{ fontSize: 18 }}><CheckCircleOutlined /></a>
+                  <a><CheckCircleOutlined /></a>
                 </Popover>
               ) : (
                 <Popover
@@ -149,8 +149,7 @@ export const UserAccountForm = ({
             { required: true, message: 'Please input your display name!' },
             {
               pattern: new RegExp(/^(?=.*\S).+$/g),
-              message:
-                  'Display name can not contain only whitespace'
+              message: 'Display name can not contain only whitespace'
             },
             {
               min: 3,

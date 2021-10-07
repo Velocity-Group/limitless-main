@@ -329,7 +329,7 @@ class Header extends PureComponent<IProps> {
                   <div className={router.pathname === '/model/my-store' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingOutlined />
                     {' '}
-                    Store
+                    Products
                   </div>
                 </Link>
                 <Link href="/model/my-gallery" as="/model/my-gallery">

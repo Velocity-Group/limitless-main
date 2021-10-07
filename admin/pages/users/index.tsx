@@ -1,20 +1,17 @@
-/* eslint-disable no-nested-ternary */
-import Head from 'next/head';
-import Link from 'next/link';
 import { PureComponent } from 'react';
 import {
-  Table, message, Tag, Modal
+  Table, message, Tag, Modal, Avatar
 } from 'antd';
 import Page from '@components/common/layout/page';
 import { SearchFilter } from '@components/performer/search-filter';
 import {
-  EditOutlined,
-  DeleteOutlined
+  EditOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import { BreadcrumbComponent, DropdownAction } from '@components/common';
 import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
-import { userService } from '@services/user.service';
+import { userService } from '@services/user.service'; import Head from 'next/head';
+import Link from 'next/link';
 
 export default class Performers extends PureComponent<any> {
   _selectedUser: any;
@@ -40,6 +37,7 @@ export default class Performers extends PureComponent<any> {
     await this.setState({
       pagination: pager,
       sortBy: sorter.field || '',
+      // eslint-disable-next-line no-nested-ternary
       sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : ''
     });
     this.search(pager.current);
@@ -74,7 +72,6 @@ export default class Performers extends PureComponent<any> {
     } = this.state;
     try {
       await this.setState({ searching: true });
-
       const resp = await userService.search({
         limit,
         offset: (page - 1) * limit,
@@ -82,7 +79,7 @@ export default class Performers extends PureComponent<any> {
         sort,
         sortBy
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data,
         pagination: {
@@ -104,12 +101,12 @@ export default class Performers extends PureComponent<any> {
     // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = [
       {
-        title: 'Real_Name',
-        dataIndex: 'firstName',
-        render: (firstName, record) => <span>{`${record?.firstName || ''} ${record?.lastName || ''}`}</span>
+        title: '#',
+        dataIndex: 'avatar',
+        render: (avatar) => <Avatar src={avatar || '/no-avatar.png'} />
       },
       {
-        title: 'Display_Name',
+        title: 'Display Name',
         dataIndex: 'name'
       },
       {
@@ -136,7 +133,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Verified_Email',
+        title: 'Email verification',
         dataIndex: 'verifiedEmail',
         render(verifiedEmail) {
           switch (verifiedEmail) {
@@ -149,15 +146,15 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Created_At',
-        dataIndex: 'createdAt',
+        title: 'Update at',
+        dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
           return <span>{formatDate(date)}</span>;
         }
       },
       {
-        title: '#',
+        title: 'Actions',
         dataIndex: '_id',
         render(id: string, record) {
           return (

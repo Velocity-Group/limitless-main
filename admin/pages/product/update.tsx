@@ -3,10 +3,11 @@ import { PureComponent } from 'react';
 import Page from '@components/common/layout/page';
 import { message } from 'antd';
 import { productService } from '@services/product.service';
-import { IProductUpdate } from 'src/interfaces';
+import { IProduct } from 'src/interfaces';
 import Loader from '@components/common/base/loader';
 import { BreadcrumbComponent } from '@components/common';
 import { FormProduct } from '@components/product/form-product';
+import Router from 'next/router';
 
 interface IProps {
   id: string;
@@ -21,7 +22,7 @@ class ProductUpdate extends PureComponent<IProps> {
   state = {
     submiting: false,
     fetching: true,
-    product: {} as IProductUpdate,
+    product: {} as IProduct,
     uploadPercentage: 0
   };
 
@@ -72,19 +73,15 @@ class ProductUpdate extends PureComponent<IProps> {
         return files;
       }, [] as IFiles[]) as [IFiles];
 
-      this.setState({ submiting: true });
-
-      const submitData = {
-        ...data
-      };
+      await this.setState({ submiting: true });
       await productService.update(
         id,
         files,
-        submitData,
+        data,
         this.onUploading.bind(this)
       );
       message.success('Updated successfully');
-      this.setState({ submiting: false });
+      Router.push('/product');
     } catch (e) {
       // TODO - check and show error here
       message.error('Something went wrong, please try again!');
