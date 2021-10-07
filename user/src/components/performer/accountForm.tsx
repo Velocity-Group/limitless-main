@@ -389,19 +389,19 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 <Option key="white" value="white">
                   White
                 </Option>
-                <Option key="blackOrAfricanAmerican" value="blackOrAfricanAmerican">
-                  Black or African American
-                </Option>
                 <Option key="Asian" value="asian">
                   Asian
-                </Option>
-                <Option key="hispanic" value="hispanic">
-                  Hispanic
                 </Option>
                 <Option key="latino" value="latino">
                   Latino
                 </Option>
-                <Option key="nativeHawaiianOrOtherPacificIslander" value="nativeHawaiianOrOtherPacificIslander">
+                <Option key="hispanic" value="hispanic">
+                  Hispanic
+                </Option>
+                <Option key="blackOrAfricanAmerican" value="black or african american">
+                  Black or African American
+                </Option>
+                <Option key="native hawaiian or other pacific islander" value="native hawaiian or other pacific islander">
                   Native Hawaiian or Other Pacific Islander
                 </Option>
               </Select>
@@ -540,7 +540,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
-            <Form.Item name="bust" label="Butt size">
+            <Form.Item name="butt" label="Butt size">
               <Select>
                 <Option key="large" value="large">
                   Large

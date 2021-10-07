@@ -71,7 +71,7 @@ export class PerformerSearchPayload extends SearchRequest {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  bust: string;
+  butt: string;
 
   @ApiProperty()
   @IsString()

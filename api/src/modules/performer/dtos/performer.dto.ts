@@ -29,7 +29,7 @@ export interface IPerformerResponse {
   bio?: string;
   eyes?: string;
   hair?: string;
-  bust?: string;
+  butt?: string;
   ethnicity?: string;
   sexualOrientation?: string;
   isFreeSubscription?: boolean;
@@ -164,7 +164,7 @@ export class PerformerDto {
 
   hair?: string;
 
-  bust?: string;
+  butt?: string;
 
   ethnicity?: string;
 
@@ -291,7 +291,7 @@ export class PerformerDto {
         'bio',
         'eyes',
         'hair',
-        'bust',
+        'butt',
         'ethnicity',
         'sexualOrientation',
         'isFreeSubscription',
@@ -368,7 +368,7 @@ export class PerformerDto {
       height: this.height,
       weight: this.weight,
       hair: this.hair,
-      bust: this.bust,
+      butt: this.butt,
       ethnicity: this.ethnicity,
       bio: this.bio,
       eyes: this.eyes,
@@ -476,7 +476,7 @@ export class PerformerDto {
       bio: this.bio,
       eyes: this.eyes,
       hair: this.hair,
-      bust: this.bust,
+      butt: this.butt,
       ethnicity: this.ethnicity,
       sexualOrientation: this.sexualOrientation,
       isFreeSubscription: this.isFreeSubscription,

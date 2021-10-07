@@ -57,11 +57,11 @@ const buttSizes = [
 const ethnicities = [
   { key: '', text: 'All ethnicities' },
   { key: 'white', text: 'White' },
-  { key: 'blackOrAfricanAmerican', text: 'Black or African American' },
   { key: 'asian', text: 'Asian' },
   { key: 'hispanic', text: 'Hispanic' },
   { key: 'latino', text: 'Latino' },
-  { key: 'nativeHawaiianOrOtherPacificIslander', text: 'Native Hawaiian or Other Pacific Islander' }
+  { key: 'black or african american', text: 'Black or African American' },
+  { key: 'native hawaiian or other pacific islander', text: 'Native Hawaiian or Other Pacific Islander' }
 ];
 
 const bodyTypes = [
@@ -205,7 +205,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               {countries.map((c) => (
                 <Select.Option key={c.code} label={c.name} value={c.code}>
                   <img alt="flag" src={c.flag} width="25px" />
-                      &nbsp;
+                  &nbsp;
                   {c.name}
                 </Select.Option>
               ))}
@@ -242,7 +242,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ age: val }, () => this.handleSubmit())}
               style={{ width: '100%' }}
-              placeholder="Ages"
+              placeholder="Age"
               defaultValue=""
             >
               {ages.map((i) => (
@@ -256,7 +256,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ eyes: val }, () => this.handleSubmit())}
               style={{ width: '100%' }}
-              placeholder="Eyes color"
+              placeholder="Eye color"
               defaultValue=""
             >
               {eyeColors.map((i) => (
@@ -282,9 +282,9 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
           </div>
           <div className="filter-item">
             <Select
-              onChange={(val) => this.setState({ bust: val }, () => this.handleSubmit())}
+              onChange={(val) => this.setState({ butt: val }, () => this.handleSubmit())}
               style={{ width: '100%' }}
-              placeholder="Select butt size"
+              placeholder="Butt size"
               defaultValue=""
             >
               {buttSizes.map((i) => (
@@ -299,7 +299,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ height: val }, () => this.handleSubmit())}
               style={{ width: '100%' }}
-              placeholder="Select height"
+              placeholder="Height"
               defaultValue=""
             >
               <Select.Option key="all" value="">
@@ -318,7 +318,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ weight: val }, () => this.handleSubmit())}
               style={{ width: '100%' }}
-              placeholder="Select weight"
+              placeholder="Weight"
               defaultValue=""
             >
               <Select.Option key="all" value="">
@@ -336,7 +336,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ ethnicity: val }, () => this.handleSubmit())}
               style={{ width: '100%' }}
-              placeholder="Select ethnicity"
+              placeholder="Ethnicity"
               defaultValue=""
             >
               {ethnicities.map((i) => (
@@ -350,7 +350,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ bodyType: val }, () => this.handleSubmit())}
               style={{ width: '100%' }}
-              placeholder="Select body type"
+              placeholder="Body type"
               defaultValue=""
             >
               {bodyTypes.map((i) => (

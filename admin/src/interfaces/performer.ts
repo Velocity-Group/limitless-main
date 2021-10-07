@@ -67,7 +67,7 @@ export interface IPerformer {
   live: boolean;
   streamingStatus: string;
   ethnicity: string;
-  bust: string;
+  butt: string;
   hair: string;
   pubicHair: string;
   idVerification: any;

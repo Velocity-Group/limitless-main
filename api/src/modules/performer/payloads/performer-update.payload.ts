@@ -172,7 +172,7 @@ export class PerformerUpdatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  bust?: string;
+  butt?: string;
 
   @ApiProperty()
   @IsString()
@@ -342,7 +342,7 @@ export class SelfUpdatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  bust?: string;
+  butt?: string;
 
   @ApiProperty()
   @IsString()
