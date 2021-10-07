@@ -167,7 +167,7 @@ export class PerformerCreatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  bust?: string;
+  butt?: string;
 
   @ApiProperty()
   @IsString()

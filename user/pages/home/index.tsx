@@ -16,6 +16,7 @@ import ScrollListFeed from '@components/post/scroll-list';
 import {
   SyncOutlined, TagOutlined, SearchOutlined, CloseOutlined
 } from '@ant-design/icons';
+import { HomeIcon } from 'src/icons';
 import Link from 'next/link';
 import { debounce } from 'lodash';
 import './index.less';
@@ -157,7 +158,11 @@ class HomePage extends PureComponent<IProps> {
           <div style={{ position: 'relative' }}>
             <div className="main-container">
               <div className="home-heading">
-                <h3>HOME</h3>
+                <h3>
+                  <HomeIcon />
+                  {' '}
+                  HOME
+                </h3>
                 <div className="search-bar-feed">
                   <Input
                     className={openSearch ? 'active' : ''}

@@ -41,7 +41,7 @@ export class PerformerSearchService {
       query._id = { $in: req.performerIds.split(',') };
     }
     ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender', 'status',
-      'height', 'weight', 'eyes', 'bust', 'sexualOrientation'].forEach((f) => {
+      'height', 'weight', 'eyes', 'butt', 'sexualOrientation'].forEach((f) => {
       if (req[f]) {
         query[f] = req[f];
       }
@@ -125,7 +125,7 @@ export class PerformerSearchService {
       query._id = { $in: req.performerIds.split(',') };
     }
     ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender', 'status',
-      'height', 'weight', 'eyes', 'bust', 'sexualOrientation'].forEach((f) => {
+      'height', 'weight', 'eyes', 'butt', 'sexualOrientation'].forEach((f) => {
       if (req[f]) {
         query[f] = req[f];
       }

@@ -124,7 +124,7 @@ const performerSchema = new mongoose.Schema({
     type: String,
     index: true
   },
-  bust: {
+  butt: {
     type: String,
     index: true
   },
