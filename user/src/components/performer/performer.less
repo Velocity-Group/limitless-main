@@ -82,6 +82,12 @@
     }
   }
 
+  .ant-image {
+    .ant-image-mask {
+      border-radius: 50%;
+    }
+  }
+
   img {
     width: 100px;
     height: 100px;
@@ -262,10 +268,6 @@
   @media screen and (max-width: @mobile-screen) {
     margin-top: 5px;
   }
-
-  &.mar-0 {
-    margin-top: 10px;
-  }
 }
 
 .model-content {
@@ -414,13 +416,13 @@
   }
 
   .online-status {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     background-color: @gray;
     border-radius: 50%;
     position: absolute;
-    bottom: 30px;
-    left: 25px;
+    bottom: 20px;
+    left: 95px;
     opacity: 0.8;
     z-index: 1;
 
@@ -553,7 +555,9 @@
     }
 
     .online-status {
-      left: 30px;
+      width: 8px;
+      height: 8px;
+      left: 75px;
       bottom: 15px;
     }
 

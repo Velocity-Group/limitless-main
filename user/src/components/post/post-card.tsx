@@ -330,7 +330,7 @@ class FeedCard extends Component<IProps> {
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
       openTeaser, openSubscriptionModal, openReportModal
     } = this.state;
-    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought);
+    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     const thumbUrl = feed?.thumbnailUrl || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0]) || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0]) || '/static/leaf.jpg';
@@ -431,19 +431,27 @@ class FeedCard extends Component<IProps> {
             <div className="lock-content">
               {/* eslint-disable-next-line no-nested-ternary */}
               <div className="feed-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
-              <div
-                className="lock-middle"
-                onMouseEnter={() => this.setState({ isHovered: true })}
-                onMouseLeave={() => this.setState({ isHovered: false })}
-              >
+              <div className="lock-middle">
                 {(isHovered || canView) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
-                <Button disabled={user.isPerformer} className="secondary" onClick={() => this.setState({ openSubscriptionModal: true })}>
+                <Button
+                  onMouseEnter={() => this.setState({ isHovered: true })}
+                  onMouseLeave={() => this.setState({ isHovered: false })}
+                  disabled={user.isPerformer}
+                  className="secondary"
+                  onClick={() => this.setState({ openSubscriptionModal: true })}
+                >
                   Subcribe to unlock
                 </Button>
                 )}
                 {feed.isSale && !isBought && (
-                <Button disabled={user.isPerformer} className="secondary" onClick={() => this.setState({ openPurchaseModal: true })}>
+                <Button
+                  onMouseEnter={() => this.setState({ isHovered: true })}
+                  onMouseLeave={() => this.setState({ isHovered: false })}
+                  disabled={user.isPerformer}
+                  className="secondary"
+                  onClick={() => this.setState({ openPurchaseModal: true })}
+                >
                   Pay&nbsp;
                   <img alt="coin" src="/static/coin-ico.png" width="15px" />
                   {feed.price.toFixed(2)}

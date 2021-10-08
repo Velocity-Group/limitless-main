@@ -187,6 +187,7 @@ class HomePage extends PureComponent<IProps> {
                       {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
                         <Link key={per._id} href={{ pathname: '/model/profile', query: { username: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
                           <div className="story-per-card" title={per?.name || per?.username || 'N/A'}>
+                            <span className={per?.isOnline > 0 ? 'online-status active' : 'online-status'} />
                             <img className="per-avatar" alt="avatar" src={per?.avatar || '/static/no-avatar.png'} />
                             <Tooltip key={per._id} title={per?.name || per?.username}><div className="per-name">{per?.name || per?.username || 'N/A'}</div></Tooltip>
                           </div>
