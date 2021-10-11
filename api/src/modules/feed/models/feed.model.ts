@@ -34,8 +34,6 @@ export class FeedModel extends Document {
 
   thumbnailId: ObjectId;
 
-  tagline: string;
-
   isPinned: boolean;
 
   status: string;

@@ -50,6 +50,4 @@ export class VideoModel extends Document {
   updatedAt: Date;
 
   participantIds?: string[];
-
-  tagline: string;
 }

@@ -11,6 +11,7 @@ import { EarningService } from './services/earning.service';
 import { earningProviders } from './providers/earning.provider';
 import { TransactionEarningListener, HandleDeleteItemListener } from './listeners';
 import { UserModule } from '../user/user.module';
+import { OrderModule } from '../order/order.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { UserModule } from '../user/user.module';
     forwardRef(() => PerformerModule),
     forwardRef(() => PaymentModule),
     forwardRef(() => SettingModule),
-    forwardRef(() => PurchasedItemModule)
+    forwardRef(() => PurchasedItemModule),
+    forwardRef(() => OrderModule)
   ],
   providers: [...earningProviders, EarningService, TransactionEarningListener, HandleDeleteItemListener],
   controllers: [EarningController],

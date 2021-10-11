@@ -36,6 +36,4 @@ export class GalleryModel extends Document {
   createdAt: Date;
 
   updatedAt: Date;
-
-  tagline: string;
 }

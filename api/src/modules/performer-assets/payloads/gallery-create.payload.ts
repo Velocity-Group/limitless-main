@@ -22,11 +22,6 @@ export class GalleryCreatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  tagline: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
   @IsIn(['active', 'inactive'])
   status: string;
 

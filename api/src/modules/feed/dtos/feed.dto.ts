@@ -59,8 +59,6 @@ export class FeedDto {
 
   thumbnailUrl: string;
 
-  tagline: string;
-
   isPinned: boolean;
 
   pinnedAt: Date;
@@ -105,7 +103,6 @@ export class FeedDto {
         'teaser',
         'thumbnailId',
         'thumbnailUrl',
-        'tagline',
         'isPinned',
         'pinnedAt',
         'status',

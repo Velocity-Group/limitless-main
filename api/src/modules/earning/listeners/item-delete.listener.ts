@@ -17,8 +17,10 @@ import { MessageModel } from 'src/modules/message/models';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { USER_MODEL_PROVIDER } from 'src/modules/user/providers';
 import { UserModel } from 'src/modules/user/models';
-import { REFUND_ORDER_CHANNEL } from 'src/modules/order/constants';
+import { ORDER_STATUS, REFUND_ORDER_CHANNEL } from 'src/modules/order/constants';
 import { OrderDto } from 'src/modules/order/dtos';
+import { ORDER_MODEL_PROVIDER } from 'src/modules/order/providers';
+import { OrderModel } from 'src/modules/order/models';
 import { EARNING_MODEL_PROVIDER } from '../providers/earning.provider';
 import { EarningModel } from '../models/earning.model';
 
@@ -29,6 +31,8 @@ const HANDLE_REFUND_ORDER_EARNING_TOPIC = 'HANDLE_REFUND_ORDER_EARNING_TOPIC';
 @Injectable()
 export class HandleDeleteItemListener {
   constructor(
+    @Inject(ORDER_MODEL_PROVIDER)
+    private readonly orderModel: Model<OrderModel>,
     @Inject(EARNING_MODEL_PROVIDER)
     private readonly earningModel: Model<EarningModel>,
     @Inject(PERFORMER_MODEL_PROVIDER)
@@ -129,6 +133,7 @@ export class HandleDeleteItemListener {
     });
     if (!earning) return;
     await Promise.all([
+      this.orderModel.updateOne({ transactionId }, { deliveryStatus: ORDER_STATUS.REFUNDED }),
       this.paymentTokenModel.updateOne({ _id: transactionId }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
       this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } }),
       this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } }),

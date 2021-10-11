@@ -25,11 +25,6 @@ export class FeedCreatePayload {
   text: string;
 
   @ApiProperty()
-  @IsString()
-  @IsOptional()
-  tagline: string;
-
-  @ApiProperty()
   @IsString({ each: true })
   @IsOptional()
   fileIds: string[];

@@ -112,9 +112,6 @@ export class SearchKeywordService {
         $or: [
           {
             text: { $regex: regexp }
-          },
-          {
-            tagline: { $regex: regexp }
           }
         ]
       }, { status: STATUS.ACTIVE }];

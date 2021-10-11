@@ -59,8 +59,6 @@ export class VideoDto {
 
   participants: any[];
 
-  tagline: string;
-
   isSubscribed: boolean;
 
   isBought: boolean;
@@ -101,7 +99,6 @@ export class VideoDto {
         'updatedAt',
         'participantIds',
         'participants',
-        'tagline',
         'isBought',
         'isSubscribed',
         'isLiked',
@@ -176,8 +173,6 @@ export class IVideoResponse {
   participantIds: string[];
 
   participants: any[];
-
-  tagline: string;
 
   constructor(init: Partial<IVideoResponse>) {
     Object.assign(

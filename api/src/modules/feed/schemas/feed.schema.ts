@@ -51,7 +51,6 @@ export const FeedSchema = new Schema({
     index: true,
     default: STATUS.ACTIVE
   },
-  tagline: String,
   isPinned: { type: Boolean, default: false },
   pinnedAt: { type: Date },
   totalLike: { type: Number, default: 0 },
