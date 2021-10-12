@@ -30,6 +30,8 @@ export class EarningService {
   public async admminSearch(
     req: EarningSearchRequestPayload
   ): Promise<PageableData<EarningDto>> {
+    if (req.fromDate === 'undefined') req.fromDate = null;
+    if (req.toDate === 'undefined') req.toDate = null;
     const query = {} as any;
     if (req.performerId) {
       query.performerId = req.performerId;
@@ -104,6 +106,9 @@ export class EarningService {
     req: EarningSearchRequestPayload,
     user: UserDto
   ): Promise<PageableData<EarningDto>> {
+    if (req.fromDate === 'undefined') req.fromDate = null;
+    if (req.toDate === 'undefined') req.toDate = null;
+
     const query = {
       performerId: user._id
     } as any;
@@ -184,6 +189,9 @@ export class EarningService {
   public async stats(
     req: EarningSearchRequestPayload
   ): Promise<IEarningStatResponse> {
+    if (req.fromDate === 'undefined') req.fromDate = null;
+    if (req.toDate === 'undefined') req.toDate = null;
+
     const query = {} as any;
     if (req.performerId) {
       query.performerId = toObjectId(req.performerId);
@@ -247,6 +255,8 @@ export class EarningService {
   public async updatePaidStatus(
     payload: UpdateEarningStatusPayload
   ): Promise<any> {
+    if (!payload.fromDate || payload.fromDate === 'undefined') throw new Error('Date invalid');
+    if (!payload.toDate || payload.toDate === 'undefined') throw new Error('Date invalid');
     const query = { } as any;
 
     if (payload.fromDate && payload.toDate) {

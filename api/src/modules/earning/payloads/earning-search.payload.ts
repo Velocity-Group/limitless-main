@@ -17,9 +17,9 @@ export class EarningSearchRequestPayload extends SearchRequest {
 
   fromDate?: string | Date;
 
-  toDate?: Date;
+  toDate?: string | Date;
 
-  paidAt?: Date;
+  paidAt?: string | Date;
 
   isPaid?: boolean;
 
