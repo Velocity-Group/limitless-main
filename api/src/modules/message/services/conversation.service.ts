@@ -248,7 +248,7 @@ export class ConversationService {
               const isBlockeCountry = blockCountries.find((b) => `${b.sourceId}` === `${recipient.sourceId}` && b.countryCodes.includes(countryCode));
               isBlocked = !!isBlockeCountry;
             }
-            const isSubscribed = subscriptions.find((s) => `${s.userId}` === `${sender.sourceId}`);
+            const isSubscribed = subscriptions.find((s) => `${s.performerId}` === `${recipientInfo._id}`);
             // eslint-disable-next-line no-param-reassign
             conversation.isSubscribed = !!isSubscribed;
             // eslint-disable-next-line no-param-reassign
