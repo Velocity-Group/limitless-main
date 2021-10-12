@@ -47,7 +47,7 @@ class Dashboard extends PureComponent<IProps> {
       loginSuccessHandler();
       updateCurrentUserHandler(user.data);
       Router.push('/home');
-    } catch (e) {
+    } catch {
       // console.log(e);
     }
   }

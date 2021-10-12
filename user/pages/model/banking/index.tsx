@@ -38,11 +38,8 @@ class BankingSettings extends PureComponent<IProps> {
         paymentService.retrieveStripeAccount(),
         paymentService.loginLink()
       ]);
-      this.setState({ stripeAccount: account.data, loginUrl: loginLink.data.url });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(await e);
-    } finally {
+      this.setState({ stripeAccount: account.data, loginUrl: loginLink.data.url, loading: false });
+    } catch {
       this.setState({ loading: false });
     }
   }

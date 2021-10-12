@@ -136,8 +136,6 @@ class Header extends PureComponent<IProps> {
       totalNotReadMessage, openProfile, openCallRequest
     } = this.state;
 
-    console.log(currentUser);
-
     return (
       <div className="main-header">
         <Event
