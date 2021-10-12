@@ -10,8 +10,6 @@ import { PERFORMER_PRODUCT_MODEL_PROVIDER } from 'src/modules/performer-assets/p
 import { ProductModel } from 'src/modules/performer-assets/models';
 import { FEED_PROVIDER } from 'src/modules/feed/providers';
 import { FeedModel } from 'src/modules/feed/models';
-import { PERFORMER_STORY_PROVIDER } from 'src/modules/performer-story/providers';
-import { StoryModel } from 'src/modules/performer-story/models';
 import * as moment from 'moment';
 import { SearchDto } from '../dtos/search.dto';
 import { UserDto } from '../../user/dtos';
@@ -36,11 +34,9 @@ export class SearchKeywordService {
     @Inject(PERFORMER_PRODUCT_MODEL_PROVIDER)
     private readonly productModel: Model<ProductModel>,
     @Inject(FEED_PROVIDER)
-    private readonly feedModel: Model<FeedModel>,
-    @Inject(PERFORMER_STORY_PROVIDER)
-    private readonly storyModel: Model<StoryModel>
+    private readonly feedModel: Model<FeedModel>
   ) {
-    this.defindJobs();
+    // this.defindJobs();
   }
 
   private async defindJobs() {
@@ -76,8 +72,6 @@ export class SearchKeywordService {
     user: UserDto
   ) {
     const queryPerformer = { } as any;
-    const queryStory = { } as any;
-    const queryBlog = { } as any;
     const queryProduct = { } as any;
     const queryFeed = { } as any;
     if (req.keyword) {
@@ -115,31 +109,11 @@ export class SearchKeywordService {
           }
         ]
       }, { status: STATUS.ACTIVE }];
-
-      queryStory.$and = [{
-        $or: [
-          {
-            text: { $regex: regexp }
-          }
-        ]
-      }];
-
-      queryBlog.$and = [{
-        $or: [
-          {
-            title: { $regex: regexp }
-          },
-          {
-            text: { $regex: regexp }
-          }
-        ]
-      }];
     }
-    const [totalPerformer, totalProduct, totalFeed, totalStory] = await Promise.all([
+    const [totalPerformer, totalProduct, totalFeed] = await Promise.all([
       this.performerModel.countDocuments(queryPerformer),
       this.productModel.countDocuments(queryProduct),
-      this.feedModel.countDocuments(queryFeed),
-      this.storyModel.countDocuments(queryStory)
+      this.feedModel.countDocuments(queryFeed)
     ]);
     await this.queueEventService.publish(
       new QueueEvent({
@@ -155,8 +129,7 @@ export class SearchKeywordService {
     return {
       totalPerformer,
       totalProduct,
-      totalFeed,
-      totalStory
+      totalFeed
     };
   }
 

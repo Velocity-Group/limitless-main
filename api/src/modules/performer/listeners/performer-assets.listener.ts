@@ -8,9 +8,7 @@ import {
 import { Model } from 'mongoose';
 import { PHOTO_STATUS, VIDEO_STATUS, PRODUCT_STATUS } from 'src/modules/performer-assets/constants';
 import { EVENT } from 'src/kernel/constants';
-import { FeedDto } from 'src/modules/feed/dtos';
 import { PERFORMER_FEED_CHANNEL } from 'src/modules/feed/constants';
-import { PERFORMER_STORY_CHANNEL } from 'src/modules/performer-story/constants';
 import { PerformerModel } from '../models';
 import { PERFORMER_MODEL_PROVIDER } from '../providers';
 
@@ -18,7 +16,6 @@ const HANDLE_PHOTO_COUNT_FOR_PERFORMER = 'HANDLE_PHOTO_COUNT_FOR_PERFORMER';
 const HANDLE_VIDEO_COUNT_FOR_PERFORMER = 'HANDLE_VIDEO_COUNT_FOR_PERFORMER';
 const HANDLE_PRODUCT_COUNT_FOR_PERFORMER = 'HANDLE_PRODUCT_COUNT_FOR_PERFORMER';
 const HANDLE_FEED_COUNT_FOR_PERFORMER = 'HANDLE_FEED_COUNT_FOR_PERFORMER';
-const HANDLE_STORY_COUNT_FOR_PERFORMER = 'HANDLE_STORY_COUNT_FOR_PERFORMER';
 
 @Injectable()
 export class PerformerAssetsListener {
@@ -49,12 +46,6 @@ export class PerformerAssetsListener {
       PERFORMER_FEED_CHANNEL,
       HANDLE_FEED_COUNT_FOR_PERFORMER,
       this.handleFeedCount.bind(this)
-    );
-
-    this.queueEventService.subscribe(
-      PERFORMER_STORY_CHANNEL,
-      HANDLE_STORY_COUNT_FOR_PERFORMER,
-      this.handleStoryCount.bind(this)
     );
   }
 
@@ -100,49 +91,42 @@ export class PerformerAssetsListener {
   }
 
   public async handleVideoCount(event: QueueEvent) {
-    try {
-      const { eventName } = event;
-      if (![EVENT.CREATED, EVENT.DELETED, EVENT.UPDATED].includes(eventName)) {
-        return false;
-      }
-      const { performerId, status, oldStatus } = event.data;
-      let increase = 0;
+    const { eventName } = event;
+    if (![EVENT.CREATED, EVENT.DELETED, EVENT.UPDATED].includes(eventName)) {
+      return;
+    }
+    const { performerId, status, oldStatus } = event.data;
+    let increase = 0;
 
-      switch (eventName) {
-        case EVENT.CREATED:
-          if (status === VIDEO_STATUS.ACTIVE) increase = 1;
-          break;
-        case EVENT.UPDATED:
-          if (
-            oldStatus !== VIDEO_STATUS.ACTIVE
+    switch (eventName) {
+      case EVENT.CREATED:
+        if (status === VIDEO_STATUS.ACTIVE) increase = 1;
+        break;
+      case EVENT.UPDATED:
+        if (
+          oldStatus !== VIDEO_STATUS.ACTIVE
             && status === VIDEO_STATUS.ACTIVE
-          ) increase = 1;
-          if (
-            oldStatus === VIDEO_STATUS.ACTIVE
+        ) increase = 1;
+        if (
+          oldStatus === VIDEO_STATUS.ACTIVE
             && status !== VIDEO_STATUS.ACTIVE
-          ) increase = -1;
-          break;
-        case EVENT.DELETED:
-          if (status === VIDEO_STATUS.ACTIVE) increase = -1;
-          break;
-        default:
-          break;
-      }
-      if (increase) {
-        await this.performerModel.updateOne(
-          { _id: performerId },
-          {
-            $inc: {
-              'stats.totalVideos': increase
-            }
+        ) increase = -1;
+        break;
+      case EVENT.DELETED:
+        if (status === VIDEO_STATUS.ACTIVE) increase = -1;
+        break;
+      default:
+        break;
+    }
+    if (increase) {
+      await this.performerModel.updateOne(
+        { _id: performerId },
+        {
+          $inc: {
+            'stats.totalVideos': increase
           }
-        );
-      }
-      return true;
-    } catch (e) {
-      // TODO - log me
-      // console.log(e);
-      return false;
+        }
+      );
     }
   }
 
@@ -250,38 +234,6 @@ export class PerformerAssetsListener {
         {
           $inc: {
             'stats.totalFeeds': increase
-          }
-        }, {
-          upsert: true
-        }
-      );
-    }
-  }
-
-  public async handleStoryCount(event: QueueEvent) {
-    const { eventName } = event;
-    if (![EVENT.CREATED, EVENT.DELETED].includes(eventName)) {
-      return;
-    }
-    const { fromSourceId } = event.data as FeedDto;
-    let increase = 0;
-
-    switch (eventName) {
-      case EVENT.CREATED:
-        increase = 1;
-        break;
-      case EVENT.DELETED:
-        increase = -1;
-        break;
-      default:
-        break;
-    }
-    if (increase) {
-      await this.performerModel.updateOne(
-        { _id: fromSourceId },
-        {
-          $inc: {
-            'stats.totalStories': increase
           }
         }, {
           upsert: true

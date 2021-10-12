@@ -3,7 +3,6 @@ export const OBJECT_TYPE = {
   PERFORMER: 'performer',
   FEED: 'feed',
   COMMENT: 'comment',
-  STORY: 'story',
   PRODUCT: 'product',
   GALLERY: 'gallery'
 };
