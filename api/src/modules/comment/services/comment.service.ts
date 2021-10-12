@@ -52,14 +52,9 @@ export class CommentService {
         data: new CommentDto(newComment)
       })
     );
-    const [performerInfo] = await Promise.all([
-      this.performerService.findById(newComment.createdBy)
-    ]);
     const returnData = new CommentDto(newComment);
     // eslint-disable-next-line no-nested-ternary
-    returnData.creator = performerInfo
-      ? new PerformerDto(performerInfo).toPublicDetailsResponse()
-      : (user ? new UserDto(user).toResponse() : null);
+    returnData.creator = new UserDto(user).toResponse();
     return returnData;
   }
 

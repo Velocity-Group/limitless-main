@@ -203,7 +203,6 @@ export class AuthService {
     // TODO - should cache here?
     if (decodded.source === 'user') {
       const user = await this.userService.findById(decodded.sourceId);
-
       // TODO - check activated status here
       return new UserDto(user).toResponse(true);
     }
