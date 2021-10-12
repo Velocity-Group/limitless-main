@@ -1,6 +1,6 @@
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Input, Button, message
+  Form, Input, Button, message, Popover
 } from 'antd';
 import {
   SendOutlined, SmileOutlined
@@ -91,10 +91,11 @@ export class CommentForm extends PureComponent<IProps> {
             >
               <TextArea disabled={!creator || !creator._id} maxLength={150} showCount minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
-            <div className="grp-emotions">
-              <SmileOutlined />
-              <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
-            </div>
+            <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null}>
+              <div className="grp-emotions">
+                <SmileOutlined />
+              </div>
+            </Popover>
           </div>
           <Button className={!isReply ? 'submit-btn' : ''} htmlType="submit" disabled={requesting}>
             {!isReply ? <SendOutlined /> : 'Reply'}

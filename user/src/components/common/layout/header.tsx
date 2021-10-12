@@ -4,7 +4,7 @@ import {
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { IUser, StreamSettings } from 'src/interfaces';
+import { IUser, StreamSettings, IUIConfig } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
@@ -25,14 +25,15 @@ import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/action
 import { updateUIValue } from 'src/redux/ui/actions';
 import { updateBalance } from '@redux/user/actions';
 import './header.less';
+import { shortenLargeNumber } from '@lib/number';
 
 interface IProps {
   updateBalance: Function;
   updateUIValue: Function;
-  currentUser?: IUser;
+  currentUser: IUser;
   logout: Function;
   router: any;
-  ui: any;
+  ui: IUIConfig;
   privateRequests: any;
   addPrivateRequest: Function;
   accessPrivateRequest: Function;
@@ -134,6 +135,8 @@ class Header extends PureComponent<IProps> {
     const {
       totalNotReadMessage, openProfile, openCallRequest
     } = this.state;
+
+    console.log(currentUser);
 
     return (
       <div className="main-header">
@@ -249,21 +252,38 @@ class Header extends PureComponent<IProps> {
           </Drawer> */}
           <Drawer
             title={(
-              <div className="profile-user">
-                <img className="avatar" src={currentUser?.avatar || '/static/no-avatar.png'} alt="avatar" />
-                <span className="profile-name">
-                  {currentUser?.name || 'N/A'}
-                  <span className="sub-name">
-                    @
-                    {currentUser?.username || 'n/a'}
+              <>
+                <div className="profile-user">
+                  <img className="avatar" src={currentUser?.avatar || '/static/no-avatar.png'} alt="avatar" />
+                  <span className="profile-name">
+                    {currentUser?.name || 'N/A'}
+                    <span className="sub-name">
+                      @
+                      {currentUser?.username || 'n/a'}
+                    </span>
                   </span>
+                </div>
+                <div className="sub-info">
                   <a aria-hidden className="user-balance" onClick={() => !currentUser?.isPerformer && Router.push('/token-package')}>
                     <img src="/static/coin-ico.png" alt="gem" />
                     {(currentUser?.balance || 0).toFixed(2)}
                     {!currentUser?.isPerformer && <PlusCircleOutlined />}
                   </a>
-                </span>
-              </div>
+                  {currentUser.isPerformer ? (
+                    <span>
+                      {shortenLargeNumber(currentUser?.stats?.subscribers || 0)}
+                      {' '}
+                      Followers
+                    </span>
+                  ) : (
+                    <span>
+                      {shortenLargeNumber(currentUser?.stats?.totalSubscriptions || 0)}
+                      {' '}
+                      Following
+                    </span>
+                  )}
+                </div>
+              </>
             )}
             closable
             onClose={() => this.setState({ openProfile: false })}

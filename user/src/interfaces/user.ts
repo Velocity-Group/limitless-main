@@ -19,6 +19,7 @@ export interface IUser {
   balance: number;
   stripeCardIds: string[];
   stripeCustomerId: string;
+  stats: any;
 }
 
 export interface IUserFormData {
