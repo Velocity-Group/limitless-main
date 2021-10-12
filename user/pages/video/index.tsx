@@ -171,7 +171,7 @@ class VideoViewPage extends PureComponent<IProps> {
           isLiked: !isLiked,
           videoStats: {
             ...videoStats,
-            likes: videoStats.likes + 1
+            likes: videoStats.likes + (isLiked ? -1 : 1)
           }
         });
         message.success(!isLiked ? 'Liked' : 'Unliked');
@@ -191,7 +191,7 @@ class VideoViewPage extends PureComponent<IProps> {
           isBookmarked: !isBookmarked,
           videoStats: {
             ...videoStats,
-            bookmarks: videoStats.bookmarks + 1
+            bookmarks: videoStats.bookmarks + (isBookmarked ? -1 : 1)
           }
         });
       }

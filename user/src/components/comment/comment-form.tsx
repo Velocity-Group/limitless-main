@@ -82,9 +82,6 @@ export class CommentForm extends PureComponent<IProps> {
         }}
       >
         <div className="comment-form">
-          <div className="cmt-user">
-            <img alt="creator-img" src={creator?.avatar || '/static/no-avatar.png'} />
-          </div>
           <div className="cmt-area">
             <Form.Item
               name="content"
