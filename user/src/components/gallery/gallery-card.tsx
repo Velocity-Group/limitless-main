@@ -1,5 +1,5 @@
-import React from 'react';
-import { Tooltip, Button } from 'antd';
+import { useState } from 'react';
+import { Tooltip } from 'antd';
 import { PictureOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ interface GalleryCardIProps {
 }
 
 const GalleryCard = ({ gallery }: GalleryCardIProps) => {
+  const [isHovered, setHover] = useState(false);
   const canView = (!gallery.isSale && gallery.isSubscribed) || (gallery.isSale && gallery.isBought);
   const thumbUrl = (gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]) || '/static/no-image.jpg';
   return (
@@ -17,7 +18,11 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
       href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
       as={`/gallery/${gallery?.slug || gallery?._id}`}
     >
-      <div className="gallery-card">
+      <div
+        className="gallery-card"
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
         {gallery?.isSale && gallery?.price > 0 && (
         <span className="gallery-price">
           <div className="label-price">
@@ -36,16 +41,16 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
             </a>
           </div>
           <div className="lock-middle">
-            {canView ? <UnlockOutlined /> : <LockOutlined />}
-            {(!gallery.isSale && !gallery.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}
-            {(gallery.isSale && !gallery.isBought) && <Button type="link">Pay now to unlock</Button>}
+            {(canView || isHovered) ? <UnlockOutlined /> : <LockOutlined />}
+            {/* {(!gallery.isSale && !gallery.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}
+            {(gallery.isSale && !gallery.isBought) && <Button type="link">Pay now to unlock</Button>} */}
           </div>
         </div>
-        <div className="gallery-info">
-          <Tooltip title={gallery?.title}>
-            <span>{gallery?.title}</span>
-          </Tooltip>
-        </div>
+        <Tooltip title={gallery?.title}>
+          <div className="gallery-info">
+            {gallery.title}
+          </div>
+        </Tooltip>
       </div>
     </Link>
   );

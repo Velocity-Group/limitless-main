@@ -364,7 +364,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
-            <Form.Item name="state" label="State/County/Province">
+            <Form.Item name="state" label="State">
               <Input />
             </Form.Item>
           </Col>

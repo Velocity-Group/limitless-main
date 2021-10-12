@@ -47,12 +47,7 @@ class Header extends PureComponent<IProps> {
   };
 
   async componentDidMount() {
-    RouterEvent.events.on(
-      'routeChangeStart',
-      async () => this.setState({
-        openProfile: false, openCallRequest: false
-      })
-    );
+    RouterEvent.events.on('routeChangeStart', this.handleChangeRoute);
   }
 
   async componentDidUpdate(prevProps: any) {
@@ -60,6 +55,19 @@ class Header extends PureComponent<IProps> {
     if (currentUser._id && prevProps.currentUser._id !== currentUser._id) {
       this.handleCountNotificationMessage();
     }
+  }
+
+  componentWillUnmount() {
+    RouterEvent.events.off('routeChangeStart', this.handleChangeRoute);
+    const token = authService.getToken();
+    const socket = this.context;
+    token && socket && socket.emit('auth/logout', { token });
+  }
+
+  handleChangeRoute = () => {
+    this.setState({
+      openProfile: false, openCallRequest: false
+    });
   }
 
   handleMessage = async (event) => {
@@ -116,7 +124,6 @@ class Header extends PureComponent<IProps> {
     token && socket && await socket.emit('auth/logout', {
       token
     });
-    socket && socket.close();
     handleLogout();
   }
 

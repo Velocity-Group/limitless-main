@@ -22,7 +22,7 @@ export class ListComments extends PureComponent<IProps> {
       <div className="cmt-list">
         {comments.map((comment: IComment) => <CommentItem canReply={canReply} key={comment._id} item={comment} user={user} onDelete={onDelete} />)}
         {requesting && <div className="text-center" style={{ margin: 20 }}><Spin /></div>}
-        {!requesting && !comments.length && <div className="text-center" style={{ padding: '15px 5px' }}>Being the first to comment</div>}
+        {!requesting && !comments.length && <div className="text-center" style={{ padding: '15px 5px' }}>Be the first to comment</div>}
       </div>
     );
   }

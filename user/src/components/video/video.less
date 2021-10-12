@@ -26,6 +26,7 @@
       }
       .ant-btn {
         font-size: 11px;
+        color: @white;
         font-family: @primary-font-bold;
       }
     }
@@ -36,12 +37,22 @@
       width: 100%;
       height: 100%;
       background-color: @light-grey;
-      background-size: cover;
+      background-size: 100%;
       background-repeat: no-repeat;
       background-position: center;
+      overflow: hidden;
     }
     @media screen and (max-width: @mobile-screen) {
       height: 150px;
+    }
+  }
+  
+  &:hover {
+    opacity: 0.9;
+    .vid-thumb {
+      .card-bg {
+        background-size: 102%;
+      }
     }
   }
   .vid-stats {
@@ -51,7 +62,7 @@
     justify-content: space-between;
     color: @white;
     font-size: 10px;
-    padding: 10px 0 10px 5px;
+    padding: 5px 0 5px 5px;
     font-weight: 600;
     position: absolute;
     bottom: 0;
@@ -63,9 +74,10 @@
   }
   .vid-info {
     font-family: @primary-font-bold;
-    color: @primary-color;
-    background-color: @light-card;
-    padding: 5px 10px;
+    color: @white;
+    background-color: @primary-color;
+    padding: 5px;
+    font-size: 12px;
     text-align: center;
     font-weight: 600;
     text-transform: capitalize;
@@ -76,16 +88,6 @@
       font-size: 11px;
     }
   }
-
-  &:hover {
-    .vid-info {
-      a {
-        color: @white!important;
-      }
-      color: @white!important;
-      background-color: @primary-color;
-    }
-  }
   .vid-price {
     position: absolute;
     left: 0px;
@@ -93,11 +95,10 @@
     z-index: 99;
     .label-price {
       color: @white;
-      background-color: @secondary-color;;
-      width: auto;
+      background-color: @secondary-color;
       padding: 3px 15px;
       clip-path: polygon(0px 0px,0px 100%,100% 100%,90% 50%,100% 0);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       margin: 5px 0;
     }

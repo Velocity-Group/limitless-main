@@ -196,6 +196,11 @@
   button.ant-btn {
     font-size: 15px;
   }
+
+  @media screen and (max-width: @mobile-screen) { 
+    margin: 10px 0;
+    font-size: 16px;
+  }
 }
 
 .text-center {
@@ -357,6 +362,10 @@
   }
 }
 
+.ant-tabs.custom {
+  overflow: unset;
+}
+
 .ant-tabs-tab {
   font-weight: 600;
   font-size: 16px;
@@ -420,7 +429,7 @@
     height: 40px;
   }
 
-  @media screen and (max-width: @tablet-screen) {
+  @media screen and (max-width: @mobile-screen) {
     &.custom {
       flex-wrap: wrap;
 
@@ -814,7 +823,7 @@
       .anticon {
         font-size: 14px;
         margin-left: 2px;
-        color: @secondary-color;
+        color: @theme-color;
       }
     }
 

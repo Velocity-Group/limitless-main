@@ -380,8 +380,7 @@ class VideoViewPage extends PureComponent<IProps> {
               <HourglassOutlined />
               &nbsp;
               {videoDuration(video?.video?.duration || 0)}
-            </a>
-            <a>
+              &nbsp;&nbsp;&nbsp;
               <CalendarOutlined />
               &nbsp;
               {formatDate(video.updatedAt, 'll')}
@@ -389,80 +388,80 @@ class VideoViewPage extends PureComponent<IProps> {
           </div>
           <div className="vid-player">
             {((video.isSale && !isBought) || (!video.isSale && !isSubscribed) || video.isSchedule) && (
-            <div className="main-player">
-              <div className="vid-group">
-                <div className="left-group">
-                  {video.teaser && video.teaserProcessing && (
-                  <div
-                    className="text-center"
-                    style={{
-                      position: 'absolute', top: 0, padding: 10, zIndex: 1
-                    }}
-                  >
-                    Teaser is currently on processing
-                    {' '}
-                    <Spin />
-                  </div>
-                  )}
-                  {video.teaser && !video.teaserProcessing && <VideoPlayer {...teaserOptions} />}
-                  {!video.teaser && (
-                    <div className="video-thumbs">
-                      <img alt="thumbnail" src={thumbUrl} />
-                    </div>
-                  )}
-                  <div className="vid-exl-group">
-                    {/* eslint-disable-next-line no-nested-ternary */}
-                    <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
-                    <div className="text-center">
-                      {video.isSale && !isBought && (
-                      <Button type="primary" loading={submiting} disabled={submiting} onClick={this.purchaseVideo.bind(this)}>
-                        PAY
+              <div className="main-player">
+                <div className="vid-group">
+                  <div className="left-group">
+                    {video.teaser && video.teaserProcessing && (
+                      <div
+                        className="text-center"
+                        style={{
+                          position: 'absolute', top: 0, padding: 10, zIndex: 1
+                        }}
+                      >
+                        Teaser is currently on processing
                         {' '}
-                        {video.price.toFixed(2)}
-                        {' '}
-                        <img alt="token" src="/static/coin-ico.png" height="25px" />
-                        {' '}
-                        TO UNLOCK
-                      </Button>
-                      )}
-                      {!video.isSale && !isSubscribed && (
-                      <ConfirmSubscriptionPerformerForm
-                        type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
-                        performer={video.performer}
-                        submiting={submiting}
-                        onFinish={this.subscribe.bind(this)}
-                      />
-                      )}
-                    </div>
-                    {video.isSchedule && (
-                    <h4>
-                      Main video will be premiered at
-                      {' '}
-                      {formatDate(video.scheduledAt, 'll')}
-                    </h4>
+                        <Spin />
+                      </div>
                     )}
+                    {video.teaser && !video.teaserProcessing && <VideoPlayer {...teaserOptions} />}
+                    {!video.teaser && (
+                      <div className="video-thumbs">
+                        <img alt="thumbnail" src={thumbUrl} />
+                      </div>
+                    )}
+                    <div className="vid-exl-group">
+                      {/* eslint-disable-next-line no-nested-ternary */}
+                      <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
+                      <div className="text-center">
+                        {video.isSale && !isBought && (
+                          <Button type="primary" loading={submiting} disabled={submiting} onClick={this.purchaseVideo.bind(this)}>
+                            PAY
+                            &nbsp;
+                            <img alt="token" src="/static/coin-ico.png" height="20px" />
+                            {' '}
+                            {video.price.toFixed(2)}
+                            {' '}
+                            TO UNLOCK
+                          </Button>
+                        )}
+                        {!video.isSale && !isSubscribed && (
+                          <ConfirmSubscriptionPerformerForm
+                            type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
+                            performer={video.performer}
+                            submiting={submiting}
+                            onFinish={this.subscribe.bind(this)}
+                          />
+                        )}
+                      </div>
+                      {video.isSchedule && (
+                        <h4>
+                          Main video will be premiered at
+                          {' '}
+                          {formatDate(video.scheduledAt, 'll')}
+                        </h4>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             )}
             {((!video.isSale && isSubscribed && !video.isSchedule) || (video.isSale && isBought && !video.isSchedule)) && (
-            <div className="main-player">
-              <div className="vid-group">
-                {video.processing ? (
-                  <div
-                    className="text-center"
-                    style={{
-                      position: 'absolute', top: 0, padding: 10, zIndex: 1
-                    }}
-                  >
-                    Video file is currently on processing
-                    {' '}
-                    <Spin />
-                  </div>
-                ) : <VideoPlayer {...videoJsOptions} />}
+              <div className="main-player">
+                <div className="vid-group">
+                  {video.processing ? (
+                    <div
+                      className="text-center"
+                      style={{
+                        position: 'absolute', top: 0, padding: 10, zIndex: 1
+                      }}
+                    >
+                      Video file is currently on processing
+                      {' '}
+                      <Spin />
+                    </div>
+                  ) : <VideoPlayer {...videoJsOptions} />}
+                </div>
               </div>
-            </div>
             )}
           </div>
         </div>
@@ -530,12 +529,12 @@ class VideoViewPage extends PureComponent<IProps> {
         <div className="main-container">
           <div className="vid-tags">
             {video.tags && video.tags.length > 0
-                && video.tags.map((tag) => (
-                  <a color="magenta" style={{ marginRight: 5 }}>
-                    #
-                    {tag || 'tag'}
-                  </a>
-                ))}
+              && video.tags.map((tag) => (
+                <a color="magenta" style={{ marginRight: 5 }}>
+                  #
+                  {tag || 'tag'}
+                </a>
+              ))}
           </div>
           <Tabs
             defaultActiveKey="description"
@@ -563,7 +562,11 @@ class VideoViewPage extends PureComponent<IProps> {
                         src={per?.avatar || '/no-avatar.png'}
                       />
                       <div className="participant-info">
-                        <h4>{per?.name || 'N/A'}</h4>
+                        <h4>
+                          {per?.name || 'N/A'}
+                          &nbsp;
+                          {per?.verifiedAccount && <TickIcon />}
+                        </h4>
                         <h5>
                           @
                           {per?.username || 'n/a'}
@@ -604,11 +607,11 @@ class VideoViewPage extends PureComponent<IProps> {
               />
 
               {comments.length < totalComments && (
-              <p className="text-center">
-                <a aria-hidden onClick={this.loadMoreComment.bind(this)}>
-                  More comments
-                </a>
-              </p>
+                <p className="text-center">
+                  <a aria-hidden onClick={this.loadMoreComment.bind(this)}>
+                    More comments
+                  </a>
+                </p>
               )}
             </TabPane>
           </Tabs>

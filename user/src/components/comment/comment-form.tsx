@@ -41,10 +41,11 @@ export class CommentForm extends PureComponent<IProps> {
     } = this.props;
     const data = values;
     if (!creator || !creator._id) {
+      message.error('Please login!');
       return Router.push('/');
     }
     if (!data.content) {
-      return message.error('Please add comment');
+      return message.error('Please add comment!');
     }
     if (data.content.length > 150) {
       return message.error('Comment is over 150 characters');

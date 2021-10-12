@@ -38,13 +38,23 @@
       width: 100%;
       height: 100%;
       background-color: @light-grey;
-      background-size: cover;
+      background-size: 100%;
       background-repeat: no-repeat;
       background-position: center;
+      overflow: hidden;
     }
 
     @media screen and (max-width: @mobile-screen) {
       height: 150px;
+    }
+  }
+
+  &:hover {
+    opacity: 0.9;
+    .gallery-thumb {
+      .card-bg {
+        background-size: 102%;
+      }
     }
   }
 
@@ -55,7 +65,7 @@
     justify-content: space-between;
     color: @white;
     font-size: 10px;
-    padding: 10px 0 10px 5px;
+    padding: 5px 0 5px 5px;
     font-weight: 600;
     position: absolute;
     bottom: 0;
@@ -69,29 +79,22 @@
 
   .gallery-info {
     font-family: @primary-font-bold;
-    color: @primary-color;
-    background-color: @light-card;
+    color: @white;
+    background-color: @primary-color;
     padding: 5px 10px;
+    font-size: 12px;
     text-align: center;
     font-weight: 600;
     text-transform: capitalize;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    a {
+      color: @white;
+    }
 
     @media screen and (max-width: @mobile-screen) {
       font-size: 11px;
-    }
-  }
-
-  &:hover {
-    .gallery-info {
-      a {
-        color: @white;
-      }
-
-      color: @white;
-      background-color: @primary-color;
     }
   }
 
@@ -104,11 +107,10 @@
     .label-price {
       color: @white;
       background-color: @secondary-color;
-      ;
+      font-size: 11px;
       width: auto;
       padding: 3px 15px;
       clip-path: polygon(0px 0px, 0px 100%, 100% 100%, 90% 50%, 100% 0);
-      font-size: 12px;
       font-weight: 600;
       margin: 5px 0;
     }

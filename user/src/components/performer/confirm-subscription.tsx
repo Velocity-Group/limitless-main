@@ -26,7 +26,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
       <div className="confirm-subscription-form">
         <div className="text-center">
           <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
-          <p>
+          <p className="p-name">
             {performer?.name || performer?.username || 'N/A'}
             {' '}
             {performer?.verifiedAccount && <TickIcon className="primary-color" />}
