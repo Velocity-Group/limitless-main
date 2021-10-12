@@ -268,17 +268,26 @@ class Header extends PureComponent<IProps> {
                     {!currentUser?.isPerformer && <PlusCircleOutlined />}
                   </a>
                   {currentUser.isPerformer ? (
-                    <span>
-                      {shortenLargeNumber(currentUser?.stats?.subscribers || 0)}
-                      {' '}
-                      Followers
-                    </span>
+                    <Link href="/model/my-subscriber">
+                      <a>
+                        <StarOutlined />
+                        {' '}
+                        {shortenLargeNumber(currentUser?.stats?.subscribers || 0)}
+                        {' '}
+                        Followers
+                      </a>
+
+                    </Link>
                   ) : (
-                    <span>
-                      {shortenLargeNumber(currentUser?.stats?.totalSubscriptions || 0)}
-                      {' '}
-                      Following
-                    </span>
+                    <Link href="/user/my-subscription">
+                      <a>
+                        <HeartOutlined />
+                        {' '}
+                        {shortenLargeNumber(currentUser?.stats?.totalSubscriptions || 0)}
+                        {' '}
+                        Following
+                      </a>
+                    </Link>
                   )}
                 </div>
               </>
@@ -304,13 +313,6 @@ class Header extends PureComponent<IProps> {
                     <UserOutlined />
                     {' '}
                     Edit Profile
-                  </div>
-                </Link>
-                <Link href={{ pathname: '/model/my-subscriber' }} as="/model/my-subscriber">
-                  <div className={router.pathname === '/model/my-subscriber' ? 'menu-item active' : 'menu-item'}>
-                    <StarOutlined />
-                    {' '}
-                    Subscribers
                   </div>
                 </Link>
                 <Link href={{ pathname: '/model/block-user' }} as="/model/block-user">
@@ -402,19 +404,11 @@ class Header extends PureComponent<IProps> {
                     Add Card
                   </div>
                 </Link>
-                <Divider />
                 <Link href="/user/bookmarks" as="/user/bookmarks">
                   <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
                     <BookOutlined />
                     {' '}
                     Bookmarks
-                  </div>
-                </Link>
-                <Link href="/user/my-subscription" as="/user/my-subscription">
-                  <div className={router.pathname === '/user/my-subscription' ? 'menu-item active' : 'menu-item'}>
-                    <HeartOutlined />
-                    {' '}
-                    Subscriptions
                   </div>
                 </Link>
                 <Divider />

@@ -94,9 +94,6 @@ implements OnGatewayConnection, OnGatewayDisconnect {
     const decodeded = this.authService.verifyJWT(token);
     if (!decodeded) {
       return;
-      // client.emit('auth_error', {
-      //   message: 'Invalid token!'
-      // });
     }
     if (!client.authUser) {
       return;
