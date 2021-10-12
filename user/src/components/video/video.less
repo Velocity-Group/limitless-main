@@ -1,12 +1,13 @@
 @import '../../../style/vars.less';
 
 .vid-card {
-  box-shadow: 0 4px 16px rgba(0,0,0,.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .05);
   position: relative;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
   border-radius: 5px;
   overflow: hidden;
+
   .vid-thumb {
     height: 220px;
     position: relative;
@@ -14,22 +15,27 @@
     width: 100%;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+
     .lock-middle {
       position: relative;
       width: 100%;
       display: inline-flex;
       justify-content: center;
       flex-direction: column;
+
       .anticon {
         font-size: 32px;
         color: @white;
       }
+
       .ant-btn {
         font-size: 11px;
         color: @white;
         font-family: @primary-font-bold;
       }
     }
+
     .card-bg {
       position: absolute;
       top: 0;
@@ -40,21 +46,23 @@
       background-size: 100%;
       background-repeat: no-repeat;
       background-position: center;
-      overflow: hidden;
     }
+
     @media screen and (max-width: @mobile-screen) {
       height: 150px;
     }
   }
-  
+
   &:hover {
     opacity: 0.9;
+
     .vid-thumb {
       .card-bg {
         background-size: 102%;
       }
     }
   }
+
   .vid-stats {
     display: flex;
     width: 100%;
@@ -66,12 +74,14 @@
     font-weight: 600;
     position: absolute;
     bottom: 0;
-    background-image: linear-gradient(to bottom, #04040e00 0%, rgba(60,60,60, .5) 100%);
+    background-image: linear-gradient(to bottom, #04040e00 0%, rgba(60, 60, 60, .5) 100%);
+
     a {
       color: @white;
       padding-right: 10px;
     }
   }
+
   .vid-info {
     font-family: @primary-font-bold;
     color: @white;
@@ -84,20 +94,23 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+
     @media screen and (max-width: @mobile-screen) {
       font-size: 11px;
     }
   }
+
   .vid-price {
     position: absolute;
     left: 0px;
     top: 10px;
     z-index: 99;
+
     .label-price {
       color: @white;
       background-color: @secondary-color;
       padding: 3px 15px;
-      clip-path: polygon(0px 0px,0px 100%,100% 100%,90% 50%,100% 0);
+      clip-path: polygon(0px 0px, 0px 100%, 100% 100%, 90% 50%, 100% 0);
       font-size: 11px;
       font-weight: 600;
       margin: 5px 0;

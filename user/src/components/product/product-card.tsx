@@ -24,17 +24,17 @@ export class ProductCard extends PureComponent<IProps, IStates> {
         <a>
           <div className="prd-card" style={{ backgroundImage: `url(${image})` }}>
             <div className="label-wrapper">
-              {product.price && (
+              {product.price > 0 && (
               <span className="label-wrapper-price">
                 <img alt="token" src="/static/coin-ico.png" width="15px" />
-              &nbsp;
+                &nbsp;
                 {product.price.toFixed(2)}
               </span>
               )}
               {!product.stock && product.type === 'physical' && (
               <div className="label-wrapper-digital">Out of stock!</div>
               )}
-              {product.stock && product.type === 'physical' && (
+              {product.stock > 0 && product.type === 'physical' && (
               <div className="label-wrapper-digital">
                 {product.stock}
                 {' '}
