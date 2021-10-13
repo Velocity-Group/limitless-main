@@ -30,26 +30,22 @@ class Dashboard extends PureComponent<IProps> {
       loginSuccess: loginSuccessHandler,
       updateCurrentUser: updateCurrentUserHandler
     } = this.props;
-    try {
-      const token = authService.getToken();
-      if (!token || token === 'null') {
-        return;
-      }
-      authService.setToken(token);
-      const user = await userService.me({
-        Authorization: token
-      });
-
-      // TODO - check permission
-      if (!user.data._id) {
-        return;
-      }
-      loginSuccessHandler();
-      updateCurrentUserHandler(user.data);
-      Router.push('/home');
-    } catch {
-      // console.log(e);
+    const token = authService.getToken();
+    if (!token || token === 'null') {
+      return;
     }
+    authService.setToken(token);
+    const user = await userService.me({
+      Authorization: token
+    });
+
+    // TODO - check permission
+    if (!user.data._id) {
+      return;
+    }
+    loginSuccessHandler();
+    updateCurrentUserHandler(user.data);
+    Router.push('/home');
   }
 
   handleSwitch(value) {
