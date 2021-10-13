@@ -37,7 +37,7 @@ export class SocketUserService {
       {},
       this.scheduleOfflineSockets.bind(this)
     );
-    this.agenda.schedule('10 seconds from now', SCHEDULE_OFFLINE_SOCKETS, {});
+    this.agenda.schedule('1 minute from now', SCHEDULE_OFFLINE_SOCKETS, {});
   }
 
   private async scheduleOfflineSockets(job: any, done: any): Promise<void> {
@@ -98,7 +98,7 @@ export class SocketUserService {
       console.log('Schedule offline socket error', e);
     } finally {
       job.remove();
-      this.agenda.schedule('2 minutes from now', SCHEDULE_OFFLINE_SOCKETS, {});
+      this.agenda.schedule('1 minute from now', SCHEDULE_OFFLINE_SOCKETS, {});
       typeof done === 'function' && done();
     }
   }

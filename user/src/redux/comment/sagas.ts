@@ -18,7 +18,6 @@ const commentSagas = [
         yield put(getCommentsSuccess(resp.data));
       } catch (e) {
         const error = yield Promise.resolve(e);
-        console.log('get_comments_error', error);
         yield put(getCommentsFail(error));
       }
     }
@@ -31,7 +30,6 @@ const commentSagas = [
         yield put(moreCommentSuccess(resp.data));
       } catch (e) {
         const error = yield Promise.resolve(e);
-        console.log('more_comments_error', error);
         yield put(moreCommentFail(error));
       }
     }

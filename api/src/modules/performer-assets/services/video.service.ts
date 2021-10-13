@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-console */
 import {
   Injectable, Inject, forwardRef, HttpException
 } from '@nestjs/common';
@@ -83,7 +81,7 @@ export class VideoService {
     });
 
     this.agenda.define(SCHEDULE_VIDEO_AGENDA, {}, this.scheduleVideo.bind(this));
-    this.agenda.schedule('1 hours from now', SCHEDULE_VIDEO_AGENDA, {});
+    this.agenda.schedule('1 hour from now', SCHEDULE_VIDEO_AGENDA, {});
   }
 
   private async scheduleVideo(job: any, done: any): Promise<void> {
@@ -117,10 +115,11 @@ export class VideoService {
         );
       }));
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log('Schedule video error', e);
     } finally {
       job.remove();
-      this.agenda.schedule('1 hours from now', SCHEDULE_VIDEO_AGENDA, {});
+      this.agenda.schedule('1 hour from now', SCHEDULE_VIDEO_AGENDA, {});
       typeof done === 'function' && done();
     }
   }
@@ -350,6 +349,10 @@ export class VideoService {
     if (dto.isSale) {
       const bought = currentUser && await this.checkPaymentService.checkBought(dto, PurchaseItemType.VIDEO, currentUser);
       dto.isBought = bought;
+    }
+    if (currentUser && currentUser.roles && currentUser.roles.includes('admin')) {
+      dto.isBought = true;
+      dto.isSubscribed = true;
     }
     dto.thumbnail = thumbnailFile ? {
       url: thumbnailFile.getUrl(),

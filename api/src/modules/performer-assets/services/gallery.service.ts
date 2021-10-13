@@ -227,6 +227,10 @@ export class GalleryService {
     dto.isSubscribed = !!subscribed;
     const isBought = user && await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
     dto.isBought = !!isBought;
+    if (user && user.roles && user.roles.includes('admin')) {
+      dto.isBought = true;
+      dto.isSubscribed = true;
+    }
     await this.galleryModel.updateOne({ _id: gallery._id }, { $inc: { 'stats.views': 1 } });
     return dto;
   }
