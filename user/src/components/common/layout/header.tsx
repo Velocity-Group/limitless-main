@@ -212,7 +212,7 @@ class Header extends PureComponent<IProps> {
                 )}
                 {!currentUser._id && [
                   <li key="logo" className="logo-nav">
-                    <Link href="/">
+                    <Link href="/home">
                       <a>{ui.logo ? <img src={ui.logo} alt="logo" /> : `${ui.siteName}`}</a>
                     </Link>
                   </li>,
