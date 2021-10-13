@@ -544,7 +544,6 @@ export class VideoService {
     if (user.roles && user.roles.indexOf('admin') > -1) {
       return true;
     }
-    // check type video
     const video = await this.PerformerVideoModel.findById(query.videoId);
     if (!video) throw new EntityNotFoundException();
     if (user._id.toString() === video.performerId.toString()) {

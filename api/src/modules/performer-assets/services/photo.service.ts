@@ -272,7 +272,6 @@ export class PhotoService {
     if (user.roles && user.roles.indexOf('admin') > -1) {
       return true;
     }
-    // check type video
     const photo = await this.photoModel.findById(query.photoId);
     if (!photo) throw new EntityNotFoundException();
     if (user._id.toString() === photo.performerId.toString()) {
@@ -289,9 +288,12 @@ export class PhotoService {
         throw new ForbiddenException();
       }
     }
-    const checkBought = await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
-    if (!checkBought) {
-      throw new ForbiddenException();
+    if (gallery.isSale) {
+      // check bought
+      const checkBought = await this.paymentTokenService.checkBought(new GalleryDto(gallery), PurchaseItemType.GALLERY, user);
+      if (!checkBought) {
+        throw new ForbiddenException();
+      }
     }
     return true;
   }
