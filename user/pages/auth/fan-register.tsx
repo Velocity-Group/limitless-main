@@ -128,7 +128,7 @@ class FanRegister extends PureComponent<IProps> {
                 lg={12}
               >
                 <div className="login-content right">
-                  <div className="title">FAN SIGN UP</div>
+                  <div className="title">Fan Sign Up</div>
                   <p className="text-center"><small>Sign up to interact with your idols!</small></p>
                   <div className="social-login">
                     <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
