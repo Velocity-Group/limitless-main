@@ -20,7 +20,9 @@ export class SocketUserService {
     private readonly agenda: AgendaService,
     private readonly queueEventService: QueueEventService,
     private readonly redisService: RedisService
-  ) {}
+  ) {
+    this.defineJobs();
+  }
 
   private async defineJobs() {
     const collection = (this.agenda as any)._collection;
