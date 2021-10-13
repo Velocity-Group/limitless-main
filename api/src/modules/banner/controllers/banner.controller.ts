@@ -7,6 +7,7 @@ import {
   Query
 } from '@nestjs/common';
 import { DataResponse } from 'src/kernel';
+import { STATUS } from 'src/kernel/constants';
 import { BannerSearchRequest } from '../payloads';
 import { BannerSearchService } from '../services';
 
@@ -18,6 +19,7 @@ export class BannerController {
   @Get('/search')
   @HttpCode(HttpStatus.OK)
   async search(@Query() req: BannerSearchRequest) {
+    req.status = STATUS.ACTIVE;
     const list = await this.bannerSearchService.search(req);
     return DataResponse.ok(list);
   }

@@ -91,7 +91,7 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      border-radius: 5px;
+      border-radius: 3px;
       transition: all 0.5s ease-in-out;
       overflow: hidden;
 
@@ -258,6 +258,8 @@
     .video-js {
       height: 400px;
       width: 100%;
+      border-radius: 3px;
+      overflow: hidden;
 
       .vjs-big-play-button {
         top: calc(50% - 24px);
@@ -265,8 +267,8 @@
       }
 
       .vjs-poster {
-        background-size: cover;
-        border-radius: 0;
+        border-radius: 3px;
+        border: none
       }
 
       @media screen and (max-width: @mobile-screen) {

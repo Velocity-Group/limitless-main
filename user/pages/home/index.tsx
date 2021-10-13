@@ -99,7 +99,7 @@ class HomePage extends PureComponent<IProps> {
 
   getBanners() {
     const { getBanners: handleGetBanners } = this.props;
-    handleGetBanners({ status: 'active', limit: 99 });
+    handleGetBanners({ limit: 99 });
   }
 
   async getPerformers() {
@@ -189,7 +189,6 @@ class HomePage extends PureComponent<IProps> {
                           <div className="story-per-card" title={per?.name || per?.username || 'N/A'}>
                             <span className={per?.isOnline > 0 ? 'online-status active' : 'online-status'} />
                             <img className="per-avatar" alt="avatar" src={per?.avatar || '/static/no-avatar.png'} />
-                            <Tooltip key={per._id} title={per?.name || per?.username}><div className="per-name">{per?.name || per?.username || 'N/A'}</div></Tooltip>
                           </div>
                         </Link>
                       ))}
