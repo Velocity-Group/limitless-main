@@ -68,7 +68,6 @@ export const VideoSchema = new Schema({
       default: 0
     }
   },
-  tagline: String,
   createdBy: ObjectId,
   updatedBy: ObjectId,
   scheduledAt: { type: Date },

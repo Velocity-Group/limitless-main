@@ -2,7 +2,7 @@
 
 .prd-card {
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 100%;
   background-position: center;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -13,6 +13,11 @@
   height: 220px;
   margin-bottom: 40px;
 
+  &:hover {
+    opacity: 0.9;
+    background-size: 102%;
+  }
+
   .prd-info {
     position: absolute;
     top: 100%;
@@ -21,8 +26,8 @@
     border-bottom-right-radius: 5px;
     text-transform: capitalize;
     font-family: @primary-font-bold;
-    color: @primary-color;
-    background-color: @light-card;
+    color: @white;
+    background-color: @primary-color;
     padding: 5px 10px;
     text-align: center;
     font-weight: 600;
@@ -42,35 +47,30 @@
 
     .label-wrapper-price {
       color: @white;
-      line-height: 2em;
       background-color: @secondary-color;
-      width: auto;
-      padding: 0.2em 2em;
+      padding: 3px 15px;
       clip-path: polygon(0px 0px, 0px 100%, 100% 100%, 90% 50%, 100% 0);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       margin: 5px 0;
     }
 
     .label-wrapper-digital {
       color: @white;
-      line-height: 2em;
       background-color: @primary-color;
-      width: auto;
-      padding: 0.2em 2em;
+      padding: 3px 15px;
       clip-path: polygon(0px 0px, 0px 100%, 100% 100%, 90% 50%, 100% 0);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       margin: 5px 0;
     }
   }
 
-  &:hover .prd-info {
-    color: @white;
-    background-color: @primary-color;
+  @media screen and (max-width: @tablet-screen) {
+    height: 220px;
   }
 
-  @media screen and (max-width: @tablet-screen) {
+  @media screen and (max-width: @mobile-screen) {
     height: 150px;
   }
 }

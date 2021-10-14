@@ -572,7 +572,7 @@ export class AccountForm extends PureComponent<IProps> {
                 Submit
               </Button>
               &nbsp;
-              <Button onClick={() => Router.back()} disabled={submiting} loading={submiting}>
+              <Button onClick={() => Router.back()} disabled={submiting}>
                 Back
               </Button>
             </Form.Item>

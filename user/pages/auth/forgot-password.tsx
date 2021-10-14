@@ -120,7 +120,7 @@ class Forgot extends PureComponent<IProps, IState> {
                   sm={24}
                   md={6}
                   lg={12}
-                  className="login-content left"
+                  className="login-content left fixed"
                   style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui?.loginPlaceholderImage})` } : null}
                 />
                 <Col
@@ -162,16 +162,9 @@ class Forgot extends PureComponent<IProps, IState> {
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                       <Form.Item style={{ textAlign: 'center' }}>
                         <Button
-                          className="primary"
                           type="primary"
                           htmlType="submit"
-                          style={{
-                            width: '100%',
-                            marginBottom: 15,
-                            fontWeight: 600,
-                            padding: '5px 25px',
-                            height: '42px'
-                          }}
+                          className="login-form-button"
                           disabled={submiting || countTime < 60}
                           loading={submiting || countTime < 60}
                         >

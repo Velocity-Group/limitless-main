@@ -79,7 +79,7 @@ export class PerformerSearchService {
         .skip(parseInt(req.offset as string, 10)),
       this.performerModel.countDocuments(query)
     ]);
-    const performers = data.map((d) => new PerformerDto(d).toResponse());
+    const performers = data.map((d) => new PerformerDto(d).toResponse(true));
     return {
       data: performers,
       total
@@ -285,7 +285,7 @@ export class PerformerSearchService {
     }
     const data = await this.performerModel.aggregate([
       { $match: query },
-      { $sample: { size: 99 } }
+      { $sample: { size: 50 } }
     ]);
     return {
       data: data.map((item) => new PerformerDto(item).toSearchResponse())

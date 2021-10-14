@@ -13,13 +13,10 @@ interface IProps {
 }
 
 class Header extends PureComponent<IProps> {
-  handleClickMenu() {}
-
   render() {
     const { collapsed, onCollapseChange, currentUser } = this.props;
-
     const rightContent = [
-      <Menu key="user" mode="horizontal" onClick={this.handleClickMenu}>
+      <Menu key="user" mode="horizontal">
         <Menu.SubMenu
           title={(
             <>

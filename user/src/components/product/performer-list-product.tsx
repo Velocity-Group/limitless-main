@@ -14,7 +14,7 @@ export class PerformerListProduct extends PureComponent<IProps> {
       <Row>
         {products.length > 0
           && products.map((product: IProduct) => (
-            <Col xs={12} sm={12} md={6} lg={6} key={product._id}>
+            <Col xs={12} sm={12} md={8} lg={6} key={product._id}>
               <ProductCard
                 product={product}
               />

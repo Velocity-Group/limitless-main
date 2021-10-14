@@ -554,7 +554,6 @@ class PerformerProfile extends PureComponent<IProps> {
                   }}
                 >
                   SUBSCRIBE FOR $
-                  {' '}
                   {performer && performer?.monthlyPrice.toFixed(2)}
                 </button>
               </div>
@@ -572,7 +571,6 @@ class PerformerProfile extends PureComponent<IProps> {
                   }}
                 >
                   SUBSCRIBE FOR $
-                  {' '}
                   {performer?.yearlyPrice.toFixed(2)}
                 </button>
               </div>

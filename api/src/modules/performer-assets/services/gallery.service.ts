@@ -151,13 +151,13 @@ export class GalleryService {
           .lean()
           .exec()
         : [],
-      user && user._id ? this.reactionService.findByQuery({
+      user?._id ? this.reactionService.findByQuery({
         objectType: REACTION_TYPE.GALLERY, objectId: { $in: galleryIds }, createdBy: user._id
       }) : [],
-      user && user._id ? this.subscriptionService.findSubscriptionList({
+      user?._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id, performerId: { $in: performerIds }, expiredAt: { $gt: new Date() }
       }) : [],
-      user && user._id ? this.purchasedItemSearchService.findByQuery({
+      user?._id ? this.purchasedItemSearchService.findByQuery({
         sourceId: user._id,
         targetId: { $in: galleryIds },
         target: PURCHASE_ITEM_TARTGET_TYPE.GALLERY,
@@ -189,9 +189,9 @@ export class GalleryService {
         }
       }
       const isSubscribed = subscriptions.find((s) => `${s.performerId}` === `${g.performerId}`);
-      g.isSubscribed = !!((isSubscribed || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      g.isSubscribed = !user ? false : !!((isSubscribed || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${g._id}`);
-      g.isBought = !!((bought || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      g.isBought = !user ? false : !!((bought || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
     });
     return galleries;
   }
@@ -227,6 +227,10 @@ export class GalleryService {
     dto.isSubscribed = !!subscribed;
     const isBought = user && await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
     dto.isBought = !!isBought;
+    if (user && user.roles && user.roles.includes('admin')) {
+      dto.isBought = true;
+      dto.isSubscribed = true;
+    }
     await this.galleryModel.updateOne({ _id: gallery._id }, { $inc: { 'stats.views': 1 } });
     return dto;
   }

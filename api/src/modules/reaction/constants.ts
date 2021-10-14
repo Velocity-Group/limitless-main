@@ -10,8 +10,7 @@ export const REACTION_TYPE = {
   FEED: 'feed',
   PERFORMER: 'performer',
   COMMENT: 'comment',
-  PRODUCT: 'product',
-  STORY: 'story'
+  PRODUCT: 'product'
 };
 
 export const REACTION_CHANNEL = 'REACTION_CHANNEL';

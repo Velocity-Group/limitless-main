@@ -60,7 +60,7 @@ export class UserSearchService {
       this.userModel.countDocuments(query)
     ]);
     return {
-      data: data.map((item) => new UserDto(item).toResponse()),
+      data: data.map((item) => new UserDto(item).toResponse(true)),
       total
     };
   }

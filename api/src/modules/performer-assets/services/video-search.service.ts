@@ -262,13 +262,13 @@ export class VideoSearchService {
     const videoIds = data.map((d) => d._id);
     const [files, subscriptions, transactions] = await Promise.all([
       fileIds.length ? this.fileService.findByIds(fileIds) : [],
-      user && user._id ? this.subscriptionService.findSubscriptionList({
+      user?._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
         performerId: { $in: performerIds },
         expiredAt: { $gt: new Date() },
         status: SUBSCRIPTION_STATUS.ACTIVE
       }) : [],
-      user && user._id ? this.purchasedItemSearchService.findByQuery({
+      user?._id ? this.purchasedItemSearchService.findByQuery({
         sourceId: user._id,
         targetId: { $in: videoIds },
         target: PURCHASE_ITEM_TARTGET_TYPE.VIDEO,
@@ -308,9 +308,9 @@ export class VideoSearchService {
         }
       }
       const isSubscribed = subscriptions.find((s) => `${s.performerId}` === `${v.performerId}`);
-      v.isSubscribed = !!((isSubscribed || (`${user._id}` === `${v.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      v.isSubscribed = !user ? false : !!((isSubscribed || (`${user._id}` === `${v.performerId}`) || (user.roles && user.roles.includes('admin'))));
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${v._id}`);
-      v.isBought = !!((bought || (`${user._id}` === `${v.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      v.isBought = !user ? false : !!((bought || (`${user._id}` === `${v.performerId}`) || (user.roles && user.roles.includes('admin'))));
       return v;
     });
     return videos;

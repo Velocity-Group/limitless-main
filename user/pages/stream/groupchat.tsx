@@ -104,8 +104,6 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
         performer
       };
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('No creator was found!');
       if (process.browser) {
         return Router.back();
       }

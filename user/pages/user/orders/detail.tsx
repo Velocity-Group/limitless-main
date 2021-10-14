@@ -105,11 +105,21 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 </Item>
               </Descriptions>
               {order?.productInfo?.type === 'digital' ? (
-                <div style={{ marginBottom: '10px' }}>
-                  Download Link:
-                  {' '}
-                  <a aria-hidden onClick={this.downloadFile.bind(this)}>Click to download</a>
-                </div>
+                <>
+                  {order?.deliveryStatus === 'delivered' ? (
+                    <div style={{ marginBottom: '10px' }}>
+                      Download Link:
+                      {' '}
+                      <a aria-hidden onClick={this.downloadFile.bind(this)}>Click to download</a>
+                    </div>
+                  ) : (
+                    <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
+                      Delivery Status:
+                      {' '}
+                      <Tag color="green">{order?.deliveryStatus || 'N/A'}</Tag>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div>
                   <Divider>Delivery information</Divider>

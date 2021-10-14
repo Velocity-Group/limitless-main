@@ -37,13 +37,20 @@
   background-color: @light-blue;
 }
 
-.ant-drawer-close {
-  z-index: 9999;
-}
+.ant-drawer {
+  .ant-drawer-close {
+    z-index: 9999;
+    padding: 10px;
+  }
 
-.ant-drawer-body {
-  padding-top: 60px;
-  z-index: 999;
+  .ant-drawer-header {
+    padding: 15px 20px 5px;
+  }
+
+  .ant-drawer-body {
+    padding-top: 60px;
+    z-index: 999;
+  }
 }
 
 .ant-form-item-explain {
@@ -138,7 +145,7 @@
   margin: auto;
   max-width: 1080px;
   width: 100%;
-  padding: 0 5px;
+  padding: 0 2px;
 
   &.user-account {
     padding: 20px 5px;
@@ -146,6 +153,7 @@
 
   &.custom {
     max-width: 720px;
+    padding: 0;
   }
 }
 
@@ -187,6 +195,7 @@
 
   .anticon {
     font-size: 22px;
+
     &.anticon-custom {
       font-size: 28px;
     }
@@ -194,6 +203,11 @@
 
   button.ant-btn {
     font-size: 15px;
+  }
+
+  @media screen and (max-width: @mobile-screen) {
+    margin: 10px 0;
+    font-size: 16px;
   }
 }
 
@@ -203,6 +217,7 @@
 
 .ant-row {
   width: 100%;
+
   .ant-col {
     padding: 5px;
   }
@@ -216,6 +231,7 @@
 .ant-table {
   border-radius: 0;
   overflow: auto;
+
   table {
     border: 1px solid @border-color-split;
     border-radius: 0;
@@ -283,19 +299,26 @@
     padding: 0 11px;
   }
 
-  .ant-input, .ant-input-number,
+  .ant-input,
+  .ant-input-number,
   .ant-select-selector,
   .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
     min-height: 40px;
+
     .ant-select-selection-item {
       line-height: 3;
     }
   }
+
   .ant-select-multiple .ant-select-selector .ant-select-selection-item {
     line-height: normal;
     height: auto;
   }
-  .ant-form-item-has-error :not(.ant-input-disabled).ant-input, .ant-form-item-has-error :not(.ant-input-affix-wrapper-disabled).ant-input-affix-wrapper, .ant-form-item-has-error :not(.ant-input-disabled).ant-input:hover, .ant-form-item-has-error :not(.ant-input-affix-wrapper-disabled).ant-input-affix-wrapper:hover {
+
+  .ant-form-item-has-error :not(.ant-input-disabled).ant-input,
+  .ant-form-item-has-error :not(.ant-input-affix-wrapper-disabled).ant-input-affix-wrapper,
+  .ant-form-item-has-error :not(.ant-input-disabled).ant-input:hover,
+  .ant-form-item-has-error :not(.ant-input-affix-wrapper-disabled).ant-input-affix-wrapper:hover {
     box-shadow: none;
   }
 }
@@ -350,6 +373,7 @@
       top: 0;
       left: 0
     }
+
     &.anticon-file-done {
       background-color: @success-color;
     }
@@ -410,6 +434,7 @@
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     padding: 5px 11px;
     min-height: 40px;
+
     .ant-select-selection-item {
       line-height: 3;
     }
@@ -419,12 +444,13 @@
     height: 40px;
   }
 
-  @media screen and (max-width: @tablet-screen) {
+  @media screen and (max-width: @mobile-screen) {
     &.custom {
       flex-wrap: wrap;
 
       .filter-item {
         width: 50%;
+
         &.custom {
           width: 100%;
         }
@@ -528,23 +554,6 @@
 }
 
 .ant-carousel {
-  .slick-slide {
-    text-align: center;
-    overflow: hidden;
-    height: 420px;
-    line-height: 420px;
-
-    img {
-      width: 100%;
-      object-fit: cover;
-    }
-
-    @media screen and (max-width: @tablet-screen) {
-      height: 94px;
-      line-height: 94px;
-    }
-  }
-
   .slick-prev {
     top: calc(50% - 15px);
     left: 10px;
@@ -569,6 +578,18 @@
       position: absolute;
       left: 8px;
       top: 8px;
+    }
+
+    @media screen and (max-width: @mobile-screen) {
+      width: 20px;
+      height: 20px;
+      padding: 10px;
+
+      &::before {
+        background-size: 10px;
+        width: 5px;
+        height: 5px;
+      }
     }
   }
 
@@ -597,6 +618,18 @@
       left: 8px;
       top: 8px;
     }
+
+    @media screen and (max-width: @mobile-screen) {
+      width: 20px;
+      height: 20px;
+      padding: 10px;
+
+      &::before {
+        background-size: 10px;
+        width: 5px;
+        height: 5px;
+      }
+    }
   }
 }
 
@@ -619,31 +652,6 @@
     border: solid 1px @light-grey;
     min-height: 100px;
   }
-}
-
-.streaming-status {
-  height: 15px;
-  width: 15px;
-  border-radius: 50%;
-  position: absolute;
-  bottom: 10%;
-  left: 10%;
-}
-
-.private {
-  background-color: @private-status-color;
-}
-
-.public {
-  background-color: @public-status-color;
-}
-
-.group {
-  background-color: @group-status-color;
-}
-
-.offline {
-  background-color: @offline-status-color;
 }
 
 .align-right {
@@ -715,7 +723,11 @@
   margin-left: -5px;
   margin-right: -5px;
   width: auto;
-  .ant-select-single:not(.ant-select-customize-input) .ant-select-selector, .ant-select-selector, .ant-picker.ant-picker-range, .ant-input {
+
+  .ant-select-single:not(.ant-select-customize-input) .ant-select-selector,
+  .ant-select-selector,
+  .ant-picker.ant-picker-range,
+  .ant-input {
     height: 38px;
   }
 }
@@ -742,34 +754,42 @@
   display: flex;
   width: 100%;
   justify-content: space-between;
+
   .sort-model {
     text-align: right;
     width: 15%;
+
     button {
-      border: 1px solid @light-grey!important;
+      border: 1px solid @light-grey !important;
       height: 40px;
       width: 100px;
     }
   }
+
   @media screen and (max-width: @mobile-screen) {
     flex-direction: column-reverse;
+
     .sort-model {
       width: 100%;
       margin-bottom: 5px;
+
       button {
         width: 100%;
       }
     }
   }
 }
+
 .ant-image-mask {
   .ant-image-mask-info {
     display: none;
   }
 }
+
 .ant-image-preview-mask {
   background-color: @white;
 }
+
 .ant-image-preview-operations {
   background-color: @grey-color;
 }
@@ -810,10 +830,11 @@
     .owner-name {
       display: inline-flex;
       flex-direction: column;
+
       .anticon {
         font-size: 14px;
         margin-left: 2px;
-        color: @secondary-color;
+        color: @theme-color;
       }
     }
 
@@ -854,26 +875,9 @@
   position: absolute;
   right: 10px;
   top: 15px;
+
   .anticon {
     font-size: 22px;
     color: @primary-color;
-  }
-  .emoji-mart {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 50%;
-    z-index: 9999;
-    @media screen and (max-width: @mobile-screen) {
-      position: fixed;
-      top: unset!important;
-      bottom: 5px!important;
-      max-width: calc(100% - 10px);
-      right: 5px;
-    }
-  }
-
-  &:hover .emoji-mart {
-    display: block;
   }
 }

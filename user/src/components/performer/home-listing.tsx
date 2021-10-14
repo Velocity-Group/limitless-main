@@ -12,7 +12,7 @@ interface IProps {
 export class HomePerformers extends PureComponent<IProps> {
   render() {
     const { performers } = this.props;
-    const chunkPerformers = chunk(performers, 3);
+    const chunkPerformers = chunk(performers, 5);
     return (
       <div className="sug-content">
         <Carousel swipeToSlide arrows dots={false}>

@@ -4,7 +4,7 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  height: 188px;
+  height: 230px;
 
   .tab-stat {
     color: @white;
@@ -30,7 +30,11 @@
   }
 
   @media screen and (max-width: @tablet-screen) {
-    height: 132px;
+    height: 165px;
+  }
+
+  @media screen and (max-width: @mobile-screen) {
+    height: 95px;
   }
 }
 
@@ -57,7 +61,7 @@
 .main-profile {
   margin-top: -40px;
 
-  @media screen and (max-width: @mobile-screen) {
+  @media screen and (max-width: @tablet-screen) {
     margin-top: -20px;
   }
 }
@@ -79,6 +83,12 @@
 
     &.off {
       background-color: @gray;
+    }
+  }
+
+  .ant-image {
+    .ant-image-mask {
+      border-radius: 50%;
     }
   }
 
@@ -116,7 +126,7 @@
 
     .anticon {
       color: @primary-color;
-      font-size: 22px;
+      font-size: 18px;
     }
 
     .live-icon {
@@ -205,6 +215,10 @@
     width: 100%;
   }
 
+  @media screen and (max-width: @tablet-screen) {
+    margin-top: -52px;
+  }
+
   @media screen and (max-width: @mobile-screen) {
     button {
       width: 35px;
@@ -261,10 +275,6 @@
 
   @media screen and (max-width: @mobile-screen) {
     margin-top: 5px;
-  }
-
-  &.mar-0 {
-    margin-top: 10px;
   }
 }
 
@@ -392,7 +402,7 @@
   box-shadow: 1px 1px 2px 0px rgba(0,0,0,0.75);
   position: relative;
   transition: all 0.3s ease-in-out;
-  height: 130px;
+  height: 100px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -402,25 +412,25 @@
 
   .card-img {
     position: absolute;
-    top: calc(50% - 40px);
+    top: calc(50% - 35px);
     left: 30px;
     z-index: 1;
 
     .ant-avatar {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       border: 1px solid @theme-color;
     }
   }
 
   .online-status {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     background-color: @gray;
     border-radius: 50%;
     position: absolute;
-    bottom: 30px;
-    left: 35px;
+    bottom: 20px;
+    left: 85px;
     opacity: 0.8;
     z-index: 1;
 
@@ -495,7 +505,7 @@
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    padding: 15px 5px;
+    padding: 5px;
     background-color: rgba(0, 0, 0, .25);
 
     .name {
@@ -553,7 +563,9 @@
     }
 
     .online-status {
-      left: 30px;
+      width: 8px;
+      height: 8px;
+      left: 75px;
       bottom: 15px;
     }
 
@@ -773,7 +785,7 @@
 
     .anticon {
       margin-left: 3px;
-      font-size: 16px;
+      font-size: 14px;
       color: @primary-color;
     }
   }

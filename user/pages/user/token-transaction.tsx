@@ -78,7 +78,8 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         limit: pagination.pageSize,
         offset: (pagination.current - 1) * pagination.pageSize
       });
-      return await this.setState({
+      this.setState({
+        loading: false,
         paymentList: resp.data.data,
         pagination: {
           ...pagination,
@@ -86,8 +87,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         }
       });
     } catch (error) {
-      return message.error(getResponseError(error));
-    } finally {
+      message.error(getResponseError(await error));
       this.setState({ loading: false });
     }
   }

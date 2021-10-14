@@ -15,7 +15,7 @@ export class PerformerInfo extends PureComponent<IProps> {
     return (
       <div className="per-infor">
         <Collapse defaultActiveKey={['1']} bordered={false} accordion>
-          <Collapse.Panel header="BIO" key="1">
+          <Collapse.Panel header="BIOGRAPHY" key="1">
             <p className="bio">{performer?.bio || 'No bio yet'}</p>
             <Descriptions className="performer-info">
               {performer?.country && (

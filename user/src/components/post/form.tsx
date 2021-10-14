@@ -2,7 +2,7 @@
 import { PureComponent } from 'react';
 import {
   Upload, message, Button, Tooltip, Select, Row, Col,
-  Input, Form, InputNumber, Switch, Progress
+  Input, Form, InputNumber, Switch, Progress, Popover
 } from 'antd';
 import {
   BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
@@ -325,10 +325,11 @@ export default class FeedForm extends PureComponent<IProps> {
           <Form.Item rules={[{ required: true, message: 'Please add a description' }]}>
             <div className="input-f-desc">
               <TextArea value={text} onChange={(e) => this.setState({ text: e.target.value })} className="feed-input" rows={3} placeholder={!fileIds.length ? 'Compose new post...' : 'Add a description'} allowClear />
-              <span className="grp-emotions">
-                <SmileOutlined />
-                <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
-              </span>
+              <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null}>
+                <span className="grp-emotions">
+                  <SmileOutlined />
+                </span>
+              </Popover>
             </div>
           </Form.Item>
           {['video', 'photo'].includes(feed?.type || type) && (

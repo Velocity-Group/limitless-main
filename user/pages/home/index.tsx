@@ -16,7 +16,6 @@ import ScrollListFeed from '@components/post/scroll-list';
 import {
   SyncOutlined, TagOutlined, SearchOutlined, CloseOutlined
 } from '@ant-design/icons';
-import { HomeIcon } from 'src/icons';
 import Link from 'next/link';
 import { debounce } from 'lodash';
 import './index.less';
@@ -100,7 +99,7 @@ class HomePage extends PureComponent<IProps> {
 
   getBanners() {
     const { getBanners: handleGetBanners } = this.props;
-    handleGetBanners({ status: 'active', limit: 99 });
+    handleGetBanners({ limit: 99 });
   }
 
   async getPerformers() {
@@ -159,8 +158,6 @@ class HomePage extends PureComponent<IProps> {
             <div className="main-container">
               <div className="home-heading">
                 <h3>
-                  <HomeIcon />
-                  {' '}
                   HOME
                 </h3>
                 <div className="search-bar-feed">
@@ -190,8 +187,8 @@ class HomePage extends PureComponent<IProps> {
                       {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
                         <Link key={per._id} href={{ pathname: '/model/profile', query: { username: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
                           <div className="story-per-card" title={per?.name || per?.username || 'N/A'}>
+                            <span className={per?.isOnline > 0 ? 'online-status active' : 'online-status'} />
                             <img className="per-avatar" alt="avatar" src={per?.avatar || '/static/no-avatar.png'} />
-                            <Tooltip key={per._id} title={per?.name || per?.username}><div className="per-name">{per?.name || per?.username || 'N/A'}</div></Tooltip>
                           </div>
                         </Link>
                       ))}

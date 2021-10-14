@@ -1,6 +1,6 @@
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Input, Button, message
+  Form, Input, Button, message, Popover
 } from 'antd';
 import {
   SendOutlined, SmileOutlined
@@ -41,10 +41,11 @@ export class CommentForm extends PureComponent<IProps> {
     } = this.props;
     const data = values;
     if (!creator || !creator._id) {
+      message.error('Please login!');
       return Router.push('/');
     }
     if (!data.content) {
-      return message.error('Please add comment');
+      return message.error('Please add comment!');
     }
     if (data.content.length > 150) {
       return message.error('Comment is over 150 characters');
@@ -57,7 +58,7 @@ export class CommentForm extends PureComponent<IProps> {
 
   async onEmojiClick(emoji) {
     const { creator } = this.props;
-    if (!creator) return;
+    if (!creator || !creator._id) return;
     const { text } = this.state;
     const instance = this.formRef.current as FormInstance;
     instance.setFieldsValue({
@@ -81,19 +82,17 @@ export class CommentForm extends PureComponent<IProps> {
         }}
       >
         <div className="comment-form">
-          <div className="cmt-user">
-            <img alt="creator-img" src={creator?.avatar || '/static/no-avatar.png'} />
-          </div>
           <div className="cmt-area">
             <Form.Item
               name="content"
             >
               <TextArea disabled={!creator || !creator._id} maxLength={150} showCount minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
-            <div className="grp-emotions">
-              <SmileOutlined />
-              <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
-            </div>
+            <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null}>
+              <div className="grp-emotions">
+                <SmileOutlined />
+              </div>
+            </Popover>
           </div>
           <Button className={!isReply ? 'submit-btn' : ''} htmlType="submit" disabled={requesting}>
             {!isReply ? <SendOutlined /> : 'Reply'}

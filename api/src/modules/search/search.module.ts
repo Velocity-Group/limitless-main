@@ -9,7 +9,6 @@ import { UserModule } from '../user/user.module';
 import { PerformerModule } from '../performer/performer.module';
 import { PerformerAssetsModule } from '../performer-assets/performer-assets.module';
 import { FeedModule } from '../feed/feed.module';
-import { PerformerStoryModule } from '../performer-story/story.module';
 
 @Module({
   imports: [
@@ -20,8 +19,7 @@ import { PerformerStoryModule } from '../performer-story/story.module';
     forwardRef(() => UserModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => PerformerAssetsModule),
-    forwardRef(() => FeedModule),
-    forwardRef(() => PerformerStoryModule)
+    forwardRef(() => FeedModule)
   ],
   controllers: [SearchController],
   providers: [

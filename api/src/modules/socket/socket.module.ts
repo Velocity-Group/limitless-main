@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { RedisModule } from 'nestjs-redis';
 import { ConfigService } from 'nestjs-config';
-import { QueueModule } from 'src/kernel';
+import { QueueModule, AgendaModule } from 'src/kernel';
 import { SocketUserService } from './services/socket-user.service';
 import { WsUserConnectedGateway } from './gateways/user-connected.gateway';
 import { AuthModule } from '../auth/auth.module';
@@ -9,6 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [
     QueueModule,
+    AgendaModule.register(),
     // https://github.com/kyknow/nestjs-redis
     RedisModule.forRootAsync({
       // TODO - load config for redis socket

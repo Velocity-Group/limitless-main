@@ -229,12 +229,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
       return;
     }
     const { callTime } = this.state;
-    try {
-      await streamService.updateStreamDuration({ streamId: this.streamId, duration: callTime });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(await e);
-    }
+    await streamService.updateStreamDuration({ streamId: this.streamId, duration: callTime });
   }
 
   render() {

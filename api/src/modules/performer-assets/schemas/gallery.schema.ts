@@ -55,7 +55,6 @@ export const GallerySchema = new Schema({
       default: 0
     }
   },
-  tagline: String,
   coverPhotoId: ObjectId,
   createdBy: ObjectId,
   updatedBy: ObjectId,

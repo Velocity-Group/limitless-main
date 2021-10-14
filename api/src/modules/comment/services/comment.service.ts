@@ -52,14 +52,13 @@ export class CommentService {
         data: new CommentDto(newComment)
       })
     );
-    const [performerInfo] = await Promise.all([
-      this.performerService.findById(newComment.createdBy)
+    const [performerInfo, userInfo] = await Promise.all([
+      this.performerService.findById(user._id),
+      this.userService.findById(user._id)
     ]);
     const returnData = new CommentDto(newComment);
     // eslint-disable-next-line no-nested-ternary
-    returnData.creator = performerInfo
-      ? new PerformerDto(performerInfo).toPublicDetailsResponse()
-      : (user ? new UserDto(user).toResponse() : null);
+    returnData.creator = (userInfo && new UserDto(userInfo).toResponse()) || (performerInfo && new PerformerDto(performerInfo).toResponse());
     return returnData;
   }
 

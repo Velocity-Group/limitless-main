@@ -7,7 +7,8 @@ import {
   Param,
   UseGuards,
   Query,
-  Request
+  Request,
+  ForbiddenException
 } from '@nestjs/common';
 import { DataResponse } from 'src/kernel';
 import { STATUS } from 'src/kernel/constants';
@@ -46,9 +47,25 @@ export class UserPhotosController {
   @Get('/:id/view')
   @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)
-  async details(@Param('id') id: string, @CurrentUser() user: UserDto) {
-    // TODO - filter for subscriber
+  async details(
+    @Param('id') id: string,
+   @CurrentUser() user: UserDto
+  ) {
     const details = await this.photoService.details(id, user);
     return DataResponse.ok(details);
+  }
+
+  @Get('/auth/check')
+  @HttpCode(HttpStatus.OK)
+  async checkAuth(
+    @Request() req: any
+  ) {
+    if (!req.query.token) throw new ForbiddenException();
+    const user = await this.authService.getSourceFromJWT(req.query.token);
+    if (!user) {
+      throw new ForbiddenException();
+    }
+    const valid = await this.photoService.checkAuth(req, user);
+    return DataResponse.ok(valid);
   }
 }

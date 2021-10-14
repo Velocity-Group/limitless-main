@@ -4,6 +4,5 @@ export const REPORT_TARGET = {
   FEED: 'feed',
   PERFORMER: 'performer',
   COMMENT: 'comment',
-  PRODUCT: 'product',
-  STORY: 'story'
+  PRODUCT: 'product'
 };

@@ -180,7 +180,7 @@ export class PhotoSearchService {
         v.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
-          url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
+          url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url,
           width: file.width,
           height: file.height,
           mimeType: file.mimeType

@@ -15,7 +15,7 @@ import {
   Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
-import { DataResponse, getConfig, ForbiddenException } from 'src/kernel';
+import { DataResponse, getConfig } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
 import { UserDto } from 'src/modules/user/dtos';
@@ -121,19 +121,5 @@ export class PerformerPhotoController {
   async details(@Param('id') id: string) {
     const details = await this.photoService.details(id);
     return DataResponse.ok(details);
-  }
-
-  @Get('/auth/check')
-  @HttpCode(HttpStatus.OK)
-  async checkAuth(
-    @Request() req: any
-  ) {
-    if (!req.query.token) throw new ForbiddenException();
-    const user = await this.authService.getSourceFromJWT(req.query.token);
-    if (!user) {
-      throw new ForbiddenException();
-    }
-    const valid = await this.photoService.checkAuth(req, user);
-    return DataResponse.ok(valid);
   }
 }

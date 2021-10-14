@@ -1,5 +1,5 @@
 import {
-  IsString, IsOptional, IsDateString, IsNotEmpty
+  IsString, IsOptional, IsDateString
 } from 'class-validator';
 import { SearchRequest } from 'src/kernel/common';
 import { ApiProperty } from '@nestjs/swagger';

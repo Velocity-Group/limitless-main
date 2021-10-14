@@ -16,11 +16,6 @@ export class VideoUpdatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  tagline: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
   @IsIn(['active', 'inactive'])
   status: string;
 

@@ -46,14 +46,16 @@ export class StripeService {
         apiVersion: '2020-08-27'
       });
       // find & update customer Id
-      const customer = user.stripeCustomerId ? await stripe.customers.retrieve(user.stripeCustomerId)
-        : await stripe.customers.create({
+      let customer = user.stripeCustomerId && await stripe.customers.retrieve(user.stripeCustomerId);
+      if (!customer) {
+        customer = await stripe.customers.create({
           email: user.email,
-          name: `${user.firstName} ${user.lastName}`,
+          name: (user.firstName && user.lastName && `${user.firstName} ${user.lastName}`) || user.name || user.username,
           description: `Create customer ${user.name || user.username}`
         });
-      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 404);
-      !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
+      }
+      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 422);
+      await this.userService.updateStripeCustomerId(user._id, customer.id);
       // add card
       const card = await stripe.customers.createSource(customer.id, {
         source: payload.sourceToken
@@ -61,7 +63,7 @@ export class StripeService {
       card && !user.stripeCardIds.includes(card.id) && await this.userService.updateStripeCardIds(user._id, card.id);
       const cards = await stripe.customers.listSources(
         customer.id,
-        { limit: 100 }
+        { limit: 10 }
       );
       return cards;
     } catch (e) {
@@ -75,15 +77,16 @@ export class StripeService {
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
-      // find & update customer Id
-      const customer = user.stripeCustomerId ? await stripe.customers.retrieve(user.stripeCustomerId)
-        : await stripe.customers.create({
+      let customer = user.stripeCustomerId && await stripe.customers.retrieve(user.stripeCustomerId);
+      if (!customer) {
+        customer = await stripe.customers.create({
           email: user.email,
-          name: `${user.firstName} ${user.lastName}`,
+          name: (user.firstName && user.lastName && `${user.firstName} ${user.lastName}`) || user.name || user.username,
           description: `Create customer ${user.name || user.username}`
         });
-      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 404);
-      !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
+      }
+      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 422);
+      await this.userService.updateStripeCustomerId(user._id, customer.id);
       // add card
       const card = await stripe.customers.retrieveSource(customer.id, cardId);
       if (!card) throw new EntityNotFoundException();
@@ -102,20 +105,19 @@ export class StripeService {
         apiVersion: '2020-08-27'
       });
       // find & update customer Id
-      const customer = user.stripeCustomerId ? await stripe.customers.retrieve(user.stripeCustomerId)
-        : await stripe.customers.create({
+      let customer = user.stripeCustomerId && await stripe.customers.retrieve(user.stripeCustomerId);
+      if (!customer) {
+        customer = await stripe.customers.create({
           email: user.email,
-          name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : `${user?.name || user?.username}`,
-          description: `Create customer ${user.name || user.username}`,
-          metadata: {
-            userId: user._id.toString()
-          }
+          name: (user.firstName && user.lastName && `${user.firstName} ${user.lastName}`) || user.name || user.username,
+          description: `Create customer ${user.name || user.username}`
         });
-      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 404);
-      !user.stripeCustomerId && await this.userService.updateStripeCustomerId(user._id, customer.id);
+      }
+      if (!customer) throw new HttpException('Could not retrieve customer on Stripe', 422);
+      await this.userService.updateStripeCustomerId(user._id, customer.id);
       const cards = await stripe.customers.listSources(
         customer.id,
-        { limit: 100 }
+        { limit: 10 }
       );
       return cards;
     } catch (e) {

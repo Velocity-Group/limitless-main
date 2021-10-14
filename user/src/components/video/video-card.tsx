@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import {
   EyeOutlined, LikeOutlined, HourglassOutlined, LockOutlined, UnlockOutlined
 } from '@ant-design/icons';
-import { Tooltip, Button } from 'antd';
+import { Tooltip } from 'antd';
 import Link from 'next/link';
 import { videoDuration, shortenLargeNumber } from '@lib/index';
 import { IVideo } from 'src/interfaces';
@@ -13,8 +13,13 @@ interface IProps {
 }
 
 export class VideoCard extends PureComponent<IProps> {
+  state = {
+    isHovered: false
+  }
+
   render() {
     const { video } = this.props;
+    const { isHovered } = this.state;
     const canView = (!video.isSale && video.isSubscribed) || (video.isSale && video.isBought);
     const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     return (
@@ -22,7 +27,11 @@ export class VideoCard extends PureComponent<IProps> {
         href={{ pathname: '/video', query: { id: video.slug || video._id } }}
         as={`/video/${video.slug || video._id}`}
       >
-        <div className="vid-card">
+        <div
+          className="vid-card"
+          onMouseEnter={() => this.setState({ isHovered: true })}
+          onMouseLeave={() => this.setState({ isHovered: false })}
+        >
           {video.isSale && video.price > 0 && (
           <span className="vid-price">
             <div className="label-price">
@@ -53,16 +62,16 @@ export class VideoCard extends PureComponent<IProps> {
               </a>
             </div>
             <div className="lock-middle">
-              {canView ? <UnlockOutlined /> : <LockOutlined />}
-              {(!video.isSale && !video.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}
-              {(video.isSale && !video.isBought) && <Button type="link">Pay now to unlock</Button>}
+              {(canView || isHovered) ? <UnlockOutlined /> : <LockOutlined />}
+              {/* {(!video.isSale && !video.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}
+              {(video.isSale && !video.isBought) && <Button type="link">Pay now to unlock</Button>} */}
             </div>
           </div>
-          <div className="vid-info">
-            <Tooltip title={video.title}>
-              <a>{video.title}</a>
-            </Tooltip>
-          </div>
+          <Tooltip title={video.title}>
+            <div className="vid-info">
+              {video.title}
+            </div>
+          </Tooltip>
         </div>
       </Link>
     );

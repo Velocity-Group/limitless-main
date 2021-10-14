@@ -308,8 +308,7 @@ export class FeedService {
       );
       const searchValue = { $regex: regexp };
       query.$or = [
-        { text: searchValue },
-        { tagline: searchValue }
+        { text: searchValue }
       ];
     }
 
@@ -350,8 +349,7 @@ export class FeedService {
       );
       const searchValue = { $regex: regexp };
       query.$or = [
-        { text: searchValue },
-        { tagline: searchValue }
+        { text: searchValue }
       ];
       await this.queueEventService.publish(
         new QueueEvent({
@@ -419,9 +417,6 @@ export class FeedService {
       query.$or = [
         {
           text: { $regex: new RegExp(req.q, 'i') }
-        },
-        {
-          tagline: { $regex: new RegExp(req.q, 'i') }
         }
       ];
     }

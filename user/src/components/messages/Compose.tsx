@@ -1,6 +1,7 @@
 import { PureComponent, createRef } from 'react';
-import { connect } from 'react-redux'; import {
-  Modal, message
+import { connect } from 'react-redux';
+import {
+  Modal, message, Popover
 } from 'antd';
 import { sendMessage, sentFileSuccess } from '@redux/message/actions';
 import { SmileOutlined, SendOutlined } from '@ant-design/icons';
@@ -117,12 +118,11 @@ class Compose extends PureComponent<IProps> {
           disabled={disabled || status.sending || !conversation._id}
           ref={(c) => { this._input = c; }}
         />
-        <div className="grp-icons">
-          <div className="grp-emotions">
+        <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null}>
+          <div className="grp-icons">
             <SmileOutlined />
-            <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
           </div>
-        </div>
+        </Popover>
         {/* <div className="grp-icons">
           <div aria-hidden className="grp-emotions" onClick={() => this.setState({ openTipModal: true })}>
             <DollarOutlined />

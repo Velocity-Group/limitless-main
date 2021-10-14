@@ -4,7 +4,7 @@ import {
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { IUser, StreamSettings } from 'src/interfaces';
+import { IUser, StreamSettings, IUIConfig } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
@@ -25,14 +25,15 @@ import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/action
 import { updateUIValue } from 'src/redux/ui/actions';
 import { updateBalance } from '@redux/user/actions';
 import './header.less';
+import { shortenLargeNumber } from '@lib/number';
 
 interface IProps {
   updateBalance: Function;
   updateUIValue: Function;
-  currentUser?: IUser;
+  currentUser: IUser;
   logout: Function;
   router: any;
-  ui: any;
+  ui: IUIConfig;
   privateRequests: any;
   addPrivateRequest: Function;
   accessPrivateRequest: Function;
@@ -47,12 +48,7 @@ class Header extends PureComponent<IProps> {
   };
 
   async componentDidMount() {
-    RouterEvent.events.on(
-      'routeChangeStart',
-      async () => this.setState({
-        openProfile: false, openCallRequest: false
-      })
-    );
+    RouterEvent.events.on('routeChangeStart', this.handleChangeRoute);
   }
 
   async componentDidUpdate(prevProps: any) {
@@ -60,6 +56,19 @@ class Header extends PureComponent<IProps> {
     if (currentUser._id && prevProps.currentUser._id !== currentUser._id) {
       this.handleCountNotificationMessage();
     }
+  }
+
+  componentWillUnmount() {
+    RouterEvent.events.off('routeChangeStart', this.handleChangeRoute);
+    const token = authService.getToken();
+    const socket = this.context;
+    token && socket && socket.emit('auth/logout', { token });
+  }
+
+  handleChangeRoute = () => {
+    this.setState({
+      openProfile: false, openCallRequest: false
+    });
   }
 
   handleMessage = async (event) => {
@@ -116,7 +125,6 @@ class Header extends PureComponent<IProps> {
     token && socket && await socket.emit('auth/logout', {
       token
     });
-    socket && socket.close();
     handleLogout();
   }
 
@@ -204,7 +212,7 @@ class Header extends PureComponent<IProps> {
                 )}
                 {!currentUser._id && [
                   <li key="logo" className="logo-nav">
-                    <Link href="/">
+                    <Link href="/home">
                       <a>{ui.logo ? <img src={ui.logo} alt="logo" /> : `${ui.siteName}`}</a>
                     </Link>
                   </li>,
@@ -242,21 +250,47 @@ class Header extends PureComponent<IProps> {
           </Drawer> */}
           <Drawer
             title={(
-              <div className="profile-user">
-                <img className="avatar" src={currentUser?.avatar || '/static/no-avatar.png'} alt="avatar" />
-                <span className="profile-name">
-                  {currentUser?.name || 'N/A'}
-                  <span className="sub-name">
-                    @
-                    {currentUser?.username || 'n/a'}
+              <>
+                <div className="profile-user">
+                  <img className="avatar" src={currentUser?.avatar || '/static/no-avatar.png'} alt="avatar" />
+                  <span className="profile-name">
+                    {currentUser?.name || 'N/A'}
+                    <span className="sub-name">
+                      @
+                      {currentUser?.username || 'n/a'}
+                    </span>
                   </span>
+                </div>
+                <div className="sub-info">
                   <a aria-hidden className="user-balance" onClick={() => !currentUser?.isPerformer && Router.push('/token-package')}>
                     <img src="/static/coin-ico.png" alt="gem" />
                     {(currentUser?.balance || 0).toFixed(2)}
                     {!currentUser?.isPerformer && <PlusCircleOutlined />}
                   </a>
-                </span>
-              </div>
+                  {currentUser.isPerformer ? (
+                    <Link href="/model/my-subscriber">
+                      <a>
+                        <StarOutlined />
+                        {' '}
+                        {shortenLargeNumber(currentUser?.stats?.subscribers || 0)}
+                        {' '}
+                        Followers
+                      </a>
+
+                    </Link>
+                  ) : (
+                    <Link href="/user/my-subscription">
+                      <a>
+                        <HeartOutlined />
+                        {' '}
+                        {shortenLargeNumber(currentUser?.stats?.totalSubscriptions || 0)}
+                        {' '}
+                        Following
+                      </a>
+                    </Link>
+                  )}
+                </div>
+              </>
             )}
             closable
             onClose={() => this.setState({ openProfile: false })}
@@ -279,13 +313,6 @@ class Header extends PureComponent<IProps> {
                     <UserOutlined />
                     {' '}
                     Edit Profile
-                  </div>
-                </Link>
-                <Link href={{ pathname: '/model/my-subscriber' }} as="/model/my-subscriber">
-                  <div className={router.pathname === '/model/my-subscriber' ? 'menu-item active' : 'menu-item'}>
-                    <StarOutlined />
-                    {' '}
-                    Subscribers
                   </div>
                 </Link>
                 <Link href={{ pathname: '/model/block-user' }} as="/model/block-user">
@@ -377,19 +404,11 @@ class Header extends PureComponent<IProps> {
                     Add Card
                   </div>
                 </Link>
-                <Divider />
                 <Link href="/user/bookmarks" as="/user/bookmarks">
                   <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
                     <BookOutlined />
                     {' '}
                     Bookmarks
-                  </div>
-                </Link>
-                <Link href="/user/my-subscription" as="/user/my-subscription">
-                  <div className={router.pathname === '/user/my-subscription' ? 'menu-item active' : 'menu-item'}>
-                    <HeartOutlined />
-                    {' '}
-                    Subscriptions
                   </div>
                 </Link>
                 <Divider />

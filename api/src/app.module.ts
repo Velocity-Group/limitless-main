@@ -22,7 +22,6 @@ import { MessageModule } from './modules/message/message.module';
 import { SocketModule } from './modules/socket/socket.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { FeedModule } from './modules/feed/feed.module';
-import { PerformerStoryModule } from './modules/performer-story/story.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { StreamModule } from './modules/stream/stream.module';
 import { SearchModule } from './modules/search/search.module';
@@ -58,7 +57,6 @@ import { ReportModule } from './modules/report/report.module';
     MessageModule,
     CouponModule,
     FeedModule,
-    PerformerStoryModule,
     StreamModule,
     ContactModule,
     SearchModule,

@@ -134,7 +134,7 @@ const commentReducers = [
     reducer(state: any, data: any) {
       const nextState = { ...state };
       const { objectId } = data.payload;
-      if (!nextState.commentMapping[objectId] || !nextState.commentMapping[objectId].items) {
+      if (!nextState?.commentMapping[objectId]?.items) {
         nextState.commentMapping[objectId].items = [];
         nextState.commentMapping[objectId].total = 0;
       }
