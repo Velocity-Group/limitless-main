@@ -14,7 +14,7 @@ export class PerformerListVideo extends PureComponent<IProps> {
       <Row>
         {videos.length > 0
           && videos.map((video: IVideo) => (
-            <Col xs={12} sm={12} md={6} lg={6} key={video._id}>
+            <Col xs={12} sm={12} md={8} lg={6} key={video._id}>
               <VideoCard video={video} />
             </Col>
           ))}
