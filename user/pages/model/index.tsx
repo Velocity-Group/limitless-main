@@ -90,7 +90,7 @@ class Performers extends PureComponent<IProps> {
           />
           <Row>
             {performers && performers.length > 0 && performers.map((p) => (
-              <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
+              <Col xs={12} sm={12} md={8} lg={6} key={p._id}>
                 <PerformerGridCard performer={p} />
               </Col>
             ))}

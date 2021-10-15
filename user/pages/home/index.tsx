@@ -226,11 +226,11 @@ class HomePage extends PureComponent<IProps> {
                     loadMore={this.loadmoreFeeds.bind(this)}
                   />
                 </div>
-                <div className="right-container">
+                <div className="right-container" id="home-right-container">
                   <div className="suggestion-bl">
                     <div className="sug-top">
-                      <span style={{ width: '55%' }}>SUGGESTIONS</span>
-                      <span style={{ width: '45%', textAlign: randomPerformers.length < 4 ? 'right' : 'left' }}>
+                      <span className="sug-text">SUGGESTIONS</span>
+                      <span className="btns-grp" style={{ textAlign: randomPerformers.length < 4 ? 'right' : 'left' }}>
                         <a aria-hidden className="free-btn" onClick={this.onGetFreePerformers.bind(this)}><Tooltip title={isFreeSubscription ? 'Show all' : 'Show only free'}><TagOutlined className={isFreeSubscription ? 'active' : ''} /></Tooltip></a>
                         <a aria-hidden className="reload-btn" onClick={this.getPerformers.bind(this)}><Tooltip title="Refresh"><SyncOutlined spin={loadingPerformer} /></Tooltip></a>
                       </span>

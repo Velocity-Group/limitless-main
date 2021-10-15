@@ -411,16 +411,7 @@ class FeedCard extends Component<IProps> {
         </div>
         <div className="feed-container">
           <div className="feed-text">
-            <Collapse
-              bordered={false}
-              expandIcon={({ isActive }) => <CaretDownOutlined rotate={isActive ? 180 : 0} />}
-              className="site-collapse-custom-collapse"
-              expandIconPosition="right"
-            >
-              <Collapse.Panel header={feed.text} key="1" className="site-collapse-custom-panel">
-                {feed.text}
-              </Collapse.Panel>
-            </Collapse>
+            {feed.text}
           </div>
           {canView && (
             <div className="feed-content">

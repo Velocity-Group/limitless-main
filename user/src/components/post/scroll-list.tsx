@@ -28,7 +28,7 @@ export default class ScrollListFeed extends PureComponent<IProps> {
         endMessage={null}
         scrollThreshold={0.9}
       >
-        <div className={isGrid ? 'grid-view' : ''}>
+        <div className={isGrid ? 'grid-view' : 'fixed-scroll'}>
           {items.length > 0 && items.map((item) => {
             if (isGrid) {
               return <FeedGridCard feed={item} key={item._id} />;

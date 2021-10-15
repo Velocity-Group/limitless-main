@@ -162,10 +162,6 @@
         }
       }
 
-      @media screen and (max-width: @tablet-screen) {
-        height: 300px;
-      }
-
       @media screen and (max-width: @mobile-screen) {
         height: 215px;
       }
@@ -173,51 +169,9 @@
 
     .feed-text {
       margin-bottom: 5px;
-
-      .ant-collapse {
-        background-color: transparent;
-
-        .ant-collapse-item {
-          border: none;
-
-          .ant-collapse-header {
-            padding: 5px;
-            font-size: 12px;
-            color: @dark-grey;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-
-          &.ant-collapse-item-active {
-            .ant-collapse-header {
-              display: none;
-            }
-          }
-
-          .ant-collapse-content {
-            font-size: 12px;
-            color: @dark-grey;
-          }
-
-          .ant-collapse-arrow {
-            right: 0;
-          }
-        }
-
-        .ant-collapse-content-box {
-          padding: 0;
-        }
-      }
-    }
-
-    .feed-tagline {
-      padding: 3px 5px;
+      font-size: 12px;
+      color: @dark-grey;
       white-space: pre-line;
-
-      a {
-        color: @primary-color;
-      }
     }
   }
 
@@ -760,8 +714,16 @@
     }
   }
 
+  @media screen and (max-width: @tablet-screen) {
+    .feed-grid-card {
+      .card-thumb {
+        height: 325px;
+      }
+    }
+  }
+
   @media screen and (max-width: @mobile-screen) {
-    .grid-card {
+    .feed-grid-card {
       width: 50%;
 
       .card-thumb {
