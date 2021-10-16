@@ -95,7 +95,7 @@ class Performers extends PureComponent<IProps> {
               </Col>
             ))}
           </Row>
-          {!total && !fetching && <p>No model profile was found</p>}
+          {!total && !fetching && <p className="text-center" style={{ margin: 20 }}>No profile was found</p>}
           {fetching && (
             <div className="text-center" style={{ margin: 30 }}>
               <Spin />
