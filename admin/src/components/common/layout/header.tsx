@@ -1,5 +1,7 @@
 import { PureComponent } from 'react';
-import { Layout, Menu, Avatar } from 'antd';
+import {
+  Layout, Menu, Avatar, Dropdown
+} from 'antd';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Link from 'next/link';
@@ -15,19 +17,9 @@ interface IProps {
 class Header extends PureComponent<IProps> {
   render() {
     const { collapsed, onCollapseChange, currentUser } = this.props;
-    const rightContent = [
-      <Menu key="user" mode="horizontal">
-        <Menu.SubMenu
-          title={(
-            <>
-              <span style={{ color: '#999', marginRight: 4 }}>
-                <span>Hi,</span>
-              </span>
-              <span>{currentUser?.name || currentUser?.username || 'Admin'}</span>
-              <Avatar style={{ marginLeft: 8 }} src={currentUser?.avatar} />
-            </>
-          )}
-        >
+    const rightContent = (
+      <Dropdown overlay={(
+        <Menu key="user" mode="horizontal">
           <Menu.Item key="settings">
             <Link href="/account/settings">
               <a>Update profile</a>
@@ -38,9 +30,14 @@ class Header extends PureComponent<IProps> {
               <a>Log out</a>
             </Link>
           </Menu.Item>
-        </Menu.SubMenu>
-      </Menu>
-    ];
+        </Menu>
+      )}
+      >
+        <a className="ant-dropdown-link">
+          <Avatar style={{ margin: '0 15px' }} src={currentUser?.avatar} />
+        </a>
+      </Dropdown>
+    );
 
     return (
       <Layout.Header className="header" id="layoutHeader">
