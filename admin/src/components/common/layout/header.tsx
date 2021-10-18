@@ -34,7 +34,7 @@ class Header extends PureComponent<IProps> {
       )}
       >
         <a className="ant-dropdown-link">
-          <Avatar style={{ margin: '0 15px' }} src={currentUser?.avatar} />
+          <Avatar style={{ margin: '0 15px' }} src={currentUser?.avatar || '/no-avatar.png'} />
         </a>
       </Dropdown>
     );
