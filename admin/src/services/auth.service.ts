@@ -29,7 +29,7 @@ export class AuthService extends APIRequest {
   }
 
   updatePassword(password: string, userId?: string, source?: string) {
-    const url = userId ? '/auth/users/password' : '/auth/me/password';
+    const url = userId ? '/auth/users/password' : '/auth/users/me/password';
     return this.put(url, { userId, password, source });
   }
 
