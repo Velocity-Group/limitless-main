@@ -231,10 +231,6 @@
         border: none
       }
 
-      @media screen and (max-width: @tablet-screen) {
-        height: 300px;
-      }
-
       @media screen and (max-width: @mobile-screen) {
         height: 215px;
       }
@@ -327,26 +323,25 @@
     border-radius: 5px;
 
     .slick-slide {
-      height: 400px;
+      height: auto;
 
       &>div {
         height: 100%;
         display: flex;
         align-items: center;
 
-        a,
-        img {
+        a, img {
           height: 100%;
         }
       }
 
-      @media screen and (max-width: @tablet-screen) {
-        height: 300px;
-      }
+      // @media screen and (max-width: @tablet-screen) {
+      //   height: 300px;
+      // }
 
-      @media screen and (max-width: @mobile-screen) {
-        height: 215px;
-      }
+      // @media screen and (max-width: @mobile-screen) {
+      //   height: 215px;
+      // }
     }
   }
 

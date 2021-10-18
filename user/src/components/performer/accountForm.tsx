@@ -66,19 +66,12 @@ export class PerformerAccountForm extends PureComponent<IProps> {
 
   componentDidMount() {
     const { user } = this.props;
-    const { previewVideo } = this.state;
     user && user.welcomeVideoPath && this.setState({
       previewVideo: user.welcomeVideoPath
-    }, () => {
-      if (previewVideo) {
-        const video = document.getElementById('video') as HTMLVideoElement;
-        video.setAttribute('src', previewVideo);
-      }
     });
   }
 
   handleVideoChange = (info: any) => {
-    const { previewVideo } = this.state;
     info.file && info.file.percent && this.setState({ uploadVideoPercentage: info.file.percent });
     if (info.file.status === 'uploading') {
       this.setState({ isUploadingVideo: true });
@@ -86,13 +79,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
     }
     if (info.file.status === 'done') {
       message.success('Welcome video uploaded');
-      this.setState({ isUploadingVideo: false, previewVideo: info.file.response.data && info.file.response.data.url },
-        () => {
-          if (previewVideo) {
-            const video = document.getElementById('video') as HTMLVideoElement;
-            video.setAttribute('src', previewVideo);
-          }
-        });
+      this.setState({ isUploadingVideo: false, previewVideo: info.file.response.data && info.file.response.data.url });
     }
   };
 
@@ -555,42 +542,20 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
-            <Form.Item label="Welcome Video">
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center'
-                }}
+            <Form.Item label="Welcome Video" help={previewVideo ? <a rel="noreferrer" href={previewVideo} target="_blank">Video welcome video</a> : null}>
+              <Upload
+                accept={'video/*'}
+                name="welcome-video"
+                showUploadList={false}
+                action={videoUploadUrl}
+                headers={uploadHeaders}
+                onChange={this.handleVideoChange.bind(this)}
               >
-                <div className="ant-col ant-col-16 ant-form-item-control">
-                  <Upload
-                    accept={'video/*'}
-                    name="welcome-video"
-                    showUploadList={false}
-                    action={videoUploadUrl}
-                    headers={uploadHeaders}
-                    onChange={this.handleVideoChange.bind(this)}
-                  >
-                    {previewVideo ? (
-                      <video
-                        controls
-                        id="video"
-                        style={{ width: '250px', marginBottom: '10px' }}
-                      />
-                    ) : null}
-                    <div style={{ clear: 'both' }} />
-                    <Button>
-                      <UploadOutlined />
-                      {' '}
-                      Select File
-                    </Button>
-                  </Upload>
-                  {uploadVideoPercentage ? (
-                    <Progress percent={Math.round(uploadVideoPercentage)} />
-                  ) : null}
-                </div>
-              </div>
+                <UploadOutlined />
+              </Upload>
+              {uploadVideoPercentage ? (
+                <Progress percent={Math.round(uploadVideoPercentage)} />
+              ) : null}
             </Form.Item>
             <Form.Item name="activateWelcomeVideo" valuePropName="checked">
               <Checkbox>Activate welcome video</Checkbox>
