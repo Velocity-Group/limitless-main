@@ -364,10 +364,6 @@
     }
   }
 
-  .ant-col {
-    padding: 10px 12px;
-  }
-
   @media screen and (max-width: @mobile-screen) {
     padding: 5px;
 
@@ -399,7 +395,6 @@
 }
 
 .model-card {
-  box-shadow: 1px 1px 2px 0px rgba(0,0,0,0.75);
   position: relative;
   transition: all 0.3s ease-in-out;
   height: 100px;
@@ -590,7 +585,7 @@
   background-position: center;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  margin-bottom: 44px;
+  margin-bottom: 38px;
 
   .card-stat {
     width: 100%;
@@ -669,8 +664,13 @@
   }
 
   @media screen and (max-width: @tablet-screen) {
+    height: 280px;
+  }
+
+  @media screen and (max-width: @mobile-screen) {
     height: 225px;
   }
+
 
 }
 
@@ -684,12 +684,20 @@
 
 .suggestion-bl {
   .sug-top {
-    font-size: 18px;
     margin-bottom: 5px;
-    color: @grey-color;
     display: flex;
     justify-content: space-between;
     padding: 2px;
+
+    .sug-text {
+      font-size: 18px;
+      color: @grey-color;
+      width: 55%;
+    }
+
+    .btns-grp {
+      width: 45%;
+    }
 
     .reload-btn {
       font-size: 22px;
@@ -725,7 +733,7 @@
     }
 
     .slick-prev {
-      top: -22px;
+      top: -23px;
       right: 50px;
       left: unset;
       padding: 12px;
@@ -738,7 +746,7 @@
     }
 
     .slick-next {
-      top: -22px;
+      top: -23px;
       right: 15px;
       left: unset;
       padding: 12px;
@@ -761,6 +769,29 @@
         button {
           background: @theme-color;
         }
+      }
+    }
+  }
+
+  @media screen and (max-width: @tablet-screen) {
+    .sug-top {
+      .sug-text {
+        width: 50%;
+        font-size: 16px;
+      }
+  
+      .btns-grp {
+        width: 50%;
+      }
+    }
+    .ant-carousel {
+  
+      .slick-prev {
+        right: 32px;
+      }
+  
+      .slick-next {
+        right: 2px;
       }
     }
   }

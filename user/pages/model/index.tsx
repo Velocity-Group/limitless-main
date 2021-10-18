@@ -90,12 +90,12 @@ class Performers extends PureComponent<IProps> {
           />
           <Row>
             {performers && performers.length > 0 && performers.map((p) => (
-              <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
+              <Col xs={12} sm={12} md={8} lg={6} key={p._id}>
                 <PerformerGridCard performer={p} />
               </Col>
             ))}
           </Row>
-          {!total && !fetching && <p>No model profile was found</p>}
+          {!total && !fetching && <p className="text-center" style={{ margin: 20 }}>No profile was found</p>}
           {fetching && (
             <div className="text-center" style={{ margin: 30 }}>
               <Spin />

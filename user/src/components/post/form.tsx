@@ -248,8 +248,12 @@ export default class FeedForm extends PureComponent<IProps> {
       pollList, addPoll, isSale, expiredPollAt, fileIds, text
     } = this.state;
     const formValues = { ...payload };
-    if (!text || !text.trim()) {
+    if (!text) {
       message.error('Please add a description');
+      return;
+    }
+    if (text.length > 300) {
+      message.error('Description is over 300 characters');
       return;
     }
     if (formValues.price < 1) {
@@ -324,7 +328,7 @@ export default class FeedForm extends PureComponent<IProps> {
         >
           <Form.Item rules={[{ required: true, message: 'Please add a description' }]}>
             <div className="input-f-desc">
-              <TextArea value={text} onChange={(e) => this.setState({ text: e.target.value })} className="feed-input" rows={3} placeholder={!fileIds.length ? 'Compose new post...' : 'Add a description'} allowClear />
+              <TextArea showCount value={text} onChange={(e) => this.setState({ text: e.target.value })} className="feed-input" minLength={1} maxLength={300} rows={3} placeholder={!fileIds.length ? 'Compose new post...' : 'Add a description'} allowClear />
               <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null}>
                 <span className="grp-emotions">
                   <SmileOutlined />
