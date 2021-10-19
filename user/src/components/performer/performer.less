@@ -683,6 +683,10 @@
 }
 
 .suggestion-bl {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 5px;
+  
   .sug-top {
     margin-bottom: 5px;
     display: flex;
@@ -808,6 +812,13 @@
   
       .slick-next {
         right: 2px;
+      }
+    }
+  }
+  @media screen and (max-width: @mobile-screen) {
+    .sug-top {
+      .sug-text {
+        width: 85%;
       }
     }
   }
