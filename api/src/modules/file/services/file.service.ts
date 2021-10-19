@@ -634,6 +634,7 @@ export class FileService {
       return;
     }
     const fileData = event.data.file as FileDto;
+    let { metadata = {} } = fileData;
     const options = event.data.options || {};
     try {
       await this.fileModel.updateOne(
@@ -645,36 +646,23 @@ export class FileService {
         }
       );
 
-      // get thumb of the file, then convert to mp4
       const publicDir = this.config.get('file.publicDir');
       const photoDir = this.config.get('file.photoDir');
       let photoPath: any;
       let thumbnailAbsolutePath: string;
       let thumbnailPath: string;
-      if (fileData.server === Storage.S3) {
-        // photoPath = fileData.absolutePath;
-        const result = await this.s3StorageService.getObject(
-          fileData.absolutePath
-        );
-        if (result.$response.error) {
-          throw new NoFileException();
-        }
+      let absolutePath: string;
 
-        photoPath = result.Body;
-      } else if (fileData.server === Storage.DiskStorage) {
-        if (existsSync(fileData.absolutePath)) {
-          photoPath = fileData.absolutePath;
-        } else if (existsSync(join(publicDir, fileData.path))) {
-          photoPath = join(publicDir, fileData.path);
-        }
+      if (existsSync(fileData.absolutePath)) {
+        photoPath = fileData.absolutePath;
+      } else if (existsSync(join(publicDir, fileData.path))) {
+        photoPath = join(publicDir, fileData.path);
       }
-
       if (!photoPath) {
         throw new NoFileException();
       }
-
       const meta = await this.imageService.getMetaData(photoPath);
-      const buffer = await this.imageService.createThumbnail(
+      const thumbBuffer = await this.imageService.createThumbnail(
         photoPath,
         options.thumbnailSize || {
           width: 250,
@@ -682,7 +670,7 @@ export class FileService {
         }
       ) as Buffer;
 
-      // store to a file
+      // create a thumbnail
       const thumbName = `${StringHelper.randomString(
         5
       )}_thumb${StringHelper.getExt(fileData.name)}`;
@@ -690,15 +678,35 @@ export class FileService {
         const upload = await this.s3StorageService.upload(
           thumbName,
           S3ObjectCannelACL.PublicRead,
-          buffer,
+          thumbBuffer,
           fileData.mimeType
         );
         thumbnailAbsolutePath = upload.Key;
         thumbnailPath = upload.Location;
-      } else if (fileData.server === Storage.DiskStorage) {
+      } else {
         thumbnailPath = join(photoDir, thumbName).replace(publicDir, '');
         thumbnailAbsolutePath = join(photoDir, thumbName);
-        writeFileSync(join(photoDir, thumbName), buffer);
+        writeFileSync(join(photoDir, thumbName), thumbBuffer);
+      }
+      if (fileData.server === Storage.S3) {
+        const buffer = await this.imageService.replaceWithoutExif(photoPath);
+        const upload = await this.s3StorageService.upload(
+          fileData.name,
+          fileData.acl,
+          buffer,
+          fileData.mimeType
+        );
+        if (upload.Key && upload.Location) {
+          absolutePath = upload.Key;
+          photoPath = upload.Location;
+        }
+        metadata = {
+          ...metadata,
+          bucket: upload.Bucket,
+          endpoint: S3Service.getEndpoint(upload)
+        };
+        // remove old file once upload s3 done
+        existsSync(photoPath) && unlinkSync(photoPath);
       }
       await this.fileModel.updateOne(
         { _id: fileData._id },
@@ -707,6 +715,9 @@ export class FileService {
             status: 'finished',
             width: meta.width,
             height: meta.height,
+            metadata,
+            absolutePath,
+            path: photoPath,
             thumbnails: [
               {
                 path: thumbnailPath,

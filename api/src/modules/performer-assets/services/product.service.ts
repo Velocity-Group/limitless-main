@@ -10,7 +10,7 @@ import { FileDto } from 'src/modules/file';
 import { FileService } from 'src/modules/file/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
-import { merge, uniq, pick } from 'lodash';
+import { merge, uniq } from 'lodash';
 import { EVENT } from 'src/kernel/constants';
 import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
 import { UserDto } from 'src/modules/user/dtos';
@@ -209,10 +209,9 @@ export class ProductService {
     dto.isBookMarked = !!bookmark;
     dto.image = image ? image.getUrl() : null;
     if (digitalFile) {
-      const auth = await this.authService.findBySource({ source: 'user', type: 'email', sourceId: user._id })
-      || await this.authService.findBySource({ source: 'user', type: 'username', sourceId: user._id });
-      const jwToken = this.authService.generateJWT(pick(auth, ['_id', 'source', 'sourceId']), { expiresIn: 3 * 60 * 60 });
-      dto.digitalFileUrl = digitalFile ? `${new FileDto(digitalFile).getUrl()}?productId=${product._id}&token=${jwToken}` : null;
+      const bought = await this.checkPaymentService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
+      const canView = !!bought || (user && `${user._id}` === `${product.performerId}`) || (user && user.roles && user.roles.includes('admin'));
+      dto.digitalFileUrl = digitalFile ? `${new FileDto(digitalFile).getUrl(canView)}` : null;
     }
     dto.performer = new PerformerDto(performer).toResponse();
     await this.productModel.updateOne({ _id: product._id }, { $inc: { 'stats.views': 1 } });
@@ -253,17 +252,16 @@ export class ProductService {
     );
   }
 
-  public async generateDownloadLink(productId, userId) {
-    const product = await this.productModel.findById(productId);
+  public async generateDownloadLink(productId: string, user: UserDto) {
+    const query = isObjectId(productId) ? { _id: productId } : { slug: productId };
+    const product = await this.productModel.findOne(query);
     if (!product.digitalFileId) throw new EntityNotFoundException();
     const file = await this.fileService.findById(product.digitalFileId);
     if (!file) throw new EntityNotFoundException();
-
-    const auth = await this.authService.findBySource({ source: 'user', type: 'email', sourceId: userId })
-      || await this.authService.findBySource({ source: 'user', type: 'username', sourceId: userId });
-    const jwToken = this.authService.generateJWT(pick(auth, ['_id', 'source', 'sourceId']), { expiresIn: 3 * 60 * 60 });
+    const bought = await this.checkPaymentService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
+    const canView = !!bought || (`${user._id}` === `${product.performerId}`) || (user && user.roles && user.roles.includes('admin'));
     // TODO - should change with header download link
-    return `${new FileDto(file).getUrl()}?productId=${product._id}&token=${jwToken}`;
+    return `${new FileDto(file).getUrl(canView)}`;
   }
 
   public async checkAuth(req: any, user: UserDto) {

@@ -120,9 +120,9 @@ export class FeedService {
     return data;
   }
 
-  public async findByIds(ids, user, jwToken) {
+  public async findByIds(ids: string[] | ObjectId[], user: UserDto) {
     const data = await this.feedModel.find({ _id: { $in: ids } });
-    const result = await this.populateFeedData(data as any, user, jwToken);
+    const result = await this.populateFeedData(data, user);
     return result;
   }
 
@@ -137,7 +137,7 @@ export class FeedService {
     // TODO - validate for other
   }
 
-  private async populateFeedData(feeds: FeedModel[], user: UserDto, jwtToken) {
+  private async populateFeedData(feeds: any, user: UserDto) {
     const performerIds = uniq(
       feeds.map((f) => f.fromSourceId.toString())
     );
@@ -182,25 +182,20 @@ export class FeedService {
       const bookmarked = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.BOOK_MARK);
       feed.isBookMarked = !!bookmarked;
       const subscribed = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
-      feed.isSubscribed = !!((subscribed || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))));
+      feed.isSubscribed = !!subscribed;
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
-      feed.isBought = !!((bought || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))));
+      feed.isBought = !!bought;
       const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
       const feedPollStringIds = (f.pollIds || []).map((pollId) => pollId.toString());
       feed.polls = polls.filter((p) => feedPollStringIds.includes(p._id.toString()));
       const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
+      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'));
       if (feedFiles.length) {
-        feed.files = feedFiles.map((file) => {
-          let fileUrl = file.getUrl();
-          if (jwtToken) {
-            fileUrl = `${fileUrl}?feedId=${feed._id}&token=${jwtToken}`;
-          }
-          return {
-            ...file.toResponse(),
-            thumbnails: (file.thumbnails || []).map((thumb) => FileDto.getPublicUrl(thumb.path)),
-            url: fileUrl
-          };
-        });
+        feed.files = feedFiles.map((file) => ({
+          ...file.toResponse(),
+          thumbnails: (file.thumbnails || []).map((thumb) => FileDto.getPublicUrl(thumb.path)),
+          url: file.getUrl(canView)
+        }));
       }
       if (feed.thumbnailId) {
         const thumbnail = files.find((file) => file._id.toString() === feed.thumbnailId.toString());
@@ -217,13 +212,13 @@ export class FeedService {
     });
   }
 
-  public async findOne(id, user, jwtToken): Promise<FeedDto> {
+  public async findOne(id: string, user: UserDto): Promise<FeedDto> {
     const query = isObjectId(id) ? { _id: id } : { slug: id };
     const feed = await this.feedModel.findOne(query);
     if (!feed) {
       throw new EntityNotFoundException();
     }
-    const newFeed = await this.populateFeedData([feed], user, jwtToken);
+    const newFeed = await this.populateFeedData([feed], user);
     return new FeedDto(newFeed[0]);
   }
 
@@ -243,7 +238,7 @@ export class FeedService {
     }
     const feed = await this.feedModel.create({
       ...data,
-      orientation: performer.gender,
+      orientation: performer.sexualOrientation,
       fromSource: 'performer',
       fromSourceId
     } as any);
@@ -273,7 +268,7 @@ export class FeedService {
     return feed;
   }
 
-  public async search(req: FeedSearchRequest, user: UserDto, jwtToken) {
+  public async search(req: FeedSearchRequest, user: UserDto) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER
     } as any;
@@ -328,12 +323,12 @@ export class FeedService {
 
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data as any, user, jwtToken),
+      data: await this.populateFeedData(data, user),
       total
     };
   }
 
-  public async userSearchFeeds(req: FeedSearchRequest, user: UserDto, jwtToken) {
+  public async userSearchFeeds(req: FeedSearchRequest, user: UserDto) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER,
       status: STATUS.ACTIVE
@@ -392,12 +387,12 @@ export class FeedService {
     ]);
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data as any, user, jwtToken),
+      data: await this.populateFeedData(data, user),
       total
     };
   }
 
-  public async searchSubscribedPerformerFeeds(req: FeedSearchRequest, user: UserDto, jwtToken: string) {
+  public async searchSubscribedPerformerFeeds(req: FeedSearchRequest, user: UserDto) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER,
       status: STATUS.ACTIVE
@@ -445,7 +440,7 @@ export class FeedService {
     ]);
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data, user, jwtToken),
+      data: await this.populateFeedData(data, user),
       total
     };
   }

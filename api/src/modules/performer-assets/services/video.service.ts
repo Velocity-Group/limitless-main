@@ -134,14 +134,9 @@ export class VideoService {
     return videos;
   }
 
-  public getVideoForView(fileDto: FileDto, video: VideoDto, jwToken: string) {
-    // get thumb, video link, thumbnails, etc...
-    let file = fileDto.getUrl();
-    if (video && jwToken) {
-      file = `${file}?videoId=${video._id}&token=${jwToken}`;
-    }
+  public getVideoForView(fileDto: FileDto, canView: boolean) {
     return {
-      url: file,
+      url: fileDto.getUrl(canView),
       duration: fileDto.duration,
       thumbnails: (fileDto.thumbnails || []).map((thumb) => FileDto.getPublicUrl(thumb.path))
     };
@@ -297,7 +292,7 @@ export class VideoService {
     return new VideoDto(model);
   }
 
-  public async getDetails(videoId: string | ObjectId, jwToken: string): Promise<VideoDto> {
+  public async getDetails(videoId: string | ObjectId): Promise<VideoDto> {
     const video = await this.PerformerVideoModel.findById(videoId);
     if (!video) throw new EntityNotFoundException();
     const participantIds = video.participantIds.filter((p) => StringHelper.isObjectId(p));
@@ -313,13 +308,13 @@ export class VideoService {
     const dto = new VideoDto(video);
     dto.thumbnail = thumbnailFile ? thumbnailFile.getUrl() : null;
     dto.teaser = teaserFile ? teaserFile.getUrl() : null;
-    dto.video = this.getVideoForView(videoFile, dto, jwToken);
+    dto.video = this.getVideoForView(videoFile, true);
     dto.performer = performer ? new PerformerDto(performer).toSearchResponse() : null;
     dto.participants = participants.map((p) => p.toSearchResponse());
     return dto;
   }
 
-  public async userGetDetails(videoId: string, currentUser: UserDto, jwToken: string): Promise<VideoDto> {
+  public async userGetDetails(videoId: string, currentUser: UserDto): Promise<VideoDto> {
     const query = isObjectId(videoId) ? { _id: videoId } : { slug: videoId };
     const video = await this.PerformerVideoModel.findOne(query);
     if (!video) throw new EntityNotFoundException();
@@ -354,6 +349,7 @@ export class VideoService {
       dto.isBought = true;
       dto.isSubscribed = true;
     }
+    const canView = (!dto.isSale && dto.isBought) || (dto.isSale && dto.isBought);
     dto.thumbnail = thumbnailFile ? {
       url: thumbnailFile.getUrl(),
       thumbnails: thumbnailFile.getThumbnails()
@@ -362,7 +358,7 @@ export class VideoService {
       url: teaserFile.getUrl(),
       thumbnails: teaserFile.getThumbnails()
     } : null;
-    dto.video = this.getVideoForView(videoFile, dto, jwToken);
+    dto.video = this.getVideoForView(videoFile, canView);
     dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     dto.participants = participants.map((p) => p.toPublicDetailsResponse());
     await this.increaseView(dto._id);

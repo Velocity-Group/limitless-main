@@ -162,7 +162,7 @@ export default class FeedForm extends PureComponent<IProps> {
         return newFile;
       }));
       await this.setState({
-        fileList: [...fileList, ...files],
+        fileList: file.type.includes('video') ? files : [...fileList, ...files],
         uploading: true
       });
       const newFileIds = [...fileIds];

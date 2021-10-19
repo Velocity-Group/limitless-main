@@ -6,7 +6,6 @@ import {
   Post,
   HttpCode,
   HttpStatus,
-  Request,
   Get,
   Param,
   Query,
@@ -92,11 +91,9 @@ export class PerformerVideosController {
   @UseGuards(RoleGuard)
   @Roles('performer')
   async details(
-    @Param('id') id: string,
-    @Request() req: any
+    @Param('id') id: string
   ) {
-    const jwToken = req.jwToken || null;
-    const details = await this.videoService.getDetails(id, jwToken);
+    const details = await this.videoService.getDetails(id);
     return DataResponse.ok(details);
   }
 

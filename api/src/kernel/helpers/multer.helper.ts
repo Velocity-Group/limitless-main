@@ -8,7 +8,7 @@ export const formatFileName = (file: Express.Multer.File) => {
   const orgName = StringHelper.getFileName(file.originalname, true);
   const randomText = StringHelper.randomString(5); // avoid duplicated name, we might check file name first?
   return (
-    StringHelper.createAlias(`${randomText}-${orgName}`).toLocaleLowerCase() +
-    ext
+    StringHelper.createAlias(`${randomText}-${orgName}`).toLocaleLowerCase()
+    + ext
   );
 };

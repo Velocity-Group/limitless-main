@@ -12,7 +12,6 @@ import {
   Post,
   Body,
   Delete,
-  Request,
   forwardRef,
   Inject
 } from '@nestjs/common';
@@ -64,12 +63,9 @@ export class ReactionController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async bookmarkFeeds(
     @Query() query: ReactionSearchRequestPayload,
-    @CurrentUser() user: UserDto,
-    @Request() req: any
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<PageableData<ReactionDto>>> {
-    const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = await this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
-    const data = await this.reactionService.getListFeeds(query, user, jwToken);
+    const data = await this.reactionService.getListFeeds(query, user);
     return DataResponse.ok(data);
   }
 

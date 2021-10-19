@@ -109,11 +109,10 @@ export class AdminPerformerController {
   @UseGuards(RoleGuard)
   async updateUser(
     @Body() payload: PerformerUpdatePayload,
-    @Param('id') performerId: string,
-    @Request() req: any
+    @Param('id') performerId: string
   ): Promise<DataResponse<PerformerDto>> {
     await this.performerService.adminUpdate(performerId, payload);
-    const performer = await this.performerService.getDetails(performerId, req.jwToken);
+    const performer = await this.performerService.getDetails(performerId);
     return DataResponse.ok(performer);
   }
 
@@ -122,10 +121,9 @@ export class AdminPerformerController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   async getDetails(
-    @Param('id') performerId: string,
-    @Request() req: any
+    @Param('id') performerId: string
   ): Promise<DataResponse<IPerformerResponse>> {
-    const performer = await this.performerService.getDetails(performerId, req.jwToken);
+    const performer = await this.performerService.getDetails(performerId);
     // TODO - check roles or other to response info
     const data = performer.toResponse(true, true);
     return DataResponse.ok(data);

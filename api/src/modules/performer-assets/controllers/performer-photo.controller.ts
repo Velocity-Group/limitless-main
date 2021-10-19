@@ -11,8 +11,7 @@ import {
   Param,
   Delete,
   Get,
-  Query,
-  Request
+  Query
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
@@ -105,10 +104,9 @@ export class PerformerPhotoController {
   @Roles('performer')
   async search(
     @Query() query: PhotoSearchRequest,
-    @CurrentUser() user: UserDto,
-    @Request() req: any
+    @CurrentUser() user: UserDto
   ) {
-    const details = await this.photoSearchService.performerSearch(query, user, req.jwToken);
+    const details = await this.photoSearchService.performerSearch(query, user);
     return DataResponse.ok(details);
   }
 
