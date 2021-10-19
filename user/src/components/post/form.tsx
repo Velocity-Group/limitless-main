@@ -504,7 +504,7 @@ export default class FeedForm extends PureComponent<IProps> {
                 className="secondary"
                 disabled={uploading}
               >
-                Discard
+                DISCARD
               </Button>
             )}
           </div>

@@ -26,9 +26,7 @@
 }
 
 .ant-layout-content {
-  flex: auto;
   min-height: calc(100vh - 160px);
-  overflow: auto;
   padding: 0;
 }
 
@@ -563,10 +561,10 @@
     left: 0;
     background-color: rgba(0,0,0,.2);
     padding: 15px;
-    z-index: 9;
+    z-index: 1;
 
-    &:hover {
-      opacity: 0.9;
+    &:hover, &:focus {
+      background-color: rgba(0,0,0,.5);
     }
 
     &::before {
@@ -588,10 +586,10 @@
     right: 0;
     background-color: rgba(0,0,0,.2);
     padding: 15px;
-    z-index: 9;
+    z-index: 1;
 
-    &:hover {
-      opacity: 0.9;
+    &:hover, &:focus {
+      background-color: rgba(0,0,0,.5);
     }
 
     &::before {
