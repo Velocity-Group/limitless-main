@@ -44,17 +44,15 @@ class CreateProduct extends PureComponent {
     } if (data.type === 'physical') {
       this._files.digitalFile = null;
     }
-
-    const files = Object.keys(this._files).reduce((file, key) => {
+    const files = Object.keys(this._files).reduce((f, key) => {
       if (this._files[key]) {
-        files.push({
+        f.push({
           fieldname: key,
           file: this._files[key] || null
         });
       }
-      return files;
+      return f;
     }, [] as IFiles[]) as [IFiles];
-
     await this.setState({
       uploading: true
     });

@@ -18,6 +18,7 @@ import { DataResponse, getConfig } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
 import { UserDto } from 'src/modules/user/dtos';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { VideoCreatePayload } from '../payloads/video-create.payload';
 import { VideoService } from '../services/video.service';
 import { VideoSearchRequest, VideoUpdatePayload } from '../payloads';
@@ -43,14 +44,18 @@ export class AdminPerformerVideosController {
           type: 'performer-video',
           fieldName: 'video',
           options: {
-            destination: getConfig('file').videoProtectedDir
+            destination: getConfig('file').videoProtectedDir,
+            acl: S3ObjectCannelACL.AuthenticatedRead,
+            server: Storage.S3
           }
         },
         {
           type: 'performer-video-teaser',
           fieldName: 'teaser',
           options: {
-            destination: getConfig('file').videoDir
+            destination: getConfig('file').videoDir,
+            acl: S3ObjectCannelACL.PublicRead,
+            server: Storage.S3
           }
         },
         {
@@ -59,12 +64,12 @@ export class AdminPerformerVideosController {
           options: {
             destination: getConfig('file').imageDir,
             generateThumbnail: true,
-            replaceWithThumbail: false,
-            thumbnailSize: getConfig('image').videoThumbnail
+            thumbnailSize: getConfig('image').blurThumbnail,
+            acl: S3ObjectCannelACL.PublicRead,
+            server: Storage.S3
           }
         }
-      ],
-      {}
+      ]
     )
   )
   async uploadVideo(
@@ -114,14 +119,18 @@ export class AdminPerformerVideosController {
           type: 'performer-video',
           fieldName: 'video',
           options: {
-            destination: getConfig('file').videoProtectedDir
+            destination: getConfig('file').videoProtectedDir,
+            acl: S3ObjectCannelACL.AuthenticatedRead,
+            server: Storage.S3
           }
         },
         {
           type: 'performer-video-teaser',
           fieldName: 'teaser',
           options: {
-            destination: getConfig('file').videoDir
+            destination: getConfig('file').videoDir,
+            acl: S3ObjectCannelACL.PublicRead,
+            server: Storage.S3
           }
         },
         {
@@ -130,12 +139,12 @@ export class AdminPerformerVideosController {
           options: {
             destination: getConfig('file').imageDir,
             generateThumbnail: true,
-            replaceWithThumbail: true,
-            thumbnailSize: getConfig('image').videoThumbnail
+            thumbnailSize: getConfig('image').videoThumbnail,
+            acl: S3ObjectCannelACL.PublicRead,
+            server: Storage.S3
           }
         }
-      ],
-      {}
+      ]
     )
   )
   async update(

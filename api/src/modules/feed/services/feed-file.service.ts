@@ -18,8 +18,8 @@ export class FeedFileService {
     }
     await this.fileService.queueProcessPhoto(photo._id, {
       thumbnailSize: {
-        width: 900,
-        height: 300
+        width: 768,
+        height: 480
       }
     });
 

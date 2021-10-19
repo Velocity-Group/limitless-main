@@ -12,6 +12,7 @@ import { ConfigService } from 'nestjs-config';
 import { existsSync } from 'fs';
 import * as mkdirp from 'mkdirp';
 import { StringHelper } from 'src/kernel';
+import { S3ObjectCannelACL } from 'src/modules/storage/contants';
 import { FileService } from '../services';
 import { transformException } from '../lib/multer/multer.utils';
 import { IFileUploadOptions } from '../lib';
@@ -22,7 +23,9 @@ export interface IMultiFileUpload {
   options: IFileUploadOptions;
 }
 
-export function MultiFileUploadInterceptor(data: IMultiFileUpload[], opts = {} as any) {
+export function MultiFileUploadInterceptor(
+  data: IMultiFileUpload[]
+) {
   @Injectable()
   class MixinInterceptor implements NestInterceptor {
     constructor(
@@ -48,8 +51,10 @@ export function MultiFileUploadInterceptor(data: IMultiFileUpload[], opts = {} a
       // todo - support other storage type?
       const uploadDir = {} as any;
       const fileName = {} as any;
-      data.forEach((conf) => {
-        const { fieldName, options = {} } = conf;
+      const acls = {} as Record<string, S3ObjectCannelACL>;
+      data.forEach((file) => {
+        const { fieldName, options = {} } = file;
+        acls[fieldName] = options.acl || S3ObjectCannelACL.PublicRead;
         uploadDir[fieldName] = options.destination || this.config.get('file').publicDir;
 
         if (options.fileName) {
@@ -64,11 +69,13 @@ export function MultiFileUploadInterceptor(data: IMultiFileUpload[], opts = {} a
           if (fileName[file.fieldname]) {
             return cb(null, fileName[file.fieldname]);
           }
-
           const ext = (
             StringHelper.getExt(file.originalname) || ''
           ).toLocaleLowerCase();
-          const orgName = StringHelper.getFileName(file.originalname, true);
+          const orgName = StringHelper.getFileName(
+            file.originalname,
+            true
+          );
           const randomText = StringHelper.randomString(5); // avoid duplicated name, we might check file name first?
           const name = StringHelper.createAlias(
             `${randomText}-${orgName}`
@@ -78,15 +85,14 @@ export function MultiFileUploadInterceptor(data: IMultiFileUpload[], opts = {} a
       });
       const upload = multer({
         storage
-      })
-        .fields(data.map((conf) => ({ name: conf.fieldName })));
-      await new Promise<void>((resolve, reject) => upload(ctx.getRequest(), ctx.getResponse(), (err: any) => {
+      }).fields(data.map((conf) => ({ name: conf.fieldName })));
+      await new Promise((resolve, reject) => upload(ctx.getRequest(), ctx.getResponse(), (err: any) => {
         if (err) {
           const error = transformException(err);
           // TODO - trace error and throw error
           return reject(error);
         }
-        return resolve();
+        return resolve(null);
       }));
 
       /**
@@ -102,25 +108,23 @@ export function MultiFileUploadInterceptor(data: IMultiFileUpload[], opts = {} a
       } */
       const ctxRequest = ctx.getRequest();
       if (!ctxRequest.files) ctxRequest.files = {};
-      const files = ctxRequest.files || {} as any;
+      const files = ctxRequest.files || ({} as any);
       // store media and overwrite multer file property in request
-      // hook user uploader if user logged in?
-      if (!opts.uploader && ctxRequest.user) {
-        // eslint-disable-next-line no-param-reassign
-        opts.uploader = ctxRequest.user;
-      }
-      // do not use promise all here
+      // Do not use promise all here
       // eslint-disable-next-line no-restricted-syntax
       for (const f of data) {
+        f.options.uploader = ctxRequest.user;
         const fileContent = files[f.fieldName];
         if (fileContent && fileContent.length) {
-          // eslint-disable-next-line no-await-in-loop
-          const file = await this.fileService.createFromMulter(
-            f.type,
-            fileContent[0],
-            f.options
-          );
-          ctxRequest.files[f.fieldName] = file;
+          if (fileContent[0]) {
+            // eslint-disable-next-line no-await-in-loop
+            const file = await this.fileService.createFromMulter(
+              f.type,
+              fileContent[0],
+              f.options
+            );
+            ctxRequest.files[f.fieldName] = file;
+          }
         }
       }
 

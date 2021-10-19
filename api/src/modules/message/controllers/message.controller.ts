@@ -19,6 +19,7 @@ import {
 import { DataResponse, getConfig } from 'src/kernel';
 import { AuthGuard, RoleGuard } from 'src/modules/auth/guards';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
 import { MessageService, NotificationMessageService } from '../services';
@@ -46,7 +47,14 @@ export class MessageController {
         fieldName: 'message-photo',
         options: {
           destination: getConfig('file').imageDir,
-          replaceWithoutExif: true
+          uploadImmediately: true,
+          generateThumbnail: true,
+          thumbnailSize: {
+            width: 250,
+            height: 250
+          },
+          acl: S3ObjectCannelACL.PublicRead,
+          server: Storage.S3
         }
       }
     ])

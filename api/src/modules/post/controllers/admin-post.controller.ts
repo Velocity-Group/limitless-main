@@ -20,6 +20,7 @@ import { DataResponse, getConfig, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
 import { FileUploadInterceptor, FileUploaded, FileDto } from 'src/modules/file';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { PostCreatePayload, PostUpdatePayload, AdminSearch } from '../payloads';
 import { PostModel } from '../models';
 import { PostService, PostSearchService } from '../services';
@@ -52,7 +53,7 @@ export class AdminPostController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async update(
     @CurrentUser() currentUser: UserDto,
-    @Body() payload: PostCreatePayload,
+    @Body() payload: PostUpdatePayload,
     @Param('id') id: string
   ): Promise<DataResponse<PostModel>> {
     const post = await this.postService.update(id, payload, currentUser);
@@ -66,7 +67,6 @@ export class AdminPostController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async delete(
     @CurrentUser() currentUser: UserDto,
-    @Body() payload: PostUpdatePayload,
     @Param('id') id: string
   ): Promise<DataResponse<boolean>> {
     const post = await this.postService.delete(id, currentUser);
@@ -80,12 +80,13 @@ export class AdminPostController {
   @UseInterceptors(
     // TODO - check mime type?
     FileUploadInterceptor('image', 'image', {
-      destination: getConfig('file').imageDir
-      // TODO - define rule of
+      destination: getConfig('file').imageDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadImage(
-    @CurrentUser() user: UserDto,
     @FileUploaded() file: FileDto
   ): Promise<any> {
     return DataResponse.ok({

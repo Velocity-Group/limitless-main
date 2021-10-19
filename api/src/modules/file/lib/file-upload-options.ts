@@ -1,22 +1,27 @@
+import { UserDto } from 'src/modules/user/dtos';
 import { ObjectId } from 'mongodb';
-import { PerformerDto } from 'src/modules/performer/dtos';
+import { S3ObjectCannelACL } from 'src/modules/storage/contants';
 
+/**
+ * @param storage Storage
+ * @uploadImmediately Upload to Storage immediately
+ * @acl Access Control List
+ */
 export interface IFileUploadOptions {
-  uploader?: PerformerDto;
+  uploader?: UserDto;
   convertMp4?: boolean;
   generateThumbnail?: boolean;
   thumbnailSize?: {
     width: number;
     height: number;
   },
-  replaceWithThumbail?: boolean;
   refItem?: {
     itemId: ObjectId;
     itemType: string;
   };
-  fileName?: string | Function;
+  fileName?: string;
   destination?: string;
   server?: string;
-  replaceWithoutExif?: boolean;
-  createThumbs?: boolean;
+  uploadImmediately?: boolean;
+  acl?: S3ObjectCannelACL;
 }

@@ -214,7 +214,7 @@ class Login extends PureComponent<IProps> {
                 lg={12}
               >
                 <div className="login-content right">
-                  {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
+                  <div className="login-logo"><a href="/">{ui.logo ? <img alt="logo" src={ui.logo} height="80px" /> : ui.siteName}</a></div>
                   <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
                   <div className="social-login">
                     <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">

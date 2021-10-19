@@ -12,8 +12,10 @@ import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig, EntityNotFoundException } from 'src/kernel';
 import { FileUploadInterceptor, FileUploaded, FileDto } from 'src/modules/file';
 import { Roles } from 'src/modules/auth';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { UserDto } from '../dtos';
 import { UserService } from '../services';
+
 @Injectable()
 @Controller('admin/users')
 export class AdminAvatarController {
@@ -29,9 +31,9 @@ export class AdminAvatarController {
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
       generateThumbnail: true,
-      replaceWithThumbail: true,
-      thumbnailSize: getConfig('image').avatar
-      // TODO - check option fir resize, etc...
+      thumbnailSize: getConfig('image').avatar,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadUserAvatar(

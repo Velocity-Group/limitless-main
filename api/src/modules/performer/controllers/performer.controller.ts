@@ -34,6 +34,7 @@ import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
 import { CountryService } from 'src/modules/utils/services';
 import { UserDto } from 'src/modules/user/dtos';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { PERFORMER_STATUSES } from '../constants';
 import {
   PerformerDto,
@@ -174,7 +175,10 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(
     FileUploadInterceptor('performer-document', 'file', {
-      destination: getConfig('file').documentDir
+      destination: getConfig('file').documentDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerDocument(
@@ -200,8 +204,9 @@ export class PerformerController {
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
       generateThumbnail: true,
-      replaceWithThumbail: true,
-      thumbnailSize: getConfig('image').avatar
+      thumbnailSize: getConfig('image').avatar,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerAvatar(
@@ -222,7 +227,11 @@ export class PerformerController {
   @Roles('performer')
   @UseInterceptors(
     FileUploadInterceptor('cover', 'cover', {
-      destination: getConfig('file').coverDir
+      destination: getConfig('file').coverDir,
+      generateThumbnail: true,
+      thumbnailSize: getConfig('image').coverThumbnail,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerCover(
@@ -243,7 +252,9 @@ export class PerformerController {
   @Roles('performer')
   @UseInterceptors(
     FileUploadInterceptor('performer-welcome-video', 'welcome-video', {
-      destination: getConfig('file').videoDir
+      destination: getConfig('file').videoDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerVideo(
