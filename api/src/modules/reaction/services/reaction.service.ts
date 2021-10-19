@@ -306,7 +306,7 @@ export class ReactionService {
     };
   }
 
-  public async getListFeeds(req: ReactionSearchRequestPayload, user: UserDto, jwToken: string) {
+  public async getListFeeds(req: ReactionSearchRequestPayload, user: UserDto) {
     const query = {
       objectType: REACTION_TYPE.FEED,
       action: REACTION.BOOK_MARK,
@@ -332,7 +332,7 @@ export class ReactionService {
     ]);
 
     const feedIds = uniq(items.map((i) => i.objectId));
-    const feeds = await this.feedService.findByIds(feedIds, user, jwToken);
+    const feeds = await this.feedService.findByIds(feedIds, user);
     const reactions = items.map((v) => new ReactionDto(v));
     reactions.forEach((item) => {
       const feed = feeds.find((p) => `${p._id}` === `${item.objectId}`);

@@ -37,12 +37,9 @@ export class UserFeedController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getPerformerFeeds(
     @Query() query: FeedSearchRequest,
-    @CurrentUser() user: UserDto,
-    @Request() req: any
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
-    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
-    const data = await this.feedService.userSearchFeeds(query, user, jwToken);
+    const data = await this.feedService.userSearchFeeds(query, user);
     return DataResponse.ok(data);
   }
 
@@ -52,12 +49,9 @@ export class UserFeedController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getSubscribedPerformerFeeds(
     @Query() query: FeedSearchRequest,
-    @CurrentUser() user: UserDto,
-    @Request() req: any
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
-    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
-    const data = await this.feedService.searchSubscribedPerformerFeeds(query, user, jwToken);
+    const data = await this.feedService.searchSubscribedPerformerFeeds(query, user);
     return DataResponse.ok(data);
   }
 
@@ -67,12 +61,9 @@ export class UserFeedController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async details(
     @Param('id') id: string,
-    @CurrentUser() user: any,
-    @Request() req: any
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
-    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = req.authUser && await this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
-    const data = await this.feedService.findOne(id, user, jwToken);
+    const data = await this.feedService.findOne(id, user);
     return DataResponse.ok(data);
   }
 

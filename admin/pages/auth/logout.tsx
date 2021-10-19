@@ -1,4 +1,4 @@
-import { Fragment, PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
 import './index.less';

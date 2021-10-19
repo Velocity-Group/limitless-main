@@ -20,6 +20,7 @@ import { DataResponse, getConfig } from 'src/kernel';
 import { Roles, CurrentUser } from 'src/modules/auth';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
 import { UserDto } from 'src/modules/user/dtos';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { ProductService } from '../services/product.service';
 import { ProductCreatePayload, ProductSearchRequest } from '../payloads';
 import { ProductSearchService } from '../services/product-search.service';
@@ -45,15 +46,20 @@ export class AdminPerformerProductsController {
         options: {
           destination: getConfig('file').imageDir,
           generateThumbnail: true,
-          replaceWithThumbail: true,
-          thumbnailSize: getConfig('image').productThumbnail
+          uploadImmediately: true,
+          thumbnailSize: getConfig('image').productThumbnail,
+          acl: S3ObjectCannelACL.PublicRead,
+          server: Storage.S3
         }
       },
       {
         type: 'performer-product-digital',
         fieldName: 'digitalFile',
         options: {
-          destination: getConfig('file').digitalProductDir
+          destination: getConfig('file').digitalProductDir,
+          uploadImmediately: true,
+          acl: S3ObjectCannelACL.AuthenticatedRead,
+          server: Storage.S3
         }
       }
     ])
@@ -85,16 +91,21 @@ export class AdminPerformerProductsController {
         fieldName: 'image',
         options: {
           destination: getConfig('file').imageDir,
+          uploadImmediately: true,
           generateThumbnail: true,
-          replaceWithThumbail: true,
-          thumbnailSize: getConfig('image').productThumbnail
+          thumbnailSize: getConfig('image').productThumbnail,
+          acl: S3ObjectCannelACL.PublicRead,
+          server: Storage.S3
         }
       },
       {
         type: 'performer-product-digital',
         fieldName: 'digitalFile',
         options: {
-          destination: getConfig('file').digitalProductDir
+          destination: getConfig('file').digitalProductDir,
+          uploadImmediately: true,
+          acl: S3ObjectCannelACL.AuthenticatedRead,
+          server: Storage.S3
         }
       }
     ])
@@ -130,9 +141,10 @@ export class AdminPerformerProductsController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   async details(
-    @Param('id') id: string
+    @Param('id') id: string,
+    @CurrentUser() user: UserDto
   ): Promise<any> {
-    const resp = await this.productService.getDetails(id, null);
+    const resp = await this.productService.getDetails(id, user);
     return DataResponse.ok(resp);
   }
 

@@ -32,6 +32,7 @@ import { OrderModule } from './modules/order/order.module';
 import { ChangeTokenLogModule } from './modules/change-token-logs/change-token-log.module';
 import { BlockModule } from './modules/block/block.module';
 import { ReportModule } from './modules/report/report.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ReportModule } from './modules/report/report.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public')
     }),
+    StorageModule.forRoot(),
     AuthModule,
     UserModule,
     PostModule,

@@ -26,6 +26,7 @@ import { CurrentUser, Roles } from 'src/modules/auth';
 import { AuthService } from 'src/modules/auth/services';
 import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { FileUploadInterceptor, FileUploaded, FileDto } from 'src/modules/file';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
@@ -108,11 +109,10 @@ export class AdminPerformerController {
   @UseGuards(RoleGuard)
   async updateUser(
     @Body() payload: PerformerUpdatePayload,
-    @Param('id') performerId: string,
-    @Request() req: any
+    @Param('id') performerId: string
   ): Promise<DataResponse<PerformerDto>> {
     await this.performerService.adminUpdate(performerId, payload);
-    const performer = await this.performerService.getDetails(performerId, req.jwToken);
+    const performer = await this.performerService.getDetails(performerId);
     return DataResponse.ok(performer);
   }
 
@@ -121,10 +121,9 @@ export class AdminPerformerController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   async getDetails(
-    @Param('id') performerId: string,
-    @Request() req: any
+    @Param('id') performerId: string
   ): Promise<DataResponse<IPerformerResponse>> {
-    const performer = await this.performerService.getDetails(performerId, req.jwToken);
+    const performer = await this.performerService.getDetails(performerId);
     // TODO - check roles or other to response info
     const data = performer.toResponse(true, true);
     return DataResponse.ok(data);
@@ -147,7 +146,10 @@ export class AdminPerformerController {
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('performer-document', 'file', {
-      destination: getConfig('file').documentDir
+      destination: getConfig('file').documentDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerDocument(
@@ -173,8 +175,9 @@ export class AdminPerformerController {
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
       generateThumbnail: true,
-      replaceWithThumbail: true,
-      thumbnailSize: getConfig('image').avatar
+      thumbnailSize: getConfig('image').avatar,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerAvatar(@FileUploaded() file: FileDto): Promise<any> {
@@ -191,10 +194,11 @@ export class AdminPerformerController {
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('cover', 'cover', {
-      destination: getConfig('file').coverDir
-      // generateThumbnail: true,
-      // replaceWithThumbail: true,
-      // thumbnailSize: getConfig('image').coverThumbnail
+      destination: getConfig('file').coverDir,
+      generateThumbnail: true,
+      thumbnailSize: getConfig('image').coverThumbnail,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerCover(@FileUploaded() file: FileDto): Promise<any> {

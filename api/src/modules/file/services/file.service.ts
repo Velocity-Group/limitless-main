@@ -1,19 +1,19 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { ConfigService } from 'nestjs-config';
 import {
-  StringHelper,
-  QueueEventService,
-  QueueEvent,
-  getConfig,
-  EntityNotFoundException
+  StringHelper, QueueEventService, QueueEvent, getConfig, EntityNotFoundException
 } from 'src/kernel';
 import {
-  writeFileSync, unlinkSync, existsSync, createReadStream
+  writeFileSync, unlinkSync, existsSync, createReadStream, readFileSync
 } from 'fs';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
+import { S3Service, S3StorageService } from 'src/modules/storage/services';
+import { formatFileName } from 'src/kernel/helpers/multer.helper';
 import { join } from 'path';
 import * as jwt from 'jsonwebtoken';
+import { NoFileException } from '../exceptions';
 import { FILE_MODEL_PROVIDER } from '../providers';
 import { FileModel } from '../models';
 import { IMulterUploadedFile } from '../lib/multer/multer.utils';
@@ -36,13 +36,15 @@ export const FILE_EVENT = {
 @Injectable()
 export class FileService {
   constructor(
-    private readonly config: ConfigService,
+    @Inject(forwardRef(() => S3StorageService))
+    private readonly s3StorageService: S3StorageService,
     @Inject(FILE_MODEL_PROVIDER)
     private readonly fileModel: Model<FileModel>,
     private readonly imageService: ImageService,
     private readonly videoService: VideoFileService,
     private readonly audioFileService: AudioFileService,
-    private readonly queueEventService: QueueEventService
+    private readonly queueEventService: QueueEventService,
+    private readonly config: ConfigService
   ) {
     this.queueEventService.subscribe(
       VIDEO_QUEUE_CHANNEL,
@@ -96,61 +98,113 @@ export class FileService {
   public async createFromMulter(
     type: string,
     multerData: IMulterUploadedFile,
-    options?: IFileUploadOptions
+    fileUploadOptions?: IFileUploadOptions
   ): Promise<FileDto> {
-    // eslint-disable-next-line no-param-reassign
-    options = options || {};
+    const options = { ...fileUploadOptions } || {};
     const publicDir = this.config.get('file.publicDir');
     const photoDir = this.config.get('file.photoDir');
-    // replace new photo without exif, ignore video
-    if (options.replaceWithoutExif) {
-      const buffer = await this.imageService.replaceWithoutExif(multerData.path);
-      unlinkSync(multerData.path);
-      writeFileSync(multerData.path, buffer);
-    }
-
-    if (options.replaceWithThumbail && options.generateThumbnail && options.thumbnailSize) {
-      const buffer = await this.imageService.createThumbnail(
-        multerData.path,
-        options.thumbnailSize
-      );
-      unlinkSync(multerData.path);
-      writeFileSync(multerData.path, buffer);
-    }
-
+    let absolutePath: string;
+    let path: string;
+    let { metadata = {} } = multerData;
     const thumbnails = [];
-    if (!options.replaceWithThumbail && options.generateThumbnail && options.thumbnailSize) {
-      // create thumbnails without replace
-      const buffer = await this.imageService.createThumbnail(
-        multerData.path,
-        options.thumbnailSize
-      );
-      const thumbName = `${StringHelper.randomString(5)}_thumb${StringHelper.getExt(multerData.path)}`;
-      writeFileSync(join(photoDir, thumbName), buffer);
-      thumbnails.push({
-        thumbnailSize: options.thumbnailSize,
-        path: join(photoDir, thumbName).replace(publicDir, ''),
-        absolutePath: join(photoDir, thumbName)
-      });
+    // replace new photo without exif
+    if (multerData.mimetype.includes('image') && options.uploadImmediately) {
+      if (options.generateThumbnail) {
+        const thumbBuffer = await this.imageService.createThumbnail(
+          multerData.path,
+          options.thumbnailSize || { width: 250, height: 250 }
+        ) as Buffer;
+        const thumbName = `${StringHelper.randomString(5)}_thumb${StringHelper.getExt(multerData.path)}`;
+        if (fileUploadOptions.server === Storage.S3) {
+          const [uploadThumb] = await Promise.all([
+            this.s3StorageService.upload(
+              thumbName,
+              fileUploadOptions.acl,
+              thumbBuffer,
+              multerData.mimetype
+            )
+          ]);
+          if (uploadThumb.Key && uploadThumb.Location) {
+            thumbnails.push({
+              thumbnailSize: options.thumbnailSize,
+              path: uploadThumb.Location,
+              absolutePath: uploadThumb.Key
+            });
+          }
+        } else {
+          writeFileSync(join(photoDir, thumbName), thumbBuffer);
+          thumbnails.push({
+            thumbnailSize: options.thumbnailSize,
+            path: join(photoDir, thumbName).replace(publicDir, ''),
+            absolutePath: join(photoDir, thumbName)
+          });
+        }
+      }
+      const buffer = await this.imageService.replaceWithoutExif(multerData.path);
+      if (fileUploadOptions.server === Storage.S3) {
+        const upload = await this.s3StorageService.upload(
+          formatFileName(multerData),
+          fileUploadOptions.acl,
+          buffer,
+          multerData.mimetype
+        );
+        if (upload.Key && upload.Location) {
+          absolutePath = upload.Key;
+          path = upload.Location;
+        }
+        metadata = {
+          ...metadata,
+          bucket: upload.Bucket,
+          endpoint: S3Service.getEndpoint(upload)
+        };
+        // remove old file once upload s3 done
+        existsSync(multerData.path) && unlinkSync(multerData.path);
+      } else {
+        writeFileSync(multerData.path, buffer);
+      }
+    }
+    if (!multerData.mimetype.includes('image') && options.uploadImmediately) {
+      const buffer = readFileSync(multerData.path);
+      if (fileUploadOptions.server === Storage.S3) {
+        const upload = await this.s3StorageService.upload(
+          formatFileName(multerData),
+          fileUploadOptions.acl,
+          buffer,
+          multerData.mimetype
+        );
+        if (upload.Key && upload.Location) {
+          absolutePath = upload.Key;
+          path = upload.Location;
+        }
+        metadata = {
+          ...metadata,
+          bucket: upload.Bucket,
+          endpoint: S3Service.getEndpoint(upload)
+        };
+        // remove old file once upload s3 done
+        existsSync(multerData.path) && unlinkSync(multerData.path);
+      } else {
+        writeFileSync(multerData.path, buffer);
+      }
     }
 
     const data = {
       type,
       name: multerData.filename,
-      description: '', // TODO - get from options
+      description: '',
       mimeType: multerData.mimetype,
-      server: options.server || 'local',
-      // todo - get path from public
-      path: multerData.path.replace(publicDir, ''),
-      absolutePath: multerData.path,
+      server: options.server || Storage.DiskStorage,
+      path: path || multerData.location || multerData.path.replace(publicDir, ''),
+      absolutePath: absolutePath || multerData.key || multerData.path,
+      acl: multerData.acl || options.acl,
       thumbnails,
-      // TODO - update file size
+      metadata,
       size: multerData.size,
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: options.uploader ? options.uploader._id : null,
       updatedBy: options.uploader ? options.uploader._id : null
-    } as FileModel;
+    };
 
     const file = await this.fileModel.create(data);
     // TODO - check option and process
@@ -189,6 +243,12 @@ export class FileService {
         path: file.path
       }
     ].concat(file.thumbnails || []);
+
+    if (file.server === Storage.S3) {
+      const del = filePaths.map((fp) => ({ Key: fp.absolutePath }));
+      await this.s3StorageService.deleteObjects({ Objects: del });
+      return true;
+    }
 
     filePaths.forEach((fp) => {
       if (existsSync(fp.absolutePath)) {
@@ -263,6 +323,21 @@ export class FileService {
     }
     const fileData = event.data.file as FileDto;
     const options = event.data.options || {};
+    // get thumb of the file, then convert to mp4
+    const publicDir = this.config.get('file.publicDir');
+    const videoDir = this.config.get('file.videoDir');
+    let videoPath: string;
+    let { metadata = {} } = fileData;
+    if (existsSync(fileData.absolutePath)) {
+      videoPath = fileData.absolutePath;
+    } else if (existsSync(join(publicDir, fileData.path))) {
+      videoPath = join(publicDir, fileData.path);
+    }
+
+    if (!videoPath) {
+      throw new NoFileException();
+    }
+
     try {
       await this.fileModel.updateOne(
         { _id: fileData._id },
@@ -273,33 +348,57 @@ export class FileService {
         }
       );
 
-      // get thumb of the file, then convert to mp4
-      const publicDir = this.config.get('file.publicDir');
-      const videoDir = this.config.get('file.videoDir');
-      // eslint-disable-next-line no-nested-ternary
-      const videoPath = existsSync(fileData.absolutePath)
-        ? fileData.absolutePath
-        : existsSync(join(publicDir, fileData.path))
-          ? join(publicDir, fileData.path)
-          : null;
-
-      if (!videoPath) {
-        // eslint-disable-next-line no-throw-literal
-        throw 'No file file!';
-      }
-
       const respVideo = await this.videoService.convert2Mp4(videoPath);
       // delete old video and replace with new one
-      const newAbsolutePath = respVideo.toPath;
-      const newPath = respVideo.toPath.replace(publicDir, '');
+      let newAbsolutePath = respVideo.toPath;
+      let newPath = respVideo.toPath.replace(publicDir, '');
 
       const respThumb = await this.videoService.createThumbs(videoPath, {
         toFolder: videoDir
       });
-      const thumbnails = respThumb.map((name) => ({
-        absolutePath: join(videoDir, name),
-        path: join(videoDir, name).replace(publicDir, '')
-      }));
+      let thumbnails: any = [];
+      if (fileData.server === Storage.S3) {
+        const video = readFileSync(respVideo.toPath);
+        const result = await this.s3StorageService.upload(
+          respVideo.fileName,
+          fileData.acl,
+          video,
+          'video/mp4'
+        );
+        newAbsolutePath = result.Key;
+        newPath = result.Location;
+        // eslint-disable-next-line prefer-template
+        metadata = {
+          ...metadata,
+          bucket: result.Bucket,
+          endpoint: S3Service.getEndpoint(result)
+        };
+        if (respThumb.length) {
+          // eslint-disable-next-line no-restricted-syntax
+          for (const name of respThumb) {
+            if (existsSync(join(videoDir, name))) {
+              const file = readFileSync(join(videoDir, name));
+              // eslint-disable-next-line no-await-in-loop
+              const thumb = await this.s3StorageService.upload(
+                name,
+                S3ObjectCannelACL.PublicRead,
+                file,
+                'image/png'
+              );
+              thumbnails.push({
+                path: thumb.Location,
+                absolutePath: thumb.Key
+              });
+              unlinkSync(join(videoDir, name));
+            }
+          }
+        }
+      } else {
+        thumbnails = respThumb.map((name) => ({
+          absolutePath: join(videoDir, name),
+          path: join(videoDir, name).replace(publicDir, '')
+        }));
+      }
       const duration = await this.videoService.getDuration(videoPath);
       existsSync(videoPath) && unlinkSync(videoPath);
       await this.fileModel.updateOne(
@@ -310,7 +409,8 @@ export class FileService {
             absolutePath: newAbsolutePath,
             path: newPath,
             thumbnails,
-            duration
+            duration,
+            metadata
           }
         }
       );
@@ -323,7 +423,6 @@ export class FileService {
           }
         }
       );
-
       throw e;
     } finally {
       // TODO - fire event to subscriber
@@ -379,6 +478,17 @@ export class FileService {
     }
     const fileData = event.data.file as FileDto;
     const options = event.data.options || {};
+    const publicDir = this.config.get('file.publicDir');
+    let audioPath: string;
+    let { metadata = {} } = fileData;
+    if (existsSync(fileData.absolutePath)) {
+      audioPath = fileData.absolutePath;
+    } else if (existsSync(join(publicDir, fileData.path))) {
+      audioPath = join(publicDir, fileData.path);
+    }
+    if (!audioPath) {
+      throw new NoFileException();
+    }
     try {
       await this.fileModel.updateOne(
         { _id: fileData._id },
@@ -389,26 +499,30 @@ export class FileService {
         }
       );
 
-      const publicDir = this.config.get('file.publicDir');
-      // eslint-disable-next-line no-nested-ternary
-      const audioPath = existsSync(fileData.absolutePath)
-        ? fileData.absolutePath
-        : existsSync(join(publicDir, fileData.path))
-          ? join(publicDir, fileData.path)
-          : null;
-
-      if (!audioPath) {
-        // eslint-disable-next-line no-throw-literal
-        throw 'No file file!';
-      }
-
       const respAudio = await this.audioFileService.convert2Mp3(audioPath);
       // delete old audio and replace with new one
-      const newAbsolutePath = respAudio.toPath;
-      const newPath = respAudio.toPath.replace(publicDir, '');
-
+      let newAbsolutePath = respAudio.toPath;
+      let newPath = respAudio.toPath.replace(publicDir, '');
+      if (fileData.server === Storage.S3) {
+        const audio = readFileSync(respAudio.toPath);
+        const result = await this.s3StorageService.upload(
+          respAudio.fileName,
+          fileData.acl,
+          audio,
+          'audio/mp3'
+        );
+        newAbsolutePath = result.Key;
+        newPath = result.Location;
+        // eslint-disable-next-line prefer-template
+        metadata = {
+          ...metadata,
+          bucket: result.Bucket,
+          endpoint: S3Service.getEndpoint(result)
+        };
+      }
       const duration = await this.videoService.getDuration(audioPath);
       existsSync(audioPath) && unlinkSync(audioPath);
+
       await this.fileModel.updateOne(
         { _id: fileData._id },
         {
@@ -418,7 +532,8 @@ export class FileService {
             path: newPath,
             duration,
             mimeType: 'audio/mp3',
-            name: fileData.name.replace(`.${fileData.mimeType.split('audio/')[1]}`, '.mp3')
+            name: fileData.name.replace(`.${fileData.mimeType.split('audio/')[1]}`, '.mp3'),
+            metadata
           }
         }
       );
@@ -519,6 +634,7 @@ export class FileService {
       return;
     }
     const fileData = event.data.file as FileDto;
+    let { metadata = {} } = fileData;
     const options = event.data.options || {};
     try {
       await this.fileModel.updateOne(
@@ -530,35 +646,68 @@ export class FileService {
         }
       );
 
-      // get thumb of the file, then convert to mp4
       const publicDir = this.config.get('file.publicDir');
       const photoDir = this.config.get('file.photoDir');
-      // eslint-disable-next-line no-nested-ternary
-      const photoPath = existsSync(fileData.absolutePath)
-        ? fileData.absolutePath
-        : existsSync(join(publicDir, fileData.path))
-          ? join(publicDir, fileData.path)
-          : null;
+      let photoPath: any;
+      let thumbnailAbsolutePath: string;
+      let thumbnailPath: string;
+      let absolutePath: string;
 
-      if (!photoPath) {
-        // eslint-disable-next-line no-throw-literal
-        throw 'No file!';
+      if (existsSync(fileData.absolutePath)) {
+        photoPath = fileData.absolutePath;
+      } else if (existsSync(join(publicDir, fileData.path))) {
+        photoPath = join(publicDir, fileData.path);
       }
-
+      if (!photoPath) {
+        throw new NoFileException();
+      }
       const meta = await this.imageService.getMetaData(photoPath);
-      const buffer = await this.imageService.createThumbnail(
+      const thumbBuffer = await this.imageService.createThumbnail(
         photoPath,
         options.thumbnailSize || {
           width: 250,
           height: 250
         }
-      );
+      ) as Buffer;
 
-      // store to a file
-      const thumbName = `${StringHelper.randomString(5)
-      }_thumb${
-        StringHelper.getExt(photoPath)}`;
-      writeFileSync(join(photoDir, thumbName), buffer);
+      // create a thumbnail
+      const thumbName = `${StringHelper.randomString(
+        5
+      )}_thumb${StringHelper.getExt(fileData.name)}`;
+      if (fileData.server === Storage.S3) {
+        const upload = await this.s3StorageService.upload(
+          thumbName,
+          S3ObjectCannelACL.PublicRead,
+          thumbBuffer,
+          fileData.mimeType
+        );
+        thumbnailAbsolutePath = upload.Key;
+        thumbnailPath = upload.Location;
+      } else {
+        thumbnailPath = join(photoDir, thumbName).replace(publicDir, '');
+        thumbnailAbsolutePath = join(photoDir, thumbName);
+        writeFileSync(join(photoDir, thumbName), thumbBuffer);
+      }
+      if (fileData.server === Storage.S3) {
+        const buffer = await this.imageService.replaceWithoutExif(photoPath);
+        const upload = await this.s3StorageService.upload(
+          fileData.name,
+          fileData.acl,
+          buffer,
+          fileData.mimeType
+        );
+        if (upload.Key && upload.Location) {
+          absolutePath = upload.Key;
+          photoPath = upload.Location;
+        }
+        metadata = {
+          ...metadata,
+          bucket: upload.Bucket,
+          endpoint: S3Service.getEndpoint(upload)
+        };
+        // remove old file once upload s3 done
+        existsSync(photoPath) && unlinkSync(photoPath);
+      }
       await this.fileModel.updateOne(
         { _id: fileData._id },
         {
@@ -566,10 +715,13 @@ export class FileService {
             status: 'finished',
             width: meta.width,
             height: meta.height,
+            metadata,
+            absolutePath,
+            path: photoPath,
             thumbnails: [
               {
-                path: join(photoDir, thumbName).replace(publicDir, ''),
-                absolutePath: join(photoDir, thumbName)
+                path: thumbnailPath,
+                absolutePath: thumbnailAbsolutePath
               }
             ]
           }
@@ -587,7 +739,7 @@ export class FileService {
 
       throw e;
     } finally {
-      // fire event to subscriber
+      // TODO - fire event to subscriber
       if (options.publishChannel) {
         await this.queueEventService.publish(
           new QueueEvent({

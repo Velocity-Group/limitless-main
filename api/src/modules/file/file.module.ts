@@ -3,15 +3,24 @@ import { MongoDBModule } from 'src/kernel';
 import { AuthModule } from '../auth/auth.module';
 import { fileProviders } from './providers';
 import { FileController } from './controllers/file.controller';
-import { FileService, VideoFileService, AudioFileService } from './services';
-import { ImageService } from './services/image.service';
+import {
+  FileService, VideoFileService, AudioFileService, ImageService
+} from './services';
 
 @Module({
   imports: [
-    MongoDBModule, forwardRef(() => AuthModule)
+    MongoDBModule,
+    forwardRef(() => AuthModule)
   ],
-  providers: [...fileProviders, FileService, ImageService, VideoFileService, AudioFileService],
+  providers: [
+    ...fileProviders,
+    FileService,
+    ImageService,
+    VideoFileService,
+    AudioFileService],
   controllers: [FileController],
-  exports: [...fileProviders, FileService, ImageService, VideoFileService, AudioFileService]
+  exports: [
+    ...fileProviders,
+    FileService]
 })
-export class FileModule {}
+export class FileModule { }

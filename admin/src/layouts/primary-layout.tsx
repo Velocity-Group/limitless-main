@@ -426,12 +426,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
             id: 'system-settings',
             route: '/settings',
             as: '/settings',
-            name: 'System settings'
-          },
-          {
-            name: 'Account settings',
-            id: 'account-settings',
-            route: '/account/settings'
+            name: 'Settings'
           }
         ]
       }

@@ -11,14 +11,14 @@ import {
   Param,
   Delete,
   Get,
-  Query,
-  Request
+  Query
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
 import { UserDto } from 'src/modules/user/dtos';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { PhotoCreatePayload, PhotoUpdatePayload, PhotoSearchRequest } from '../payloads';
 import { PhotoService } from '../services/photo.service';
 import { PhotoSearchService } from '../services/photo-search.service';
@@ -43,7 +43,8 @@ export class AdminPerformerPhotoController {
         fieldName: 'photo',
         options: {
           destination: getConfig('file').photoProtectedDir,
-          replaceWithoutExif: true
+          acl: S3ObjectCannelACL.AuthenticatedRead,
+          server: Storage.S3
         }
       }
     ])
@@ -88,11 +89,9 @@ export class AdminPerformerPhotoController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   async search(
-    @Query() query: PhotoSearchRequest,
-    @Request() req: any
+    @Query() query: PhotoSearchRequest
   ) {
-    const { jwToken } = req;
-    const details = await this.photoSearchService.adminSearch(query, jwToken);
+    const details = await this.photoSearchService.adminSearch(query);
     return DataResponse.ok(details);
   }
 

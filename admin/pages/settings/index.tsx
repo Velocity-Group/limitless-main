@@ -256,12 +256,10 @@ class Settings extends PureComponent {
                   />
                 </div>
               </div>
-              <div className="ant-form-item-explain">{setting.description}</div>
-
+              {setting.description && <div className="ant-form-item-explain">{setting.description}</div>}
               <div>
                 <Button disabled={updating} loading={updating} onClick={this.verifyMailer.bind(this)} type="link">Once saved, click here to send a test email.</Button>
               </div>
-
             </div>
           </div>
         );
@@ -318,6 +316,7 @@ class Settings extends PureComponent {
               <Menu.Item key="mailer">SMTP</Menu.Item>
               <Menu.Item key="custom">SEO</Menu.Item>
               <Menu.Item key="commission">Commission</Menu.Item>
+              <Menu.Item key="s3">S3</Menu.Item>
               <Menu.Item key="stripe">Stripe</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>

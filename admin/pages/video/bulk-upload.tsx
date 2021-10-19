@@ -1,8 +1,5 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-continue */
-/* eslint-disable no-await-in-loop */
 import Head from 'next/head';
-import { PureComponent, Fragment, createRef } from 'react';
+import { PureComponent, createRef } from 'react';
 import {
   message, Form, Upload, Button
 } from 'antd';
@@ -69,10 +66,13 @@ class BulkUploadVideo extends PureComponent<IProps> {
     }
 
     await this.setState({ uploading: true });
+    // eslint-disable-next-line no-restricted-syntax
     for (const file of uploadFiles) {
       try {
-        if (['uploading', 'done'].includes(file.status)) return;
+        // eslint-disable-next-line no-continue
+        if (['uploading', 'done'].includes(file.status)) continue;
         file.status = 'uploading';
+        // eslint-disable-next-line no-await-in-loop
         await videoService.uploadVideo(
           [
             {
@@ -147,7 +147,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
             </Form.Item>
             <Form.Item style={{ textAlign: 'center' }}>
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading || !fileList.length}>
-                UPLOAD
+                UPLOAD ALL
               </Button>
             </Form.Item>
           </Form>

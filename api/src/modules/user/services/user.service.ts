@@ -57,12 +57,12 @@ export class UserService {
     return this.userModel.findById(id);
   }
 
-  public async getMe(id: string | ObjectId, jwToken: string): Promise<any> {
+  public async getMe(id: string | ObjectId): Promise<any> {
     const user = await this.userModel.findById(id);
     if (user) {
       return new UserDto(user).toResponse(true);
     }
-    const performer = await this.performerService.getDetails(id, jwToken);
+    const performer = await this.performerService.getDetails(id);
     if (!performer && !user) {
       throw new EntityNotFoundException();
     }

@@ -60,12 +60,9 @@ export class UserVideosController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async details(
     @Param('id') id: string,
-    @CurrentUser() user: UserDto,
-    @Request() req: any
+    @CurrentUser() user: UserDto
   ) {
-    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
-    const details = await this.videoService.userGetDetails(id, user, jwToken);
+    const details = await this.videoService.userGetDetails(id, user);
     return DataResponse.ok(details);
   }
 }

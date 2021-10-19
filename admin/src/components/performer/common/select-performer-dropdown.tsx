@@ -54,7 +54,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
         optionFilterProp="children"
         disabled={disabled}
       >
-        <Select.Option value="" key="default">
+        <Select.Option value="" key="default" disabled={showAll}>
           {showAll ? 'Select a model' : 'All models'}
         </Select.Option>
         {data && data.length > 0 && data.map((u) => (

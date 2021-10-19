@@ -64,7 +64,7 @@ export class UserProductsController {
     @Param('id') id: string,
     @CurrentUser() user: UserDto
   ) {
-    const downloadLink = await this.productService.generateDownloadLink(id, user._id);
+    const downloadLink = await this.productService.generateDownloadLink(id, user);
     return DataResponse.ok({
       downloadLink
     });

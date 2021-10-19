@@ -17,9 +17,9 @@ export class FeedFileService {
       throw new InvalidFeedTypeException('Invalid photo file!');
     }
     await this.fileService.queueProcessPhoto(photo._id, {
-      thumbnailSize: {
-        width: 900,
-        height: 300
+      thumbnailSize: { // for blur image
+        width: 500,
+        height: 500
       }
     });
 

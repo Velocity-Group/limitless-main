@@ -11,7 +11,6 @@ import {
   ForbiddenException
 } from '@nestjs/common';
 import { DataResponse } from 'src/kernel';
-import { STATUS } from 'src/kernel/constants';
 import { CurrentUser } from 'src/modules/auth';
 import { LoadUser } from 'src/modules/auth/guards';
 import { UserDto } from 'src/modules/user/dtos';
@@ -34,13 +33,9 @@ export class UserPhotosController {
   @HttpCode(HttpStatus.OK)
   async search(
     @Query() query: PhotoSearchRequest,
-    @Request() req: any
+    @CurrentUser() user: UserDto
   ) {
-    // eslint-disable-next-line no-param-reassign
-    query.status = STATUS.ACTIVE;
-    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = auth && this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
-    const data = await this.photoSearchService.searchPhotos(query, jwToken);
+    const data = await this.photoSearchService.searchPhotos(query, user);
     return DataResponse.ok(data);
   }
 
