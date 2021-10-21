@@ -651,7 +651,7 @@ export class FileService {
       let photoPath: any;
       let thumbnailAbsolutePath: string;
       let thumbnailPath: string;
-      let absolutePath: string;
+      let { absolutePath } = fileData;
 
       if (existsSync(fileData.absolutePath)) {
         photoPath = fileData.absolutePath;
@@ -707,6 +707,9 @@ export class FileService {
         };
         // remove old file once upload s3 done
         existsSync(photoPath) && unlinkSync(photoPath);
+      } else {
+        const buffer = await this.imageService.replaceWithoutExif(photoPath);
+        writeFileSync(photoPath, buffer);
       }
       await this.fileModel.updateOne(
         { _id: fileData._id },
