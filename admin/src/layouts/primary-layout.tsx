@@ -79,19 +79,19 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
     const sliderMenus = [
       {
         id: 'blockCountry',
-        name: 'Blacklist Country',
+        name: 'Block Country',
         icon: <BlockOutlined />,
         children: [
           {
             id: 'blockCountry',
-            name: 'Listing',
+            name: 'Block Country',
             route: '/block-country'
           }
         ]
       },
       {
         id: 'email-template',
-        name: 'Email templates',
+        name: 'Email Templates',
         icon: <MailOutlined />,
         children: [
           {
@@ -103,7 +103,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
       },
       {
         id: 'posts',
-        name: 'Static Pages',
+        name: 'Posts',
         icon: <ContainerOutlined />,
         children: [
           {
@@ -159,7 +159,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'banner-listing',
-            name: 'Listing',
+            name: 'Banners',
             route: '/banner'
           },
           {
@@ -175,7 +175,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         icon: <UserOutlined />,
         children: [
           {
-            name: 'Listing',
+            name: 'Users',
             id: 'users',
             route: '/users'
           },
@@ -197,7 +197,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
           //   route: '/model/category'
           // },
           {
-            name: 'Listing',
+            name: 'Models',
             id: 'performers',
             route: '/model'
           },
@@ -230,7 +230,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
           // },
           {
             id: 'create_post',
-            name: 'Create New',
+            name: 'Create new',
             route: '/feed/create'
           }
         ]
@@ -247,12 +247,12 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
           },
           {
             id: 'video-upload',
-            name: 'Upload',
+            name: 'Upload new',
             route: '/video/upload'
           },
           {
             id: 'video-bulk-upload',
-            name: 'Bulk Upload',
+            name: 'Bulk upload',
             route: '/video/bulk-upload'
           }
         ]
@@ -264,11 +264,11 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'gallery-listing',
-            name: 'Listing',
+            name: 'Galleries',
             route: '/gallery'
           },
           {
-            name: 'New Gallery',
+            name: 'New gallery',
             id: 'create-galleries',
             route: '/gallery/create'
           },
@@ -278,7 +278,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
           //   route: '/photos'
           // },
           {
-            name: 'Upload photo',
+            name: 'Upload new',
             id: 'upload-photo',
             route: '/photos/upload'
           },
@@ -300,9 +300,21 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
             route: '/product'
           },
           {
-            name: 'Create',
+            name: 'Create new',
             id: 'create-product',
             route: '/product/create'
+          }
+        ]
+      },
+      {
+        id: 'report',
+        name: 'Reports',
+        icon: <NotificationOutlined />,
+        children: [
+          {
+            id: 'Report',
+            name: 'Reports',
+            route: '/report'
           }
         ]
       },
@@ -406,18 +418,6 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         ]
       },
       {
-        id: 'report',
-        name: 'Reports',
-        icon: <NotificationOutlined />,
-        children: [
-          {
-            id: 'Report',
-            name: 'Listing',
-            route: '/report'
-          }
-        ]
-      },
-      {
         id: 'settings',
         name: 'Settings',
         icon: <PieChartOutlined />,
@@ -426,12 +426,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
             id: 'system-settings',
             route: '/settings',
             as: '/settings',
-            name: 'System settings'
-          },
-          {
-            name: 'Account settings',
-            id: 'account-settings',
-            route: '/account/settings'
+            name: 'Settings'
           }
         ]
       }
