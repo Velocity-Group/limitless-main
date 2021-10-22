@@ -107,7 +107,7 @@ export class FileService {
     let path: string;
     let { metadata = {} } = multerData;
     const thumbnails = [];
-    // replace new photo without exif
+    // image replace new photo without exif
     if (multerData.mimetype.includes('image') && options.uploadImmediately) {
       if (options.generateThumbnail) {
         const thumbBuffer = await this.imageService.createThumbnail(
@@ -141,6 +141,7 @@ export class FileService {
         }
       }
       const buffer = await this.imageService.replaceWithoutExif(multerData.path);
+      // TODO should check s3 key, bucket,...??
       if (fileUploadOptions.server === Storage.S3) {
         const upload = await this.s3StorageService.upload(
           formatFileName(multerData),
@@ -163,6 +164,7 @@ export class FileService {
         writeFileSync(multerData.path, buffer);
       }
     }
+    // other file not image
     if (!multerData.mimetype.includes('image') && options.uploadImmediately) {
       const buffer = readFileSync(multerData.path);
       if (fileUploadOptions.server === Storage.S3) {
