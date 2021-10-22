@@ -6,7 +6,7 @@ import {
 import { InboxOutlined } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Router from 'next/router';
-import UploadList from '@components/file/upload-list';
+import PhotoUploadList from '@components/file/upload-list';
 import './gallery.less';
 
 interface IProps {
@@ -108,7 +108,7 @@ const FormGallery = ({
         </Dragger>
       )}
       {filesList && filesList.length > 0 && (
-        <UploadList
+        <PhotoUploadList
           files={filesList}
           setCover={setCover && setCover.bind(this)}
           remove={removePhoto && removePhoto.bind(this)}
