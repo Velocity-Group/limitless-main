@@ -60,7 +60,7 @@ class BulkUploadPhoto extends PureComponent<IProps> {
     if (field === 'performerId') this.setState({ selectedPerformerId: val });
   }
 
-  async beforeUpload(file, fileList) {
+  async beforeUpload(file, listFile) {
     if (file.size / 1024 / 1024 > (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
       message.error(`${file.name} is over ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
       return false;
@@ -69,8 +69,9 @@ class BulkUploadPhoto extends PureComponent<IProps> {
       // eslint-disable-next-line no-param-reassign
       file.thumbUrl = imageUrl;
     });
+    const { fileList } = this.state;
     this.setState({
-      fileList: fileList.filter((f) => f.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5))
+      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5))]
     });
     return true;
   }

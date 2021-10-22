@@ -1,6 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable react/jsx-tag-spacing */
 import { PureComponent } from 'react';
 import { FileAddOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Progress } from 'antd';
@@ -35,7 +32,7 @@ export default class VideoUploadList extends PureComponent<IProps> {
                 {file.percent !== 100
                   && (
                   <span className="ant-upload-list-item-card-actions picture">
-                    <a onClick={remove.bind(this, file)} >
+                    <a aria-hidden onClick={remove.bind(this, file)}>
                       <DeleteOutlined />
                     </a>
                   </span>

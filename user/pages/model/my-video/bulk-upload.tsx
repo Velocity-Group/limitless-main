@@ -50,8 +50,6 @@ class BulkUploadVideo extends PureComponent<IProps> {
   onUploading(file, resp: any) {
     // eslint-disable-next-line no-param-reassign
     file.percent = resp.percentage;
-    // eslint-disable-next-line no-param-reassign
-    if (file.percent === 100) file.status = 'done';
     this.forceUpdate();
   }
 
@@ -62,19 +60,21 @@ class BulkUploadVideo extends PureComponent<IProps> {
     });
   }
 
-  beforeUpload(file, fileList) {
-    this.setState({ fileList });
-    return false;
+  beforeUpload(file, listFile) {
+    if (file.size / 1024 / 1024 > (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000)) {
+      message.error(`${file.name} is over ${process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB`);
+      return false;
+    }
+    const { fileList } = this.state;
+    this.setState({
+      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000))]
+    });
+    return true;
   }
 
   remove(file) {
     const { fileList } = this.state;
-    fileList.splice(
-      fileList.findIndex((f) => f.uid === file.uid),
-      1
-    );
-    this.setState({ fileList });
-    this.forceUpdate();
+    this.setState({ fileList: fileList.filter((f) => f.uid !== file.uid) });
   }
 
   async submit() {
@@ -90,7 +90,8 @@ class BulkUploadVideo extends PureComponent<IProps> {
     // eslint-disable-next-line no-restricted-syntax
     for (const file of uploadFiles) {
       try {
-        if (['uploading', 'done'].includes(file.status)) return;
+        // eslint-disable-next-line no-continue
+        if (['uploading', 'done'].includes(file.status)) continue;
         file.status = 'uploading';
         // eslint-disable-next-line no-await-in-loop
         await videoService.uploadVideo(
@@ -112,7 +113,9 @@ class BulkUploadVideo extends PureComponent<IProps> {
           },
           this.onUploading.bind(this, file)
         );
+        file.status = 'done';
       } catch (e) {
+        file.status = 'error';
         message.error(`File ${file.name} error!`);
       }
     }
