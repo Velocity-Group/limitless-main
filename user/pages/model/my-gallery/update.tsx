@@ -10,6 +10,7 @@ import PageHeading from '@components/common/page-heading';
 import {
   IGallery, IGalleryCreate, IUIConfig
 } from 'src/interfaces';
+import Page from '@components/common/layout/page';
 import { galleryService } from 'src/services';
 import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
@@ -29,10 +30,16 @@ interface IStates {
   uploading: boolean;
 }
 
-class GalleryUpdatePage extends PureComponent<IProps, IStates> {
-  static authenticate = true;
+function getBase64(img, callback) {
+  const reader = new FileReader();
+  reader.addEventListener('load', () => callback(reader.result));
+  reader.readAsDataURL(img);
+}
 
-  static onlyPerformer = true;
+class GalleryUpdatePage extends PureComponent<IProps, IStates> {
+  static authenticate: boolean = true;
+
+  static onlyPerformer: boolean = true;
 
   static async getInitialProps({ ctx }) {
     return ctx.query;
@@ -53,11 +60,6 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
     this.getGallery();
   }
 
-  handleBeforeUpload(_, files) {
-    const { filesList } = this.state;
-    this.setState({ filesList: [...filesList, ...files] });
-  }
-
   async handleUploadPhotos() {
     const { id } = this.props;
     const data = {
@@ -71,7 +73,8 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
     // eslint-disable-next-line no-restricted-syntax
     for (const file of uploadFiles) {
       try {
-        if (['uploading', 'done'].includes(file.status)) return;
+        // eslint-disable-next-line no-continue
+        if (['uploading', 'done'].includes(file.status)) continue;
         file.status = 'uploading';
         // eslint-disable-next-line no-await-in-loop
         await photoService.uploadImages(
@@ -79,6 +82,8 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
           data,
           this.onUploading.bind(this, file)
         );
+        file.status = 'done';
+        file.response = { status: 'success' };
       } catch (e) {
         file.status = 'error';
         message.error(`File ${file?.name} error!`);
@@ -88,27 +93,20 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
 
   onUploading(file, resp: any) {
     file.percent = resp.percentage;
-    file.status = 'uploading';
-    if (file.percent === 100) file.status = 'done';
     this.forceUpdate();
   }
 
   async onFinish(data: IGalleryCreate) {
     try {
+      this.setState({ uploading: true });
       const { id } = this.props;
-      await this.setState({ submiting: true });
-      if (!data.isSale) {
-        // eslint-disable-next-line no-param-reassign
-        data.price = 0;
-      }
       await galleryService.update(id, data);
       await this.handleUploadPhotos();
-      message.success('Changes saved.');
+      message.success('Updated successfully');
+      Router.push('/model/my-gallery');
     } catch (e) {
       message.error(getResponseError(e));
-    } finally {
-      this.setState({ submiting: false });
-      Router.push('/model/my-gallery');
+      this.setState({ uploading: false });
     }
   }
 
@@ -131,7 +129,7 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
   async getPhotosInGallery() {
     try {
       const { id } = this.props;
-      const photos = await (await photoService.searchPhotosInGallery({ galleryId: id, limit: 200 })).data;
+      const photos = await (await photoService.searchPhotosInGallery({ galleryId: id })).data;
       this.setState({
         filesList: photos ? photos.data : []
       });
@@ -143,11 +141,7 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
   }
 
   async setCover(file) {
-    const { filesList } = this.state;
     if (!file._id) {
-      this.setState({
-        filesList: filesList.filter((f) => f.uid !== file.uid)
-      });
       return;
     }
     try {
@@ -185,6 +179,21 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
     }
   }
 
+  async beforeUpload(file, files) {
+    if (file.size / 1024 / 1024 > (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
+      message.error(`${file.name} is over ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+      return false;
+    }
+    getBase64(file, (imageUrl) => {
+      // eslint-disable-next-line no-param-reassign
+      file.thumbUrl = imageUrl;
+      this.forceUpdate();
+    });
+    const { filesList } = this.state;
+    this.setState({ filesList: [...filesList, ...files] });
+    return true;
+  }
+
   render() {
     const { ui } = this.props;
     const {
@@ -197,24 +206,26 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
             {' '}
             {ui && ui.siteName}
             {' '}
-            | Edit Gallery
+            | Update Gallery
             {' '}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Edit Gallery" icon={<PictureOutlined />} />
-          {!loading && gallery && (
-          <FormGallery
-            gallery={gallery}
-            onFinish={this.onFinish.bind(this)}
-            submiting={submiting || uploading}
-            filesList={filesList}
-            handleBeforeUpload={this.handleBeforeUpload.bind(this)}
-            removePhoto={this.removePhoto.bind(this)}
-            setCover={this.setCover.bind(this)}
-          />
-          )}
-          {loading && <div className="text-center"><Spin /></div>}
+          <Page>
+            <PageHeading title="Edit Gallery" icon={<PictureOutlined />} />
+            {!loading && gallery && (
+              <FormGallery
+                gallery={gallery}
+                onFinish={this.onFinish.bind(this)}
+                submiting={submiting || uploading}
+                filesList={filesList}
+                handleBeforeUpload={this.beforeUpload.bind(this)}
+                removePhoto={this.removePhoto.bind(this)}
+                setCover={this.setCover.bind(this)}
+              />
+            )}
+            {loading && <div className="text-center"><Spin /></div>}
+          </Page>
         </div>
       </Layout>
     );

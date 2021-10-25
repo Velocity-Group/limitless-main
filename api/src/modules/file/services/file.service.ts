@@ -163,6 +163,7 @@ export class FileService {
         writeFileSync(multerData.path, buffer);
       }
     }
+    // other file not image
     if (!multerData.mimetype.includes('image') && options.uploadImmediately) {
       const buffer = readFileSync(multerData.path);
       if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {

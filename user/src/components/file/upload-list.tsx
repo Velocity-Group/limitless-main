@@ -1,48 +1,18 @@
 /* eslint-disable no-nested-ternary */
 import { PureComponent } from 'react';
 import {
-  DeleteOutlined, PictureOutlined
+  DeleteOutlined, PictureOutlined, FileDoneOutlined
 } from '@ant-design/icons';
-import { Progress, Image } from 'antd';
+import { Progress } from 'antd';
 
 interface IProps {
   remove: Function;
   setCover: Function;
   files: any[];
 }
-export default class UploadList extends PureComponent<IProps> {
-  state = {
-    previews: {} as any
-  }
-
-  componentDidMount() {
-    this.renderPreviews();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { files } = this.props;
-    if (prevProps?.files && prevProps.files.length !== files.length) {
-      this.renderPreviews();
-    }
-  }
-
-  renderPreviews = () => {
-    const { files } = this.props;
-    files.forEach((file) => {
-      if (file._id) return;
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.addEventListener('load', () => {
-        const { previews } = this.state;
-        const url = reader.result as string;
-        this.setState({ previews: { ...previews, [file.uid]: url } });
-      });
-    });
-  }
-
+export default class PhotoUploadList extends PureComponent<IProps> {
   render() {
     const { files, remove, setCover } = this.props;
-    const { previews } = this.state;
     return (
       <div className="ant-upload-list ant-upload-list-picture">
         {files.length > 0 && files.map((file) => (
@@ -54,10 +24,14 @@ export default class UploadList extends PureComponent<IProps> {
             <div className="photo-upload-list">
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <div className="photo-thumb">
-                  {file._id ? <Image preview={false} placeholder src={file?.photo?.thumbnails[0]} alt="thumb" /> : file.uid ? <Image preview={false} placeholder alt="thumb" src={previews[file?.uid]} /> : <PictureOutlined />}
+                  {file._id && file?.photo?.thumbnails && file?.photo?.thumbnails[0] ? <img src={file?.photo?.thumbnails[0]} alt="thumb" /> : file.uid ? <img alt="thumb" src={file.thumbUrl} /> : <PictureOutlined />}
                 </div>
                 <div>
-                  <p>{`${file?.name || file?.title} | ${((file?.size || file?.photo?.size) / (1024 * 1024)).toFixed(2)} MB`}</p>
+                  <p>
+                    {`${file?.name || file?.title} | ${((file?.size || file?.photo?.size) / (1024 * 1024)).toFixed(2)} MB`}
+                    {' '}
+                    {file._id && <FileDoneOutlined style={{ color: 'green' }} />}
+                  </p>
                   <div>
                     {file.isGalleryCover && (
                       <a aria-hidden>
@@ -77,12 +51,9 @@ export default class UploadList extends PureComponent<IProps> {
                   <DeleteOutlined />
                 </a>
               )}
-              {file.percent && (
+              {file.percent ? (
                 <Progress percent={Math.round(file.percent)} />
-              )}
-              {file._id && (
-                <Progress percent={100} />
-              )}
+              ) : null}
             </div>
           </div>
         ))}
