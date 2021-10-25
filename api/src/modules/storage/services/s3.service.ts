@@ -187,19 +187,21 @@ export class S3ConfigurationService {
 
   public async checkSetting() {
     const [
+      enabled,
       accessKeyId,
       secretAccessKey,
       region,
       endpoint,
       bucket
     ] = await Promise.all([
+      this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_ENABLE),
       this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_ACCESS_KEY_ID),
       this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_SECRET_ACCESS_KEY),
       this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_REGION_NAME),
       this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_BUCKET_ENDPOINT),
       this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_BUCKET_NAME)
     ]);
-    if (!accessKeyId || !secretAccessKey || !region || !endpoint || !bucket) {
+    if (!enabled || !accessKeyId || !secretAccessKey || !region || !endpoint || !bucket) {
       return false;
     }
     return true;

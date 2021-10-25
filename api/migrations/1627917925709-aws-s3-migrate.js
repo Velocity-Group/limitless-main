@@ -1,6 +1,7 @@
 const { DB, COLLECTION } = require('./lib');
 
 const SETTING_KEYS = {
+  AWS_S3_ENABLE: 's3Enabled',
   AWS_S3_REGION_NAME: 's3RegionName',
   AWS_S3_ACCESS_KEY_ID: 's3AccessKeyId',
   AWS_S3_SECRET_ACCESS_KEY: 's3SecretAccessKey',
@@ -10,10 +11,31 @@ const SETTING_KEYS = {
 
 const settings = [
   {
+    key: SETTING_KEYS.AWS_S3_ENABLE,
+    value: false,
+    name: 'Enable/Disable S3 service',
+    description: '',
+    public: false,
+    group: 's3',
+    type: 'boolean',
+    editable: true,
+    visible: true
+  },
+  {
     key: SETTING_KEYS.AWS_S3_REGION_NAME,
     value: '',
     name: 'Region Name',
     description: 'Bucket region eg: us-east-1, us-west2, ...',
+    public: false,
+    group: 's3',
+    editable: true,
+    visible: true
+  },
+  {
+    key: SETTING_KEYS.AWS_S3_BUCKET_NAME,
+    value: '',
+    name: 'Bucket name',
+    description: 'Name of s3 bucket',
     public: false,
     group: 's3',
     editable: true,
@@ -44,16 +66,6 @@ const settings = [
     value: '',
     name: 'Endpoint',
     description: 's3.region.amazonaws.com  eg: s3.us-east-1.amazonaws.com',
-    public: false,
-    group: 's3',
-    editable: true,
-    visible: true
-  },
-  {
-    key: SETTING_KEYS.AWS_S3_BUCKET_NAME,
-    value: '',
-    name: 'Bucket name',
-    description: 'Name of s3 bucket',
     public: false,
     group: 's3',
     editable: true,
