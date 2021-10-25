@@ -42,7 +42,7 @@ export class AccountForm extends PureComponent<IProps> {
       onFinish, user, updating, options
     } = this.props;
     const {
-      uploadHeaders, avatarUploadUrl, beforeUpload
+      uploadHeaders, avatarUploadUrl, beforeUpload, onAvatarUploaded
     } = options;
     return (
       <Form
@@ -207,6 +207,7 @@ export class AccountForm extends PureComponent<IProps> {
                 headers={uploadHeaders}
                 uploadUrl={avatarUploadUrl}
                 onBeforeUpload={beforeUpload}
+                onUploaded={onAvatarUploaded}
                 image={options?.avatarUrl}
               />
             </Form.Item>

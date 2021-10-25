@@ -107,7 +107,7 @@ export class FileService {
     let path: string;
     let { metadata = {} } = multerData;
     const thumbnails = [];
-    // replace new photo without exif
+    const checkS3Settings = await this.s3StorageService.checkSetting();
     if (multerData.mimetype.includes('image') && options.uploadImmediately) {
       if (options.generateThumbnail) {
         const thumbBuffer = await this.imageService.createThumbnail(
@@ -115,7 +115,7 @@ export class FileService {
           options.thumbnailSize || { width: 250, height: 250 }
         ) as Buffer;
         const thumbName = `${StringHelper.randomString(5)}_thumb${StringHelper.getExt(multerData.path)}`;
-        if (fileUploadOptions.server === Storage.S3) {
+        if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
           const [uploadThumb] = await Promise.all([
             this.s3StorageService.upload(
               thumbName,
@@ -141,7 +141,7 @@ export class FileService {
         }
       }
       const buffer = await this.imageService.replaceWithoutExif(multerData.path);
-      if (fileUploadOptions.server === Storage.S3) {
+      if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
         const upload = await this.s3StorageService.upload(
           formatFileName(multerData),
           fileUploadOptions.acl,
@@ -165,7 +165,7 @@ export class FileService {
     }
     if (!multerData.mimetype.includes('image') && options.uploadImmediately) {
       const buffer = readFileSync(multerData.path);
-      if (fileUploadOptions.server === Storage.S3) {
+      if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
         const upload = await this.s3StorageService.upload(
           formatFileName(multerData),
           fileUploadOptions.acl,
@@ -357,7 +357,9 @@ export class FileService {
         toFolder: videoDir
       });
       let thumbnails: any = [];
-      if (fileData.server === Storage.S3) {
+      // check s3 settings
+      const checkS3Settings = await this.s3StorageService.checkSetting();
+      if (fileData.server === Storage.S3 && checkS3Settings) {
         const video = readFileSync(respVideo.toPath);
         const result = await this.s3StorageService.upload(
           respVideo.fileName,
@@ -503,7 +505,9 @@ export class FileService {
       // delete old audio and replace with new one
       let newAbsolutePath = respAudio.toPath;
       let newPath = respAudio.toPath.replace(publicDir, '');
-      if (fileData.server === Storage.S3) {
+      // check s3 settings
+      const checkS3Settings = await this.s3StorageService.checkSetting();
+      if (fileData.server === Storage.S3 && checkS3Settings) {
         const audio = readFileSync(respAudio.toPath);
         const result = await this.s3StorageService.upload(
           respAudio.fileName,
@@ -674,7 +678,9 @@ export class FileService {
       const thumbName = `${StringHelper.randomString(
         5
       )}_thumb${StringHelper.getExt(fileData.name)}`;
-      if (fileData.server === Storage.S3) {
+      // check s3 settings
+      const checkS3Settings = await this.s3StorageService.checkSetting();
+      if (fileData.server === Storage.S3 && checkS3Settings) {
         const upload = await this.s3StorageService.upload(
           thumbName,
           S3ObjectCannelACL.PublicRead,
@@ -688,7 +694,7 @@ export class FileService {
         thumbnailAbsolutePath = join(photoDir, thumbName);
         writeFileSync(join(photoDir, thumbName), thumbBuffer);
       }
-      if (fileData.server === Storage.S3) {
+      if (fileData.server === Storage.S3 && checkS3Settings) {
         const buffer = await this.imageService.replaceWithoutExif(photoPath);
         const upload = await this.s3StorageService.upload(
           fileData.name,

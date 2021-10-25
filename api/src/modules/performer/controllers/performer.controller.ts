@@ -182,8 +182,7 @@ export class PerformerController {
   )
   async uploadPerformerDocument(
     @CurrentUser() currentUser: PerformerDto,
-    @FileUploaded() file: FileDto,
-    @Request() req: any
+    @FileUploaded() file: FileDto
   ): Promise<any> {
     await this.fileService.addRef(file._id, {
       itemId: currentUser._id,
@@ -191,7 +190,7 @@ export class PerformerController {
     });
     return DataResponse.ok({
       ...file,
-      url: `${file.getUrl()}?documentId=${file._id}&token=${req.jwToken}`
+      url: `${file.getUrl(true)}`
     });
   }
 
@@ -202,8 +201,7 @@ export class PerformerController {
   @UseInterceptors(
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
-      generateThumbnail: true,
-      thumbnailSize: getConfig('image').avatar,
+      uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
     })
@@ -227,8 +225,7 @@ export class PerformerController {
   @UseInterceptors(
     FileUploadInterceptor('cover', 'cover', {
       destination: getConfig('file').coverDir,
-      generateThumbnail: true,
-      thumbnailSize: getConfig('image').coverThumbnail,
+      uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
     })
@@ -264,7 +261,7 @@ export class PerformerController {
     await this.performerService.updateWelcomeVideo(performer, file);
     return DataResponse.ok({
       ...file,
-      url: file.getUrl()
+      url: file.getUrl(true)
     });
   }
 

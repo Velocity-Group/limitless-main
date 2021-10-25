@@ -62,6 +62,7 @@ export class PerformerVideosController {
           fieldName: 'thumbnail',
           options: {
             destination: getConfig('file').imageDir,
+            uploadImmediately: true,
             generateThumbnail: true,
             thumbnailSize: getConfig('image').blurThumbnail,
             acl: S3ObjectCannelACL.PublicRead,
@@ -141,6 +142,7 @@ export class PerformerVideosController {
           options: {
             destination: getConfig('file').imageDir,
             generateThumbnail: true,
+            uploadImmediately: true,
             thumbnailSize: getConfig('image').blurThumbnail,
             acl: S3ObjectCannelACL.PublicRead,
             server: Storage.S3

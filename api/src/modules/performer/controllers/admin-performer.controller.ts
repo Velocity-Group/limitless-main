@@ -13,7 +13,6 @@ import {
   Param,
   Query,
   UseInterceptors,
-  Request,
   Inject,
   forwardRef,
   Delete
@@ -154,8 +153,7 @@ export class AdminPerformerController {
   )
   async uploadPerformerDocument(
     @FileUploaded() file: FileDto,
-    @Param('performerId') id: any,
-    @Request() req: any
+    @Param('performerId') id: any
   ): Promise<any> {
     await this.fileService.addRef(file._id, {
       itemId: id,
@@ -163,7 +161,7 @@ export class AdminPerformerController {
     });
     return DataResponse.ok({
       ...file,
-      url: `${file.getUrl()}?documentId=${file._id}&token=${req.jwToken}`
+      url: `${file.getUrl(true)}`
     });
   }
 
@@ -174,8 +172,7 @@ export class AdminPerformerController {
   @UseInterceptors(
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
-      generateThumbnail: true,
-      thumbnailSize: getConfig('image').avatar,
+      uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
     })
@@ -195,8 +192,7 @@ export class AdminPerformerController {
   @UseInterceptors(
     FileUploadInterceptor('cover', 'cover', {
       destination: getConfig('file').coverDir,
-      generateThumbnail: true,
-      thumbnailSize: getConfig('image').coverThumbnail,
+      uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
     })
