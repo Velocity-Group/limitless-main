@@ -292,7 +292,7 @@ export class S3StorageService {
           endpoint: endpoint.toString(),
           region,
           bucket: Bucket,
-          expires: this.config.get('s3.expires').toString()
+          expires: this.config.get('s3.expires')
         }
       },
       credential
