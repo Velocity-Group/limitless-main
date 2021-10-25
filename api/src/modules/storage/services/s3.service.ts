@@ -184,6 +184,26 @@ export class S3ConfigurationService {
     this.setBucket(Bucket);
     this.setCredential(options);
   }
+
+  public async checkSetting() {
+    const [
+      accessKeyId,
+      secretAccessKey,
+      region,
+      endpoint,
+      bucket
+    ] = await Promise.all([
+      this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_ACCESS_KEY_ID),
+      this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_SECRET_ACCESS_KEY),
+      this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_REGION_NAME),
+      this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_BUCKET_ENDPOINT),
+      this.settingService.getKeyValue(SETTING_KEYS.AWS_S3_BUCKET_NAME)
+    ]);
+    if (!accessKeyId || !secretAccessKey || !region || !endpoint || !bucket) {
+      return false;
+    }
+    return true;
+  }
 }
 
 @Injectable()
@@ -192,6 +212,10 @@ export class S3StorageService {
     private readonly s3ConfigurationService: S3ConfigurationService,
     private readonly config: ConfigService
   ) {}
+
+  public checkSetting() {
+    return this.s3ConfigurationService.checkSetting();
+  }
 
   public createMulterS3Storage(options: MulterS3Options): StorageEngine {
     const credential = this.s3ConfigurationService.getCredential();

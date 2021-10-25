@@ -4,16 +4,13 @@ import {
   ExecutionContext,
   CallHandler,
   mixin,
-  Type,
-  Inject,
-  forwardRef
+  Type
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import * as multer from 'multer';
 import { existsSync } from 'fs';
 import * as mkdirp from 'mkdirp';
 import { StringHelper } from 'src/kernel';
-import { S3StorageService } from 'src/modules/storage/services';
 import { FileService } from '../services';
 import { transformException } from '../lib/multer/multer.utils';
 import { IFileUploadOptions } from '../lib';
@@ -28,9 +25,7 @@ export function FileUploadInterceptor(
     private uploadDir: string;
 
     constructor(
-      private readonly fileService: FileService,
-      @Inject(forwardRef(() => S3StorageService))
-      private readonly s3StorageService: S3StorageService
+      private readonly fileService: FileService
     ) {
       this.uploadDir = options.destination;
       this.createFolderIfNotExists(this.uploadDir);

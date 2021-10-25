@@ -28,8 +28,7 @@ export class AvatarController {
   @UseInterceptors(
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
-      generateThumbnail: true,
-      thumbnailSize: getConfig('image').avatar,
+      uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
     })

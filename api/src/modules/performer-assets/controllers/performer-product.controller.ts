@@ -45,6 +45,7 @@ export class PerformerProductController {
         fieldName: 'image',
         options: {
           destination: getConfig('file').imageDir,
+          uploadImmediately: true,
           generateThumbnail: true,
           thumbnailSize: getConfig('image').productThumbnail,
           acl: S3ObjectCannelACL.PublicRead,
@@ -90,6 +91,7 @@ export class PerformerProductController {
         fieldName: 'image',
         options: {
           destination: getConfig('file').imageDir,
+          uploadImmediately: true,
           generateThumbnail: true,
           thumbnailSize: getConfig('image').productThumbnail,
           acl: S3ObjectCannelACL.PublicRead,
