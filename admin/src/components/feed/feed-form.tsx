@@ -68,7 +68,7 @@ export default class FormFeed extends PureComponent<IProps> {
         isSale: feed.isSale,
         addPoll: !!feed.pollIds.length,
         pollList: feed.polls,
-        thumbnail: feed.thumbnailUrl,
+        thumbnail: feed.thumbnail,
         teaser: feed.teaser
       });
 
@@ -362,12 +362,12 @@ export default class FormFeed extends PureComponent<IProps> {
             </Form.Item>
           )}
           {thumbnail && (
-            <Form.Item label="Thumbnail">
-              <div style={{ position: 'relative' }}>
-                <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, right: 2 }}><DeleteOutlined /></Button>
-                <img alt="thumbnail" src={thumbnail} width="100%" />
-              </div>
-            </Form.Item>
+          <Form.Item label="Thumbnail">
+            <div style={{ position: 'relative' }}>
+              <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, left: 2 }}><DeleteOutlined /></Button>
+              <img alt="thumbnail" src={(thumbnail?.thumbnails && thumbnail?.thumbnails[0]) || thumbnail?.url} width="200px" />
+            </div>
+          </Form.Item>
           )}
           {teaser && (
             <Form.Item label="Teaser">

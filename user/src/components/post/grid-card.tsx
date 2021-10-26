@@ -27,7 +27,7 @@ export class FeedGridCard extends PureComponent<IProps> {
         >
           <div className="card-thumb">
             {/* eslint-disable-next-line no-nested-ternary */}
-            <div className="card-bg" style={feed.thumbnailUrl && canView ? { backgroundImage: `url(${feed.thumbnailUrl})` } : feed.thumbnailUrl && !canView ? { backgroundImage: `url(${feed.thumbnailUrl})`, filter: 'blur(20px)' } : { backgroundImage: '/static/leaf.jpg', filter: 'blur(2px)' }} />
+            <div className="card-bg" style={feed?.thumbnail && canView ? { backgroundImage: `url(${feed?.thumbnail?.url})` } : feed?.thumbnail && !canView ? { backgroundImage: `url(${feed?.thumbnail?.url})`, filter: 'blur(20px)' } : { backgroundImage: '/static/leaf.jpg', filter: 'blur(2px)' }} />
             <div className="card-middle">
               {canView ? <UnlockOutlined /> : <LockOutlined />}
               {(!feed.isSale && !feed.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}

@@ -45,6 +45,11 @@ class BulkUploadVideo extends PureComponent<IProps> {
 
   componentDidMount() {
     if (!this.formRef) this.formRef = createRef();
+    const { user } = this.props;
+    if (!user || !user.verifiedDocument) {
+      message.warning('Your ID documents are not verified yet! You could not post any content right now. Please upload your ID documents to get approval then start making money.');
+      Router.back();
+    }
   }
 
   onUploading(file, resp: any) {

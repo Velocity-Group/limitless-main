@@ -46,9 +46,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
     previewThumbnail: null,
     previewTeaser: null,
     previewVideo: null,
-    isSelectedThumbnail: false,
-    isSelectedVideo: false,
-    isSelectedTeaser: false,
+    selectedThumbnail: null,
+    selectedVideo: null,
+    selectedTeaser: null,
     isSale: false,
     isSchedule: false,
     scheduledAt: moment(),
@@ -110,7 +110,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
         message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
         return isValid;
       }
-      this.setState({ isSelectedThumbnail: true });
+      this.setState({ selectedThumbnail: file });
     }
     if (field === 'teaser') {
       const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
@@ -118,7 +118,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
         message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
         return isValid;
       }
-      this.setState({ isSelectedTeaser: true });
+      this.setState({ selectedTeaser: file });
     }
     if (field === 'video') {
       const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000);
@@ -126,7 +126,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
         message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB or below`);
         return isValid;
       }
-      this.setState({ isSelectedVideo: true });
+      this.setState({ selectedVideo: file });
     }
     return beforeUploadHandler(file, field);
   }
@@ -143,9 +143,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
       isSale,
       isSchedule,
       scheduledAt,
-      isSelectedThumbnail,
-      isSelectedTeaser,
-      isSelectedVideo
+      selectedThumbnail,
+      selectedTeaser,
+      selectedVideo
     } = this.state;
     return (
       <Form
@@ -282,14 +282,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col xs={24} md={8}>
-            <Form.Item
-              label="Video File"
-              help={previewVideo ? (
-                <a href={previewVideo} target="_blank" rel="noreferrer">
-                  Click here to preview video
-                </a>
-              ) : null}
-            >
+            <Form.Item label="Video" help={(selectedVideo && <a>{selectedVideo.name}</a>) || (previewVideo && <a href={previewVideo} target="_blank" rel="noreferrer">Click here to preview</a>) || `Video file is ${process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`}>
               <Upload
                 customRequest={() => false}
                 listType="picture-card"
@@ -300,19 +293,12 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 disabled={uploading}
                 beforeUpload={(file) => this.beforeUpload(file, 'video')}
               >
-                {isSelectedVideo ? <FileDoneOutlined /> : <VideoCameraAddOutlined />}
+                {selectedVideo ? <FileDoneOutlined /> : <VideoCameraAddOutlined />}
               </Upload>
             </Form.Item>
           </Col>
           <Col xs={24} md={8}>
-            <Form.Item
-              label="Teaser file"
-              help={previewTeaser ? (
-                <a href={previewTeaser} target="_blank" rel="noreferrer">
-                  Click here to preview teaser
-                </a>
-              ) : null}
-            >
+            <Form.Item label="Teaser" help={(selectedTeaser && <a>{selectedTeaser.name}</a>) || (previewTeaser && <p><a href={previewTeaser} target="_blank" rel="noreferrer">Click here to preview</a></p>) || `Teaser is ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`}>
               <Upload
                 customRequest={() => false}
                 listType="picture-card"
@@ -323,19 +309,12 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 disabled={uploading}
                 beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
               >
-                {isSelectedTeaser ? <FileDoneOutlined /> : <VideoCameraAddOutlined />}
+                {selectedTeaser ? <FileDoneOutlined /> : <VideoCameraAddOutlined />}
               </Upload>
             </Form.Item>
           </Col>
           <Col xs={24} md={8}>
-            <Form.Item
-              label="Thumbnail"
-              help={previewThumbnail ? (
-                <a href={previewThumbnail} target="_blank" rel="noreferrer">
-                  Click here to preview thumbnail
-                </a>
-              ) : null}
-            >
+            <Form.Item label="Thumbnail" help={(selectedThumbnail && <a>{selectedThumbnail.name}</a>) || (previewThumbnail && <p><a href={previewThumbnail} target="_blank" rel="noreferrer">Click here to preview</a></p>) || `Thumbnail is ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`}>
               <Upload
                 listType="picture-card"
                 className="avatar-uploader"
@@ -345,7 +324,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 disabled={uploading}
                 beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
               >
-                {isSelectedThumbnail ? <FileDoneOutlined /> : <CameraOutlined />}
+                {selectedThumbnail ? <FileDoneOutlined /> : <CameraOutlined />}
               </Upload>
             </Form.Item>
           </Col>

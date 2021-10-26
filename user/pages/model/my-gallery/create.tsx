@@ -4,7 +4,7 @@ import { PictureOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import FormGallery from '@components/gallery/form-gallery';
 import PageHeading from '@components/common/page-heading';
-import { IGalleryCreate, IUIConfig } from 'src/interfaces';
+import { IUser, IUIConfig } from 'src/interfaces';
 import { galleryService } from 'src/services';
 import { getResponseError } from '@lib/utils';
 import Router from 'next/router';
@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 
 interface IProps {
   ui: IUIConfig;
+  user: IUser;
 }
 
 interface IStates {
@@ -30,7 +31,15 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
     };
   }
 
-  async onFinish(data: IGalleryCreate) {
+  componentDidMount() {
+    const { user } = this.props;
+    if (!user || !user.verifiedDocument) {
+      message.warning('Your ID documents are not verified yet! You could not post any content right now. Please upload your ID documents to get approval then start making money.');
+      Router.back();
+    }
+  }
+
+  async onFinish(data) {
     try {
       await this.setState({ submiting: true });
       const resp = await galleryService.create(data);
@@ -70,6 +79,7 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
 }
 
 const mapStates = (state: any) => ({
-  ui: { ...state.ui }
+  ui: { ...state.ui },
+  user: { ...state.user.current }
 });
 export default connect(mapStates)(GalleryCreatePage);

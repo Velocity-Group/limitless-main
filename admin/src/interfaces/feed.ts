@@ -24,8 +24,14 @@ export interface IFeed {
     pollIds: string[];
     pollExpiredAt: Date;
     isBookMarked: boolean;
-    thumbnailUrl: string;
-    teaser: any;
+    thumbnail: {
+        url: string;
+        thumbnails: string[]
+    };
+    teaser: {
+        url: string;
+        thumbnails: string[]
+    };
     isSchedule: boolean;
     scheduleAt: Date;
     status: string;

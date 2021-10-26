@@ -8,7 +8,7 @@ import Head from 'next/head';
 import FormGallery from '@components/gallery/form-gallery';
 import PageHeading from '@components/common/page-heading';
 import {
-  IGallery, IGalleryCreate, IUIConfig
+  IGallery, IUIConfig
 } from 'src/interfaces';
 import Page from '@components/common/layout/page';
 import { galleryService } from 'src/services';
@@ -96,7 +96,7 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
     this.forceUpdate();
   }
 
-  async onFinish(data: IGalleryCreate) {
+  async onFinish(data) {
     try {
       this.setState({ uploading: true });
       const { id } = this.props;
