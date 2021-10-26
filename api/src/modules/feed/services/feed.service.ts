@@ -474,6 +474,12 @@ export class FeedService {
         itemType: REF_TYPE.FEED
       })));
     }
+    if (feed.thumbnailId && !data.thumbnailId) {
+      await this.fileService.remove(feed.thumbnailId);
+    }
+    if (feed.teaserId && !data.teaserId) {
+      await this.fileService.remove(feed.teaserId);
+    }
     return { updated: true };
   }
 

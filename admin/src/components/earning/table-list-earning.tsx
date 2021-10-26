@@ -62,7 +62,7 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Site_Commission',
+        title: 'Site Commission',
         dataIndex: 'siteCommission',
         render(commission) {
           return (
@@ -79,9 +79,9 @@ export class TableListEarning extends PureComponent<IProps> {
         render(type: string) {
           switch (type) {
             case 'monthly_subscription':
-              return <Tag color="#936dc9">Monthly Subscription</Tag>;
+              return <Tag color="blue">Monthly Sub</Tag>;
             case 'yearly_subscription':
-              return <Tag color="#936dc9">Yearly Subscription</Tag>;
+              return <Tag color="red">Yearly Sub</Tag>;
             case 'product':
               return <Tag color="#FFCF00">Product</Tag>;
             case 'gallery':

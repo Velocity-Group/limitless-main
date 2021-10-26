@@ -88,7 +88,7 @@ export class CommentForm extends PureComponent<IProps> {
             >
               <TextArea disabled={!creator || !creator._id} maxLength={150} showCount minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
-            <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null}>
+            <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
               <div className="grp-emotions">
                 <SmileOutlined />
               </div>

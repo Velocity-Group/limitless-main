@@ -46,11 +46,11 @@ class Earning extends PureComponent<IProps> {
     this.stats();
   }
 
-  handleTableChange = (pagi, filters, sorter) => {
+  handleTableChange = async (pagi, filters, sorter) => {
     const { pagination } = this.state;
     const pager = { ...pagination };
     pager.current = pagi.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
       sortBy: sorter.field || 'createdAt',
       sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : 'desc'

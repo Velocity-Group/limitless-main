@@ -1,7 +1,7 @@
 import { PureComponent, createRef } from 'react';
 import { connect } from 'react-redux';
 import { sendStreamMessage } from '@redux/stream-chat/actions';
-import { Input, message } from 'antd';
+import { Input, message, Popover } from 'antd';
 import {
   SendOutlined, SmileOutlined
 } from '@ant-design/icons';
@@ -93,10 +93,11 @@ class StreamChatCompose extends PureComponent<IProps> {
           rows={1}
         />
         <div className="grp-icons">
-          <div className="grp-emotions">
-            <SmileOutlined />
-            <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
-          </div>
+          <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
+            <div className="grp-emotions">
+              <SmileOutlined />
+            </div>
+          </Popover>
         </div>
         {/* <div className="grp-icons" style={{ padding: 0 }}>
           <div className="grp-emotions">

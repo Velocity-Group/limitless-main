@@ -78,8 +78,8 @@ export class PerformerAccountForm extends PureComponent<IProps> {
       return;
     }
     if (info.file.status === 'done') {
-      message.success('Welcome video uploaded');
-      this.setState({ isUploadingVideo: false, previewVideo: info.file.response.data && info.file.response.data.url });
+      message.success('Intro video was uploaded');
+      this.setState({ isUploadingVideo: false, previewVideo: info?.file?.response?.data.url });
     }
   };
 
@@ -360,7 +360,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
               <Input />
             </Form.Item>
           </Col>
-          <Col lg={12} md={12} xs={24}>
+          <Col lg={24} md={24} xs={24}>
             <Form.Item name="address" label="Address">
               <Input />
             </Form.Item>
@@ -542,10 +542,12 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
-            <Form.Item label="Welcome Video" help={previewVideo ? <a rel="noreferrer" href={previewVideo} target="_blank">Video welcome video</a> : null}>
+            <Form.Item label="Intro Video">
               <Upload
                 accept={'video/*'}
                 name="welcome-video"
+                listType="picture-card"
+                className="avatar-uploader"
                 showUploadList={false}
                 action={videoUploadUrl}
                 headers={uploadHeaders}
@@ -553,12 +555,13 @@ export class PerformerAccountForm extends PureComponent<IProps> {
               >
                 <UploadOutlined />
               </Upload>
+              {previewVideo && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a rel="noreferrer" href={previewVideo} target="_blank">Click here to preview intro video</a></div>}
               {uploadVideoPercentage ? (
                 <Progress percent={Math.round(uploadVideoPercentage)} />
               ) : null}
             </Form.Item>
             <Form.Item name="activateWelcomeVideo" valuePropName="checked">
-              <Checkbox>Activate welcome video</Checkbox>
+              <Checkbox>Activate intro video</Checkbox>
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>

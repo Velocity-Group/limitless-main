@@ -118,7 +118,7 @@ class Compose extends PureComponent<IProps> {
           disabled={disabled || status.sending || !conversation._id}
           ref={(c) => { this._input = c; }}
         />
-        <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null}>
+        <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
           <div className="grp-icons">
             <SmileOutlined />
           </div>

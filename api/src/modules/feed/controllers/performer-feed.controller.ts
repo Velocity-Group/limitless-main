@@ -23,8 +23,7 @@ import { CurrentUser, Roles } from 'src/modules/auth';
 import { AuthService } from 'src/modules/auth/services';
 import { UserDto } from 'src/modules/user/dtos';
 import {
-  FeedCreatePayload, FeedSearchRequest,
-  PollCreatePayload
+  FeedCreatePayload, FeedSearchRequest, PollCreatePayload
 } from '../payloads';
 import { FeedDto } from '../dtos';
 import { FeedService } from '../services';

@@ -14,7 +14,7 @@ export interface IFileUploadOptions {
     itemId: ObjectId;
     itemType: string;
   };
-  fileName?: string | Function;
+  fileName?: string;
   destination?: string;
   server?: string;
   replaceWithoutExif?: boolean;

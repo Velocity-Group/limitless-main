@@ -200,13 +200,13 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                     src={product?.image || '/static/empty_product.svg'}
                     placeholder
                   />
-                  {product.stock && product.type === 'physical' && (
-                  <span className="prod-stock">
-                    {product.stock}
-                    {' '}
-                    in stock
-                  </span>
-                  )}
+                  {product.stock && product.type === 'physical' ? (
+                    <span className="prod-stock">
+                      {product.stock}
+                      {' '}
+                      in stock
+                    </span>
+                  ) : null}
                   {!product.stock && product.type === 'physical' && (
                   <span className="prod-stock">Out of stock!</span>
                   )}

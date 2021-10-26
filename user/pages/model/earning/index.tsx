@@ -29,7 +29,7 @@ interface IStates {
   stats: IPerformerStats;
   sortBy: string;
   sort: string;
-  sourceType: string;
+  type: string;
   dateRange: any;
   isToken: boolean;
 }
@@ -48,7 +48,7 @@ const initialState = {
   },
   sortBy: 'createdAt',
   sort: 'desc',
-  sourceType: '',
+  type: '',
   dateRange: null
 };
 
@@ -68,7 +68,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
   async handleFilter(data) {
     const { dateRange } = this.state;
     await this.setState({
-      sourceType: data.type,
+      type: data.type,
       dateRange: {
         ...dateRange,
         fromDate: data.fromDate,
@@ -95,7 +95,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
 
   async getData() {
     const {
-      pagination, sort, sortBy, sourceType, dateRange, isToken
+      pagination, sort, sortBy, type, dateRange, isToken
     } = this.state;
     try {
       const { current, pageSize } = pagination;
@@ -104,29 +104,29 @@ class EarningPage extends PureComponent<IProps, IStates> {
         offset: (current - 1) * pageSize,
         sort,
         sortBy,
-        sourceType,
+        type,
         isToken,
         ...dateRange
       });
-      await this.setState({
+      this.setState({
         earning: earning.data.data,
-        pagination: { ...pagination, total: earning.data.total }
+        pagination: { ...pagination, total: earning.data.total },
+        loading: false
       });
     } catch (error) {
-      message.error(getResponseError(error));
-    } finally {
+      message.error(getResponseError(await error));
       this.setState({ loading: false });
     }
   }
 
   async getPerformerStats() {
-    const { dateRange, sourceType, isToken } = this.state;
+    const { dateRange, type, isToken } = this.state;
     const resp = await earningService.performerStarts({
       isToken,
-      sourceType,
+      type,
       ...dateRange
     });
-    await this.setState({ stats: resp.data });
+    resp.data && this.setState({ stats: resp.data });
   }
 
   render() {

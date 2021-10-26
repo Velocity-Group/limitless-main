@@ -6,7 +6,7 @@ import {
 } from 'antd';
 import {
   BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
-  PlayCircleOutlined
+  PlayCircleOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import UploadList from '@components/file/list-media';
 import { IFeed } from 'src/interfaces';
@@ -38,16 +38,15 @@ export default class FormFeed extends PureComponent<IProps> {
 
   pollIds = [];
 
-  thumbnailId = '';
+  thumbnailId = null;
 
-  teaserId = '';
-
-  teaser = null;
+  teaserId = null;
 
   state = {
     type: 'text',
     uploading: false,
     thumbnail: null,
+    teaser: null,
     fileList: [],
     fileIds: [],
     pollList: [],
@@ -69,9 +68,23 @@ export default class FormFeed extends PureComponent<IProps> {
         isSale: feed.isSale,
         addPoll: !!feed.pollIds.length,
         pollList: feed.polls,
-        thumbnail: feed.thumbnailUrl
+        thumbnail: feed.thumbnailUrl,
+        teaser: feed.teaser
       });
-      this.teaser = feed.teaser;
+
+      this.teaserId = feed.teaserId;
+      this.thumbnailId = feed.thumbnailId;
+    }
+  }
+
+  handleDeleteFile(field: string) {
+    if (field === 'thumbnail') {
+      this.setState({ thumbnail: null });
+      this.thumbnailId = null;
+    }
+    if (field === 'teaser') {
+      this.setState({ teaser: null });
+      this.teaserId = null;
     }
   }
 
@@ -164,10 +177,10 @@ export default class FormFeed extends PureComponent<IProps> {
         return newFile;
       }));
       await this.setState({
-        fileList: [...fileList, ...files],
+        fileList: file.type.includes('video') ? files : [...fileList, ...files],
         uploading: true
       });
-      const newFileIds = [...fileIds];
+      const newFileIds = file.type.includes('video') ? [] : [...fileIds];
       // eslint-disable-next-line no-restricted-syntax
       for (const fileItem of listFile) {
         try {
@@ -224,17 +237,17 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    this.teaser = file;
     const valid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!valid) {
       message.error(`Teaser must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB`);
       return;
     }
+    this.setState({ teaser: file });
     try {
       const resp = await feedService.uploadTeaser(
         file,
         {},
-        this.onUploading.bind(this, this.teaser)
+        this.onUploading.bind(this, file)
       ) as any;
       this.teaserId = resp.data._id;
     } catch (e) {
@@ -256,12 +269,8 @@ export default class FormFeed extends PureComponent<IProps> {
     if (formValues.price < 1) {
       return message.error('Tokens must be greater than 1');
     }
-    if (this.teaserId) {
-      formValues.teaserId = this.teaserId;
-    }
-    if (this.thumbnailId) {
-      formValues.thumbnailId = this.thumbnailId;
-    }
+    formValues.teaserId = this.teaserId;
+    formValues.thumbnailId = this.thumbnailId;
     formValues.isSale = isSale;
     formValues.fileIds = fileIds;
     if (['video', 'photo'].includes(feed?.type || type) && !fileIds.length) {
@@ -301,7 +310,7 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!this.formRef) this.formRef = createRef();
     const { feed, onDelete } = this.props;
     const {
-      uploading, fileList, isSale, pollList, type,
+      uploading, fileList, isSale, pollList, type, teaser,
       addPoll, openPollDuration, expirePollTime, thumbnail
     } = this.state;
     return (
@@ -353,31 +362,37 @@ export default class FormFeed extends PureComponent<IProps> {
           )}
           {thumbnail && (
             <Form.Item label="Thumbnail">
-              <a href={thumbnail} target="_blank" rel="noreferrer">
-                <img alt="thumbnail" src={thumbnail} width="100px" />
-              </a>
+              <div style={{ position: 'relative' }}>
+                <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, right: 2 }}><DeleteOutlined /></Button>
+                <img alt="thumbnail" src={thumbnail} width="100%" />
+              </div>
             </Form.Item>
           )}
-          {this.teaser && (
+          {teaser && (
             <Form.Item label="Teaser">
               <div className="f-upload-list">
                 <div className="f-upload-item">
                   <div className="f-upload-thumb">
-                    <a href={this.teaser?.url} target="_blank" rel="noreferrer">
+                    <a href={teaser?.url} target="_blank" rel="noreferrer">
                       <span className="f-thumb-vid">
                         <PlayCircleOutlined />
                       </span>
                     </a>
                   </div>
                   <div className="f-upload-name">
-                    <Tooltip title={this.teaser?.name}>{this.teaser?.name}</Tooltip>
+                    <Tooltip title={teaser?.name}>{teaser?.name}</Tooltip>
                   </div>
                   <div className="f-upload-size">
-                    {(this.teaser.size / (1024 * 1024)).toFixed(2)}
+                    {(teaser.size / (1024 * 1024)).toFixed(2)}
                     {' '}
                     MB
                   </div>
-                  {this.teaser.percent && <Progress percent={Math.round(this.teaser.percent)} />}
+                  <span className="f-remove">
+                    <Button type="primary" onClick={() => this.handleDeleteFile('teaser')}>
+                      <DeleteOutlined />
+                    </Button>
+                  </span>
+                  {teaser.percent && <Progress percent={Math.round(teaser.percent)} />}
                 </div>
               </div>
             </Form.Item>

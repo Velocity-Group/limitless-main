@@ -206,12 +206,12 @@ export class FormProduct extends PureComponent<IProps> {
                 className="avatar-uploader"
                 multiple={false}
                 showUploadList
-                disabled={uploading || !!product?.digitalFileId}
+                disabled={uploading}
                 beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
               >
                 <FileAddOutlined />
               </Upload>
-              {product?.digitalFileId && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a download href={product?.digitalFileUrl}>Click to download</a></div>}
+              {product?.digitalFileId && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a download target="_blank" href={product?.digitalFileUrl} rel="noreferrer">Click to download</a></div>}
               {uploadPercentage ? (
                 <Progress percent={Math.round(uploadPercentage)} />
               ) : null}
