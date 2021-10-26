@@ -205,6 +205,29 @@ export class AdminPerformerController {
     });
   }
 
+  @Post('/:id/welcome-video/upload')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('admin')
+  @UseInterceptors(
+    FileUploadInterceptor('performer-welcome-video', 'welcome-video', {
+      destination: getConfig('file').videoDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+    })
+  )
+  async uploadPerformerVideo(
+    @FileUploaded() file: FileDto,
+    @Param('id') performerId: string
+  ): Promise<any> {
+    // TODO - define url for perfomer id if have?
+    await this.performerService.adminUpdateWelcomeVideo(performerId, file);
+    return DataResponse.ok({
+      ...file,
+      url: file.getUrl(true)
+    });
+  }
+
   @Put('/:id/payment-gateway-settings')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')

@@ -1,16 +1,13 @@
 import { PureComponent } from 'react';
 import {
-  Form, Input, Button, Select, message, Switch, Row, Col, DatePicker, InputNumber
+  Form, Input, Button, Select, message, Switch, Row, Col, DatePicker, InputNumber, Upload, Checkbox, Progress
 } from 'antd';
 import {
-  IPerformer,
-  ICountry,
-  ILangguges,
-  IPhoneCodes,
-  IPerformerCategory,
-  IHeight,
-  IWeight
+  IPerformer, ICountry, ILangguges, IPhoneCodes, IPerformerCategory, IHeight, IWeight
 } from 'src/interfaces';
+import {
+  UploadOutlined
+} from '@ant-design/icons';
 import { AvatarUpload } from '@components/user/avatar-upload';
 import { CoverUpload } from '@components/user/cover-upload';
 import { authService, performerService } from '@services/index';
@@ -54,11 +51,37 @@ interface IProps {
 }
 
 export class AccountForm extends PureComponent<IProps> {
+  state = {
+    isUploadingVideo: false,
+    uploadVideoPercentage: 0,
+    previewVideo: null
+  }
+
+  componentDidMount() {
+    const { performer } = this.props;
+    if (performer.welcomeVideoPath) {
+      this.setState({ previewVideo: performer.welcomeVideoPath });
+    }
+  }
+
+  handleVideoChange = (info: any) => {
+    info.file && info.file.percent && this.setState({ uploadVideoPercentage: info.file.percent });
+    if (info.file.status === 'uploading') {
+      this.setState({ isUploadingVideo: true });
+      return;
+    }
+    if (info.file.status === 'done') {
+      message.success('Intro video was uploaded');
+      this.setState({ isUploadingVideo: false, previewVideo: info?.file?.response?.data.url });
+    }
+  };
+
   render() {
     const {
       performer, onFinish, submiting, countries, onUploaded, heights, weights,
       avatarUrl, coverUrl
     } = this.props;
+    const { uploadVideoPercentage, isUploadingVideo, previewVideo } = this.state;
     const uploadHeaders = {
       authorization: authService.getToken()
     };
@@ -536,7 +559,7 @@ export class AccountForm extends PureComponent<IProps> {
           </Select>
         </Form.Item> */}
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Tracking reality email-adress">
+            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Tracking reall email adress">
               <Switch />
             </Form.Item>
           </Col>
@@ -565,9 +588,32 @@ export class AccountForm extends PureComponent<IProps> {
               </Select>
             </Form.Item>
           </Col>
+          <Col md={12} xs={12}>
+            <Form.Item label="Intro Video">
+              <Upload
+                accept={'video/*'}
+                name="welcome-video"
+                listType="picture-card"
+                className="avatar-uploader"
+                showUploadList={false}
+                action={performerService.getWelcomeVideoUploadUrl(performer._id)}
+                headers={uploadHeaders}
+                onChange={this.handleVideoChange.bind(this)}
+              >
+                <UploadOutlined />
+              </Upload>
+              {previewVideo && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a rel="noreferrer" href={previewVideo} target="_blank">Click here to preview intro video</a></div>}
+              {uploadVideoPercentage ? (
+                <Progress percent={Math.round(uploadVideoPercentage)} />
+              ) : null}
+            </Form.Item>
+            <Form.Item name="activateWelcomeVideo" valuePropName="checked">
+              <Checkbox>Activate intro video</Checkbox>
+            </Form.Item>
+          </Col>
           <Col xs={24} md={24}>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-              <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
+              <Button type="primary" htmlType="submit" disabled={submiting || isUploadingVideo} loading={submiting || isUploadingVideo}>
                 Submit
               </Button>
               &nbsp;

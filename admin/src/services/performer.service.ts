@@ -33,6 +33,10 @@ export class PerformerService extends APIRequest {
     return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/cover/upload`;
   }
 
+  getWelcomeVideoUploadUrl(performerId: string) {
+    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/${performerId}/welcome-video/upload`;
+  }
+
   updatePaymentGatewaySetting(id: string, payload: any) {
     return this.put(`/admin/performers/${id}/payment-gateway-settings`, payload);
   }
@@ -43,22 +47,6 @@ export class PerformerService extends APIRequest {
 
   updateBankingSetting(id: string, payload: any) {
     return this.put(`/admin/performers/${id}/banking-settings`, payload);
-  }
-
-  trendingProfiles(query) {
-    return this.get(this.buildUrl('/performers-trending/search', query));
-  }
-
-  trendingUpdate(payload) {
-    return this.post('/performers-trending/update-ordering', payload);
-  }
-
-  trendingRemove(id: string) {
-    return this.del(`/performers-trending/${id}`);
-  }
-
-  trendingCreate(payload: any) {
-    return this.post('/performers-trending/create', payload);
   }
 }
 

@@ -28,7 +28,7 @@ import { UserService } from 'src/modules/user/services';
 import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
-import { isObjectId } from 'src/kernel/helpers/string.helper';
+import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
@@ -661,8 +661,31 @@ export class PerformerService {
       itemId: user._id,
       itemType: REF_TYPE.PERFORMER
     });
-    if (user.welcomeVideoId) {
+    if (user.welcomeVideoId && `${user.welcomeVideoId}` !== `${file._id}`) {
       await this.fileService.remove(user.welcomeVideoId);
+    }
+    await this.fileService.queueProcessVideo(file._id);
+    return file;
+  }
+
+  public async adminUpdateWelcomeVideo(performerId: string, file: FileDto) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
+    await this.performerModel.updateOne(
+      { _id: performerId },
+      {
+        welcomeVideoId: file._id,
+        welcomeVideoPath: file.path
+      }
+    );
+
+    await this.fileService.addRef(file._id, {
+      itemId: toObjectId(performerId),
+      itemType: REF_TYPE.PERFORMER
+    });
+
+    if (performer.welcomeVideoId && `${performer.welcomeVideoId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.welcomeVideoId);
     }
     await this.fileService.queueProcessVideo(file._id);
     return file;
