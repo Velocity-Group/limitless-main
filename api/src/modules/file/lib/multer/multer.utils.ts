@@ -3,6 +3,7 @@ import {
   HttpException,
   PayloadTooLargeException
 } from '@nestjs/common';
+import { Express } from 'express';
 import { multerExceptions } from './multer.constants';
 
 export function transformException(error: Error | undefined) {
@@ -23,13 +24,4 @@ export function transformException(error: Error | undefined) {
   }
 }
 
-export interface IMulterUploadedFile {
-  fieldname: string; // 'file'
-  originalname: string; // 'abc.tif'
-  encoding: string; // '7bit'
-  mimetype: string; // 'image/tiff'
-  destination: string; // '/absolute/path/public'
-  filename: string; // 'q1pjq-abc.tif'
-  path: string; // '/absolute/path/public/q1pjq-abc.tif'
-  size: number; // 15866
-}
+export interface IMulterUploadedFile extends Express.Multer.File, Express.MulterS3.File{}

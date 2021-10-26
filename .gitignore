@@ -51,6 +51,7 @@ Thumbs.db
 .env
 .next
 api/public
+api/*.lock
 
 *.lock
 package-lock.json

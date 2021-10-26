@@ -44,7 +44,6 @@ class CreateProduct extends PureComponent {
     } if (data.type === 'physical') {
       this._files.digitalFile = null;
     }
-
     const files = Object.keys(this._files).reduce((f, key) => {
       if (this._files[key]) {
         f.push({
@@ -54,7 +53,6 @@ class CreateProduct extends PureComponent {
       }
       return f;
     }, [] as IFiles[]) as [IFiles];
-
     await this.setState({
       uploading: true
     });

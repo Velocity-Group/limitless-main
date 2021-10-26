@@ -336,6 +336,7 @@ export default class FormFeed extends PureComponent<IProps> {
               { required: true, message: 'Please select a model!' }]}
           >
             <SelectPerformerDropdown
+              showAll
               defaultValue={feed && (feed?.fromSourceId || '')}
               onSelect={(val) => this.setFormVal('fromSourceId', val)}
             />

@@ -155,7 +155,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
             </Form.Item>
             <Form.Item style={{ textAlign: 'center' }}>
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading || !fileList.length}>
-                UPLOAD
+                UPLOAD ALL
               </Button>
             </Form.Item>
           </Form>

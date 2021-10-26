@@ -1,10 +1,16 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
+import { uniq } from 'lodash';
 import { PageableData } from 'src/kernel';
 import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { STATUS } from 'src/kernel/constants';
+import { PurchasedItemSearchService } from 'src/modules/purchased-item/services';
+import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
+import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
+import { PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
 import { PERFORMER_PHOTO_MODEL_PROVIDER } from '../providers';
 import { PhotoModel } from '../models';
 import { PhotoDto } from '../dtos';
@@ -14,6 +20,10 @@ import { GalleryService } from './gallery.service';
 @Injectable()
 export class PhotoSearchService {
   constructor(
+    @Inject(forwardRef(() => PurchasedItemSearchService))
+    private readonly purchasedItemSearchService: PurchasedItemSearchService,
+    @Inject(forwardRef(() => SubscriptionService))
+    private readonly subscriptionService: SubscriptionService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(PERFORMER_PHOTO_MODEL_PROVIDER)
@@ -22,7 +32,7 @@ export class PhotoSearchService {
     private readonly fileService: FileService
   ) { }
 
-  public async adminSearch(req: PhotoSearchRequest, jwToken: string): Promise<PageableData<PhotoDto>> {
+  public async adminSearch(req: PhotoSearchRequest): Promise<PageableData<PhotoDto>> {
     const query = {} as any;
     if (req.q) query.title = { $regex: req.q };
     if (req.performerId) query.performerId = req.performerId;
@@ -69,12 +79,11 @@ export class PhotoSearchService {
 
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
-        const url = file.getUrl();
         // eslint-disable-next-line no-param-reassign
         v.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
-          url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
+          url: file.getUrl(true),
           width: file.width,
           height: file.height,
           mimeType: file.mimeType
@@ -88,7 +97,7 @@ export class PhotoSearchService {
     };
   }
 
-  public async performerSearch(req: PhotoSearchRequest, user: UserDto, jwToken: string): Promise<PageableData<PhotoDto>> {
+  public async performerSearch(req: PhotoSearchRequest, user: UserDto): Promise<PageableData<PhotoDto>> {
     const query = {} as any;
     if (req.q) query.title = { $regex: req.q };
     query.performerId = user._id;
@@ -121,12 +130,11 @@ export class PhotoSearchService {
 
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
-        const url = file.getUrl();
         // eslint-disable-next-line no-param-reassign
         v.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
-          url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url || null,
+          url: file.getUrl(`${v.performerId}` === `${user._id}`),
           width: file.width,
           height: file.height,
           mimeType: file.mimeType
@@ -140,9 +148,10 @@ export class PhotoSearchService {
     };
   }
 
-  public async searchPhotos(req: PhotoSearchRequest, jwToken: string) {
+  public async searchPhotos(req: PhotoSearchRequest, user: UserDto) {
     const query = {
-      processing: false
+      processing: false,
+      status: STATUS.ACTIVE
     } as any;
     if (req.galleryId) query.galleryId = req.galleryId;
     const sort = { createdAt: -1 };
@@ -158,11 +167,23 @@ export class PhotoSearchService {
 
     const fileIds = data.map((d) => d.fileId);
     const photos = data.map((v) => new PhotoDto(v));
-
+    const performerIds = uniq(data.map((v) => v.performerId));
     const galleryIds = data.filter((d) => d.galleryId).map((p) => p.galleryId);
-    const [galleries, files] = await Promise.all([
+    const [galleries, files, subscriptions, transactions] = await Promise.all([
       galleryIds.length ? this.galleryService.findByIds(galleryIds) : [],
-      fileIds.length ? this.fileService.findByIds(fileIds) : []
+      fileIds.length ? this.fileService.findByIds(fileIds) : [],
+      user?._id ? this.subscriptionService.findSubscriptionList({
+        userId: user._id,
+        performerId: { $in: performerIds },
+        expiredAt: { $gt: new Date() },
+        status: SUBSCRIPTION_STATUS.ACTIVE
+      }) : [],
+      user?._id ? this.purchasedItemSearchService.findByQuery({
+        sourceId: user._id,
+        targetId: { $in: galleryIds },
+        target: PURCHASE_ITEM_TARTGET_TYPE.GALLERY,
+        status: PURCHASE_ITEM_STATUS.SUCCESS
+      }) : []
     ]);
     photos.forEach((v) => {
       if (v.galleryId) {
@@ -172,15 +193,16 @@ export class PhotoSearchService {
           // eslint-disable-next-line no-param-reassign
         if (gallery) v.gallery = gallery;
       }
-
+      const subscription = subscriptions.find((s) => `${s.performerId}` === `${v.performerId}`);
+      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${v._id}`);
+      const canView = (v.gallery && !v.gallery.isSale && !!subscription) || (v.gallery && v.gallery.isSale && !!bought) || (user && `${user._id}` === `${v.performerId}`) || (user && user.roles && user.roles.includes('admin'));
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
-        const url = file.getUrl();
         // eslint-disable-next-line no-param-reassign
         v.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
-          url: jwToken ? `${url}?photoId=${v._id}&token=${jwToken}` : url,
+          url: file.getUrl(canView),
           width: file.width,
           height: file.height,
           mimeType: file.mimeType

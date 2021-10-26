@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import * as multer from 'multer';
-import { ConfigService } from 'nestjs-config';
 import { existsSync } from 'fs';
 import * as mkdirp from 'mkdirp';
 import { StringHelper } from 'src/kernel';
@@ -26,10 +25,9 @@ export function FileUploadInterceptor(
     private uploadDir: string;
 
     constructor(
-      private readonly config: ConfigService,
       private readonly fileService: FileService
     ) {
-      this.uploadDir = options.destination || this.config.get('file').publicDir;
+      this.uploadDir = options.destination;
       this.createFolderIfNotExists(this.uploadDir);
     }
 
@@ -45,10 +43,10 @@ export function FileUploadInterceptor(
       // todo - support other storage type?
       const { uploadDir } = this;
       const storage = multer.diskStorage({
-        destination(req, file, cb) {
+        destination: (req, file, cb) => {
           cb(null, uploadDir);
         },
-        filename(req, file, cb) {
+        filename: (req, file, cb) => {
           if (options.fileName) {
             return cb(null, options.fileName);
           }
@@ -56,7 +54,10 @@ export function FileUploadInterceptor(
           const ext = (
             StringHelper.getExt(file.originalname) || ''
           ).toLocaleLowerCase();
-          const orgName = StringHelper.getFileName(file.originalname, true);
+          const orgName = StringHelper.getFileName(
+            file.originalname,
+            true
+          );
           const randomText = StringHelper.randomString(5); // avoid duplicated name, we might check file name first?
           const name = StringHelper.createAlias(
             `${randomText}-${orgName}`
@@ -73,7 +74,7 @@ export function FileUploadInterceptor(
           // TODO - trace error and throw error
           return reject(error);
         }
-        return resolve(true);
+        return resolve(null);
       }));
 
       /**
@@ -95,13 +96,19 @@ export function FileUploadInterceptor(
         // eslint-disable-next-line no-param-reassign
         options.uploader = ctxRequest.user;
       }
-      const file = await this.fileService.createFromMulter(type, fileContent, options);
-      ctxRequest.file = file;
+      if (fileContent) {
+        const file = await this.fileService.createFromMulter(
+          type,
+          fileContent,
+          options
+        );
+        ctxRequest.file = file;
+      }
 
       return next.handle();
     }
   }
 
-  const Interceptor = mixin(MixinInterceptor);
-  return Interceptor as Type<NestInterceptor>;
+  const interceptor = mixin(MixinInterceptor);
+  return interceptor as Type<NestInterceptor>;
 }

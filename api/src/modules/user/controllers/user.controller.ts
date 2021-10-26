@@ -31,8 +31,8 @@ export class UserController {
   async me(
     @Request() req: any
   ): Promise<DataResponse<IUserResponse>> {
-    const { authUser, jwToken } = req;
-    const user = await this.userService.getMe(authUser.sourceId, jwToken);
+    const { authUser } = req;
+    const user = await this.userService.getMe(authUser.sourceId);
     return DataResponse.ok(user);
   }
 

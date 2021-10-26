@@ -13,7 +13,6 @@ import {
   Delete,
   Get,
   Query,
-  Request,
   forwardRef,
   Inject
 } from '@nestjs/common';
@@ -61,12 +60,9 @@ export class PerformerFeedController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getMyFeeds(
     @Query() query: FeedSearchRequest,
-    @CurrentUser() performer: UserDto,
-    @Request() req: any
+    @CurrentUser() performer: UserDto
   ): Promise<DataResponse<PageableData<any>>> {
-    const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = await this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
-    const data = await this.feedService.search(query, performer, jwToken);
+    const data = await this.feedService.search(query, performer);
     return DataResponse.ok(data);
   }
 
@@ -77,12 +73,9 @@ export class PerformerFeedController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getPerformerFeed(
     @CurrentUser() user: UserDto,
-    @Param('id') id: string,
-    @Request() req: any
+    @Param('id') id: string
   ): Promise<DataResponse<FeedDto>> {
-    const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
-    const data = await this.feedService.findOne(id, user, jwToken);
+    const data = await this.feedService.findOne(id, user);
     return DataResponse.ok(data);
   }
 

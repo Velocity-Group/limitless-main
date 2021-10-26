@@ -1,7 +1,8 @@
 import {
-  IsString, IsOptional, IsArray, IsIn, IsNumber
+  IsString, IsOptional, IsArray, IsIn, IsNumber, ValidateNested
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { PostMetaPayload } from './post-meta.payload';
 
 export class PostUpdatePayload {
   @ApiProperty()
@@ -53,4 +54,9 @@ export class PostUpdatePayload {
   @IsString()
   @IsOptional()
   image: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @ValidateNested()
+  meta?: PostMetaPayload[];
 }

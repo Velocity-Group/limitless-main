@@ -72,7 +72,6 @@ class ProductUpdate extends PureComponent<IProps> {
         }
         return f;
       }, [] as IFiles[]) as [IFiles];
-
       await this.setState({ submiting: true });
       await productService.update(
         id,

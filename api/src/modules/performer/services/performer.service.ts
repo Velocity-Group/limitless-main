@@ -182,7 +182,7 @@ export class PerformerService {
     return performers.map((p) => new PerformerDto(p));
   }
 
-  public async getDetails(id: string | ObjectId, jwtToken: string): Promise<PerformerDto> {
+  public async getDetails(id: string | ObjectId): Promise<PerformerDto> {
     const performer = await this.performerModel.findById(id);
     if (!performer) {
       throw new EntityNotFoundException();
@@ -211,20 +211,18 @@ export class PerformerService {
     const dto = new PerformerDto(performer);
     dto.avatar = avatar ? FileDto.getPublicUrl(avatar.path) : null; // TODO - get default avatar
     dto.cover = cover ? FileDto.getPublicUrl(cover.path) : null;
-    dto.welcomeVideoPath = welcomeVideo
-      ? FileDto.getPublicUrl(welcomeVideo.path)
-      : null;
+    dto.welcomeVideoPath = welcomeVideo ? FileDto.getPublicUrl(welcomeVideo.path) : null;
     dto.idVerification = idVerification
       ? {
         _id: idVerification._id,
-        url: jwtToken ? `${FileDto.getPublicUrl(idVerification.path)}?documentId=${idVerification._id}&token=${jwtToken}` : FileDto.getPublicUrl(idVerification.path),
+        url: new FileDto(idVerification).getUrl(true),
         mimeType: idVerification.mimeType
       }
       : null;
     dto.documentVerification = documentVerification
       ? {
         _id: documentVerification._id,
-        url: jwtToken ? `${FileDto.getPublicUrl(documentVerification.path)}?documentId=${documentVerification._id}&token=${jwtToken}` : FileDto.getPublicUrl(documentVerification.path),
+        url: new FileDto(documentVerification).getUrl(true),
         mimeType: documentVerification.mimeType
       }
       : null;

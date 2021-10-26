@@ -3,7 +3,7 @@ import {
   Form, Input, InputNumber, Select, Upload, Button, message, Progress
 } from 'antd';
 import { IProduct } from 'src/interfaces';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined, CameraOutlined } from '@ant-design/icons';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { FormInstance } from 'antd/lib/form';
 
@@ -133,6 +133,8 @@ export class FormProduct extends PureComponent<IProps> {
         <Form.Item label="Image">
           <Upload
             accept="image/*"
+            listType="picture-card"
+            className="avatar-uploader"
             multiple={false}
             showUploadList={false}
             disabled={uploading}
@@ -141,7 +143,7 @@ export class FormProduct extends PureComponent<IProps> {
             {previewImageProduct && (
               <img src={previewImageProduct} alt="file" width="100%" />
             )}
-            <UploadOutlined />
+            <CameraOutlined />
           </Upload>
         </Form.Item>
         {isDigitalProduct && (

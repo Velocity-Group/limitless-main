@@ -22,7 +22,7 @@ export default function Custom404() {
           width: 64em;
         }
         figcaption {
-          color: #fff;
+          color: #333;
           display: flex;
           align-content: space-between;
           flex-wrap: wrap;
@@ -40,12 +40,6 @@ export default function Custom404() {
           margin: 0 2em;
           width: 4em;
           height: 6em;
-        }
-        .sr-text {
-          overflow: hidden;
-          position: absolute;
-          width: 0;
-          height: 0;
         }
         /* II. Sprites */
         /* 1. Sad Mac */
@@ -106,12 +100,6 @@ export default function Custom404() {
       <figure>
         <div className="sad-mac" />
         <figcaption>
-          <span className="sr-text">Error 404: Page Not Found</span>
-          <span className="e" />
-          <span className="r" />
-          <span className="r" />
-          <span className="o" />
-          <span className="r" />
           <span className="_4" />
           <span className="_0" />
           <span className="_4" />

@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { PureComponent, Fragment, createRef } from 'react';
+import { PureComponent, createRef } from 'react';
 import { message } from 'antd';
 import Page from '@components/common/layout/page';
 import { FormInstance } from 'antd/lib/form';

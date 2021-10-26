@@ -31,7 +31,7 @@ export class FileModel extends Document {
 
   status: string;
 
-  thumbnails: any[];
+  thumbnails: any;
 
   encoding: string;
 

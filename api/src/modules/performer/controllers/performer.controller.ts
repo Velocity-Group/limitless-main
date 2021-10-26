@@ -34,6 +34,7 @@ import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
 import { CountryService } from 'src/modules/utils/services';
 import { UserDto } from 'src/modules/user/dtos';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { PERFORMER_STATUSES } from '../constants';
 import {
   PerformerDto,
@@ -69,7 +70,7 @@ export class PerformerController {
   async me(
     @Request() req: any
   ): Promise<DataResponse<IPerformerResponse>> {
-    const user = await this.performerService.getDetails(req.user._id, req.jwToken);
+    const user = await this.performerService.getDetails(req.user._id);
     return DataResponse.ok(new PerformerDto(user).toResponse(true, false));
   }
 
@@ -105,11 +106,10 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   async updateUser(
     @Body() payload: SelfUpdatePayload,
-    @Param('id') performerId: string,
-    @Request() req: any
+    @Param('id') performerId: string
   ): Promise<DataResponse<IPerformerResponse>> {
     await this.performerService.selfUpdate(performerId, payload);
-    const performer = await this.performerService.getDetails(performerId, req.jwToken);
+    const performer = await this.performerService.getDetails(performerId);
 
     if (payload.password) {
       await Promise.all([
@@ -174,13 +174,15 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(
     FileUploadInterceptor('performer-document', 'file', {
-      destination: getConfig('file').documentDir
+      destination: getConfig('file').documentDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerDocument(
     @CurrentUser() currentUser: PerformerDto,
-    @FileUploaded() file: FileDto,
-    @Request() req: any
+    @FileUploaded() file: FileDto
   ): Promise<any> {
     await this.fileService.addRef(file._id, {
       itemId: currentUser._id,
@@ -188,7 +190,7 @@ export class PerformerController {
     });
     return DataResponse.ok({
       ...file,
-      url: `${file.getUrl()}?documentId=${file._id}&token=${req.jwToken}`
+      url: `${file.getUrl(true)}`
     });
   }
 
@@ -199,9 +201,9 @@ export class PerformerController {
   @UseInterceptors(
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
-      generateThumbnail: true,
-      replaceWithThumbail: true,
-      thumbnailSize: getConfig('image').avatar
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerAvatar(
@@ -222,7 +224,10 @@ export class PerformerController {
   @Roles('performer')
   @UseInterceptors(
     FileUploadInterceptor('cover', 'cover', {
-      destination: getConfig('file').coverDir
+      destination: getConfig('file').coverDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerCover(
@@ -243,7 +248,9 @@ export class PerformerController {
   @Roles('performer')
   @UseInterceptors(
     FileUploadInterceptor('performer-welcome-video', 'welcome-video', {
-      destination: getConfig('file').videoDir
+      destination: getConfig('file').videoDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerVideo(
@@ -254,7 +261,7 @@ export class PerformerController {
     await this.performerService.updateWelcomeVideo(performer, file);
     return DataResponse.ok({
       ...file,
-      url: file.getUrl()
+      url: file.getUrl(true)
     });
   }
 

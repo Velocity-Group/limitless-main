@@ -33,10 +33,7 @@ class AccountSettings extends PureComponent<IProps> {
 
   componentDidUpdate(prevProps: any) {
     const { updateSuccess: handlerUpdate } = this.props;
-    if (
-      prevProps.updateSuccess !== handlerUpdate
-      && handlerUpdate
-    ) {
+    if (prevProps.updateSuccess !== handlerUpdate && handlerUpdate) {
       message.success('Updated successfully!');
     }
   }
