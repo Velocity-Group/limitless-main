@@ -5,7 +5,7 @@ import { videoService } from '@services/video.service';
 import { VideoCameraOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { FormUploadVideo } from '@components/video/form-upload';
-import { IVideoUpdate, IUIConfig, IUser } from 'src/interfaces';
+import { IVideo, IUIConfig, IUser } from 'src/interfaces';
 import Router from 'next/router';
 import { Layout, message, Spin } from 'antd';
 import { getResponseError } from '@lib/utils';
@@ -35,7 +35,7 @@ class VideoUpdate extends PureComponent<IProps> {
     fetching: true,
     uploading: false,
     uploadPercentage: 0,
-    video: {} as IVideoUpdate
+    video: {} as IVideo
   };
 
   _files: {

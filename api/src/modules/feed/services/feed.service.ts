@@ -199,12 +199,17 @@ export class FeedService {
       }
       if (feed.thumbnailId) {
         const thumbnail = files.find((file) => file._id.toString() === feed.thumbnailId.toString());
-        feed.thumbnailUrl = (thumbnail && FileDto.getPublicUrl(thumbnail.path)) || '';
+        feed.thumbnail = thumbnail && {
+          ...thumbnail.toResponse(),
+          thumbnails: thumbnail.getThumbnails(),
+          url: thumbnail.getUrl()
+        };
       }
       if (feed.teaserId) {
         const teaser = files.find((file) => file._id.toString() === feed.teaserId.toString());
-        feed.teaser = {
+        feed.teaser = teaser && {
           ...teaser,
+          thumbnails: teaser.getThumbnails(),
           url: teaser.getUrl()
         };
       }
@@ -229,7 +234,7 @@ export class FeedService {
     const performer = await this.performerService.findById(fromSourceId);
     if (!performer) throw new EntityNotFoundException();
     const data = { ...payload } as any;
-    data.slug = `post-${StringHelper.randomString(8, '0123456789')}`;
+    data.slug = `${StringHelper.randomString(8, '0123456789')}`;
     const slugCheck = await this.feedModel.countDocuments({
       slug: data.slug
     });
@@ -464,15 +469,17 @@ export class FeedService {
     if (payload.fileIds && payload.fileIds.length) {
       const ids = feed.fileIds.map((_id) => _id.toString());
       const Ids = payload.fileIds.filter((_id) => !ids.includes(_id));
+      const deleteIds = feed.fileIds.filter((_id) => !payload.fileIds.includes(_id.toString()));
       await Promise.all(Ids.map((fileId) => this.fileService.addRef((fileId as any), {
         itemId: feed._id,
         itemType: REF_TYPE.FEED
       })));
+      await Promise.all(deleteIds.map((_id) => this.fileService.remove(_id)));
     }
-    if (feed.thumbnailId && !data.thumbnailId) {
+    if ((feed.thumbnailId && `${feed.thumbnailId}` !== `${data.thumbnailId}`) || (feed.thumbnailId && !data.thumbnailId)) {
       await this.fileService.remove(feed.thumbnailId);
     }
-    if (feed.teaserId && !data.teaserId) {
+    if ((feed.teaserId && `${feed.teaserId}` !== `${data.teaserId}`) || (feed.teaserId && !data.teaserId)) {
       await this.fileService.remove(feed.teaserId);
     }
     return { updated: true };
@@ -488,6 +495,11 @@ export class FeedService {
       throw new HttpException('You don\'t have permission to remove this post', 403);
     }
     await feed.remove();
+    await Promise.all([
+      feed.thumbnailId && this.fileService.remove(feed.thumbnailId),
+      feed.teaserId && this.fileService.remove(feed.teaserId)
+    ]);
+    await Promise.all(feed.fileIds.map((_id) => this.fileService.remove(_id)));
     await this.queueEventService.publish(
       new QueueEvent({
         channel: PERFORMER_FEED_CHANNEL,

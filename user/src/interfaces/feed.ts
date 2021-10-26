@@ -27,10 +27,9 @@ export interface IFeed {
   pollExpiredAt: Date;
   isBookMarked: boolean;
   thumbnailId: string;
-  thumbnailUrl: string;
+  thumbnail: any;
   teaserId: string;
   teaser: any;
-  tagline: string;
   isPinned: boolean;
   pinnedAt: Date;
 }

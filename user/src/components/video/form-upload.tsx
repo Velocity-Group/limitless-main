@@ -13,7 +13,7 @@ import {
   Row,
   Col
 } from 'antd';
-import { IVideoUpdate, IVideoCreate, IUser } from 'src/interfaces/index';
+import { IUser, IVideo } from 'src/interfaces/index';
 import { CameraOutlined, VideoCameraAddOutlined, FileDoneOutlined } from '@ant-design/icons';
 import { performerService } from '@services/index';
 import moment from 'moment';
@@ -23,7 +23,7 @@ import './video.less';
 
 interface IProps {
   user: IUser;
-  video?: IVideoUpdate;
+  video?: IVideo;
   submit: Function;
   beforeUpload?: Function;
   uploading?: boolean;
@@ -150,7 +150,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
     return (
       <Form
         {...layout}
-        onFinish={(values: IVideoUpdate) => {
+        onFinish={(values) => {
           const data = values;
           if (isSchedule) {
             data.scheduledAt = scheduledAt;
@@ -171,7 +171,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
             participantIds: [user._id],
             isSchedule: false,
             status: 'active'
-          } as IVideoCreate)
+          })
         }
         className="account-form"
       >

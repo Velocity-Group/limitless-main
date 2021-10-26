@@ -13,7 +13,6 @@ import { S3Service, S3StorageService } from 'src/modules/storage/services';
 import { formatFileName } from 'src/kernel/helpers/multer.helper';
 import { join } from 'path';
 import * as jwt from 'jsonwebtoken';
-import { NoFileException } from '../exceptions';
 import { FILE_MODEL_PROVIDER } from '../providers';
 import { FileModel } from '../models';
 import { IMulterUploadedFile } from '../lib/multer/multer.utils';
@@ -103,9 +102,10 @@ export class FileService {
     const options = { ...fileUploadOptions } || {};
     const publicDir = this.config.get('file.publicDir');
     const photoDir = this.config.get('file.photoDir');
-    let absolutePath: string;
-    let path: string;
+    let absolutePath = multerData.path;
+    let path = multerData.path.replace(publicDir, '');
     let { metadata = {} } = multerData;
+    let server = options.server || Storage.DiskStorage;
     const thumbnails = [];
     const checkS3Settings = await this.s3StorageService.checkSetting();
     if (multerData.mimetype.includes('image') && options.uploadImmediately) {
@@ -152,6 +152,7 @@ export class FileService {
           absolutePath = upload.Key;
           path = upload.Location;
         }
+        server = Storage.S3;
         metadata = {
           ...metadata,
           bucket: upload.Bucket,
@@ -160,6 +161,7 @@ export class FileService {
         // remove old file once upload s3 done
         existsSync(multerData.path) && unlinkSync(multerData.path);
       } else {
+        server = Storage.DiskStorage;
         writeFileSync(multerData.path, buffer);
       }
     }
@@ -188,14 +190,13 @@ export class FileService {
         writeFileSync(multerData.path, buffer);
       }
     }
-
     const data = {
       type,
       name: multerData.filename,
       description: '',
       mimeType: multerData.mimetype,
-      server: options.server || Storage.DiskStorage,
-      path: path || multerData.location || multerData.path.replace(publicDir, ''),
+      server,
+      path: path || multerData.location,
       absolutePath: absolutePath || multerData.key || multerData.path,
       acl: multerData.acl || options.acl,
       thumbnails,
@@ -328,15 +329,11 @@ export class FileService {
     const publicDir = this.config.get('file.publicDir');
     const videoDir = this.config.get('file.videoDir');
     let videoPath: string;
-    let { metadata = {} } = fileData;
+    let { metadata = {}, server } = fileData;
     if (existsSync(fileData.absolutePath)) {
       videoPath = fileData.absolutePath;
     } else if (existsSync(join(publicDir, fileData.path))) {
       videoPath = join(publicDir, fileData.path);
-    }
-
-    if (!videoPath) {
-      throw new NoFileException();
     }
 
     try {
@@ -397,6 +394,7 @@ export class FileService {
           }
         }
       } else {
+        server = Storage.DiskStorage;
         thumbnails = respThumb.map((name) => ({
           absolutePath: join(videoDir, name),
           path: join(videoDir, name).replace(publicDir, '')
@@ -413,7 +411,8 @@ export class FileService {
             path: newPath,
             thumbnails,
             duration,
-            metadata
+            metadata,
+            server
           }
         }
       );
@@ -483,14 +482,11 @@ export class FileService {
     const options = event.data.options || {};
     const publicDir = this.config.get('file.publicDir');
     let audioPath: string;
-    let { metadata = {} } = fileData;
+    let { metadata = {}, server } = fileData;
     if (existsSync(fileData.absolutePath)) {
       audioPath = fileData.absolutePath;
     } else if (existsSync(join(publicDir, fileData.path))) {
       audioPath = join(publicDir, fileData.path);
-    }
-    if (!audioPath) {
-      throw new NoFileException();
     }
     try {
       await this.fileModel.updateOne(
@@ -524,6 +520,8 @@ export class FileService {
           bucket: result.Bucket,
           endpoint: S3Service.getEndpoint(result)
         };
+      } else {
+        server = Storage.DiskStorage;
       }
       const duration = await this.videoService.getDuration(audioPath);
       existsSync(audioPath) && unlinkSync(audioPath);
@@ -538,7 +536,8 @@ export class FileService {
             duration,
             mimeType: 'audio/mp3',
             name: fileData.name.replace(`.${fileData.mimeType.split('audio/')[1]}`, '.mp3'),
-            metadata
+            metadata,
+            server
           }
         }
       );
@@ -639,7 +638,7 @@ export class FileService {
       return;
     }
     const fileData = event.data.file as FileDto;
-    let { metadata = {} } = fileData;
+    let { metadata = {}, server } = fileData;
     const options = event.data.options || {};
     try {
       await this.fileModel.updateOne(
@@ -663,9 +662,6 @@ export class FileService {
       } else if (existsSync(join(publicDir, fileData.path))) {
         photoPath = join(publicDir, fileData.path);
       }
-      if (!photoPath) {
-        throw new NoFileException();
-      }
       const meta = await this.imageService.getMetaData(photoPath);
       const thumbBuffer = await this.imageService.createThumbnail(
         photoPath,
@@ -681,6 +677,7 @@ export class FileService {
       )}_thumb${StringHelper.getExt(fileData.name)}`;
       // check s3 settings
       const checkS3Settings = await this.s3StorageService.checkSetting();
+      // upload thumb to s3
       if (fileData.server === Storage.S3 && checkS3Settings) {
         const upload = await this.s3StorageService.upload(
           thumbName,
@@ -695,6 +692,7 @@ export class FileService {
         thumbnailAbsolutePath = join(photoDir, thumbName);
         writeFileSync(join(photoDir, thumbName), thumbBuffer);
       }
+      // upload file to s3
       if (fileData.server === Storage.S3 && checkS3Settings) {
         const buffer = await this.imageService.replaceWithoutExif(photoPath);
         const upload = await this.s3StorageService.upload(
@@ -717,6 +715,8 @@ export class FileService {
       } else {
         const buffer = await this.imageService.replaceWithoutExif(photoPath);
         writeFileSync(photoPath, buffer);
+        photoPath = photoPath.replace(publicDir, '');
+        server = Storage.DiskStorage;
       }
       await this.fileModel.updateOne(
         { _id: fileData._id },
@@ -726,6 +726,7 @@ export class FileService {
             width: meta.width,
             height: meta.height,
             metadata,
+            server,
             absolutePath,
             path: photoPath,
             thumbnails: [

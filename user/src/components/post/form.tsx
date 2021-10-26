@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import { PureComponent } from 'react';
 import {
-  Upload, message, Button, Tooltip, Select, Row, Col,
+  Upload, message, Button, Tooltip, Select,
   Input, Form, InputNumber, Switch, Progress, Popover
 } from 'antd';
 import {
@@ -66,7 +66,7 @@ export default class FeedForm extends PureComponent<IProps> {
         isSale: feed.isSale,
         addPoll: !!feed.pollIds.length,
         pollList: feed.polls,
-        thumbnail: feed.thumbnailUrl,
+        thumbnail: feed.thumbnail,
         teaser: feed.teaser,
         text: feed.text
       });
@@ -214,7 +214,7 @@ export default class FeedForm extends PureComponent<IProps> {
       return;
     }
     const reader = new FileReader();
-    reader.addEventListener('load', () => { this.setState({ thumbnail: reader.result }); });
+    reader.addEventListener('load', () => { this.setState({ thumbnail: { url: reader.result } }); });
     reader.readAsDataURL(file);
     try {
       const resp = await feedService.uploadThumbnail(
@@ -406,8 +406,8 @@ export default class FeedForm extends PureComponent<IProps> {
           {thumbnail && (
           <Form.Item label="Thumbnail">
             <div style={{ position: 'relative' }}>
-              <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, right: 2 }}><DeleteOutlined /></Button>
-              <img alt="thumbnail" src={thumbnail} width="100%" />
+              <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, left: 2 }}><DeleteOutlined /></Button>
+              <img alt="thumbnail" src={(thumbnail?.thumbnails && thumbnail?.thumbnails[0]) || thumbnail?.url} width="200px" />
             </div>
           </Form.Item>
           )}

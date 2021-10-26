@@ -1,12 +1,12 @@
 /* eslint-disable no-prototype-builtins */
 import { Component } from 'react';
 import {
-  Menu, Dropdown, Divider, message, Modal, Tooltip, Button, Collapse
+  Menu, Dropdown, Divider, message, Modal, Tooltip, Button
 } from 'antd';
 import {
   HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined, EyeOutlined,
   MoreOutlined, DollarOutlined, LockOutlined, FlagOutlined,
-  FileImageOutlined, VideoCameraOutlined, CaretDownOutlined
+  FileImageOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import Link from 'next/link';
@@ -333,7 +333,9 @@ class FeedCard extends Component<IProps> {
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
-    const thumbUrl = feed?.thumbnailUrl || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0]) || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0]) || '/static/leaf.jpg';
+    const thumbUrl = feed?.thumbnail?.url || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0])
+    || (feed?.teaser && feed?.teaser?.thumbnails && feed?.teaser?.thumbnails[0])
+    || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0]) || '/static/leaf.jpg';
     let totalVote = 0;
     polls && polls.forEach((poll) => {
       totalVote += poll.totalVote;

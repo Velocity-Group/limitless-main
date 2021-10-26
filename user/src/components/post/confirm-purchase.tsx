@@ -2,9 +2,6 @@ import { PureComponent } from 'react';
 import {
   Button, Avatar
 } from 'antd';
-import {
-  CheckCircleOutlined
-} from '@ant-design/icons';
 import { IFeed, IUser } from '@interfaces/index';
 import './index.less';
 

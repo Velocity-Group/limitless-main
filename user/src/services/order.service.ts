@@ -1,4 +1,3 @@
-// import { IGalleryCreate } from 'src/interfaces';
 import { APIRequest } from './api-request';
 
 export class OrderService extends APIRequest {

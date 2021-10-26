@@ -57,7 +57,7 @@ export class FeedDto {
 
   thumbnailId: ObjectId;
 
-  thumbnailUrl: string;
+  thumbnail: any;
 
   isPinned: boolean;
 
@@ -102,7 +102,7 @@ export class FeedDto {
         'teaserId',
         'teaser',
         'thumbnailId',
-        'thumbnailUrl',
+        'thumbnail',
         'isPinned',
         'pinnedAt',
         'status',
