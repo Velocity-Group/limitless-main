@@ -190,20 +190,6 @@
     color: @primary-color;
     border-bottom: 2px solid;
   }
-
-  @media (max-width: @mobile-screen) {
-    width: 100%;
-    justify-content: space-between;
-
-    li {
-      padding: 0 5px;
-
-      .cart-total {
-        top: -2px;
-        right: 2px;
-      }
-    }
-  }
 }
 
 .ant-menu.ant-menu-sub {
@@ -369,12 +355,20 @@
 
   .nav-bar {
     .nav-icons {
+      width: 100%;
+      justify-content: space-between;
+
       li {
         font-size: 14px;
         padding: 2px 12px;
 
         span {
           font-size: 25px;
+        }
+
+        .cart-total {
+          top: -2px;
+          right: 2px;
         }
       }
 
