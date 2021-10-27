@@ -1,5 +1,5 @@
 import {
-  Layout, message, Tabs, Tooltip
+  Layout, message, Tabs
 } from 'antd';
 import { PureComponent } from 'react';
 import PageHeading from '@components/common/page-heading';
@@ -273,7 +273,14 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
               size="large"
               onChange={this.onTabsChange.bind(this)}
             >
-              <Tabs.TabPane tab={<Tooltip title="Feeds"><FireOutlined /></Tooltip>} key="feeds">
+              <Tabs.TabPane tab={<FireOutlined />} key="feeds">
+                <div className="heading-tab">
+                  <h4>
+                    {totalFeeds > 0 && totalFeeds}
+                    {' '}
+                    POST
+                  </h4>
+                </div>
                 <ScrollListFeed
                   isGrid
                   items={feeds.map((f) => f.objectInfo)}
@@ -283,7 +290,14 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   loadMore={this.handlePagechange.bind(this, 'feeds')}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Videos"><VideoCameraOutlined /></Tooltip>} key="videos">
+              <Tabs.TabPane tab={<VideoCameraOutlined />} key="videos">
+                <div className="heading-tab">
+                  <h4>
+                    {totalVideos > 0 && totalVideos}
+                    {' '}
+                    VIDEO
+                  </h4>
+                </div>
                 <ScrollListVideo
                   items={videos.map((f) => f.objectInfo)}
                   loading={loading}
@@ -291,7 +305,14 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   loadMore={this.handlePagechange.bind(this, 'videos')}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Galleries"><PictureOutlined /></Tooltip>} key="galleries">
+              <Tabs.TabPane tab={<PictureOutlined />} key="galleries">
+                <div className="heading-tab">
+                  <h4>
+                    {totalGalleries > 0 && totalGalleries}
+                    {' '}
+                    GALLERY
+                  </h4>
+                </div>
                 <ScrollListGallery
                   items={galleries.map((f) => f.objectInfo)}
                   loading={loading}
@@ -299,7 +320,14 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   loadMore={this.handlePagechange.bind(this, 'galleries')}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Shop"><ShopOutlined /></Tooltip>} key="products">
+              <Tabs.TabPane tab={<ShopOutlined />} key="products">
+                <div className="heading-tab">
+                  <h4>
+                    {totalProducts > 0 && totalProducts}
+                    {' '}
+                    PRODUCT
+                  </h4>
+                </div>
                 <ScrollListProduct
                   loading={loading}
                   items={products.map((p) => p.objectInfo)}
@@ -310,7 +338,14 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   )}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Models"><ModelIcon /></Tooltip>} key="performers">
+              <Tabs.TabPane tab={<ModelIcon />} key="performers">
+                <div className="heading-tab">
+                  <h4>
+                    {totalPerformers > 0 && totalPerformers}
+                    {' '}
+                    MODEL
+                  </h4>
+                </div>
                 <UserPerformerBookmarks
                   loading={loading}
                   performers={performers.map((p) => p.objectInfo)}
