@@ -155,6 +155,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
           if (isSchedule) {
             data.scheduledAt = scheduledAt;
           }
+          if (values.tags && values.tags.length) {
+            data.tags = values.tags.map((tag) => tag.replace(/[^a-zA-Z0-9 ]/g, '_'));
+          }
           submit(data);
         }}
         onFinishFailed={() => message.error('Please complete the required fields')}
