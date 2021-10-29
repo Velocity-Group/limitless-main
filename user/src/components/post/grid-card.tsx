@@ -20,7 +20,7 @@ export class FeedGridCard extends PureComponent<IProps> {
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
 
-    const thumbUrl = feed?.thumbnail?.url || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0])
+    const thumbUrl = (!canView ? feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0] : feed?.thumbnail?.url) || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0])
     || (feed?.teaser && feed?.teaser?.thumbnails && feed?.teaser?.thumbnails[0])
     || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0]) || '/static/leaf.jpg';
 

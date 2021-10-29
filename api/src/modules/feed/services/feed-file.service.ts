@@ -11,13 +11,28 @@ export class FeedFileService {
     private readonly fileService: FileService
   ) { }
 
-  public async validatePhoto(photo: FileDto): Promise<any> {
+  public async validateThumbnail(photo: FileDto): Promise<any> {
     if (!photo.isImage()) {
       await this.fileService.remove(photo._id);
       throw new InvalidFeedTypeException('Invalid photo file!');
     }
     await this.fileService.queueProcessPhoto(photo._id, {
       thumbnailSize: { // for blur image
+        width: 65,
+        height: 65
+      }
+    });
+
+    return true;
+  }
+
+  public async validatePhoto(photo: FileDto): Promise<any> {
+    if (!photo.isImage()) {
+      await this.fileService.remove(photo._id);
+      throw new InvalidFeedTypeException('Invalid photo file!');
+    }
+    await this.fileService.queueProcessPhoto(photo._id, {
+      thumbnailSize: {
         width: 500,
         height: 500
       }

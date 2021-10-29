@@ -211,12 +211,12 @@ class Settings extends PureComponent {
       case 'mixed':
         return (
           <div className="ant-row ant-form-item ant-form-item-with-help" key={setting._id} style={{ margin: '15px 0' }}>
-            <div className="ant-col ant-col-4 ant-form-item-label">
+            <div className="ant-col ant-col-24 ant-form-item-label">
               <label>
                 {setting.name}
               </label>
             </div>
-            <div className="ant-col ant-col-20 ant-form-item-control">
+            <div className="ant-col ant-col-24 ant-form-item-control">
               <div className="ant-form-item">
                 <div>
                   <label>

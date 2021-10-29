@@ -104,7 +104,7 @@ export class FeedFileController {
   async uploadThumb(
     @FileUploaded() file: FileDto
   ): Promise<any> {
-    await this.feedFileService.validatePhoto(file);
+    await this.feedFileService.validateThumbnail(file);
 
     return DataResponse.ok({
       success: true,

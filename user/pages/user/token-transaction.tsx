@@ -142,6 +142,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
           <PageHeading title="Token Transactions" icon={<HistoryOutlined />} />
           <SearchFilter
             type={type}
+            searchWithPerformer
             onSubmit={this.handleFilter.bind(this)}
             dateRange
           />

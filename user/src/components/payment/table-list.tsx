@@ -27,9 +27,9 @@ const PaymentTableList = ({
       key: '_id',
       render(id) {
         return (
-          <span style={{ whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+          <a style={{ whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
             {id.slice(16, 24)}
-          </span>
+          </a>
         );
       }
     },

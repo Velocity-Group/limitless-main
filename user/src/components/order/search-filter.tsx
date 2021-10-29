@@ -39,7 +39,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
   render() {
     const { onSubmit } = this.props;
     return (
-      <Row gutter={24}>
+      <Row className="search-filter">
         <Col lg={6} md={8} xs={12}>
           <Select
             onChange={(val) => this.setState({ deliveryStatus: val }, () => onSubmit(this.state))}
