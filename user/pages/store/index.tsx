@@ -18,8 +18,8 @@ import { updateBalance } from '@redux/user/actions';
 import {
   IProduct, IUser, IUIConfig, IError
 } from 'src/interfaces';
-import './store.less';
 import Router from 'next/router';
+import './store.less';
 
 interface IProps {
   user: IUser;
@@ -190,32 +190,31 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
             content={product.description}
           />
         </Head>
-        <div className="prod-main">
-          <div className="main-container">
-            <div className="prod-card">
-              {product && !loading ? (
-                <div className="prod-img">
-                  <Image
-                    alt="product-img"
-                    src={product?.image || '/static/empty_product.svg'}
-                    placeholder
-                  />
-                  {product.stock && product.type === 'physical' ? (
-                    <span className="prod-stock">
-                      {product.stock}
-                      {' '}
-                      in stock
-                    </span>
-                  ) : null}
-                  {!product.stock && product.type === 'physical' && (
+        <div className="main-container">
+          <PageHeading title={product.name || 'N/A'} icon={<ShopOutlined />} />
+          <div className="prod-card">
+            {product && !loading ? (
+              <div className="prod-img">
+                <Image
+                  alt="product-img"
+                  src={product?.image || '/static/empty_product.svg'}
+                  placeholder
+                />
+                {product.stock && product.type === 'physical' ? (
+                  <span className="prod-stock">
+                    {product.stock}
+                    {' '}
+                    in stock
+                  </span>
+                ) : null}
+                {!product.stock && product.type === 'physical' && (
                   <span className="prod-stock">Out of stock!</span>
-                  )}
-                  <span className="prod-digital">{product.type}</span>
-                </div>
-              ) : <div><Spin /></div>}
-              {product && (
+                )}
+                <span className="prod-digital">{product.type}</span>
+              </div>
+            ) : <div><Spin /></div>}
+            {product && (
               <div className="prod-info">
-                <PageHeading title={product.name || 'N/A'} icon={<ShopOutlined />} />
                 <p className="prod-desc">{product?.description}</p>
                 <div className="add-cart">
                   <p className="prod-price">
@@ -234,8 +233,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   </div>
                 </div>
               </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
         <div className="vid-split">
@@ -287,7 +285,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           <div className="related-items">
             <h4 className="ttl-1">You may also like</h4>
             {!loading && relatedProducts.length > 0 && (
-            <PerformerListProduct products={relatedProducts} />
+              <PerformerListProduct products={relatedProducts} />
             )}
             {!loading && !relatedProducts.length && <p>No product was found</p>}
             {loading && <div style={{ margin: 10, textAlign: 'center' }}><Spin /></div>}
