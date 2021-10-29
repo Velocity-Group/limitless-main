@@ -25,6 +25,7 @@ import { UserDto } from 'src/modules/user/dtos';
 import { PurchaseItemType } from 'src/modules/purchased-item/constants';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
+import { Storage } from 'src/modules/storage/contants';
 import { VideoUpdatePayload } from '../payloads';
 import { VideoDto, IVideoResponse } from '../dtos';
 import { VIDEO_STATUS } from '../constants';
@@ -134,11 +135,15 @@ export class VideoService {
     return videos;
   }
 
-  public getVideoForView(fileDto: FileDto, canView: boolean) {
+  public getVideoForView(file: FileDto, video: VideoDto, canView: boolean, jwToken: string) {
+    let fileUrl = file.getUrl(canView);
+    if (file.server !== Storage.S3) {
+      fileUrl = `${fileUrl}?videoId=${video._id}&token=${jwToken}`;
+    }
     return {
-      url: fileDto.getUrl(canView),
-      duration: fileDto.duration,
-      thumbnails: (fileDto.thumbnails || []).map((thumb) => FileDto.getPublicUrl(thumb.path))
+      url: fileUrl,
+      duration: file.duration,
+      thumbnails: file.getThumbnails()
     };
   }
 
@@ -292,7 +297,7 @@ export class VideoService {
     return new VideoDto(model);
   }
 
-  public async getDetails(videoId: string | ObjectId): Promise<VideoDto> {
+  public async getDetails(videoId: string, jwToken: string): Promise<VideoDto> {
     const video = await this.PerformerVideoModel.findById(videoId);
     if (!video) throw new EntityNotFoundException();
     const participantIds = video.participantIds.filter((p) => StringHelper.isObjectId(p));
@@ -308,13 +313,13 @@ export class VideoService {
     const dto = new VideoDto(video);
     dto.thumbnail = thumbnailFile ? thumbnailFile.getUrl() : null;
     dto.teaser = teaserFile ? teaserFile.getUrl() : null;
-    dto.video = this.getVideoForView(videoFile, true);
+    dto.video = this.getVideoForView(videoFile, dto, true, jwToken);
     dto.performer = performer ? new PerformerDto(performer).toSearchResponse() : null;
     dto.participants = participants.map((p) => p.toSearchResponse());
     return dto;
   }
 
-  public async userGetDetails(videoId: string, currentUser: UserDto): Promise<VideoDto> {
+  public async userGetDetails(videoId: string, currentUser: UserDto, jwToken: string): Promise<VideoDto> {
     const query = isObjectId(videoId) ? { _id: videoId } : { slug: videoId };
     const video = await this.PerformerVideoModel.findOne(query);
     if (!video) throw new EntityNotFoundException();
@@ -358,7 +363,7 @@ export class VideoService {
       url: teaserFile.getUrl(),
       thumbnails: teaserFile.getThumbnails()
     } : null;
-    dto.video = this.getVideoForView(videoFile, canView);
+    dto.video = this.getVideoForView(videoFile, dto, canView, jwToken);
     dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     dto.participants = participants.map((p) => p.toPublicDetailsResponse());
     await this.increaseView(dto._id);

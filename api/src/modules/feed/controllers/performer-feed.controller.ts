@@ -14,7 +14,8 @@ import {
   Get,
   Query,
   forwardRef,
-  Inject
+  Inject,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
@@ -60,9 +61,12 @@ export class PerformerFeedController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getMyFeeds(
     @Query() query: FeedSearchRequest,
-    @CurrentUser() performer: UserDto
+    @CurrentUser() performer: UserDto,
+    @Request() req: any
   ): Promise<DataResponse<PageableData<any>>> {
-    const data = await this.feedService.search(query, performer);
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const data = await this.feedService.search(query, performer, jwToken);
     return DataResponse.ok(data);
   }
 
@@ -73,9 +77,12 @@ export class PerformerFeedController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getPerformerFeed(
     @CurrentUser() user: UserDto,
-    @Param('id') id: string
+    @Param('id') id: string,
+    @Request() req: any
   ): Promise<DataResponse<FeedDto>> {
-    const data = await this.feedService.findOne(id, user);
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const data = await this.feedService.findOne(id, user, jwToken);
     return DataResponse.ok(data);
   }
 

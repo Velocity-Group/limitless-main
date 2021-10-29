@@ -33,9 +33,12 @@ export class UserPhotosController {
   @HttpCode(HttpStatus.OK)
   async search(
     @Query() query: PhotoSearchRequest,
-    @CurrentUser() user: UserDto
+    @CurrentUser() user: UserDto,
+    @Request() req: any
   ) {
-    const data = await this.photoSearchService.searchPhotos(query, user);
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const data = await this.photoSearchService.searchPhotos(query, user, jwToken);
     return DataResponse.ok(data);
   }
 
@@ -44,9 +47,12 @@ export class UserPhotosController {
   @HttpCode(HttpStatus.OK)
   async details(
     @Param('id') id: string,
-   @CurrentUser() user: UserDto
+     @CurrentUser() user: UserDto,
+     @Request() req: any
   ) {
-    const details = await this.photoService.details(id, user);
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const details = await this.photoService.details(id, jwToken, user);
     return DataResponse.ok(details);
   }
 

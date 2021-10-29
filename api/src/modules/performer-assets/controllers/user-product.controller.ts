@@ -52,8 +52,7 @@ export class UserProductsController {
     @Param('id') id: string,
     @CurrentUser() user: UserDto
   ) {
-    const details = await this.productService.getDetails(id, user);
-    // TODO - filter here
+    const details = await this.productService.userGetDetails(id, user);
     return DataResponse.ok(details.toPublic());
   }
 
@@ -62,9 +61,12 @@ export class UserProductsController {
   @HttpCode(HttpStatus.OK)
   async getDownloadLink(
     @Param('id') id: string,
-    @CurrentUser() user: UserDto
+    @CurrentUser() user: UserDto,
+    @Request() req: any
   ) {
-    const downloadLink = await this.productService.generateDownloadLink(id, user);
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const downloadLink = await this.productService.generateDownloadLink(id, user, jwToken);
     return DataResponse.ok({
       downloadLink
     });

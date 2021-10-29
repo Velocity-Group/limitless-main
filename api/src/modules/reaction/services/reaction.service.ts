@@ -306,7 +306,7 @@ export class ReactionService {
     };
   }
 
-  public async getListFeeds(req: ReactionSearchRequestPayload, user: UserDto) {
+  public async getListFeeds(req: ReactionSearchRequestPayload, user: UserDto, jwToken: string) {
     const query = {
       objectType: REACTION_TYPE.FEED,
       action: REACTION.BOOK_MARK,
@@ -332,10 +332,11 @@ export class ReactionService {
     ]);
 
     const feedIds = uniq(items.map((i) => i.objectId));
-    const feeds = await this.feedService.findByIds(feedIds, user);
+    const feeds = await this.feedService.findByIds(feedIds);
+    const mapFeeds = await this.feedService.populateFeedData(feeds, user, jwToken);
     const reactions = items.map((v) => new ReactionDto(v));
     reactions.forEach((item) => {
-      const feed = feeds.find((p) => `${p._id}` === `${item.objectId}`);
+      const feed = mapFeeds.find((p) => `${p._id}` === `${item.objectId}`);
       // eslint-disable-next-line no-param-reassign
       item.objectInfo = feed ? new FeedDto(feed) : null;
     });

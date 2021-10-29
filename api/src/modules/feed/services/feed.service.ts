@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import {
   Injectable, Inject, forwardRef, HttpException
 } from '@nestjs/common';
@@ -13,7 +12,6 @@ import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
-import { FileDto } from 'src/modules/file';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION } from 'src/modules/reaction/constants';
 import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
@@ -24,6 +22,7 @@ import { PurchasedItemSearchService, PaymentTokenService } from 'src/modules/pur
 import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import * as moment from 'moment';
+import { Storage } from 'src/modules/storage/contants';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
@@ -120,10 +119,9 @@ export class FeedService {
     return data;
   }
 
-  public async findByIds(ids: string[] | ObjectId[], user: UserDto) {
+  public async findByIds(ids: string[] | ObjectId[]) {
     const data = await this.feedModel.find({ _id: { $in: ids } });
-    const result = await this.populateFeedData(data, user);
-    return result;
+    return data;
   }
 
   public async handleCommentStat(feedId: string, num = 1) {
@@ -137,7 +135,7 @@ export class FeedService {
     // TODO - validate for other
   }
 
-  private async populateFeedData(feeds: any, user: UserDto) {
+  public async populateFeedData(feeds: any, user: UserDto, jwToken?: string) {
     const performerIds = uniq(
       feeds.map((f) => f.fromSourceId.toString())
     );
@@ -191,11 +189,18 @@ export class FeedService {
       const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
       const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'));
       if (feedFiles.length) {
-        feed.files = feedFiles.map((file) => ({
-          ...file.toResponse(),
-          thumbnails: (file.thumbnails || []).map((thumb) => FileDto.getPublicUrl(thumb.path)),
-          url: file.getUrl(canView)
-        }));
+        feed.files = feedFiles.map((file) => {
+          // track server s3 or local, assign jwtoken if local
+          let fileUrl = file.getUrl(canView);
+          if (file.server !== Storage.S3) {
+            fileUrl = `${fileUrl}?feedId=${feed._id}&token=${jwToken}`;
+          }
+          return {
+            ...file.toResponse(),
+            thumbnails: file.getThumbnails(),
+            url: fileUrl
+          };
+        });
       }
       if (feed.thumbnailId) {
         const thumbnail = files.find((file) => file._id.toString() === feed.thumbnailId.toString());
@@ -217,13 +222,13 @@ export class FeedService {
     });
   }
 
-  public async findOne(id: string, user: UserDto): Promise<FeedDto> {
+  public async findOne(id: string, user: UserDto, jwToken: string): Promise<FeedDto> {
     const query = isObjectId(id) ? { _id: id } : { slug: id };
     const feed = await this.feedModel.findOne(query);
     if (!feed) {
       throw new EntityNotFoundException();
     }
-    const newFeed = await this.populateFeedData([feed], user);
+    const newFeed = await this.populateFeedData([feed], user, jwToken);
     return new FeedDto(newFeed[0]);
   }
 
@@ -273,7 +278,7 @@ export class FeedService {
     return feed;
   }
 
-  public async search(req: FeedSearchRequest, user: UserDto) {
+  public async search(req: FeedSearchRequest, user: UserDto, jwToken: string) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER
     } as any;
@@ -328,12 +333,12 @@ export class FeedService {
 
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data, user),
+      data: await this.populateFeedData(data, user, jwToken),
       total
     };
   }
 
-  public async userSearchFeeds(req: FeedSearchRequest, user: UserDto) {
+  public async userSearchFeeds(req: FeedSearchRequest, user: UserDto, jwToken: string) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER,
       status: STATUS.ACTIVE
@@ -392,12 +397,12 @@ export class FeedService {
     ]);
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data, user),
+      data: await this.populateFeedData(data, user, jwToken),
       total
     };
   }
 
-  public async searchSubscribedPerformerFeeds(req: FeedSearchRequest, user: UserDto) {
+  public async searchSubscribedPerformerFeeds(req: FeedSearchRequest, user: UserDto, jwToken: string) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER,
       status: STATUS.ACTIVE
@@ -445,7 +450,7 @@ export class FeedService {
     ]);
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data, user),
+      data: await this.populateFeedData(data, user, jwToken),
       total
     };
   }

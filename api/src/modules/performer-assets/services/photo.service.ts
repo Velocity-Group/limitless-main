@@ -16,6 +16,8 @@ import { REF_TYPE } from 'src/modules/file/constants';
 import { PaymentTokenService } from 'src/modules/purchased-item/services';
 import { PurchaseItemType } from 'src/modules/purchased-item/constants';
 import { UserDto } from 'src/modules/user/dtos';
+import { Storage } from 'src/modules/storage/contants';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { PHOTO_STATUS } from '../constants';
 import { PhotoDto, GalleryDto } from '../dtos';
 import { PhotoCreatePayload, PhotoUpdatePayload } from '../payloads';
@@ -145,7 +147,7 @@ export class PhotoService {
     return dto;
   }
 
-  public async updateInfo(id: string | ObjectId, payload: PhotoUpdatePayload, updater?: UserDto): Promise<PhotoDto> {
+  public async updateInfo(id: string, payload: PhotoUpdatePayload, updater?: UserDto): Promise<PhotoDto> {
     const photo = await this.photoModel.findById(id);
     if (!photo) {
       throw new EntityNotFoundException();
@@ -175,7 +177,7 @@ export class PhotoService {
     return dto;
   }
 
-  public async setCoverGallery(id: string | ObjectId, updater: UserDto): Promise<PhotoDto> {
+  public async setCoverGallery(id: string, updater: UserDto): Promise<PhotoDto> {
     const photo = await this.photoModel.findById(id);
     if (!photo) {
       throw new EntityNotFoundException();
@@ -194,24 +196,30 @@ export class PhotoService {
     return new PhotoDto(photo);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async details(id: string | ObjectId, user?: UserDto): Promise<PhotoDto> {
+  public async details(id: string, jwToken: string, user: UserDto): Promise<PhotoDto> {
     const photo = await this.photoModel.findOne({ _id: id });
     if (!photo) {
       throw new EntityNotFoundException();
     }
 
     const dto = new PhotoDto(photo);
-    const [performer, gallery, file] = await Promise.all([
+    const [performer, gallery, file, isSubscribed] = await Promise.all([
       photo.performerId ? this.performerService.findById(photo.performerId) : null,
       photo.galleryId ? this.galleryService.findById(photo.galleryId) : null,
-      photo.fileId ? this.fileService.findById(photo.fileId) : null
+      photo.fileId ? this.fileService.findById(photo.fileId) : null,
+      user ? this.subscriptionService.checkSubscribed(photo.performerId, user._id) : false
     ]);
-    if (performer) dto.performer = { username: performer.username };
+    if (performer) dto.performer = new PerformerDto(performer).toResponse();
     if (gallery) dto.gallery = new GalleryDto(gallery);
+    const isBought = user && gallery ? this.paymentTokenService.checkBought(new GalleryDto(gallery), PurchaseItemType.GALLERY, user) : false;
+    const canView = (gallery.isSale && isBought) || (!gallery.isSale && isSubscribed) || (`${user?._id}` === `${gallery?.performerId}`) || (user && user.roles && user.roles.includes('admin'));
     if (file) {
+      let fileUrl = file.getUrl(canView);
+      if (file.server !== Storage.S3) {
+        fileUrl = `${fileUrl}?photoId=${dto._id}&token=${jwToken}`;
+      }
       dto.photo = {
-        url: file.getUrl(),
+        url: fileUrl,
         thumbnails: file.getThumbnails(),
         width: file.width,
         height: file.height

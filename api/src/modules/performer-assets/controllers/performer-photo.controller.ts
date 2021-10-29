@@ -11,7 +11,8 @@ import {
   Param,
   Delete,
   Get,
-  Query
+  Query,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
@@ -22,15 +23,13 @@ import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { PhotoCreatePayload, PhotoUpdatePayload, PhotoSearchRequest } from '../payloads';
 import { PhotoService } from '../services/photo.service';
 import { PhotoSearchService } from '../services/photo-search.service';
-import { AuthService } from '../../auth/services';
 
 @Injectable()
 @Controller('performer/performer-assets/photos')
 export class PerformerPhotoController {
   constructor(
     private readonly photoService: PhotoService,
-    private readonly photoSearchService: PhotoSearchService,
-    private readonly authService: AuthService
+    private readonly photoSearchService: PhotoSearchService
   ) {}
 
   @Post('/upload')
@@ -104,9 +103,10 @@ export class PerformerPhotoController {
   @Roles('performer')
   async search(
     @Query() query: PhotoSearchRequest,
-    @CurrentUser() user: UserDto
+    @CurrentUser() user: UserDto,
+    @Request() req: any
   ) {
-    const details = await this.photoSearchService.performerSearch(query, user);
+    const details = await this.photoSearchService.performerSearch(query, user, req.jwToken);
     return DataResponse.ok(details);
   }
 
@@ -114,8 +114,12 @@ export class PerformerPhotoController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
   @Roles('performer')
-  async details(@Param('id') id: string) {
-    const details = await this.photoService.details(id);
+  async details(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDto,
+    @Request() req: any
+  ) {
+    const details = await this.photoService.details(id, req.jwToken, user);
     return DataResponse.ok(details);
   }
 }

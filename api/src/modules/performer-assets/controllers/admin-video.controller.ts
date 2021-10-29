@@ -10,7 +10,8 @@ import {
   Param,
   Query,
   UseInterceptors,
-  Delete
+  Delete,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
@@ -90,9 +91,10 @@ export class AdminPerformerVideosController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   async details(
-    @Param('id') id: string
+    @Param('id') id: string,
+    @Request() req: any
   ) {
-    const details = await this.videoService.getDetails(id);
+    const details = await this.videoService.getDetails(id, req.jwToken);
     return DataResponse.ok(details);
   }
 

@@ -25,7 +25,16 @@ export default class BaseLayout extends PureComponent<DefaultProps> {
     geoBlocked: false
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    document.addEventListener('contextmenu', (event) => event.preventDefault());
+    this.clientCheckBlockByIp();
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('contextmenu', (event) => event.preventDefault());
+  }
+
+  async clientCheckBlockByIp() {
     const checkBlock = await blockService.checkCountryBlock();
     if (checkBlock?.data?.blocked) {
       this.setState({ geoBlocked: true });

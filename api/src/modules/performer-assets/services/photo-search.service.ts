@@ -11,6 +11,7 @@ import { PurchasedItemSearchService } from 'src/modules/purchased-item/services'
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
+import { Storage } from 'src/modules/storage/contants';
 import { PERFORMER_PHOTO_MODEL_PROVIDER } from '../providers';
 import { PhotoModel } from '../models';
 import { PhotoDto } from '../dtos';
@@ -32,7 +33,7 @@ export class PhotoSearchService {
     private readonly fileService: FileService
   ) { }
 
-  public async adminSearch(req: PhotoSearchRequest): Promise<PageableData<PhotoDto>> {
+  public async adminSearch(req: PhotoSearchRequest, jwToken: string): Promise<PageableData<PhotoDto>> {
     const query = {} as any;
     if (req.q) query.title = { $regex: req.q };
     if (req.performerId) query.performerId = req.performerId;
@@ -79,11 +80,15 @@ export class PhotoSearchService {
 
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
+        let fileUrl = file.getUrl(true);
+        if (file.server !== Storage.S3) {
+          fileUrl = `${fileUrl}?photoId=${v._id}&token=${jwToken}`;
+        }
         // eslint-disable-next-line no-param-reassign
         v.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
-          url: file.getUrl(true),
+          url: fileUrl,
           width: file.width,
           height: file.height,
           mimeType: file.mimeType
@@ -97,7 +102,7 @@ export class PhotoSearchService {
     };
   }
 
-  public async performerSearch(req: PhotoSearchRequest, user: UserDto): Promise<PageableData<PhotoDto>> {
+  public async performerSearch(req: PhotoSearchRequest, user: UserDto, jwToken: string): Promise<PageableData<PhotoDto>> {
     const query = {} as any;
     if (req.q) query.title = { $regex: req.q };
     query.performerId = user._id;
@@ -130,11 +135,15 @@ export class PhotoSearchService {
 
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
+        let fileUrl = file.getUrl(`${v.performerId}` === `${user._id}`);
+        if (file.server !== Storage.S3) {
+          fileUrl = `${fileUrl}?photoId=${v._id}&token=${jwToken}`;
+        }
         // eslint-disable-next-line no-param-reassign
         v.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
-          url: file.getUrl(`${v.performerId}` === `${user._id}`),
+          url: fileUrl,
           width: file.width,
           height: file.height,
           mimeType: file.mimeType
@@ -148,7 +157,7 @@ export class PhotoSearchService {
     };
   }
 
-  public async searchPhotos(req: PhotoSearchRequest, user: UserDto) {
+  public async searchPhotos(req: PhotoSearchRequest, user: UserDto, jwToken: string) {
     const query = {
       processing: false,
       status: STATUS.ACTIVE
@@ -198,11 +207,15 @@ export class PhotoSearchService {
       const canView = (v.gallery && !v.gallery.isSale && !!subscription) || (v.gallery && v.gallery.isSale && !!bought) || (user && `${user._id}` === `${v.performerId}`) || (user && user.roles && user.roles.includes('admin'));
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
+        let fileUrl = file.getUrl(canView);
+        if (file.server !== Storage.S3) {
+          fileUrl = `${fileUrl}?photoId=${v._id}&token=${jwToken}`;
+        }
         // eslint-disable-next-line no-param-reassign
         v.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
-          url: file.getUrl(canView),
+          url: fileUrl,
           width: file.width,
           height: file.height,
           mimeType: file.mimeType

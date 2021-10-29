@@ -13,7 +13,8 @@ import {
   Param,
   Query,
   UseInterceptors,
-  Delete
+  Delete,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
@@ -142,9 +143,10 @@ export class AdminPerformerProductsController {
   @UseGuards(RoleGuard)
   async details(
     @Param('id') id: string,
-    @CurrentUser() user: UserDto
+    @CurrentUser() user: UserDto,
+    @Request() req: any
   ): Promise<any> {
-    const resp = await this.productService.getDetails(id, user);
+    const resp = await this.productService.getDetails(id, user, req.jwToken);
     return DataResponse.ok(resp);
   }
 

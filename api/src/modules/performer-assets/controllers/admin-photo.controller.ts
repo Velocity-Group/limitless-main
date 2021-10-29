@@ -11,7 +11,8 @@ import {
   Param,
   Delete,
   Get,
-  Query
+  Query,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
@@ -89,9 +90,10 @@ export class AdminPerformerPhotoController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   async search(
-    @Query() query: PhotoSearchRequest
+    @Query() query: PhotoSearchRequest,
+    @Request() req: any
   ) {
-    const details = await this.photoSearchService.adminSearch(query);
+    const details = await this.photoSearchService.adminSearch(query, req.jwToken);
     return DataResponse.ok(details);
   }
 
@@ -99,8 +101,12 @@ export class AdminPerformerPhotoController {
   @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
-  async details(@Param('id') id: string) {
-    const details = await this.photoService.details(id);
+  async details(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDto,
+    @Request() req: any
+  ) {
+    const details = await this.photoService.details(id, req.jwToken, user);
     return DataResponse.ok(details);
   }
 }
