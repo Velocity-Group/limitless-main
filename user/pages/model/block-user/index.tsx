@@ -10,7 +10,6 @@ import { IUIConfig } from 'src/interfaces';
 import { SelectUserDropdown } from '@components/user/select-users-dropdown';
 import { blockService } from 'src/services';
 import UsersBlockList from '@components/user/users-block-list';
-import Router from 'next/router';
 import './index.less';
 
 interface IProps {
@@ -45,14 +44,15 @@ class blockPage extends PureComponent<IProps> {
 
   async handleUnblockUser(userId: string) {
     if (!window.confirm('Are you sure to unblock this user')) return;
+    const { userBlockedList } = this.state;
     try {
       await this.setState({ submiting: true });
       await blockService.unBlockUser(userId);
-      this.getBlockList();
+      message.success('Unblocked successfully');
+      this.setState({ submiting: false, userBlockedList: userBlockedList.filter((u) => u.targetId !== userId) });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'An error occured. Please try again later');
-    } finally {
       this.setState({ submiting: false });
     }
   }
@@ -61,18 +61,17 @@ class blockPage extends PureComponent<IProps> {
     const { limit, offset } = this.state;
     try {
       await this.setState({ loading: true });
-      const kq = await blockService.getBlockListUsers({
+      const resp = await blockService.getBlockListUsers({
         limit,
         offset: offset * limit
       });
       this.setState({
-        userBlockedList: kq.data.data,
-        totalBlockedUsers: kq.data.total
+        loading: false,
+        userBlockedList: resp.data.data,
+        totalBlockedUsers: resp.data.total
       });
     } catch (e) {
       message.error('An error occured, please try again later');
-      Router.back();
-    } finally {
       this.setState({ loading: false });
     }
   }
@@ -86,7 +85,7 @@ class blockPage extends PureComponent<IProps> {
     try {
       await this.setState({ submiting: true });
       await blockService.blockUser({ targetId: blockUserId, target: 'user', reason: data.reason });
-      message.success('Blocked success');
+      message.success('Blocked successfully');
       this.getBlockList();
     } catch (e) {
       const err = await e;
@@ -136,7 +135,7 @@ class blockPage extends PureComponent<IProps> {
             name="blockForm"
             onFinish={this.blockUser.bind(this)}
             initialValues={{
-              reason: ''
+              reason: 'Disturb me!'
             }}
             labelCol={{ span: 24 }}
             wrapperCol={{ span: 24 }}

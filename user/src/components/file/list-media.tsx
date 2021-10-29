@@ -55,6 +55,7 @@ export default class UploadList extends PureComponent<IProps> {
             {file.percent && <Progress percent={Math.round(file.percent)} />}
           </div>
         ))}
+        {(type === 'photo' || (type === 'video' && !files.length)) && (
         <div className="add-more">
           <Upload
             customRequest={() => true}
@@ -73,6 +74,7 @@ export default class UploadList extends PureComponent<IProps> {
             {type === 'photo' ? 'photos' : type === 'video' ? 'video' : 'files'}
           </Upload>
         </div>
+        )}
       </div>
     );
   }

@@ -21,7 +21,7 @@ const PaymentTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Transaction_ID',
+      title: 'ID',
       dataIndex: '_id',
       key: 'id',
       render(data, record) {
@@ -52,8 +52,11 @@ const PaymentTableList = ({
             };
             break;
           case 'product':
-            url = '/user/orders';
-            as = '/user/orders';
+            url = '/store';
+            as = `/store/${record?.targetId}`;
+            query = {
+              id: record?.targetId
+            };
             break;
           case 'video':
             url = '/video';
@@ -63,10 +66,10 @@ const PaymentTableList = ({
             };
             break;
           case 'gallery':
-            url = '/model/profile';
-            as = `/${record?.performerInfo?.username || record?.performerInfo?._id}`;
+            url = '/gallery';
+            as = `/gallery/${record?.targetId}`;
             query = {
-              username: record?.performerInfo?.username || record?.performerInfo?._id
+              id: record?.targetId
             };
             break;
           default: null;
@@ -116,11 +119,7 @@ const PaymentTableList = ({
       render(type: string) {
         switch (type) {
           case 'feed':
-            return <Tag color="blue">Feed Post</Tag>;
-          case 'monthly_subscription':
-            return <Tag color="pink">Monthly Sub</Tag>;
-          case 'yearly_subscription':
-            return <Tag color="pink">Yearly Sub</Tag>;
+            return <Tag color="blue">Post</Tag>;
           case 'video':
             return <Tag color="green">Video</Tag>;
           case 'product':
@@ -171,63 +170,6 @@ const PaymentTableList = ({
       sorter: true,
       render(date: Date) {
         return <span>{formatDate(date)}</span>;
-      }
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      dataIndex: '_id',
-      render: (data, record) => {
-        let url = '/';
-        let as = '/';
-        let query = {};
-        switch (record.target) {
-          case 'performer':
-            url = '/model/profile';
-            as = `/${record?.performerInfo?.username || record?.performerInfo?._id}`;
-            query = {
-              username: record?.performerInfo?.username || record?.performerInfo?._id
-            };
-            break;
-          case 'message':
-            url = '/messages';
-            as = `/messages?toId=${record?.performerId}&toSource=performer`;
-            query = {
-              toSource: 'performer',
-              toId: record?.performerId
-            };
-            break;
-          case 'feed':
-            url = `/post?id=${record?.targetId}`;
-            as = `/post/${record?.targetId}`;
-            query = {
-              id: record?.targetId
-            };
-            break;
-          case 'product':
-            url = '/user/orders';
-            as = '/user/orders';
-            break;
-          case 'video':
-            url = '/video';
-            as = `/video/${record?.targetId}`;
-            query = {
-              id: record?.targetId
-            };
-            break;
-          default: null;
-        }
-        return (
-          <Link
-            href={{
-              pathname: url,
-              query
-            }}
-            as={as}
-          >
-            <a>View</a>
-          </Link>
-        );
       }
     }
   ];

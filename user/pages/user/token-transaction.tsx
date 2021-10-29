@@ -71,6 +71,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       const {
         filter, sort, sortBy, pagination
       } = this.state;
+      await this.setState({ loading: true });
       const resp = await purchaseTokenService.userSearch({
         ...filter,
         sort,
@@ -107,6 +108,10 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         text: 'Tip'
       },
       {
+        key: 'feed',
+        text: 'Post'
+      },
+      {
         key: 'product',
         text: 'Product'
       },
@@ -117,10 +122,6 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       {
         key: 'video',
         text: 'Video'
-      },
-      {
-        key: 'feed',
-        text: 'Feed Post'
       }
       // {
       //   key: 'message',
