@@ -188,6 +188,10 @@ export class FeedService {
       feed.polls = polls.filter((p) => feedPollStringIds.includes(p._id.toString()));
       const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
       const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'));
+      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))) {
+        feed.isSubscribed = true;
+        feed.isBought = true;
+      }
       if (feedFiles.length) {
         feed.files = feedFiles.map((file) => {
           // track server s3 or local, assign jwtoken if local

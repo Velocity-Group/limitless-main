@@ -182,7 +182,7 @@ export class GalleryService {
           if (file) {
             // eslint-disable-next-line no-param-reassign
             g.coverPhoto = {
-              url: file.getUrl(),
+              url: file.getUrl(true),
               thumbnails: file.getThumbnails()
             };
           }
@@ -235,7 +235,7 @@ export class GalleryService {
     return dto;
   }
 
-  public async updatePhotoStats(id: string | ObjectId, num = 1) {
+  public async updatePhotoStats(id: ObjectId, num = 1) {
     return this.galleryModel.findOneAndUpdate(
       { _id: id },
       {
@@ -244,7 +244,7 @@ export class GalleryService {
     );
   }
 
-  public async downloadZipPhotos(galleryId: string | ObjectId, user: UserDto) {
+  public async downloadZipPhotos(galleryId: string, user: UserDto) {
     const gallery = await this.galleryModel.findOne({ _id: galleryId });
     if (!gallery) {
       throw new EntityNotFoundException();
