@@ -588,6 +588,7 @@ export class AccountForm extends PureComponent<IProps> {
               </Select>
             </Form.Item>
           </Col>
+          {performer && (
           <Col md={12} xs={12}>
             <Form.Item label="Intro Video">
               <Upload
@@ -611,6 +612,7 @@ export class AccountForm extends PureComponent<IProps> {
               <Checkbox>Activate intro video</Checkbox>
             </Form.Item>
           </Col>
+          )}
           <Col xs={24} md={24}>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
               <Button type="primary" htmlType="submit" disabled={submiting || isUploadingVideo} loading={submiting || isUploadingVideo}>

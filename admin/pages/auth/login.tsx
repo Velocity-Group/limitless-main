@@ -85,6 +85,7 @@ class Login extends PureComponent<IProps> {
                 <Button
                   type="primary"
                   loading={loginAuth.requesting}
+                  disabled={loginAuth.requesting}
                   htmlType="submit"
                 >
                   Sign in

@@ -19,6 +19,7 @@ interface IProps {
   heights?: IHeight[];
   weights?: IWeight[];
 }
+
 class PerformerCreate extends PureComponent<IProps> {
   static async getInitialProps() {
     const [countries, languages, heights, weights] = await Promise.all([
