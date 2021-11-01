@@ -4,7 +4,7 @@ import { APIRequest, TOKEN } from './api-request';
 
 export class AuthService extends APIRequest {
   public async login(data: ILogin) {
-    return this.post('/auth/login/email', data);
+    return this.post('/auth/login', data);
   }
 
   setToken(token: string): void {

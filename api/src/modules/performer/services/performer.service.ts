@@ -29,6 +29,7 @@ import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/ch
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
 import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
+import { Storage } from 'src/modules/storage/contants';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
@@ -182,7 +183,7 @@ export class PerformerService {
     return performers.map((p) => new PerformerDto(p));
   }
 
-  public async getDetails(id: string | ObjectId): Promise<PerformerDto> {
+  public async getDetails(id: string, jwToken: string): Promise<PerformerDto> {
     const performer = await this.performerModel.findById(id);
     if (!performer) {
       throw new EntityNotFoundException();
@@ -212,20 +213,28 @@ export class PerformerService {
     dto.avatar = avatar ? FileDto.getPublicUrl(avatar.path) : null; // TODO - get default avatar
     dto.cover = cover ? FileDto.getPublicUrl(cover.path) : null;
     dto.welcomeVideoPath = welcomeVideo ? FileDto.getPublicUrl(welcomeVideo.path) : null;
-    dto.idVerification = idVerification
-      ? {
+    if (idVerification) {
+      let fileUrl = idVerification.getUrl(true);
+      if (idVerification.server !== Storage.S3) {
+        fileUrl = `${fileUrl}?documentId=${idVerification._id}&token=${jwToken}`;
+      }
+      dto.idVerification = {
         _id: idVerification._id,
-        url: new FileDto(idVerification).getUrl(true),
+        url: fileUrl,
         mimeType: idVerification.mimeType
+      };
+    }
+    if (documentVerification) {
+      let fileUrl = documentVerification.getUrl(true);
+      if (documentVerification.server !== Storage.S3) {
+        fileUrl = `${fileUrl}?documentId=${documentVerification._id}&token=${jwToken}`;
       }
-      : null;
-    dto.documentVerification = documentVerification
-      ? {
+      dto.documentVerification = {
         _id: documentVerification._id,
-        url: new FileDto(documentVerification).getUrl(true),
+        url: fileUrl,
         mimeType: documentVerification.mimeType
-      }
-      : null;
+      };
+    }
 
     // dto.ccbillSetting = await this.paymentGatewaySettingModel.findOne({
     //   performerId: id,

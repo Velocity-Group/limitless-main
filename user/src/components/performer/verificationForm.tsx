@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Form, Button, Row, Col, message, Progress, Image
+  Form, Button, Row, Col, message, Image
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import { ImageUpload } from '@components/file';
@@ -15,7 +15,7 @@ const layout = {
 interface IProps {
   onFinish: Function;
   user: IPerformer;
-  updating?: boolean;
+  updating: boolean;
 }
 
 export class PerformerVerificationForm extends PureComponent<IProps> {
@@ -25,10 +25,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
 
   state = {
     idImage: '',
-    documentImage: '',
-    isUploading: false,
-    idImgProgress: 0,
-    documentImgProgress: 0
+    documentImage: ''
   }
 
   componentDidMount() {
@@ -59,7 +56,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
       onFinish, updating
     } = this.props;
     const {
-      isUploading, idImage, documentImage, idImgProgress, documentImgProgress
+      idImage, documentImage
     } = this.state;
     const documentUploadUrl = performerService.getDocumentUploadUrl();
     const headers = {
@@ -96,7 +93,6 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
                   <Image alt="id-img" src={idImage} style={{ margin: 5, height: '140px' }} />
                 ) : <img src="/static/front-id.jpeg" height="140px" alt="id-img" />}
               </div>
-              {idImgProgress > 0 && <Progress percent={idImgProgress} />}
             </Form.Item>
           </Col>
           <Col xs={24} sm={24} md={12}>
@@ -113,12 +109,11 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
                   <Image alt="id-img" src={documentImage} style={{ margin: 5, height: '140px' }} />
                 ) : <img src="/static/holding-id.jpeg" height="140px" alt="holding-id" />}
               </div>
-              {documentImgProgress > 0 && <Progress percent={documentImgProgress} />}
             </Form.Item>
           </Col>
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
-          <Button className="primary" type="primary" htmlType="submit" disabled={updating || isUploading} loading={updating || isUploading}>
+          <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>
             Submit
           </Button>
         </Form.Item>

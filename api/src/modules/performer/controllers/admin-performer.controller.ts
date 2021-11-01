@@ -15,7 +15,8 @@ import {
   UseInterceptors,
   Inject,
   forwardRef,
-  Delete
+  Delete,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import {
@@ -108,10 +109,11 @@ export class AdminPerformerController {
   @UseGuards(RoleGuard)
   async updateUser(
     @Body() payload: PerformerUpdatePayload,
-    @Param('id') performerId: string
+    @Param('id') performerId: string,
+    @Request() req: any
   ): Promise<DataResponse<PerformerDto>> {
     await this.performerService.adminUpdate(performerId, payload);
-    const performer = await this.performerService.getDetails(performerId);
+    const performer = await this.performerService.getDetails(performerId, req.jwToken);
     return DataResponse.ok(performer);
   }
 
@@ -120,9 +122,10 @@ export class AdminPerformerController {
   @Roles('admin')
   @UseGuards(RoleGuard)
   async getDetails(
-    @Param('id') performerId: string
+    @Param('id') performerId: string,
+    @Request() req: any
   ): Promise<DataResponse<IPerformerResponse>> {
-    const performer = await this.performerService.getDetails(performerId);
+    const performer = await this.performerService.getDetails(performerId, req.jwToken);
     // TODO - check roles or other to response info
     const data = performer.toResponse(true, true);
     return DataResponse.ok(data);

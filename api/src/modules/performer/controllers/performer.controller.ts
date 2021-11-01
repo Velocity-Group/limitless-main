@@ -70,7 +70,7 @@ export class PerformerController {
   async me(
     @Request() req: any
   ): Promise<DataResponse<IPerformerResponse>> {
-    const user = await this.performerService.getDetails(req.user._id);
+    const user = await this.performerService.getDetails(req.user._id, req.jwToken);
     return DataResponse.ok(new PerformerDto(user).toResponse(true, false));
   }
 
@@ -106,10 +106,11 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   async updateUser(
     @Body() payload: SelfUpdatePayload,
-    @Param('id') performerId: string
+    @Param('id') performerId: string,
+    @Request() req: any
   ): Promise<DataResponse<IPerformerResponse>> {
     await this.performerService.selfUpdate(performerId, payload);
-    const performer = await this.performerService.getDetails(performerId);
+    const performer = await this.performerService.getDetails(performerId, req.jwToken);
 
     if (payload.password) {
       await Promise.all([

@@ -60,7 +60,7 @@ class Login extends PureComponent<IProps> {
             >
               <FormItem
                 hasFeedback
-                name="email"
+                name="username"
                 rules={[
                   { required: true, message: 'Please input your email!' },
                   { type: 'email', message: 'Invalid email address' }

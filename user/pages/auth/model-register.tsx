@@ -136,7 +136,7 @@ class RegisterPerformer extends PureComponent<IProps> {
             </div>
             <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
             <div className="social-login">
-              <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
+              <button type="button" disabled={!settings.twitterClientId} onClick={() => this.loginTwitter()} className="twitter-button">
                 <TwitterOutlined />
                 {' '}
                 SIGN UP WITH TWITTER
