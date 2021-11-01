@@ -333,9 +333,7 @@ class FeedCard extends Component<IProps> {
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
-    const thumbUrl = feed?.thumbnail?.url || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0])
-    || (feed?.teaser && feed?.teaser?.thumbnails && feed?.teaser?.thumbnails[0])
-    || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0]) || '/static/leaf.jpg';
+    const thumbUrl = (feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0]) || '/static/leaf.jpg';
     let totalVote = 0;
     polls && polls.forEach((poll) => {
       totalVote += poll.totalVote;
@@ -423,7 +421,7 @@ class FeedCard extends Component<IProps> {
           {!canView && (
             <div className="lock-content">
               {/* eslint-disable-next-line no-nested-ternary */}
-              <div className="feed-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
+              <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
               <div className="lock-middle">
                 {(isHovered || canView) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (

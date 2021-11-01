@@ -86,6 +86,7 @@ class VideoViewPage extends PureComponent<IProps> {
     isSubscribed: false,
     totalComment: 0,
     submiting: false,
+    requesting: false,
     activeTab: 'description'
   };
 
@@ -233,14 +234,14 @@ class VideoViewPage extends PureComponent<IProps> {
       return;
     }
     try {
-      await this.setState({ submiting: true });
+      await this.setState({ requesting: true });
       await (await purchaseTokenService.purchaseVideo(video._id, {})).data;
       message.success('Video is unlocked!');
       handleUpdateBalance({ token: video.price });
-      this.setState({ isBought: true });
+      this.setState({ isBought: true, requesting: false });
     } catch (e) {
       const error = await e;
-      this.setState({ submiting: false });
+      this.setState({ requesting: false });
       message.error(error.message || 'Error occured, please try again later');
     }
   }
@@ -296,14 +297,7 @@ class VideoViewPage extends PureComponent<IProps> {
     const comments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].items : [];
     const totalComments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].total : 0;
     const {
-      videoStats,
-      isLiked,
-      isBookmarked,
-      isSubscribed,
-      isBought,
-      submiting,
-      activeTab,
-      isFirstLoadComment
+      videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment
     } = this.state;
     const thumbUrl = video?.thumbnail?.url || (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const playSource = {
@@ -414,7 +408,7 @@ class VideoViewPage extends PureComponent<IProps> {
                       <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
                       <div className="text-center">
                         {video.isSale && !isBought && (
-                          <Button type="primary" loading={submiting} disabled={submiting} onClick={this.purchaseVideo.bind(this)}>
+                          <Button type="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
                             PAY
                             &nbsp;
                             <img alt="token" src="/static/coin-ico.png" height="20px" />

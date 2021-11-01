@@ -48,7 +48,7 @@ export class AdminPerformerProductsController {
           destination: getConfig('file').imageDir,
           generateThumbnail: true,
           uploadImmediately: true,
-          thumbnailSize: getConfig('image').productThumbnail,
+          thumbnailSize: getConfig('image').originThumbnail,
           acl: S3ObjectCannelACL.PublicRead,
           server: Storage.S3
         }
@@ -94,7 +94,7 @@ export class AdminPerformerProductsController {
           destination: getConfig('file').imageDir,
           uploadImmediately: true,
           generateThumbnail: true,
-          thumbnailSize: getConfig('image').productThumbnail,
+          thumbnailSize: getConfig('image').originThumbnail,
           acl: S3ObjectCannelACL.PublicRead,
           server: Storage.S3
         }

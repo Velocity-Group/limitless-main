@@ -21,7 +21,7 @@ export class VideoCard extends PureComponent<IProps> {
     const { video } = this.props;
     const { isHovered } = this.state;
     const canView = (!video.isSale && video.isSubscribed) || (video.isSale && video.isBought);
-    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
+    const thumbUrl = (!canView ? (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) : video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0])) || '/static/no-image.jpg';
     return (
       <Link
         href={{ pathname: '/video', query: { id: video.slug || video._id } }}
@@ -41,7 +41,7 @@ export class VideoCard extends PureComponent<IProps> {
           </span>
           )}
           <div className="vid-thumb">
-            <div className="card-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: 'blur(20px)' }} />
+            <div className="card-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/no-image.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
             <div className="vid-stats">
               <span>
                 <a>

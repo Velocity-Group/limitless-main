@@ -105,7 +105,6 @@ export class FeedFileController {
     @FileUploaded() file: FileDto
   ): Promise<any> {
     await this.feedFileService.validateThumbnail(file);
-
     return DataResponse.ok({
       success: true,
       ...file.toResponse(),

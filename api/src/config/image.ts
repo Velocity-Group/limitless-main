@@ -4,10 +4,10 @@ export default {
     height: 500
   },
   blurThumbnail: {
-    width: 100,
-    height: 100
+    width: 65,
+    height: 65
   },
-  productThumbnail: {
+  originThumbnail: {
     width: 500,
     height: 500
   },

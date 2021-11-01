@@ -140,7 +140,7 @@ export class AdminPerformerVideosController {
             destination: getConfig('file').imageDir,
             uploadImmediately: true,
             generateThumbnail: true,
-            thumbnailSize: getConfig('image').videoThumbnail,
+            thumbnailSize: getConfig('image').blurThumbnail,
             acl: S3ObjectCannelACL.PublicRead,
             server: Storage.S3
           }

@@ -4,7 +4,7 @@ import {
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
-  QueueEventService, QueueEvent, EntityNotFoundException, ForbiddenException
+  QueueEventService, QueueEvent, EntityNotFoundException, ForbiddenException, getConfig
 } from 'src/kernel';
 import { FileDto } from 'src/modules/file';
 import { FileService, FILE_EVENT } from 'src/modules/file/services';
@@ -128,10 +128,7 @@ export class PhotoService {
           photoId: photo._id
         },
         publishChannel: PHOTO_CONVERT_CHANNEL,
-        thumbnailSize: {
-          width: 250,
-          height: 250
-        }
+        thumbnailSize: getConfig('image').blurThumbnail
       })
     ]);
 

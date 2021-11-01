@@ -12,7 +12,7 @@ interface GalleryCardIProps {
 const GalleryCard = ({ gallery }: GalleryCardIProps) => {
   const [isHovered, setHover] = useState(false);
   const canView = (!gallery.isSale && gallery.isSubscribed) || (gallery.isSale && gallery.isBought);
-  const thumbUrl = (gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]) || '/static/no-image.jpg';
+  const thumbUrl = (!canView ? gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0] : gallery?.coverPhoto?.url) || '/static/no-image.jpg';
   return (
     <Link
       href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
@@ -32,7 +32,7 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
         </span>
         )}
         <div className="gallery-thumb">
-          <div className="card-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: 'blur(20px)' }} />
+          <div className="card-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/no-image.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
           <div className="gallery-stats">
             <a>
               <PictureOutlined />

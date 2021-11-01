@@ -1,6 +1,9 @@
 import {
   Injectable
 } from '@nestjs/common';
+import {
+  getConfig
+} from 'src/kernel';
 import { FileDto } from 'src/modules/file';
 import { FileService } from 'src/modules/file/services';
 import { InvalidFeedTypeException } from '../exceptions';
@@ -17,10 +20,7 @@ export class FeedFileService {
       throw new InvalidFeedTypeException('Invalid photo file!');
     }
     await this.fileService.queueProcessPhoto(photo._id, {
-      thumbnailSize: { // for blur image
-        width: 65,
-        height: 65
-      }
+      thumbnailSize: getConfig('image').blurThumbnail
     });
 
     return true;
@@ -32,10 +32,7 @@ export class FeedFileService {
       throw new InvalidFeedTypeException('Invalid photo file!');
     }
     await this.fileService.queueProcessPhoto(photo._id, {
-      thumbnailSize: {
-        width: 500,
-        height: 500
-      }
+      thumbnailSize: getConfig('image').originThumbnail
     });
 
     return true;

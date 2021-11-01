@@ -372,7 +372,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                   <button
                     type="button"
                     className={isBookmarked ? 'react-btn active' : 'react-btn'}
-                    disabled={submiting}
+                    disabled={requesting}
                     onClick={this.handleBookmark.bind(this)}
                   >
                     <BookOutlined />
@@ -427,7 +427,7 @@ class GalleryViewPage extends PureComponent<IProps> {
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}
         >
-          <PurchaseGalleryForm gallery={gallery} submiting={submiting} onFinish={this.purchaseGallery.bind(this)} />
+          <PurchaseGalleryForm gallery={gallery} submiting={requesting} onFinish={this.purchaseGallery.bind(this)} />
         </Modal>
         {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
       </Layout>
