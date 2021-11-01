@@ -328,7 +328,7 @@ class FeedCard extends Component<IProps> {
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
-      openTeaser, openSubscriptionModal, openReportModal
+      openTeaser, openSubscriptionModal, openReportModal, requesting
     } = this.state;
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
@@ -570,31 +570,29 @@ class FeedCard extends Component<IProps> {
           footer={null}
           onCancel={() => this.setState({ openTipModal: false })}
         >
-          <TipPerformerForm performer={performer} submiting={submiting} onFinish={this.sendTip.bind(this)} />
+          <TipPerformerForm performer={performer} submiting={requesting} onFinish={this.sendTip.bind(this)} />
         </Modal>
         <Modal
           key="purchase_post"
           className="subscription-modal"
           title={null}
           visible={openPurchaseModal}
-          confirmLoading={submiting}
           footer={null}
           destroyOnClose
           onCancel={() => this.setState({ openPurchaseModal: false })}
         >
-          <PurchaseFeedForm feed={feed} submiting={submiting} onFinish={this.purchaseFeed.bind(this)} />
+          <PurchaseFeedForm feed={feed} submiting={requesting} onFinish={this.purchaseFeed.bind(this)} />
         </Modal>
         <Modal
           key="report_post"
           className="subscription-modal"
           title={null}
           visible={openReportModal}
-          confirmLoading={submiting}
           footer={null}
           destroyOnClose
           onCancel={() => this.setState({ openReportModal: false })}
         >
-          <ReportForm performer={performer} submiting={submiting} onFinish={this.handleReport.bind(this)} />
+          <ReportForm performer={performer} submiting={requesting} onFinish={this.handleReport.bind(this)} />
         </Modal>
         <Modal
           key="subscribe_performer"
