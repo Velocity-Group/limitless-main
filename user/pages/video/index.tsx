@@ -299,7 +299,7 @@ class VideoViewPage extends PureComponent<IProps> {
     const {
       videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment
     } = this.state;
-    const thumbUrl = video?.thumbnail?.url || (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
+    const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const playSource = {
       file: video?.video?.url || '',
       image: thumbUrl,

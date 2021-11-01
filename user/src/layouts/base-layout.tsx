@@ -26,12 +26,12 @@ export default class BaseLayout extends PureComponent<DefaultProps> {
   }
 
   componentDidMount() {
-    document.addEventListener('contextmenu', (event) => event.preventDefault());
+    process.env.NODE_ENV === 'production' && document.addEventListener('contextmenu', (event) => event.preventDefault());
     this.clientCheckBlockByIp();
   }
 
   componentWillUnmount() {
-    document.removeEventListener('contextmenu', (event) => event.preventDefault());
+    process.env.NODE_ENV === 'production' && document.removeEventListener('contextmenu', (event) => event.preventDefault());
   }
 
   async clientCheckBlockByIp() {

@@ -333,7 +333,11 @@ class FeedCard extends Component<IProps> {
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
-    const thumbUrl = (feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0]) || '/static/leaf.jpg';
+    const thumbUrl = (feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0])
+      || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0])
+      || (feed?.teaser && feed?.teaser?.thumbnails && feed?.teaser?.thumbnails[0])
+      || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0])
+      || '/static/leaf.jpg';
     let totalVote = 0;
     polls && polls.forEach((poll) => {
       totalVote += poll.totalVote;
@@ -425,30 +429,30 @@ class FeedCard extends Component<IProps> {
               <div className="lock-middle">
                 {(isHovered || canView) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
-                <Button
-                  onMouseEnter={() => this.setState({ isHovered: true })}
-                  onMouseLeave={() => this.setState({ isHovered: false })}
-                  disabled={user.isPerformer}
-                  className="secondary"
-                  onClick={() => this.setState({ openSubscriptionModal: true })}
-                >
-                  Subcribe to unlock
-                </Button>
+                  <Button
+                    onMouseEnter={() => this.setState({ isHovered: true })}
+                    onMouseLeave={() => this.setState({ isHovered: false })}
+                    disabled={user.isPerformer}
+                    className="secondary"
+                    onClick={() => this.setState({ openSubscriptionModal: true })}
+                  >
+                    Subcribe to unlock
+                  </Button>
                 )}
                 {feed.isSale && !isBought && (
-                <Button
-                  onMouseEnter={() => this.setState({ isHovered: true })}
-                  onMouseLeave={() => this.setState({ isHovered: false })}
-                  disabled={user.isPerformer}
-                  className="secondary"
-                  onClick={() => this.setState({ openPurchaseModal: true })}
-                >
-                  Pay&nbsp;
-                  <img alt="coin" src="/static/coin-ico.png" width="15px" />
-                  {feed.price.toFixed(2)}
-                  {' '}
-                  to unlock
-                </Button>
+                  <Button
+                    onMouseEnter={() => this.setState({ isHovered: true })}
+                    onMouseLeave={() => this.setState({ isHovered: false })}
+                    disabled={user.isPerformer}
+                    className="secondary"
+                    onClick={() => this.setState({ openPurchaseModal: true })}
+                  >
+                    Pay&nbsp;
+                    <img alt="coin" src="/static/coin-ico.png" width="15px" />
+                    {feed.price.toFixed(2)}
+                    {' '}
+                    to unlock
+                  </Button>
                 )}
                 {feed.teaser && (
                   <Button type="link" onClick={() => this.setState({ openTeaser: true })}>
@@ -457,30 +461,30 @@ class FeedCard extends Component<IProps> {
                   </Button>
                 )}
               </div>
-                {feed.files && feed.files.length > 0 && (
-                  <div className="count-media">
-                    <span className="count-media-item">
-                      {images.length > 0 && (
-                        <span>
-                          {images.length}
-                          {' '}
-                          <FileImageOutlined />
-                          {' '}
-                        </span>
-                      )}
-                      {videos.length > 0 && images.length > 0 && '|'}
-                      {videos.length > 0 && (
-                        <span>
-                          {videos.length > 1 && videos.length}
-                          {' '}
-                          <VideoCameraOutlined />
-                          {' '}
-                          {videos.length === 1 && videoDuration(videos[0].duration)}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                )}
+              {feed.files && feed.files.length > 0 && (
+                <div className="count-media">
+                  <span className="count-media-item">
+                    {images.length > 0 && (
+                      <span>
+                        {images.length}
+                        {' '}
+                        <FileImageOutlined />
+                        {' '}
+                      </span>
+                    )}
+                    {videos.length > 0 && images.length > 0 && '|'}
+                    {videos.length > 0 && (
+                      <span>
+                        {videos.length > 1 && videos.length}
+                        {' '}
+                        <VideoCameraOutlined />
+                        {' '}
+                        {videos.length === 1 && videoDuration(videos[0].duration)}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
           )}
           {polls && polls.length > 0 && polls.map((poll) => (
@@ -491,21 +495,21 @@ class FeedCard extends Component<IProps> {
             </div>
           ))}
           {polls && polls.length > 0 && (
-          <div className="total-vote">
-            <span>
-              Total
-              {' '}
-              {shortenLargeNumber(totalVote)}
-              {' '}
-              votes
-            </span>
-            {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
+            <div className="total-vote">
               <span>
-                {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}D `}
-                <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
+                Total
+                {' '}
+                {shortenLargeNumber(totalVote)}
+                {' '}
+                votes
               </span>
-            ) : <span>Expired</span>}
-          </div>
+              {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
+                <span>
+                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}D `}
+                  <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
+                </span>
+              ) : <span>Expired</span>}
+            </div>
           )}
         </div>
         <div className="feed-bottom">

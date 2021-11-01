@@ -222,7 +222,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal, isBookmarked
     } = this.state;
     const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && gallery?.isSubscribed);
-    const thumbUrl = gallery?.coverPhoto?.thumbnails[0] || gallery?.coverPhoto?.url;
+    const thumbUrl = gallery?.coverPhoto?.url || ui?.logo;
     return (
       <Layout>
         <Head>

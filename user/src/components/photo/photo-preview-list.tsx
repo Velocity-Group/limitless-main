@@ -16,7 +16,7 @@ const PhotoPreviewList = ({
         <Image
           key={item._id}
           className="photo-card"
-          src={(item?.photo?.thumbnails && item?.photo?.thumbnails[0]) || '/static/no-image.jpg'}
+          src={isBlur ? (item?.photo?.thumbnails && item?.photo?.thumbnails[0]) || '/static/no-image.jpg' : item?.photo?.url}
           preview={isBlur ? false : {
             src: item?.photo?.url
           }}

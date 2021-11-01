@@ -41,7 +41,7 @@ export class VideoCard extends PureComponent<IProps> {
           </span>
           )}
           <div className="vid-thumb">
-            <div className="card-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/no-image.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
+            <div className="card-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: !canView ? 'blur(20px)' : 'blur(0px)' }} />
             <div className="vid-stats">
               <span>
                 <a>

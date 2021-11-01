@@ -352,7 +352,9 @@ export class FileService {
       let newPath = respVideo.toPath.replace(publicDir, '');
 
       const respThumb = await this.videoService.createThumbs(videoPath, {
-        toFolder: videoDir
+        toFolder: videoDir,
+        size: options?.size || '500x500',
+        count: options?.count || 3
       });
       let thumbnails: any = [];
       // check s3 settings
@@ -454,6 +456,8 @@ export class FileService {
     options?: {
       meta?: Record<string, any>;
       publishChannel?: string;
+      size?: string; // 500x500
+      count?: number; // num of thumbnails
     }
   ) {
     // add queue and convert file to mp4 and generate thumbnail
