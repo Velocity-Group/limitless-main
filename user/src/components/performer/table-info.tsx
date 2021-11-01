@@ -15,16 +15,18 @@ export class PerformerInfo extends PureComponent<IProps> {
     return (
       <div className="per-infor">
         <Collapse defaultActiveKey={['1']} bordered={false} accordion>
-          <Collapse.Panel header="BIOGRAPHY" key="1">
+          <Collapse.Panel
+            header={performer?.country ? (
+              <>
+                <img alt="flag" src={country?.flag} width="25px" />
+                  &nbsp;
+                {country?.name}
+              </>
+            ) : 'BIOGRAPHY'}
+            key="1"
+          >
             <p className="bio">{performer?.bio || 'No bio yet'}</p>
             <Descriptions className="performer-info">
-              {performer?.country && (
-                <Descriptions.Item key="country" label="Country">
-                  <img alt="flag" src={country?.flag} width="25px" />
-                  &nbsp;
-                  {country?.name}
-                </Descriptions.Item>
-              )}
               {performer?.gender && (
                 <Descriptions.Item label="Gender">
                   {performer?.gender}
