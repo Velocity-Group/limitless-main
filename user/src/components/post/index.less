@@ -213,26 +213,15 @@
   }
 
   .videojs-player {
-    width: 100%;
-
     .video-js {
-      height: 400px;
       width: 100%;
+      max-height: 100vh;
       border-radius: 3px;
       overflow: hidden;
-
-      .vjs-big-play-button {
-        top: calc(50% - 24px);
-        left: calc(50% - 45px)
-      }
 
       .vjs-poster {
         border-radius: 3px;
         border: none
-      }
-
-      @media screen and (max-width: @mobile-screen) {
-        height: 215px;
       }
     }
   }

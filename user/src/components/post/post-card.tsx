@@ -630,6 +630,7 @@ class FeedCard extends Component<IProps> {
               autoplay: true,
               controls: true,
               playsinline: true,
+              fluid: true,
               sources: [
                 {
                   src: feed?.teaser?.url,

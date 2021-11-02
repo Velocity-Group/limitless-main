@@ -1,10 +1,9 @@
-/* eslint-disable react/no-array-index-key */
 import { PureComponent } from 'react';
-import { IVideoResponse } from 'src/interfaces';
+import { IVideo } from 'src/interfaces';
 import './video.less';
 
 interface IProps {
-  video: IVideoResponse;
+  video: IVideo;
   style?: any;
 }
 

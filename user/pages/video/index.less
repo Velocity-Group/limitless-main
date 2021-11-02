@@ -116,7 +116,7 @@
   }
 }
 
-.main-player {
+.secondary-player {
   .vid-group {
     height: 596px;
     position: relative;
@@ -163,7 +163,7 @@
     }
 
     @media screen and (max-width: @mobile-screen) {
-      height: 280px;
+      height: auto;
       .left-group {
         .vid-exl-group {
           h4 {
@@ -199,22 +199,43 @@
     top: 0;
     left: 0;
     position: absolute;
-
     .video-js {
-      height: 100%;
       width: 100%;
-
-      .vjs-big-play-button {
-        left: calc(50% - 45px);
-        top: calc(50% - 24.5px);
-      }
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 3px;
+      overflow: hidden;
     }
-
     .vjs-poster {
       border-radius: 3px;
       border: none
     }
   }
+}
+
+.main-player {
+  .videojs-player {
+    .video-js {
+      width: 100%;
+      max-height: 100vh;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .vjs-poster {
+      border-radius: 3px;
+      border: none
+    }
+  }
+}
+
+.vid-processing {
+  background-color: @black;
+  color: @white;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .coupon-form {

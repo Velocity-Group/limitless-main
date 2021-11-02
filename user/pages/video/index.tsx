@@ -26,7 +26,7 @@ import { ListComments, CommentForm } from '@components/comment';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
 import {
-  IVideoResponse, IUser, IUIConfig, IPerformer
+  IVideo, IUser, IUIConfig, IPerformer
 } from 'src/interfaces';
 import Link from 'next/link';
 import Router from 'next/router';
@@ -47,7 +47,7 @@ interface IProps {
   moreComment: Function;
   createComment: Function;
   ui: IUIConfig;
-  video: IVideoResponse;
+  video: IVideo;
   deleteComment: Function;
   updateBalance: Function;
 }
@@ -66,7 +66,7 @@ class VideoViewPage extends PureComponent<IProps> {
         await videoService.findOne(query.id, {
           Authorization: ctx.token
         })
-      ).data) as IVideoResponse;
+      ).data);
       return { video };
     } catch (e) {
       return { error: await e };
@@ -300,11 +300,6 @@ class VideoViewPage extends PureComponent<IProps> {
       videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment
     } = this.state;
     const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
-    const playSource = {
-      file: video?.video?.url || '',
-      image: thumbUrl,
-      teaser: video?.teaser?.url || ''
-    };
     const videoJsOptions = {
       key: video._id,
       controls: true,
@@ -312,7 +307,7 @@ class VideoViewPage extends PureComponent<IProps> {
       poster: thumbUrl,
       sources: [
         {
-          src: playSource.file,
+          src: video?.video?.url,
           type: 'video/mp4'
         }
       ]
@@ -322,9 +317,10 @@ class VideoViewPage extends PureComponent<IProps> {
       autoplay: true,
       controls: true,
       playsinline: true,
+      loop: true,
       sources: [
         {
-          src: playSource.teaser,
+          src: video?.teaser?.url,
           type: 'video/mp4'
         }
       ]
@@ -382,19 +378,16 @@ class VideoViewPage extends PureComponent<IProps> {
           </div>
           <div className="vid-player">
             {((video.isSale && !isBought) || (!video.isSale && !isSubscribed) || video.isSchedule) && (
-              <div className="main-player">
+              <div className="secondary-player">
                 <div className="vid-group">
                   <div className="left-group">
                     {video.teaser && video.teaserProcessing && (
-                      <div
-                        className="text-center"
-                        style={{
-                          position: 'absolute', top: 0, padding: 10, zIndex: 1
-                        }}
-                      >
-                        Teaser is currently on processing
-                        {' '}
-                        <Spin />
+                      <div className="vid-processing">
+                        <div className="text-center">
+                          <Spin />
+                          <br />
+                          Teaser is currently on processing
+                        </div>
                       </div>
                     )}
                     {video.teaser && !video.teaserProcessing && <VideoPlayer {...teaserOptions} />}
@@ -441,20 +434,15 @@ class VideoViewPage extends PureComponent<IProps> {
             )}
             {((!video.isSale && isSubscribed && !video.isSchedule) || (video.isSale && isBought && !video.isSchedule)) && (
               <div className="main-player">
-                <div className="vid-group">
                   {video.processing ? (
-                    <div
-                      className="text-center"
-                      style={{
-                        position: 'absolute', top: 0, padding: 10, zIndex: 1
-                      }}
-                    >
-                      Video file is currently on processing
-                      {' '}
-                      <Spin />
+                    <div className="vid-processing">
+                      <div className="text-center">
+                        <Spin />
+                        <br />
+                        Video file is currently on processing
+                      </div>
                     </div>
                   ) : <VideoPlayer {...videoJsOptions} />}
-                </div>
               </div>
             )}
           </div>
@@ -524,7 +512,7 @@ class VideoViewPage extends PureComponent<IProps> {
           <div className="vid-tags">
             {video.tags && video.tags.length > 0
               && video.tags.map((tag) => (
-                <a color="magenta" style={{ marginRight: 5 }}>
+                <a color="magenta" key={tag} style={{ marginRight: 5 }}>
                   #
                   {tag || 'tag'}
                 </a>

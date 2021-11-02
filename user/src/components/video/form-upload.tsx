@@ -11,7 +11,8 @@ import {
   Switch,
   DatePicker,
   Row,
-  Col
+  Col,
+  Avatar
 } from 'antd';
 import { IUser, IVideo } from 'src/interfaces/index';
 import { CameraOutlined, VideoCameraAddOutlined, FileDoneOutlined } from '@ant-design/icons';
@@ -179,7 +180,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
         className="account-form"
       >
         <Row>
-          <Col md={12} xs={24}>
+          <Col md={24} xs={24}>
             <Form.Item
               label="Title"
               name="title"
@@ -189,15 +190,8 @@ export class FormUploadVideo extends PureComponent<IProps> {
             >
               <Input />
             </Form.Item>
-            <Form.Item label="Tags" name="tags">
-              <Select
-                mode="tags"
-                style={{ width: '100%' }}
-                size="middle"
-                showArrow={false}
-                defaultActiveFirstOption={false}
-              />
-            </Form.Item>
+          </Col>
+          <Col md={24} xs={24}>
             <Form.Item
               label="Participants"
               name="participantIds"
@@ -215,11 +209,26 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   && performers.length > 0
                   && performers.map((p) => (
                     <Option key={p._id} value={p._id}>
+                      <Avatar src={p?.avatar || '/static/no-avatar.png'} />
+                      {' '}
                       {p?.name || p?.username || 'N/A'}
                     </Option>
                   ))}
               </Select>
             </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item label="Tags" name="tags">
+              <Select
+                mode="tags"
+                style={{ width: '100%' }}
+                size="middle"
+                showArrow={false}
+                defaultActiveFirstOption={false}
+              />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
             <Form.Item
               name="status"
               label="Status"
@@ -252,9 +261,11 @@ export class FormUploadVideo extends PureComponent<IProps> {
             </Form.Item>
             {isSale && (
               <Form.Item name="price" label="Amount of Tokens">
-                <InputNumber min={1} />
+                <InputNumber style={{ width: '100%' }} min={1} />
               </Form.Item>
             )}
+          </Col>
+          <Col md={12} xs={24}>
             <Form.Item
               name="isSchedule"
               label="Scheduling?"
@@ -269,6 +280,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
             {isSchedule && (
               <Form.Item label="Schedule at">
                 <DatePicker
+                  style={{ width: '100%' }}
                   disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
                   defaultValue={scheduledAt}
                   onChange={this.onSchedule.bind(this)}
@@ -339,7 +351,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
           <Button className="primary" htmlType="submit" loading={uploading} disabled={uploading}>
             {video ? 'Update' : 'Upload'}
           </Button>
-          <Button className="secondary" onClick={() => Router.back()} loading={uploading} disabled={uploading}>
+          <Button className="secondary" onClick={() => Router.back()} disabled={uploading}>
             Back
           </Button>
         </Form.Item>

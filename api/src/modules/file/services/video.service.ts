@@ -47,13 +47,12 @@ export class VideoFileService {
     }
   }
 
-  public async getDuration(filePath: string): Promise<number> {
+  public async getMetaData(filePath: string): Promise<any> {
     return new Promise((resolve, reject) => ffmpeg.ffprobe(filePath, (err, metadata) => {
       if (err) {
         return reject(err);
       }
-
-      return resolve(parseInt(metadata.format.duration, 10));
+      return resolve(metadata);
     }));
   }
 

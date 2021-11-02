@@ -1,10 +1,10 @@
 import { PureComponent } from 'react';
 import { Button } from 'antd';
 import { } from '@ant-design/icons';
-import { IVideoResponse } from '@interfaces/index';
+import { IVideo } from '@interfaces/index';
 
 interface IProps {
-  video: IVideoResponse;
+  video: IVideo;
   onFinish: Function;
   submiting: boolean;
 }

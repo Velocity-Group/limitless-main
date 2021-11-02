@@ -67,6 +67,7 @@ export default class FeedSlider extends PureComponent<IProps> {
                   controls: true,
                   playsinline: true,
                   poster: feed?.thumbnail?.url,
+                  fluid: true,
                   sources: [
                     {
                       src: vid.url,

@@ -319,6 +319,39 @@ export class FileService {
     return true;
   }
 
+  // TODO - fix here, currently we just support local server, need a better solution if scale?
+  /**
+   * generate mp4 video & thumbnail
+   * @param fileId
+   * @param options
+   */
+  public async queueProcessVideo(
+    fileId: string | ObjectId,
+    options?: {
+      meta?: Record<string, any>;
+      publishChannel?: string;
+      size?: string; // 500x500
+      count?: number; // num of thumbnails
+    }
+  ) {
+    // add queue and convert file to mp4 and generate thumbnail
+    const file = await this.fileModel.findOne({ _id: fileId });
+    if (!file || file.status === 'processing') {
+      return false;
+    }
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: VIDEO_QUEUE_CHANNEL,
+        eventName: 'processVideo',
+        data: {
+          file: new FileDto(file),
+          options
+        }
+      })
+    );
+    return true;
+  }
+
   private async _processVideo(event: QueueEvent) {
     if (event.eventName !== 'processVideo') {
       return;
@@ -351,9 +384,11 @@ export class FileService {
       let newAbsolutePath = respVideo.toPath;
       let newPath = respVideo.toPath.replace(publicDir, '');
 
+      const meta = await this.videoService.getMetaData(videoPath);
+      const { width, height } = meta.streams[0];
       const respThumb = await this.videoService.createThumbs(videoPath, {
         toFolder: videoDir,
-        size: options?.size || '500x500',
+        size: options?.size || (width && height ? `${width}x${height}` : '640x360'),
         count: options?.count || 3
       });
       let thumbnails: any = [];
@@ -402,7 +437,6 @@ export class FileService {
           path: join(videoDir, name).replace(publicDir, '')
         }));
       }
-      const duration = await this.videoService.getDuration(videoPath);
       existsSync(videoPath) && unlinkSync(videoPath);
       await this.fileModel.updateOne(
         { _id: fileData._id },
@@ -412,9 +446,11 @@ export class FileService {
             absolutePath: newAbsolutePath,
             path: newPath,
             thumbnails,
-            duration,
+            duration: parseInt(meta.format.duration, 10),
             metadata,
-            server
+            server,
+            width,
+            height
           }
         }
       );
@@ -445,19 +481,16 @@ export class FileService {
     }
   }
 
-  // TODO - fix here, currently we just support local server, need a better solution if scale?
   /**
    * generate mp4 video & thumbnail
    * @param fileId
    * @param options
    */
-  public async queueProcessVideo(
+  public async queueProcessAudio(
     fileId: string | ObjectId,
     options?: {
       meta?: Record<string, any>;
       publishChannel?: string;
-      size?: string; // 500x500
-      count?: number; // num of thumbnails
     }
   ) {
     // add queue and convert file to mp4 and generate thumbnail
@@ -467,8 +500,8 @@ export class FileService {
     }
     await this.queueEventService.publish(
       new QueueEvent({
-        channel: VIDEO_QUEUE_CHANNEL,
-        eventName: 'processVideo',
+        channel: AUDIO_QUEUE_CHANNEL,
+        eventName: 'processAudio',
         data: {
           file: new FileDto(file),
           options
@@ -527,7 +560,7 @@ export class FileService {
       } else {
         server = Storage.DiskStorage;
       }
-      const duration = await this.videoService.getDuration(audioPath);
+      const meta = await this.videoService.getMetaData(audioPath);
       existsSync(audioPath) && unlinkSync(audioPath);
 
       await this.fileModel.updateOne(
@@ -537,7 +570,7 @@ export class FileService {
             status: 'finished',
             absolutePath: newAbsolutePath,
             path: newPath,
-            duration,
+            duration: parseInt(meta.format.duration, 10),
             mimeType: 'audio/mp3',
             name: fileData.name.replace(`.${fileData.mimeType.split('audio/')[1]}`, '.mp3'),
             metadata,
@@ -571,36 +604,6 @@ export class FileService {
         );
       }
     }
-  }
-
-  /**
-   * generate mp4 video & thumbnail
-   * @param fileId
-   * @param options
-   */
-  public async queueProcessAudio(
-    fileId: string | ObjectId,
-    options?: {
-      meta?: Record<string, any>;
-      publishChannel?: string;
-    }
-  ) {
-    // add queue and convert file to mp4 and generate thumbnail
-    const file = await this.fileModel.findOne({ _id: fileId });
-    if (!file || file.status === 'processing') {
-      return false;
-    }
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: AUDIO_QUEUE_CHANNEL,
-        eventName: 'processAudio',
-        data: {
-          file: new FileDto(file),
-          options
-        }
-      })
-    );
-    return true;
   }
 
   /**

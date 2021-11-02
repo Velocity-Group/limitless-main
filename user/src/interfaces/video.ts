@@ -22,47 +22,13 @@ export interface IVideo {
   tags: string[];
   participantIds: string[];
   participants: any[];
-  video: { url: string; thumbnails: string[]; duration: number };
-  stats: {
-    views: number;
-    likes: number;
-    comments: number;
-    bookmarks: number;
-  };
-  performer: IPerformer;
-  isBought: boolean;
-  isSubscribed: boolean;
-  isBookmarked: boolean;
-  isLiked: boolean;
-  isSchedule: boolean;
-  scheduledAt: Date;
-  updatedAt: Date;
-  createdAt: Date;
-}
-
-export interface IVideoResponse {
-  _id: string;
-  title: string;
-  slug: string;
-  performerId: string;
-  isSale: boolean;
-  price: number;
-  status: string;
-  processing: boolean;
-  description: string;
-  thumbnail: {
+  video: {
     url: string;
-    thumbnails: any[]
+    thumbnails: string[];
+    duration: number;
+    width: number;
+    height: number;
   };
-  teaser: {
-    url: string;
-    thumbnails: any[]
-  };
-  teaserProcessing: boolean;
-  tags: string[];
-  participantIds: string[];
-  participants: any[];
-  video: { url: string; thumbnails: string[]; duration: number };
   stats: {
     views: number;
     likes: number;
