@@ -453,7 +453,7 @@ export default class FeedForm extends PureComponent<IProps> {
                 </div>
               </Form.Item>
               )}
-          <div style={{ display: 'flex', margin: '15px 0' }}>
+          <div className="submit-btns">
             {['video', 'photo'].includes(feed?.type || type) && [
               <Upload
                 key="upload_thumb"
@@ -465,7 +465,7 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Button type="primary" style={{ marginLeft: 15 }}>
+                <Button type="primary">
                   <PictureOutlined />
                   {' '}
                   Add thumbnail
@@ -483,21 +483,21 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Button type="primary" style={{ marginLeft: 15 }}>
+                <Button type="primary">
                   <VideoCameraAddOutlined />
                   {' '}
                   Add teaser
                 </Button>
               </Upload>
             ]}
-            <Button disabled={addPoll || (!!(feed && feed._id))} type="primary" style={{ marginLeft: '15px' }} onClick={this.onAddPoll.bind(this)}>
+            <Button disabled={addPoll || (!!(feed && feed._id))} type="primary" onClick={this.onAddPoll.bind(this)}>
               <BarChartOutlined style={{ transform: 'rotate(90deg)' }} />
               {' '}
               Add polls
             </Button>
           </div>
           <AddPollDurationForm onAddPollDuration={this.onChangePollDuration.bind(this)} openDurationPollModal={openPollDuration} />
-          <div className="submit-btns">
+          <div className="submit-btns custom">
             <Button
               className="primary"
               htmlType="submit"

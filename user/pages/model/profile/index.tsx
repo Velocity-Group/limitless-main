@@ -719,6 +719,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 autoplay: true,
                 controls: true,
                 playsinline: true,
+                fluid: true,
                 sources: [
                   {
                     src: performer?.welcomeVideoPath,

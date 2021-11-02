@@ -18,10 +18,9 @@ export class VideoPlayer extends PureComponent<any> {
   }
 
   render() {
-    const { height } = this.props;
     return (
       <div className="videojs-player">
-        <div data-vjs-player style={height && { maxHeight: height }}>
+        <div data-vjs-player>
           <video ref={(node) => { this.videoNode = node; }} className="video-js" />
         </div>
       </div>
