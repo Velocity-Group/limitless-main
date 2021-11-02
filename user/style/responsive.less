@@ -1,5 +1,5 @@
-@import './default.less';
-@import './mixin.less';
+@import "./default.less";
+@import "./mixin.less";
 
 @media screen and (max-width: @mobile-screen) {
   .ant-layout-content {
@@ -14,25 +14,30 @@
     padding: 5px;
   }
   .ant-btn.info,
-  .ant-btn.secondary-custom{
+  .ant-btn.secondary-custom {
     margin-bottom: 5px;
   }
   .ant-btn.secondary,
-  .ant-btn.primary{
-      display: block;
-      width: 100%;
+  .ant-btn.primary {
+    display: block;
+    width: 100%;
   }
-  .ant-col-offset-4{
+  .ant-col-offset-4,
+  .ant-col-offset-8 {
     margin-left: 0;
   }
-  .switch-grp{
+  .switch-grp {
     margin-bottom: 10px;
   }
-  textarea:focus, input:focus {
-    font-size: 16px!important;
+  textarea:focus,
+  input:focus {
+    font-size: 16px !important;
     &:placeholder-shown {
-      font-size: 14px!important;
+      font-size: 14px !important;
     }
   }
-}
 
+  .user-account .ant-tabs .ant-tabs-nav-list {
+    width: initial !important;
+  }
+}
