@@ -5,6 +5,7 @@ import {
 import { IBannerUpdate, IBannerCreate } from 'src/interfaces';
 import { LoadingOutlined, UploadOutlined } from '@ant-design/icons';
 import ImgCrop from 'antd-img-crop';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   banner?: IBannerUpdate;
@@ -45,9 +46,10 @@ export class FormUploadBanner extends PureComponent<IProps> {
   };
 
   beforeUpload(file) {
-    const isMaxSize = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    const config = getGlobalConfig();
+    const isMaxSize = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isMaxSize) {
-      message.error(`Image must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+      message.error(`Image must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
     }
     return isMaxSize;
   }

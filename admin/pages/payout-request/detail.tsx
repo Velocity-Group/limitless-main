@@ -13,6 +13,7 @@ import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
 import { formatDate } from 'src/lib/date';
 import './index.less';
+import { getGlobalConfig } from '@services/config';
 
 const { Content } = Layout;
 
@@ -132,6 +133,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
       request, adminNote, loading, statsPayout, status
     } = this.state;
     const paymentAccountInfo = request?.paymentAccountInfo;
+    const config = getGlobalConfig();
     return (
       <Layout>
         <Head>
@@ -211,7 +213,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     Amount: $
                     {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
                   </p>
-                  <form action={process.env.NEXT_PUBLIC_PAYPAY_PAYOUT_URL || 'https://www.paypal.com/cgi-bin/webscr'} method="post" className="paypal-payout">
+                  <form action={config.NEXT_PUBLIC_PAYPAY_PAYOUT_URL || 'https://www.paypal.com/cgi-bin/webscr'} method="post" className="paypal-payout">
                     <input type="hidden" name="cmd" value="_xclick" />
                     <input type="hidden" name="return" value={window.location.href} />
                     <input type="hidden" name="cancel_return" value={window.location.href} />

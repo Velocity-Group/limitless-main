@@ -27,6 +27,7 @@ import { debounce } from 'lodash';
 import Router from 'next/router';
 import './video.less';
 import { VideoPlayer } from '@components/common';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   user: IUser;
@@ -169,38 +170,27 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   beforeUpload(file: File, field: string) {
     const { beforeUpload: beforeUploadHandler } = this.props;
+    const config = getGlobalConfig();
     if (field === 'thumbnail') {
-      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!isValid) {
-        message.error(
-          `File is too large please provide an file ${
-            process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5
-          }MB or below`
-        );
+        message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
         return isValid;
       }
       this.setState({ selectedThumbnail: file });
     }
     if (field === 'teaser') {
-      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
       if (!isValid) {
-        message.error(
-          `File is too large please provide an file ${
-            process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200
-          }MB or below`
-        );
+        message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
         return isValid;
       }
       this.setState({ selectedTeaser: file });
     }
     if (field === 'video') {
-      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000);
+      const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000);
       if (!isValid) {
-        message.error(
-          `File is too large please provide an file ${
-            process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000
-          }MB or below`
-        );
+        message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB or below`);
         return isValid;
       }
       this.setState({ selectedVideo: file });
@@ -224,6 +214,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
       selectedTeaser,
       selectedVideo
     } = this.state;
+    const config = getGlobalConfig();
     return (
       <>
         <Form
@@ -371,7 +362,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                     </a>
                   ))
                   || `Video file is ${
-                    process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048
+                    config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048
                   }MB or below`
                 }
               >
@@ -414,7 +405,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                     </p>
                   ))
                   || `Teaser is ${
-                    process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200
+                    config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200
                   }MB or below`
                 }
               >
@@ -457,7 +448,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                     </p>
                   ))
                   || `Thumbnail is ${
-                    process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5
+                    config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5
                   }MB or below`
                 }
               >

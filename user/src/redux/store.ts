@@ -5,13 +5,7 @@ import storeHolder from '@lib/storeHolder';
 import rootReducer from './rootReducer';
 import rootSaga from './rootSaga';
 
-const bindMiddleware = (middleware: any) => {
-  if (process.env.NODE_ENV !== 'production') {
-    const composeEnhancers = process.browser && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : compose;
-    return composeEnhancers(applyMiddleware(...middleware));
-  }
-  return applyMiddleware(...middleware);
-};
+const bindMiddleware = (middleware: any) => applyMiddleware(...middleware);
 
 function configureStore(initialState: any) {
   const sagaMiddleware = createSagaMiddleware();

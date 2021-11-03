@@ -1,4 +1,5 @@
 import { APIRequest } from './api-request';
+import { getGlobalConfig } from './config';
 
 export class MessageService extends APIRequest {
   getConversations(query?: Record<string, any>) {
@@ -34,7 +35,8 @@ export class MessageService extends APIRequest {
   }
 
   getMessageUploadUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/messages/private/file`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/messages/private/file`;
   }
 
   getConversationByStreamId(streamId: string) {

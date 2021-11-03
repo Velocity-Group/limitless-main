@@ -9,6 +9,7 @@ import { SelectPerformerDropdown } from '@components/performer/common/select-per
 import { FormInstance } from 'antd/lib/form';
 import { ThumbnailPhoto } from '@components/photo/thumbnail-photo';
 import { SelectGalleryDropdown } from '@components/gallery/common/select-gallery-dropdown';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   photo?: IPhotoUpdate;
@@ -56,10 +57,11 @@ export class FormUploadPhoto extends PureComponent<IProps> {
   }
 
   beforeUpload(file) {
+    const config = getGlobalConfig();
     const { beforeUpload: handleUpload } = this.props;
-    const isMaxSize = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    const isMaxSize = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isMaxSize) {
-      message.error(`Image must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+      message.error(`Image must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
       return false;
     }
     getBase64(file, (imageUrl) => {
@@ -78,6 +80,7 @@ export class FormUploadPhoto extends PureComponent<IProps> {
     } = this.props;
     const { previewImage, selectedPerformerId } = this.state;
     const havePhoto = !!photo;
+    const config = getGlobalConfig();
     return (
       <Form
         {...layout}
@@ -135,7 +138,7 @@ export class FormUploadPhoto extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item help={`Image must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`}>
+        <Form.Item help={`Image must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`}>
           {!havePhoto ? (
             <>
               <Upload

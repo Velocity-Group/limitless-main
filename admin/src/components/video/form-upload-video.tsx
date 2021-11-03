@@ -8,6 +8,7 @@ import { CameraOutlined, VideoCameraAddOutlined, FileAddOutlined } from '@ant-de
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { FormInstance } from 'antd/lib/form';
 import moment from 'moment';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   video?: IVideo;
@@ -67,14 +68,15 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   beforeUpload(file: File, field: string) {
     const { beforeUpload: beforeUploadHandler } = this.props;
-    let maxSize = process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100;
+    const config = getGlobalConfig();
+    let maxSize = config.NEXT_PUBLIC_MAX_SIZE_FILE || 100;
     switch (field) {
       case 'thumbnail':
-        maxSize = process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5;
+        maxSize = config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5;
         break;
-      case 'teaser': maxSize = process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200;
+      case 'teaser': maxSize = config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200;
         break;
-      case 'video': maxSize = process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048;
+      case 'video': maxSize = config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048;
         break;
       default: break;
     }
@@ -100,6 +102,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
       previewThumbnail, previewVideo, isSchedule, previewTeaserVideo, scheduledAt,
       selectedTeaser, selectedThumbnail, selectedVideo, isSale
     } = this.state;
+    const config = getGlobalConfig();
     return (
       <Form
         {...layout}
@@ -194,7 +197,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
         </Form.Item>
         <Row>
           <Col lg={8} xs={24}>
-            <Form.Item label="Video" help={(selectedVideo && <a>{selectedVideo.name}</a>) || (previewVideo && <a href={previewVideo} target="_blank" rel="noreferrer">Click here to preview</a>) || `Video file is ${process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`}>
+            <Form.Item label="Video" help={(selectedVideo && <a>{selectedVideo.name}</a>) || (previewVideo && <a href={previewVideo} target="_blank" rel="noreferrer">Click here to preview</a>) || `Video file is ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`}>
               <Upload
                 customRequest={() => false}
                 listType="picture-card"
@@ -210,7 +213,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={8} xs={24}>
-            <Form.Item label="Thumbnail" help={(selectedThumbnail && <a>{selectedThumbnail.name}</a>) || (previewThumbnail && <p><a href={previewThumbnail} target="_blank" rel="noreferrer">Click here to preview</a></p>) || `Thumbnail is ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`}>
+            <Form.Item label="Thumbnail" help={(selectedThumbnail && <a>{selectedThumbnail.name}</a>) || (previewThumbnail && <p><a href={previewThumbnail} target="_blank" rel="noreferrer">Click here to preview</a></p>) || `Thumbnail is ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`}>
               <Upload
                 customRequest={() => false}
                 listType="picture-card"
@@ -226,7 +229,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={8} xs={24}>
-            <Form.Item label="Teaser" help={(selectedTeaser && <a>{selectedTeaser.name}</a>) || (previewTeaserVideo && <p><a href={previewTeaserVideo} target="_blank" rel="noreferrer">Click here to preview</a></p>) || `Teaser is ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`}>
+            <Form.Item label="Teaser" help={(selectedTeaser && <a>{selectedTeaser.name}</a>) || (previewTeaserVideo && <p><a href={previewTeaserVideo} target="_blank" rel="noreferrer">Click here to preview</a></p>) || `Teaser is ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`}>
               <Upload
                 customRequest={() => false}
                 listType="picture-card"

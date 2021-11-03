@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { authService } from '@services/auth.service';
 import Router from 'next/router';
 import './index.less';
+import { getGlobalConfig } from '@services/config';
 
 const FormItem = Form.Item;
 
@@ -42,6 +43,7 @@ class ForgotPassword extends PureComponent<IProps> {
   render() {
     const { ui } = this.props;
     const { submiting } = this.state;
+    const config = getGlobalConfig();
     return (
       <Layout>
         <Head>
@@ -89,7 +91,7 @@ class ForgotPassword extends PureComponent<IProps> {
         <div className="footer">
           Version
           {' '}
-          {process.env.NEXT_PUBLIC_BUILD_VERSION}
+          {config.NEXT_PUBLIC_BUILD_VERSION}
           {' '}
           - Copy right
           {' '}

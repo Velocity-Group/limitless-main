@@ -17,6 +17,7 @@ import { formatDate } from '@lib/date';
 import { Emotions } from '@components/messages/emotions';
 import AddPollDurationForm from './add-poll-duration';
 import './index.less';
+import { getGlobalConfig } from '@services/config';
 
 const { TextArea } = Input;
 
@@ -149,18 +150,19 @@ export default class FeedForm extends PureComponent<IProps> {
   }
 
   async beforeUpload(file, listFile) {
+    const config = getGlobalConfig();
     const { fileList, fileIds } = this.state;
     if (file.type.includes('image')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!valid) {
-        message.error(`Image ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+        message.error(`Image ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
         return false;
       }
     }
     if (file.type.includes('video')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
       if (!valid) {
-        message.error(`Video ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
+        message.error(`Video ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
         return false;
       }
     }
@@ -208,9 +210,10 @@ export default class FeedForm extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    const config = getGlobalConfig();
+    const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isLt2M) {
-      message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+      message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
       return;
     }
     const reader = new FileReader();
@@ -234,9 +237,10 @@ export default class FeedForm extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    const config = getGlobalConfig();
+    const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!isLt2M) {
-      message.error(`Teaser is too large please provide an video ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
+      message.error(`Teaser is too large please provide an video ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
       return;
     }
     this.setState({ teaser: file });

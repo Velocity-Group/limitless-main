@@ -11,6 +11,7 @@ import { photoService } from '@services/photo.service';
 import { SelectGalleryDropdown } from '@components/gallery/common/select-gallery-dropdown';
 import { BreadcrumbComponent } from '@components/common';
 import Router from 'next/router';
+import { getGlobalConfig } from '@services/config';
 
 const layout = {
   labelCol: { span: 24 },
@@ -61,8 +62,9 @@ class BulkUploadPhoto extends PureComponent<IProps> {
   }
 
   async beforeUpload(file, listFile) {
-    if (file.size / 1024 / 1024 > (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
-      message.error(`${file.name} is over ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+    const config = getGlobalConfig();
+    if (file.size / 1024 / 1024 > (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
+      message.error(`${file.name} is over ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
       return false;
     }
     getBase64(file, (imageUrl) => {
@@ -71,7 +73,7 @@ class BulkUploadPhoto extends PureComponent<IProps> {
     });
     const { fileList } = this.state;
     this.setState({
-      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5))]
+      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5))]
     });
     return true;
   }

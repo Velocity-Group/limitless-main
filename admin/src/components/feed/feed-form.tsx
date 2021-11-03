@@ -18,6 +18,7 @@ import { SelectPerformerDropdown } from '@components/performer/common/select-per
 import { FormInstance } from 'antd/lib/form';
 import AddPollDurationForm from './add-poll-duration';
 import './index.less';
+import { getGlobalConfig } from '@services/config';
 
 const { TextArea } = Input;
 const layout = {
@@ -152,18 +153,19 @@ export default class FormFeed extends PureComponent<IProps> {
   }
 
   async beforeUpload(file, listFile) {
+    const config = getGlobalConfig();
     const { fileList, fileIds } = this.state;
     if (file.type.includes('image')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!valid) {
-        message.error(`Image ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+        message.error(`Image ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
         return false;
       }
     }
     if (file.type.includes('video')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
       if (!valid) {
-        message.error(`Video ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
+        message.error(`Video ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
         return false;
       }
     }
@@ -211,9 +213,10 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    const valid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    const config = getGlobalConfig();
+    const valid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!valid) {
-      message.error(`Thumbnail must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+      message.error(`Thumbnail must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
       return;
     }
     const reader = new FileReader();
@@ -237,9 +240,10 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    const valid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    const config = getGlobalConfig();
+    const valid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!valid) {
-      message.error(`Teaser must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB`);
+      message.error(`Teaser must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB`);
       return;
     }
     this.setState({ teaser: file });

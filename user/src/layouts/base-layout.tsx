@@ -5,6 +5,7 @@ import PrimaryLayout from './primary-layout';
 import MaintenaceLayout from './maintenance-layout';
 import GEOLayout from './geoBlocked-layout';
 import PublicLayout from './public-layout';
+import { getGlobalConfig } from '@services/config';
 
 interface DefaultProps {
   children: any;
@@ -26,12 +27,14 @@ export default class BaseLayout extends PureComponent<DefaultProps> {
   }
 
   componentDidMount() {
-    process.env.NODE_ENV === 'production' && document.addEventListener('contextmenu', (event) => event.preventDefault());
+    const config = getGlobalConfig();
+    config.NODE_ENV === 'production' && document.addEventListener('contextmenu', (event) => event.preventDefault());
     this.clientCheckBlockByIp();
   }
 
   componentWillUnmount() {
-    process.env.NODE_ENV === 'production' && document.removeEventListener('contextmenu', (event) => event.preventDefault());
+    const config = getGlobalConfig();
+    config.NODE_ENV === 'production' && document.removeEventListener('contextmenu', (event) => event.preventDefault());
   }
 
   async clientCheckBlockByIp() {

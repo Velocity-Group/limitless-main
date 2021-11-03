@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import { Upload, message } from 'antd';
 import { LoadingOutlined, EditOutlined } from '@ant-design/icons';
 import ImgCrop from 'antd-img-crop';
+import { getGlobalConfig } from '@services/config';
 
 function getBase64(img, callback) {
   const reader = new FileReader();
@@ -10,9 +11,10 @@ function getBase64(img, callback) {
 }
 
 function beforeUpload(file) {
-  const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+  const config = getGlobalConfig();
+  const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isLt2M) {
-    message.error(`Cover must be less than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+    message.error(`Cover must be less than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
   }
   return isLt2M;
 }
