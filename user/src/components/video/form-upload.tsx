@@ -1,4 +1,4 @@
-import { PureComponent } from "react";
+import { PureComponent } from 'react';
 import {
   Form,
   Input,
@@ -13,20 +13,20 @@ import {
   Row,
   Col,
   Avatar,
-  Modal,
-} from "antd";
-import { IUser, IVideo } from "src/interfaces/index";
+  Modal
+} from 'antd';
+import { IUser, IVideo } from 'src/interfaces/index';
 import {
   CameraOutlined,
   VideoCameraAddOutlined,
-  FileDoneOutlined,
-} from "@ant-design/icons";
-import { performerService } from "@services/index";
-import moment from "moment";
-import { debounce } from "lodash";
-import Router from "next/router";
-import "./video.less";
-import { VideoPlayer } from "@components/common";
+  FileDoneOutlined
+} from '@ant-design/icons';
+import { performerService } from '@services/index';
+import moment from 'moment';
+import { debounce } from 'lodash';
+import Router from 'next/router';
+import './video.less';
+import { VideoPlayer } from '@components/common';
 
 interface IProps {
   user: IUser;
@@ -39,13 +39,13 @@ interface IProps {
 
 const layout = {
   labelCol: { span: 24 },
-  wrapperCol: { span: 24 },
+  wrapperCol: { span: 24 }
 };
 
 const { Option } = Select;
 
 const validateMessages = {
-  required: "This field is required!",
+  required: 'This field is required!'
 };
 
 export class FormUploadVideo extends PureComponent<IProps> {
@@ -61,8 +61,8 @@ export class FormUploadVideo extends PureComponent<IProps> {
     scheduledAt: moment(),
     performers: [],
     isShowPreview: false,
-    previewUrl: "",
-    previewType: "",
+    previewUrl: '',
+    previewType: ''
   };
 
   componentDidMount() {
@@ -74,28 +74,28 @@ export class FormUploadVideo extends PureComponent<IProps> {
         previewTeaser: video.teaser ? video.teaser : null,
         isSale: video.isSale,
         isSchedule: video.isSchedule,
-        scheduledAt: video.scheduledAt ? moment(video.scheduledAt) : moment(),
+        scheduledAt: video.scheduledAt ? moment(video.scheduledAt) : moment()
       });
     }
-    this.getPerformers("", video?.participantIds || [user._id]);
+    this.getPerformers('', video?.participantIds || [user._id]);
   }
 
   onSwitch(field: string, checked: boolean) {
-    if (field === "saleVideo") {
+    if (field === 'saleVideo') {
       this.setState({
-        isSale: checked,
+        isSale: checked
       });
     }
-    if (field === "scheduling") {
+    if (field === 'scheduling') {
       this.setState({
-        isSchedule: checked,
+        isSchedule: checked
       });
     }
   }
 
   onSchedule(val: any) {
     this.setState({
-      scheduledAt: val,
+      scheduledAt: val
     });
   }
 
@@ -104,23 +104,73 @@ export class FormUploadVideo extends PureComponent<IProps> {
       const resp = await (
         await performerService.search({
           q,
-          performerIds: performerIds || "",
-          limit: 500,
+          performerIds: performerIds || '',
+          limit: 500
         })
       ).data;
       const performers = resp.data || [];
       this.setState({ performers });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || "Error occured");
+      message.error(err?.message || 'Error occured');
     }
   }, 500);
 
+  previewModal = () => {
+    const {
+      isShowPreview: isShow,
+      previewUrl: url,
+      previewType: type
+    } = this.state;
+    return (
+      <Modal
+        title={(
+          <span style={{ textTransform: 'capitalize' }}>
+            {type}
+            {' '}
+            preview
+          </span>
+        )}
+        closable={false}
+        visible={isShow}
+        footer={(
+          <Button type="primary" onClick={() => this.setState({ isShowPreview: false })}>
+            Ok
+          </Button>
+        )}
+      >
+        {type === 'teaser' && (
+          <VideoPlayer
+            {...{
+              autoplay: true,
+              controls: true,
+              playsinline: true,
+              fluid: true,
+              sources: [
+                {
+                  src: url,
+                  type: 'video/mp4'
+                }
+              ]
+            }}
+          />
+        )}
+        {type === 'thumbnail' && (
+          <img
+            src={url}
+            alt="thumbnail"
+            width="100%"
+            style={{ borderRadius: 5 }}
+          />
+        )}
+      </Modal>
+    );
+  };
+
   beforeUpload(file: File, field: string) {
     const { beforeUpload: beforeUploadHandler } = this.props;
-    if (field === "thumbnail") {
-      const isValid =
-        file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    if (field === 'thumbnail') {
+      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!isValid) {
         message.error(
           `File is too large please provide an file ${
@@ -131,10 +181,8 @@ export class FormUploadVideo extends PureComponent<IProps> {
       }
       this.setState({ selectedThumbnail: file });
     }
-    if (field === "teaser") {
-      const isValid =
-        file.size / 1024 / 1024 <
-        (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    if (field === 'teaser') {
+      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
       if (!isValid) {
         message.error(
           `File is too large please provide an file ${
@@ -145,10 +193,8 @@ export class FormUploadVideo extends PureComponent<IProps> {
       }
       this.setState({ selectedTeaser: file });
     }
-    if (field === "video") {
-      const isValid =
-        file.size / 1024 / 1024 <
-        (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000);
+    if (field === 'video') {
+      const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000);
       if (!isValid) {
         message.error(
           `File is too large please provide an file ${
@@ -162,55 +208,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
     return beforeUploadHandler(file, field);
   }
 
-  previewModal = () => {
-    const {
-      isShowPreview: isShow,
-      previewUrl: url,
-      previewType: type,
-    } = this.state;
-    return (
-      <Modal
-        title={
-          <span style={{ textTransform: "capitalize" }}>{type} preview</span>
-        }
-        closable={false}
-        visible={isShow}
-        footer={
-          <Button type="primary" onClick={() => this.setState({ isShowPreview: false })}>
-            Ok
-          </Button>
-        }
-      >
-        {type === "teaser" && (
-          <VideoPlayer
-            {...{
-              autoplay: true,
-              controls: true,
-              playsinline: true,
-              fluid: true,
-              sources: [
-                {
-                  src: url,
-                  type: "video/mp4",
-                },
-              ],
-            }}
-          />
-        )}
-        {type === "thumbnail" && (
-          <img
-            src={url}
-            alt="thumbnail"
-            width={"100%"}
-            style={{ borderRadius: 5 }}
-          />
-        )}
-      </Modal>
-    );
-  };
-
   render() {
-    const { video, submit, uploading, uploadPercentage, user } = this.props;
+    const {
+      video, submit, uploading, uploadPercentage, user
+    } = this.props;
     const {
       previewThumbnail,
       previewTeaser,
@@ -221,9 +222,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
       scheduledAt,
       selectedThumbnail,
       selectedTeaser,
-      selectedVideo,
-      previewUrl,
-      previewType,
+      selectedVideo
     } = this.state;
     return (
       <>
@@ -235,27 +234,23 @@ export class FormUploadVideo extends PureComponent<IProps> {
               data.scheduledAt = scheduledAt;
             }
             if (values.tags && values.tags.length) {
-              data.tags = values.tags.map((tag) =>
-                tag.replace(/[^a-zA-Z0-9 ]/g, "_")
-              );
+              data.tags = values.tags.map((tag) => tag.replace(/[^a-zA-Z0-9 ]/g, '_'));
             }
             submit(data);
           }}
-          onFinishFailed={() =>
-            message.error("Please complete the required fields")
-          }
+          onFinishFailed={() => message.error('Please complete the required fields')}
           name="form-upload"
           validateMessages={validateMessages}
           initialValues={
             video || {
-              title: "",
+              title: '',
               price: 9.99,
-              description: "",
+              description: '',
               tags: [],
               isSale: false,
               participantIds: [user._id],
               isSchedule: false,
-              status: "active",
+              status: 'active'
             }
           }
           className="account-form"
@@ -266,7 +261,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 label="Title"
                 name="title"
                 rules={[
-                  { required: true, message: "Please input title of video!" },
+                  { required: true, message: 'Please input title of video!' }
                 ]}
               >
                 <Input />
@@ -276,19 +271,20 @@ export class FormUploadVideo extends PureComponent<IProps> {
               <Form.Item label="Participants" name="participantIds">
                 <Select
                   mode="multiple"
-                  style={{ width: "100%" }}
+                  style={{ width: '100%' }}
                   showSearch
                   placeholder="Search performers here"
                   optionFilterProp="children"
                   onSearch={this.getPerformers.bind(this)}
                   loading={uploading}
                 >
-                  {performers &&
-                    performers.length > 0 &&
-                    performers.map((p) => (
+                  {performers
+                    && performers.length > 0
+                    && performers.map((p) => (
                       <Option key={p._id} value={p._id}>
-                        <Avatar src={p?.avatar || "/static/no-avatar.png"} />{" "}
-                        {p?.name || p?.username || "N/A"}
+                        <Avatar src={p?.avatar || '/static/no-avatar.png'} />
+                        {' '}
+                        {p?.name || p?.username || 'N/A'}
                       </Option>
                     ))}
                 </Select>
@@ -298,7 +294,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
               <Form.Item label="Tags" name="tags">
                 <Select
                   mode="tags"
-                  style={{ width: "100%" }}
+                  style={{ width: '100%' }}
                   size="middle"
                   showArrow={false}
                   defaultActiveFirstOption={false}
@@ -309,7 +305,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
               <Form.Item
                 name="status"
                 label="Status"
-                rules={[{ required: true, message: "Please select status!" }]}
+                rules={[{ required: true, message: 'Please select status!' }]}
               >
                 <Select>
                   <Select.Option key="error" value="file-error" disabled>
@@ -330,12 +326,12 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   checkedChildren="Pay per view"
                   unCheckedChildren="Subscribe to view"
                   checked={isSale}
-                  onChange={this.onSwitch.bind(this, "saleVideo")}
+                  onChange={this.onSwitch.bind(this, 'saleVideo')}
                 />
               </Form.Item>
               {isSale && (
                 <Form.Item name="price" label="Amount of Tokens">
-                  <InputNumber style={{ width: "100%" }} min={1} />
+                  <InputNumber style={{ width: '100%' }} min={1} />
                 </Form.Item>
               )}
             </Col>
@@ -345,16 +341,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   checkedChildren="Scheduling"
                   unCheckedChildren="Unschedule"
                   checked={isSchedule}
-                  onChange={this.onSwitch.bind(this, "scheduling")}
+                  onChange={this.onSwitch.bind(this, 'scheduling')}
                 />
               </Form.Item>
               {isSchedule && (
                 <Form.Item label="Schedule at">
                   <DatePicker
-                    style={{ width: "100%" }}
-                    disabledDate={(currentDate) =>
-                      currentDate && currentDate < moment().endOf("day")
-                    }
+                    style={{ width: '100%' }}
+                    disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
                     defaultValue={scheduledAt}
                     onChange={this.onSchedule.bind(this)}
                   />
@@ -370,13 +364,13 @@ export class FormUploadVideo extends PureComponent<IProps> {
               <Form.Item
                 label="Video"
                 help={
-                  (selectedVideo && <a>{selectedVideo.name}</a>) ||
-                  (previewVideo && (
+                  (selectedVideo && <a>{selectedVideo.name}</a>)
+                  || (previewVideo && (
                     <a href={previewVideo} target="_blank" rel="noreferrer">
                       Click here to preview
                     </a>
-                  )) ||
-                  `Video file is ${
+                  ))
+                  || `Video file is ${
                     process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048
                   }MB or below`
                 }
@@ -389,7 +383,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   multiple={false}
                   showUploadList={false}
                   disabled={uploading}
-                  beforeUpload={(file) => this.beforeUpload(file, "video")}
+                  beforeUpload={(file) => this.beforeUpload(file, 'video')}
                 >
                   {selectedVideo ? (
                     <FileDoneOutlined />
@@ -403,24 +397,23 @@ export class FormUploadVideo extends PureComponent<IProps> {
               <Form.Item
                 label="Teaser"
                 help={
-                  (selectedTeaser && <a>{selectedTeaser.name}</a>) ||
-                  (previewTeaser && (
+                  (selectedTeaser && <a>{selectedTeaser.name}</a>)
+                  || (previewTeaser && (
                     <p>
                       <a
-                        onClick={() =>
-                          this.setState({
-                            isShowPreview: true,
-                            previewUrl: previewTeaser,
-                            previewType: "teaser",
-                          })
-                        }
+                        aria-hidden
+                        onClick={() => this.setState({
+                          isShowPreview: true,
+                          previewUrl: previewTeaser,
+                          previewType: 'teaser'
+                        })}
                         rel="noreferrer"
                       >
                         Click here to preview
                       </a>
                     </p>
-                  )) ||
-                  `Teaser is ${
+                  ))
+                  || `Teaser is ${
                     process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200
                   }MB or below`
                 }
@@ -433,7 +426,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   multiple={false}
                   showUploadList={false}
                   disabled={uploading}
-                  beforeUpload={(file) => this.beforeUpload(file, "teaser")}
+                  beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
                 >
                   {selectedTeaser ? (
                     <FileDoneOutlined />
@@ -447,24 +440,23 @@ export class FormUploadVideo extends PureComponent<IProps> {
               <Form.Item
                 label="Thumbnail"
                 help={
-                  (selectedThumbnail && <a>{selectedThumbnail.name}</a>) ||
-                  (previewThumbnail && (
+                  (selectedThumbnail && <a>{selectedThumbnail.name}</a>)
+                  || (previewThumbnail && (
                     <p>
                       <a
+                        aria-hidden
                         rel="noreferrer"
-                        onClick={() =>
-                          this.setState({
-                            isShowPreview: true,
-                            previewUrl: previewThumbnail,
-                            previewType: "thumbnail",
-                          })
-                        }
+                        onClick={() => this.setState({
+                          isShowPreview: true,
+                          previewUrl: previewThumbnail,
+                          previewType: 'thumbnail'
+                        })}
                       >
                         Click here to preview
                       </a>
                     </p>
-                  )) ||
-                  `Thumbnail is ${
+                  ))
+                  || `Thumbnail is ${
                     process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5
                   }MB or below`
                 }
@@ -476,7 +468,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   multiple={false}
                   showUploadList={false}
                   disabled={uploading}
-                  beforeUpload={(file) => this.beforeUpload(file, "thumbnail")}
+                  beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
                 >
                   {selectedThumbnail ? (
                     <FileDoneOutlined />
@@ -497,7 +489,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
               loading={uploading}
               disabled={uploading}
             >
-              {video ? "Update" : "Upload"}
+              {video ? 'Update' : 'Upload'}
             </Button>
             <Button
               className="secondary"

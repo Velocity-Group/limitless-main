@@ -214,7 +214,7 @@ class TokenPackages extends PureComponent<IProps> {
               )}
             </div>
           </Modal>
-          {searching && <div><Spin /></div>}
+          {searching && <div className="text-center" style={{ margin: '30px 0' }}><Spin /></div>}
           {!searching && !list.length && <p className="text-center" style={{ margin: '30px 0' }}>No token package was found</p>}
           {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
         </div>
