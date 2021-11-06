@@ -5,19 +5,11 @@ export const EarningSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     index: true
   },
-  orderId: {
-    type: mongoose.Schema.Types.ObjectId,
-    index: true
-  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     index: true
   },
   performerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    index: true
-  },
-  agentId: {
     type: mongoose.Schema.Types.ObjectId,
     index: true
   },
@@ -39,23 +31,7 @@ export const EarningSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  referralPrice: {
-    type: Number,
-    default: 0
-  },
-  agentPrice: {
-    type: Number,
-    default: 0
-  },
   siteCommission: {
-    type: Number,
-    default: 0
-  },
-  referralCommission: {
-    type: Number,
-    default: 0
-  },
-  agentCommission: {
     type: Number,
     default: 0
   },

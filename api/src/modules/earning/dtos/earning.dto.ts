@@ -24,11 +24,7 @@ export class EarningDto {
 
   netPrice: number;
 
-  referralPrice: number;
-
   siteCommission: number;
-
-  referralCommission: number;
 
   isPaid?: boolean;
 
@@ -57,10 +53,8 @@ export class EarningDto {
         'type',
         'grossPrice',
         'netPrice',
-        'referralPrice',
         'isPaid',
         'siteCommission',
-        'referralCommission',
         'createdAt',
         'updatedAt',
         'paidAt',
@@ -75,6 +69,4 @@ export interface IEarningStatResponse {
   totalGrossPrice: number;
   totalNetPrice: number;
   totalSiteCommission: number;
-  totalReferralCommission?: number;
-  totalAgentCommission?: number;
 }
