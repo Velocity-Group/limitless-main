@@ -20,6 +20,7 @@ import { pick } from 'lodash';
 import { updateLiveStreamSettings } from '@redux/streaming/actions';
 import { updateSettings } from '@redux/settings/actions';
 import '../style/index.less';
+import { setGlobalConfig } from '@services/config';
 
 declare global {
   interface Window {
@@ -142,12 +143,31 @@ interface IApp {
   layout: string;
   Component: AppComponent;
   settings: any;
+  config: any;
 }
 
+const publicConfig = {} as any;
 class Application extends App<IApp> {
   // TODO - consider if we need to use get static props in children component instead?
   // or check in render?
   static async getInitialProps({ Component, ctx }) {
+    // load configuration from ENV and put to config
+    if (!process.browser) {
+      // eslint-disable-next-line global-require
+      const dotenv = require('dotenv');
+      const myEnv = dotenv.config().parsed;
+
+      // publish to server config with app
+      setGlobalConfig(myEnv);
+
+      // load public config and api-endpoint?
+      Object.keys(myEnv).forEach((key) => {
+        if (key.indexOf('NEXT_PUBLIC_') === 0) {
+          publicConfig[key] = myEnv[key];
+        }
+      });
+    }
+
     // won't check auth for un-authenticated page such as login, register
     // use static field in the component
     const { noredirect, onlyPerformer, authenticate } = Component;
@@ -173,8 +193,14 @@ class Application extends App<IApp> {
     return {
       settings,
       pageProps,
-      layout: Component.layout
+      layout: Component.layout,
+      config: publicConfig
     };
+  }
+
+  constructor(props) {
+    super(props);
+    setGlobalConfig(this.props.config);
   }
 
   render() {

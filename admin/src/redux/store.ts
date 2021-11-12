@@ -4,9 +4,11 @@ import createSagaMiddleware from 'redux-saga';
 import storeHolder from '@lib/storeHolder';
 import rootReducer from './rootReducer';
 import rootSaga from './rootSaga';
+import { getGlobalConfig } from '@services/config';
 
 const bindMiddleware = (middleware: any) => {
-  if (process.env.NODE_ENV !== 'production') {
+  const config = getGlobalConfig();
+  if (config.NODE_ENV !== 'production') {
     return applyMiddleware(...middleware);
   }
   return applyMiddleware(...middleware);

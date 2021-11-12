@@ -1,4 +1,5 @@
 import { APIRequest } from './api-request';
+import { getGlobalConfig } from './config';
 
 export class PerformerService extends APIRequest {
   create(payload: any) {
@@ -22,19 +23,23 @@ export class PerformerService extends APIRequest {
   }
 
   getUploadDocumentUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/documents/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/documents/upload`;
   }
 
   getAvatarUploadUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/avatar/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/avatar/upload`;
   }
 
   getCoverUploadUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/cover/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/cover/upload`;
   }
 
   getWelcomeVideoUploadUrl(performerId: string) {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/${performerId}/welcome-video/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/${performerId}/welcome-video/upload`;
   }
 
   updatePaymentGatewaySetting(id: string, payload: any) {

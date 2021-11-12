@@ -16,6 +16,7 @@ import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
 import { photoService } from '@services/index';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   id: string;
@@ -180,8 +181,10 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
   }
 
   async beforeUpload(file, files) {
-    if (file.size / 1024 / 1024 > (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
-      message.error(`${file.name} is over ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+    const config = getGlobalConfig();
+
+    if (file.size / 1024 / 1024 > (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
+      message.error(`${file.name} is over ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
       return false;
     }
     getBase64(file, (imageUrl) => {

@@ -7,6 +7,7 @@ import Head from 'next/head';
 import { login } from '@redux/auth/actions';
 import Link from 'next/link';
 import './index.less';
+import { getGlobalConfig } from '@services/config';
 
 const FormItem = Form.Item;
 
@@ -40,6 +41,7 @@ class Login extends PureComponent<IProps> {
     const {
       loginAuth = { requesting: false, error: null, success: false }
     } = this.props;
+    const config = getGlobalConfig();
     return (
       <Layout>
         <Head>
@@ -102,7 +104,7 @@ class Login extends PureComponent<IProps> {
         <div className="footer">
           Version
           {' '}
-          {process.env.NEXT_PUBLIC_BUILD_VERSION}
+          {config.NEXT_PUBLIC_BUILD_VERSION}
           {' '}
           - Copy right
           {' '}

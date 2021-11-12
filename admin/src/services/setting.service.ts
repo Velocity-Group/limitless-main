@@ -1,5 +1,6 @@
 import { ISetting } from 'src/interfaces';
 import { APIRequest, IResponse } from './api-request';
+import { getGlobalConfig } from './config';
 
 export class SettingService extends APIRequest {
   private _settings = {} as any;
@@ -23,7 +24,8 @@ export class SettingService extends APIRequest {
   }
 
   getFileUploadUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/settings/files/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/settings/files/upload`;
   }
 
   verifyMailer() {

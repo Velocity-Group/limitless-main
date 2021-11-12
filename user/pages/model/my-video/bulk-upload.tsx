@@ -11,6 +11,7 @@ import { videoService } from '@services/video.service';
 import { connect } from 'react-redux';
 import Router from 'next/router';
 import { IUIConfig, IUser } from 'src/interfaces';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   ui: IUIConfig;
@@ -66,13 +67,15 @@ class BulkUploadVideo extends PureComponent<IProps> {
   }
 
   beforeUpload(file, listFile) {
-    if (file.size / 1024 / 1024 > (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000)) {
-      message.error(`${file.name} is over ${process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB`);
+    const config = getGlobalConfig();
+
+    if (file.size / 1024 / 1024 > (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000)) {
+      message.error(`${file.name} is over ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB`);
       return false;
     }
     const { fileList } = this.state;
     this.setState({
-      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000))]
+      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000))]
     });
     return true;
   }

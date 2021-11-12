@@ -9,6 +9,8 @@ import { generateUuid } from 'src/lib';
 import { WEBRTC_ADAPTOR_INFORMATIONS } from './constants';
 import { WebRTCAdaptorConfigs } from './interfaces/WebRTCAdaptorConfigs';
 import { warning } from './utils';
+import { getGlobalConfig } from '@services/config';
+
 
 interface IProps {
   token?: string;
@@ -116,7 +118,7 @@ export default function withAntmedia(Component) {
       }
 
       if (!this.webRTCAdaptor && autoRepublishDisabled) return;
-
+      const config = getGlobalConfig();
       const pc_config = {
         iceServers: [
           {
@@ -148,10 +150,10 @@ export default function withAntmedia(Component) {
       this.webRTCAdaptor = new window['WebRTCAdaptor']({
         websocket_url: websocketURL,
         mediaConstraints,
-        debug: process.env.NODE_ENV === 'development',
+        debug: config.NODE_ENV === 'development',
         peerconnection_config: pc_config,
         sdp_constraints: sdpConstraints,
-        bandwidth: process.env.NEXT_PUBLIC_MAX_STREAM_BITRATE || 900,
+        bandwidth: config.NEXT_PUBLIC_MAX_STREAM_BITRATE || 900,
         isPlayMode: false,
         ...configs,
         callback: (info: WEBRTC_ADAPTOR_INFORMATIONS, obj: any) => {
