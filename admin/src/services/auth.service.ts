@@ -8,7 +8,6 @@ export class AuthService extends APIRequest {
   }
 
   setToken(token: string): void {
-    process.browser && localStorage.setItem(TOKEN, token);
     // https://github.com/js-cookie/js-cookie
     // since Safari does not support, need a better solution
     cookie.set(TOKEN, token);
@@ -17,15 +16,11 @@ export class AuthService extends APIRequest {
 
   getToken(): string {
     const token = cookie.get(TOKEN);
-    if (token) {
-      return token;
-    }
-    return !token && process.browser ? localStorage.getItem(TOKEN) : null;
+    return token;
   }
 
   removeToken(): void {
     cookie.remove(TOKEN);
-    process.browser && localStorage.removeItem(TOKEN);
   }
 
   updatePassword(password: string, userId?: string, source?: string) {
