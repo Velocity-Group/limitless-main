@@ -57,13 +57,11 @@ export class LoginController {
     const [authUser, authPerformer] = await Promise.all([
       user && this.authService.findBySource({
         source: 'user',
-        sourceId: user._id,
-        type: 'username'
+        sourceId: user._id
       }),
       performer && this.authService.findBySource({
         source: 'performer',
-        sourceId: performer._id,
-        type: 'username'
+        sourceId: performer._id
       })
     ]);
     if (!authUser && !authPerformer) {
