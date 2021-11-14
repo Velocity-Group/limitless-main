@@ -28,6 +28,13 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Description',
+        key: 'description',
+        render(record: any) {
+          return <span>{record?.products && record?.products[0] && record?.products[0].name}</span>;
+        }
+      },
+      {
         title: 'Type',
         dataIndex: 'type',
         key: 'type',

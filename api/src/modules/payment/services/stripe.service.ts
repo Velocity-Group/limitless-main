@@ -136,7 +136,8 @@ export class StripeService {
         productType
       });
       if (performerProduct) return performerProduct;
-      const subscriptionType = productType === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 'Monthly Subscription' : 'Yearly Subscription';
+      // eslint-disable-next-line no-nested-ternary
+      const subscriptionType = productType === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? 'Monthly subscription' : productType === PAYMENT_TYPE.YEARLY_SUBSCRIPTION ? 'Yearly subscription' : `Free subscription in ${performer?.durationFreeSubscriptionDays} days`;
       const stripeProduct = await stripe.products.create({
         name: `${subscriptionType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`,
         description: `${productType} ${performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`}`

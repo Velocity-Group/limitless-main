@@ -17,7 +17,6 @@ import { TwitterOutlined } from '@ant-design/icons';
 import GoogleLogin from 'react-google-login';
 import Loader from '@components/common/base/loader';
 import './auth/index.less';
-// import { GoogleReCaptcha } from '@components/common';
 
 interface IProps {
   loginAuth: any;
@@ -38,7 +37,9 @@ class Login extends PureComponent<IProps> {
   recaptchaSuccess = false;
 
   static async getInitialProps({ ctx }) {
-    return ctx.query;
+    return {
+      ...ctx.query
+    };
   }
 
   state = {
@@ -157,6 +158,7 @@ class Login extends PureComponent<IProps> {
             content={settings && settings.metaDescription}
           />
           {/* OG tags */}
+          <meta property="og:type" content="website" />
           <meta
             property="og:title"
             content={ui && ui.siteName}
@@ -167,6 +169,7 @@ class Login extends PureComponent<IProps> {
             content={settings && settings.metaDescription}
           />
           {/* Twitter tags */}
+          <meta name="twitter:card" content="summary" />
           <meta
             name="twitter:title"
             content={ui && ui.siteName}

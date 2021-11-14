@@ -361,6 +361,7 @@ class PerformerProfile extends PureComponent<IProps> {
             content={`${performer?.username}, ${performer?.name}`}
           />
           <meta name="description" content={performer?.bio} />
+          <meta property="og:type" content="website" />
           <meta
             property="og:title"
             content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
@@ -370,6 +371,7 @@ class PerformerProfile extends PureComponent<IProps> {
             property="og:description"
             content={performer?.bio}
           />
+          <meta name="twitter:card" content="summary" />
           <meta
             name="twitter:title"
             content={`${ui?.siteName} | ${performer?.name || performer?.username}`}

@@ -244,7 +244,7 @@ export class EarningService {
     ]);
     const totalGross = (totalGrossPrice && totalGrossPrice.length && totalGrossPrice[0].total) || 0;
     const totalNet = (totalNetPrice && totalNetPrice.length && totalNetPrice[0].total) || 0;
-    const totalSiteCommission = totalGross && totalNet ? (totalGross - totalNet) : 0;
+    const totalSiteCommission = totalGross - totalNet;
     return {
       totalGrossPrice: totalGross,
       totalNetPrice: totalNet,

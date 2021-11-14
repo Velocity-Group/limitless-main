@@ -42,7 +42,7 @@ const PayoutRequestList = ({
       )
     },
     {
-      title: 'Request_Tokens',
+      title: 'Requested Tokens',
       dataIndex: 'requestTokens',
       key: 'requestTokens',
       render: (requestTokens: number) => (
@@ -97,7 +97,7 @@ const PayoutRequestList = ({
       }
     },
     {
-      title: 'Created_at',
+      title: 'Created at',
       key: 'createdAt',
       dataIndex: 'createdAt',
       render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>,
