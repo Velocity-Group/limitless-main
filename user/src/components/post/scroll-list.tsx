@@ -1,9 +1,9 @@
-import { PureComponent } from 'react';
-import { Alert, Spin } from 'antd';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { IFeed } from '@interfaces/index';
-import FeedCard from './post-card';
-import { FeedGridCard } from './grid-card';
+import { PureComponent } from "react";
+import { Alert, Spin } from "antd";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { IFeed } from "@interfaces/index";
+import FeedCard from "./post-card";
+import { FeedGridCard } from "./grid-card";
 
 interface IProps {
   items: IFeed[];
@@ -17,7 +17,12 @@ interface IProps {
 export default class ScrollListFeed extends PureComponent<IProps> {
   render() {
     const {
-      items = [], loadMore, onDelete, canLoadmore, loading = false, isGrid = false
+      items = [],
+      loadMore,
+      onDelete,
+      canLoadmore,
+      loading = false,
+      isGrid = false,
     } = this.props;
     return (
       <InfiniteScroll
@@ -28,20 +33,37 @@ export default class ScrollListFeed extends PureComponent<IProps> {
         endMessage={null}
         scrollThreshold={0.9}
       >
-        <div className={isGrid ? 'grid-view' : 'fixed-scroll'}>
-          {items.length > 0 && items.map((item) => {
-            if (isGrid) {
-              return <FeedGridCard feed={item} key={item._id} />;
-            }
-            return <FeedCard feed={item} key={item._id} onDelete={onDelete.bind(this)} />;
-          })}
+        <div className={isGrid ? "grid-view" : "fixed-scroll"}>
+          {items.length > 0 &&
+            items.map((item) => {
+              if (item) {
+                if (isGrid) {
+                  return <FeedGridCard feed={item} key={item._id} />;
+                }
+                return (
+                  <FeedCard
+                    feed={item}
+                    key={item._id}
+                    onDelete={onDelete.bind(this)}
+                  />
+                );
+              } else return;
+            })}
         </div>
         {!items.length && !loading && (
-        <div className="main-container custom">
-          <Alert className="text-center" message="No post was found" type="info" />
-        </div>
+          <div className="main-container custom">
+            <Alert
+              className="text-center"
+              message="No post was found"
+              type="info"
+            />
+          </div>
         )}
-        {loading && <div className="text-center"><Spin /></div>}
+        {loading && (
+          <div className="text-center">
+            <Spin />
+          </div>
+        )}
       </InfiniteScroll>
     );
   }
