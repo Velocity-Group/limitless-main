@@ -1,7 +1,7 @@
 import { PureComponent, createRef } from 'react';
 import { connect } from 'react-redux';
 import {
-  Modal, message, Popover
+  Modal, message
 } from 'antd';
 import { sendMessage, sentFileSuccess } from '@redux/message/actions';
 import { SmileOutlined, SendOutlined } from '@ant-design/icons';
@@ -26,7 +26,9 @@ interface IProps {
 class Compose extends PureComponent<IProps> {
   _input: any;
 
-  state = { text: '', openTipModal: false, submiting: false };
+  state = {
+    text: '', openTipModal: false, submiting: false, openIcon: false
+  };
 
   componentDidMount() {
     if (!this._input) this._input = createRef();
@@ -99,7 +101,9 @@ class Compose extends PureComponent<IProps> {
   }
 
   render() {
-    const { text, openTipModal, submiting } = this.state;
+    const {
+      text, openTipModal, submiting, openIcon
+    } = this.state;
     const {
       disabled, sendMessageStatus: status, conversation, currentUser
     } = this.props;
@@ -118,11 +122,9 @@ class Compose extends PureComponent<IProps> {
           disabled={disabled || status.sending || !conversation._id}
           ref={(c) => { this._input = c; }}
         />
-        <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
-          <div className="grp-icons">
-            <SmileOutlined />
-          </div>
-        </Popover>
+        <div className="grp-icons" aria-hidden onClick={() => this.setState({ openIcon: !openIcon })}>
+          <SmileOutlined />
+        </div>
         {/* <div className="grp-icons">
           <div aria-hidden className="grp-emotions" onClick={() => this.setState({ openTipModal: true })}>
             <DollarOutlined />
@@ -149,6 +151,12 @@ class Compose extends PureComponent<IProps> {
           <div aria-hidden className="grp-send" onClick={this.send.bind(this)}>
             <SendOutlined />
           </div>
+        </div>
+        <div style={{
+          visibility: openIcon ? 'visible' : 'hidden', position: 'absolute', bottom: 55, right: 5
+        }}
+        >
+          <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
         </div>
         <Modal
           key="tip_performer"
