@@ -11,6 +11,7 @@ import {
 import UploadList from '@components/file/list-media';
 import { IFeed } from 'src/interfaces';
 import { feedService } from '@services/index';
+import { getGlobalConfig } from '@services/config';
 import Router from 'next/router';
 import moment from 'moment';
 import { formatDate } from '@lib/date';
@@ -18,7 +19,6 @@ import { SelectPerformerDropdown } from '@components/performer/common/select-per
 import { FormInstance } from 'antd/lib/form';
 import AddPollDurationForm from './add-poll-duration';
 import './index.less';
-import { getGlobalConfig } from '@services/config';
 
 const { TextArea } = Input;
 const layout = {
@@ -367,9 +367,9 @@ export default class FormFeed extends PureComponent<IProps> {
           )}
           {thumbnail && (
           <Form.Item label="Thumbnail">
-            <div style={{ position: 'relative' }}>
-              <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, left: 2 }}><DeleteOutlined /></Button>
-              <img alt="thumbnail" src={(thumbnail?.thumbnails && thumbnail?.thumbnails[0]) || thumbnail?.url} width="200px" />
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, right: 2 }}><DeleteOutlined /></Button>
+              <img alt="thumbnail" src={(thumbnail?.thumbnails && thumbnail?.thumbnails[0]) || thumbnail?.url || thumbnail} width="200px" />
             </div>
           </Form.Item>
           )}
