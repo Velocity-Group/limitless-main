@@ -1,14 +1,13 @@
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Button, Select, DatePicker, message
+  Form, Button, Select, DatePicker
 } from 'antd';
 import { ISubscriptionCreate } from 'src/interfaces';
 import { FormInstance } from 'antd/lib/form';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
-import { userService } from '@services/user.service';
+import { SelectUserDropdown } from '@components/user/common/select-user-dropdown';
 import moment from 'moment';
 
-const { Option } = Select;
 interface IProps {
   onFinish: Function;
   submiting?: boolean;
@@ -20,10 +19,6 @@ export class FormSubscription extends PureComponent<IProps> {
   formRef: any;
 
   timeout = 0;
-
-  state = {
-    users: []
-  };
 
   componentDidMount() {
     if (!this.formRef) this.formRef = createRef();
@@ -39,25 +34,6 @@ export class FormSubscription extends PureComponent<IProps> {
   render() {
     if (!this.formRef) this.formRef = createRef();
     const { onFinish, submiting } = this.props;
-    const { users } = this.state;
-    const handleSearch = async (value: string) => {
-      try {
-        if (this.timeout) clearTimeout(this.timeout);
-        // await this.setState({ searching: true });
-        this.timeout = window.setTimeout(async () => {
-          const result = await userService.search({
-            q: value,
-            limit: 5,
-            sortBy: 'updatedAt',
-            sort: 'desc'
-          });
-          this.setState({ users: result.data.data });
-        }, 300);
-      } catch (error) {
-        message.error('An error occurred, please try again!');
-        // await this.setState({ searching: false });
-      }
-    };
     return (
       <Form
         ref={this.formRef}
@@ -87,26 +63,7 @@ export class FormSubscription extends PureComponent<IProps> {
           </Select>
         </Form.Item>
         <Form.Item name="userId" label="User" rules={[{ required: true }]}>
-          <Select
-            showSearch
-            defaultActiveFirstOption={false}
-            showArrow
-            onSearch={handleSearch}
-            onChange={(val) => this.setFormVal('userId', val)}
-            notFoundContent={null}
-            allowClear
-          >
-            {users.map((u) => (
-              <Option key={u._id} value={u._id}>
-                <span>
-                  <strong>{u.username}</strong>
-                  {' '}
-                  /
-                  <span>{u.name}</span>
-                </span>
-              </Option>
-            ))}
-          </Select>
+          <SelectUserDropdown onSelect={(val) => this.setFormVal('userId', val)} showAll />
         </Form.Item>
         <Form.Item name="performerId" label="Performer" rules={[{ required: true }]}>
           <SelectPerformerDropdown onSelect={(val) => this.setFormVal('performerId', val)} />
