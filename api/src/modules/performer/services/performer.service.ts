@@ -558,6 +558,7 @@ export class PerformerService {
     }
     const data = { ...payload } as any;
     delete data.balance;
+    delete data.welcomeVideoId;
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
