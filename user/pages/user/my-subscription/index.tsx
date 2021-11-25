@@ -138,7 +138,12 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     }
     try {
       await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({ type: subscriptionType, performerId: performer._id });
+      await paymentService.subscribePerformer({
+        type: subscriptionType,
+        performerId: performer._id,
+        paymentGateway: 'stripe',
+        stripeCardId: currentUser.stripeCardIds[0]
+      });
       this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
