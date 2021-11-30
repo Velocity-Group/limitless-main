@@ -20,7 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "copy-template": "cp -r ./src/templates ./dist/templates",
     "migrate": "node migrate",
-    "migrate:create": "./node_modules/.bin/migrate create"
+    "migrate:create": "./node_modules/.bin/migrate create",
+    "obfuscator": "yarn build && javascript-obfuscator ./dist --output ./obfuscator && cp -r ./dist/templates ./obfuscator"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.7",
@@ -41,6 +42,7 @@
     "dotenv": "^8.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "google-auth-library": "^6.1.4",
+    "javascript-obfuscator": "^3.0.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.20",
     "migrate": "^1.7.0",
