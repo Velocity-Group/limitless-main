@@ -1,6 +1,6 @@
 {
-  "name": "next-ant",
-  "version": "0.1.0",
+  "name": "admin-fanso",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "ts-node --project tsconfig.server.json server/index.ts",
