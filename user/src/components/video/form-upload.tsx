@@ -215,6 +215,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
       selectedVideo
     } = this.state;
     const config = getGlobalConfig();
+
     return (
       <>
         <Form
@@ -351,19 +352,12 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 <Input.TextArea rows={3} />
               </Form.Item>
             </Col>
-            <Col xs={24} md={8}>
+            <Col xs={24} md={12}>
               <Form.Item
                 label="Video"
                 help={
                   (selectedVideo && <a>{selectedVideo.name}</a>)
-                  || (previewVideo && (
-                    <a href={previewVideo} target="_blank" rel="noreferrer">
-                      Click here to preview
-                    </a>
-                  ))
-                  || `Video file is ${
-                    config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048
-                  }MB or below`
+                  || `Video file is ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`
                 }
               >
                 <Upload
@@ -384,29 +378,23 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 </Upload>
               </Form.Item>
             </Col>
-            <Col xs={24} md={8}>
+            <Col xs={12} md={12}>
+              {(!selectedVideo && previewVideo) && (
+                <video
+                  src={previewVideo}
+                  controls
+                  style={{
+                    maxHeight: 300, maxWidth: '90vw', width: '100%', height: '100%'
+                  }}
+                />
+              )}
+            </Col>
+            <Col xs={24} md={12}>
               <Form.Item
                 label="Teaser"
                 help={
                   (selectedTeaser && <a>{selectedTeaser.name}</a>)
-                  || (previewTeaser && (
-                    <p>
-                      <a
-                        aria-hidden
-                        onClick={() => this.setState({
-                          isShowPreview: true,
-                          previewUrl: previewTeaser,
-                          previewType: 'teaser'
-                        })}
-                        rel="noreferrer"
-                      >
-                        Click here to preview
-                      </a>
-                    </p>
-                  ))
-                  || `Teaser is ${
-                    config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200
-                  }MB or below`
+                  || `Teaser is ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`
                 }
               >
                 <Upload
@@ -427,29 +415,23 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 </Upload>
               </Form.Item>
             </Col>
-            <Col xs={24} md={8}>
+            <Col xs={12} md={12}>
+              {(!selectedTeaser && previewTeaser) && (
+                <video
+                  src={previewTeaser}
+                  controls
+                  style={{
+                    maxHeight: 300, maxWidth: '90vw', width: '100%', height: '100%'
+                  }}
+                />
+              )}
+            </Col>
+            <Col xs={24} md={12}>
               <Form.Item
                 label="Thumbnail"
                 help={
                   (selectedThumbnail && <a>{selectedThumbnail.name}</a>)
-                  || (previewThumbnail && (
-                    <p>
-                      <a
-                        aria-hidden
-                        rel="noreferrer"
-                        onClick={() => this.setState({
-                          isShowPreview: true,
-                          previewUrl: previewThumbnail,
-                          previewType: 'thumbnail'
-                        })}
-                      >
-                        Click here to preview
-                      </a>
-                    </p>
-                  ))
-                  || `Thumbnail is ${
-                    config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5
-                  }MB or below`
+                  || `Thumbnail is ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`
                 }
               >
                 <Upload
@@ -468,6 +450,17 @@ export class FormUploadVideo extends PureComponent<IProps> {
                   )}
                 </Upload>
               </Form.Item>
+            </Col>
+            <Col xs={12} md={12}>
+              {(!selectedThumbnail && previewThumbnail) && (
+                <img
+                  src={previewThumbnail}
+                  alt="video thumbnail"
+                  style={{
+                    maxHeight: 200, maxWidth: '90vw', width: '100%', height: '100%', objectFit: 'contain'
+                  }}
+                />
+              )}
             </Col>
           </Row>
           {uploadPercentage ? (
