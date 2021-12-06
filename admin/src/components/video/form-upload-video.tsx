@@ -48,10 +48,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
     if (video) {
       this.setState(
         {
-          previewThumbnail: video?.thumbnail?.url || '',
+          previewThumbnail: typeof video?.thumbnail === 'string' ? video?.thumbnail : video?.thumbnail?.url || '',
           previewVideo: video?.video?.url || '',
           isSale: video.isSale,
-          previewTeaserVideo: video?.teaser?.url || '',
+          previewTeaserVideo: typeof video?.teaser === 'string' ? video?.teaser : video?.teaser?.url || '',
           isSchedule: video.isSchedule,
           scheduledAt: video.scheduledAt || moment().add(1, 'day')
         }
