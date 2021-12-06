@@ -12,9 +12,12 @@ import { BreadcrumbComponent, DropdownAction } from '@components/common';
 import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
 import { userService } from '@services/user.service'; import Head from 'next/head';
 import Link from 'next/link';
+import Router from 'next/router';
 
 export default class Performers extends PureComponent<any> {
   _selectedUser: any;
+
+  query = Router?.router?.query || {} as any;
 
   state = {
     pagination: {} as any,
@@ -22,7 +25,7 @@ export default class Performers extends PureComponent<any> {
     openChangeTokenLogModal: false,
     list: [],
     limit: 10,
-    filter: {} as any,
+    filter: this.query,
     sortBy: 'updatedAt',
     sort: 'desc'
   };
@@ -214,7 +217,7 @@ export default class Performers extends PureComponent<any> {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Users' }]} />
         <Page>
-          <SearchFilter onSubmit={this.handleFilter.bind(this)} />
+          <SearchFilter onSubmit={this.handleFilter.bind(this)} defaultValue={this.query} />
           <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
             <Table

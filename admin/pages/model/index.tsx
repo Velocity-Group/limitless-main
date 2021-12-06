@@ -15,16 +15,19 @@ import { formatDate } from '@lib/date';
 import { BreadcrumbComponent, DropdownAction } from '@components/common';
 import { IPerformer } from 'src/interfaces';
 import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
+import Router from 'next/router';
 
 export default class Performers extends PureComponent<any> {
   _selectedUser: IPerformer;
+
+  query = Router?.router?.query || {} as any;
 
   state = {
     pagination: {} as any,
     searching: false,
     list: [],
     limit: 10,
-    filter: {} as any,
+    filter: this.query,
     sortBy: 'updatedAt',
     sort: 'desc',
     openChangeTokenLogModal: false
@@ -317,17 +320,17 @@ export default class Performers extends PureComponent<any> {
                     </Link>
                   )
                 }
-              // {
-              //   key: 'change-token-logs',
-              //   name: 'Token balance change logs',
-              //   children: (
-              //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
-              //       <HistoryOutlined />
-              //       {' '}
-              //       Token Change Logs
-              //     </a>
-              //   )
-              // }
+                // {
+                //   key: 'change-token-logs',
+                //   name: 'Token balance change logs',
+                //   children: (
+                //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
+                //       <HistoryOutlined />
+                //       {' '}
+                //       Token Change Logs
+                //     </a>
+                //   )
+                // }
               ]}
             />
           );
@@ -342,7 +345,7 @@ export default class Performers extends PureComponent<any> {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Models' }]} />
         <Page>
-          <SearchFilter onSubmit={this.handleFilter.bind(this)} />
+          <SearchFilter onSubmit={this.handleFilter.bind(this)} defaultValue={this.query} />
           <div className="table-responsive custom">
             <Table
               dataSource={list}

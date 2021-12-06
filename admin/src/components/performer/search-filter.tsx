@@ -5,6 +5,11 @@ import {
 
 interface IProps {
   onSubmit: Function;
+  defaultValue?: {
+    q?: string,
+    gender?: 'male' | 'female' | 'transgender',
+    status?: 'active' | 'inactive' | 'pending-email-confirmation'
+  };
 }
 
 export class SearchFilter extends PureComponent<IProps> {
@@ -14,12 +19,19 @@ export class SearchFilter extends PureComponent<IProps> {
     status: ''
   };
 
+  componentDidMount() {
+    const { defaultValue } = this.props;
+    defaultValue && this.setState({ ...defaultValue });
+  }
+
   render() {
     const { onSubmit } = this.props;
+    const { status: initStatus, gender: initGender, q: initQ } = this.state;
     return (
       <Row gutter={24}>
         <Col lg={8} xs={24}>
           <Input
+            value={initQ}
             placeholder="Enter keyword"
             onChange={(evt) => this.setState({ q: evt.target.value })}
             onPressEnter={() => onSubmit(this.state, () => onSubmit(this.state))}
@@ -27,7 +39,7 @@ export class SearchFilter extends PureComponent<IProps> {
         </Col>
         <Col lg={8} xs={24}>
           <Select
-            defaultValue=""
+            value={initStatus}
             style={{ width: '100%' }}
             onChange={(status) => this.setState({ status }, () => onSubmit(this.state))}
           >
@@ -41,7 +53,7 @@ export class SearchFilter extends PureComponent<IProps> {
         </Col>
         <Col lg={8} xs={24}>
           <Select
-            defaultValue=""
+            value={initGender}
             style={{ width: '100%' }}
             onChange={(gender) => this.setState({ gender }, () => onSubmit(this.state))}
           >

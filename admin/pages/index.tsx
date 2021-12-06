@@ -58,7 +58,7 @@ export default class Dashboard extends PureComponent<any> {
         </Head>
         <Row className="dashboard-stats">
           <Col md={8} xs={12}>
-            <Link href="/users">
+            <Link href={{ pathname: '/users', query: { status: 'active' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -72,7 +72,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/users">
+            <Link href={{ pathname: '/users', query: { status: 'inactive' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -86,7 +86,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/users">
+            <Link href={{ pathname: '/users', query: { status: 'pending-email-confirmation' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -100,7 +100,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/model">
+            <Link href={{ pathname: '/model', query: { status: 'active' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -115,7 +115,7 @@ export default class Dashboard extends PureComponent<any> {
 
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/model">
+            <Link href={{ pathname: '/model', query: { status: 'inactive' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -129,7 +129,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/model">
+            <Link href={{ pathname: '/model', query: { verifiedDocument: false } }}>
               <a>
                 <Card>
                   <Statistic
