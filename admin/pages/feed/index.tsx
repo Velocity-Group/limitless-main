@@ -37,7 +37,7 @@ class Feeds extends PureComponent<IProps> {
     const { filter } = this.state;
     await this.setState({ filter: { type: router?.query?.type || '' } });
     if (performerId) {
-      await this.setState({ filter: { ...filter, fromSourceId: performerId } });
+      await this.setState({ filter: { ...filter, performerId } });
     }
     this.search();
   }
@@ -48,7 +48,7 @@ class Feeds extends PureComponent<IProps> {
       const { filter } = this.state;
       await this.setState({ filter: { type: router?.query?.type || '' } });
       if (performerId) {
-        await this.setState({ filter: { ...filter, fromSourceId: performerId } });
+        await this.setState({ filter: { ...filter, performerId } });
       }
       this.search();
     }
