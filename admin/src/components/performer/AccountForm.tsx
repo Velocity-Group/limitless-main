@@ -203,7 +203,8 @@ export class AccountForm extends PureComponent<IProps> {
             <Form.Item
               name="username"
               label="Username"
-              rules={[{ required: true },
+              rules={[
+                { required: true },
                 {
                   pattern: new RegExp(/^[a-z0-9]+$/g),
                   message: 'Username must contain lowercase alphanumerics only'
@@ -317,7 +318,13 @@ export class AccountForm extends PureComponent<IProps> {
                 key="password"
                 name="password"
                 label="Password"
-                rules={[{ required: true, message: 'Please enter your password' }, { min: 6, message: 'Password must be at least 6 characters' }]}
+                rules={[
+                  {
+                    pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                    message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                  },
+                  { required: true, message: 'Please enter your password!' }
+                ]}
               >
                 <Input.Password placeholder="Password" />
               </Form.Item>
@@ -327,7 +334,13 @@ export class AccountForm extends PureComponent<IProps> {
                 key="rePassword"
                 name="rePassword"
                 label="Confirm password"
-                rules={[{ required: true, message: 'Please confirm your password' }, { min: 6, message: 'Password must be at least 6 characters' }]}
+                rules={[
+                  {
+                    pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                    message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                  },
+                  { required: true, message: 'Please confirm your password!' }
+                ]}
               >
                 <Input.Password placeholder="Confirm password" />
               </Form.Item>
@@ -447,11 +460,11 @@ export class AccountForm extends PureComponent<IProps> {
             <Form.Item name="weight" label="Weight">
               <Select showSearch>
                 {weights
-              && weights.map((w: IWeight) => (
-                <Option key={w.text} value={w.text}>
-                  {w.text}
-                </Option>
-              ))}
+                  && weights.map((w: IWeight) => (
+                    <Option key={w.text} value={w.text}>
+                      {w.text}
+                    </Option>
+                  ))}
               </Select>
             </Form.Item>
           </Col>
@@ -589,29 +602,29 @@ export class AccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           {performer && (
-          <Col md={12} xs={12}>
-            <Form.Item label="Intro Video">
-              <Upload
-                accept={'video/*'}
-                name="welcome-video"
-                listType="picture-card"
-                className="avatar-uploader"
-                showUploadList={false}
-                action={performerService.getWelcomeVideoUploadUrl(performer._id)}
-                headers={uploadHeaders}
-                onChange={this.handleVideoChange.bind(this)}
-              >
-                <UploadOutlined />
-              </Upload>
-              {previewVideo && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a rel="noreferrer" href={previewVideo} target="_blank">Click here to preview intro video</a></div>}
-              {uploadVideoPercentage ? (
-                <Progress percent={Math.round(uploadVideoPercentage)} />
-              ) : null}
-            </Form.Item>
-            <Form.Item name="activateWelcomeVideo" valuePropName="checked">
-              <Checkbox>Activate intro video</Checkbox>
-            </Form.Item>
-          </Col>
+            <Col md={12} xs={12}>
+              <Form.Item label="Intro Video">
+                <Upload
+                  accept={'video/*'}
+                  name="welcome-video"
+                  listType="picture-card"
+                  className="avatar-uploader"
+                  showUploadList={false}
+                  action={performerService.getWelcomeVideoUploadUrl(performer._id)}
+                  headers={uploadHeaders}
+                  onChange={this.handleVideoChange.bind(this)}
+                >
+                  <UploadOutlined />
+                </Upload>
+                {previewVideo && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a rel="noreferrer" href={previewVideo} target="_blank">Click here to preview intro video</a></div>}
+                {uploadVideoPercentage ? (
+                  <Progress percent={Math.round(uploadVideoPercentage)} />
+                ) : null}
+              </Form.Item>
+              <Form.Item name="activateWelcomeVideo" valuePropName="checked">
+                <Checkbox>Activate intro video</Checkbox>
+              </Form.Item>
+            </Col>
           )}
           <Col xs={24} md={24}>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>

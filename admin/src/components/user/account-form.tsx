@@ -73,7 +73,7 @@ export class AccountForm extends PureComponent<IProps> {
                     /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                   ),
                   message:
-                'First name can not contain number and special character'
+                    'First name can not contain number and special character'
                 }
               ]}
             >
@@ -92,7 +92,7 @@ export class AccountForm extends PureComponent<IProps> {
                     /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                   ),
                   message:
-                'Last name can not contain number and special character'
+                    'Last name can not contain number and special character'
                 }
               ]}
             >
@@ -121,7 +121,7 @@ export class AccountForm extends PureComponent<IProps> {
                 {
                   pattern: new RegExp(/^(?=.*\S).+$/g),
                   message:
-                'Display name can not contain only whitespace'
+                    'Display name can not contain only whitespace'
                 },
                 {
                   min: 3,
@@ -160,12 +160,32 @@ export class AccountForm extends PureComponent<IProps> {
           </Col>
           {!user && [
             <Col xs={12} md={12}>
-              <Form.Item name="password" label="Password" rules={[{ required: true }, { min: 6 }]}>
+              <Form.Item
+                name="password"
+                label="Password"
+                rules={[
+                  {
+                    pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                    message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                  },
+                  { required: true, message: 'Please enter your password!' }
+                ]}
+              >
                 <Input.Password placeholder="User password" />
               </Form.Item>
             </Col>,
             <Col xs={12} md={12}>
-              <Form.Item name="rePassword" label="Confirm password" rules={[{ required: true }, { min: 6 }]}>
+              <Form.Item
+                name="rePassword"
+                label="Confirm password"
+                rules={[
+                  {
+                    pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                    message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                  },
+                  { required: true, message: 'Please confirm your password!' }
+                ]}
+              >
                 <Input.Password placeholder="Confirm user password" />
               </Form.Item>
             </Col>
