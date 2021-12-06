@@ -2,21 +2,26 @@ import React, { PureComponent } from 'react';
 import {
   Input, Row, Col, Select
 } from 'antd';
+import Router from 'next/router';
 
 interface IProps {
   onSubmit: Function;
   defaultValue?: {
     q?: string,
     gender?: 'male' | 'female' | 'transgender',
-    status?: 'active' | 'inactive' | 'pending-email-confirmation'
+    status?: 'active' | 'inactive' | 'pending-email-confirmation',
+    verifiedDocument?: 'true' | 'false'
   };
 }
 
 export class SearchFilter extends PureComponent<IProps> {
+  pathname = Router.router?.pathname || '';
+
   state = {
     q: '',
     gender: '',
-    status: ''
+    status: '',
+    verifiedDocument: ''
   };
 
   componentDidMount() {
@@ -26,10 +31,13 @@ export class SearchFilter extends PureComponent<IProps> {
 
   render() {
     const { onSubmit } = this.props;
-    const { status: initStatus, gender: initGender, q: initQ } = this.state;
+    const {
+      status: initStatus, gender: initGender, q: initQ, verifiedDocument: initVerifiedDocument
+    } = this.state;
+
     return (
       <Row gutter={24}>
-        <Col lg={8} xs={24}>
+        <Col lg={6} xs={24}>
           <Input
             value={initQ}
             placeholder="Enter keyword"
@@ -37,7 +45,7 @@ export class SearchFilter extends PureComponent<IProps> {
             onPressEnter={() => onSubmit(this.state, () => onSubmit(this.state))}
           />
         </Col>
-        <Col lg={8} xs={24}>
+        <Col lg={6} xs={24}>
           <Select
             value={initStatus}
             style={{ width: '100%' }}
@@ -51,7 +59,7 @@ export class SearchFilter extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Col>
-        <Col lg={8} xs={24}>
+        <Col lg={6} xs={24}>
           <Select
             value={initGender}
             style={{ width: '100%' }}
@@ -69,6 +77,23 @@ export class SearchFilter extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Col>
+        {this.pathname === '/model' && (
+          <Col lg={6} xs={24}>
+            <Select
+              value={initVerifiedDocument}
+              style={{ width: '100%' }}
+              onChange={(verifiedDocument) => this.setState({ verifiedDocument }, () => onSubmit(this.state))}
+            >
+              <Select.Option value="">All</Select.Option>
+              <Select.Option key="vserified" value="true">
+                Verified ID
+              </Select.Option>
+              <Select.Option key="notVerified" value="false">
+                Not Verified ID
+              </Select.Option>
+            </Select>
+          </Col>
+        )}
       </Row>
     );
   }
