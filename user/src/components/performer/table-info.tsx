@@ -9,6 +9,27 @@ interface IProps {
 }
 
 export class PerformerInfo extends PureComponent<IProps> {
+  detectURLs(str: string) {
+    const urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+    return str.match(urlRegex);
+  }
+
+  replaceURLs(str: string) {
+    if (!str) return 'No bio yet';
+
+    const urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+    const result = str.replace(urlRegex, (url: string) => {
+      let hyperlink = url;
+      if (!hyperlink.match('^https?:\\/\\/')) {
+        hyperlink = `http://${hyperlink}`;
+      }
+      return `<a href="${hyperlink}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
+
+    // eslint-disable-next-line consistent-return
+    return result;
+  }
+
   render() {
     const { performer, countries = [] } = this.props;
     const country = countries.length && countries.find((c) => c.code === performer?.country);
@@ -19,13 +40,17 @@ export class PerformerInfo extends PureComponent<IProps> {
             header={performer?.country ? (
               <>
                 <img alt="flag" src={country?.flag} width="25px" />
-                  &nbsp;
+                &nbsp;
                 {country?.name}
               </>
             ) : 'BIOGRAPHY'}
             key="1"
           >
-            <p className="bio">{performer?.bio || 'No bio yet'}</p>
+            <p
+              className="bio"
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: this.replaceURLs(performer?.bio) }}
+            />
             <Descriptions className="performer-info">
               {performer?.gender && (
                 <Descriptions.Item label="Gender">
