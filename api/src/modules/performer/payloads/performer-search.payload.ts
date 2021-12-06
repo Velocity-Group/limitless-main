@@ -44,6 +44,10 @@ export class PerformerSearchPayload extends SearchRequest {
   verifiedEmail: boolean;
 
   @ApiProperty()
+  @IsOptional()
+  verifiedDocument: boolean;
+
+  @ApiProperty()
   @IsString()
   @IsOptional()
   country: string;
