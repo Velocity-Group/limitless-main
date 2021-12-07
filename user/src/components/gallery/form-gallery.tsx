@@ -39,10 +39,10 @@ const FormGallery = ({
       name="galleryForm"
       onFinish={onFinish.bind(this)}
       initialValues={
-          gallery || {
-            title: '', status: 'active', description: '', price: 4.99, isSale: false
-          }
+        gallery || {
+          title: '', status: 'active', description: '', price: 4.99, isSale: false
         }
+      }
       labelCol={{ span: 24 }}
       wrapperCol={{ span: 24 }}
       className="account-form"
@@ -103,7 +103,7 @@ const FormGallery = ({
             <InboxOutlined />
           </p>
           <p className="ant-upload-text">
-            Drag & drop photos to this area or browser to upload
+            Drag and drop your photos to this area, or browse your computer to upload
           </p>
         </Dragger>
       )}

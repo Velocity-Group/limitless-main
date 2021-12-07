@@ -75,12 +75,12 @@ class PostListing extends PureComponent<IProps> {
   }
 
   async deleteFeed(feed) {
-    if (!window.confirm('All earnings are related to this post will be refunded. Are you sure to remove?')) {
+    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to delete it?')) {
       return;
     }
     try {
       await feedService.delete(feed._id);
-      message.success('Remove success');
+      message.success('Deleted successfully');
       this.getData();
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};

@@ -51,6 +51,8 @@ export class TableListEarning extends PureComponent<IProps> {
               return <Tag color="pink">Message</Tag>;
             case 'product':
               return <Tag color="blue">Product</Tag>;
+            case 'gallery':
+              return <Tag color="success">Gallery</Tag>;
           }
           return <Tag color="success">{type}</Tag>;
         }

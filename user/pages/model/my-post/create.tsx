@@ -54,7 +54,7 @@ class CreatePost extends PureComponent<IProps> {
               <div className="story-switch-type">
                 <div aria-hidden className="type-item left" onClick={() => this.setState({ type: 'photo', chosenType: true })}>
                   <span><PictureOutlined /></span>
-                  <p>Create a Photos post</p>
+                  <p>Create a Photo post</p>
                 </div>
                 <div aria-hidden className="type-item right" onClick={() => this.setState({ type: 'video', chosenType: true })}>
                   <span><VideoCameraOutlined /></span>

@@ -165,7 +165,7 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
       });
       return;
     }
-    if (!window.confirm('Are sure to remove this photo?')) return;
+    if (!window.confirm('Are you sure you want to remove this photo?')) return;
     try {
       await this.setState({ submiting: true });
       await photoService.delete(file._id);

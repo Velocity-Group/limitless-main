@@ -138,7 +138,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${isToken ? 'Token Earning Report' : 'USD Earning Report'}`}
+            {`${ui?.siteName} | ${isToken ? 'Token Earnings Report' : 'USD Earnings Report'}`}
           </title>
         </Head>
         <div className="main-container">

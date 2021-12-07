@@ -43,7 +43,7 @@ class blockPage extends PureComponent<IProps> {
   }
 
   async handleUnblockUser(userId: string) {
-    if (!window.confirm('Are you sure to unblock this user')) return;
+    if (!window.confirm('Are you sure you want to unblock this user?')) return;
     const { userBlockedList } = this.state;
     try {
       await this.setState({ submiting: true });
@@ -67,7 +67,7 @@ class blockPage extends PureComponent<IProps> {
      try {
        await this.setState({ submiting: true });
        await blockService.blockUser({ targetId, target: 'user', reason });
-       message.success('Blocked successfully');
+       message.success('The student profile was blocked');
        this.getBlockList();
      } catch (e) {
        const error = await Promise.resolve(e);

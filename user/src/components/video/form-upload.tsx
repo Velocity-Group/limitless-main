@@ -300,9 +300,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
                 rules={[{ required: true, message: 'Please select status!' }]}
               >
                 <Select>
-                  <Select.Option key="error" value="file-error" disabled>
+                  {/* <Select.Option key="error" value="file-error" disabled>
                     File Error
-                  </Select.Option>
+                  </Select.Option> */}
                   <Select.Option key="active" value="active">
                     Active
                   </Select.Option>
@@ -328,16 +328,16 @@ export class FormUploadVideo extends PureComponent<IProps> {
               )}
             </Col>
             <Col md={12} xs={24}>
-              <Form.Item name="isSchedule" label="Scheduling?">
+              <Form.Item name="isSchedule" label="scheduled?">
                 <Switch
-                  checkedChildren="Scheduling"
-                  unCheckedChildren="Unschedule"
+                  checkedChildren="Scheduled"
+                  unCheckedChildren="Not scheduled"
                   checked={isSchedule}
                   onChange={this.onSwitch.bind(this, 'scheduling')}
                 />
               </Form.Item>
               {isSchedule && (
-                <Form.Item label="Schedule at">
+                <Form.Item label="Scheduled for">
                   <DatePicker
                     style={{ width: '100%' }}
                     disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
