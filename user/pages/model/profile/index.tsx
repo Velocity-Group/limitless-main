@@ -450,7 +450,7 @@ class PerformerProfile extends PureComponent<IProps> {
                         </a>
                       </Menu.Item>
                     </Menu>
-                )}
+                  )}
                   >
                     <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
                       <MoreOutlined />
@@ -619,7 +619,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalFeed > 0 && totalFeed}
                     {' '}
-                    POST
+                    {totalFeed > 1 ? 'POSTS' : 'POST'}
                   </h4>
                   <SearchPostBar searching={loadingFeed} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
                 </div>
@@ -639,7 +639,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalVideos > 0 && totalVideos}
                     {' '}
-                    VIDEO
+                    {totalVideos > 1 ? 'VIDEOS' : 'VIDEO'}
                   </h4>
                   <SearchPostBar searching={loadingVideo} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
                 </div>
@@ -657,7 +657,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalGalleries > 0 && totalGalleries}
                     {' '}
-                    GALLERY
+                    {totalGalleries > 1 ? 'GALLERIES' : 'GALLERY'}
                   </h4>
                   <SearchPostBar searching={loadingGallery} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
                 </div>
@@ -675,7 +675,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalProducts > 0 && totalProducts}
                     {' '}
-                    PRODUCT
+                    {totalProducts > 1 ? 'PRODUCTS' : 'PRODUCT'}
                   </h4>
                   <SearchPostBar searching={loadingPrd} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} />
                 </div>
@@ -689,9 +689,11 @@ class PerformerProfile extends PureComponent<IProps> {
             </Tabs>
           </div>
         </div>
-        {performer
+        {
+          performer
           && performer?.welcomeVideoPath
-          && performer?.activateWelcomeVideo && (
+          && performer?.activateWelcomeVideo
+          && (
             <Modal
               key="welcome-video"
               destroyOnClose
@@ -731,7 +733,8 @@ class PerformerProfile extends PureComponent<IProps> {
               }}
               />
             </Modal>
-        )}
+          )
+        }
         <Modal
           key="tip_performer"
           className="subscription-modal"

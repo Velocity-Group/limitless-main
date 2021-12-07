@@ -187,7 +187,7 @@ class VideoViewPage extends PureComponent<IProps> {
           action,
           objectType: 'video'
         });
-        message.success(!isBookmarked ? 'Added to Bookmarks' : 'Remove form Bookmarks');
+        message.success(!isBookmarked ? 'Added to Bookmarks' : 'Removed from Bookmarks');
         this.setState({
           isBookmarked: !isBookmarked,
           videoStats: {

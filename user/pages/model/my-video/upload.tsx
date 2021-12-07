@@ -95,7 +95,7 @@ class UploadVideo extends PureComponent<IProps> {
         data,
         this.onUploading.bind(this)
       )) as IResponse;
-      message.success('Video has been uploaded');
+      message.success('Your video has been uploaded');
       Router.replace('/model/my-video');
     } catch (error) {
       message.error(

@@ -103,7 +103,7 @@ class VideoUpdate extends PureComponent<IProps> {
         this.onUploading.bind(this)
       );
 
-      message.success('Video has been uploaded');
+      message.success('Your video has been updated');
       Router.replace('/model/my-video');
     } catch (error) {
       message.error(getResponseError(error) || 'An error occurred, please try again!');

@@ -164,7 +164,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
           </div>
           <SearchFilter
             type={isToken ? [
-              { key: '', text: 'All type' },
+              { key: '', text: 'All types' },
               // { key: 'private_chat', text: 'Private Chat' },
               // { key: 'group_chat', text: 'Group Chat' },
               // { key: 'public_chat', text: 'Public Chat' },
@@ -176,7 +176,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
               // { key: 'gift', text: 'Gift' },
               // { key: 'message', text: 'Message' }
             ] : [
-              { key: '', text: 'All type' },
+              { key: '', text: 'All types' },
               { key: 'monthly_subscription', text: 'Monthly Subscription' },
               { key: 'yearly_subscription', text: 'Yearly Subscription' }
             ]}
@@ -191,13 +191,13 @@ class EarningPage extends PureComponent<IProps, IStates> {
               precision={2}
             />
             <Statistic
-              title="Admin earned"
+              title="Platform commission"
               prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
               value={stats?.totalSiteCommission || 0}
               precision={2}
             />
             <Statistic
-              title="You earned"
+              title="Your Earnings"
               prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
               value={stats?.totalNetPrice || 0}
               precision={2}

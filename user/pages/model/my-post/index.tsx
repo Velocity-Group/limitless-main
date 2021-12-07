@@ -94,7 +94,7 @@ class PostListing extends PureComponent<IProps> {
     const type = [
       {
         key: '',
-        text: 'All type'
+        text: 'All types'
       },
       {
         key: 'text',

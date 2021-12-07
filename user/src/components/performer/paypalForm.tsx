@@ -43,7 +43,7 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
           <Col lg={12} xs={24}>
             <Form.Item
               name="email"
-              label="Paypal buisiness account email"
+              label="Paypal business account email"
               validateTrigger={['onChange', 'onBlur']}
               rules={[{ required: true }, { type: 'email' }]}
               help="You must upgrade to Business account to earn money"

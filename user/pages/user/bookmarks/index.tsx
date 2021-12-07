@@ -278,7 +278,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalFeeds > 0 && totalFeeds}
                     {' '}
-                    POST
+                    {totalFeeds > 1 ? 'POSTS' : 'POST'}
                   </h4>
                 </div>
                 <ScrollListFeed
@@ -295,7 +295,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalVideos > 0 && totalVideos}
                     {' '}
-                    VIDEO
+                    {totalVideos > 1 ? 'VIDEOS' : 'VIDEO'}
                   </h4>
                 </div>
                 <ScrollListVideo
@@ -310,7 +310,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalGalleries > 0 && totalGalleries}
                     {' '}
-                    GALLERY
+                    {totalGalleries > 1 ? 'GALLERIES' : 'GALLERY'}
                   </h4>
                 </div>
                 <ScrollListGallery
@@ -325,7 +325,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalProducts > 0 && totalProducts}
                     {' '}
-                    PRODUCT
+                    {totalProducts > 1 ? 'PRODUCTS' : 'PRODUCT'}
                   </h4>
                 </div>
                 <ScrollListProduct
@@ -343,7 +343,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalPerformers > 0 && totalPerformers}
                     {' '}
-                    MODEL
+                    {totalPerformers > 1 ? 'MODELS' : 'MODEL'}
                   </h4>
                 </div>
                 <UserPerformerBookmarks
