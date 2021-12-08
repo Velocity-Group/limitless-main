@@ -56,7 +56,17 @@ export class FormCoupon extends PureComponent<IProps> {
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item name="code" label="Code" rules={[{ required: true, message: 'Please input code of coupon!' }]}>
+        <Form.Item
+          name="code"
+          label="Code"
+          rules={[
+            {
+              pattern: new RegExp(/^[a-zA-Z0-9]*$/g),
+              message: 'Coupon only have alphanumeric and no spaces'
+            },
+            { required: true, message: 'Please input code of coupon!' }
+          ]}
+        >
           <Input />
         </Form.Item>
         <Form.Item
