@@ -6,11 +6,10 @@ import { IPerformer, StreamSettings } from 'src/interfaces';
 import { SETTING_KEYS } from 'src/constants';
 import { message as _message } from 'antd';
 import { generateUuid } from 'src/lib';
+import { getGlobalConfig } from '@services/config';
 import { WEBRTC_ADAPTOR_INFORMATIONS } from './constants';
 import { WebRTCAdaptorConfigs } from './interfaces/WebRTCAdaptorConfigs';
 import { warning } from './utils';
-import { getGlobalConfig } from '@services/config';
-
 
 interface IProps {
   token?: string;
@@ -150,7 +149,7 @@ export default function withAntmedia(Component) {
       this.webRTCAdaptor = new window['WebRTCAdaptor']({
         websocket_url: websocketURL,
         mediaConstraints,
-        debug: config.NODE_ENV === 'development',
+        debug: process.env.NODE_ENV === 'development',
         peerconnection_config: pc_config,
         sdp_constraints: sdpConstraints,
         bandwidth: config.NEXT_PUBLIC_MAX_STREAM_BITRATE || 900,

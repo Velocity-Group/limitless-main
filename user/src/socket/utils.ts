@@ -6,12 +6,10 @@
  * @param {String} message The warning message.
  * @returns {void}
  */
-import { getGlobalConfig } from '@services/config';
 
 export const warning = function (...args) {
   // debug on development and staging.
-  const config = getGlobalConfig();
-  if (config.NODE_ENV === 'production') return;
+  if (process.env.NODE_ENV === 'production') return;
 
   /* eslint-disable no-console */
   if (typeof console !== 'undefined' && typeof console.error === 'function') {
@@ -31,8 +29,7 @@ export const warning = function (...args) {
 
 export const debug = function (...args) {
   // debug on development and staging.
-  const config = getGlobalConfig();
-  if (config.NODE_ENV === 'production') return;
+  if (process.env.NODE_ENV === 'production') return;
 
   /* eslint-disable no-console */
   if (typeof console !== 'undefined' && typeof console.debug === 'function') {
