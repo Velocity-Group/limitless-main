@@ -82,7 +82,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
           <Col xs={24} sm={24} md={12}>
             <Form.Item
               labelCol={{ span: 24 }}
-              label="ID photo"
+              label="Your government issued ID"
               valuePropName="fileList"
               className="model-photo-verification"
               help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"

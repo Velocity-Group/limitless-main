@@ -80,7 +80,7 @@ class PostListing extends PureComponent<IProps> {
     }
     try {
       await feedService.delete(feed._id);
-      message.success('Deleted successfully');
+      message.success('Post deleted successfully');
       this.getData();
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};

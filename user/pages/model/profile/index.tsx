@@ -714,7 +714,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   className="primary"
                   onClick={this.handleViewWelcomeVideo.bind(this)}
                 >
-                  Don&apos;t show me again
+                  Don&apos;t show this again
                 </Button>
               ]}
             >

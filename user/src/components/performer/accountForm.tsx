@@ -181,7 +181,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
           <Col lg={12} md={12} xs={24}>
             <Form.Item
               name="name"
-              label="Display name"
+              label="Display Name"
               validateTrigger={['onChange', 'onBlur']}
               rules={[
                 { required: true, message: 'Please input your display name!' },

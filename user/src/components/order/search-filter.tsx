@@ -12,7 +12,7 @@ const deliveryStatuses = [
   },
   {
     key: 'shipping',
-    text: 'Shipping'
+    text: 'Shipped'
   },
   {
     key: 'delivered',
@@ -48,7 +48,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
             defaultValue=""
           >
             <Select.Option key="all" value="">
-              All delivery status
+              All delivery statuses
             </Select.Option>
             {deliveryStatuses.map((s) => (
               <Select.Option key={s.key} value={s.key}>

@@ -28,7 +28,7 @@ export class TableListProduct extends PureComponent<IProps> {
     } = this.props;
     const columns = [
       {
-        title: '#',
+        title: 'Thumbnail',
         dataIndex: 'image',
         render(data, record) {
           return (

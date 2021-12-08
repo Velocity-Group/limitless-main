@@ -43,7 +43,7 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
     try {
       await this.setState({ submiting: true });
       const resp = await galleryService.create(data);
-      message.success('Created success!');
+      message.success('New gallery created successfully');
       Router.replace(`/model/my-gallery/update?id=${resp.data._id}`);
     } catch (e) {
       message.error(getResponseError(e) || 'An error occurred, please try again!');

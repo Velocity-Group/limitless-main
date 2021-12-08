@@ -51,14 +51,14 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Start recurring date',
+      title: 'Subscription Start Date',
       dataIndex: 'startRecurringDate',
       render(date: Date, record) {
         return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
       }
     },
     {
-      title: 'Next recurring date',
+      title: 'Renwes on',
       dataIndex: 'nextRecurringDate',
       render(date: Date, record) {
         return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
@@ -83,7 +83,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Updated at',
+      title: 'Updated on',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
