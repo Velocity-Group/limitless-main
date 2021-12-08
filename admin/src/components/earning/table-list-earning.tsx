@@ -74,6 +74,18 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Platform Earnings',
+        dataIndex: 'platformEarning',
+        render(v, record) {
+          return (
+            <span>
+              {record.isToken ? <img src="/coin-ico.png" width="15px" alt="coin" /> : '$'}
+              {(record.grossPrice - record.netPrice || 0).toFixed(2)}
+            </span>
+          );
+        }
+      },
+      {
         title: 'Type',
         dataIndex: 'type',
         render(type: string) {
