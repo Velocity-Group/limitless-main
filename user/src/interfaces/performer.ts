@@ -62,6 +62,7 @@ export interface IPerformer {
   googleConnected: boolean;
   welcomeVideoId: string;
   welcomeVideoPath: string;
+  welcomeVideoName: string;
   activateWelcomeVideo: boolean;
   isBookMarked: boolean;
   isSubscribed: boolean;
@@ -117,6 +118,7 @@ export interface IUpdatePerformer {
   bankingInformation: IBanking;
   welcomeVideoId: string;
   welcomeVideoPath: string;
+  welcomeVideoName: string;
   activateWelcomeVideo: boolean;
   publicChatPrice: number;
   privateChatPrice: number;
@@ -187,6 +189,8 @@ export interface ITrendingPerformer {
   welcomeVideoId: string;
 
   welcomeVideoPath: string;
+
+  welcomeVideoName: string;
 
   activateWelcomeVideo: boolean;
 

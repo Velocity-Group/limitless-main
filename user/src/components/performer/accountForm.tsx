@@ -61,13 +61,17 @@ export class PerformerAccountForm extends PureComponent<IProps> {
   state = {
     isUploadingVideo: false,
     uploadVideoPercentage: 0,
-    previewVideo: null
+    previewVideoUrl: null,
+    previewVideoName: null
   }
 
   componentDidMount() {
     const { user } = this.props;
     user && user.welcomeVideoPath && this.setState({
-      previewVideo: user.welcomeVideoPath
+      previewVideoUrl: user.welcomeVideoPath
+    });
+    user && user.welcomeVideoName && this.setState({
+      previewVideoName: user.welcomeVideoName
     });
   }
 
@@ -79,7 +83,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
     }
     if (info.file.status === 'done') {
       message.success('Intro video was uploaded');
-      this.setState({ isUploadingVideo: false, previewVideo: info?.file?.response?.data.url });
+      this.setState({ isUploadingVideo: false, previewVideoUrl: info?.file?.response?.data.url, previewVideoName: info?.file?.response?.data.name });
     }
   };
 
@@ -96,7 +100,9 @@ export class PerformerAccountForm extends PureComponent<IProps> {
       onCoverUploaded,
       videoUploadUrl
     } = options;
-    const { isUploadingVideo, uploadVideoPercentage, previewVideo } = this.state;
+    const {
+      isUploadingVideo, uploadVideoPercentage, previewVideoUrl, previewVideoName
+    } = this.state;
     return (
       <Form
         {...layout}
@@ -555,7 +561,8 @@ export class PerformerAccountForm extends PureComponent<IProps> {
               >
                 <UploadOutlined />
               </Upload>
-              {previewVideo && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a rel="noreferrer" href={previewVideo} target="_blank">Click here to preview intro video</a></div>}
+              {previewVideoUrl && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a rel="noreferrer" href={previewVideoUrl} target="_blank">Click here to preview intro video</a></div>}
+              {previewVideoName && <span>{previewVideoName}</span>}
               {uploadVideoPercentage ? (
                 <Progress percent={Math.round(uploadVideoPercentage)} />
               ) : null}

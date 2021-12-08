@@ -226,6 +226,8 @@ export class PerformerDto {
 
   welcomeVideoPath?: string;
 
+  welcomeVideoName?: string;
+
   activateWelcomeVideo?: boolean;
 
   isBookMarked?: boolean;
@@ -320,6 +322,7 @@ export class PerformerDto {
         'isOnline',
         'welcomeVideoId',
         'welcomeVideoPath',
+        'welcomeVideoName',
         'activateWelcomeVideo',
         'isBookMarked',
         'isSubscribed',
@@ -350,6 +353,7 @@ export class PerformerDto {
       blockCountries: this.blockCountries,
       isOnline: this.isOnline,
       welcomeVideoPath: FileDto.getPublicUrl(this.welcomeVideoPath),
+      welcomeVideoName: this.welcomeVideoName,
       activateWelcomeVideo: this.activateWelcomeVideo,
       verifiedAccount: this.verifiedAccount,
       isSubscribed: this.isSubscribed,
@@ -494,6 +498,7 @@ export class PerformerDto {
       isOnline: this.isOnline,
       welcomeVideoId: this.welcomeVideoId,
       welcomeVideoPath: FileDto.getPublicUrl(this.welcomeVideoPath),
+      welcomeVideoName: this.welcomeVideoName,
       activateWelcomeVideo: this.activateWelcomeVideo,
       verifiedAccount: this.verifiedAccount,
       isBookMarked: this.isBookMarked,
