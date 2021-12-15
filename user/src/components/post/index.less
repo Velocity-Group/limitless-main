@@ -258,7 +258,12 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background: @white;
+        background-color: @white;
+        cursor: pointer;
+
+        &:hover {
+          background-color: @light-grey;
+        }
 
         .anticon {
           color: @theme-color;

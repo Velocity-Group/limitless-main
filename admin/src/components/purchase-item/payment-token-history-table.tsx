@@ -1,6 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
 import { Table, Tag } from 'antd';
 import { IPaymentTokenHistory } from 'src/interfaces';
+import { getGlobalConfig } from '@services/index';
 import { formatDate } from '@lib/date';
 
 interface IProps {
@@ -20,12 +21,33 @@ const PaymentTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Transaction_ID',
+      title: 'ID',
       dataIndex: '_id',
       key: 'id',
       render(data, record) {
+        let path = '';
+        switch (record.type) {
+          case 'feed':
+            path = `/post/${record?.targetId}`;
+            break;
+          case 'product':
+            path = `/store/${record?.targetId}`;
+            break;
+          case 'video':
+            path = `/video/${record?.targetId}`;
+            break;
+          case 'gallery':
+            path = `/gallery/${record?.targetId}`;
+            break;
+          default: null;
+        }
         return (
-          <a style={{ textTransform: 'uppercase', fontWeight: 600 }}>
+          <a
+            style={{ textTransform: 'uppercase', fontWeight: 600 }}
+            target="_blank"
+            href={`${getGlobalConfig().NEXT_PUBLIC_SITE_URL}${path}`}
+            rel="noreferrer"
+          >
             {record._id.slice(16, 24)}
           </a>
         );
@@ -87,11 +109,11 @@ const PaymentTableList = ({
       render(type: string) {
         switch (type) {
           case 'feed':
-            return <Tag color="#1da3f1">Feed Post</Tag>;
+            return <Tag color="#1da3f1">Feed</Tag>;
           case 'monthly_subscription':
-            return <Tag color="#ca50c6">Monthly Subscription</Tag>;
+            return <Tag color="#ca50c6">Monthly Sub</Tag>;
           case 'yearly_subscription':
-            return <Tag color="#ca50c6">Yearly Subscription</Tag>;
+            return <Tag color="#ca50c6">Yearly Subs</Tag>;
           case 'video':
             return <Tag color="#00dcff">Video</Tag>;
           case 'gallery':

@@ -11,7 +11,6 @@ import { paymentService, subscriptionService } from '@services/index';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
 import { SearchFilter } from '@components/common';
-import { updateBalance } from '@redux/user/actions';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import Loader from '@components/common/base/loader';
 import Router from 'next/router';
@@ -19,7 +18,6 @@ import Router from 'next/router';
 interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
-  updateBalance: Function;
 }
 interface IStates {
   subscriptionList: ISubscription[];
@@ -209,5 +207,5 @@ const mapState = (state: any) => ({
   ui: { ...state.ui },
   currentUser: { ...state.user.current }
 });
-const mapDispatch = { updateBalance };
+const mapDispatch = { };
 export default connect(mapState, mapDispatch)(SubscriptionPage);

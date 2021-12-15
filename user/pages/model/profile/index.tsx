@@ -720,7 +720,6 @@ class PerformerProfile extends PureComponent<IProps> {
             >
               <VideoPlayer {...{
                 key: `${performer._id}`,
-                autoplay: true,
                 controls: true,
                 playsinline: true,
                 fluid: true,

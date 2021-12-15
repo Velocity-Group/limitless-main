@@ -416,6 +416,30 @@ class FeedCard extends Component<IProps> {
         <div className="feed-container">
           <div className="feed-text">
             {feed.text}
+            {polls && polls.length > 0 && polls.map((poll) => (
+              <div aria-hidden className="feed-poll" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
+                <span>{poll?.description}</span>
+                {' '}
+                <span>{poll?.totalVote || 0}</span>
+              </div>
+            ))}
+            {polls && polls.length > 0 && (
+            <div className="total-vote">
+              <span>
+                Total
+                {' '}
+                {shortenLargeNumber(totalVote)}
+                {' '}
+                votes
+              </span>
+              {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
+                <span>
+                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}D `}
+                  <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
+                </span>
+              ) : <span>Expired</span>}
+            </div>
+            )}
           </div>
           {canView && (
             <div className="feed-content">
@@ -485,30 +509,6 @@ class FeedCard extends Component<IProps> {
                   </span>
                 </div>
               )}
-            </div>
-          )}
-          {polls && polls.length > 0 && polls.map((poll) => (
-            <div aria-hidden className="feed-poll" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
-              <span>{poll?.description}</span>
-              {' '}
-              <span>{poll?.totalVote || 0}</span>
-            </div>
-          ))}
-          {polls && polls.length > 0 && (
-            <div className="total-vote">
-              <span>
-                Total
-                {' '}
-                {shortenLargeNumber(totalVote)}
-                {' '}
-                votes
-              </span>
-              {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
-                <span>
-                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}D `}
-                  <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
-                </span>
-              ) : <span>Expired</span>}
             </div>
           )}
         </div>
