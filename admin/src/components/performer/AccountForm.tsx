@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import { AvatarUpload } from '@components/user/avatar-upload';
 import { CoverUpload } from '@components/user/cover-upload';
-import { authService, performerService } from '@services/index';
+import { authService, performerService, getGlobalConfig } from '@services/index';
 import Router from 'next/router';
 import moment from 'moment';
 import './index.less';
@@ -54,14 +54,16 @@ export class AccountForm extends PureComponent<IProps> {
   state = {
     isUploadingVideo: false,
     uploadVideoPercentage: 0,
-    previewVideo: null
+    previewVideoUrl: '',
+    previewVideoName: ''
   }
 
   componentDidMount() {
     const { performer } = this.props;
-    if (performer && performer.welcomeVideoPath) {
-      this.setState({ previewVideo: performer.welcomeVideoPath });
-    }
+    this.setState({
+      previewVideoUrl: performer?.welcomeVideoPath,
+      previewVideoName: performer?.welcomeVideoname
+    });
   }
 
   handleVideoChange = (info: any) => {
@@ -72,16 +74,32 @@ export class AccountForm extends PureComponent<IProps> {
     }
     if (info.file.status === 'done') {
       message.success('Intro video was uploaded');
-      this.setState({ isUploadingVideo: false, previewVideo: info?.file?.response?.data.url });
+      this.setState({
+        isUploadingVideo: false,
+        previewVideoUrl: info?.file?.response?.data?.url,
+        previewVideoName: info?.file?.response?.data?.name
+      });
     }
   };
+
+  beforeUploadVideo = (file) => {
+    const isValid = file.size / 1024 / 1024 < (getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    if (!isValid) {
+      message.error(`File is too large please provide an file ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
+      return false;
+    }
+    this.setState({ previewVideoName: file.name });
+    return true;
+  }
 
   render() {
     const {
       performer, onFinish, submiting, countries, onUploaded, heights, weights,
       avatarUrl, coverUrl
     } = this.props;
-    const { uploadVideoPercentage, isUploadingVideo, previewVideo } = this.state;
+    const {
+      uploadVideoPercentage, isUploadingVideo, previewVideoName, previewVideoUrl
+    } = this.state;
     const uploadHeaders = {
       authorization: authService.getToken()
     };
@@ -612,11 +630,21 @@ export class AccountForm extends PureComponent<IProps> {
                   showUploadList={false}
                   action={performerService.getWelcomeVideoUploadUrl(performer._id)}
                   headers={uploadHeaders}
+                  beforeUpload={(file) => this.beforeUploadVideo(file)}
                   onChange={this.handleVideoChange.bind(this)}
                 >
                   <UploadOutlined />
                 </Upload>
-                {previewVideo && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a rel="noreferrer" href={previewVideo} target="_blank">Click here to preview intro video</a></div>}
+                <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
+                  {((previewVideoUrl || previewVideoName) && <a rel="noreferrer" href={previewVideoUrl} target="_blank">{previewVideoName || 'Click here to preview'}</a>)
+                 || (
+                 <a>
+                   Intro video is $
+                   {getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}
+                   MB or below
+                 </a>
+                 )}
+                </div>
                 {uploadVideoPercentage ? (
                   <Progress percent={Math.round(uploadVideoPercentage)} />
                 ) : null}

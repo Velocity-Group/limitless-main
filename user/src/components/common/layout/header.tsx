@@ -302,7 +302,7 @@ class Header extends PureComponent<IProps> {
             {currentUser.isPerformer && (
               <div className="profile-menu-item">
                 <Link href={{ pathname: '/model/profile', query: { username: currentUser.username || currentUser._id } }} as={`/${currentUser.username || currentUser._id}`}>
-                  <div className={router.pathname === `/${currentUser.username || currentUser._id}` ? 'menu-item active' : 'menu-item'}>
+                  <div className={router.asPath === `/${currentUser.username || currentUser._id}` ? 'menu-item active' : 'menu-item'}>
                     <HomeIcon />
                     {' '}
                     My Profile

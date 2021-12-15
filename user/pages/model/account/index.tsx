@@ -173,8 +173,7 @@ class AccountSettings extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Account Settings
-            {' '}
+            | Edit Profile
           </title>
         </Head>
         <div className="main-container user-account">

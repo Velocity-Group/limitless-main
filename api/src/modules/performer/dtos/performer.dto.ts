@@ -497,7 +497,6 @@ export class PerformerDto {
       isOnline: this.isOnline,
       welcomeVideoId: this.welcomeVideoId,
       welcomeVideoPath: FileDto.getPublicUrl(this.welcomeVideoPath),
-      welcomeVideoName: this.welcomeVideoName,
       activateWelcomeVideo: this.activateWelcomeVideo,
       verifiedAccount: this.verifiedAccount,
       isBookMarked: this.isBookMarked,

@@ -13,6 +13,7 @@ import {
   UploadOutlined, TwitterOutlined, CheckCircleOutlined,
   IssuesCloseOutlined, GoogleOutlined
 } from '@ant-design/icons';
+import { getGlobalConfig } from '@services/config';
 import moment from 'moment';
 
 const { Option } = Select;
@@ -67,11 +68,9 @@ export class PerformerAccountForm extends PureComponent<IProps> {
 
   componentDidMount() {
     const { user } = this.props;
-    user && user.welcomeVideoPath && this.setState({
-      previewVideoUrl: user.welcomeVideoPath
-    });
-    user && user.welcomeVideoName && this.setState({
-      previewVideoName: user.welcomeVideoName
+    this.setState({
+      previewVideoUrl: user?.welcomeVideoPath,
+      previewVideoName: user?.welcomeVideoName
     });
   }
 
@@ -83,9 +82,23 @@ export class PerformerAccountForm extends PureComponent<IProps> {
     }
     if (info.file.status === 'done') {
       message.success('Intro video was uploaded');
-      this.setState({ isUploadingVideo: false, previewVideoUrl: info?.file?.response?.data.url, previewVideoName: info?.file?.response?.data.name });
+      this.setState({
+        isUploadingVideo: false,
+        previewVideoUrl: info?.file?.response?.data.url,
+        previewVideoName: info?.file?.response?.data.name
+      });
     }
   };
+
+  beforeUploadVideo = (file) => {
+    const isValid = file.size / 1024 / 1024 < (getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    if (!isValid) {
+      message.error(`File is too large please provide an file ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
+      return false;
+    }
+    this.setState({ previewVideoName: file.name });
+    return true;
+  }
 
   render() {
     const {
@@ -557,12 +570,21 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 showUploadList={false}
                 action={videoUploadUrl}
                 headers={uploadHeaders}
+                beforeUpload={(file) => this.beforeUploadVideo(file)}
                 onChange={this.handleVideoChange.bind(this)}
               >
                 <UploadOutlined />
               </Upload>
-              {previewVideoUrl && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a rel="noreferrer" href={previewVideoUrl} target="_blank">Click here to preview intro video</a></div>}
-              {previewVideoName && <span>{previewVideoName}</span>}
+              <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
+                {((previewVideoUrl || previewVideoName) && <a rel="noreferrer" href={previewVideoUrl} target="_blank">{previewVideoName || 'Click here to preview'}</a>)
+                 || (
+                 <a>
+                   Intro video is $
+                   {getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}
+                   MB or below
+                 </a>
+                 )}
+              </div>
               {uploadVideoPercentage ? (
                 <Progress percent={Math.round(uploadVideoPercentage)} />
               ) : null}
