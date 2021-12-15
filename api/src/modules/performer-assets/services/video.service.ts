@@ -141,6 +141,7 @@ export class VideoService {
       fileUrl = `${fileUrl}?videoId=${video._id}&token=${jwToken}`;
     }
     return {
+      name: file.name,
       url: fileUrl,
       duration: file.duration,
       thumbnails: file.getThumbnails()
@@ -311,8 +312,12 @@ export class VideoService {
 
     // TODO - define interface or dto?
     const dto = new VideoDto(video);
-    dto.thumbnail = thumbnailFile ? thumbnailFile.getUrl() : null;
-    dto.teaser = teaserFile ? teaserFile.getUrl() : null;
+    dto.thumbnail = thumbnailFile && {
+      name: thumbnailFile.name,
+      url: thumbnailFile.getUrl(),
+      thumbnails: thumbnailFile.getThumbnails()
+    };
+    dto.teaser = teaserFile && this.getVideoForView(teaserFile, dto, true, jwToken);
     dto.video = this.getVideoForView(videoFile, dto, true, jwToken);
     dto.performer = performer ? new PerformerDto(performer).toSearchResponse() : null;
     dto.participants = participants.map((p) => p.toSearchResponse());
@@ -355,14 +360,11 @@ export class VideoService {
       dto.isSubscribed = true;
     }
     const canView = (!dto.isSale && dto.isBought) || (dto.isSale && dto.isBought);
-    dto.thumbnail = thumbnailFile ? {
+    dto.thumbnail = thumbnailFile && {
       url: thumbnailFile.getUrl(),
       thumbnails: thumbnailFile.getThumbnails()
-    } : null;
-    dto.teaser = teaserFile ? {
-      url: teaserFile.getUrl(),
-      thumbnails: teaserFile.getThumbnails()
-    } : null;
+    };
+    dto.teaser = teaserFile && this.getVideoForView(teaserFile, dto, true, jwToken);
     dto.video = this.getVideoForView(videoFile, dto, canView, jwToken);
     dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     dto.participants = participants.map((p) => p.toPublicDetailsResponse());
@@ -482,7 +484,7 @@ export class VideoService {
     return dto;
   }
 
-  public async delete(id: string | ObjectId) {
+  public async delete(id: string) {
     const video = await this.PerformerVideoModel.findById(id);
     if (!video) {
       throw new EntityNotFoundException();
@@ -490,6 +492,7 @@ export class VideoService {
 
     await video.remove();
     video.fileId && (await this.fileService.remove(video.fileId));
+    video.teaserId && (await this.fileService.remove(video.teaserId));
     video.thumbnailId && (await this.fileService.remove(video.fileId));
     await this.queueEventService.publish(
       new QueueEvent({
@@ -498,6 +501,25 @@ export class VideoService {
         data: new VideoDto(video)
       })
     );
+    return true;
+  }
+
+  public async deleteFile(id: string, type: string, user: UserDto) {
+    const video = await this.PerformerVideoModel.findById(id);
+    if (!video) {
+      throw new EntityNotFoundException();
+    }
+    if (user.roles && !user.roles.includes('admin') && `${user._id}` !== `${video.performerId}`) {
+      throw new ForbiddenException();
+    }
+    if (type === 'teaser' && video.teaserId) {
+      await this.fileService.remove(video.teaserId);
+      await this.PerformerVideoModel.updateOne({ _id: video._id }, { $unset: { teaserId: null } });
+    }
+    if (type === 'thumbnail' && video.thumbnailId) {
+      await this.fileService.remove(video.thumbnailId);
+      await this.PerformerVideoModel.updateOne({ _id: video._id }, { $unset: { thumbnailId: null } });
+    }
     return true;
   }
 

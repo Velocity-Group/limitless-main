@@ -17,17 +17,15 @@ import {
 } from 'antd';
 import { IUser, IVideo } from 'src/interfaces/index';
 import {
-  CameraOutlined,
-  VideoCameraAddOutlined,
-  FileDoneOutlined
+  CameraOutlined, VideoCameraAddOutlined, FileDoneOutlined, DeleteOutlined
 } from '@ant-design/icons';
-import { performerService } from '@services/index';
+import { performerService, videoService } from '@services/index';
 import moment from 'moment';
 import { debounce } from 'lodash';
 import Router from 'next/router';
-import './video.less';
 import { VideoPlayer } from '@components/common';
 import { getGlobalConfig } from '@services/config';
+import './video.less';
 
 interface IProps {
   user: IUser;
@@ -63,16 +61,18 @@ export class FormUploadVideo extends PureComponent<IProps> {
     performers: [],
     isShowPreview: false,
     previewUrl: '',
-    previewType: ''
+    previewType: '',
+    removedTeaser: false,
+    removedThumbnail: false
   };
 
   componentDidMount() {
     const { video, user } = this.props;
     if (video) {
       this.setState({
-        previewThumbnail: video.thumbnail ? video.thumbnail : null,
-        previewVideo: video.video && video.video.url ? video.video.url : null,
-        previewTeaser: video.teaser ? video.teaser : null,
+        previewThumbnail: video?.thumbnail,
+        previewVideo: video?.video,
+        previewTeaser: video?.teaser,
         isSale: video.isSale,
         isSchedule: video.isSchedule,
         scheduledAt: video.scheduledAt ? moment(video.scheduledAt) : moment()
@@ -81,23 +81,17 @@ export class FormUploadVideo extends PureComponent<IProps> {
     this.getPerformers('', video?.participantIds || [user._id]);
   }
 
-  onSwitch(field: string, checked: boolean) {
-    if (field === 'saleVideo') {
-      this.setState({
-        isSale: checked
-      });
+  async handleRemovefile(type: string) {
+    if (!window.confirm('Confirm to remove file!')) return;
+    const { video } = this.props;
+    try {
+      await videoService.deleteFile(video._id, type);
+      type === 'teaser' && this.setState({ removedTeaser: true });
+      type === 'thumbnail' && this.setState({ removedThumbnail: true });
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later');
     }
-    if (field === 'scheduling') {
-      this.setState({
-        isSchedule: checked
-      });
-    }
-  }
-
-  onSchedule(val: any) {
-    this.setState({
-      scheduledAt: val
-    });
   }
 
   getPerformers = debounce(async (q, performerIds) => {
@@ -119,28 +113,18 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   previewModal = () => {
     const {
-      isShowPreview: isShow,
-      previewUrl: url,
-      previewType: type
+      isShowPreview, previewUrl, previewType
     } = this.state;
     return (
       <Modal
-        title={(
-          <span style={{ textTransform: 'capitalize' }}>
-            {type}
-            {' '}
-            preview
-          </span>
-        )}
-        closable={false}
-        visible={isShow}
-        footer={(
-          <Button type="primary" onClick={() => this.setState({ isShowPreview: false })}>
-            Ok
-          </Button>
-        )}
+        width={768}
+        footer={null}
+        onOk={() => this.setState({ isShowPreview: false })}
+        onCancel={() => this.setState({ isShowPreview: false })}
+        visible={isShowPreview}
+        destroyOnClose
       >
-        {type === 'teaser' && (
+        {['teaser', 'video'].includes(previewType) && (
           <VideoPlayer
             {...{
               autoplay: true,
@@ -149,16 +133,16 @@ export class FormUploadVideo extends PureComponent<IProps> {
               fluid: true,
               sources: [
                 {
-                  src: url,
+                  src: previewUrl,
                   type: 'video/mp4'
                 }
               ]
             }}
           />
         )}
-        {type === 'thumbnail' && (
+        {previewType === 'thumbnail' && (
           <img
-            src={url}
+            src={previewUrl}
             alt="thumbnail"
             width="100%"
             style={{ borderRadius: 5 }}
@@ -212,28 +196,29 @@ export class FormUploadVideo extends PureComponent<IProps> {
       scheduledAt,
       selectedThumbnail,
       selectedTeaser,
-      selectedVideo
+      selectedVideo,
+      removedTeaser,
+      removedThumbnail
     } = this.state;
     const config = getGlobalConfig();
 
     return (
-      <>
-        <Form
-          {...layout}
-          onFinish={(values) => {
-            const data = values;
-            if (isSchedule) {
-              data.scheduledAt = scheduledAt;
-            }
-            if (values.tags && values.tags.length) {
-              data.tags = values.tags.map((tag) => tag.replace(/[^a-zA-Z0-9 ]/g, '_'));
-            }
-            submit(data);
-          }}
-          onFinishFailed={() => message.error('Please complete the required fields')}
-          name="form-upload"
-          validateMessages={validateMessages}
-          initialValues={
+      <Form
+        {...layout}
+        onFinish={(values) => {
+          const data = values;
+          if (isSchedule) {
+            data.scheduledAt = scheduledAt;
+          }
+          if (values.tags && values.tags.length) {
+            data.tags = values.tags.map((tag) => tag.replace(/[^a-zA-Z0-9 ]/g, '_'));
+          }
+          submit(data);
+        }}
+        onFinishFailed={() => message.error('Please complete the required fields')}
+        name="form-upload"
+        validateMessages={validateMessages}
+        initialValues={
             video || {
               title: '',
               price: 9.99,
@@ -245,32 +230,33 @@ export class FormUploadVideo extends PureComponent<IProps> {
               status: 'active'
             }
           }
-          className="account-form"
-        >
-          <Row>
-            <Col md={24} xs={24}>
-              <Form.Item
-                label="Title"
-                name="title"
-                rules={[
-                  { required: true, message: 'Please input title of video!' }
-                ]}
+        className="account-form"
+      >
+        <Row>
+          <Col md={24} xs={24}>
+            <Form.Item
+              label="Title"
+              name="title"
+              rules={[
+                { required: true, message: 'Please input title of video!' }
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col md={24} xs={24}>
+            <Form.Item label="Participants" name="participantIds">
+              <Select
+                mode="multiple"
+                style={{ width: '100%' }}
+                showSearch
+                placeholder="Search performers here"
+                optionFilterProp="children"
+                onSearch={this.getPerformers.bind(this)}
+                loading={uploading}
+                defaultValue={video?.participantIds || []}
               >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col md={24} xs={24}>
-              <Form.Item label="Participants" name="participantIds">
-                <Select
-                  mode="multiple"
-                  style={{ width: '100%' }}
-                  showSearch
-                  placeholder="Search performers here"
-                  optionFilterProp="children"
-                  onSearch={this.getPerformers.bind(this)}
-                  loading={uploading}
-                >
-                  {performers
+                {performers
                     && performers.length > 0
                     && performers.map((p) => (
                       <Option key={p._id} value={p._id}>
@@ -279,214 +265,211 @@ export class FormUploadVideo extends PureComponent<IProps> {
                         {p?.name || p?.username || 'N/A'}
                       </Option>
                     ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col md={12} xs={24}>
-              <Form.Item label="Tags" name="tags">
-                <Select
-                  mode="tags"
-                  style={{ width: '100%' }}
-                  size="middle"
-                  showArrow={false}
-                  defaultActiveFirstOption={false}
-                />
-              </Form.Item>
-            </Col>
-            <Col md={12} xs={24}>
-              <Form.Item
-                name="status"
-                label="Status"
-                rules={[{ required: true, message: 'Please select status!' }]}
-              >
-                <Select>
-                  {/* <Select.Option key="error" value="file-error" disabled>
-                    File Error
-                  </Select.Option> */}
-                  <Select.Option key="active" value="active">
-                    Active
-                  </Select.Option>
-                  <Select.Option key="inactive" value="inactive">
-                    Inactive
-                  </Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col md={12} xs={24}>
-              <Form.Item name="isSale" label="For sale?">
-                <Switch
-                  checkedChildren="Pay per view"
-                  unCheckedChildren="Subscribe to view"
-                  checked={isSale}
-                  onChange={this.onSwitch.bind(this, 'saleVideo')}
-                />
-              </Form.Item>
-              {isSale && (
-                <Form.Item name="price" label="Amount of Tokens">
-                  <InputNumber style={{ width: '100%' }} min={1} />
-                </Form.Item>
-              )}
-            </Col>
-            <Col md={12} xs={24}>
-              <Form.Item name="isSchedule" label="scheduled?">
-                <Switch
-                  checkedChildren="Scheduled"
-                  unCheckedChildren="Not scheduled"
-                  checked={isSchedule}
-                  onChange={this.onSwitch.bind(this, 'scheduling')}
-                />
-              </Form.Item>
-              {isSchedule && (
-                <Form.Item label="Scheduled for">
-                  <DatePicker
-                    style={{ width: '100%' }}
-                    disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
-                    defaultValue={scheduledAt}
-                    onChange={this.onSchedule.bind(this)}
-                  />
-                </Form.Item>
-              )}
-            </Col>
-            <Col span={24}>
-              <Form.Item name="description" label="Description">
-                <Input.TextArea rows={3} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item
-                label="Video"
-                help={
-                  (selectedVideo && <a>{selectedVideo.name}</a>)
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item label="Tags" name="tags">
+              <Select
+                mode="tags"
+                style={{ width: '100%' }}
+                size="middle"
+                showArrow={false}
+                defaultValue={video?.tags || []}
+              />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item
+              name="status"
+              label="Status"
+              rules={[{ required: true, message: 'Please select status!' }]}
+            >
+              <Select>
+                <Select.Option key="active" value="active">
+                  Active
+                </Select.Option>
+                <Select.Option key="inactive" value="inactive">
+                  Inactive
+                </Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="isSale" label="For sale?">
+              <Switch
+                checkedChildren="Pay per view"
+                unCheckedChildren="Subscribe to view"
+                checked={isSale}
+                onChange={(val) => this.setState({ isSale: val })}
+              />
+            </Form.Item>
+            {isSale && (
+            <Form.Item name="price" label="Amount of Tokens">
+              <InputNumber style={{ width: '100%' }} min={1} />
+            </Form.Item>
+            )}
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item name="isSchedule" label="Schedule?">
+              <Switch
+                checkedChildren="Upcoming"
+                unCheckedChildren="Recent"
+                checked={isSchedule}
+                onChange={(val) => this.setState({ isSchedule: val })}
+              />
+            </Form.Item>
+            {isSchedule && (
+            <Form.Item label="Scheduled for">
+              <DatePicker
+                style={{ width: '100%' }}
+                disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
+                defaultValue={scheduledAt}
+                onChange={(val) => this.setState({ scheduledAt: val })}
+              />
+            </Form.Item>
+            )}
+          </Col>
+          <Col span={24}>
+            <Form.Item name="description" label="Description">
+              <Input.TextArea rows={3} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              label="Video"
+              className="upload-bl"
+              help={
+                  (previewVideo && (
+                  <a
+                    aria-hidden
+                    onClick={() => this.setState({
+                      isShowPreview: true, previewUrl: previewVideo?.url, previewType: 'video'
+                    })}
+                  >
+                    {previewVideo?.name || 'Click here to preview'}
+                  </a>
+                  ))
+                  || (selectedVideo && <a>{selectedVideo.name}</a>)
                   || `Video file is ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`
                 }
+            >
+              <Upload
+                customRequest={() => false}
+                listType="picture-card"
+                className="avatar-uploader"
+                accept="video/*"
+                multiple={false}
+                showUploadList={false}
+                disabled={uploading}
+                beforeUpload={(file) => this.beforeUpload(file, 'video')}
               >
-                <Upload
-                  customRequest={() => false}
-                  listType="picture-card"
-                  className="avatar-uploader"
-                  accept="video/*"
-                  multiple={false}
-                  showUploadList={false}
-                  disabled={uploading}
-                  beforeUpload={(file) => this.beforeUpload(file, 'video')}
-                >
-                  {selectedVideo ? (
-                    <FileDoneOutlined />
-                  ) : (
-                    <VideoCameraAddOutlined />
-                  )}
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col xs={12} md={12}>
-              {(!selectedVideo && previewVideo) && (
-                <video
-                  src={previewVideo}
-                  controls
-                  style={{
-                    maxHeight: 300, maxWidth: '90vw', width: '100%', height: '100%'
-                  }}
-                />
-              )}
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item
-                label="Teaser"
-                help={
-                  (selectedTeaser && <a>{selectedTeaser.name}</a>)
+                {selectedVideo ? (
+                  <FileDoneOutlined />
+                ) : (
+                  <VideoCameraAddOutlined />
+                )}
+              </Upload>
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              label="Teaser"
+              className="upload-bl"
+              help={
+                (previewTeaser && !removedTeaser && (
+                  <a
+                    aria-hidden
+                    onClick={() => this.setState({
+                      isShowPreview: true, previewUrl: previewTeaser?.url, previewType: 'teaser'
+                    })}
+                  >
+                    {previewTeaser?.name || 'Click here to preview'}
+                  </a>
+                ))
+                  || (selectedTeaser && <a>{selectedTeaser.name}</a>)
                   || `Teaser is ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`
                 }
+            >
+              <Upload
+                customRequest={() => false}
+                listType="picture-card"
+                className="avatar-uploader"
+                accept="video/*"
+                multiple={false}
+                showUploadList={false}
+                disabled={uploading}
+                beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
               >
-                <Upload
-                  customRequest={() => false}
-                  listType="picture-card"
-                  className="avatar-uploader"
-                  accept="video/*"
-                  multiple={false}
-                  showUploadList={false}
-                  disabled={uploading}
-                  beforeUpload={(file) => this.beforeUpload(file, 'teaser')}
-                >
-                  {selectedTeaser ? (
-                    <FileDoneOutlined />
-                  ) : (
-                    <VideoCameraAddOutlined />
-                  )}
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col xs={12} md={12}>
-              {(!selectedTeaser && previewTeaser) && (
-                <video
-                  src={previewTeaser}
-                  controls
-                  style={{
-                    maxHeight: 300, maxWidth: '90vw', width: '100%', height: '100%'
-                  }}
-                />
-              )}
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item
-                label="Thumbnail"
-                help={
-                  (selectedThumbnail && <a>{selectedThumbnail.name}</a>)
+                {selectedTeaser ? (
+                  <FileDoneOutlined />
+                ) : (
+                  <VideoCameraAddOutlined />
+                )}
+              </Upload>
+              {video?.teaserId && !removedTeaser && <Button className="remove-btn" type="primary" onClick={() => this.handleRemovefile('teaser')}><DeleteOutlined /></Button>}
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              className="upload-bl"
+              label="Thumbnail"
+              help={
+                (previewThumbnail && !removedThumbnail && (
+                  <a
+                    aria-hidden
+                    onClick={() => this.setState({
+                      isShowPreview: true, previewUrl: previewThumbnail?.url, previewType: 'thumbnail'
+                    })}
+                  >
+                    {previewThumbnail?.name || 'Click here to preview'}
+                  </a>
+                ))
+                  || (selectedThumbnail && <a>{selectedThumbnail.name}</a>)
                   || `Thumbnail is ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`
                 }
+            >
+              <Upload
+                listType="picture-card"
+                className="avatar-uploader"
+                accept="image/*"
+                multiple={false}
+                showUploadList={false}
+                disabled={uploading}
+                beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
               >
-                <Upload
-                  listType="picture-card"
-                  className="avatar-uploader"
-                  accept="image/*"
-                  multiple={false}
-                  showUploadList={false}
-                  disabled={uploading}
-                  beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
-                >
-                  {selectedThumbnail ? (
-                    <FileDoneOutlined />
-                  ) : (
-                    <CameraOutlined />
-                  )}
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col xs={12} md={12}>
-              {(!selectedThumbnail && previewThumbnail) && (
-                <img
-                  src={previewThumbnail}
-                  alt="video thumbnail"
-                  style={{
-                    maxHeight: 200, maxWidth: '90vw', width: '100%', height: '100%', objectFit: 'contain'
-                  }}
-                />
-              )}
-            </Col>
-          </Row>
-          {uploadPercentage ? (
-            <Progress percent={Math.round(uploadPercentage)} />
-          ) : null}
-          <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-            <Button
-              className="primary"
-              htmlType="submit"
-              loading={uploading}
-              disabled={uploading}
-            >
-              {video ? 'Update' : 'Upload'}
-            </Button>
-            <Button
-              className="secondary"
-              onClick={() => Router.back()}
-              disabled={uploading}
-            >
-              Back
-            </Button>
-          </Form.Item>
-        </Form>
-
+                {selectedThumbnail ? (
+                  <FileDoneOutlined />
+                ) : (
+                  <CameraOutlined />
+                )}
+              </Upload>
+              {video?.thumbnailId && !removedThumbnail && <Button className="remove-btn" type="primary" onClick={() => this.handleRemovefile('thumbnail')}><DeleteOutlined /></Button>}
+            </Form.Item>
+          </Col>
+        </Row>
+        {uploadPercentage ? (
+          <Progress percent={Math.round(uploadPercentage)} />
+        ) : null}
+        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+          <Button
+            className="primary"
+            htmlType="submit"
+            loading={uploading}
+            disabled={uploading}
+          >
+            {video ? 'Update' : 'Upload'}
+          </Button>
+          <Button
+            className="secondary"
+            onClick={() => Router.back()}
+            disabled={uploading}
+          >
+            Back
+          </Button>
+        </Form.Item>
         {this.previewModal()}
-      </>
+      </Form>
     );
   }
 }

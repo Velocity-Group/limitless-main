@@ -1,14 +1,16 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { PureComponent, createRef } from 'react';
 import {
   Form, Input, Select, Upload, Button, message, Progress, Switch, DatePicker,
-  Col, Row, InputNumber
+  Col, Row, InputNumber, Avatar
 } from 'antd';
 import { IVideo } from 'src/interfaces';
 import { CameraOutlined, VideoCameraAddOutlined, FileAddOutlined } from '@ant-design/icons';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
+import { performerService, getGlobalConfig, videoService } from '@services/index';
 import { FormInstance } from 'antd/lib/form';
 import moment from 'moment';
-import { getGlobalConfig } from '@services/config';
+import { debounce } from 'lodash';
 
 interface IProps {
   video?: IVideo;
@@ -23,21 +25,21 @@ const layout = {
   wrapperCol: { span: 24 }
 };
 
-const validateMessages = {
-  required: 'This field is required!'
-};
-
 export class FormUploadVideo extends PureComponent<IProps> {
   state = {
     previewThumbnail: null,
     previewVideo: null,
     previewTeaserVideo: null,
-    isSale: false,
+    isSaleVideo: false,
     isSchedule: false,
     scheduledAt: moment().add(1, 'day'),
     selectedVideo: null,
     selectedThumbnail: null,
-    selectedTeaser: null
+    selectedTeaser: null,
+    firstLoadPerformer: false,
+    performers: [],
+    removedTeaser: false,
+    removedThumbnail: false
   };
 
   formRef: any;
@@ -48,16 +50,42 @@ export class FormUploadVideo extends PureComponent<IProps> {
     if (video) {
       this.setState(
         {
-          previewThumbnail: typeof video?.thumbnail === 'string' ? video?.thumbnail : video?.thumbnail?.url || '',
-          previewVideo: video?.video?.url || '',
-          isSale: video.isSale,
-          previewTeaserVideo: typeof video?.teaser === 'string' ? video?.teaser : video?.teaser?.url || '',
+          previewThumbnail: video?.thumbnail,
+          previewVideo: video?.video,
+          isSaleVideo: video.isSale,
+          previewTeaserVideo: video?.teaser,
           isSchedule: video.isSchedule,
           scheduledAt: video.scheduledAt || moment().add(1, 'day')
         }
       );
     }
+    this.getPerformers('', video?.participantIds || '');
   }
+
+  async handleRemovefile(type: string) {
+    if (!window.confirm('Confirm to remove file!')) return;
+    const { video } = this.props;
+    try {
+      await videoService.deleteFile(video._id, type);
+      type === 'teaser' && this.setState({ removedTeaser: true });
+      type === 'thumbnail' && this.setState({ removedThumbnail: true });
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later');
+    }
+  }
+
+  getPerformers = debounce(async (q, performerIds) => {
+    try {
+      const resp = await (await performerService.search({ q, performerIds: performerIds || '', limit: 99 })).data;
+      const performers = resp.data || [];
+      this.setState({ performers, firstLoadPerformer: true });
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured');
+      this.setState({ firstLoadPerformer: true });
+    }
+  }, 500);
 
   setFormVal(field: string, val: any) {
     const instance = this.formRef.current as FormInstance;
@@ -68,15 +96,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   beforeUpload(file: File, field: string) {
     const { beforeUpload: beforeUploadHandler } = this.props;
-    const config = getGlobalConfig();
-    let maxSize = config.NEXT_PUBLIC_MAX_SIZE_FILE || 100;
+    let maxSize = getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_FILE || 100;
     switch (field) {
       case 'thumbnail':
-        maxSize = config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5;
+        maxSize = getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_IMAGE || 5;
         break;
-      case 'teaser': maxSize = config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200;
+      case 'teaser': maxSize = getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200;
         break;
-      case 'video': maxSize = config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048;
+      case 'video': maxSize = getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048;
         break;
       default: break;
     }
@@ -100,9 +127,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
     } = this.props;
     const {
       previewThumbnail, previewVideo, isSchedule, previewTeaserVideo, scheduledAt,
-      selectedTeaser, selectedThumbnail, selectedVideo, isSale
+      selectedTeaser, selectedThumbnail, selectedVideo, isSaleVideo, performers, firstLoadPerformer,
+      removedTeaser, removedThumbnail
     } = this.state;
-    const config = getGlobalConfig();
     return (
       <Form
         {...layout}
@@ -120,20 +147,18 @@ export class FormUploadVideo extends PureComponent<IProps> {
           }
           submit(data);
         }}
-        onFinishFailed={() => message.error('Please complete the required fields')}
         name="form-upload"
         ref={this.formRef}
-        validateMessages={validateMessages}
         initialValues={
           video || ({
             title: '',
-            price: 1,
+            price: 9.99,
             description: '',
             status: 'active',
             performerId: '',
             tags: [],
             categoryIds: [],
-            isSale: false,
+            isSaleVideo: false,
             participantIds: [],
             isSchedule: false
           })
@@ -142,16 +167,22 @@ export class FormUploadVideo extends PureComponent<IProps> {
         <Form.Item name="performerId" label="Model">
           <SelectPerformerDropdown
             showAll
-            defaultValue={video && video.performerId}
+            defaultValue={video?.performerId || ''}
             onSelect={(val) => this.setFormVal('performerId', val)}
           />
         </Form.Item>
-        <Form.Item name="title" rules={[{ required: true, message: 'Please input title of video!' }]} label="Title">
+        <Form.Item
+          name="title"
+          label="Title"
+          rules={[{
+            required: true, message: 'Please input video title'
+          }]}
+        >
           <Input placeholder="Enter video title" />
         </Form.Item>
         <Form.Item label="Tags" name="tags">
           <Select
-            defaultValue={video && video.tags}
+            defaultValue={video?.tags || []}
             onChange={(val) => this.setFormVal('tags', val)}
             mode="tags"
             style={{ width: '100%' }}
@@ -161,14 +192,41 @@ export class FormUploadVideo extends PureComponent<IProps> {
             placeholder="Add Tags"
           />
         </Form.Item>
+        <Form.Item
+          label="Participants"
+          name="participantIds"
+        >
+          {firstLoadPerformer && (
+          <Select
+            defaultValue={video?.participantIds || []}
+            mode="multiple"
+            style={{ width: '100%' }}
+            showSearch
+            placeholder="Search performers here"
+            optionFilterProp="children"
+            onSearch={this.getPerformers.bind(this)}
+            loading={uploading}
+          >
+            {performers
+              && performers.length > 0
+              && performers.map((p) => (
+                <Select.Option key={p._id} value={p._id}>
+                  <Avatar src={p?.avatar || '/no-avatar.png'} />
+                  {' '}
+                  {p?.name || p?.username || 'N/A'}
+                </Select.Option>
+              ))}
+          </Select>
+          )}
+        </Form.Item>
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item name="isSale" label="PPV?" valuePropName="checked">
-          <Switch unCheckedChildren="Subscribe to view" checkedChildren="Per per view" onChange={(val) => this.setState({ isSale: val })} />
+        <Form.Item name="isSaleVideo" label="PPV?" valuePropName="checked">
+          <Switch unCheckedChildren="Subscribe to view" checkedChildren="Pay per view" onChange={(val) => this.setState({ isSaleVideo: val })} />
         </Form.Item>
-        {isSale && (
-          <Form.Item name="price" label="Amount of Tokens">
+        {isSaleVideo && (
+          <Form.Item name="price" label="Price">
             <InputNumber min={1} />
           </Form.Item>
         )}
@@ -185,19 +243,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
             />
           </Form.Item>
         )}
-        <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status!' }]}>
-          <Select>
-            <Select.Option key="active" value="active">
-              Active
-            </Select.Option>
-            <Select.Option key="inactive" value="inactive">
-              Inactive
-            </Select.Option>
-          </Select>
-        </Form.Item>
         <Row>
           <Col lg={8} xs={24}>
-            <Form.Item label="Video" help={(selectedVideo && <a>{selectedVideo.name}</a>) || (previewVideo && <a href={previewVideo} target="_blank" rel="noreferrer">Click here to preview</a>) || `Video file is ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`}>
+            <Form.Item
+              label="Video"
+              help={(selectedVideo && <a>{selectedVideo.name}</a>)
+                || (previewVideo && <a href={previewVideo?.url} target="_blank" rel="noreferrer">{previewVideo?.name || 'Click here to preview'}</a>)
+                || `Video file is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`}
+            >
               <Upload
                 customRequest={() => false}
                 listType="picture-card"
@@ -213,23 +266,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={8} xs={24}>
-            <Form.Item label="Thumbnail" help={(selectedThumbnail && <a>{selectedThumbnail.name}</a>) || (previewThumbnail && <p><a href={previewThumbnail} target="_blank" rel="noreferrer">Click here to preview</a></p>) || `Thumbnail is ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`}>
-              <Upload
-                customRequest={() => false}
-                listType="picture-card"
-                className="avatar-uploader"
-                accept="image/*"
-                multiple={false}
-                showUploadList={false}
-                disabled={uploading}
-                beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
-              >
-                {selectedThumbnail ? <FileAddOutlined /> : <CameraOutlined />}
-              </Upload>
-            </Form.Item>
-          </Col>
-          <Col lg={8} xs={24}>
-            <Form.Item label="Teaser" help={(selectedTeaser && <a>{selectedTeaser.name}</a>) || (previewTeaserVideo && <p><a href={previewTeaserVideo} target="_blank" rel="noreferrer">Click here to preview</a></p>) || `Teaser is ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`}>
+            <Form.Item
+              label="Teaser"
+              help={
+                (selectedTeaser && <a>{selectedTeaser.name}</a>)
+                || (previewTeaserVideo && !removedTeaser && <a href={previewTeaserVideo?.url} target="_blank" rel="noreferrer">{previewTeaserVideo?.name || 'Click here to preview'}</a>)
+                || `Teaser is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`
+              }
+            >
               <Upload
                 customRequest={() => false}
                 listType="picture-card"
@@ -242,14 +286,47 @@ export class FormUploadVideo extends PureComponent<IProps> {
               >
                 {selectedTeaser ? <FileAddOutlined /> : <VideoCameraAddOutlined />}
               </Upload>
+              {video?.teaserId && <Button disabled={removedTeaser} onClick={() => this.handleRemovefile('teaser')}>{!removedTeaser ? 'Remove Teaser' : 'Teaser was removed'}</Button>}
+            </Form.Item>
+          </Col>
+          <Col lg={8} xs={24}>
+            <Form.Item
+              label="Thumbnail"
+              help={(selectedThumbnail && <a>{selectedThumbnail.name}</a>)
+                || (previewThumbnail && !removedThumbnail && <a href={previewThumbnail?.url} target="_blank" rel="noreferrer">{previewThumbnail?.name || 'Click here to preview'}</a>)
+                || `Thumbnail is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`}
+            >
+              <Upload
+                customRequest={() => false}
+                listType="picture-card"
+                className="avatar-uploader"
+                accept="image/*"
+                multiple={false}
+                showUploadList={false}
+                disabled={uploading}
+                beforeUpload={(file) => this.beforeUpload(file, 'thumbnail')}
+              >
+                {selectedThumbnail ? <FileAddOutlined /> : <CameraOutlined />}
+              </Upload>
+              {video?.thumbnailId && <Button disabled={removedThumbnail} onClick={() => this.handleRemovefile('thumbnail')}>{!removedThumbnail ? 'Remove Thumbnail' : 'Thumbnail was removed'}</Button>}
             </Form.Item>
           </Col>
         </Row>
+        <Form.Item name="status" label="Status" rules={[{ required: true, message: 'Please select status!' }]}>
+          <Select>
+            <Select.Option key="active" value="active">
+              Active
+            </Select.Option>
+            <Select.Option key="inactive" value="inactive">
+              Inactive
+            </Select.Option>
+          </Select>
+        </Form.Item>
         {uploadPercentage > 0 && (
           <Progress percent={Math.round(uploadPercentage)} />
         )}
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-          <Button type="primary" htmlType="submit" loading={uploading}>
+        <Form.Item className="text-center mar-10">
+          <Button type="primary" htmlType="submit" disabled={uploading} loading={uploading}>
             {video ? 'Update' : 'Upload'}
           </Button>
         </Form.Item>

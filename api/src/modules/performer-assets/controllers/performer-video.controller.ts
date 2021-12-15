@@ -11,7 +11,8 @@ import {
   Query,
   UseInterceptors,
   Delete,
-  Request
+  Request,
+  Put
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
@@ -112,7 +113,7 @@ export class PerformerVideosController {
     return DataResponse.ok(resp);
   }
 
-  @Post('/edit/:id')
+  @Put('/edit/:id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
   @Roles('performer')
@@ -171,6 +172,19 @@ export class PerformerVideosController {
     @Param('id') id: string
   ) {
     const details = await this.videoService.delete(id);
+    return DataResponse.ok(details);
+  }
+
+  @Delete('/remove-file/:id')
+  @HttpCode(HttpStatus.OK)
+  @Roles('performer')
+  @UseGuards(RoleGuard)
+  async removeFile(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDto,
+    @Body() payload: { type: string }
+  ) {
+    const details = await this.videoService.deleteFile(id, payload.type, user);
     return DataResponse.ok(details);
   }
 }

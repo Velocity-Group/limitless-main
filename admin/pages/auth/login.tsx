@@ -56,7 +56,7 @@ class Login extends PureComponent<IProps> {
             <Form
               onFinish={(values) => handlerLogin(values)}
               initialValues={{
-                email: '',
+                username: '',
                 password: ''
               }}
             >
@@ -64,12 +64,11 @@ class Login extends PureComponent<IProps> {
                 hasFeedback
                 name="username"
                 rules={[
-                  { required: true, message: 'Please input your email!' },
-                  { type: 'email', message: 'Invalid email address' }
+                  { required: true, message: 'Email or Username is missing' }
                 ]}
               >
                 <Input
-                  placeholder="youremail@example.com"
+                  placeholder="Email address or Username"
                 />
               </FormItem>
               <FormItem

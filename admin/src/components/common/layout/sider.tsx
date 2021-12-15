@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { Layout, Switch } from 'antd';
-import { BulbOutlined } from '@ant-design/icons';
 import Link from 'next/link';
+import { getGlobalConfig } from '@services/config';
 import ScrollBar from '../base/scroll-bar';
 import { SiderMenu } from './menu';
 import './sider.less';
@@ -60,8 +60,8 @@ class Sider extends PureComponent<ISiderProps> {
         {!collapsed && (
           <div className="switchTheme">
             <span>
-              <BulbOutlined />
-              <span>Switch Theme</span>
+              v
+              {getGlobalConfig().NEXT_PUBLIC_BUILD_VERSION}
             </span>
             <Switch
               onChange={onThemeChange && onThemeChange.bind(

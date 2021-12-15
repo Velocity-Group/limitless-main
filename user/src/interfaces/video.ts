@@ -44,4 +44,7 @@ export interface IVideo {
   scheduledAt: Date;
   updatedAt: Date;
   createdAt: Date;
+  teaserId: string;
+  fileId: string;
+  thumbnailId: string;
 }

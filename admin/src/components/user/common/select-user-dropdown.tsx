@@ -15,7 +15,8 @@ interface IProps {
 export class SelectUserDropdown extends PureComponent<IProps> {
   state = {
     loading: false,
-    data: [] as any
+    data: [],
+    isFirstLoaded: false
   };
 
   loadUsers = debounce(async (q) => {
@@ -23,18 +24,17 @@ export class SelectUserDropdown extends PureComponent<IProps> {
       await this.setState({ loading: true });
       const resp = await (await userService.search({
         q,
-        limit: 5,
-        sortBy: 'updatedAt',
-        sort: 'desc'
+        limit: 99
       })).data;
       this.setState({
-        data: resp.data
+        data: resp.data,
+        isFirstLoaded: true,
+        loading: false
       });
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured');
-    } finally {
-      this.setState({ loading: false });
+      this.setState({ loading: false, isFirstLoaded: true });
     }
   }, 500);
 
@@ -46,30 +46,35 @@ export class SelectUserDropdown extends PureComponent<IProps> {
     const {
       style, onSelect, defaultValue, disabled, showAll
     } = this.props;
-    const { data, loading } = this.state;
+    const { data, loading, isFirstLoaded } = this.state;
     return (
-      <Select
-        showSearch
-        defaultValue={defaultValue}
-        placeholder="Type to search user here"
-        style={style}
-        onSearch={this.loadUsers.bind(this)}
-        onChange={(val) => onSelect(val)}
-        loading={loading}
-        optionFilterProp="children"
-        disabled={disabled}
-      >
-        <Select.Option value="" key="default" disabled={showAll}>
-          {showAll ? 'Select a user' : 'All users'}
-        </Select.Option>
-        {data && data.length > 0 && data.map((u) => (
-          <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>
-            <Avatar src={u?.avatar || '/no-avatar.png'} />
-            {' '}
-            {`${u?.name || u?.username || 'no_name'}`}
+      <>
+        {isFirstLoaded && (
+        <Select
+          showSearch
+          defaultValue={defaultValue}
+          placeholder="Type to search user here"
+          style={style}
+          onSearch={this.loadUsers.bind(this)}
+          onChange={(val) => onSelect(val)}
+          loading={loading}
+          optionFilterProp="children"
+          disabled={disabled}
+        >
+          <Select.Option value="" key="default" disabled={showAll}>
+            {showAll ? 'Select a user' : 'All users'}
           </Select.Option>
-        ))}
-      </Select>
+          {data && data.length > 0 && data.map((u) => (
+            <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>
+              <Avatar size={28} src={u?.avatar || '/no-avatar.png'} />
+              {' '}
+              {`${u?.name || u?.username || 'no_name'}`}
+            </Select.Option>
+          ))}
+        </Select>
+        )}
+
+      </>
     );
   }
 }

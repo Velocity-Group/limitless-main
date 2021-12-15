@@ -1,17 +1,16 @@
 import Head from 'next/head';
 import { PureComponent } from 'react';
-import { message, Checkbox, Table } from 'antd';
+import {
+  message, Switch, Table, Layout, Input, Spin
+} from 'antd';
 import Page from '@components/common/layout/page';
 import { utilsService, blockCountryService } from '@services/index';
 import { BreadcrumbComponent } from '@components/common';
 
-interface IProps {
-}
+interface IProps {}
 
 class BlockCountries extends PureComponent<IProps> {
-  static async getInitialProps({ ctx }) {
-    return ctx.query;
-  }
+  countries: any;
 
   state = {
     searching: false,
@@ -24,21 +23,30 @@ class BlockCountries extends PureComponent<IProps> {
     this.searchCountry();
   }
 
-  async handleChange(code, e) {
-    if (e.target && e.target.checked) {
+  handleFilterCountry = async (q) => {
+    this.setState({
+      countries: this.countries.filter((c) => {
+        const regex = new RegExp(q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''), 'i');
+        return regex.test(c.name);
+      })
+    });
+  }
+
+  async handleChange(value: boolean, countryCode: string) {
+    if (value) {
       try {
         await this.setState({ submiting: true });
-        await blockCountryService.create(code);
+        await blockCountryService.create(countryCode);
       } catch (error) {
         message.error('error');
       } finally {
         this.setState({ submiting: false });
       }
     }
-    if (e.target && !e.target.checked) {
+    if (!value) {
       try {
         await this.setState({ submiting: true });
-        await blockCountryService.delete(code);
+        await blockCountryService.delete(countryCode);
       } catch (error) {
         message.error('error');
       } finally {
@@ -50,16 +58,19 @@ class BlockCountries extends PureComponent<IProps> {
   async searchCountry() {
     try {
       await this.setState({ searching: true });
-      const countries = await (await utilsService.countriesList()).data;
-      const blockCountries = await (await blockCountryService.search()).data;
+      const [countries, blockCountries] = await Promise.all([
+        utilsService.countriesList(),
+        blockCountryService.search()
+      ]);
       await this.setState({
         searching: false,
-        countries,
-        blockCountries
+        countries: countries?.data,
+        blockCountries: blockCountries?.data
       });
+      this.countries = countries?.data;
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
@@ -70,43 +81,44 @@ class BlockCountries extends PureComponent<IProps> {
     const columns = [
       {
         title: 'Country',
-        dataIndex: 'name',
-        key: 'name'
+        key: 'name',
+        render: (record) => (
+          <span>
+            <img src={record.flag} width="50px" alt="flag" />
+            &nbsp;
+            {record.name}
+          </span>
+        )
       },
       {
-        title: 'Coutry Code',
+        title: 'Country Code',
         dataIndex: 'code',
         key: 'code'
       },
       {
-        title: 'Flag',
-        dataIndex: 'flag',
-        key: 'flag',
-        render: (flag) => <img alt="" src={flag} width="50px" />
-      },
-      {
-        title: '#',
+        title: 'Block',
         dataIndex: 'code',
         key: 'check',
         render: (code) => (
-          <Checkbox
+          <Switch
             disabled={submiting}
             defaultChecked={!!(blockCountries.length > 0 && blockCountries.find((c) => c.countryCode === code))}
-            onChange={this.handleChange.bind(this, code)}
+            onChange={(val) => this.handleChange(val, code)}
           />
         )
       }
     ];
     return (
-      <>
+      <Layout>
         <Head>
-          <title>Black List Countries</title>
+          <title>Block Countries</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Black List Countries' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Block Countries' }]} />
         <Page>
-          <div style={{ marginBottom: '20px' }}>
-            <div className="">
-              {countries && countries.length > 0 && !searching && (
+          <Input.Search placeholder="Type to search country here" enterButton="Search" onSearch={this.handleFilterCountry} />
+          <div style={{ margin: '15px 0' }}>
+            {searching && <div className="text-center" style={{ margin: '20px' }}><Spin /></div>}
+            {countries && countries.length > 0 && (
               <div className="table-responsive">
                 <Table
                   pagination={false}
@@ -118,11 +130,10 @@ class BlockCountries extends PureComponent<IProps> {
                   columns={columns}
                 />
               </div>
-              )}
-            </div>
+            )}
           </div>
         </Page>
-      </>
+      </Layout>
     );
   }
 }

@@ -302,6 +302,7 @@ class VideoViewPage extends PureComponent<IProps> {
     const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const videoJsOptions = {
       key: video._id,
+      autoplay: true,
       controls: true,
       playsinline: true,
       poster: thumbUrl,
@@ -317,7 +318,7 @@ class VideoViewPage extends PureComponent<IProps> {
       autoplay: true,
       controls: true,
       playsinline: true,
-      loop: true,
+      fluid: true,
       sources: [
         {
           src: video?.teaser?.url,
@@ -330,11 +331,7 @@ class VideoViewPage extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {ui.siteName}
-            {' '}
-            |
-            {' '}
-            {video.title || 'Video'}
+            {`${ui.siteName} | ${video.title}`}
           </title>
           <meta name="description" content={video.description} />
           {/* OG tags */}

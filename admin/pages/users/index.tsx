@@ -41,7 +41,7 @@ export default class Performers extends PureComponent<any> {
       pagination: pager,
       sortBy: sorter.field || '',
       // eslint-disable-next-line no-nested-ternary
-      sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : ''
+      sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : 'updatedAt'
     });
     this.search(pager.current);
   }
