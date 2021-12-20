@@ -13,6 +13,7 @@ import {
 import { AuthGuard, RoleGuard } from 'src/modules/auth/guards';
 import { CurrentUser, Roles } from 'src/modules/auth/decorators';
 import { DataResponse, PageableData } from 'src/kernel';
+import { AuthService } from 'src/modules/auth/services';
 import { UserSearchService, UserService } from '../services';
 import { UserDto, IUserResponse } from '../dtos';
 import { UserSearchRequestPayload, UserUpdatePayload } from '../payloads';
@@ -21,6 +22,7 @@ import { UserSearchRequestPayload, UserUpdatePayload } from '../payloads';
 @Controller('users')
 export class UserController {
   constructor(
+    private readonly authService: AuthService,
     private readonly userService: UserService,
     private readonly userSearchService: UserSearchService
   ) { }
@@ -43,6 +45,24 @@ export class UserController {
     @Body() payload: UserUpdatePayload
   ): Promise<DataResponse<IUserResponse>> {
     const user = await this.userService.update(currentUser._id, payload, currentUser);
+    if (payload.password) {
+      await Promise.all([
+        user.email && this.authService.create({
+          source: 'user',
+          sourceId: user._id,
+          type: 'email',
+          key: user.email,
+          value: payload.password
+        }),
+        user.username && this.authService.create({
+          source: 'user',
+          sourceId: user._id,
+          type: 'username',
+          key: user.username,
+          value: payload.password
+        })
+      ]);
+    }
     return DataResponse.ok(new UserDto(user).toResponse(true));
   }
 

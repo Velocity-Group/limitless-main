@@ -20,7 +20,6 @@ import {
 import {
   authService, blockService, performerService, utilsService
 } from '@services/index';
-import { UpdatePaswordForm } from '@components/user/update-password-form';
 import {
   PerformerAccountForm, PerformerSubscriptionForm, PerformerBlockCountriesForm,
   PerformerVerificationForm, PerformerPaypalForm
@@ -60,7 +59,6 @@ class AccountSettings extends PureComponent<IProps> {
   _intervalCountdown: any;
 
   state = {
-    pwUpdating: false,
     emailSending: false,
     countTime: 60
   };
@@ -128,19 +126,6 @@ class AccountSettings extends PureComponent<IProps> {
     });
   }
 
-  async updatePassword(data: any) {
-    try {
-      this.setState({ pwUpdating: true });
-      await authService.updatePassword(data.password, 'performer');
-      message.success('Changes saved.');
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'An error occurred, please try again!');
-    } finally {
-      this.setState({ pwUpdating: false });
-    }
-  }
-
   async verifyEmail() {
     const { currentUser } = this.props;
     try {
@@ -163,7 +148,7 @@ class AccountSettings extends PureComponent<IProps> {
     const {
       currentUser, updating, ui, countries, heights, weights
     } = this.props;
-    const { pwUpdating, emailSending, countTime } = this.state;
+    const { emailSending, countTime } = this.state;
     const uploadHeaders = {
       authorization: authService.getToken()
     };
@@ -241,12 +226,12 @@ class AccountSettings extends PureComponent<IProps> {
                 countries={countries}
               />
             </Tabs.TabPane>
-            <Tabs.TabPane tab={<span>Change Password</span>} key="password">
+            {/* <Tabs.TabPane tab={<span>Change Password</span>} key="password">
               <UpdatePaswordForm
                 onFinish={this.updatePassword.bind(this)}
                 updating={pwUpdating}
               />
-            </Tabs.TabPane>
+            </Tabs.TabPane> */}
           </Tabs>
         </div>
       </Layout>

@@ -10,8 +10,7 @@ import {
 import { AvatarUpload } from '@components/user/avatar-upload';
 import { CoverUpload } from '@components/user/cover-upload';
 import {
-  UploadOutlined, TwitterOutlined, CheckCircleOutlined,
-  IssuesCloseOutlined, GoogleOutlined
+  UploadOutlined, TwitterOutlined, GoogleOutlined
 } from '@ant-design/icons';
 import { getGlobalConfig } from '@services/config';
 import moment from 'moment';
@@ -124,9 +123,9 @@ export class PerformerAccountForm extends PureComponent<IProps> {
         validateMessages={validateMessages}
         initialValues={{
           ...user,
-          dateOfBirth: (user.dateOfBirth && moment(user.dateOfBirth)) || '',
-          bodyType: 'slim'
+          dateOfBirth: (user.dateOfBirth && moment(user.dateOfBirth)) || ''
         }}
+        scrollToFirstError
         className="account-form"
       >
         <div
@@ -242,12 +241,12 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             <Form.Item
               name="email"
               label={(
-                <span>
+                <span style={{ fontSize: 10 }}>
                   Email Address
                   {'  '}
                   {user.verifiedEmail ? (
                     <Popover title="Your email address is verified" content={null}>
-                      <a style={{ fontSize: 18 }}><CheckCircleOutlined /></a>
+                      <a className="success-color">Verified!</a>
                     </Popover>
                   ) : (
                     <Popover
@@ -269,7 +268,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                         </Button>
                       )}
                     >
-                      <a style={{ fontSize: 18 }}><IssuesCloseOutlined /></a>
+                      <a className="error-color">Not verified!</a>
                     </Popover>
                   )}
                 </span>
@@ -365,8 +364,53 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col span={24}>
-            <Form.Item name="bio" label="Bio">
+            <Form.Item
+              name="bio"
+              label="Bio"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter your bio!'
+                }
+              ]}
+            >
               <TextArea rows={3} placeholder="Tell people something about you..." />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item
+              label="Password"
+              name="password"
+              hasFeedback
+              rules={[
+                {
+                  pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                  message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                }
+              ]}
+            >
+              <Input.Password placeholder="Password" />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item
+              label="Confirm Password"
+              name="confirm"
+              dependencies={['password']}
+              hasFeedback
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (!value || getFieldValue('password') === value) {
+                      return Promise.resolve();
+                    }
+                    // eslint-disable-next-line prefer-promise-reject-errors
+                    return Promise.reject('Passwords do not match together!');
+                  }
+                })
+              ]}
+            >
+              <Input.Password placeholder="Confirm password" />
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
@@ -579,7 +623,8 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 {((previewVideoUrl || previewVideoName) && <a rel="noreferrer" href={previewVideoUrl} target="_blank">{previewVideoName || 'Click here to preview'}</a>)
                  || (
                  <a>
-                   Intro video is $
+                   Intro video is
+                   {' '}
                    {getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}
                    MB or below
                  </a>
