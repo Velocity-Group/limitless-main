@@ -262,7 +262,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                           {' '}
                           {countTime < 60 ? 'resend' : 'send'}
                           {' '}
-                          an email to verify your email address
+                          the verification link
                           {' '}
                           {countTime < 60 && `${countTime}s`}
                         </Button>

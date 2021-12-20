@@ -7,7 +7,6 @@ import {
   IBanking,
   IUIConfig,
   ICountry,
-  IBlockCountries,
   IHeight,
   IWeight
 } from 'src/interfaces';
@@ -18,30 +17,30 @@ import {
   updateCurrentUserCover
 } from 'src/redux/user/actions';
 import {
-  authService, blockService, performerService, utilsService
+  authService, performerService, utilsService
 } from '@services/index';
 import {
-  PerformerAccountForm, PerformerSubscriptionForm, PerformerBlockCountriesForm,
-  PerformerVerificationForm, PerformerPaypalForm
+  PerformerAccountForm, PerformerSubscriptionForm,
+  PerformerVerificationForm
 } from '@components/performer';
 import '../../user/index.less';
 
 interface IProps {
   currentUser: IPerformer;
   updatePerformer: Function;
-  updating?: boolean;
+  updating: boolean;
   updateCurrentUserAvatar: Function;
   updateBanking: Function;
   ui: IUIConfig;
   updateCurrentUserCover: Function;
   countries: ICountry[];
-  heights?: IHeight[];
-  weights?: IWeight[];
+  heights: IHeight[];
+  weights: IWeight[];
 }
 class AccountSettings extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
-  static onlyPerformer: boolean = true;
+  static onlyPerformer = true;
 
   static async getInitialProps() {
     const [countries, heights, weights] = await Promise.all([
@@ -77,28 +76,6 @@ class AccountSettings extends PureComponent<IProps> {
   async handleUpdateBanking(data: IBanking) {
     const { currentUser, updateBanking: handleUpdateBanking } = this.props;
     await handleUpdateBanking({ ...data, performerId: currentUser._id });
-  }
-
-  async handleUpdateBlockCountries(data: IBlockCountries) {
-    try {
-      await blockService.blockCountries(data);
-      message.success('Changes saved');
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'Error occured, please try againl later');
-    }
-  }
-
-  async handleUpdatePaypal(data) {
-    const { currentUser } = this.props;
-    try {
-      const payload = { key: 'paypal', value: data, performerId: currentUser._id };
-      await performerService.updatePaymentGateway(currentUser._id, payload);
-      message.success('Changes saved');
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'Error occured, please try againl later');
-    }
   }
 
   onAvatarUploaded(data: any) {
@@ -206,24 +183,6 @@ class AccountSettings extends PureComponent<IProps> {
                 onFinish={this.submit.bind(this)}
                 updating={updating}
                 user={currentUser}
-              />
-            </Tabs.TabPane>
-            <Tabs.TabPane
-              tab={<span>Paypal Settings</span>}
-              key="paypal"
-            >
-              <PerformerPaypalForm
-                onFinish={this.handleUpdatePaypal.bind(this)}
-                updating={updating}
-                user={currentUser}
-              />
-            </Tabs.TabPane>
-            <Tabs.TabPane tab={<span>Block Countries</span>} key="block">
-              <PerformerBlockCountriesForm
-                onFinish={this.handleUpdateBlockCountries.bind(this)}
-                updating={updating}
-                blockCountries={currentUser.blockCountries}
-                countries={countries}
               />
             </Tabs.TabPane>
             {/* <Tabs.TabPane tab={<span>Change Password</span>} key="password">

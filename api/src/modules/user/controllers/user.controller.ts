@@ -71,9 +71,8 @@ export class UserController {
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   async search(
-    @Query() req: UserSearchRequestPayload,
-    @CurrentUser() user: UserDto
+    @Query() req: UserSearchRequestPayload
   ): Promise<DataResponse<PageableData<IUserResponse>>> {
-    return DataResponse.ok(await this.userSearchService.performerSearch(req, user));
+    return DataResponse.ok(await this.userSearchService.performerSearch(req));
   }
 }

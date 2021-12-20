@@ -70,18 +70,6 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Commission',
-        dataIndex: 'siteCommission',
-        render(commission: number) {
-          return (
-            <span>
-              {commission * 100}
-              %
-            </span>
-          );
-        }
-      },
-      {
         title: 'NET',
         dataIndex: 'netPrice',
         render(netPrice: number, record: any) {
@@ -89,6 +77,18 @@ export class TableListEarning extends PureComponent<IProps> {
             <span style={{ whiteSpace: 'nowrap' }}>
               {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
               {(netPrice || 0).toFixed(2)}
+            </span>
+          );
+        }
+      },
+      {
+        title: 'Commission',
+        dataIndex: 'siteCommission',
+        render(commission: number) {
+          return (
+            <span>
+              {commission * 100}
+              %
             </span>
           );
         }

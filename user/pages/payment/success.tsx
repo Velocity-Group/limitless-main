@@ -19,9 +19,9 @@ interface IProps {
 }
 
 class PaymentSuccess extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
-  static noredirect: boolean = true;
+  static noredirect = true;
 
   componentDidMount() {
     const { clearCart: clearCartHandler } = this.props;
@@ -52,13 +52,13 @@ class PaymentSuccess extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Payment success
+            | Payment successful
           </title>
         </Head>
         <div className="main-container">
           <Result
             status="success"
-            title="Payment Success"
+            title="Payment Successful"
             subTitle={`Hi ${user?.name || user?.username || 'there'}, your payment has been successfully processed`}
             extra={[
               <Button className="secondary" key="console" onClick={() => Router.push('/home')}>

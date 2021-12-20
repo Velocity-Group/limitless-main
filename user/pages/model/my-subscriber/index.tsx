@@ -26,7 +26,7 @@ interface IStates {
 }
 
 class SubscriberPage extends PureComponent<IProps, IStates> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
   static onlyPerformer = true;
 

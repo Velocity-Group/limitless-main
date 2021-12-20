@@ -429,7 +429,7 @@ class GalleryViewPage extends PureComponent<IProps> {
         >
           <PurchaseGalleryForm gallery={gallery} submiting={requesting} onFinish={this.purchaseGallery.bind(this)} />
         </Modal>
-        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );
   }

@@ -20,7 +20,7 @@ interface IProps {
 class ContactPage extends PureComponent<IProps> {
   static authenticate = true;
 
-  static noredirect: boolean = true;
+  static noredirect = true;
 
   _intervalCountdown: any;
 
@@ -102,7 +102,7 @@ class ContactPage extends PureComponent<IProps> {
             {' '}
             {ui?.siteName}
             {' '}
-            | Contact
+            | Contact Us
           </title>
         </Head>
         <div className="main-container">
@@ -124,25 +124,26 @@ class ContactPage extends PureComponent<IProps> {
                 className="login-content right"
               >
                 <p className="text-center">
-                  <span className="title">Contact</span>
+                  <span className="title">Contact Us</span>
                 </p>
                 <h5
                   className="text-center"
                   style={{ fontSize: 13, color: '#888' }}
                 >
-                  Please fill out all the info below and we will get back to you with-in 48hrs.
+                  Please fill out the form below and we will get back to you as soon as possible
                 </h5>
                 <Form
                   layout="vertical"
                   name="contact-from"
                   ref={this.formRef}
                   onFinish={this.onFinish.bind(this)}
+                  scrollToFirstError
                 >
                   <Form.Item
                     name="name"
-                    rules={[{ required: true, message: 'Tell us your name' }]}
+                    rules={[{ required: true, message: 'Tell us your full name' }]}
                   >
-                    <Input placeholder="Tell us your name" />
+                    <Input placeholder="Full name" />
                   </Form.Item>
                   <Form.Item
                     name="email"
@@ -154,7 +155,7 @@ class ContactPage extends PureComponent<IProps> {
                       { type: 'email', message: 'Invalid email format' }
                     ]}
                   >
-                    <Input placeholder="Your valid email address" />
+                    <Input placeholder="Email address" />
                   </Form.Item>
                   <Form.Item
                     name="message"
@@ -166,7 +167,7 @@ class ContactPage extends PureComponent<IProps> {
                       }
                     ]}
                   >
-                    <TextArea rows={3} placeholder="What can we help you?" />
+                    <TextArea rows={3} placeholder="Message" />
                   </Form.Item>
                   {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                   <div className="text-center">

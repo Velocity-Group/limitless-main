@@ -116,7 +116,7 @@ class Earning extends PureComponent<IProps> {
     const type = [
       {
         key: '',
-        text: 'All Type'
+        text: 'All Types'
       },
       {
         key: 'monthly_subscription',

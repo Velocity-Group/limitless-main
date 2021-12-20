@@ -17,6 +17,8 @@ export class FeedDto {
 
   text: string;
 
+  pollDescription: string;
+
   fileIds: Array<string | ObjectId>;
 
   pollIds: Array<string | ObjectId>;
@@ -82,6 +84,7 @@ export class FeedDto {
         'title',
         'slug',
         'text',
+        'pollDescription',
         'fileIds',
         'pollIds',
         'totalLike',

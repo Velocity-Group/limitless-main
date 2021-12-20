@@ -357,7 +357,7 @@ export default class FormFeed extends PureComponent<IProps> {
           </Form.Item>
           {['photo', 'video'].includes(type) && (
           <Form.Item>
-            <Switch checkedChildren="PPV Content" unCheckedChildren="Free Content" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
+            <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
           </Form.Item>
           )}
           {isSale && (
@@ -425,15 +425,25 @@ export default class FormFeed extends PureComponent<IProps> {
                         </span>
                       )}
                   </div>
+                  <Form.Item
+                    name="pollDescription"
+                    className="form-item-no-pad"
+                    validateTrigger={['onChange', 'onBlur']}
+                    rules={[
+                      { required: true, message: 'Please add a question' }
+                    ]}
+                  >
+                    <Input placeholder="Question" />
+                  </Form.Item>
                   {/* eslint-disable-next-line no-nested-ternary */}
-                  <Input disabled={!!feed?._id} className="poll-input" value={pollList && pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
+                  <Input disabled={!!feed?._id} className="poll-input" placeholder="Poll 1" value={pollList && pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
                   {/* eslint-disable-next-line no-nested-ternary */}
-                  <Input disabled={!!feed?._id || !pollList.length} className="poll-input" value={pollList && pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
+                  <Input disabled={!!feed?._id || !pollList.length} className="poll-input" placeholder="Poll 2" value={pollList && pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
 
                   {pollList.map((poll, index) => {
                     if (index === 0 || index === 1) return null;
                     // eslint-disable-next-line react/no-array-index-key
-                    return <Input disabled={!!feed?._id} key={`poll_${index}`} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
+                    return <Input disabled={!!feed?._id} key={`poll_${index}`} placeholder={`Poll ${index + 1}`} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
                   })}
                   {!feed && pollList.length > 1 && (
                   <p style={{ display: 'flex', justifyContent: 'space-between' }}>

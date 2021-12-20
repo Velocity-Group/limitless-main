@@ -18,9 +18,9 @@ interface IProps {
 }
 
 class EmailVerifiedSuccess extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
-  static noredirect: boolean = true;
+  static noredirect = true;
 
   async handleSwitchToPerformer() {
     const { user, logout: handleLogout } = this.props;

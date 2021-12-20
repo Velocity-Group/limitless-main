@@ -1,5 +1,5 @@
 import {
-  Layout, Tabs, Button, Menu, message, Modal, Dropdown, Image, Popover, Tooltip
+  Layout, Tabs, Button, message, Modal, Image, Popover, Tooltip
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -14,7 +14,7 @@ import {
 import Head from 'next/head';
 import {
   ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined,
-  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, MoreOutlined
+  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined
 } from '@ant-design/icons';
 import { TickIcon, ShareIcon, MessageIcon } from 'src/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
@@ -440,24 +440,6 @@ class PerformerProfile extends PureComponent<IProps> {
                   </div>
                 </div>
               </div>
-              {!currentUser.isPerformer && (
-                <div className="drop-actions">
-                  <Dropdown overlay={(
-                    <Menu key="menu_actions">
-                      <Menu.Item key="book_mark">
-                        <a aria-hidden onClick={this.handleBookmark.bind(this)}>
-                          {!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}
-                        </a>
-                      </Menu.Item>
-                    </Menu>
-                  )}
-                  >
-                    <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
-                      <MoreOutlined />
-                    </a>
-                  </Dropdown>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -486,40 +468,50 @@ class PerformerProfile extends PureComponent<IProps> {
                 </h5>
               </div>
             </div>
-            {currentUser._id && !currentUser.isPerformer && (
-              <div className="btn-grp">
-                <div style={{ marginBottom: '4px' }}>
-                  <Tooltip title="Send Tip">
-                    <Button
-                      className="normal"
-                      onClick={() => this.setState({ openTipModal: true })}
-                    >
-                      <DollarOutlined />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="Send Message">
-                    <Button
-                      className="normal"
-                      onClick={() => Router.push({
-                        pathname: '/messages',
-                        query: {
-                          toSource: 'performer',
-                          toId: (performer?._id) || ''
-                        }
-                      })}
-                    >
-                      <MessageIcon />
-                    </Button>
-                  </Tooltip>
-                  <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
-                    <Button
-                      className="normal"
-                    >
-                      <ShareIcon />
-                    </Button>
-                  </Popover>
-                </div>
-                {/* {performer?.isSubscribed && (
+            <div className="btn-grp">
+              <div style={{ marginBottom: '4px' }}>
+                <Tooltip title="Send Tip">
+                  <Button
+                    disabled={!currentUser._id || currentUser.isPerformer}
+                    className="normal"
+                    onClick={() => this.setState({ openTipModal: true })}
+                  >
+                    <DollarOutlined />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Send Message">
+                  <Button
+                    disabled={!currentUser._id || currentUser.isPerformer}
+                    className="normal"
+                    onClick={() => Router.push({
+                      pathname: '/messages',
+                      query: {
+                        toSource: 'performer',
+                        toId: (performer?._id) || ''
+                      }
+                    })}
+                  >
+                    <MessageIcon />
+                  </Button>
+                </Tooltip>
+                <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                  <Button
+                    disabled={!currentUser._id || currentUser.isPerformer}
+                    className={isBookMarked ? 'active' : ''}
+                    onClick={() => this.handleBookmark()}
+                  >
+                    <BookOutlined />
+                  </Button>
+                </Tooltip>
+                <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
+                  <Button
+                    className="normal"
+                  >
+                    <ShareIcon />
+                  </Button>
+                </Popover>
+              </div>
+              {/* {performer?.isSubscribed && (
                       <div className="stream-btns">
                         <Button
                           type="link"
@@ -538,8 +530,7 @@ class PerformerProfile extends PureComponent<IProps> {
                         </Button>
                       </div>
                     )} */}
-              </div>
-            )}
+            </div>
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={ui?.countries || []} performer={performer} />
             </div>
@@ -766,7 +757,7 @@ class PerformerProfile extends PureComponent<IProps> {
             onFinish={this.subscribe.bind(this)}
           />
         </Modal>
-        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );
   }

@@ -24,7 +24,7 @@ interface IProps {
 }
 
 class NewCardPage extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
   state = {
     submiting: false

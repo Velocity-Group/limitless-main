@@ -230,6 +230,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
               status: 'active'
             }
           }
+        scrollToFirstError
         className="account-form"
       >
         <Row>

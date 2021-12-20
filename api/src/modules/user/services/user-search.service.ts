@@ -66,9 +66,8 @@ export class UserSearchService {
   }
 
   public async performerSearch(
-    req: UserSearchRequestPayload,
-    user: UserDto
-  ): Promise<PageableData<UserDto>> {
+    req: UserSearchRequestPayload
+  ): Promise<PageableData<IUserResponse>> {
     const query = {
       status: STATUS_ACTIVE,
       roles: { $ne: ROLE_ADMIN }
@@ -102,17 +101,7 @@ export class UserSearchService {
       this.userModel.countDocuments(query)
     ]);
 
-    const users = data.map((d) => new UserDto(d));
-    const userIds = data.map((d) => d._id);
-    const blockUserList = await this.performerBlockService.listByQuery({
-      sourceId: user._id,
-      targetId: { $in: userIds }
-    });
-    users.forEach((u) => {
-      const isBlocked = blockUserList.find((b) => `${b.targetId}` === `${u._id}`);
-      // eslint-disable-next-line no-param-reassign
-      u.isBlocked = !!isBlocked;
-    });
+    const users = data.map((d) => new UserDto(d).toResponse());
     return {
       data: users,
       total

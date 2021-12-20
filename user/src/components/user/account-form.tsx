@@ -41,6 +41,7 @@ export const UserAccountForm = ({
     {...layout}
     name="user-account-form"
     onFinish={onFinish}
+    scrollToFirstError
     initialValues={user}
   >
     <Row>
@@ -128,7 +129,7 @@ export const UserAccountForm = ({
                       {' '}
                       {countTime < 60 ? 'resend' : 'send'}
                       {' '}
-                      an email to verify your email address
+                      the verification link
                       {' '}
                       {countTime < 60 && `${countTime}s`}
                     </Button>
@@ -149,7 +150,7 @@ export const UserAccountForm = ({
       <Col xs={24} sm={12}>
         <Form.Item
           name="name"
-          label="Display name"
+          label="Display Name"
           validateTrigger={['onChange', 'onBlur']}
           rules={[
             { required: true, message: 'Please input your display name!' },
@@ -164,7 +165,7 @@ export const UserAccountForm = ({
           ]}
           hasFeedback
         >
-          <Input placeholder="Display name" />
+          <Input placeholder="Display Name" />
         </Form.Item>
       </Col>
       <Col xs={24} sm={12}>

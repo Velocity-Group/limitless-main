@@ -175,7 +175,7 @@ class Forgot extends PureComponent<IProps, IState> {
                         <p>
                           Have an account already?
                           <Link href="/">
-                            <a> Login here.</a>
+                            <a> Log in here.</a>
                           </Link>
                         </p>
                         <p>

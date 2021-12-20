@@ -154,7 +154,7 @@ class FeedCard extends Component<IProps> {
   async handleReport(reason: string) {
     const { feed } = this.props;
     if (!reason || reason.length < 20) {
-      message.error('Please fill out at least 20 characters');
+      message.error('You report must be at least 20 characters');
       return;
     }
     try {
@@ -296,7 +296,7 @@ class FeedCard extends Component<IProps> {
     const { polls } = this.state;
     const isExpired = new Date(feed.pollExpiredAt) < new Date();
     if (isExpired) {
-      message.error('Poll was expired to vote');
+      message.error('The poll is now closed');
       return;
     }
     if (!window.confirm('Vote it?')) return;
@@ -416,28 +416,31 @@ class FeedCard extends Component<IProps> {
         <div className="feed-container">
           <div className="feed-text">
             {feed.text}
-            {polls && polls.length > 0 && polls.map((poll) => (
-              <div aria-hidden className="feed-poll" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
-                <span>{poll?.description}</span>
-                {' '}
-                <span>{poll?.totalVote || 0}</span>
-              </div>
-            ))}
             {polls && polls.length > 0 && (
-            <div className="total-vote">
-              <span>
-                Total
-                {' '}
-                {shortenLargeNumber(totalVote)}
-                {' '}
-                votes
-              </span>
-              {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
+            <div className="feed-polls">
+              {feed.pollDescription && <h4 className="p-question">{feed.pollDescription}</h4>}
+              {polls.map((poll) => (
+                <div aria-hidden className="p-item" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
+                  <span className="p-desc">{poll?.description}</span>
+                  {' '}
+                  <span>{poll?.totalVote || 0}</span>
+                </div>
+              ))}
+              <div className="total-vote">
                 <span>
-                  {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}D `}
-                  <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
+                  Total
+                  {' '}
+                  {shortenLargeNumber(totalVote)}
+                  {' '}
+                  {totalVote < 1 ? 'vote' : 'votes'}
                 </span>
-              ) : <span>Expired</span>}
+                {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
+                  <span>
+                    {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}d `}
+                    <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
+                  </span>
+                ) : <span>Closed</span>}
+              </div>
             </div>
             )}
           </div>
@@ -640,7 +643,7 @@ class FeedCard extends Component<IProps> {
             }}
           />
         </Modal>
-        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </div>
     );
   }

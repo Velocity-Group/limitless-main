@@ -100,7 +100,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     const type = [
       {
         key: '',
-        text: 'All type'
+        text: 'All types'
       },
       {
         key: 'tip',

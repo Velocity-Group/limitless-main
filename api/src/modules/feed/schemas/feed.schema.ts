@@ -14,7 +14,7 @@ export const FeedSchema = new Schema({
     type: String,
     index: true
   },
-  title: { type: String },
+  title: String,
   slug: {
     type: String,
     index: true,
@@ -23,7 +23,8 @@ export const FeedSchema = new Schema({
     trim: true,
     sparse: true
   },
-  text: { type: String },
+  text: String,
+  pollDescription: String,
   fileIds: [{
     type: Schema.Types.ObjectId,
     _id: false

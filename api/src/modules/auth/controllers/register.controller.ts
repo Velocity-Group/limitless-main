@@ -56,7 +56,7 @@ export class RegisterController {
     // if require for email verification, we will send verification email
     user.email && await this.authService.sendVerificationEmail(user);
     return DataResponse.ok({
-      message: 'We have sent you a verification email please check your email account you registered with'
+      message: 'Please check your inbox and verify your email address'
     });
   }
 

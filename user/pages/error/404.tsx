@@ -10,7 +10,7 @@ interface IProps {
 }
 
 class Error404Page extends PureComponent<IProps> {
-  static noredirect: boolean = true;
+  static noredirect = true;
 
   render() {
     const { ui, system } = this.props;

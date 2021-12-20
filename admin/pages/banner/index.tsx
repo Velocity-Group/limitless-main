@@ -93,7 +93,7 @@ class Banners extends PureComponent<IProps> {
     const statuses = [
       {
         key: '',
-        text: 'All status'
+        text: 'All statuses'
       },
       {
         key: 'active',

@@ -19,24 +19,9 @@ interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
 }
-interface IStates {
-  subscriptionList: ISubscription[];
-  loading: boolean;
-  submiting: boolean;
-  pagination: {
-    pageSize: number;
-    current: number;
-    total: number;
-  };
-  sort: string;
-  sortBy: string;
-  filter: any;
-  openSubscriptionModal: boolean;
-  selectedSubscription: ISubscription;
-}
 
-class SubscriptionPage extends PureComponent<IProps, IStates> {
-  static authenticate: boolean = true;
+class SubscriptionPage extends PureComponent<IProps> {
+  static authenticate = true;
 
   state = {
     subscriptionList: [],
@@ -100,16 +85,11 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
 
   async cancelSubscription(subscription: ISubscription) {
     try {
-      await this.setState({ submiting: true });
-      const resp = await (await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway))
-        .data;
-      resp.success && message.success('Cancel subscription success');
+      await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
       this.getData();
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Error occured, please try again later');
-    } finally {
-      this.setState({ submiting: false });
     }
   }
 
@@ -196,7 +176,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
               onFinish={this.subscribe.bind(this)}
             />
           </Modal>
-          {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+          {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
         </div>
       </Layout>
     );

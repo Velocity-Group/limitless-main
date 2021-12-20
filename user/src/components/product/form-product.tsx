@@ -114,6 +114,7 @@ export class FormProduct extends PureComponent<IProps> {
           })
         }
         className="account-form"
+        scrollToFirstError
       >
         <Row>
           <Col md={12} xs={24}>

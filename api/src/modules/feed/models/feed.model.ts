@@ -16,6 +16,8 @@ export class FeedModel extends Document {
 
   text: string;
 
+  pollDescription: string;
+
   fileIds: Array<string | ObjectId>;
 
   pollIds: Array<string | ObjectId>;
