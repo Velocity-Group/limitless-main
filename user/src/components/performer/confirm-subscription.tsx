@@ -34,13 +34,13 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
         </div>
         <div className="info-body">
           <p>
-            SUBSCRIBE & GET THIS BENEFITS
+            SUBSCRIBE & GET THESE BENEFITS
           </p>
           <ul>
             <li>
               <CheckSquareOutlined />
               {' '}
-              Full access to this model&apos;s content
+              Full access to this model&apos;s contents
             </li>
             <li>
               <CheckSquareOutlined />
@@ -61,25 +61,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
           {' '}
           subscription
           {' '}
-          {type !== 'free' ? (
-            <>
-              for $
-              {' '}
-              {type === 'monthly' ? performer.monthlyPrice.toFixed(2) : performer.yearlyPrice.toFixed(2)}
-            </>
-          ) : (
-            <>
-              {' '}
-              in
-              {' '}
-              {performer.durationFreeSubscriptionDays}
-              {' '}
-              days then $
-              {performer.monthlyPrice.toFixed(2)}
-              {' '}
-              monthly later
-            </>
-          )}
+          with the model
         </Button>
       </div>
     );

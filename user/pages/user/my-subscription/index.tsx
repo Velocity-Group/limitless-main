@@ -86,6 +86,7 @@ class SubscriptionPage extends PureComponent<IProps> {
   async cancelSubscription(subscription: ISubscription) {
     try {
       await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
+      message.success('Subscription cancelled successfully');
       this.getData();
     } catch (e) {
       const error = await e;
@@ -110,7 +111,7 @@ class SubscriptionPage extends PureComponent<IProps> {
       return;
     }
     if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
-      message.error('Please add payment card');
+      message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
     }

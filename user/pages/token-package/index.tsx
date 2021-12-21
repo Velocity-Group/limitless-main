@@ -66,7 +66,7 @@ class TokenPackages extends PureComponent<IProps> {
       isApliedCode, paymentGateway = 'stripe', couponCode, selectedPackage
     } = this.state;
     if (!user.stripeCardIds || !user.stripeCardIds.length) {
-      message.error('Please add payment card');
+      message.error('Please add a payment card to complete your purchase');
       Router.push('/user/cards');
       return;
     }

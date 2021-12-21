@@ -228,7 +228,7 @@ class PerformerProfile extends PureComponent<IProps> {
       return;
     }
     if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
-      message.error('Please add payment card');
+      message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
     }

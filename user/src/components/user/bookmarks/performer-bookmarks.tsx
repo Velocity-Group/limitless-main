@@ -10,10 +10,12 @@ interface IProps {
   total: number;
   loadMore(): Function;
   loading: boolean;
+  // eslint-disable-next-line react/require-default-props
+  notFoundText?: string;
 }
 
 const UserPerformerBookmarks = ({
-  loadMore, performers, total, loading
+  loadMore, performers, total, loading, notFoundText
 }: IProps) => (
   <>
     <InfiniteScroll
@@ -33,7 +35,7 @@ const UserPerformerBookmarks = ({
           ))}
       </Row>
     </InfiniteScroll>
-    {!performers.length && !loading && <div className="main-container custom text-center"><Alert type="info" message="No model was found" /></div>}
+    {!performers.length && !loading && <div className="main-container custom text-center"><Alert type="info" message={notFoundText || 'No profile was found'} /></div>}
     {loading && (
     <div className="text-center">
       <Spin />

@@ -266,7 +266,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="BookMarks" icon={<BookOutlined />} />
+          <PageHeading title="Bookmarks" icon={<BookOutlined />} />
           <div className="user-account">
             <Tabs
               defaultActiveKey={tab || 'feeds'}
@@ -288,6 +288,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   canLoadmore={totalFeeds > feeds.length}
                   onDelete={this.onDeleteFeed.bind(this)}
                   loadMore={this.handlePagechange.bind(this, 'feeds')}
+                  notFoundText="No bookmarked posts found"
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<VideoCameraOutlined />} key="videos">
@@ -303,6 +304,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   loading={loading}
                   canLoadmore={totalVideos > videos.length}
                   loadMore={this.handlePagechange.bind(this, 'videos')}
+                  notFoundText="No bookmarked videos found"
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<PictureOutlined />} key="galleries">
@@ -318,6 +320,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   loading={loading}
                   canLoadmore={totalGalleries > galleries.length}
                   loadMore={this.handlePagechange.bind(this, 'galleries')}
+                  notFoundText="No bookmarked galleries found"
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<ShopOutlined />} key="products">
@@ -332,10 +335,8 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   loading={loading}
                   items={products.map((p) => p.objectInfo)}
                   canLoadmore={totalProducts > products.length}
-                  loadMore={this.handlePagechange.bind(
-                    this,
-                    'products'
-                  )}
+                  loadMore={this.handlePagechange.bind(this, 'products')}
+                  notFoundText="No bookmarked products found"
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<ModelIcon />} key="performers">
@@ -354,6 +355,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                     this,
                     'performers'
                   )}
+                  notFoundText="No bookmarked profiles found"
                 />
               </Tabs.TabPane>
             </Tabs>

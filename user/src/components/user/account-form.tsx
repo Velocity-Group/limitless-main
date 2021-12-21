@@ -189,7 +189,7 @@ export const UserAccountForm = ({
       </Col>
       <Col md={12} xs={24}>
         <Form.Item
-          label="Password"
+          label="New Password"
           name="password"
           hasFeedback
           rules={[
@@ -199,12 +199,12 @@ export const UserAccountForm = ({
             }
           ]}
         >
-          <Input.Password placeholder="Password" />
+          <Input.Password placeholder="New password" />
         </Form.Item>
       </Col>
       <Col md={12} xs={24}>
         <Form.Item
-          label="Confirm Password"
+          label="Confirm new password"
           name="confirm-password"
           dependencies={['password']}
           hasFeedback
@@ -220,7 +220,7 @@ export const UserAccountForm = ({
             })
           ]}
         >
-          <Input.Password placeholder="Confirm password" />
+          <Input.Password placeholder="Confirm new password" />
         </Form.Item>
       </Col>
       <Col xs={24} sm={12}>

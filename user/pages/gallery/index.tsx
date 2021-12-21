@@ -183,7 +183,7 @@ class GalleryViewPage extends PureComponent<IProps> {
         return;
       }
       if (!user.stripeCardIds || !user.stripeCardIds.length) {
-        message.error('Please add payment card');
+        message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
       }

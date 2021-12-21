@@ -36,7 +36,7 @@ class NewCardPage extends PureComponent<IProps> {
       await this.setState({ submiting: true });
       await paymentService.addStripeCard({ sourceToken: source.id });
       handleUpdateCurrentUser();
-      message.success('Add card success');
+      message.success('Payment card added successfully');
       Router.replace('/user/cards');
     } catch (error) {
       const e = await error;

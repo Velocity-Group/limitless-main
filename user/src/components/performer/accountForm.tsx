@@ -379,7 +379,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
           </Col>
           <Col md={12} xs={24}>
             <Form.Item
-              label="Password"
+              label="New Password"
               name="password"
               hasFeedback
               rules={[
@@ -389,12 +389,12 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 }
               ]}
             >
-              <Input.Password placeholder="Password" />
+              <Input.Password placeholder="New password" />
             </Form.Item>
           </Col>
           <Col md={12} xs={24}>
             <Form.Item
-              label="Confirm Password"
+              label="Confirm new Password"
               name="confirm"
               dependencies={['password']}
               hasFeedback
@@ -410,7 +410,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 })
               ]}
             >
-              <Input.Password placeholder="Confirm password" />
+              <Input.Password placeholder="Confirm new password" />
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>

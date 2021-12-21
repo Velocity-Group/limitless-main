@@ -11,12 +11,13 @@ interface IProps {
   canLoadmore: boolean;
   loadMore(): Function;
   loading: boolean;
+  notFoundText?: string;
 }
 
 export class ScrollListGallery extends PureComponent<IProps> {
   render() {
     const {
-      items = [], loadMore, canLoadmore = false, loading = false
+      items = [], loadMore, canLoadmore = false, loading = false, notFoundText
     } = this.props;
     return (
       <>
@@ -46,7 +47,7 @@ export class ScrollListGallery extends PureComponent<IProps> {
         </InfiniteScroll>
         {!loading && !items.length && (
         <div className="main-container custom">
-          <Alert className="text-center" type="info" message="No gallery was found" />
+          <Alert className="text-center" type="info" message={notFoundText || 'No gallery was found'} />
         </div>
         )}
         {loading && <div className="text-center"><Spin /></div>}
