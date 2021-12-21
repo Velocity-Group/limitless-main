@@ -118,7 +118,7 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <div style={{ whiteSpace: 'nowrap' }}>

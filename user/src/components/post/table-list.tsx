@@ -28,7 +28,7 @@ const FeedList = ({
 }: IProps) => {
   const columns = [
     {
-      title: '#',
+      title: 'Post Type',
       key: 'id',
       render: (record) => {
         const images = record.files && record.files.filter((f) => f.type === 'feed-photo');
@@ -108,7 +108,7 @@ const FeedList = ({
       sorter: true
     },
     {
-      title: 'Actions',
+      title: 'Action',
       key: 'details',
       render: (record) => [
         <Button className="info" key="edit">

@@ -147,7 +147,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="POSTS"
+                    title="TOTAL POSTS"
                     value={stats.totalPosts}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -161,7 +161,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="GALLERIES"
+                    title="TOTAL GALLERIES"
                     value={stats.totalGalleries}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -175,7 +175,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="PHOTOS"
+                    title="TOTAL PHOTOS"
                     value={stats.totalPhotos}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -189,7 +189,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="VIDEOS"
+                    title="TOTAL VIDEOS"
                     value={stats.totalVideos}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -203,7 +203,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="PRODUCTS"
+                    title="TOTAL PRODUCTS"
                     value={stats.totalProducts}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}

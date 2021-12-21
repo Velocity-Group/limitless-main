@@ -335,7 +335,7 @@ class PerformerProfile extends PureComponent<IProps> {
       galleryState
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Model profile was not found'} />;
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
     }
     const { items: feeds = [], total: totalFeed = 0, requesting: loadingFeed } = feedState;
     const { items: videos = [], total: totalVideos = 0, requesting: loadingVideo } = videoState;
@@ -580,7 +580,7 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR FREE IN
+                  SUBSCRIBE FOR FREE FOR
                   {' '}
                   {performer?.durationFreeSubscriptionDays || 1}
                   {' '}
@@ -589,7 +589,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   THEN $
                   {performer?.monthlyPrice.toFixed(2)}
                   {' '}
-                  MONTHLY LATER
+                  PER MONTH
                 </button>
               </div>
             )}

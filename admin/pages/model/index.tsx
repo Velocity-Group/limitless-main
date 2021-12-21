@@ -15,26 +15,33 @@ import { formatDate } from '@lib/date';
 import { BreadcrumbComponent, DropdownAction } from '@components/common';
 import { IPerformer } from 'src/interfaces';
 import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
-import Router from 'next/router';
 
-export default class Performers extends PureComponent<any> {
+interface IProps {
+  status: string;
+  verifiedDocument: string;
+}
+
+export default class Performers extends PureComponent<IProps> {
   _selectedUser: IPerformer;
 
-  query = Router?.router?.query || {} as any;
+  static async getInitialProps({ ctx }) {
+    return ctx.query;
+  }
 
   state = {
     pagination: {} as any,
     searching: false,
     list: [],
     limit: 10,
-    filter: this.query,
+    filter: { } as any,
     sortBy: 'updatedAt',
     sort: 'desc',
     openChangeTokenLogModal: false
   };
 
   componentDidMount() {
-    this.search();
+    const { status, verifiedDocument } = this.props;
+    this.setState({ filter: { status: status || '', verifiedDocument: verifiedDocument || '' } }, () => this.search());
   }
 
   async handleTableChange(pagination, filters, sorter) {
@@ -100,6 +107,7 @@ export default class Performers extends PureComponent<any> {
   }
 
   render() {
+    const { status: defaultStatus, verifiedDocument } = this.props;
     const {
       list, searching, pagination, openChangeTokenLogModal
     } = this.state;
@@ -345,7 +353,13 @@ export default class Performers extends PureComponent<any> {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Models' }]} />
         <Page>
-          <SearchFilter onSubmit={this.handleFilter.bind(this)} defaultValue={this.query} />
+          <SearchFilter
+            onSubmit={this.handleFilter.bind(this)}
+            defaultValue={{
+              status: defaultStatus || '',
+              verifiedDocument
+            }}
+          />
           <div className="table-responsive custom">
             <Table
               dataSource={list}

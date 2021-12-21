@@ -128,7 +128,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Actions',
+      title: 'Action',
       render(record) {
         if (record.status === 'require_authentication' && record.stripeConfirmUrl) {
           return <Link href={record.stripeConfirmUrl}><a>Confirm payment</a></Link>;

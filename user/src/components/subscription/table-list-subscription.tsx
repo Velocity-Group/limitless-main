@@ -133,7 +133,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Actions',
+      title: 'Action',
       dataIndex: '_id',
       render(_id, record) {
         return (

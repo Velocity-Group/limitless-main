@@ -61,7 +61,7 @@ const UsersBlockList = ({
       sorter: true
     },
     {
-      title: 'Actions',
+      title: 'Action',
       key: '_id',
       render: (item) => (
         <Button

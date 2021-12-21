@@ -83,36 +83,51 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
             <Form.Item
               labelCol={{ span: 24 }}
               label="Your government issued ID"
-              valuePropName="fileList"
               className="model-photo-verification"
-              help="Please upload proof of one of either of the following: Government-issued ID card, National Id card, Passport or Driving license."
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'idFile')} />
                 {idImage ? (
-                  <Image alt="id-img" src={idImage} style={{ margin: 5, height: '140px' }} />
-                ) : <img src="/static/front-id.jpeg" height="140px" alt="id-img" />}
+                  <Image alt="id-img" src={idImage} style={{ margin: 5, height: '150px' }} />
+                ) : <img src="/static/front-id.png" height="150px" alt="id-img" />}
+              </div>
+              <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
+                <ul className="list-issued-id">
+                  <li>Government-issued ID card</li>
+                  <li>National Id card</li>
+                  <li>Passport</li>
+                  <li>Driving license</li>
+                </ul>
               </div>
             </Form.Item>
           </Col>
           <Col xs={24} sm={24} md={12}>
             <Form.Item
               labelCol={{ span: 24 }}
-              label="Holding ID photo"
-              valuePropName="fileList"
+              label="Your selfie with your ID and handwritten note"
               className="model-photo-verification"
-              help="Upload a photo of yourself holding your indentity document next to your face"
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'documentFile')} />
                 {documentImage ? (
-                  <Image alt="id-img" src={documentImage} style={{ margin: 5, height: '140px' }} />
-                ) : <img src="/static/holding-id.jpeg" height="140px" alt="holding-id" />}
+                  <Image alt="id-img" src={documentImage} style={{ margin: 5, height: '150px' }} />
+                ) : <img src="/static/holding-id.jpg" height="150px" alt="holding-id" />}
+              </div>
+              <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
+                <ul className="list-issued-id">
+                  <li>
+                    On a blank piece of white paper write your name, today&apos;s date and our website address
+                    {' '}
+                    {window.location.hash}
+                  </li>
+                  <li>Hold your paper and your ID so we can clearly see hoth</li>
+                  <li>Take a selfie of you, your ID and your handwritten note. All three elements (you, your ID and your writting) must be clearly visible without copying or editing</li>
+                </ul>
               </div>
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
+        <Form.Item className="text-center">
           <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>
             Submit
           </Button>

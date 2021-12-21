@@ -360,22 +360,22 @@ class RegisterPerformer extends PureComponent<IProps> {
                       labelCol={{ span: 24 }}
                       name="idVerificationId"
                       className="model-photo-verification"
-                      help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
+                      help="Your government issued ID card, National ID card, Passport or Driving license"
                     >
                       <div className="id-block">
                         <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} />
-                        <img alt="id-img" className="img-id" src="/static/front-id.jpeg" />
+                        <img alt="id-img" className="img-id" src="/static/front-id.png" />
                       </div>
                     </Form.Item>
                     <Form.Item
                       labelCol={{ span: 24 }}
                       name="documentVerificationId"
                       className="model-photo-verification"
-                      help="Upload a photo of yourself holding your indentity document next to your face"
+                      help="Your selfie with your ID and handwritten note"
                     >
                       <div className="id-block">
                         <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'documentFile')} />
-                        <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpeg" />
+                        <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpg" />
                       </div>
                     </Form.Item>
                   </div>
@@ -388,6 +388,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                   disabled={registerPerformerData.requesting || isLoading}
                   loading={registerPerformerData.requesting || isLoading}
                   className="login-form-button"
+                  style={{ maxWidth: 300 }}
                 >
                   CREATE YOUR ACCOUNT
                 </Button>

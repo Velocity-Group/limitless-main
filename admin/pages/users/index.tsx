@@ -3,21 +3,25 @@ import {
   Table, message, Tag, Modal, Avatar
 } from 'antd';
 import Page from '@components/common/layout/page';
-import { SearchFilter } from '@components/performer/search-filter';
 import {
   EditOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
-import { BreadcrumbComponent, DropdownAction } from '@components/common';
+import { BreadcrumbComponent, DropdownAction, SearchFilter } from '@components/common';
 import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
 import { userService } from '@services/user.service'; import Head from 'next/head';
 import Link from 'next/link';
-import Router from 'next/router';
 
-export default class Performers extends PureComponent<any> {
+interface IProps {
+  status: string
+}
+
+export default class Performers extends PureComponent<IProps> {
   _selectedUser: any;
 
-  query = Router?.router?.query || {} as any;
+  static async getInitialProps({ ctx }) {
+    return ctx.query;
+  }
 
   state = {
     pagination: {} as any,
@@ -25,13 +29,14 @@ export default class Performers extends PureComponent<any> {
     openChangeTokenLogModal: false,
     list: [],
     limit: 10,
-    filter: this.query,
+    filter: {} as any,
     sortBy: 'updatedAt',
     sort: 'desc'
   };
 
   componentDidMount() {
-    this.search();
+    const { status } = this.props;
+    this.setState({ filter: { status: status || '' } }, () => this.search());
   }
 
   async handleTableChange(pagination, filters, sorter) {
@@ -97,6 +102,7 @@ export default class Performers extends PureComponent<any> {
   }
 
   render() {
+    const { status: defaultStatus } = this.props;
     const {
       list, searching, pagination, openChangeTokenLogModal
     } = this.state;
@@ -210,6 +216,26 @@ export default class Performers extends PureComponent<any> {
         }
       }
     ];
+
+    const statuses = [
+      {
+        key: '',
+        text: 'All statuses'
+      },
+      {
+        key: 'active',
+        text: 'Active'
+      },
+      {
+        key: 'inactive',
+        text: 'Inactive'
+      },
+      {
+        key: 'pending-email-confirmation',
+        text: 'Not verified email'
+      }
+    ];
+
     return (
       <>
         <Head>
@@ -217,7 +243,7 @@ export default class Performers extends PureComponent<any> {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Users' }]} />
         <Page>
-          <SearchFilter onSubmit={this.handleFilter.bind(this)} defaultValue={this.query} />
+          <SearchFilter keyword onSubmit={this.handleFilter.bind(this)} statuses={statuses} defaultStatus={defaultStatus} />
           <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
             <Table

@@ -102,7 +102,7 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (data, record) => (
           <div style={{ whiteSpace: 'nowrap' }}>

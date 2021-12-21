@@ -28,7 +28,7 @@ export class TableListVideo extends PureComponent<IProps> {
     } = this.props;
     const columns = [
       {
-        title: '#',
+        title: 'Thumbnail',
         render(record: any) {
           return (
             <Link href={{ pathname: '/video', query: { id: record.slug || record._id } }} as={`/video/${record.slug || record._id}`}><a><ThumbnailVideo video={record} /></a></Link>
@@ -102,7 +102,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <div style={{ whiteSpace: 'nowrap' }}>

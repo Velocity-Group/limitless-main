@@ -1,7 +1,7 @@
 import {
   Table, Tag, Button, Avatar
 } from 'antd';
-import { StopOutlined } from '@ant-design/icons';
+import { StopOutlined, RightCircleOutlined } from '@ant-design/icons';
 import { ISubscription } from 'src/interfaces';
 import { formatDate } from '@lib/date';
 
@@ -12,6 +12,7 @@ interface IProps {
   onChange(): Function;
   loading: boolean;
   onCancelSubscription: Function;
+  onRenewSubscription: Function;
 }
 
 export const TableListSubscription = ({
@@ -20,7 +21,8 @@ export const TableListSubscription = ({
   rowKey,
   onChange,
   loading,
-  onCancelSubscription
+  onCancelSubscription,
+  onRenewSubscription
 }: IProps) => {
   const columns = [
     {
@@ -133,6 +135,13 @@ export const TableListSubscription = ({
       render(data, records) {
         return (
           <span>
+            {records?.status === 'deactivated' ? (
+              <Button type="primary" onClick={() => onRenewSubscription(records)}>
+                <RightCircleOutlined />
+                {' '}
+                Reactivate subscription
+              </Button>
+            ) : null}
             {records?.status === 'active' ? (
               <Button type="primary" onClick={() => onCancelSubscription(records)}>
                 <StopOutlined />

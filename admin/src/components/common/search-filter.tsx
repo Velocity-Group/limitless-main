@@ -23,6 +23,7 @@ interface IProps {
     text?: string;
   }[];
   defaultType?: string;
+  defaultStatus?: string;
   searchWithPerformer?: boolean;
   performerId?: string;
   searchWithGallery?: boolean;
@@ -31,21 +32,6 @@ interface IProps {
 }
 
 export class SearchFilter extends PureComponent<IProps> {
-  performerRef: any;
-
-  state = {
-    q: '',
-    performerId: '',
-    galleryId: ''
-  };
-
-  componentDidMount() {
-    const { performerId } = this.props;
-    if (performerId) {
-      this.setState({ performerId });
-    }
-  }
-
   render() {
     const { onSubmit } = this.props;
     const {
@@ -59,7 +45,8 @@ export class SearchFilter extends PureComponent<IProps> {
       sourceType,
       keyword,
       type,
-      defaultType
+      defaultType,
+      defaultStatus
     } = this.props;
     return (
       <Row gutter={24}>
@@ -81,7 +68,7 @@ export class SearchFilter extends PureComponent<IProps> {
               }}
               style={{ width: '100%' }}
               placeholder="Select status"
-              defaultValue=""
+              defaultValue={defaultStatus}
             >
               {statuses.map((s) => (
                 <Select.Option key={s.key} value={s.key}>

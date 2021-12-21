@@ -45,7 +45,7 @@ class Login extends PureComponent<IProps> {
     return (
       <Layout>
         <Head>
-          <title>Login</title>
+          <title>Log in</title>
         </Head>
         <div className="form-body">
           <div className="form">
@@ -89,7 +89,7 @@ class Login extends PureComponent<IProps> {
                   disabled={loginAuth.requesting}
                   htmlType="submit"
                 >
-                  Sign in
+                  Log in
                 </Button>
               </Row>
             </Form>

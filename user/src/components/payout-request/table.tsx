@@ -111,7 +111,7 @@ const PayoutRequestList = ({
       sorter: true
     },
     {
-      title: 'Actions',
+      title: 'Action',
       key: 'details',
       render: (request: PayoutRequestInterface) => (
         <Link

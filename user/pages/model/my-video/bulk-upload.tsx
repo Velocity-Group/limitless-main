@@ -164,7 +164,7 @@ class BulkUploadVideo extends PureComponent<IProps> {
                   <UploadOutlined />
                 </p>
                 <p className="ant-upload-text">
-                  Click or drag & drop files to this area to upload
+                  Click here or drag & drop your VIDEO files to this area to upload
                 </p>
               </Dragger>
             </Form.Item>

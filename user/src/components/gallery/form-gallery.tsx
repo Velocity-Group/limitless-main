@@ -65,7 +65,7 @@ const FormGallery = ({
         name="isSale"
         label="For sale?"
       >
-        <Switch checkedChildren="Sale" unCheckedChildren="Free" checked={isSale} onChange={(val) => setSale(val)} />
+        <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={(val) => setSale(val)} />
       </Form.Item>
       {isSale && (
         <Form.Item
@@ -104,7 +104,7 @@ const FormGallery = ({
             <InboxOutlined />
           </p>
           <p className="ant-upload-text">
-            Drag and drop your photos to this area, or browse your computer to upload
+            Click here or drag & drop your PHOTO files to this area to upload
           </p>
         </Dragger>
       )}

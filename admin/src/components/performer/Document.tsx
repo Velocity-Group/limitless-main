@@ -47,7 +47,6 @@ export class PerformerDocument extends PureComponent<IProps> {
             <Form.Item
               style={{ textAlign: 'center' }}
               label="Govt issued ID photo"
-              help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
             >
               <ImageUpload
                 uploadUrl={`${performerService.getUploadDocumentUrl()}/${performer._id}`}
@@ -58,15 +57,14 @@ export class PerformerDocument extends PureComponent<IProps> {
                 }}
               />
               {idVerificationUrl ? (
-                <Image alt="id-img" src={idVerificationUrl} style={{ margin: 5, height: '140px' }} />
-              ) : <img src="/front-id.jpeg" height="140px" alt="id-img" />}
+                <Image alt="id-img" src={idVerificationUrl} style={{ margin: 5, height: '150px' }} />
+              ) : <img src="/front-id.png" height="150px" alt="id-img" />}
             </Form.Item>
           </Col>
           <Col md={12} xs={24}>
             <Form.Item
               style={{ textAlign: 'center' }}
-              label="Govt issued"
-              help="Upload a photo of yourself holding your indentity document next to your face"
+              label="Selfie with ID photo and handwritten note"
             >
               <ImageUpload
                 uploadUrl={`${performerService.getUploadDocumentUrl()}/${performer._id}`}
@@ -79,12 +77,12 @@ export class PerformerDocument extends PureComponent<IProps> {
                 }}
               />
               {documentVerificationUrl ? (
-                <Image alt="id-img" src={documentVerificationUrl} style={{ margin: 5, height: '140px' }} />
-              ) : <img src="/holding-id.jpeg" height="140px" alt="holding-id" />}
+                <Image alt="id-img" src={documentVerificationUrl} style={{ margin: 5, height: '150px' }} />
+              ) : <img src="/holding-id.jpg" height="150px" alt="holding-id" />}
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+        <Form.Item className="text-center">
           <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
             Submit
           </Button>

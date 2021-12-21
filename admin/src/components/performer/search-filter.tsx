@@ -2,44 +2,31 @@ import React, { PureComponent } from 'react';
 import {
   Input, Row, Col, Select
 } from 'antd';
-import Router from 'next/router';
 
 interface IProps {
   onSubmit: Function;
   defaultValue?: {
-    q?: string,
-    gender?: 'male' | 'female' | 'transgender',
-    status?: 'active' | 'inactive' | 'pending-email-confirmation',
-    verifiedDocument?: 'true' | 'false'
+    status?: string,
+    verifiedDocument?: string
   };
 }
 
 export class SearchFilter extends PureComponent<IProps> {
-  pathname = Router.router?.pathname || '';
-
-  state = {
-    q: '',
-    gender: '',
-    status: '',
-    verifiedDocument: ''
-  };
-
   componentDidMount() {
     const { defaultValue } = this.props;
     defaultValue && this.setState({ ...defaultValue });
   }
 
   render() {
-    const { onSubmit } = this.props;
+    const { onSubmit, defaultValue } = this.props;
     const {
-      status: initStatus, gender: initGender, q: initQ, verifiedDocument: initVerifiedDocument
-    } = this.state;
+      status = '', verifiedDocument = ''
+    } = defaultValue;
 
     return (
       <Row gutter={24}>
         <Col lg={6} xs={24}>
           <Input
-            value={initQ}
             placeholder="Enter keyword"
             onChange={(evt) => this.setState({ q: evt.target.value })}
             onPressEnter={() => onSubmit(this.state, () => onSubmit(this.state))}
@@ -47,25 +34,25 @@ export class SearchFilter extends PureComponent<IProps> {
         </Col>
         <Col lg={6} xs={24}>
           <Select
-            value={initStatus}
+            defaultValue={status}
             style={{ width: '100%' }}
-            onChange={(status) => this.setState({ status }, () => onSubmit(this.state))}
+            onChange={(val) => this.setState({ status: val }, () => onSubmit(this.state))}
           >
-            <Select.Option value="">Status</Select.Option>
+            <Select.Option value="">All Statuses</Select.Option>
             <Select.Option value="active">Active</Select.Option>
             <Select.Option value="inactive">Suspend</Select.Option>
             <Select.Option value="pending-email-confirmation">
-              Pending Email Confirmation
+              Not verified email
             </Select.Option>
           </Select>
         </Col>
         <Col lg={6} xs={24}>
           <Select
-            value={initGender}
+            defaultValue=""
             style={{ width: '100%' }}
-            onChange={(gender) => this.setState({ gender }, () => onSubmit(this.state))}
+            onChange={(val) => this.setState({ gender: val }, () => onSubmit(this.state))}
           >
-            <Select.Option value="">Gender</Select.Option>
+            <Select.Option value="">All Genders</Select.Option>
             <Select.Option key="male" value="male">
               Male
             </Select.Option>
@@ -77,23 +64,21 @@ export class SearchFilter extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Col>
-        {this.pathname === '/model' && (
-          <Col lg={6} xs={24}>
-            <Select
-              value={initVerifiedDocument}
-              style={{ width: '100%' }}
-              onChange={(verifiedDocument) => this.setState({ verifiedDocument }, () => onSubmit(this.state))}
-            >
-              <Select.Option value="">All</Select.Option>
-              <Select.Option key="vserified" value="true">
-                Verified ID
-              </Select.Option>
-              <Select.Option key="notVerified" value="false">
-                Not Verified ID
-              </Select.Option>
-            </Select>
-          </Col>
-        )}
+        <Col lg={6} xs={24}>
+          <Select
+            defaultValue={verifiedDocument}
+            style={{ width: '100%' }}
+            onChange={(val) => this.setState({ verifiedDocument: val }, () => onSubmit(this.state))}
+          >
+            <Select.Option value="">All </Select.Option>
+            <Select.Option key="verified" value="true">
+              Verified ID
+            </Select.Option>
+            <Select.Option key="notVerified" value="false">
+              Not Verified ID
+            </Select.Option>
+          </Select>
+        </Col>
       </Row>
     );
   }
