@@ -70,7 +70,7 @@ export class SearchFilter extends PureComponent<IProps> {
             style={{ width: '100%' }}
             onChange={(val) => this.setState({ verifiedDocument: val }, () => onSubmit(this.state))}
           >
-            <Select.Option value="">All </Select.Option>
+            <Select.Option value="">All verified ID statuses</Select.Option>
             <Select.Option key="verified" value="true">
               Verified ID
             </Select.Option>
