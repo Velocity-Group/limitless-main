@@ -3,6 +3,11 @@
 .main-header {
   border-bottom: 1px solid @light-grey;
   background-color: @white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
 }
 
 .header.ant-layout-header {
@@ -332,27 +337,6 @@
 }
 
 @media (max-width: @mobile-screen) {
-  .main-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 999;
-  }
-
-  .ant-btn.info,
-  .ant-btn.secondary-custom {
-    margin-bottom: 5px;
-  }
-
-  .ant-col-offset-4 {
-    margin-left: 0;
-  }
-
-  .switch-grp {
-    margin-bottom: 10px;
-  }
-
   .nav-bar {
     .nav-icons {
       width: 100%;
