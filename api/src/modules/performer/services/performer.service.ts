@@ -610,7 +610,7 @@ export class PerformerService {
       });
     }
     // update auth key if username or email has changed
-    if (performer.username && performer.username.trim() !== newPerformer.username) {
+    if (performer.username && performer.username !== newPerformer.username) {
       await this.authService.updateKey({
         source: 'performer',
         sourceId: newPerformer._id,

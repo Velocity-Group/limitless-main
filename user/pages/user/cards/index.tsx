@@ -18,7 +18,7 @@ interface IProps {
 }
 
 class CardsPage extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
   state = {
     cards: [],
@@ -87,7 +87,7 @@ class CardsPage extends PureComponent<IProps> {
           <div className="card-list">
             {!loading && !cards.length && (
               <p>
-                No authorised card was found,
+                No payment card found,
                 {' '}
                 <Link href="/user/cards/add-card">
                   <a>

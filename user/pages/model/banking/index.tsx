@@ -1,24 +1,24 @@
 import Head from 'next/head';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { Layout, message } from 'antd';
+import { Layout, message, Tabs } from 'antd';
 import { BankOutlined } from '@ant-design/icons';
 import {
   IPerformer, IUIConfig
 } from 'src/interfaces';
-import { PerformerBankingForm } from '@components/performer';
-import { paymentService } from '@services/payment.service';
+import { PerformerBankingForm, PerformerPaypalForm } from '@components/performer';
+import { paymentService, performerService } from '@services/index';
 import PageHeading from '@components/common/page-heading';
 import '../../user/index.less';
 
 interface IProps {
-  currentUser: IPerformer;
+  user: IPerformer;
   ui: IUIConfig;
 }
 class BankingSettings extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
-  static onlyPerformer: boolean = true;
+  static onlyPerformer = true;
 
   state = {
     stripeAccount: null,
@@ -29,6 +29,21 @@ class BankingSettings extends PureComponent<IProps> {
 
   componentDidMount() {
     this.getAccount();
+  }
+
+  async handleUpdatePaypal(data) {
+    const { user } = this.props;
+    try {
+      await this.setState({ submiting: true });
+      const payload = { key: 'paypal', value: data, performerId: user._id };
+      await performerService.updatePaymentGateway(user._id, payload);
+      this.setState({ submiting: false });
+      message.success('Changes saved');
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try againl later');
+      this.setState({ submiting: false });
+    }
   }
 
   async getAccount() {
@@ -61,7 +76,7 @@ class BankingSettings extends PureComponent<IProps> {
 
   render() {
     const {
-      ui
+      ui, user
     } = this.props;
     const {
       stripeAccount, loading, submiting, loginUrl
@@ -72,13 +87,23 @@ class BankingSettings extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Stripe Banking
-            {' '}
+            | Banking (to earn)
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading icon={<BankOutlined />} title="Stripe Banking" />
-          <PerformerBankingForm stripeAccount={stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
+          <PageHeading icon={<BankOutlined />} title="Banking (to earn)" />
+          <Tabs>
+            <Tabs.TabPane tab={<span>Stripe Connect</span>} key="stripe">
+              <PerformerBankingForm stripeAccount={stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
+            </Tabs.TabPane>
+            <Tabs.TabPane tab={<span>Paypal</span>} key="paypal">
+              <PerformerPaypalForm
+                onFinish={this.handleUpdatePaypal.bind(this)}
+                updating={submiting}
+                user={user}
+              />
+            </Tabs.TabPane>
+          </Tabs>
         </div>
       </Layout>
     );
@@ -86,7 +111,8 @@ class BankingSettings extends PureComponent<IProps> {
 }
 
 const mapStates = (state: any) => ({
-  ui: { ...state.ui }
+  ui: { ...state.ui },
+  user: { ...state.user.current }
 });
 const mapDispatch = { };
 export default connect(mapStates, mapDispatch)(BankingSettings);

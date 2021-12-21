@@ -24,7 +24,7 @@ interface IProps {
 }
 
 class FanRegister extends PureComponent<IProps> {
-  static authenticate: boolean = false;
+  static authenticate = false;
 
   static layout = 'blank';
 
@@ -152,11 +152,43 @@ class FanRegister extends PureComponent<IProps> {
                       name="member_register"
                       initialValues={{ remember: true, gender: 'male' }}
                       onFinish={this.handleRegister.bind(this)}
+                      scrollToFirstError
                     >
+                      <Form.Item
+                        name="firstName"
+                        validateTrigger={['onChange', 'onBlur']}
+                        rules={[
+                          { required: true, message: 'Please input your name!' },
+                          {
+                            pattern: new RegExp(
+                              /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
+                            ),
+                            message:
+                              'First name can not contain number and special character'
+                          }
+                        ]}
+                      >
+                        <Input placeholder="First name" />
+                      </Form.Item>
+                      <Form.Item
+                        name="lastName"
+                        validateTrigger={['onChange', 'onBlur']}
+                        rules={[
+                          { required: true, message: 'Please input your name!' },
+                          {
+                            pattern: new RegExp(
+                              /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
+                            ),
+                            message:
+                              'Last name can not contain number and special character'
+                          }
+                        ]}
+                      >
+                        <Input placeholder="Last name" />
+                      </Form.Item>
                       <Form.Item
                         name="email"
                         validateTrigger={['onChange', 'onBlur']}
-                        hasFeedback
                         rules={[
                           {
                             type: 'email',
@@ -171,44 +203,8 @@ class FanRegister extends PureComponent<IProps> {
                         <Input placeholder="Email address" />
                       </Form.Item>
                       <Form.Item
-                        name="username"
-                        validateTrigger={['onChange', 'onBlur']}
-                        rules={[
-                          { required: true, message: 'Please input your username!' },
-                          {
-                            pattern: new RegExp(/^[a-z0-9]+$/g),
-                            message:
-                                'Username must contain lowercase alphanumerics only'
-                          },
-                          { min: 3, message: 'Username must containt at least 3 characters' }
-                        ]}
-                        hasFeedback
-                      >
-                        <Input placeholder="Username" />
-                      </Form.Item>
-                      <Form.Item
-                        name="name"
-                        validateTrigger={['onChange', 'onBlur']}
-                        rules={[
-                          { required: true, message: 'Please input your display name!' },
-                          {
-                            pattern: new RegExp(/^(?=.*\S).+$/g),
-                            message:
-                                'Display name can not contain only whitespace'
-                          },
-                          {
-                            min: 3,
-                            message: 'Display name must containt at least 3 characters'
-                          }
-                        ]}
-                        hasFeedback
-                      >
-                        <Input placeholder="Display name" />
-                      </Form.Item>
-                      <Form.Item
                         name="password"
                         validateTrigger={['onChange', 'onBlur']}
-                        hasFeedback
                         rules={[
                           {
                             pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
@@ -237,13 +233,13 @@ class FanRegister extends PureComponent<IProps> {
                           {' '}
                           and
                           {' '}
-                          <a href="/page/privacy-policy" target="_blank">Privacy & Policy</a>
+                          <a href="/page/privacy-policy" target="_blank">Privacy Policy</a>
                           , and confirm that you are at least 18 years old.
                         </p>
                         <p>
                           Have an account already?
                           <Link href="/">
-                            <a> Login.</a>
+                            <a> Log in here.</a>
                           </Link>
                         </p>
                         <p>

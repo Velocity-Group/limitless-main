@@ -49,6 +49,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
         initialValues={user}
         labelAlign="left"
         className="account-form"
+        scrollToFirstError
       >
         <Row>
           <Col xl={12} md={12} xs={24}>

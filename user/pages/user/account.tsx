@@ -1,9 +1,10 @@
 /* eslint-disable react/no-did-update-set-state */
 import { PureComponent } from 'react';
-import { Layout, Tabs, message } from 'antd';
+import { Layout, message } from 'antd';
+import { EditOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import { connect } from 'react-redux';
-import { UserAccountForm, UpdatePaswordForm } from '@components/user';
+import { UserAccountForm } from '@components/user';
 import { IUser, IUserFormData } from 'src/interfaces/user';
 import { authService } from '@services/auth.service';
 import { userService } from '@services/user.service';
@@ -11,42 +12,33 @@ import { updateUser, updateCurrentUserAvatar, updatePassword } from 'src/redux/u
 import { IUIConfig } from 'src/interfaces';
 import { SocketContext } from 'src/socket';
 import { logout } from '@redux/auth/actions';
+import PageHeading from '@components/common/page-heading';
 import './index.less';
 
 interface IProps {
-  name: string;
-  username: string;
-  email: string;
-  onFinish(): Function;
   user: IUser;
   updating: boolean;
   updateUser: Function;
   updateCurrentUserAvatar: Function;
   updatePassword: Function;
   updateSuccess: boolean;
-  error: any;
   ui: IUIConfig;
   logout: Function;
 }
 interface IState {
-  pwUpdating: boolean;
   emailSending: boolean;
   countTime: number;
 }
 
 class UserAccountSettingPage extends PureComponent<IProps, IState> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
   _intervalCountdown: any;
 
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      pwUpdating: false,
-      emailSending: false,
-      countTime: 60
-    };
-  }
+  state = {
+    emailSending: false,
+    countTime: 60
+  };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.countTime === 0) {
@@ -130,7 +122,7 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
 
   render() {
     const { user, updating, ui } = this.props;
-    const { pwUpdating, countTime, emailSending } = this.state;
+    const { countTime, emailSending } = this.state;
     const uploadHeader = {
       authorization: authService.getToken()
     };
@@ -140,34 +132,24 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Account
-            {' '}
+            | Edit Profile
           </title>
         </Head>
         <div className="main-container user-account">
-          <Tabs defaultActiveKey="user-profile" tabPosition="top" className="nav-tabs custom">
-            <Tabs.TabPane tab={<span>Basic Settings</span>} key="basic">
-              <UserAccountForm
-                onFinish={this.onFinish.bind(this)}
-                updating={updating || emailSending}
-                user={user}
-                options={{
-                  uploadHeader,
-                  avatarUrl: userService.getAvatarUploadUrl(),
-                  uploadAvatar: this.uploadAvatar.bind(this)
-                }}
-                countTime={countTime}
-                onVerifyEmail={this.verifyEmail.bind(this)}
-                onSwitchToPerformer={this.handleSwitchToPerformer.bind(this)}
-              />
-            </Tabs.TabPane>
-            <Tabs.TabPane tab={<span>Change password</span>} key="password">
-              <UpdatePaswordForm
-                onFinish={this.updatePassword.bind(this)}
-                updating={pwUpdating}
-              />
-            </Tabs.TabPane>
-          </Tabs>
+          <PageHeading title="Edit Profile" icon={<EditOutlined />} />
+          <UserAccountForm
+            onFinish={this.onFinish.bind(this)}
+            updating={updating || emailSending}
+            user={user}
+            options={{
+              uploadHeader,
+              avatarUrl: userService.getAvatarUploadUrl(),
+              uploadAvatar: this.uploadAvatar.bind(this)
+            }}
+            countTime={countTime}
+            onVerifyEmail={this.verifyEmail.bind(this)}
+            onSwitchToPerformer={this.handleSwitchToPerformer.bind(this)}
+          />
         </div>
       </Layout>
     );
@@ -179,7 +161,6 @@ UserAccountSettingPage.contextType = SocketContext;
 const mapStates = (state) => ({
   user: state.user.current,
   updating: state.user.updating,
-  error: state.user.error,
   updateSuccess: state.user.updateSuccess,
   ui: { ...state.ui }
 });

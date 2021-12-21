@@ -107,7 +107,7 @@ const PaymentTableList = ({
           case 'processing':
             return <Tag color="orange">Processing</Tag>;
           case 'canceled':
-            return <Tag color="pink">Canceled</Tag>;
+            return <Tag color="pink">Cancelled</Tag>;
           case 'refunded':
             return <Tag color="violet">Refunded</Tag>;
           case 'created':
@@ -120,7 +120,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Update at',
+      title: 'Update on',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {

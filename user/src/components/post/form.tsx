@@ -99,7 +99,7 @@ export default class FeedForm extends PureComponent<IProps> {
 
   async onAddPoll() {
     const { addPoll } = this.state;
-    await this.setState({ addPoll: !addPoll });
+    this.setState({ addPoll: !addPoll });
     if (!addPoll) {
       this.pollIds = [];
       this.setState({ pollList: [] });
@@ -121,7 +121,7 @@ export default class FeedForm extends PureComponent<IProps> {
       await this.setState({ uploading: true });
       !feed ? await feedService.create({ ...values, type }) : await feedService.update(feed._id, { ...values, type: feed.type });
       message.success('Posted successfully!');
-      Router.back();
+      Router.push('/model/my-post');
     } catch {
       message.success('Something went wrong, please try again later');
       this.setState({ uploading: false });
@@ -339,8 +339,13 @@ export default class FeedForm extends PureComponent<IProps> {
             isSale: false,
             status: 'active'
           })}
+          scrollToFirstError
         >
-          <Form.Item rules={[{ required: true, message: 'Please add a description' }]}>
+          <Form.Item
+            name="text"
+            validateTrigger={['onChange', 'onBlur']}
+            rules={[{ required: true, message: 'Please add a description' }]}
+          >
             <div className="input-f-desc">
               <TextArea showCount value={text} onChange={(e) => this.setState({ text: e.target.value })} className="feed-input" minLength={1} maxLength={300} rows={3} placeholder={!fileIds.length ? 'Compose new post...' : 'Add a description'} allowClear />
               <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
@@ -356,7 +361,7 @@ export default class FeedForm extends PureComponent<IProps> {
           </Form.Item>
           )}
           {isSale && (
-            <Form.Item label="Amount of Tokens" name="price" rules={[{ required: isSale, message: 'Please add tokens' }]}>
+            <Form.Item label="Amount of Tokens" name="price" rules={[{ required: true, message: 'Please add amount of tokens' }]}>
               <InputNumber min={1} />
             </Form.Item>
           )}
@@ -372,49 +377,56 @@ export default class FeedForm extends PureComponent<IProps> {
           </Form.Item>
           )}
           <Row>
-
             {addPoll
               && (
               <Col md={8} xs={24}>
-                <Form.Item label="Polls">
-                  <div className="poll-form">
-                    <div className="poll-top">
-                      {!feed ? (
-                        <>
-                          <span aria-hidden="true" onClick={() => this.setState({ openPollDuration: true })}>
-                            Poll duration -
-                            {' '}
-                            {!expirePollTime ? 'No limit' : `${expirePollTime} days`}
-                          </span>
-                          <a aria-hidden="true" onClick={this.onAddPoll.bind(this)}>x</a>
-                        </>
-                      )
-                        : (
-                          <span>
-                            Poll expiration
-                            {' '}
-                            {formatDate(feed?.pollExpiredAt)}
-                          </span>
-                        )}
-                    </div>
-                    {/* eslint-disable-next-line no-nested-ternary */}
-                    <Input disabled={!!feed?._id} className="poll-input" value={pollList && pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
-                    {/* eslint-disable-next-line no-nested-ternary */}
-                    <Input disabled={!!feed?._id || !pollList.length} className="poll-input" value={pollList && pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
-                    {pollList.map((poll, index) => {
-                      if (index === 0 || index === 1) return null;
-                      return <Input disabled={!!feed?._id} key={poll?.description || poll} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
-                    })}
-                    {!feed && pollList.length > 1 && (
+                <div className="poll-form">
+                  <div className="poll-top">
+                    {!feed ? (
+                      <>
+                        <span aria-hidden="true" onClick={() => this.setState({ openPollDuration: true })}>
+                          Poll duration -
+                          {' '}
+                          {!expirePollTime ? 'No limit' : `${expirePollTime} days`}
+                        </span>
+                        <a aria-hidden="true" onClick={this.onAddPoll.bind(this)}>x</a>
+                      </>
+                    )
+                      : (
+                        <span>
+                          Poll expiration
+                          {' '}
+                          {formatDate(feed?.pollExpiredAt)}
+                        </span>
+                      )}
+                  </div>
+                  <Form.Item
+                    name="pollDescription"
+                    className="form-item-no-pad"
+                    validateTrigger={['onChange', 'onBlur']}
+                    rules={[
+                      { required: true, message: 'Please add a question' }
+                    ]}
+                  >
+                    <Input placeholder="Question" />
+                  </Form.Item>
+                  {/* eslint-disable-next-line no-nested-ternary */}
+                  <Input disabled={!!feed?._id} className="poll-input" placeholder="Poll 1" value={pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
+                  {/* eslint-disable-next-line no-nested-ternary */}
+                  <Input disabled={!!feed?._id || !pollList.length} placeholder="Poll 2" className="poll-input" value={pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
+                  {pollList.map((poll, index) => {
+                    if (index === 0 || index === 1) return null;
+                    return <Input autoFocus disabled={!!feed?._id} placeholder={`Poll ${index + 1}`} key={poll?.description || poll} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
+                  })}
+                  {!feed && pollList.length > 1 && (
                     <p style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <a aria-hidden onClick={() => this.setState({ pollList: pollList.concat(['']) })}>Add another option</a>
                       <a aria-hidden onClick={this.onClearPolls.bind(this)}>
                         Clear polls
                       </a>
                     </p>
-                    )}
-                  </div>
-                </Form.Item>
+                  )}
+                </div>
               </Col>
               )}
             {thumbnail && (
@@ -498,7 +510,7 @@ export default class FeedForm extends PureComponent<IProps> {
                 </Button>
               </Upload>
             ]}
-            <Button disabled={addPoll || (!!(feed && feed._id))} type="primary" onClick={this.onAddPoll.bind(this)}>
+            <Button disabled={(!!(feed && feed._id))} type="primary" onClick={this.onAddPoll.bind(this)}>
               <BarChartOutlined style={{ transform: 'rotate(90deg)' }} />
               {' '}
               Add polls

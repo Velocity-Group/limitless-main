@@ -24,7 +24,7 @@ export class PurchaseProductForm extends PureComponent<IProps> {
     const { product } = this.props;
     if (quantity < 1) return;
     if (product.stock < quantity) {
-      this.setState({ quantity: product.stock });
+      message.error('Quantity is over product stock!');
       return;
     }
     this.setState({ quantity });
@@ -61,10 +61,10 @@ export class PurchaseProductForm extends PureComponent<IProps> {
           <div>
             <Form.Item
               name="quantity"
-              rules={[{ required: true, message: 'Please input quantity' }]}
+              rules={[{ required: true, message: 'Please input quantity of product' }]}
               label="Quantity"
             >
-              <InputNumber onChange={this.handleChangeQuantity} min={1} style={{ width: '100%' }} />
+              <InputNumber onChange={this.handleChangeQuantity} min={1} max={product.stock} style={{ width: '100%' }} />
             </Form.Item>
             <Form.Item
               name="deliveryAddress"
@@ -76,12 +76,17 @@ export class PurchaseProductForm extends PureComponent<IProps> {
             <Form.Item
               name="phoneNumber"
               label="Phone number"
+              rules={[
+                {
+                  pattern: new RegExp(/^([+]\d{2,4})?\d{9,12}$/g), message: 'Please provide valid digit numbers'
+                }
+              ]}
             >
-              <Input />
+              <Input placeholder="Enter valid phone number (+910123456789)" />
             </Form.Item>
             <Form.Item
               name="userNote"
-              label="Note something"
+              label="Comment"
             >
               <Input.TextArea rows={2} />
             </Form.Item>
@@ -93,9 +98,14 @@ export class PurchaseProductForm extends PureComponent<IProps> {
               className="primary"
               type="primary"
               loading={submiting}
-              disabled={submiting}
+              disabled={submiting || (product.type === 'physical' && product.stock < quantity)}
             >
-              Confirm to purchase by &nbsp;
+              Confirm Purchase:
+              {' '}
+              {product.name}
+              {' '}
+              for
+              &nbsp;
               <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 3px' }} />
               {(quantity * product.price).toFixed(2)}
             </Button>

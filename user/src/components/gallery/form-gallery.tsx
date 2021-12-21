@@ -46,6 +46,7 @@ const FormGallery = ({
       labelCol={{ span: 24 }}
       wrapperCol={{ span: 24 }}
       className="account-form"
+      scrollToFirstError
     >
       <Form.Item
         name="title"

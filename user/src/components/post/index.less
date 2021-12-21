@@ -138,6 +138,7 @@
           &.ant-btn-link {
             font-size: 12px;
             color: @white;
+
             .anticon {
               font-size: 14px;
             }
@@ -172,6 +173,7 @@
       font-size: 12px;
       color: @dark-grey;
       white-space: pre-line;
+
       &::first-letter {
         text-transform: capitalize;
       }
@@ -198,7 +200,8 @@
           font-size: 20px;
         }
 
-        &:hover, &.active {
+        &:hover,
+        &.active {
           color: @theme-color
         }
       }
@@ -325,7 +328,8 @@
         display: flex;
         align-items: center;
 
-        a, img {
+        a,
+        img {
           height: 100%;
         }
       }
@@ -429,7 +433,6 @@
 
 .poll-form {
   width: 100%;
-  max-width: 320px;
   padding: 5px;
   border-radius: 5px;
   background-color: @light-blue;
@@ -459,29 +462,51 @@
   .poll-input {
     margin-bottom: 10px;
   }
-}
 
-.feed-poll {
-  display: flex;
-  background-color: @aliceblue;
-  padding: 5px;
-  border-radius: 3px;
-  justify-content: space-between;
-  cursor: pointer;
-  margin: 3px 0;
-
-  &:hover {
-    opacity: 0.8;
+  .form-item-no-pad {
+    .ant-col {
+      padding: 5px 0;
+    }
   }
 }
 
-.total-vote {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  font-size: 10px;
-  color: @gray;
+.feed-polls {
+  max-width: 400px;
+  margin: 10px auto;
+  .p-question {
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .p-item {
+    display: flex;
+    background-color: @aliceblue;
+    padding: 5px;
+    border-radius: 3px;
+    justify-content: space-between;
+    cursor: pointer;
+    margin: 3px 0;
+
+    .p-desc {
+      font-size: 11px;
+      &::first-letter {
+        text-transform: capitalize;
+      }
+    }
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  .total-vote {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 10px;
+    color: @gray;
+  }
 }
 
 .story-switch-type {
@@ -545,11 +570,13 @@
   margin: 10px auto;
   width: 450px;
   display: flex;
+
   &.custom {
     width: 200px;
   }
+
   @media screen and (max-width: @mobile-screen) {
-   width: 100%;
+    width: 100%;
   }
 }
 

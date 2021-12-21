@@ -32,4 +32,5 @@ export interface IFeed {
   teaser: any;
   isPinned: boolean;
   pinnedAt: Date;
+  pollDescription: string;
 }

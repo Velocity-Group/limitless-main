@@ -10,7 +10,7 @@ import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
   VideoCameraOutlined, FireOutlined, NotificationOutlined, BookOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
-  LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined
+  LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined
 } from '@ant-design/icons';
 import {
   HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon
@@ -218,7 +218,7 @@ class Header extends PureComponent<IProps> {
                   </li>,
                   <li key="login" className={router.pathname === '/' ? 'active' : ''}>
                     <Link href="/">
-                      <a>Login</a>
+                      <a>Log In</a>
                     </Link>
                   </li>,
                   <li key="signup" className={router.pathname === '/auth/register' ? 'active' : ''}>
@@ -322,6 +322,13 @@ class Header extends PureComponent<IProps> {
                     Black List
                   </div>
                 </Link>
+                <Link href={{ pathname: '/model/block-countries' }} as="/model/block-countries">
+                  <div className={router.pathname === '/model/block-countries' ? 'menu-item active' : 'menu-item'}>
+                    <StopOutlined />
+                    {' '}
+                    Block Countries
+                  </div>
+                </Link>
                 <Link href={{ pathname: '/model/banking' }} as="/model/banking">
                   <div className={router.pathname === '/model/banking' ? 'menu-item active' : 'menu-item'}>
                     <BankOutlined />
@@ -405,18 +412,32 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 <Link href="/user/bookmarks" as="/user/bookmarks">
-                  <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
+                  <div className={router.pathname === '/user/bookmarks' ? 'menu-item active' : 'menu-item'}>
                     <BookOutlined />
                     {' '}
                     Bookmarks
                   </div>
                 </Link>
+                <Link href="/user/my-subscription" as="/user/my-subscription">
+                  <div className={router.pathname === '/user/my-subscriptions' ? 'menu-item active' : 'menu-item'}>
+                    <BookOutlined />
+                    {' '}
+                    Subscriptions
+                  </div>
+                </Link>
                 <Divider />
+                <Link href="/user/token-transaction" as="/user/token-transaction">
+                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
+                    <DollarOutlined />
+                    {' '}
+                    Token Transactions
+                  </div>
+                </Link>
                 <Link href="/user/orders" as="/user/orders">
                   <div className={router.pathname === '/user/orders' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingCartOutlined />
                     {' '}
-                    Orders
+                    Order History
                   </div>
                 </Link>
                 <Link href="/user/payment-history" as="/user/payment-history">
@@ -424,13 +445,6 @@ class Header extends PureComponent<IProps> {
                     <HistoryOutlined />
                     {' '}
                     Payment History
-                  </div>
-                </Link>
-                <Link href="/user/token-transaction" as="/user/token-transaction">
-                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
-                    <DollarOutlined />
-                    {' '}
-                    Token Transactions
                   </div>
                 </Link>
                 <Divider />

@@ -33,7 +33,7 @@ import {
   PURCHASE_ITEM_TARTGET_TYPE,
   PURCHASED_ITEM_SUCCESS_CHANNEL,
   PURCHASE_ITEM_STATUS,
-  ROLE, PURCHASE_ITEM_TARGET_SOURCE
+  PURCHASE_ITEM_TARGET_SOURCE
 } from '../constants';
 import {
   NotEnoughMoneyException,
@@ -344,7 +344,7 @@ export class PurchaseItemService {
     const paymentTransaction = new this.TokenPaymentModel();
     paymentTransaction.originalPrice = price;
     paymentTransaction.totalPrice = price;
-    paymentTransaction.source = ROLE.USER;
+    paymentTransaction.source = 'user';
     paymentTransaction.sourceId = user._id;
     paymentTransaction.target = PURCHASE_ITEM_TARTGET_TYPE.PERFORMER;
     paymentTransaction.performerId = performer._id;

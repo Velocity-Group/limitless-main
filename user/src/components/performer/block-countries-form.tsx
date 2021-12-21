@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import { PureComponent } from 'react';
 import {
-  Form, Button, Row, Col, Select
+  Form, Button, Select
 } from 'antd';
 import { IBlockCountries, ICountry } from 'src/interfaces';
 
@@ -45,15 +45,13 @@ export class PerformerBlockCountriesForm extends PureComponent<IProps> {
         labelAlign="left"
         className="account-form"
       >
-        <Row>
-          <Col span={24}>
-            <Form.Item name="countryCodes" label="Select countries you want to block">
-              <Select
-                showSearch
-                optionFilterProp="label"
-                mode="multiple"
-              >
-                {countries
+        <Form.Item name="countryCodes" label="Select countries you want to block">
+          <Select
+            showSearch
+            optionFilterProp="label"
+            mode="multiple"
+          >
+            {countries
                   && countries.length > 0
                   && countries.map((c) => (
                     <Option value={c.code} label={c.name} key={c.code}>
@@ -62,11 +60,9 @@ export class PerformerBlockCountriesForm extends PureComponent<IProps> {
                       {c.name}
                     </Option>
                   ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol }}>
+          </Select>
+        </Form.Item>
+        <Form.Item className="text-center">
           <Button type="primary" htmlType="submit" className="primary" loading={updating}>
             Save Changes
           </Button>

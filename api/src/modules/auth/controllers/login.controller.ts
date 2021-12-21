@@ -49,7 +49,7 @@ export class LoginController {
       this.performerService.findOne(query)
     ]);
     if (!user && !performer) {
-      throw new HttpException('This account is not found. Please Sign up', 404);
+      throw new HttpException('This account is not found, please sign up', 404);
     }
     if ((user && user.status === STATUS_INACTIVE) || (performer && performer.status === PERFORMER_STATUSES.INACTIVE)) {
       throw new AccountInactiveException();
@@ -65,7 +65,7 @@ export class LoginController {
       })
     ]);
     if (!authUser && !authPerformer) {
-      throw new HttpException('This account is not found. Please Sign up', 404);
+      throw new HttpException('This account is not found, please sign up', 404);
     }
     if (authUser && !this.authService.verifyPassword(req.password, authUser)) {
       throw new PasswordIncorrectException();

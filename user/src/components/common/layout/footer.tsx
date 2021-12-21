@@ -15,7 +15,7 @@ class Footer extends PureComponent<IProps> {
     const linkAuth = [
       <li key="login">
         <Link href="/">
-          <a>Login</a>
+          <a>Log in</a>
         </Link>
       </li>,
       <li key="signup">

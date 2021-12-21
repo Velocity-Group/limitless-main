@@ -25,6 +25,7 @@ export default routes()
   // performer
   .add('models', '/model', '/model')
   .add('banking', '/model/banking', '/model/banking')
+  .add('block-countries', '/model/block-countries', '/model/block-countries')
   .add('block-user', '/model/block-user', '/model/block-user')
   .add('account', '/model/account', '/model/account')
   .add('earning', '/model/earning', '/model/earning')

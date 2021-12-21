@@ -61,7 +61,8 @@ class blockPage extends PureComponent<IProps> {
      const { blockUserId: targetId } = this.state;
      const { reason } = data;
      if (!targetId) {
-       return message.error('Please select a user');
+       message.error('Please select a user');
+       return;
      }
 
      try {
@@ -75,8 +76,6 @@ class blockPage extends PureComponent<IProps> {
      } finally {
        this.setState({ submiting: false, openBlockModal: false });
      }
-
-     return true;
    }
 
    async getBlockList() {

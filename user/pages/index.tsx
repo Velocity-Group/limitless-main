@@ -30,7 +30,7 @@ interface IProps {
 }
 
 class Login extends PureComponent<IProps> {
-  static authenticate: boolean = false;
+  static authenticate = false;
 
   static layout = 'blank';
 
@@ -204,12 +204,12 @@ class Login extends PureComponent<IProps> {
                     <button type="button" disabled={!settings.twitterClientId} onClick={() => this.loginTwitter()} className="twitter-button">
                       <TwitterOutlined />
                       {' '}
-                      SIGN IN/ SIGN UP WITH TWITTER
+                      LOGIN IN / SIGN UP WITH TWITTER
                     </button>
                     <GoogleLogin
                       className="google-button"
                       clientId={settings.googleClientId}
-                      buttonText="SIGN IN/ SIGN UP WITH GOOGLE"
+                      buttonText="LOG IN / SIGN UP WITH GOOGLE"
                       onSuccess={this.onGoogleLogin.bind(this)}
                       onFailure={this.onGoogleLogin.bind(this)}
                       cookiePolicy="single_host_origin"
@@ -224,7 +224,6 @@ class Login extends PureComponent<IProps> {
                       onFinish={this.handleLogin.bind(this)}
                     >
                       <Form.Item
-                        hasFeedback
                         name="username"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
@@ -235,7 +234,6 @@ class Login extends PureComponent<IProps> {
                       </Form.Item>
                       <Form.Item
                         name="password"
-                        hasFeedback
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
                           { required: true, message: 'Please enter your password!' }
@@ -255,7 +253,7 @@ class Login extends PureComponent<IProps> {
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                       <Form.Item style={{ textAlign: 'center' }}>
                         <Button disabled={loginAuth.requesting || isLoading} loading={loginAuth.requesting || isLoading} type="primary" htmlType="submit" className="login-form-button">
-                          LOGIN
+                          LOG IN
                         </Button>
                         <p style={{ fontSize: 11 }}>
                           Visit

@@ -44,9 +44,7 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
             <Form.Item
               name="email"
               label="Paypal business account email"
-              validateTrigger={['onChange', 'onBlur']}
-              rules={[{ required: true }, { type: 'email' }]}
-              help="You must upgrade to Business account to earn money"
+              help="You must upgrade to Business account to receive the payout from Admin"
             >
               <Input />
             </Form.Item>
@@ -66,9 +64,9 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
             </Form.Item>
           </Col> */}
         </Row>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 2 }}>
           <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>
-            Save Changes
+            Submit
           </Button>
         </Form.Item>
       </Form>

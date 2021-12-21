@@ -1,8 +1,7 @@
 import { PureComponent } from 'react';
-import { Select, message } from 'antd';
+import { Select, message, Avatar } from 'antd';
 import { debounce } from 'lodash';
 import { userService } from '@services/user.service';
-// import '../../../pages/model/block-user/index.less';
 
 interface IProps {
   placeholder?: string;
@@ -56,6 +55,8 @@ export class SelectUserDropdown extends PureComponent<IProps> {
       >
         {data && data.length > 0 && data.map((u) => (
           <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>
+            <Avatar src={u?.avatar || '/static/no-avatar.png'} size={28} />
+            {' '}
             {`${u?.name || u?.username || 'N/A'}`}
           </Select.Option>
         ))}

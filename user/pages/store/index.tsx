@@ -210,12 +210,12 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 {!product.stock && product.type === 'physical' && (
                   <span className="prod-stock">Out of stock!</span>
                 )}
-                <span className="prod-digital">{product.type}</span>
+                {product.type === 'digital' && <span className="prod-digital">Digital</span>}
               </div>
-            ) : <div><Spin /></div>}
+            ) : <div className="text-center"><Spin /></div>}
             {product && (
               <div className="prod-info">
-                <p className="prod-desc">{product?.description}</p>
+                <p className="prod-desc">{product?.description || 'No description yet'}</p>
                 <div className="add-cart">
                   <p className="prod-price">
                     <img alt="coin" src="/static/coin-ico.png" width="25px" />

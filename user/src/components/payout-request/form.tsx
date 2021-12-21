@@ -47,6 +47,7 @@ const PayoutRequestForm = ({
         requestTokens: requestTokens || statsPayout?.remainingUnpaidTokens || 0,
         paymentAccountType: paymentAccountType || 'stripe'
       }}
+      scrollToFirstError
     >
       <div>
         <Space size="large">

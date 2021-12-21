@@ -1,8 +1,8 @@
-/* eslint-disable react/destructuring-assignment */
-import * as React from 'react';
-import { Table, Button, Tooltip } from 'antd';
-import '../../../pages/model/block-user/index.less';
+import {
+  Table, Button, Tooltip, Avatar
+} from 'antd';
 import { formatDate } from '@lib/date';
+import '../../../pages/model/block-user/index.less';
 
 interface IProps {
   items: any[];
@@ -29,7 +29,13 @@ const UsersBlockList = ({
       dataIndex: 'targetInfo',
       key: 'targetInfo',
       render: (targetInfo: any) => (
-        <span>{targetInfo?.name || targetInfo?.username || 'N/A'}</span>
+        <span>
+          {/* eslint-disable-next-line react/destructuring-assignment */}
+          <Avatar src={targetInfo?.avatar || '/static/no-avatar.png'} size={28} />
+          {' '}
+          {/* eslint-disable-next-line react/destructuring-assignment */}
+          {targetInfo?.name || targetInfo?.username || 'N/A'}
+        </span>
       )
     },
     {

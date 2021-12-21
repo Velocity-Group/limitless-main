@@ -25,7 +25,7 @@ export const TableListSubscription = ({
   const onCancel = (value) => {
     if (
       !window.confirm(
-        'Confirm to cancel this model subscription?'
+        'Confirm to cancel this subscription!'
       )
     ) {
       return;
@@ -135,7 +135,6 @@ export const TableListSubscription = ({
     {
       title: 'Actions',
       dataIndex: '_id',
-      sorter: false,
       render(_id, record) {
         return (
           <>

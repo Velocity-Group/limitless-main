@@ -38,9 +38,9 @@ function getBase64(img, callback) {
 }
 
 class GalleryUpdatePage extends PureComponent<IProps, IStates> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
-  static onlyPerformer: boolean = true;
+  static onlyPerformer = true;
 
   static async getInitialProps({ ctx }) {
     return ctx.query;
