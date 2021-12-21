@@ -8,8 +8,9 @@ import { TableListSubscription } from '@components/subscription/table-list-subsc
 import { ISubscription } from 'src/interfaces';
 import { subscriptionService } from '@services/subscription.service';
 import { getResponseError } from '@lib/utils';
+import moment from 'moment';
 
-interface IProps {}
+interface IProps { }
 interface IStates {
   subscriptionList: ISubscription[];
   loading: boolean;
@@ -70,6 +71,36 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     }
   }
 
+  async onRenewSubscription(subscription: ISubscription) {
+    if (!window.confirm('Are you sure you want to re-activate this subscription?')) {
+      return;
+    }
+    try {
+      const {
+        subscriptionType
+      } = subscription;
+      if (subscriptionType === 'yearly') {
+        await subscriptionService.update(subscription._id, {
+          expiredAt: moment().add(1, 'y'), subscriptionType, status: 'active'
+        });
+      } else if (subscriptionType === 'monthly') {
+        await subscriptionService.update(subscription._id, {
+          expiredAt: moment().add(1, 'M'), subscriptionType, status: 'active'
+        });
+      } else {
+        await subscriptionService.update(subscription._id, {
+          expiredAt: moment().add(1, 'd'), subscriptionType, status: 'active'
+        });
+      }
+
+      this.getData();
+      message.success('This subscription have been reactivate');
+    } catch (error) {
+      const err = await Promise.resolve(error);
+      message.error(getResponseError(err));
+    }
+  }
+
   async getData() {
     const {
       filter, sort, sortBy, pagination
@@ -114,6 +145,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
               onChange={this.handleTabChange.bind(this)}
               rowKey="_id"
               onCancelSubscription={this.onCancelSubscription.bind(this)}
+              onRenewSubscription={this.onRenewSubscription.bind(this)}
             />
           </div>
         </Page>
