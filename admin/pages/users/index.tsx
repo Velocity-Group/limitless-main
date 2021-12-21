@@ -243,7 +243,7 @@ export default class Performers extends PureComponent<IProps> {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Users' }]} />
         <Page>
-          <SearchFilter keyword onSubmit={this.handleFilter.bind(this)} statuses={statuses} defaultStatus={defaultStatus} />
+          <SearchFilter keyword onSubmit={this.handleFilter.bind(this)} statuses={statuses} defaultStatus={defaultStatus || ''} />
           <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
             <Table

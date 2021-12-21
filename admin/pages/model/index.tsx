@@ -357,7 +357,7 @@ export default class Performers extends PureComponent<IProps> {
             onSubmit={this.handleFilter.bind(this)}
             defaultValue={{
               status: defaultStatus || '',
-              verifiedDocument
+              verifiedDocument: verifiedDocument || ''
             }}
           />
           <div className="table-responsive custom">
