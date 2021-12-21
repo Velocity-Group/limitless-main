@@ -73,7 +73,7 @@ class EmailTemplates extends PureComponent<IProps> {
         dataIndex: 'subject'
       },
       {
-        title: 'Last update',
+        title: 'Last Update',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -81,7 +81,7 @@ class EmailTemplates extends PureComponent<IProps> {
         }
       },
       {
-        title: '#',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <Dropdown

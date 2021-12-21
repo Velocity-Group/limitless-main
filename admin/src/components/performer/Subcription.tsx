@@ -54,13 +54,13 @@ export class SubscriptionForm extends PureComponent<IProps> {
         <Row>
           <Col xs={24} md={12}>
             <Form.Item>
-              <Switch unCheckedChildren="Non-free Subscription" checkedChildren="Free Subcription" checked={isFreeSubscription} onChange={() => this.setState({ isFreeSubscription: !isFreeSubscription })} />
+              <Switch unCheckedChildren="Non-free Subscription" checkedChildren="Free Subscription" checked={isFreeSubscription} onChange={() => this.setState({ isFreeSubscription: !isFreeSubscription })} />
             </Form.Item>
             {isFreeSubscription && (
             <Form.Item
               name="durationFreeSubscriptionDays"
               label="Duration (days)"
-              help="Free subscription in xx days then $xx monthly later"
+              help="Free subscription for xx days, then $xx per month"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />

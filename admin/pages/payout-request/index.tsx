@@ -73,7 +73,7 @@ class PayoutRequestPage extends PureComponent<IProps, IStates> {
 
   async onDelete(request: IPayoutRequest) {
     try {
-      if (!window.confirm('Are you sure to delete?')) return;
+      if (!window.confirm('Are you sure to delete this payout request?')) return;
       if (request.status !== 'pending') {
         message.error('Could not delete if status is not PENDING');
         return;

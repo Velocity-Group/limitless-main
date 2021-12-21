@@ -1,39 +1,25 @@
-import { PureComponent, createRef } from 'react';
+import { PureComponent } from 'react';
 import {
   Form, Input, Button, InputNumber, Select, DatePicker
 } from 'antd';
-import { ICouponCreate, ICouponUpdate } from 'src/interfaces';
-import { FormInstance } from 'antd/lib/form';
+import { ICouponUpdate } from 'src/interfaces';
 import moment from 'moment';
 
 interface IProps {
   coupon?: ICouponUpdate;
   onFinish: Function;
-  submiting?: boolean;
+  submiting: boolean;
 }
+
 function disabledDate(current) {
   return current && current < moment().endOf('day');
 }
+
 export class FormCoupon extends PureComponent<IProps> {
-  formRef: any;
-
-  componentDidMount() {
-    if (!this.formRef) this.formRef = createRef();
-  }
-
-  setFormVal(field: string, val: any) {
-    const instance = this.formRef.current as FormInstance;
-    instance.setFieldsValue({
-      [field]: val
-    });
-  }
-
   render() {
-    if (!this.formRef) this.formRef = createRef();
     const { coupon, onFinish, submiting } = this.props;
     return (
       <Form
-        ref={this.formRef}
         onFinish={onFinish.bind(this)}
         initialValues={
           coupon
@@ -46,12 +32,12 @@ export class FormCoupon extends PureComponent<IProps> {
               status: 'active',
               expiredDate: '',
               numberOfUses: 1
-            } as ICouponCreate)
+            })
         }
         layout="vertical"
       >
-        <Form.Item name="name" rules={[{ required: true, message: 'Please input name of coupon!' }]} label="Name">
-          <Input placeholder="Enter coupon name" />
+        <Form.Item name="name" rules={[{ required: true, message: 'Please input name of the coupon' }]} label="Name">
+          <Input placeholder="Coupon name" />
         </Form.Item>
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
@@ -62,9 +48,9 @@ export class FormCoupon extends PureComponent<IProps> {
           rules={[
             {
               pattern: new RegExp(/^[a-zA-Z0-9]*$/g),
-              message: 'Coupon only have alphanumeric and no spaces'
+              message: 'Please input alphanumerics only'
             },
-            { required: true, message: 'Please input code of coupon!' }
+            { required: true, message: 'Please input the coupon code' }
           ]}
         >
           <Input />
@@ -73,15 +59,15 @@ export class FormCoupon extends PureComponent<IProps> {
           name="value"
           label="Discount percentage 0.01-0.99 (1% to 99%)"
           rules={[
-            { required: true, message: 'Please input percentage value of coupon!' }
+            { required: true, message: 'Please input percentage value of coupon' }
           ]}
         >
           <InputNumber min={0.01} max={0.99} />
         </Form.Item>
         <Form.Item
           name="numberOfUses"
-          label="Maximum number of people who can use coupon"
-          rules={[{ required: true, message: 'Please input number of uses of coupon!' }]}
+          label="Maximum number of people who can use this coupon"
+          rules={[{ required: true, message: 'Please input number of uses' }]}
         >
           <InputNumber min={1} />
         </Form.Item>
@@ -97,12 +83,12 @@ export class FormCoupon extends PureComponent<IProps> {
         </Form.Item>
         <Form.Item
           name="expiredDate"
-          label="Expried Date"
-          rules={[{ required: true, message: 'Please input select expried date of coupon!' }]}
+          label="Expiry Date"
+          rules={[{ required: true, message: 'Please input the expiry date of coupon' }]}
         >
           <DatePicker format="YYYY-MM-DD" disabledDate={disabledDate} />
         </Form.Item>
-        <Form.Item wrapperCol={{ span: 20, offset: 4 }}>
+        <Form.Item className="text-center">
           <Button type="primary" htmlType="submit" loading={submiting}>
             Submit
           </Button>

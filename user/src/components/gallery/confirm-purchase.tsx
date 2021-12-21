@@ -1,6 +1,6 @@
-import { PureComponent } from "react";
-import { Button } from "antd";
-import { IGallery } from "@interfaces/index";
+import { PureComponent } from 'react';
+import { Button } from 'antd';
+import { IGallery } from '@interfaces/index';
 
 interface IProps {
   submiting: boolean;
@@ -11,7 +11,7 @@ interface IProps {
 export class PurchaseGalleryForm extends PureComponent<IProps> {
   render() {
     const { gallery, onFinish, submiting } = this.props;
-    const image = gallery?.coverPhoto?.thumbnails[0] || "/static/no-image.jpg";
+    const image = gallery?.coverPhoto?.thumbnails[0] || '/static/no-image.jpg';
 
     return (
       <div className="text-center">
@@ -20,9 +20,9 @@ export class PurchaseGalleryForm extends PureComponent<IProps> {
             alt="p-avt"
             src={image}
             style={{
-              width: "220px",
-              borderRadius: "5px",
-              filter: "blur(20px)",
+              width: '220px',
+              borderRadius: '5px',
+              filter: 'blur(20px)',
               marginBottom: 10
             }}
           />
@@ -37,12 +37,12 @@ export class PurchaseGalleryForm extends PureComponent<IProps> {
             loading={submiting}
             disabled={submiting}
           >
-            Confirm to unlock by &nbsp;
+            Unlock for &nbsp;
             <img
               alt="token"
               src="/static/coin-ico.png"
               height="15px"
-              style={{ margin: "0 3px" }}
+              style={{ margin: '0 3px' }}
             />
             {(gallery?.price).toFixed(2)}
           </Button>

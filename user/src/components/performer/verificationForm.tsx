@@ -85,7 +85,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               label="Your government issued ID"
               valuePropName="fileList"
               className="model-photo-verification"
-              help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
+              help="Please upload proof of one of either of the following: Government-issued ID card, National Id card, Passport or Driving license."
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'idFile')} />

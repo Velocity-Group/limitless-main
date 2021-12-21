@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import {
   Layout, message, Select, Button, PageHeader,
-  Input, Space, Statistic, Divider
+  Input, Space, Statistic, Divider, Avatar
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
@@ -137,7 +137,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
     return (
       <Layout>
         <Head>
-          <title>Request Details</title>
+          <title>Payout Request Details</title>
         </Head>
         <Content>
           <div className="main-container">
@@ -145,30 +145,30 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
               breadcrumbs={[
                 { title: 'Payout Requests', href: '/payout-request' },
                 {
-                  title: 'Request Details'
+                  title: 'Payout Request Details'
                 }
               ]}
             />
             {request ? (
               <Page>
-                <PageHeader title="Payout Request Informations" />
+                <PageHeader title="Payout Request Details" />
                 <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
                   <Space size="large">
                     <Statistic
                       prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Total Earned Tokens"
+                      title="Total Tokens"
                       value={statsPayout?.totalEarnedTokens || 0}
                       precision={2}
                     />
                     <Statistic
                       prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Previous paid out tokens"
+                      title="Paid Out Tokens"
                       value={statsPayout?.previousPaidOutTokens || 0}
                       precision={2}
                     />
                     <Statistic
                       prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Remaining unpaid tokens"
+                      title="Remaining Tokens"
                       value={statsPayout?.remainingUnpaidTokens || 0}
                       precision={2}
                     />
@@ -177,10 +177,14 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 <p>
                   Model:
                   {' '}
-                  <strong>{request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}</strong>
+                  <strong>
+                    <Avatar src={request?.sourceInfo?.avatar || '/no-avatar.png'} />
+                    {' '}
+                    {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
+                  </strong>
                 </p>
                 <p>
-                  Requested tokens:
+                  Requested amount tokens:
                   {' '}
                   {request.requestTokens || 0}
                 </p>
@@ -191,12 +195,12 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
                 </p>
                 <p>
-                  Requested at:
+                  Requested on:
                   {' '}
                   {formatDate(request.createdAt)}
                 </p>
                 <p>
-                  Model Note:
+                  Note from the model
                   {' '}
                   {request.requestNote}
                 </p>
@@ -249,7 +253,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 <Divider />
                 <div style={{ marginBottom: '10px' }}>
                   <p>
-                    Update status here
+                    Please update the below status manually after the transaction is processed
                   </p>
                   <Select
                     disabled={loading || ['done', 'rejected'].includes(request?.status)}
@@ -272,14 +276,14 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   </Select>
                 </div>
                 <div style={{ marginBottom: '10px' }}>
-                  <p>Note to model: </p>
+                  <p>Note to the model: </p>
                   <Input.TextArea
                     defaultValue={adminNote}
                     style={{ width: '100%' }}
                     onChange={(v) => {
                       this.setState({ adminNote: v.target.value });
                     }}
-                    placeholder="Note something to model"
+                    placeholder="Write your message here"
                     autoSize={{ minRows: 3 }}
                   />
                 </div>

@@ -422,7 +422,7 @@ class GalleryViewPage extends PureComponent<IProps> {
         </Modal>
         <Modal
           key="purchase_post"
-          title={`Unlock gallery ${gallery?.title}`}
+          title={null}
           visible={openPurchaseModal}
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}

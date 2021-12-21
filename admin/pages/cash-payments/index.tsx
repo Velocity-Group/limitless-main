@@ -23,7 +23,7 @@ class PaymentTransaction extends PureComponent<IProps> {
     list: [] as any,
     limit: 10,
     filter: {} as any,
-    sortBy: 'createdAt',
+    sortBy: 'updatedAt',
     sort: 'desc'
   };
 
@@ -36,7 +36,7 @@ class PaymentTransaction extends PureComponent<IProps> {
     pager.current = pagination.current;
     this.setState({
       pagination: pager,
-      sortBy: sorter.field || 'createdAt',
+      sortBy: sorter.field || 'updatedAt',
       sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : 'desc'
     });
     this.search(pager.current);
@@ -101,7 +101,7 @@ class PaymentTransaction extends PureComponent<IProps> {
       },
       {
         key: 'canceled',
-        text: 'Canceled'
+        text: 'Cancelled'
       },
       {
         key: 'refunded',
@@ -112,9 +112,9 @@ class PaymentTransaction extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Payment History</title>
+          <title>Cash Payments</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Payment history' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Cash Payments' }]} />
         <Page>
           <SearchFilter dateRange statuses={statuses} onSubmit={this.handleFilter.bind(this)} />
           <div style={{ marginBottom: '20px' }} />

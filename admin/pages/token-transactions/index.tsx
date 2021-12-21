@@ -1,20 +1,17 @@
 import { PureComponent } from 'react';
 import { Layout, message } from 'antd';
 import Head from 'next/head';
-import Loader from '@components/common/base/loader';
 import Page from '@components/common/layout/page';
 import { purchaseItemService } from 'src/services';
-import { IPaymentTokenHistory, IUIConfig } from 'src/interfaces';
+import { IPaymentTokenHistory } from 'src/interfaces';
 import { SearchFilter } from '@components/common/search-filter';
 import PaymentTableList from '@components/purchase-item/payment-token-history-table';
 import { getResponseError } from '@lib/utils';
 import { BreadcrumbComponent } from '@components/common';
 
-interface IProps {
-  ui: IUIConfig;
-}
+interface IProps { }
+
 interface IStates {
-  loading: boolean;
   paymentList: IPaymentTokenHistory[];
   searching: boolean;
   pagination: {
@@ -29,7 +26,6 @@ interface IStates {
 
 class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
   state = {
-    loading: true,
     searching: false,
     paymentList: [],
     pagination: {
@@ -37,7 +33,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       pageSize: 10,
       current: 1
     },
-    sortBy: 'createdAt',
+    sortBy: 'updatedAt',
     sort: 'desc',
     filter: {}
   };
@@ -50,7 +46,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     const { pagination: paginationVal } = this.state;
     await this.setState({
       pagination: { ...paginationVal, current: pagination.current },
-      sortBy: sorter.field || 'createdAt',
+      sortBy: sorter.field || 'updatedAt',
       // eslint-disable-next-line no-nested-ternary
       sort: sorter.order
         ? sorter.order === 'descend'
@@ -72,6 +68,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       const {
         filter, sort, sortBy, pagination
       } = this.state;
+      await this.setState({ searching: true });
       const resp = await purchaseItemService.search({
         ...filter,
         sort,
@@ -80,7 +77,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         offset: (pagination.current - 1) * pagination.pageSize
       });
       this.setState({
-        loading: false,
+        searching: false,
         paymentList: resp.data.data,
         pagination: {
           ...pagination,
@@ -88,14 +85,14 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         }
       });
     } catch (error) {
-      message.error(getResponseError(error));
-      this.setState({ loading: false });
+      message.error(getResponseError(await error));
+      this.setState({ searching: false });
     }
   }
 
   render() {
     const {
-      loading, paymentList, searching, pagination
+      paymentList, searching, pagination
     } = this.state;
     const type = [
       {
@@ -148,29 +145,23 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         <Head>
           <title>Token Transactions</title>
         </Head>
-        <div className="main-container">
-          {loading ? (
-            <Loader />
-          ) : (
-            <Page>
-              <BreadcrumbComponent breadcrumbs={[{ title: 'Token Transactions' }]} />
-              <SearchFilter
-                type={type}
-                onSubmit={this.handleFilter.bind(this)}
-                dateRange
-              />
-              <div className="table-responsive">
-                <PaymentTableList
-                  dataSource={paymentList}
-                  pagination={pagination}
-                  onChange={this.handleTableChange.bind(this)}
-                  rowKey="_id"
-                  loading={searching}
-                />
-              </div>
-            </Page>
-          )}
-        </div>
+        <Page>
+          <BreadcrumbComponent breadcrumbs={[{ title: 'Token Transactions' }]} />
+          <SearchFilter
+            type={type}
+            onSubmit={this.handleFilter.bind(this)}
+            dateRange
+          />
+          <div className="table-responsive">
+            <PaymentTableList
+              dataSource={paymentList}
+              pagination={pagination}
+              onChange={this.handleTableChange.bind(this)}
+              rowKey="_id"
+              loading={searching}
+            />
+          </div>
+        </Page>
       </Layout>
     );
   }

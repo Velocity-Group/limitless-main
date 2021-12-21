@@ -138,14 +138,10 @@ export class FormUploadBanner extends PureComponent<IProps> {
             </ImgCrop>
           )}
         </Form.Item>
-        {uploadPercentage ? <div><Progress percent={Math.round(uploadPercentage)} /></div> : null}
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+        {uploadPercentage ? <Progress percent={Math.round(uploadPercentage)} /> : null}
+        <Form.Item className="text-center">
           <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading}>
             {haveBanner ? 'Update' : 'Upload'}
-          </Button>
-          &nbsp;
-          <Button disabled={uploading} href="/banner">
-            Cancel
           </Button>
         </Form.Item>
       </Form>

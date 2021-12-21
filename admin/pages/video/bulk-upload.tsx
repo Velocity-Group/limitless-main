@@ -151,11 +151,11 @@ class BulkUploadVideo extends PureComponent<IProps> {
                 <p className="ant-upload-drag-icon">
                   <UploadOutlined />
                 </p>
-                <p className="ant-upload-text">Click or drag-drop files to this area to upload</p>
+                <p className="ant-upload-text">Click or drag & drop files to this area to upload video file only</p>
               </Dragger>
               <VideoUploadList files={fileList} remove={this.remove.bind(this)} />
             </Form.Item>
-            <Form.Item style={{ textAlign: 'center' }}>
+            <Form.Item className="text-center">
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading || !fileList.length}>
                 UPLOAD ALL
               </Button>

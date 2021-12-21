@@ -1,4 +1,6 @@
-import { Table, Tag, Button } from 'antd';
+import {
+  Table, Tag, Button, Avatar
+} from 'antd';
 import { StopOutlined } from '@ant-design/icons';
 import { ISubscription } from 'src/interfaces';
 import { formatDate } from '@lib/date';
@@ -27,6 +29,8 @@ export const TableListSubscription = ({
       render(data, records) {
         return (
           <span>
+            <Avatar src={records?.userInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {`${records?.userInfo?.name || records?.userInfo?.username || 'N/A'}`}
           </span>
         );
@@ -38,6 +42,8 @@ export const TableListSubscription = ({
       render(data, records) {
         return (
           <span>
+            <Avatar src={records?.performerInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {`${records?.performerInfo?.name || records?.performerInfo?.username || 'N/A'}`}
           </span>
         );
@@ -67,7 +73,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Start Recurring Date',
+      title: 'Subscription start Date”',
       dataIndex: 'startRecurringDate',
       sorter: true,
       render(date: Date, record) {
@@ -75,7 +81,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Next Recurring Date',
+      title: 'Renews On',
       dataIndex: 'nextRecurringDate',
       sorter: true,
       render(date: Date, record) {
@@ -122,7 +128,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Actions',
+      title: 'Action',
       dataIndex: 'status',
       render(data, records) {
         return (

@@ -1,7 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 import { Table, Tag } from 'antd';
 import { ITokenPackage } from 'src/interfaces/index';
-// import { formatDate, formatDateNoTime } from '@lib/date';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { DropdownAction } from '@components/common/dropdown-action';
@@ -11,7 +10,7 @@ interface IProps {
     dataSource: ITokenPackage[];
     pagination: {};
     rowKey: string;
-    onChange(): Function;
+    onChange: Function;
     loading: boolean;
     deleteToken : Function;
 }
@@ -65,15 +64,15 @@ export const TableListToken = ({
       }
     },
     {
-      title: 'Created At',
-      dataIndex: 'createdAt',
+      title: 'Last Update',
+      dataIndex: 'updatedAt',
       sorter: true,
       render(date) {
         return <span>{formatDate(date)}</span>;
       }
     },
     {
-      title: 'Actions',
+      title: 'Action',
       dataIndex: '_id',
       render: (id: string) => (
         <DropdownAction
@@ -118,7 +117,7 @@ export const TableListToken = ({
       dataSource={dataSource}
       rowKey={rowKey}
       pagination={pagination}
-      onChange={onChange}
+      onChange={onChange.bind(this)}
       loading={loading}
     />
   );

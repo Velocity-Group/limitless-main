@@ -61,7 +61,7 @@ class BannerUpdate extends PureComponent<IProps> {
         </Head>
         <BreadcrumbComponent
           breadcrumbs={[
-            { title: 'Banners', href: '/banner' },
+            { title: 'Banners', href: '/banners' },
             { title: banner.title ? banner.title : 'Detail banner' },
             { title: 'Update' }
           ]}

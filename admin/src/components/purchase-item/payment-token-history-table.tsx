@@ -153,8 +153,8 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Date',
-      dataIndex: 'createdAt',
+      title: 'Last Update',
+      dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
         return <span>{formatDate(date)}</span>;

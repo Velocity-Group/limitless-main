@@ -196,11 +196,10 @@ class BulkUploadPhoto extends PureComponent<IProps> {
                 <p className="ant-upload-drag-icon">
                   <UploadOutlined />
                 </p>
-                <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                <p className="ant-upload-hint">Support image file only</p>
+                <p className="ant-upload-text">Click or drag & drop files to this area to upload image file only</p>
               </Dragger>
             </Form.Item>
-            <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+            <Form.Item className="text-center">
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading}>
                 UPLOAD ALL
               </Button>

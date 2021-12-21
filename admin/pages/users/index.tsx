@@ -104,7 +104,7 @@ export default class Performers extends PureComponent<any> {
     // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = [
       {
-        title: '#',
+        title: 'Avatar',
         dataIndex: 'avatar',
         render: (avatar) => <Avatar src={avatar || '/no-avatar.png'} />
       },
@@ -128,15 +128,15 @@ export default class Performers extends PureComponent<any> {
             case 'active':
               return <Tag color="green">Active</Tag>;
             case 'inactive':
-              return <Tag color="red">Inactive</Tag>;
+              return <Tag color="red">Suspend</Tag>;
             case 'pending-email-confirmation':
-              return <Tag color="default">Pending verify email</Tag>;
+              return <Tag color="default">Not verified email</Tag>;
             default: return <Tag color="default">{status}</Tag>;
           }
         }
       },
       {
-        title: 'Email verification',
+        title: 'Verified Email?',
         dataIndex: 'verifiedEmail',
         render(verifiedEmail) {
           switch (verifiedEmail) {
@@ -149,7 +149,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Update at',
+        title: 'Last Update',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -157,7 +157,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render(id: string, record) {
           return (

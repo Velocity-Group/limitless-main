@@ -148,7 +148,7 @@ class Posts extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Last Update',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -156,7 +156,7 @@ class Posts extends PureComponent<IProps> {
         }
       },
       {
-        title: '#',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <Dropdown

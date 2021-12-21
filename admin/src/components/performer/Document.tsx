@@ -46,7 +46,7 @@ export class PerformerDocument extends PureComponent<IProps> {
           <Col md={12} xs={24}>
             <Form.Item
               style={{ textAlign: 'center' }}
-              label="ID photo"
+              label="Govt issued ID photo"
               help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
             >
               <ImageUpload
@@ -65,7 +65,7 @@ export class PerformerDocument extends PureComponent<IProps> {
           <Col md={12} xs={24}>
             <Form.Item
               style={{ textAlign: 'center' }}
-              label="Holding ID photo"
+              label="Govt issued"
               help="Upload a photo of yourself holding your indentity document next to your face"
             >
               <ImageUpload

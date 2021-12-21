@@ -81,7 +81,7 @@ export class TableListCoupon extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Last Update',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -89,7 +89,7 @@ export class TableListCoupon extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (data, record) => (
           <DropdownAction

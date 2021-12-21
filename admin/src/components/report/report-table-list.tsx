@@ -73,7 +73,7 @@ const reportTableList = ({
       sorter: true
     },
     {
-      title: 'Actions',
+      title: 'Action',
       key: '_id',
       render: (report) => (
         <Button type="link">

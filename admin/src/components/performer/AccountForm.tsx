@@ -590,17 +590,17 @@ export class AccountForm extends PureComponent<IProps> {
           </Select>
         </Form.Item> */}
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Tracking reall email adress">
+            <Form.Item name="verifiedEmail" label="Verified Email?" valuePropName="checked" help="Turn on if email account verified">
               <Switch />
             </Form.Item>
           </Col>
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedDocument" label="Verified ID Documents" valuePropName="checked" help="Accept model to start posting contents">
+            <Form.Item name="verifiedDocument" label="Verified ID Documents?" valuePropName="checked" help="Allow model to start posting contents">
               <Switch />
             </Form.Item>
           </Col>
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedAccount" label="Verified Account" valuePropName="checked" help="Display verification tick beside model name">
+            <Form.Item name="verifiedAccount" label="Verified Account?" valuePropName="checked" help="Display verification tick beside model name">
               <Switch />
             </Form.Item>
           </Col>

@@ -222,19 +222,19 @@ export class FormUploadVideo extends PureComponent<IProps> {
         <Form.Item name="description" label="Description">
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item name="isSaleVideo" label="PPV?" valuePropName="checked">
+        <Form.Item name="isSaleVideo" label="For sale?" valuePropName="checked">
           <Switch unCheckedChildren="Subscribe to view" checkedChildren="Pay per view" onChange={(val) => this.setState({ isSaleVideo: val })} />
         </Form.Item>
         {isSaleVideo && (
-          <Form.Item name="price" label="Price">
+          <Form.Item name="price" label="Amount of tokens">
             <InputNumber min={1} />
           </Form.Item>
         )}
-        <Form.Item name="isSchedule" label="Scheduling?" valuePropName="checked">
-          <Switch unCheckedChildren="Recent" checkedChildren="Upcoming" onChange={(checked) => this.setState({ isSchedule: checked })} />
+        <Form.Item name="isSchedule" label="Scheduled?" valuePropName="checked">
+          <Switch unCheckedChildren="Not scheduled" checkedChildren="Upcoming" onChange={(checked) => this.setState({ isSchedule: checked })} />
         </Form.Item>
         {isSchedule && (
-          <Form.Item label="Upcoming at">
+          <Form.Item label="Upcoming for">
             <DatePicker
               style={{ width: '100%' }}
               disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}

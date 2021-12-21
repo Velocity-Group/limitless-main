@@ -10,7 +10,7 @@ interface IProps {
   onChange: Function;
 }
 
-export class TableListEarning extends PureComponent<IProps> {
+export class TableListTokenEarning extends PureComponent<IProps> {
   render() {
     const columns = [
       {
@@ -42,7 +42,7 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'GROSS',
+        title: 'Total Earnings',
         dataIndex: 'grossPrice',
         render(grossPrice, record) {
           return (
@@ -82,11 +82,30 @@ export class TableListEarning extends PureComponent<IProps> {
         dataIndex: 'type',
         render(type: string) {
           switch (type) {
-            case 'monthly_subscription':
-              return <Tag color="blue">Monthly Sub</Tag>;
-            case 'yearly_subscription':
-              return <Tag color="red">Yearly Sub</Tag>;
+            case 'product':
+              return <Tag color="#FFCF00">Product</Tag>;
+            case 'gallery':
+              return <Tag color="#FFCF00">Gallery</Tag>;
+            case 'feed':
+              return <Tag color="green">Post</Tag>;
+            case 'tip':
+              return <Tag color="#00dcff">Tip</Tag>;
+            case 'video':
+              return <Tag color="blue">Video</Tag>;
             default: return <Tag color="#00dcff">{type}</Tag>;
+          }
+        }
+      },
+      {
+        title: 'Paid Status',
+        dataIndex: 'isPaid',
+        render(isPaid: boolean) {
+          switch (isPaid) {
+            case true:
+              return <Tag color="green">Paid</Tag>;
+            case false:
+              return <Tag color="red">Unpaid</Tag>;
+            default: return null;
           }
         }
       },

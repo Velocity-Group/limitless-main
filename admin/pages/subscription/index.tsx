@@ -57,13 +57,13 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
   }
 
   async onCancelSubscription(subscription: ISubscription) {
-    if (!window.confirm('Are you sure you want to de-activate this subscription?')) {
+    if (!window.confirm('Are you sure to cancel the subscription?')) {
       return;
     }
     try {
       await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
       this.getData();
-      message.success('This subscription have been deactived');
+      message.success('The subscription has been cancelled');
     } catch (error) {
       const err = await Promise.resolve(error);
       message.error(getResponseError(err));
@@ -100,7 +100,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     return (
       <>
         <Head>
-          <title>Subscriptions </title>
+          <title>Subscriptions</title>
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Subscriptions' }]} />
         <Page>

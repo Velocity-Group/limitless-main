@@ -60,4 +60,4 @@ export enum PURCHASE_ITEM_TARGET_SOURCE {
 
 export const PURCHASED_ITEM_SUCCESS_CHANNEL = 'PURCHASED_ITEM_SUCCESS_CHANNEL';
 
-export const OVER_PRODUCT_STOCK = 'Over product stock';
+export const OVER_PRODUCT_STOCK = 'Not Enough Stock!';

@@ -23,7 +23,7 @@ export class TableListVideo extends PureComponent<IProps> {
 
     const columns = [
       {
-        title: '',
+        title: 'Thumbnail',
         dataIndex: 'thumbnail',
         render(data, record) {
           return <ThumbnailVideo video={record} />;
@@ -53,7 +53,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'PPV?',
+        title: 'For sale?',
         dataIndex: 'isSale',
         render(isSale: boolean) {
           switch (isSale) {
@@ -66,7 +66,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Scheduling?',
+        title: 'Scheduled?',
         dataIndex: 'isSchedule',
         render(isSchedule: boolean) {
           switch (isSchedule) {
@@ -81,7 +81,6 @@ export class TableListVideo extends PureComponent<IProps> {
       {
         title: 'Status',
         dataIndex: 'status',
-        sorter: true,
         render(status: string) {
           switch (status) {
             case 'active':
@@ -93,7 +92,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Last Update',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -101,7 +100,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <DropdownAction

@@ -255,7 +255,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col> */}
           <Col md={8} xs={12}>
-            <Link href="/earning/money">
+            <Link href="/earnings/money">
               <a>
                 <Card>
                   <Statistic
@@ -269,7 +269,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/money">
+            <Link href="/earnings/money">
               <a>
                 <Card>
                   <Statistic
@@ -283,7 +283,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/money">
+            <Link href="/earnings/money">
               <a>
                 <Card>
                   <Statistic
@@ -297,7 +297,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/token">
+            <Link href="/earnings/token">
               <a>
                 <Card>
                   <Statistic
@@ -311,7 +311,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/token">
+            <Link href="/earnings/token">
               <a>
                 <Card>
                   <Statistic
@@ -325,7 +325,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/token">
+            <Link href="/earnings/token">
               <a>
                 <Card>
                   <Statistic
