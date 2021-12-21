@@ -37,7 +37,7 @@ const PaymentTableList = ({
       title: 'Description',
       key: 'description',
       render(record: any) {
-        return <span>{record?.products[0]?.description}</span>;
+        return <span>{record?.products && record?.products[0]?.description}</span>;
       }
     },
     {
