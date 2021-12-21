@@ -46,7 +46,7 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
             className="card-bg"
             style={{
               backgroundImage: `url(${thumbUrl})`,
-              filter: canView ? 'blur(2px)' : 'blur(20px)'
+              filter: canView ? 'blur(0px)' : 'blur(20px)'
             }}
           />
           <div className="gallery-stats">
