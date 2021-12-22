@@ -1,5 +1,5 @@
 /* eslint-disable react/destructuring-assignment */
-import { Table, Tag } from 'antd';
+import { Table, Tag, Avatar } from 'antd';
 import { IPaymentTokenHistory } from 'src/interfaces';
 import { getGlobalConfig } from '@services/index';
 import { formatDate } from '@lib/date';
@@ -26,7 +26,7 @@ const PaymentTableList = ({
       key: 'id',
       render(data, record) {
         let path = '';
-        switch (record.type) {
+        switch (record.target) {
           case 'feed':
             path = `/post/${record?.targetId}`;
             break;
@@ -39,7 +39,10 @@ const PaymentTableList = ({
           case 'gallery':
             path = `/gallery/${record?.targetId}`;
             break;
-          default: null;
+          case 'performer':
+            path = `/${record?.targetId}`;
+            break;
+          default: path = '/home';
         }
         return (
           <a
@@ -54,24 +57,28 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Buyer',
+      title: 'User',
       dataIndex: 'sourceInfo',
       key: 'user',
       render(sourceInfo) {
         return (
           <span>
+            <Avatar src={sourceInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {sourceInfo?.name || sourceInfo?.username || 'N/A'}
           </span>
         );
       }
     },
     {
-      title: 'Seller',
+      title: 'Model',
       dataIndex: 'performerInfo',
       key: 'performerInfo',
       render(data, record) {
         return (
           <span>
+            <Avatar src={record?.performerInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {record?.performerInfo?.name || record?.performerInfo?.username || 'N/A'}
           </span>
         );
@@ -110,10 +117,6 @@ const PaymentTableList = ({
         switch (type) {
           case 'feed':
             return <Tag color="#1da3f1">Feed</Tag>;
-          case 'monthly_subscription':
-            return <Tag color="#ca50c6">Monthly Sub</Tag>;
-          case 'yearly_subscription':
-            return <Tag color="#ca50c6">Yearly Subs</Tag>;
           case 'video':
             return <Tag color="#00dcff">Video</Tag>;
           case 'gallery':
