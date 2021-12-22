@@ -172,7 +172,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                       Processing
                     </Select.Option>
                     <Select.Option key="shipping" value="shipping">
-                      Shipping
+                      Shipped
                     </Select.Option>
                     <Select.Option key="delivered" value="delivered">
                       Delivered

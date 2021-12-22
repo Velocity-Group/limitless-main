@@ -287,7 +287,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="MODEL COMMISSION $"
+                    title="MODELS COMMISSION $"
                     value={`${stats?.totalNetPrice.toFixed(2)}`}
                     valueStyle={{ color: '#fb2b2b' }}
                     prefix="$"
@@ -329,7 +329,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="MODEL COMMISSION TOKEN"
+                    title="MODELS COMMISSION TOKEN"
                     value={`${stats?.totalNetToken.toFixed(2)}`}
                     valueStyle={{ color: '#fb2b2b' }}
                     prefix={<img alt="coin" src="/coin-ico.png" width="20px" />}
@@ -343,7 +343,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="SHIPPING ORDERS"
+                    title="SHIPPED ORDERS"
                     value={stats.totalShippingdOrders}
                     valueStyle={{ color: '#c8d841' }}
                     prefix={<AreaChartOutlined />}
