@@ -20,7 +20,7 @@ export class VideoPlayer extends PureComponent<any> {
   render() {
     return (
       <div className="videojs-player">
-        <div data-vjs-player style={{ paddingTop: 'max(60vh)' }}>
+        <div data-vjs-player>
           <video ref={(node) => { this.videoNode = node; }} className="video-js" />
         </div>
       </div>
