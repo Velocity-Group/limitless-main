@@ -15,7 +15,7 @@ import {
   Avatar,
   Modal
 } from 'antd';
-import { IUser, IVideo } from 'src/interfaces/index';
+import { IPerformer, IVideo } from 'src/interfaces/index';
 import {
   CameraOutlined, VideoCameraAddOutlined, FileDoneOutlined, DeleteOutlined
 } from '@ant-design/icons';
@@ -28,7 +28,7 @@ import { getGlobalConfig } from '@services/config';
 import './video.less';
 
 interface IProps {
-  user: IUser;
+  user: IPerformer;
   video?: IVideo;
   submit: Function;
   beforeUpload?: Function;

@@ -25,6 +25,15 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
     return (
       <div className="confirm-subscription-form">
         <div className="text-center">
+          <h3 className="secondary-color">
+            Confirm
+            {' '}
+            {type}
+            {' '}
+            subscription with
+            {' '}
+            {performer?.name || performer?.username || 'the model'}
+          </h3>
           <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
           <p className="p-name">
             {performer?.name || performer?.username || 'N/A'}
@@ -34,13 +43,13 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
         </div>
         <div className="info-body">
           <p>
-            SUBSCRIBE & GET THESE BENEFITS
+            SUBSCRIBE TO GET THESE BENEFITS
           </p>
           <ul>
             <li>
               <CheckSquareOutlined />
               {' '}
-              Full access to this model&apos;s contents
+              Full access to this model&apos;s content
             </li>
             <li>
               <CheckSquareOutlined />
@@ -61,7 +70,9 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
           {' '}
           subscription
           {' '}
-          with the model
+          for
+          {' '}
+          {type === 'monthly' ? `$${(performer?.monthlyPrice || 0).toFixed(2)}` : type === 'yearly' ? `$${(performer?.yearlyPrice || 0).toFixed(2)}` : `${performer?.durationFreeSubscriptionDays} day${performer?.durationFreeSubscriptionDays > 1 ? 's' : ''}, then $${(performer?.monthlyPrice || 0).toFixed(2)} per month`}
         </Button>
       </div>
     );

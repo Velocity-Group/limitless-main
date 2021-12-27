@@ -10,12 +10,12 @@ import VideoUploadList from '@components/file/video-upload-list';
 import { videoService } from '@services/video.service';
 import { connect } from 'react-redux';
 import Router from 'next/router';
-import { IUIConfig, IUser } from 'src/interfaces';
+import { IUIConfig, IPerformer } from 'src/interfaces';
 import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   ui: IUIConfig;
-  user: IUser
+  user: IPerformer
 }
 
 const validateMessages = {
@@ -48,8 +48,12 @@ class BulkUploadVideo extends PureComponent<IProps> {
     if (!this.formRef) this.formRef = createRef();
     const { user } = this.props;
     if (!user || !user.verifiedDocument) {
-      message.warning('Your ID documents are not verified yet! You could not post any content right now. Please upload your ID documents to get approval then start making money.');
+      message.warning('Your ID documents are not verified yet! You could not post any content right now.');
       Router.back();
+    }
+    if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
+      message.warning('You have not connected with Stripe! You could not post any content right now.');
+      Router.push('/model/banking');
     }
   }
 

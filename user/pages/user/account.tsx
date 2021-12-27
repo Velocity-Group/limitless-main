@@ -5,7 +5,7 @@ import { EditOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import { connect } from 'react-redux';
 import { UserAccountForm } from '@components/user';
-import { IUser, IUserFormData } from 'src/interfaces/user';
+import { IUser } from 'src/interfaces/user';
 import { authService } from '@services/auth.service';
 import { userService } from '@services/user.service';
 import { updateUser, updateCurrentUserAvatar, updatePassword } from 'src/redux/user/actions';
@@ -82,7 +82,7 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
     }
   }
 
-  onFinish(data: IUserFormData) {
+  onFinish(data) {
     const { updateUser: handleUpdateUser } = this.props;
     handleUpdateUser(data);
   }

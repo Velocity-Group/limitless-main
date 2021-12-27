@@ -22,7 +22,6 @@ export interface IPerformerResponse {
   zipcode?: string;
   address?: string;
   languages?: string[];
-  agentId?: ObjectId;
   categoryIds?: ObjectId[];
   height?: string;
   weight?: string;
@@ -82,9 +81,8 @@ export interface IPerformerResponse {
     google: String;
     instagram: String;
     linkedIn: String;
-  },
-  invitationId?: ObjectId;
-  referralId?: ObjectId;
+  };
+  stripeAccount?: any;
 }
 
 export class PerformerDto {
@@ -149,8 +147,6 @@ export class PerformerDto {
   address?: string;
 
   languages?: string[];
-
-  agentId?: ObjectId;
 
   categoryIds?: ObjectId[];
 
@@ -285,8 +281,6 @@ export class PerformerDto {
         'zipcode',
         'address',
         'languages',
-        'agentId',
-        'agentInfo',
         'categoryIds',
         'height',
         'weight',
@@ -404,7 +398,6 @@ export class PerformerDto {
       stripeAccount: this.stripeAccount,
       welcomeVideoId: this.welcomeVideoId,
       paypalSetting: this.paypalSetting,
-      agentId: this.agentId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

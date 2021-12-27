@@ -6,7 +6,7 @@ import PageHeading from '@components/common/page-heading';
 import { productService } from '@services/product.service';
 import Router from 'next/router';
 import { FormProduct } from '@components/product/form-product';
-import { IUIConfig, IUser } from 'src/interfaces';
+import { IUIConfig, IPerformer } from 'src/interfaces';
 import { connect } from 'react-redux';
 import { getResponseError } from '@lib/utils';
 
@@ -17,7 +17,7 @@ interface IFiles {
 
 interface IProps {
   ui: IUIConfig;
-  user: IUser;
+  user: IPerformer;
 }
 
 class CreateProduct extends PureComponent<IProps> {
@@ -38,13 +38,17 @@ class CreateProduct extends PureComponent<IProps> {
     digitalFile: null
   };
 
-  // componentDidMount() {
-  //   const { user } = this.props;
-  //   if (!user || !user.verifiedDocument) {
-  //     message.warning('Your ID documents are not verified yet! You could not post any content right now. Please upload your ID documents to get approval then start making money.');
-  //     Router.back();
-  //   }
-  // }
+  componentDidMount() {
+    const { user } = this.props;
+    if (!user || !user.verifiedDocument) {
+      message.warning('Your ID documents are not verified yet! You could not post any content right now.');
+      Router.back();
+    }
+    if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
+      message.warning('You have not connected with Stripe! You could not post any content right now.');
+      Router.push('/model/banking');
+    }
+  }
 
   onUploading(resp: any) {
     this.setState({ uploadPercentage: resp.percentage });

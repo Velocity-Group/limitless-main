@@ -533,8 +533,6 @@ export class FeedService {
     if (user._id.toString() === feed.fromSourceId.toString()) {
       return true;
     }
-    const performer = await this.performerService.findById(feed.fromSourceId);
-    if (`${performer?.agentId}` === `${user._id}`) return true;
     if (!feed.isSale) {
       // check subscription
       const subscribed = await this.subscriptionService.checkSubscribed(

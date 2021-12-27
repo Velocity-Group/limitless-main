@@ -7,12 +7,12 @@ import PageHeading from '@components/common/page-heading';
 import { videoService } from '@services/video.service';
 import { FormUploadVideo } from '@components/video/form-upload';
 import Router from 'next/router';
-import { IUIConfig, IUser } from 'src/interfaces';
+import { IUIConfig, IPerformer } from 'src/interfaces';
 import { getResponseError } from '@lib/utils';
 
 interface IProps {
   ui: IUIConfig;
-  user: IUser;
+  user: IPerformer;
 }
 
 interface IFiles {
@@ -47,8 +47,12 @@ class UploadVideo extends PureComponent<IProps> {
   componentDidMount() {
     const { user } = this.props;
     if (!user || !user.verifiedDocument) {
-      message.warning('Your ID documents are not verified yet! You could not post any content right now. Please upload your ID documents to get approval then start making money.');
+      message.warning('Your ID documents are not verified yet! You could not post any content right now.');
       Router.back();
+    }
+    if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
+      message.warning('You have not connected with Stripe! You could not post any content right now.');
+      Router.push('/model/banking');
     }
   }
 

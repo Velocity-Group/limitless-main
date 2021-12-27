@@ -64,8 +64,8 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
             </Form.Item>
           </Col> */}
         </Row>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 2 }}>
-          <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>
+        <Form.Item>
+          <Button className="secondary" htmlType="submit" disabled={updating} loading={updating}>
             Submit
           </Button>
         </Form.Item>

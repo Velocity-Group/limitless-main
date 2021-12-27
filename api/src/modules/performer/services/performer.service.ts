@@ -30,6 +30,7 @@ import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant
 import { PerformerBlockService } from 'src/modules/block/services';
 import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
 import { Storage } from 'src/modules/storage/contants';
+import { StripeService } from 'src/modules/payment/services';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
@@ -75,6 +76,8 @@ export class PerformerService {
     private readonly fileService: FileService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
+    @Inject(forwardRef(() => StripeService))
+    private readonly stripeService: StripeService,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>,
     private readonly queueEventService: QueueEventService,
@@ -189,23 +192,18 @@ export class PerformerService {
       throw new EntityNotFoundException();
     }
     const [
-      avatar,
-      documentVerification,
-      idVerification,
-      cover,
-      welcomeVideo
+      avatar, documentVerification, idVerification, cover, welcomeVideo,
+      paypalSetting, commissionSetting, stripeAccount, blockCountries
     ] = await Promise.all([
-      performer.avatarId ? this.fileService.findById(performer.avatarId) : null,
-      performer.documentVerificationId
-        ? this.fileService.findById(performer.documentVerificationId)
-        : null,
-      performer.idVerificationId
-        ? this.fileService.findById(performer.idVerificationId)
-        : null,
-      performer.coverId ? this.fileService.findById(performer.coverId) : null,
-      performer.welcomeVideoId
-        ? this.fileService.findById(performer.welcomeVideoId)
-        : null
+      performer.avatarId && this.fileService.findById(performer.avatarId),
+      performer.documentVerificationId && this.fileService.findById(performer.documentVerificationId),
+      performer.idVerificationId && this.fileService.findById(performer.idVerificationId),
+      performer.coverId && this.fileService.findById(performer.coverId),
+      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId),
+      this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'paypal' }),
+      this.commissionSettingModel.findOne({ performerId: id }),
+      this.stripeService.getConnectAccount(performer._id),
+      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id })
     ]);
 
     // TODO - update kernel for file dto
@@ -235,28 +233,10 @@ export class PerformerService {
         mimeType: documentVerification.mimeType
       };
     }
-
-    // dto.ccbillSetting = await this.paymentGatewaySettingModel.findOne({
-    //   performerId: id,
-    //   key: 'ccbill'
-    // });
-
-    dto.paypalSetting = await this.paymentGatewaySettingModel.findOne({
-      performerId: id,
-      key: 'paypal'
-    });
-
-    dto.commissionSetting = await this.commissionSettingModel.findOne({
-      performerId: id
-    });
-
-    // dto.bankingInformation = await this.bankingSettingModel.findOne({
-    //   performerId: id
-    // });
-
-    dto.blockCountries = await this.performerBlockService.findOneBlockCountriesByQuery({
-      sourceId: id
-    });
+    dto.paypalSetting = paypalSetting;
+    dto.commissionSetting = commissionSetting;
+    dto.stripeAccount = stripeAccount;
+    dto.blockCountries = blockCountries;
     return dto;
   }
 

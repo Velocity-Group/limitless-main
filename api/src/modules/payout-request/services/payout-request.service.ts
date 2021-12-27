@@ -1,5 +1,5 @@
 import {
-  Injectable, Inject, ForbiddenException, forwardRef
+  Injectable, Inject, ForbiddenException, forwardRef, HttpException
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
@@ -21,10 +21,7 @@ import { EarningModel } from 'src/modules/earning/models/earning.model';
 import { UserDto } from 'src/modules/user/dtos';
 import { StripeService } from 'src/modules/payment/services';
 import {
-  PAYOUT_REQUEST_CHANEL,
-  PAYOUT_REQUEST_EVENT,
-  SOURCE_TYPE,
-  STATUSES
+  PAYOUT_REQUEST_CHANEL, PAYOUT_REQUEST_EVENT, SOURCE_TYPE, STATUSES
 } from '../constants';
 import { DuplicateRequestException, InvalidRequestTokenException } from '../exceptions';
 import { PayoutRequestDto } from '../dtos/payout-request.dto';
@@ -123,6 +120,18 @@ export class PayoutRequestService {
     payload: PayoutRequestCreatePayload,
     user: UserDto
   ): Promise<PayoutRequestDto> {
+    if (payload.paymentAccountType === 'stripe') {
+      const stripeConnect = await this.stripeService.getConnectAccount(user._id);
+      if (!stripeConnect || !stripeConnect.payoutsEnabled || !stripeConnect.detailsSubmitted) {
+        throw new HttpException('You have not connect with Stripe yet, please try again later', 422);
+      }
+    }
+    if (payload.paymentAccountType === 'paypal') {
+      const paypalAccount = await this.performerService.getPaymentSetting(user._id, 'paypal');
+      if (!paypalAccount?.value?.email) {
+        throw new HttpException('You have not provide your Paypal account yet, please try again later', 422);
+      }
+    }
     const data = {
       ...payload,
       source: SOURCE_TYPE.PERFORMER,
@@ -222,6 +231,18 @@ export class PayoutRequestService {
     }
     if (performer._id.toString() !== payout.sourceId.toString()) {
       throw new ForbiddenException();
+    }
+    if (payload.paymentAccountType === 'stripe') {
+      const stripeConnect = await this.stripeService.getConnectAccount(performer._id);
+      if (!stripeConnect || !stripeConnect.payoutsEnabled || !stripeConnect.detailsSubmitted) {
+        throw new HttpException('You have not connect with Stripe yet, please try again later', 422);
+      }
+    }
+    if (payload.paymentAccountType === 'paypal') {
+      const paypalAccount = await this.performerService.getPaymentSetting(performer._id, 'paypal');
+      if (!paypalAccount?.value?.email) {
+        throw new HttpException('You have not provide your Paypal account yet, please try again later', 422);
+      }
     }
     if (performer.balance < payout.requestTokens) {
       throw new InvalidRequestTokenException();

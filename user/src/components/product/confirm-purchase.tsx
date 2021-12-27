@@ -24,7 +24,7 @@ export class PurchaseProductForm extends PureComponent<IProps> {
     const { product } = this.props;
     if (quantity < 1) return;
     if (product.stock < quantity) {
-      message.error('Quantity is over product stock!');
+      message.error('Quantity is out of product stock!');
       return;
     }
     this.setState({ quantity });
@@ -38,11 +38,12 @@ export class PurchaseProductForm extends PureComponent<IProps> {
     return (
       <div className="text-center">
         <div className="tip-performer">
+          <h3 className="secondary-color">
+            Confirm purchase:
+            {' '}
+            {product?.name}
+          </h3>
           <img alt="p-avt" src={image} style={{ width: '100px', borderRadius: '5px' }} />
-          <h4>
-            {product.name}
-          </h4>
-          <p>{product.description || 'No description yet'}</p>
         </div>
         <Form
           {...layout}
@@ -86,7 +87,7 @@ export class PurchaseProductForm extends PureComponent<IProps> {
             </Form.Item>
             <Form.Item
               name="userNote"
-              label="Comment"
+              label="Comments"
             >
               <Input.TextArea rows={2} />
             </Form.Item>
@@ -100,13 +101,8 @@ export class PurchaseProductForm extends PureComponent<IProps> {
               loading={submiting}
               disabled={submiting || (product.type === 'physical' && product.stock < quantity)}
             >
-              Confirm Purchase:
-              {' '}
-              {product.name}
-              {' '}
-              for
-              &nbsp;
-              <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 3px' }} />
+              CONFIRM PURCHASE FOR&nbsp;
+              <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 2px' }} />
               {(quantity * product.price).toFixed(2)}
             </Button>
           </div>

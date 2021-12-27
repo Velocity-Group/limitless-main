@@ -251,7 +251,7 @@ class PerformerProfile extends PureComponent<IProps> {
   async sendTip(price: number) {
     const { performer, currentUser, updateBalance: handleUpdateBalance } = this.props;
     if (currentUser.balance < price) {
-      message.error('Your balance token is not enough');
+      message.error('Your token balance is not enough');
       Router.push('/token-package');
       return;
     }

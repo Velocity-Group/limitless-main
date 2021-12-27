@@ -293,7 +293,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
         </div>
         <Modal
           key="tip_performer"
-          title={`Confirm purchase ${product?.name}`}
+          title={null}
           visible={openPurchaseModal}
           onOk={() => this.setState({ openPurchaseModal: false })}
           footer={null}

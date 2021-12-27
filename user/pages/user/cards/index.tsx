@@ -32,7 +32,7 @@ class CardsPage extends PureComponent<IProps> {
   }
 
   async handleRemoveCard(cardId: string) {
-    if (!window.confirm('Are you sure to remove this payment card')) return;
+    if (!window.confirm('Are you sure to remove this payment card?')) return;
     try {
       await this.setState({ submiting: true });
       await paymentService.removeStripeCard(cardId);

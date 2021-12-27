@@ -1,5 +1,3 @@
-import { ISearch } from './utils';
-
 export interface IUser {
   _id: string;
   avatar: string;
@@ -20,16 +18,5 @@ export interface IUser {
   stripeCardIds: string[];
   stripeCustomerId: string;
   stats: any;
-}
-
-export interface IUserFormData {
-  avatar: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  username: string;
-}
-
-export interface IUserSearch extends ISearch {
-  roles: string[];
+  stripeAccount: any;
 }

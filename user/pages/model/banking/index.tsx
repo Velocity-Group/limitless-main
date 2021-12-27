@@ -21,7 +21,6 @@ class BankingSettings extends PureComponent<IProps> {
   static onlyPerformer = true;
 
   state = {
-    stripeAccount: null,
     loading: false,
     submiting: false,
     loginUrl: ''
@@ -49,11 +48,10 @@ class BankingSettings extends PureComponent<IProps> {
   async getAccount() {
     try {
       await this.setState({ loading: true });
-      const [account, loginLink] = await Promise.all([
-        paymentService.retrieveStripeAccount(),
+      const [loginLink] = await Promise.all([
         paymentService.loginLink()
       ]);
-      this.setState({ stripeAccount: account.data, loginUrl: loginLink.data.url, loading: false });
+      this.setState({ loginUrl: loginLink.data.url, loading: false });
     } catch {
       this.setState({ loading: false });
     }
@@ -79,7 +77,7 @@ class BankingSettings extends PureComponent<IProps> {
       ui, user
     } = this.props;
     const {
-      stripeAccount, loading, submiting, loginUrl
+      loading, submiting, loginUrl
     } = this.state;
     return (
       <Layout>
@@ -93,10 +91,24 @@ class BankingSettings extends PureComponent<IProps> {
         <div className="main-container">
           <PageHeading icon={<BankOutlined />} title="Banking (to earn)" />
           <Tabs>
-            <Tabs.TabPane tab={<span>Stripe Connect</span>} key="stripe">
-              <PerformerBankingForm stripeAccount={stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
+            <Tabs.TabPane
+              tab={(
+                <span>
+                  <img src="/static/stripe-icon.jpeg" alt="stripe-icon" height="30px" />
+                </span>
+              )}
+              key="stripe"
+            >
+              <PerformerBankingForm stripeAccount={user?.stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
             </Tabs.TabPane>
-            <Tabs.TabPane tab={<span>Paypal</span>} key="paypal">
+            <Tabs.TabPane
+              tab={(
+                <span>
+                  <img src="/static/paypal-ico.png" alt="paypal-icon" height="30px" />
+                </span>
+              )}
+              key="paypal"
+            >
               <PerformerPaypalForm
                 onFinish={this.handleUpdatePaypal.bind(this)}
                 updating={submiting}
@@ -114,5 +126,5 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui },
   user: { ...state.user.current }
 });
-const mapDispatch = { };
+const mapDispatch = {};
 export default connect(mapStates, mapDispatch)(BankingSettings);

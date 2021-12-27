@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Layout, Badge, message, Drawer, Divider, Avatar
+  Layout, Badge, Drawer, Divider, Avatar, Modal, Button
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ import {
 } from 'src/icons';
 import Router, { withRouter, Router as RouterEvent } from 'next/router';
 import {
-  messageService, authService, streamService
+  messageService, authService
 } from 'src/services';
 import { Event, SocketContext } from 'src/socket';
 import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/actions';
@@ -30,7 +30,7 @@ import { shortenLargeNumber } from '@lib/number';
 interface IProps {
   updateBalance: Function;
   updateUIValue: Function;
-  currentUser: IUser;
+  user: IUser;
   logout: Function;
   router: any;
   ui: IUIConfig;
@@ -44,17 +44,28 @@ class Header extends PureComponent<IProps> {
   state = {
     totalNotReadMessage: 0,
     openProfile: false,
-    openCallRequest: false
+    openStripeAlert: false
   };
 
   async componentDidMount() {
     RouterEvent.events.on('routeChangeStart', this.handleChangeRoute);
+    const { user, router } = this.props;
+    console.log(user);
+    this.handleCountNotificationMessage();
+    if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({ openStripeAlert: true });
+    }
   }
 
   async componentDidUpdate(prevProps: any) {
-    const { currentUser } = this.props;
-    if (currentUser._id && prevProps.currentUser._id !== currentUser._id) {
+    const { user, router } = this.props;
+    if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
+      if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
+        // eslint-disable-next-line react/no-did-update-set-state
+        this.setState({ openStripeAlert: true });
+      }
     }
   }
 
@@ -82,27 +93,27 @@ class Header extends PureComponent<IProps> {
     }
   }
 
-  handlePrivateChat(data: { conversationId: string; user: IUser }) {
-    const { addPrivateRequest: _addPrivateRequest } = this.props;
-    message.success(`${data?.user?.name || data?.user?.username}'ve sent you a private call request`, 10);
-    _addPrivateRequest({ ...data });
-    this.setState({ openCallRequest: true });
-  }
+  // handlePrivateChat(data: { conversationId: string; user: IUser }) {
+  //   const { addPrivateRequest: _addPrivateRequest } = this.props;
+  //   message.success(`${data?.user?.name || data?.user?.username}'ve sent you a private call request`, 10);
+  //   _addPrivateRequest({ ...data });
+  //   this.setState({ openCallRequest: true });
+  // }
 
-  async handleDeclineCall(conversationId: string) {
-    const { accessPrivateRequest: handleRemoveRequest } = this.props;
-    try {
-      await streamService.declinePrivateChat(conversationId);
-      handleRemoveRequest(conversationId);
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
-    }
-  }
+  // async handleDeclineCall(conversationId: string) {
+  //   const { accessPrivateRequest: handleRemoveRequest } = this.props;
+  //   try {
+  //     await streamService.declinePrivateChat(conversationId);
+  //     handleRemoveRequest(conversationId);
+  //   } catch (e) {
+  //     const err = await e;
+  //     message.error(err?.message || 'Error occured, please try again later');
+  //   }
+  // }
 
   async handleUpdateBalance(event) {
-    const { currentUser, updateBalance: handleUpdateBalance } = this.props;
-    if (currentUser.isPerformer) {
+    const { user, updateBalance: handleUpdateBalance } = this.props;
+    if (user.isPerformer) {
       handleUpdateBalance({ token: event.token });
     }
   }
@@ -113,10 +124,10 @@ class Header extends PureComponent<IProps> {
     }
   }
 
-  onThemeChange = (theme: string) => {
-    const { updateUIValue: handleUpdateUI } = this.props;
-    handleUpdateUI({ theme });
-  };
+  // onThemeChange = (theme: string) => {
+  //   const { updateUIValue: handleUpdateUI } = this.props;
+  //   handleUpdateUI({ theme });
+  // };
 
   async beforeLogout() {
     const { logout: handleLogout } = this.props;
@@ -130,10 +141,10 @@ class Header extends PureComponent<IProps> {
 
   render() {
     const {
-      currentUser, router, ui, privateRequests, settings
+      user, router, ui
     } = this.props;
     const {
-      totalNotReadMessage, openProfile, openCallRequest
+      totalNotReadMessage, openProfile, openStripeAlert
     } = this.state;
 
     return (
@@ -142,10 +153,10 @@ class Header extends PureComponent<IProps> {
           event="nofify_read_messages_in_conversation"
           handler={this.handleMessage.bind(this)}
         />
-        <Event
+        {/* <Event
           event="private-chat-request"
           handler={this.handlePrivateChat.bind(this)}
-        />
+        /> */}
         <Event
           event="update_balance"
           handler={this.handleUpdateBalance.bind(this)}
@@ -157,8 +168,8 @@ class Header extends PureComponent<IProps> {
         <div className="main-container">
           <Layout.Header className="header" id="layoutHeader">
             <div className="nav-bar">
-              <ul className={currentUser._id ? 'nav-icons' : 'nav-icons custom'}>
-                {currentUser._id && (
+              <ul className={user._id ? 'nav-icons' : 'nav-icons custom'}>
+                {user._id && (
                 <li className={router.pathname === '/home' ? 'active' : ''}>
                   <Link href="/home">
                     <a>
@@ -167,7 +178,7 @@ class Header extends PureComponent<IProps> {
                   </Link>
                 </li>
                 )}
-                {currentUser._id && currentUser.isPerformer && (
+                {user._id && user.isPerformer && (
                   <>
                     {/* <Tooltip key="live" title="Go Live">
                       <li className={router.pathname === '/model/live' ? 'active' : ''}>
@@ -187,7 +198,7 @@ class Header extends PureComponent<IProps> {
                     </li>
                   </>
                 )}
-                {currentUser._id && !currentUser.isPerformer && (
+                {user._id && !user.isPerformer && (
                   <li key="model" className={router.pathname === '/model' ? 'active' : ''}>
                     <Link href="/model">
                       <a>
@@ -196,7 +207,7 @@ class Header extends PureComponent<IProps> {
                     </Link>
                   </li>
                 )}
-                {currentUser._id && (
+                {user._id && (
                   <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>
                     <Link href="/messages">
                       <a>
@@ -210,7 +221,7 @@ class Header extends PureComponent<IProps> {
                     </Link>
                   </li>
                 )}
-                {!currentUser._id && [
+                {!user._id && [
                   <li key="logo" className="logo-nav">
                     <Link href="/home">
                       <a>{ui.logo ? <img src={ui.logo} alt="logo" /> : `${ui.siteName}`}</a>
@@ -227,9 +238,9 @@ class Header extends PureComponent<IProps> {
                     </Link>
                   </li>
                 ]}
-                {currentUser._id && (
+                {user._id && (
                   <li key="avatar" aria-hidden onClick={() => this.setState({ openProfile: true })}>
-                    {currentUser?.avatar ? <Avatar src={currentUser?.avatar || '/static/no-avatar.png'} /> : <UserIcon />}
+                    {user?.avatar ? <Avatar src={user?.avatar || '/static/no-avatar.png'} /> : <UserIcon />}
                   </li>
                 )}
               </ul>
@@ -252,27 +263,27 @@ class Header extends PureComponent<IProps> {
             title={(
               <>
                 <div className="profile-user">
-                  <img className="avatar" src={currentUser?.avatar || '/static/no-avatar.png'} alt="avatar" />
+                  <img className="avatar" src={user?.avatar || '/static/no-avatar.png'} alt="avatar" />
                   <span className="profile-name">
-                    {currentUser?.name || 'N/A'}
+                    {user?.name || 'N/A'}
                     <span className="sub-name">
                       @
-                      {currentUser?.username || 'n/a'}
+                      {user?.username || 'n/a'}
                     </span>
                   </span>
                 </div>
                 <div className="sub-info">
-                  <a aria-hidden className="user-balance" onClick={() => !currentUser?.isPerformer && Router.push('/token-package')}>
+                  <a aria-hidden className="user-balance" onClick={() => !user?.isPerformer && Router.push('/token-package')}>
                     <img src="/static/coin-ico.png" alt="gem" />
-                    {(currentUser?.balance || 0).toFixed(2)}
-                    {!currentUser?.isPerformer && <PlusCircleOutlined />}
+                    {(user?.balance || 0).toFixed(2)}
+                    {!user?.isPerformer && <PlusCircleOutlined />}
                   </a>
-                  {currentUser.isPerformer ? (
+                  {user.isPerformer ? (
                     <Link href="/model/my-subscriber">
                       <a>
                         <StarOutlined />
                         {' '}
-                        {shortenLargeNumber(currentUser?.stats?.subscribers || 0)}
+                        {shortenLargeNumber(user?.stats?.subscribers || 0)}
                         {' '}
                         Followers
                       </a>
@@ -283,7 +294,7 @@ class Header extends PureComponent<IProps> {
                       <a>
                         <HeartOutlined />
                         {' '}
-                        {shortenLargeNumber(currentUser?.stats?.totalSubscriptions || 0)}
+                        {shortenLargeNumber(user?.stats?.totalSubscriptions || 0)}
                         {' '}
                         Following
                       </a>
@@ -299,10 +310,10 @@ class Header extends PureComponent<IProps> {
             className={ui.theme === 'light' ? 'profile-drawer' : 'profile-drawer dark'}
             width={280}
           >
-            {currentUser.isPerformer && (
+            {user.isPerformer && (
               <div className="profile-menu-item">
-                <Link href={{ pathname: '/model/profile', query: { username: currentUser.username || currentUser._id } }} as={`/${currentUser.username || currentUser._id}`}>
-                  <div className={router.asPath === `/${currentUser.username || currentUser._id}` ? 'menu-item active' : 'menu-item'}>
+                <Link href={{ pathname: '/model/profile', query: { username: user.username || user._id } }} as={`/${user.username || user._id}`}>
+                  <div className={router.asPath === `/${user.username || user._id}` ? 'menu-item active' : 'menu-item'}>
                     <HomeIcon />
                     {' '}
                     My Profile
@@ -395,7 +406,7 @@ class Header extends PureComponent<IProps> {
                 </div>
               </div>
             )}
-            {!currentUser.isPerformer && (
+            {!user.isPerformer && (
               <div className="profile-menu-item">
                 <Link href="/user/account" as="/user/account">
                   <div className={router.pathname === '/user/account' ? 'menu-item active' : 'menu-item'}>
@@ -468,6 +479,29 @@ class Header extends PureComponent<IProps> {
               />
             </div> */}
           </Drawer>
+          <Modal
+            title={null}
+            footer={null}
+            width={500}
+            maskClosable={false}
+            visible={openStripeAlert}
+          >
+            <div className="confirm-subscription-form">
+              <div className="text-center">
+                <h2 className="secondary-color">
+                  Hi
+                  {' '}
+                  {user?.name || user?.username || 'there'}
+                </h2>
+                <h3 className="secondary-color">You have not connected with Stripe. You could not post any content until its done. Please complete the onboarding process & start earning money!</h3>
+              </div>
+              <div>
+                <Button className="primary" onClick={() => Router.push('/model/banking')}>OK, take me there</Button>
+                &nbsp;
+                <Button className="secondary" onClick={() => this.setState({ openStripeAlert: false })}>I will connect later</Button>
+              </div>
+            </div>
+          </Modal>
         </div>
       </div>
     );
@@ -477,7 +511,7 @@ class Header extends PureComponent<IProps> {
 Header.contextType = SocketContext;
 
 const mapState = (state: any) => ({
-  currentUser: { ...state.user.current },
+  user: { ...state.user.current },
   ui: { ...state.ui },
   ...state.streaming
 });

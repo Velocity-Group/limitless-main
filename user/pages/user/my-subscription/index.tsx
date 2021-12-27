@@ -164,7 +164,7 @@ class SubscriptionPage extends PureComponent<IProps> {
           </div>
           <Modal
             key="subscribe_performer"
-            title={`Confirm ${selectedSubscription?.subscriptionType} subscription ${selectedSubscription?.performerInfo?.name}`}
+            title={null}
             visible={openSubscriptionModal}
             confirmLoading={submiting}
             footer={null}

@@ -46,28 +46,21 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
   }
 
   calculateStatsPayout = async () => {
-    try {
-      const resp = await payoutRequestService.calculate();
-      this.setState({ statsPayout: resp.data });
-    } catch {
-      message.error('Something went wrong. Please try to input date again!');
-    }
+    const resp = await payoutRequestService.calculate();
+    resp?.data && this.setState({ statsPayout: resp.data });
   };
 
-  async submit(data: {
-    requestTokens: number;
-    requestNote: string;
-  }) {
+  async submit(data) {
     const { user } = this.props;
-    if (data.requestTokens > user.balance) {
-      message.error('Requested tokens must be greater than your balance');
+    if (data.requestTokens <= user.balance) {
+      message.error('Requested tokens must be less than or equal your balance');
       return;
     }
     try {
       await this.setState({ submiting: true });
       const body = { ...data, source: 'performer' };
       await payoutRequestService.create(body);
-      message.success('Your payout was received!');
+      message.success('Your payout request was sent!');
       Router.push('/model/payout-request');
     } catch (e) {
       const error = await Promise.resolve(e);

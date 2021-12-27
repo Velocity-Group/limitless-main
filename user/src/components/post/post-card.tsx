@@ -253,7 +253,7 @@ class FeedCard extends Component<IProps> {
   async sendTip(price) {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < price) {
-      message.error('Your balance token is not enough');
+      message.error('Your token balance is not enough');
       Router.push('/token-package');
       return;
     }
@@ -273,7 +273,7 @@ class FeedCard extends Component<IProps> {
   async purchaseFeed() {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < feed.price) {
-      message.error('Your balance token is not enough');
+      message.error('Your token balance is not enough');
       Router.push('/token-package');
       return;
     }

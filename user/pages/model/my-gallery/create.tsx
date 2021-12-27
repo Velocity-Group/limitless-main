@@ -4,7 +4,7 @@ import { PictureOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import FormGallery from '@components/gallery/form-gallery';
 import PageHeading from '@components/common/page-heading';
-import { IUser, IUIConfig } from 'src/interfaces';
+import { IPerformer, IUIConfig } from 'src/interfaces';
 import { galleryService } from 'src/services';
 import { getResponseError } from '@lib/utils';
 import Router from 'next/router';
@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 
 interface IProps {
   ui: IUIConfig;
-  user: IUser;
+  user: IPerformer;
 }
 
 interface IStates {
@@ -24,18 +24,19 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
 
   static onlyPerformer = true;
 
-  constructor(props: IProps) {
-    super(props);
-    this.state = {
-      submiting: false
-    };
-  }
+  state = {
+    submiting: false
+  };
 
   componentDidMount() {
     const { user } = this.props;
-    if (!user || !user.verifiedDocument) {
-      message.warning('Your ID documents are not verified yet! You could not post any content right now. Please upload your ID documents to get approval then start making money.');
+    if (!user.verifiedDocument) {
+      message.warning('Your ID documents are not verified yet! You could not post any content right now.');
       Router.back();
+    }
+    if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
+      message.warning('You have not connected with Stripe! You could not post any content right now.');
+      Router.push('/model/banking');
     }
   }
 
