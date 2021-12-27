@@ -5,7 +5,7 @@ import { videoService } from '@services/video.service';
 import { VideoCameraOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { FormUploadVideo } from '@components/video/form-upload';
-import { IVideo, IUIConfig, IUser } from 'src/interfaces';
+import { IVideo, IUIConfig, IPerformer } from 'src/interfaces';
 import Router from 'next/router';
 import { Layout, message, Spin } from 'antd';
 import { getResponseError } from '@lib/utils';
@@ -14,7 +14,7 @@ import moment from 'moment';
 interface IProps {
   id: string;
   ui: IUIConfig;
-  user: IUser;
+  user: IPerformer;
 }
 
 interface IFiles {
