@@ -3,7 +3,7 @@ import {
   Form, Input, Button, Select, Col, Row, Popover
 } from 'antd';
 import { AvatarUpload } from '@components/user/avatar-upload';
-import { IUser, IUserFormData } from 'src/interfaces';
+import { IUser } from 'src/interfaces';
 import {
   TwitterOutlined, GoogleOutlined
 } from '@ant-design/icons';
@@ -11,11 +11,11 @@ import {
 interface UserAccountFormIProps {
   user: IUser;
   updating: boolean;
-  onFinish(data: IUserFormData): Function;
+  onFinish: Function;
   options?: {
     uploadHeader: any;
     avatarUrl: string;
-    uploadAvatar(): Function;
+    uploadAvatar: Function;
   };
   onVerifyEmail: Function;
   countTime: number;
@@ -33,14 +33,13 @@ export const UserAccountForm = ({
   user,
   options,
   onVerifyEmail,
-  countTime = 60,
-  onSwitchToPerformer
+  countTime = 60
 }: UserAccountFormIProps) => (
   <Form
     className="account-form"
     {...layout}
     name="user-account-form"
-    onFinish={onFinish}
+    onFinish={(data) => onFinish(data)}
     scrollToFirstError
     initialValues={user}
   >
