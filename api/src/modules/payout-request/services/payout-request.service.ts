@@ -129,7 +129,7 @@ export class PayoutRequestService {
     if (payload.paymentAccountType === 'paypal') {
       const paypalAccount = await this.performerService.getPaymentSetting(user._id, 'paypal');
       if (!paypalAccount?.value?.email) {
-        throw new HttpException('You have not provide your Paypal account yet, please try again later', 422);
+        throw new HttpException('You have not provided your Paypal account yet, please try again later', 422);
       }
     }
     const data = {
@@ -241,7 +241,7 @@ export class PayoutRequestService {
     if (payload.paymentAccountType === 'paypal') {
       const paypalAccount = await this.performerService.getPaymentSetting(performer._id, 'paypal');
       if (!paypalAccount?.value?.email) {
-        throw new HttpException('You have not provide your Paypal account yet, please try again later', 422);
+        throw new HttpException('You have not provided your Paypal account yet, please try again later', 422);
       }
     }
     if (performer.balance < payout.requestTokens) {

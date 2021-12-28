@@ -115,11 +115,11 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
     const { user } = this.props;
     const { feeds } = this.state;
     if (user._id !== feed.fromSourceId) return;
-    if (!window.confirm('Are you sure to delete this post?')) return;
+    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) return;
     try {
       await feedService.delete(feed._id);
       feeds.filter((f) => f._id !== feed._id);
-      message.success('Removed successfully');
+      message.success('Post deleted successfully');
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Something went wrong, please try again later');
