@@ -54,11 +54,11 @@ class Feeds extends PureComponent<IProps> {
     }
   }
 
-  handleTableChange = (pagi, filters, sorter) => {
+  handleTableChange = async (pagi, filters, sorter) => {
     const { pagination } = this.state;
     const pager = { ...pagination };
     pager.current = pagi.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
       sortBy: sorter.field || 'createdAt',
       sort: sorter.order
@@ -90,7 +90,7 @@ class Feeds extends PureComponent<IProps> {
         sortBy
 
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data,
         pagination: {
@@ -101,18 +101,18 @@ class Feeds extends PureComponent<IProps> {
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
   async deleteFeed(id: string) {
     const { pagination } = this.state;
-    if (!window.confirm('Are you sure you want to delete this post?')) {
+    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) {
       return;
     }
     try {
       await feedService.delete(id);
-      message.success('Deleted successfully');
+      message.success('Post deleted successfully');
       this.search(pagination.current);
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};

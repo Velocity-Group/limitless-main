@@ -5,7 +5,9 @@ import { message } from 'antd';
 import { NotificationOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { payoutRequestService } from 'src/services';
-import { ISettings, IUIConfig, PayoutRequestInterface } from 'src/interfaces';
+import {
+  ISettings, IUIConfig, PayoutRequestInterface, IUser
+} from 'src/interfaces';
 import nextCookie from 'next-cookies';
 import Router from 'next/router';
 import { connect } from 'react-redux';
@@ -13,7 +15,8 @@ import { connect } from 'react-redux';
 interface Props {
   payout: PayoutRequestInterface;
   ui: IUIConfig;
-  settings: ISettings
+  settings: ISettings;
+  user: IUser;
 }
 
 interface States {
@@ -88,9 +91,13 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
     requestNote: string;
     requestTokens: number;
   }) {
-    const { payout } = this.props;
+    const { payout, user } = this.props;
     if (['done', 'approved', 'rejected'].includes(payout.status)) {
       message.error('Please recheck request payout status');
+      return;
+    }
+    if (data.requestTokens > user.balance) {
+      message.error('Requested tokens must be less than or equal your balance');
       return;
     }
     try {
@@ -137,6 +144,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
 
 const mapStateToProps = (state) => ({
   ui: state.ui,
+  user: state.user.current,
   settings: state.settings
 });
 

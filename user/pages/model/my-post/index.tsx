@@ -64,18 +64,18 @@ class PostListing extends PureComponent<IProps> {
       });
       await this.setState({
         items: resp.data.data,
-        pagination: { ...pagination, total: resp.data.total }
+        pagination: { ...pagination, total: resp.data.total },
+        loading: false
       });
     } catch (error) {
       const err = await error;
       message.error(err?.message || 'An error occured. Please try again.');
-    } finally {
       this.setState({ loading: false });
     }
   }
 
   async deleteFeed(feed) {
-    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to delete it?')) {
+    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) {
       return;
     }
     try {
