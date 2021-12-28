@@ -318,7 +318,6 @@ class VideoViewPage extends PureComponent<IProps> {
       autoplay: true,
       controls: true,
       playsinline: true,
-      fluid: true,
       sources: [
         {
           src: video?.teaser?.url,
@@ -359,15 +358,15 @@ class VideoViewPage extends PureComponent<IProps> {
           <PageHeading icon={<VideoCameraOutlined />} title={video.title || 'Video'} />
           <div className="vid-duration">
             <a>
+              <HourglassOutlined />
+              &nbsp;
+              {videoDuration(video?.video?.duration || 0)}
+              &nbsp;&nbsp;&nbsp;
               <EyeOutlined />
               &nbsp;
               {shortenLargeNumber(videoStats.views || 0)}
             </a>
             <a>
-              <HourglassOutlined />
-              &nbsp;
-              {videoDuration(video?.video?.duration || 0)}
-              &nbsp;&nbsp;&nbsp;
               <CalendarOutlined />
               &nbsp;
               {formatDate(video.updatedAt, 'll')}
@@ -375,72 +374,68 @@ class VideoViewPage extends PureComponent<IProps> {
           </div>
           <div className="vid-player">
             {((video.isSale && !isBought) || (!video.isSale && !isSubscribed) || video.isSchedule) && (
-              <div className="secondary-player">
-                <div className="vid-group">
-                  <div className="left-group">
-                    {video.teaser && video.teaserProcessing && (
-                      <div className="vid-processing">
-                        <div className="text-center">
-                          <Spin />
-                          <br />
-                          Teaser is currently on processing
-                        </div>
-                      </div>
-                    )}
-                    {video.teaser && !video.teaserProcessing && <VideoPlayer {...teaserOptions} />}
-                    {!video.teaser && (
-                      <div className="video-thumbs">
-                        <img alt="thumbnail" src={thumbUrl} />
-                      </div>
-                    )}
-                    <div className="vid-exl-group">
-                      {/* eslint-disable-next-line no-nested-ternary */}
-                      <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
-                      <div className="text-center">
-                        {video.isSale && !isBought && (
-                          <Button type="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
-                            PAY
-                            &nbsp;
-                            <img alt="token" src="/static/coin-ico.png" height="20px" />
-                            {' '}
-                            {video.price.toFixed(2)}
-                            {' '}
-                            TO UNLOCK
-                          </Button>
-                        )}
-                        {!video.isSale && !isSubscribed && (
-                          <ConfirmSubscriptionPerformerForm
-                            type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
-                            performer={video.performer}
-                            submiting={submiting}
-                            onFinish={this.subscribe.bind(this)}
-                          />
-                        )}
-                      </div>
-                      {video.isSchedule && (
-                        <h4>
-                          Main video will be premiered at
-                          {' '}
-                          {formatDate(video.scheduledAt, 'll')}
-                        </h4>
-                      )}
-                    </div>
-                  </div>
+            <div className="vid-group">
+              {video.teaser && video.teaserProcessing && (
+              <div className="vid-processing">
+                <div className="text-center">
+                  <Spin />
+                  <br />
+                  Teaser is currently on processing
                 </div>
               </div>
+              )}
+              {video.teaser && !video.teaserProcessing && <VideoPlayer {...teaserOptions} />}
+              {!video.teaser && (
+              <div className="video-thumbs">
+                <img alt="thumbnail" src={thumbUrl} />
+              </div>
+              )}
+              <div className="vid-exl-group">
+                {/* eslint-disable-next-line no-nested-ternary */}
+                <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
+                <div className="text-center">
+                  {video.isSale && !isBought && (
+                  <Button type="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
+                    PAY
+                    &nbsp;
+                    <img alt="token" src="/static/coin-ico.png" height="20px" />
+                    {' '}
+                    {video.price.toFixed(2)}
+                    {' '}
+                    TO UNLOCK
+                  </Button>
+                  )}
+                  {!video.isSale && !isSubscribed && (
+                  <ConfirmSubscriptionPerformerForm
+                    type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
+                    performer={video.performer}
+                    submiting={submiting}
+                    onFinish={this.subscribe.bind(this)}
+                  />
+                  )}
+                </div>
+                {video.isSchedule && (
+                <h4>
+                  Main video will be premiered at
+                  {' '}
+                  {formatDate(video.scheduledAt, 'll')}
+                </h4>
+                )}
+              </div>
+            </div>
             )}
             {((!video.isSale && isSubscribed && !video.isSchedule) || (video.isSale && isBought && !video.isSchedule)) && (
-              <div className="main-player">
-                  {video.processing ? (
-                    <div className="vid-processing">
-                      <div className="text-center">
-                        <Spin />
-                        <br />
-                        Video file is currently on processing
-                      </div>
-                    </div>
-                  ) : <VideoPlayer {...videoJsOptions} />}
-              </div>
+            <div className="vid-group">
+              {video.processing ? (
+                <div className="vid-processing">
+                  <div className="text-center">
+                    <Spin />
+                    <br />
+                    Video file is currently on processing
+                  </div>
+                </div>
+              ) : <VideoPlayer {...videoJsOptions} />}
+            </div>
             )}
           </div>
         </div>

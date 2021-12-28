@@ -50,11 +50,13 @@ class Header extends PureComponent<IProps> {
   async componentDidMount() {
     RouterEvent.events.on('routeChangeStart', this.handleChangeRoute);
     const { user, router } = this.props;
-    console.log(user);
-    this.handleCountNotificationMessage();
-    if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
+    if (user._id) {
+      this.handleCountNotificationMessage();
+      if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
+    || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
       // eslint-disable-next-line react/no-did-update-set-state
-      this.setState({ openStripeAlert: true });
+        this.setState({ openStripeAlert: true });
+      }
     }
   }
 
@@ -62,7 +64,8 @@ class Header extends PureComponent<IProps> {
     const { user, router } = this.props;
     if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
-      if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
+      if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
+      || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
         // eslint-disable-next-line react/no-did-update-set-state
         this.setState({ openStripeAlert: true });
       }
@@ -78,7 +81,7 @@ class Header extends PureComponent<IProps> {
 
   handleChangeRoute = () => {
     this.setState({
-      openProfile: false, openCallRequest: false
+      openProfile: false
     });
   }
 
