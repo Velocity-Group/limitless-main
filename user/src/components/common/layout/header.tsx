@@ -62,6 +62,7 @@ class Header extends PureComponent<IProps> {
 
   async componentDidUpdate(prevProps: any) {
     const { user, router } = this.props;
+    const { openStripeAlert } = this.state;
     if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
       if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
@@ -70,6 +71,8 @@ class Header extends PureComponent<IProps> {
         this.setState({ openStripeAlert: true });
       }
     }
+    // eslint-disable-next-line react/no-did-update-set-state
+    if (openStripeAlert && router.pathname === '/model/banking') this.setState({ openStripeAlert: false });
   }
 
   componentWillUnmount() {
@@ -499,9 +502,9 @@ class Header extends PureComponent<IProps> {
                 <h3 className="secondary-color">You have not connected with Stripe. You could not post any content until its done. Please complete the onboarding process & start earning money!</h3>
               </div>
               <div>
-                <Button className="primary" onClick={() => Router.push('/model/banking')}>OK, take me there</Button>
+                <Button className="primary" onClick={() => Router.push('/model/banking')}>Okay, take me there</Button>
                 &nbsp;
-                <Button className="secondary" onClick={() => this.setState({ openStripeAlert: false })}>I will connect later</Button>
+                <Button className="secondary" onClick={() => this.setState({ openStripeAlert: false })}>No, i will connect later</Button>
               </div>
             </div>
           </Modal>
