@@ -184,7 +184,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   </strong>
                 </p>
                 <p>
-                  Requested amount tokens:
+                  Requested amount of tokens:
                   {' '}
                   {request.requestTokens || 0}
                 </p>

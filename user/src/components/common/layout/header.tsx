@@ -499,7 +499,10 @@ class Header extends PureComponent<IProps> {
                   {' '}
                   {user?.name || user?.username || 'there'}
                 </h2>
-                <h3 className="secondary-color">You have not connected with Stripe. You could not post any content until its done. Please complete the onboarding process & start earning money!</h3>
+                <h3 className="secondary-color">
+                  You have not connected with stripe. You cannot post any content until it&apos;s configured. Please complete
+                  the onboarding process & start earning money!
+                </h3>
               </div>
               <div>
                 <Button className="primary" onClick={() => Router.push('/model/banking')}>Okay, take me there</Button>

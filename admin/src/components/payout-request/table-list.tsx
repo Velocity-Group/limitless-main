@@ -39,7 +39,7 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Requested Amount Tokens',
+        title: 'Requested Tokens',
         dataIndex: 'requestTokens',
         key: 'requestTokens',
         render(requestTokens: number) {

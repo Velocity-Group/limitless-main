@@ -75,10 +75,10 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
     return (
       <>
         <Head>
-          <title>{`${ui?.siteName} | Request a Payout`}</title>
+          <title>{`${ui?.siteName} | New Payout Request`}</title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Request a Payout" icon={<NotificationOutlined />} />
+          <PageHeading title="New Payout Request" icon={<NotificationOutlined />} />
           <PayoutRequestForm
             payout={{
               requestNote: '',

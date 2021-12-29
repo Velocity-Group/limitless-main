@@ -125,7 +125,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
     return (
       <>
         <Head>
-          <title>{`${ui?.siteName} | Edit Payout Request `}</title>
+          <title>{`${ui?.siteName} | Edit Payout Request`}</title>
         </Head>
         <div className="main-container">
           <PageHeading title="Edit Payout Request" icon={<NotificationOutlined />} />
