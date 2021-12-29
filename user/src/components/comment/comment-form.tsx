@@ -17,9 +17,9 @@ interface IProps {
   objectType?: string;
   onSubmit: Function;
   creator: IUser;
-  requesting?: boolean;
+  requesting: boolean;
   isReply?: boolean;
-  onCancel?: Function
+  siteName?: string;
 }
 
 const { TextArea } = Input;
@@ -45,14 +45,14 @@ export class CommentForm extends PureComponent<IProps> {
       return Router.push('/');
     }
     if (!data.content) {
-      return message.error('Please add comment!');
+      return message.error('Please add a comment!');
     }
     if (data.content.length > 150) {
       return message.error('Comment is over 150 characters');
     }
     data.objectId = objectId;
     data.objectType = objectType || 'video';
-    this.formRef.current.resetFields();
+    this.formRef.resetFields();
     return handleComment(data);
   }
 
@@ -60,7 +60,7 @@ export class CommentForm extends PureComponent<IProps> {
     const { creator } = this.props;
     if (!creator || !creator._id) return;
     const { text } = this.state;
-    const instance = this.formRef.current as FormInstance;
+    const instance = this.formRef as FormInstance;
     instance.setFieldsValue({
       content: `${instance.getFieldValue('content')} ${emoji} `
     });
@@ -69,12 +69,12 @@ export class CommentForm extends PureComponent<IProps> {
 
   render() {
     const {
-      creator, requesting, isReply
+      creator, requesting, isReply, siteName, objectId
     } = this.props;
     if (!this.formRef) this.formRef = createRef();
     return (
       <Form
-        ref={this.formRef}
+        ref={(ref) => { this.formRef = ref; }}
         name="comment-form"
         onFinish={this.onFinish.bind(this)}
         initialValues={{
@@ -88,7 +88,7 @@ export class CommentForm extends PureComponent<IProps> {
             >
               <TextArea disabled={!creator || !creator._id} maxLength={150} showCount minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
-            <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
+            <Popover key={objectId} className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} siteName={siteName} />} title={null} trigger="click">
               <div className="grp-emotions">
                 <SmileOutlined />
               </div>

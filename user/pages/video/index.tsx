@@ -568,6 +568,7 @@ class VideoViewPage extends PureComponent<IProps> {
                 objectId={video._id}
                 requesting={commenting}
                 objectType="video"
+                siteName={ui?.siteName}
               />
 
               <ListComments

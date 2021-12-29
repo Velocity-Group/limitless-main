@@ -1,4 +1,3 @@
-import { PureComponent } from 'react';
 import { Picker } from 'emoji-mart';
 import 'emoji-mart/css/emoji-mart.css';
 
@@ -7,21 +6,16 @@ interface IProps {
   siteName?: string;
 }
 
-export class Emotions extends PureComponent<IProps> {
-  handleClickEmoji = (emoji) => {
-    const { onEmojiClick } = this.props;
-    onEmojiClick(emoji.native);
-  }
+export const Emotions = ({ onEmojiClick, siteName }: IProps) => (
+  <Picker
+    onClick={(emoji) => onEmojiClick(emoji.native)}
+    emoji="point_up"
+    set="twitter"
+    title={siteName || ''}
+    color="#00aff0"
+  />
+);
 
-  render() {
-    const { siteName } = this.props;
-
-    return (
-      <Picker
-        onClick={this.handleClickEmoji.bind(this)}
-        showSkinTones
-        title={siteName || ''}
-      />
-    );
-  }
-}
+Emotions.defaultProps = {
+  siteName: ''
+};

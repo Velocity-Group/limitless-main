@@ -1,25 +1,27 @@
 import { PureComponent, createRef } from 'react';
 import { connect } from 'react-redux';
 import {
-  Modal, message
+  Modal, message, Popover
 } from 'antd';
 import { sendMessage, sentFileSuccess } from '@redux/message/actions';
 import { SmileOutlined, SendOutlined } from '@ant-design/icons';
 import { ImageMessageUpload } from '@components/messages/uploadPhoto';
 import { authService, messageService, purchaseTokenService } from '@services/index';
 import { TipPerformerForm } from '@components/performer/tip-form';
+import { IUIConfig } from 'src/interfaces';
 import { updateBalance } from '@redux/user/actions';
 import Router from 'next/router';
 import { Emotions } from './emotions';
 import './Compose.less';
 
 interface IProps {
+  ui: IUIConfig;
   updateBalance: Function;
   sendMessage: Function;
   sentFileSuccess: Function;
   sendMessageStatus: any;
   conversation: any;
-  currentUser: any
+  currentUser: any;
   disabled?: boolean;
 }
 
@@ -27,7 +29,7 @@ class Compose extends PureComponent<IProps> {
   _input: any;
 
   state = {
-    text: '', openTipModal: false, submiting: false, openIcon: false
+    text: '', openTipModal: false, submiting: false
   };
 
   componentDidMount() {
@@ -102,11 +104,11 @@ class Compose extends PureComponent<IProps> {
 
   render() {
     const {
-      text, openTipModal, submiting, openIcon
-    } = this.state;
-    const {
-      disabled, sendMessageStatus: status, conversation, currentUser
+      disabled, sendMessageStatus: status, conversation, currentUser, ui
     } = this.props;
+    const {
+      text, openTipModal, submiting
+    } = this.state;
     const uploadHeaders = {
       authorization: authService.getToken()
     };
@@ -122,9 +124,11 @@ class Compose extends PureComponent<IProps> {
           disabled={disabled || status.sending || !conversation._id}
           ref={(c) => { this._input = c; }}
         />
-        <div className="grp-icons" aria-hidden onClick={() => this.setState({ openIcon: !openIcon })}>
-          <SmileOutlined />
-        </div>
+        <Popover className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} siteName={ui?.siteName} />} trigger="click">
+          <div className="grp-icons">
+            <SmileOutlined />
+          </div>
+        </Popover>
         {/* <div className="grp-icons">
           <div aria-hidden className="grp-emotions" onClick={() => this.setState({ openTipModal: true })}>
             <DollarOutlined />
@@ -152,12 +156,6 @@ class Compose extends PureComponent<IProps> {
             <SendOutlined />
           </div>
         </div>
-        <div style={{
-          visibility: openIcon ? 'visible' : 'hidden', position: 'absolute', bottom: 55, right: 5
-        }}
-        >
-          <Emotions onEmojiClick={this.onEmojiClick.bind(this)} />
-        </div>
         <Modal
           key="tip_performer"
           className="subscription-modal"
@@ -177,7 +175,8 @@ class Compose extends PureComponent<IProps> {
 
 const mapStates = (state: any) => ({
   sendMessageStatus: state.message.sendMessage,
-  currentUser: state.user.current
+  currentUser: state.user.current,
+  ui: state.ui
 });
 
 const mapDispatch = { sendMessage, sentFileSuccess, updateBalance };

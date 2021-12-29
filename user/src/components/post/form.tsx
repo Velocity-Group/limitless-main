@@ -348,7 +348,7 @@ export default class FeedForm extends PureComponent<IProps> {
           >
             <div className="input-f-desc">
               <TextArea showCount value={text} onChange={(e) => this.setState({ text: e.target.value })} className="feed-input" minLength={1} maxLength={300} rows={3} placeholder={!fileIds.length ? 'Compose new post...' : 'Add a description'} allowClear />
-              <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
+              <Popover className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
                 <span className="grp-emotions">
                   <SmileOutlined />
                 </span>

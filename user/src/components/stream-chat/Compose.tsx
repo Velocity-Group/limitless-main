@@ -93,7 +93,7 @@ class StreamChatCompose extends PureComponent<IProps> {
           rows={1}
         />
         <div className="grp-icons">
-          <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
+          <Popover className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
             <div className="grp-emotions">
               <SmileOutlined />
             </div>
