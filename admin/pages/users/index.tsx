@@ -155,7 +155,7 @@ export default class Performers extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last Update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {

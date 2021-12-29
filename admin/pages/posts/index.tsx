@@ -30,10 +30,10 @@ class Posts extends PureComponent<IProps> {
     this.search();
   }
 
-  handleTableChange = (pagination, filters, sorter) => {
+  handleTableChange = async (pagination, filters, sorter) => {
     const pager = { ...pagination };
     pager.current = pagination.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
       sortBy: sorter.field || '',
       // eslint-disable-next-line no-nested-ternary
@@ -148,7 +148,7 @@ class Posts extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last Update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {

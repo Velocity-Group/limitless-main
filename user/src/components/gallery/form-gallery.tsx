@@ -104,7 +104,7 @@ const FormGallery = ({
             <InboxOutlined />
           </p>
           <p className="ant-upload-text">
-            Click here or drag & drop your PHOTO files to this area to upload
+            Drag and drop your photos to this area, or browse your computer to upload
           </p>
         </Dragger>
       )}

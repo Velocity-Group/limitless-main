@@ -551,7 +551,7 @@ export default class FeedForm extends PureComponent<IProps> {
           </div>
         </Form>
         <Modal
-          width={768}
+          width={767}
           footer={null}
           onOk={() => this.setState({ isShowPreviewTeaser: false })}
           onCancel={() => this.setState({ isShowPreviewTeaser: false })}

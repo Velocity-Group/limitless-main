@@ -157,7 +157,7 @@ class GalleryViewPage extends PureComponent<IProps> {
   async purchaseGallery() {
     const { gallery, user, updateBalance: handleUpdateBalance } = this.props;
     if (user?.balance < gallery.price) {
-      message.error('Your token balance is not enough');
+      message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
       return;
     }

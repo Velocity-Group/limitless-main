@@ -194,7 +194,7 @@ export class FormProduct extends PureComponent<IProps> {
                   <img
                     src={previewImageProduct}
                     alt="file"
-                    style={{ width: '100px' }}
+                    style={{ width: '100%' }}
                   />
                 )}
                 <CameraOutlined />

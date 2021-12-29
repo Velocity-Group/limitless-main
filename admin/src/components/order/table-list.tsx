@@ -72,7 +72,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Total Price',
+      title: 'Tokens',
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
@@ -103,7 +103,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Last Update',
+      title: 'Updated On',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {

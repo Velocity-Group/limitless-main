@@ -20,13 +20,11 @@ export class TableListMenu extends PureComponent<IProps> {
     const columns = [
       {
         title: 'Title',
-        dataIndex: 'title',
-        sorter: true
+        dataIndex: 'title'
       },
       {
         title: 'Path',
-        dataIndex: 'path',
-        sorter: true
+        dataIndex: 'path'
       },
       {
         title: 'Ordering',
@@ -47,7 +45,7 @@ export class TableListMenu extends PureComponent<IProps> {
       //   }
       // },
       {
-        title: 'Last Update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {

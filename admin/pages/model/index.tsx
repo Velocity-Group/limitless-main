@@ -107,7 +107,7 @@ export default class Performers extends PureComponent<IProps> {
   }
 
   render() {
-    const { status: defaultStatus, verifiedDocument } = this.props;
+    const { status: defaultStatus, verifiedDocument: documentVerified } = this.props;
     const {
       list, searching, pagination, openChangeTokenLogModal
     } = this.state;
@@ -142,7 +142,7 @@ export default class Performers extends PureComponent<IProps> {
             case 'active':
               return <Tag color="green">Active</Tag>;
             case 'inactive':
-              return <Tag color="red">Suspend</Tag>;
+              return <Tag color="red">Inactive</Tag>;
             case 'pending-email-confirmation':
               return <Tag color="default">Not verified email</Tag>;
             default: return <Tag color="default">{status}</Tag>;
@@ -189,7 +189,7 @@ export default class Performers extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last Update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -357,7 +357,7 @@ export default class Performers extends PureComponent<IProps> {
             onSubmit={this.handleFilter.bind(this)}
             defaultValue={{
               status: defaultStatus || '',
-              verifiedDocument: verifiedDocument || ''
+              verifiedDocument: documentVerified || ''
             }}
           />
           <div className="table-responsive custom">

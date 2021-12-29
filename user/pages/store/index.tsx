@@ -132,7 +132,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
   async purchaseProduct(payload: any) {
     const { user, updateBalance: handleUpdateBalance, product } = this.props;
     if (user.balance < product.price) {
-      message.error('Your token balance is not enough');
+      message.error('You have an insufficient token balance. Please top up.');
       return;
     }
     try {

@@ -83,7 +83,7 @@ export default class UploadList extends PureComponent<IProps> {
         </div>
         )}
         <Modal
-          width={768}
+          width={767}
           footer={null}
           onOk={() => this.setState({ isShowPreview: false })}
           onCancel={() => this.setState({ isShowPreview: false })}

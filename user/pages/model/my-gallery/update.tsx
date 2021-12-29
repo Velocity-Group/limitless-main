@@ -206,11 +206,9 @@ class GalleryUpdatePage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {' '}
             {ui && ui.siteName}
             {' '}
             | Update Gallery
-            {' '}
           </title>
         </Head>
         <div className="main-container">

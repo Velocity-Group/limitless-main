@@ -259,7 +259,7 @@ class LivePage extends PureComponent<IProps> {
     if (isFree || !this.sessionId) return;
     if (!isFree && user.balance < performer.publicChatPrice) {
       isBought && this.setState({ isBought: false });
-      message.error('Your token balance is not enough!', 15);
+      message.error('You have an insufficient token balance. Please top up.', 15);
       Router.push('/token-package');
       return;
     }
@@ -389,7 +389,7 @@ class LivePage extends PureComponent<IProps> {
       performer, user, updateBalance: handleUpdateBalance, activeConversation
     } = this.props;
     if (user.balance < token) {
-      message.error('Your token balance is not enough!');
+      message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
       return;
     }

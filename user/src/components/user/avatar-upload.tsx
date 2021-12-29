@@ -90,7 +90,7 @@ export class AvatarUpload extends PureComponent<IProps, IState> {
     const { imageUrl } = this.state;
     const { headers, uploadUrl } = this.props;
     return (
-      <ImgCrop rotate shape="round" quality={1} modalTitle="Edit Avatar" modalWidth={768}>
+      <ImgCrop rotate shape="round" quality={1} modalTitle="Edit Avatar" modalWidth={767}>
         <Upload
           accept="image/*"
           name="avatar"

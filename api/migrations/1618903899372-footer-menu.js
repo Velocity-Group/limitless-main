@@ -37,6 +37,7 @@ module.exports.up = async function up(next) {
     {
       title: 'Terms of Service',
       type: 'post',
+      internal: true,
       status: 'published',
       authorId: null,
       shortDescription: 'Terms of service',
@@ -46,6 +47,7 @@ module.exports.up = async function up(next) {
     {
       title: 'Privacy & Policy',
       type: 'post',
+      internal: true,
       status: 'published',
       authorId: null,
       shortDescription: 'Privacy and Policy',
@@ -55,6 +57,7 @@ module.exports.up = async function up(next) {
     {
       title: 'Help & Support',
       type: 'post',
+      internal: true,
       status: 'published',
       authorId: null,
       shortDescription: 'Help',
@@ -64,6 +67,7 @@ module.exports.up = async function up(next) {
     {
       title: 'U.S.C 2257',
       type: 'post',
+      internal: true,
       status: 'published',
       authorId: null,
       shortDescription: 'USC2257',
@@ -73,6 +77,7 @@ module.exports.up = async function up(next) {
     {
       title: 'DMCA',
       type: 'post',
+      internal: true,
       status: 'published',
       authorId: null,
       shortDescription: 'DMCA',

@@ -156,7 +156,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Last Update',
+      title: 'Updated On',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {

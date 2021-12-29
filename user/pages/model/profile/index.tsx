@@ -251,7 +251,7 @@ class PerformerProfile extends PureComponent<IProps> {
   async sendTip(price: number) {
     const { performer, currentUser, updateBalance: handleUpdateBalance } = this.props;
     if (currentUser.balance < price) {
-      message.error('Your token balance is not enough');
+      message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
       return;
     }
@@ -688,7 +688,7 @@ class PerformerProfile extends PureComponent<IProps> {
             <Modal
               key="welcome-video"
               destroyOnClose
-              width={768}
+              width={767}
               visible={showWelcomVideo}
               title={null}
               onCancel={() => this.setState({ showWelcomVideo: false })}

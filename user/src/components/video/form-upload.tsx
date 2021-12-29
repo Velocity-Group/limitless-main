@@ -117,7 +117,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
     } = this.state;
     return (
       <Modal
-        width={768}
+        width={767}
         footer={null}
         onOk={() => this.setState({ isShowPreview: false })}
         onCancel={() => this.setState({ isShowPreview: false })}
@@ -312,10 +312,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
             )}
           </Col>
           <Col md={12} xs={24}>
-            <Form.Item name="isSchedule" label="Schedule?">
+            <Form.Item name="isSchedule" label="Scheduled?">
               <Switch
-                checkedChildren="Upcoming"
-                unCheckedChildren="Recent"
+                checkedChildren="Scheduled"
+                unCheckedChildren="Not scheduled"
                 checked={isSchedule}
                 onChange={(val) => this.setState({ isSchedule: val })}
               />

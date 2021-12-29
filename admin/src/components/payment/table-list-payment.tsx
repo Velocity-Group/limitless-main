@@ -109,7 +109,7 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last Update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         fixed: 'right' as 'right',

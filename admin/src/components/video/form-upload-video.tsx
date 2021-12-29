@@ -231,10 +231,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
           </Form.Item>
         )}
         <Form.Item name="isSchedule" label="Scheduled?" valuePropName="checked">
-          <Switch unCheckedChildren="Not scheduled" checkedChildren="Upcoming" onChange={(checked) => this.setState({ isSchedule: checked })} />
+          <Switch unCheckedChildren="Not scheduled" checkedChildren="Scheduled" onChange={(checked) => this.setState({ isSchedule: checked })} />
         </Form.Item>
         {isSchedule && (
-          <Form.Item label="Upcoming for">
+          <Form.Item label="Scheduled for">
             <DatePicker
               style={{ width: '100%' }}
               disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}

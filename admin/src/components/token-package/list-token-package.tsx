@@ -64,7 +64,7 @@ export const TableListToken = ({
       }
     },
     {
-      title: 'Last Update',
+      title: 'Updated On',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date) {

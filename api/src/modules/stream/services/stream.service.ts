@@ -216,7 +216,7 @@ export class StreamService {
       throw new EntityNotFoundException();
     }
     if (user.balance < performer.privateChatPrice) {
-      throw new HttpException('Your token balance is not enough', 422);
+      throw new HttpException('You have an insufficient token balance. Please top up.', 422);
     }
     const subscribed = await this.subscriptionService.checkSubscribed(
       performerId,

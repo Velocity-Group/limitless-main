@@ -110,7 +110,7 @@ export class TableListTokenEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last Update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorted: true,
         render(createdAt: Date) {

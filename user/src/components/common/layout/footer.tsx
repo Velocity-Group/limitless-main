@@ -1,56 +1,59 @@
-/* eslint-disable react/no-danger */
 import { PureComponent } from 'react';
 import Link from 'next/link';
 import { connect } from 'react-redux';
 import { IUser, IUIConfig } from 'src/interfaces';
-import { withRouter } from 'next/router';
+import { withRouter, NextRouter } from 'next/router';
 
 interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
-  router: any;
+  router: NextRouter;
+  id?: string;
 }
 class Footer extends PureComponent<IProps> {
   render() {
-    const linkAuth = [
-      <li key="login">
-        <Link href="/">
-          <a>Log in</a>
-        </Link>
-      </li>,
-      <li key="signup">
-        <Link href="/auth/register">
-          <a>Sign up</a>
-        </Link>
-      </li>];
-    const { ui, currentUser, router } = this.props;
+    const {
+      ui, currentUser, router, id
+    } = this.props;
     const menus = ui.menus && ui.menus.length > 0
       ? ui.menus.filter((m) => m.section === 'footer')
       : [];
     return (
-
-      <div className="main-footer">
+      <div className="main-footer" id={id || 'main-footer'}>
         <div className="main-container">
           <ul>
-            <li>
-              <Link href="/home">
-                <a>Home</a>
-              </Link>
-            </li>
-            <li>
-              <Link href="/model">
-                <a>Models</a>
-              </Link>
-            </li>
-            <li>
-              <Link href="/contact">
-                <a>Contact</a>
-              </Link>
-            </li>
-            {!currentUser._id ? linkAuth : null}
-          </ul>
-          { menus && menus.length > 0 && (
-          <ul>
+            {!currentUser._id ? (
+              <>
+                <li key="login" className={router.pathname === '/' ? 'active' : ''}>
+                  <Link href="/">
+                    <a>Log in</a>
+                  </Link>
+                </li>
+                <li key="signup" className={router.pathname === '/auth/register' ? 'active' : ''}>
+                  <Link href="/auth/register">
+                    <a>Sign up</a>
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <>
+                <li key="home" className={router.pathname === '/home' ? 'active' : ''}>
+                  <Link href="/home">
+                    <a>Home</a>
+                  </Link>
+                </li>
+                <li key="model" className={router.pathname === '/model' ? 'active' : ''}>
+                  <Link href="/model">
+                    <a>Model</a>
+                  </Link>
+                </li>
+                <li key="contact" className={router.pathname === '/contact' ? 'active' : ''}>
+                  <Link href="/contact">
+                    <a>Contact</a>
+                  </Link>
+                </li>
+              </>
+            )}
             {menus
               && menus.length > 0
               && menus.map((item) => (
@@ -61,7 +64,7 @@ class Footer extends PureComponent<IProps> {
                 </li>
               ))}
           </ul>
-          )}
+          {/* eslint-disable-next-line react/no-danger */}
           {ui.footerContent ? <div className="footer-content" dangerouslySetInnerHTML={{ __html: ui.footerContent }} />
             : (
               <div className="copyright-text">
@@ -85,4 +88,4 @@ const mapState = (state: any) => ({
   currentUser: state.user.current,
   ui: { ...state.ui }
 });
-export default withRouter(connect(mapState)(Footer)) as any;
+export default withRouter(connect(mapState)(Footer));

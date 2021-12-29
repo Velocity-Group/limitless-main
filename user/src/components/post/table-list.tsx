@@ -101,7 +101,7 @@ const FeedList = ({
       }
     },
     {
-      title: 'Last update',
+      title: 'Updated On',
       key: 'updatedAt',
       dataIndex: 'updatedAt',
       render: (updatedAt: Date) => <span>{formatDate(updatedAt)}</span>,

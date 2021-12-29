@@ -3,16 +3,15 @@ import { PureComponent, createRef } from 'react';
 import {
   Form, Input, Button, Select, Switch, InputNumber, Popover
 } from 'antd';
-import { IMenuCreate, IMenuUpdate } from 'src/interfaces';
+import { IMenu } from 'src/interfaces';
 import { FormInstance } from 'antd/lib/form';
 import { SelectPostDropdown } from '@components/post/select-post-dropdown';
 import { isUrl } from '@lib/string';
 import Link from 'next/link';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { SelectMenuTreeDropdown } from './common/menu-tree.select';
 
 interface IProps {
-  menu?: IMenuUpdate;
+  menu?: IMenu;
   onFinish: Function;
   submiting?: boolean;
 }
@@ -20,7 +19,6 @@ export class FormMenu extends PureComponent<IProps> {
   formRef: any;
 
   state = {
-    isPage: false,
     isInternal: false,
     path: ''
   };
@@ -30,7 +28,6 @@ export class FormMenu extends PureComponent<IProps> {
     const { menu } = this.props;
     if (menu) {
       this.setState({
-        isPage: menu.isPage,
         isInternal: menu.internal,
         path: menu.path
       });
@@ -47,7 +44,7 @@ export class FormMenu extends PureComponent<IProps> {
   render() {
     if (!this.formRef) this.formRef = createRef();
     const { menu, onFinish, submiting } = this.props;
-    const { isInternal, path, isPage } = this.state;
+    const { isInternal, path } = this.state;
     return (
       <Form
         ref={this.formRef}
@@ -65,21 +62,21 @@ export class FormMenu extends PureComponent<IProps> {
             ordering: 0,
             isPage: false,
             isNewTab: false
-          } as IMenuCreate)
+          })
         }
-        labelCol={{ span: 4 }}
-        wrapperCol={{ span: 20 }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
       >
         <Form.Item
           name="internal"
           label={(
             <>
-              <Popover content={<p>Using system website Static Page as menu item or external link</p>}>
+              <Popover content={<p>Using website post as menu item or an external link</p>}>
                 <a style={{ marginRight: '5px' }}>
                   <QuestionCircleOutlined />
                 </a>
               </Popover>
-              From sytem page?
+              From sytem post?
             </>
           )}
           valuePropName="checked"
@@ -91,7 +88,6 @@ export class FormMenu extends PureComponent<IProps> {
               if (!val) {
                 this.setFormVal('path', '');
                 this.setFormVal('isPage', false);
-                this.setState({ isPage: false, path: '' });
               }
             }}
           />
@@ -99,54 +95,31 @@ export class FormMenu extends PureComponent<IProps> {
         <Form.Item name="isNewTab" label="Is new tab?" valuePropName="checked">
           <Switch defaultChecked={false} />
         </Form.Item>
-        {/* {this.state.isInternal && (
+        <Form.Item name="title" rules={[{ required: true, message: 'Please input title of menu!' }]} label="Title">
+          <Input placeholder="Enter menu title" />
+        </Form.Item>
+        {isInternal ? (
           <Form.Item
-            name="isPage"
-            label={
-              <Fragment>
-                <Popover
-                  content={<p>Checked if menu item system website Static Page and vice versa.</p>}>
-                  <a style={{ marginRight: '5px' }}>
-                    <QuestionCircleOutlined />
-                  </a>
-                </Popover>
-                Is Page?
-              </Fragment>
-            }
-            valuePropName="checked">
-            <Switch
-              defaultChecked={false}
-              onChange={val => {
-                this.setState({ isPage: val });
-                if (!val) {
-                  this.setFormVal('path', '');
-                  this.setState({ path: '' });
-                }
-              }}
-            />
-          </Form.Item>
-        )} */}
-        {isInternal && (
-          <Form.Item
+            name="path"
             label={(
               <>
                 <Popover
                   content={(
                     <p>
-                      If there is no data, please create a page at
+                      If there is no data, please create a post
                       {' '}
                       <Link href="/posts/create">
                         <a>here</a>
                       </Link>
                     </p>
                   )}
-                  title="Pages listing"
+                  title={null}
                 >
                   <a style={{ marginRight: '5px' }}>
                     <QuestionCircleOutlined />
                   </a>
                 </Popover>
-                Page
+                Posts
               </>
             )}
           >
@@ -156,33 +129,6 @@ export class FormMenu extends PureComponent<IProps> {
                 this.setFormVal('path', val ? `/page/${val}` : '');
               }}
             />
-          </Form.Item>
-        )}
-        <Form.Item name="title" rules={[{ required: true, message: 'Please input title of menu!' }]} label="Title">
-          <Input placeholder="Enter menu title" />
-        </Form.Item>
-        {isInternal ? (
-          <Form.Item
-            name="path"
-            rules={[
-              { required: true, message: 'Please input path of menu!' },
-              {
-                validator: (rule, value) => {
-                  if (!value) return Promise.resolve();
-                  const isUrlValid = isUrl(value);
-                  if (isInternal && isUrlValid) {
-                    Promise.reject('The path is not valid');
-                  }
-                  if (!isInternal && !isUrlValid) {
-                    return Promise.reject('The url is not valid');
-                  }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-            label="Path"
-          >
-            <Input placeholder="Enter menu path" disabled={isPage} />
           </Form.Item>
         ) : (
           <Form.Item
@@ -205,7 +151,7 @@ export class FormMenu extends PureComponent<IProps> {
             ]}
             label="Url"
           >
-            <Input placeholder="Enter menu url" disabled={isPage} />
+            <Input placeholder="Enter menu url" />
           </Form.Item>
         )}
         {/* <Form.Item name="help" label="Help">
@@ -213,26 +159,26 @@ export class FormMenu extends PureComponent<IProps> {
         </Form.Item> */}
         <Form.Item name="section" label="Section" rules={[{ required: true, message: 'Please select menu section!' }]}>
           <Select disabled>
-            <Select.Option key="main" value="main">
+            {/* <Select.Option key="main" value="main">
               Main
             </Select.Option>
             <Select.Option key="header" value="header">
               Header
-            </Select.Option>
+            </Select.Option> */}
             <Select.Option key="footer" value="footer">
               Footer
             </Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item name="parentId" label="Parent">
+        {/* <Form.Item name="parentId" label="Parent">
           <SelectMenuTreeDropdown
             defaultValue={menu && menu.parentId}
             onSelect={(val) => this.setFormVal('parentId', val)}
             menu={menu || null}
           />
         </Form.Item>
-        {/* <Form.Item name="public" label="Public" valuePropName="checked">
-          <Switch defaultChecked={true} />
+        <Form.Item name="public" label="Public" valuePropName="checked">
+          <Switch />
         </Form.Item> */}
         <Form.Item name="ordering" label="Ordering">
           <InputNumber type="number" placeholder="Enter ordering of menu item" />

@@ -238,7 +238,7 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
     } = this.props;
     if (!activeConversation?.data?.streamId) return;
     if (user.balance < performer.groupChatPrice) {
-      message.error('Your token balance is not enough!', 15);
+      message.error('You have an insufficient token balance. Please top up.', 15);
       Router.push('/token-package');
       return;
     }
@@ -301,7 +301,7 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
     } = this.props;
     if (!activeConversation || !activeConversation.data || !activeConversation.data._id) return;
     if (user.balance < token) {
-      message.error('Your token balance is not enough!');
+      message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
       return;
     }

@@ -1,3 +1,5 @@
+import { ISearch } from './utils';
+
 export interface IBanner {
   _id: string;
   title: string;
@@ -7,7 +9,7 @@ export interface IBanner {
   photo?: { url: string; thumbnails: string[] };
 }
 
-export interface IBannerSearch {
+export interface IBannerSearch extends ISearch {
   position?: string;
   status?: string;
 }
