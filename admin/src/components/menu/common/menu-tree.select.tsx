@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import { TreeSelect } from 'antd';
 import { sortBy } from 'lodash';
 import { menuService } from '@services/menu.service';
-import { IMenuUpdate } from 'src/interfaces';
+import { IMenu } from 'src/interfaces';
 import * as _ from 'lodash';
 
 interface IProps {
@@ -11,7 +11,7 @@ interface IProps {
   defaultValue?: any;
   onSelect: Function;
   disabled?: boolean;
-  menu?: IMenuUpdate;
+  menu?: IMenu;
 }
 
 export class SelectMenuTreeDropdown extends PureComponent<IProps> {

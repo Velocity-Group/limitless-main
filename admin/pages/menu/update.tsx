@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import Page from '@components/common/layout/page';
 import { message } from 'antd';
 import { menuService } from '@services/menu.service';
-import { IMenuUpdate } from 'src/interfaces';
+import { IMenu } from 'src/interfaces';
 import Loader from '@components/common/base/loader';
 import { BreadcrumbComponent } from '@components/common';
 import { FormMenu } from '@components/menu/form-menu';
@@ -15,7 +15,7 @@ class MenuUpdate extends PureComponent<IProps> {
   state = {
     submiting: false,
     fetching: true,
-    menu: {} as IMenuUpdate
+    menu: {} as IMenu
   };
 
   static async getInitialProps({ ctx }) {
