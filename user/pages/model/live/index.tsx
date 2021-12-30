@@ -346,6 +346,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
             />
           </Col>
           <Modal
+            centered
             key="update_stream"
             title="Update stream information"
             visible={openPriceModal}

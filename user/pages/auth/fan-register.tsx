@@ -101,7 +101,7 @@ class FanRegister extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="main-container">
-          <div className="login-box" style={{ marginTop: 0 }}>
+          <div className="login-box">
             <p className="text-center">
               <small>
                 Do not create an account on this page if you are a model. Models must create an account on

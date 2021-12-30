@@ -447,6 +447,7 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
             </Col>
           </Row>
           <Modal
+            centered
             key="update_stream"
             title="Send Private Call Request"
             visible={openPriceModal}
@@ -456,6 +457,7 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
             <PurchaseStreamForm streamType="private" submiting={processing} performer={performer} onFinish={this.sendRequest.bind(this)} />
           </Modal>
           <Modal
+            centered
             key="tip"
             title={null}
             visible={openTipModal}

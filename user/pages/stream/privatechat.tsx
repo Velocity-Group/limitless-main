@@ -456,6 +456,7 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
             </Col>
           </Row>
           <Modal
+            centered
             key="update_stream"
             title="Send Private Call Request"
             visible={openPriceModal}
@@ -466,6 +467,7 @@ class UserPrivateChat extends PureComponent<IProps, IStates> {
           </Modal>
           <Modal
             key="tip"
+            centered
             title={null}
             visible={openTipModal}
             onOk={() => this.setState({ openTipModal: false })}

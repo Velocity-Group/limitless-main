@@ -163,6 +163,7 @@ class SubscriptionPage extends PureComponent<IProps> {
             />
           </div>
           <Modal
+            centered
             key="subscribe_performer"
             title={null}
             visible={openSubscriptionModal}

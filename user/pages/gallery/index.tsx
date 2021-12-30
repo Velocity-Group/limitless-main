@@ -409,6 +409,7 @@ class GalleryViewPage extends PureComponent<IProps> {
           className="subscription-modal"
           width={500}
           title={null}
+          centered
           visible={openSubscriptionModal}
           footer={null}
           onCancel={() => this.setState({ openSubscriptionModal: false })}
@@ -421,6 +422,7 @@ class GalleryViewPage extends PureComponent<IProps> {
           />
         </Modal>
         <Modal
+          centered
           key="purchase_post"
           title={null}
           visible={openPurchaseModal}

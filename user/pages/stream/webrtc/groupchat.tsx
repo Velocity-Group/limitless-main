@@ -417,6 +417,7 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
             </Col>
           </Row>
           <Modal
+            centered
             key="update_stream"
             title={`Confirm to join ${performer?.name || performer?.username || 'N/A'} group chat`}
             visible={openPriceModal}
@@ -426,6 +427,7 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
             <PurchaseStreamForm streamType="group" submiting={processing} performer={performer} onFinish={this.joinGroupChat.bind(this)} />
           </Modal>
           <Modal
+            centered
             key="tip"
             title={null}
             visible={openTipModal}

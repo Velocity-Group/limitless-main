@@ -687,10 +687,14 @@ class PerformerProfile extends PureComponent<IProps> {
           && (
             <Modal
               key="welcome-video"
+              className="welcome-video"
               destroyOnClose
+              closable={false}
+              maskClosable={false}
               width={767}
               visible={showWelcomVideo}
               title={null}
+              centered
               onCancel={() => this.setState({ showWelcomVideo: false })}
               footer={[
                 <Button
@@ -713,7 +717,6 @@ class PerformerProfile extends PureComponent<IProps> {
                 key: `${performer._id}`,
                 controls: true,
                 playsinline: true,
-                fluid: true,
                 sources: [
                   {
                     src: performer?.welcomeVideoPath,
@@ -729,6 +732,7 @@ class PerformerProfile extends PureComponent<IProps> {
           key="tip_performer"
           className="subscription-modal"
           visible={openTipModal}
+          centered
           onOk={() => this.setState({ openTipModal: false })}
           footer={null}
           width={350}
@@ -745,6 +749,7 @@ class PerformerProfile extends PureComponent<IProps> {
           key="subscribe_performer"
           className="subscription-modal"
           width={500}
+          centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}

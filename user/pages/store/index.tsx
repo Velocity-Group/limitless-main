@@ -299,6 +299,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}
           destroyOnClose
+          centered
         >
           <PurchaseProductForm
             product={product}

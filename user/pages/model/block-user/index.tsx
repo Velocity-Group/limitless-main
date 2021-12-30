@@ -127,6 +127,7 @@ class blockPage extends PureComponent<IProps> {
            </div>
          </div>
          <Modal
+           centered
            title="Block user"
            visible={openBlockModal}
            onCancel={() => this.setState({ openBlockModal: false })}

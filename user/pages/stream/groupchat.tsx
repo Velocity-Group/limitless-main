@@ -422,12 +422,14 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
             title={`Confirm to join ${performer?.name || performer?.username || 'N/A'} group chat`}
             visible={openPriceModal}
             footer={null}
+            centered
             onCancel={() => Router.back()}
           >
             <PurchaseStreamForm streamType="group" submiting={processing} performer={performer} onFinish={this.joinGroupChat.bind(this)} />
           </Modal>
           <Modal
             key="tip"
+            centered
             title={null}
             visible={openTipModal}
             onOk={() => this.setState({ openTipModal: false })}

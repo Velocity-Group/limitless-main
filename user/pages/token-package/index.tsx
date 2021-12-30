@@ -149,6 +149,7 @@ class TokenPackages extends PureComponent<IProps> {
             ))}
           </Row>
           <Modal
+            centered
             key={`token_package_${selectedPackage?._id}`}
             title={`Purchase Token Package ${selectedPackage?.name}`}
             visible={openPurchaseModal}

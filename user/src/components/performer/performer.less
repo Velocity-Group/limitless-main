@@ -875,15 +875,6 @@
   }
 }
 
-.live-alert {
-  text-align: center;
-  background: @highlight-color;
-  color: @white;
-  padding: 5px;
-  border-radius: 5px;
-  font-weight: 600;
-}
-
 .hr-divider {
   margin: 20px 0px 0px;
   border-bottom: 1px solid @theme-color;
@@ -968,5 +959,21 @@
   flex-wrap: wrap;
   .react-share__ShareButton {
     margin: 0 5px;
+  }
+}
+
+.welcome-video {
+  .ant-modal-body {
+    padding: 0;
+    border-radius: 5px;
+  }
+  .videojs-player {
+    .video-js {
+      width: 100%;
+      height: 450px;
+      @media screen and (max-width: @mobile-screen) {
+        height: 350px;
+      }
+    }
   }
 }

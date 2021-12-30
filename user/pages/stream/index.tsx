@@ -557,6 +557,7 @@ class LivePage extends PureComponent<IProps> {
           </Modal> */}
           <Modal
             key="tip"
+            centered
             title={null}
             visible={openTipModal}
             onOk={() => this.setState({ openTipModal: false })}
@@ -567,6 +568,7 @@ class LivePage extends PureComponent<IProps> {
             <TipPerformerForm performer={performer} submiting={submiting} onFinish={this.sendTip.bind(this)} />
           </Modal>
           <Modal
+            centered
             key="confirm_join_stream"
             title={`Join ${performer?.name || performer?.username || 'N/A'} live chat`}
             visible={openPurchaseModal}
