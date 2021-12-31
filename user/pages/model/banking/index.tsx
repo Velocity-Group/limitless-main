@@ -23,7 +23,8 @@ class BankingSettings extends PureComponent<IProps> {
   state = {
     loading: false,
     submiting: false,
-    loginUrl: ''
+    loginUrl: '',
+    stripeAccount: null
   }
 
   componentDidMount() {
@@ -48,10 +49,15 @@ class BankingSettings extends PureComponent<IProps> {
   async getAccount() {
     try {
       await this.setState({ loading: true });
-      const [loginLink] = await Promise.all([
-        paymentService.loginLink()
+      const [loginLink, account] = await Promise.all([
+        paymentService.loginLink(),
+        paymentService.retrieveStripeAccount()
       ]);
-      this.setState({ loginUrl: loginLink.data.url, loading: false });
+      this.setState({
+        loginUrl: loginLink.data.url,
+        stripeAccount: account.data,
+        loading: false
+      });
     } catch {
       this.setState({ loading: false });
     }
@@ -77,7 +83,7 @@ class BankingSettings extends PureComponent<IProps> {
       ui, user
     } = this.props;
     const {
-      loading, submiting, loginUrl
+      loading, submiting, loginUrl, stripeAccount
     } = this.state;
     return (
       <Layout>
@@ -99,7 +105,7 @@ class BankingSettings extends PureComponent<IProps> {
               )}
               key="stripe"
             >
-              <PerformerBankingForm stripeAccount={user?.stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
+              <PerformerBankingForm stripeAccount={stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
             </Tabs.TabPane>
             <Tabs.TabPane
               tab={(
