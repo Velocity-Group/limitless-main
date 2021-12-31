@@ -394,7 +394,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         icon: <DollarOutlined />,
         children: [
           {
-            id: 'payment',
+            id: 'transactions',
             name: 'All token transactions',
             route: '/token-transactions'
           }

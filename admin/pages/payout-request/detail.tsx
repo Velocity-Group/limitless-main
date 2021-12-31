@@ -192,7 +192,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   Conversion rate:
                   {' '}
                   $
-                  {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                  {((request.requestTokens || 0) * (request.tokenConversionRate || 1)).toFixed(2)}
                 </p>
                 <p>
                   Requested on:
@@ -206,49 +206,49 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 </p>
                 <Divider />
                 {request.paymentAccountType === 'paypal' && (
-                <div>
-                  <h2>Confirm payout via Paypal</h2>
-                  <p>
-                    Account:
-                    {' '}
-                    {paymentAccountInfo?.value?.email || 'N/A'}
-                  </p>
-                  <p>
-                    Amount: $
-                    {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
-                  </p>
-                  <form action={config.NEXT_PUBLIC_PAYPAY_PAYOUT_URL || 'https://www.paypal.com/cgi-bin/webscr'} method="post" className="paypal-payout">
-                    <input type="hidden" name="cmd" value="_xclick" />
-                    <input type="hidden" name="return" value={window.location.href} />
-                    <input type="hidden" name="cancel_return" value={window.location.href} />
-                    <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
-                    <input type="hidden" name="item_number" value={request._id} />
-                    <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
-                    <input type="hidden" name="currency_code" value="USD" />
-                    <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
-                    <input disabled={loading || request?.status !== 'pending'} type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
-                  </form>
-                  <p style={{ color: 'red' }}>
-                    <small>Please update status manually after transaction success!</small>
-                  </p>
-                </div>
+                  <div>
+                    <h2>Confirm payout via Paypal</h2>
+                    <p>
+                      Account:
+                      {' '}
+                      {paymentAccountInfo?.value?.email || 'N/A'}
+                    </p>
+                    <p>
+                      Amount: $
+                      {((request.requestTokens || 0) * (request.tokenConversionRate || 1)).toFixed(2)}
+                    </p>
+                    <form action={config.NEXT_PUBLIC_PAYPAY_PAYOUT_URL || 'https://www.paypal.com/cgi-bin/webscr'} method="post" className="paypal-payout">
+                      <input type="hidden" name="cmd" value="_xclick" />
+                      <input type="hidden" name="return" value={window.location.href} />
+                      <input type="hidden" name="cancel_return" value={window.location.href} />
+                      <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
+                      <input type="hidden" name="item_number" value={request._id} />
+                      <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
+                      <input type="hidden" name="currency_code" value="USD" />
+                      <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
+                      <input disabled={loading || request?.status !== 'pending'} type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
+                    </form>
+                    <p style={{ color: 'red' }}>
+                      <small>Please update status manually after transaction success!</small>
+                    </p>
+                  </div>
                 )}
                 {request.paymentAccountType === 'stripe' && (
-                <div>
-                  <h2>
-                    Confirm transfer via Stripe Connect
-                  </h2>
                   <div>
-                    <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
-                      Click here to transfer $
-                      {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
-                      {' '}
-                      to
-                      {' '}
-                      {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
-                    </Button>
+                    <h2>
+                      Confirm transfer via Stripe Connect
+                    </h2>
+                    <div>
+                      <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
+                        Click here to transfer $
+                        {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                        {' '}
+                        to
+                        {' '}
+                        {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
+                      </Button>
+                    </div>
                   </div>
-                </div>
                 )}
                 <Divider />
                 <div style={{ marginBottom: '10px' }}>
