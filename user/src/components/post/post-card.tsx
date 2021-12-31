@@ -253,6 +253,10 @@ class FeedCard extends Component<IProps> {
 
   async sendTip(price) {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user._id === feed?.performer?._id) {
+      message.error('Models cannot tip for themselves');
+      return;
+    }
     if (user.balance < price) {
       message.error('Your token balance is not enough');
       Router.push('/token-package');
@@ -418,31 +422,31 @@ class FeedCard extends Component<IProps> {
           <div className="feed-text">
             {feed.text}
             {polls && polls.length > 0 && (
-            <div className="feed-polls">
-              {feed.pollDescription && <h4 className="p-question">{feed.pollDescription}</h4>}
-              {polls.map((poll) => (
-                <div aria-hidden className="p-item" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
-                  <span className="p-desc">{poll?.description}</span>
-                  {' '}
-                  <span>{poll?.totalVote || 0}</span>
-                </div>
-              ))}
-              <div className="total-vote">
-                <span>
-                  Total
-                  {' '}
-                  {shortenLargeNumber(totalVote)}
-                  {' '}
-                  {totalVote < 1 ? 'vote' : 'votes'}
-                </span>
-                {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
+              <div className="feed-polls">
+                {feed.pollDescription && <h4 className="p-question">{feed.pollDescription}</h4>}
+                {polls.map((poll) => (
+                  <div aria-hidden className="p-item" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
+                    <span className="p-desc">{poll?.description}</span>
+                    {' '}
+                    <span>{poll?.totalVote || 0}</span>
+                  </div>
+                ))}
+                <div className="total-vote">
                   <span>
-                    {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}d `}
-                    <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
+                    Total
+                    {' '}
+                    {shortenLargeNumber(totalVote)}
+                    {' '}
+                    {totalVote < 1 ? 'vote' : 'votes'}
                   </span>
-                ) : <span>Closed</span>}
+                  {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
+                    <span>
+                      {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}d `}
+                      <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
+                    </span>
+                  ) : <span>Closed</span>}
+                </div>
               </div>
-            </div>
             )}
           </div>
           {canView && (
