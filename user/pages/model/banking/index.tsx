@@ -6,6 +6,9 @@ import { BankOutlined } from '@ant-design/icons';
 import {
   IPerformer, IUIConfig
 } from 'src/interfaces';
+import {
+  updatePerformer
+} from 'src/redux/user/actions';
 import { PerformerBankingForm, PerformerPaypalForm } from '@components/performer';
 import { paymentService, performerService } from '@services/index';
 import PageHeading from '@components/common/page-heading';
@@ -14,6 +17,7 @@ import '../../user/index.less';
 interface IProps {
   user: IPerformer;
   ui: IUIConfig;
+  updatePerformer: Function;
 }
 class BankingSettings extends PureComponent<IProps> {
   static authenticate = true;
@@ -48,6 +52,7 @@ class BankingSettings extends PureComponent<IProps> {
 
   async getAccount() {
     try {
+      const { user, updatePerformer: handleUpdateStripe } = this.props;
       await this.setState({ loading: true });
       const [loginLink, account] = await Promise.all([
         paymentService.loginLink(),
@@ -58,6 +63,7 @@ class BankingSettings extends PureComponent<IProps> {
         stripeAccount: account.data,
         loading: false
       });
+      handleUpdateStripe({ ...user, stripeAccount: account.data });
     } catch {
       this.setState({ loading: false });
     }
@@ -132,5 +138,5 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui },
   user: { ...state.user.current }
 });
-const mapDispatch = {};
+const mapDispatch = { updatePerformer };
 export default connect(mapStates, mapDispatch)(BankingSettings);

@@ -20,8 +20,7 @@ import {
   authService, performerService, utilsService
 } from '@services/index';
 import {
-  PerformerAccountForm, PerformerSubscriptionForm,
-  PerformerVerificationForm
+  PerformerAccountForm, PerformerSubscriptionForm, PerformerVerificationForm
 } from '@components/performer';
 import '../../user/index.less';
 
