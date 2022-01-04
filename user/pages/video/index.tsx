@@ -501,15 +501,16 @@ class VideoViewPage extends PureComponent<IProps> {
           </div>
         </div>
         <div className="main-container">
+          {video.tags && video.tags.length > 0 && (
           <div className="vid-tags">
-            {video.tags && video.tags.length > 0
-              && video.tags.map((tag) => (
-                <a color="magenta" key={tag} style={{ marginRight: 5 }}>
-                  #
-                  {tag || 'tag'}
-                </a>
-              ))}
+            {video.tags.map((tag) => (
+              <a color="magenta" key={tag} style={{ marginRight: 5 }}>
+                #
+                {tag || 'tag'}
+              </a>
+            ))}
           </div>
+          )}
           <Tabs
             defaultActiveKey="description"
             activeKey={activeTab}

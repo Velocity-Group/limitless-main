@@ -320,14 +320,14 @@ class GalleryViewPage extends PureComponent<IProps> {
                   )}
                   {!gallery?.performer?.isFreeSubscription && gallery?.performer.yearlyPrice && (
                   <Button
-                    className="btn btn-yellow"
+                    className="secondary"
                     disabled={!user || !user._id || (submiting && this.subscriptionType === 'yearly')}
                     onClick={() => {
                       this.subscriptionType = 'yearly';
                       this.setState({ openSubscriptionModal: true });
                     }}
                   >
-                    YEARLY SUBSCRIPTON FOR
+                    YEARLY SUBSCRIPTON FOR $
                     {(gallery?.performer?.yearlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
