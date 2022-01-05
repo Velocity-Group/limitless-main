@@ -49,7 +49,11 @@ export abstract class APIRequest {
         Router.push('/login');
       }
 
-      throw new Error('Forbidden in the action!');
+      throw new Error('Please login!');
+    }
+
+    if (response.status === 403) {
+      throw new Error('Please login!');
     }
 
     // const error = new Error(response.statusText) as any;
