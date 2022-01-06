@@ -21,7 +21,7 @@ const PayoutRequestList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'IDs',
+      title: 'ID',
       dataIndex: '_id',
       key: 'id',
       render: (id: string, record) => (
@@ -42,7 +42,7 @@ const PayoutRequestList = ({
       )
     },
     {
-      title: 'Request_Tokens',
+      title: 'Amount in Tokens',
       dataIndex: 'requestTokens',
       key: 'requestTokens',
       render: (requestTokens: number) => (
@@ -97,21 +97,21 @@ const PayoutRequestList = ({
       }
     },
     {
-      title: 'Created_at',
+      title: 'Created On',
       key: 'createdAt',
       dataIndex: 'createdAt',
       render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>,
       sorter: true
     },
     {
-      title: 'Last updated at',
+      title: 'Last updated On',
       key: 'updatedAt',
       dataIndex: 'updatedAt',
       render: (updatedAt: Date) => <span>{formatDate(updatedAt)}</span>,
       sorter: true
     },
     {
-      title: 'Actions',
+      title: 'Action',
       key: 'details',
       render: (request: PayoutRequestInterface) => (
         <Link

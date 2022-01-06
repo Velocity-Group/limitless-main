@@ -62,6 +62,7 @@ export interface IPerformer {
   googleConnected: boolean;
   welcomeVideoId: string;
   welcomeVideoPath: string;
+  welcomeVideoName: string;
   activateWelcomeVideo: boolean;
   isBookMarked: boolean;
   isSubscribed: boolean;
@@ -86,47 +87,7 @@ export interface IPerformer {
     twitter: string;
     linkedIn: string;
   };
-}
-
-export interface IUpdatePerformer {
-  _id: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  phoneCode: string;
-  gender: string;
-  country: string;
-  city: string;
-  state: string;
-  zipcode: string;
-  address: string;
-  languages: string[];
-  studioId: string;
-  categoryIds: string[];
-  timezone: string;
-  noteForUser: string;
-  height: string;
-  weight: string;
-  bio: string;
-  eyes: string;
-  sexualOrientation: string;
-  isFreeSubscription: boolean;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  bankingInformation: IBanking;
-  welcomeVideoId: string;
-  welcomeVideoPath: string;
-  activateWelcomeVideo: boolean;
-  publicChatPrice: number;
-  privateChatPrice: number;
-  socialsLink: {
-    facebook: string;
-    google: string;
-    instagram: string;
-    twitter: string;
-    linkedIn: string;
-  }
+  isPerformer: boolean;
 }
 
 export interface IBanking {
@@ -157,58 +118,4 @@ export interface IBlockCountries {
 export interface IBlockedByPerformer {
   userId: string;
   description: string;
-}
-
-export interface ITrendingPerformer {
-  _id?: string;
-
-  name: string;
-
-  firstName: string;
-
-  lastName: string;
-
-  username: string;
-
-  dateOfBirth: Date;
-
-  avatarId: string;
-
-  avatarPath: string;
-
-  avatar: string;
-
-  coverId: string;
-
-  coverPath: string;
-
-  cover: string;
-
-  welcomeVideoId: string;
-
-  welcomeVideoPath: string;
-
-  activateWelcomeVideo: boolean;
-
-  verifiedAccount: boolean;
-
-  gender: string;
-
-  country: string;
-
-  bio: string;
-
-  createdAt: Date;
-
-  updatedAt: Date;
-
-  totalSubscribersInDay: number;
-
-  performerId: string;
-
-  listType: string;
-
-  isProtected: boolean;
-
-  ordering: number;
 }

@@ -6,11 +6,12 @@ import {
 } from 'antd';
 import {
   BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
-  PlayCircleOutlined
+  PlayCircleOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import UploadList from '@components/file/list-media';
 import { IFeed } from 'src/interfaces';
 import { feedService } from '@services/index';
+import { getGlobalConfig } from '@services/config';
 import Router from 'next/router';
 import moment from 'moment';
 import { formatDate } from '@lib/date';
@@ -38,16 +39,15 @@ export default class FormFeed extends PureComponent<IProps> {
 
   pollIds = [];
 
-  thumbnailId = '';
+  thumbnailId = null;
 
-  teaserId = '';
-
-  teaser = null;
+  teaserId = null;
 
   state = {
     type: 'text',
     uploading: false,
     thumbnail: null,
+    teaser: null,
     fileList: [],
     fileIds: [],
     pollList: [],
@@ -69,9 +69,23 @@ export default class FormFeed extends PureComponent<IProps> {
         isSale: feed.isSale,
         addPoll: !!feed.pollIds.length,
         pollList: feed.polls,
-        thumbnail: feed.thumbnailUrl
+        thumbnail: feed.thumbnail,
+        teaser: feed.teaser
       });
-      this.teaser = feed.teaser;
+
+      this.teaserId = feed.teaserId;
+      this.thumbnailId = feed.thumbnailId;
+    }
+  }
+
+  handleDeleteFile(field: string) {
+    if (field === 'thumbnail') {
+      this.setState({ thumbnail: null });
+      this.thumbnailId = null;
+    }
+    if (field === 'teaser') {
+      this.setState({ teaser: null });
+      this.teaserId = null;
     }
   }
 
@@ -139,18 +153,19 @@ export default class FormFeed extends PureComponent<IProps> {
   }
 
   async beforeUpload(file, listFile) {
+    const config = getGlobalConfig();
     const { fileList, fileIds } = this.state;
     if (file.type.includes('image')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!valid) {
-        message.error(`Image ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+        message.error(`Image ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
         return false;
       }
     }
     if (file.type.includes('video')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
       if (!valid) {
-        message.error(`Video ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
+        message.error(`Video ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
         return false;
       }
     }
@@ -164,10 +179,10 @@ export default class FormFeed extends PureComponent<IProps> {
         return newFile;
       }));
       await this.setState({
-        fileList: [...fileList, ...files],
+        fileList: file.type.includes('video') ? files : [...fileList, ...files],
         uploading: true
       });
-      const newFileIds = [...fileIds];
+      const newFileIds = file.type.includes('video') ? [] : [...fileIds];
       // eslint-disable-next-line no-restricted-syntax
       for (const fileItem of listFile) {
         try {
@@ -198,9 +213,10 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    const valid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    const config = getGlobalConfig();
+    const valid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!valid) {
-      message.error(`Thumbnail must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+      message.error(`Thumbnail must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
       return;
     }
     const reader = new FileReader();
@@ -224,17 +240,18 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    this.teaser = file;
-    const valid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    const config = getGlobalConfig();
+    const valid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!valid) {
-      message.error(`Teaser must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB`);
+      message.error(`Teaser must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB`);
       return;
     }
+    this.setState({ teaser: file });
     try {
       const resp = await feedService.uploadTeaser(
         file,
         {},
-        this.onUploading.bind(this, this.teaser)
+        this.onUploading.bind(this, file)
       ) as any;
       this.teaserId = resp.data._id;
     } catch (e) {
@@ -256,12 +273,8 @@ export default class FormFeed extends PureComponent<IProps> {
     if (formValues.price < 1) {
       return message.error('Tokens must be greater than 1');
     }
-    if (this.teaserId) {
-      formValues.teaserId = this.teaserId;
-    }
-    if (this.thumbnailId) {
-      formValues.thumbnailId = this.thumbnailId;
-    }
+    formValues.teaserId = this.teaserId;
+    formValues.thumbnailId = this.thumbnailId;
     formValues.isSale = isSale;
     formValues.fileIds = fileIds;
     if (['video', 'photo'].includes(feed?.type || type) && !fileIds.length) {
@@ -301,7 +314,7 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!this.formRef) this.formRef = createRef();
     const { feed, onDelete } = this.props;
     const {
-      uploading, fileList, isSale, pollList, type,
+      uploading, fileList, isSale, pollList, type, teaser,
       addPoll, openPollDuration, expirePollTime, thumbnail
     } = this.state;
     return (
@@ -327,6 +340,7 @@ export default class FormFeed extends PureComponent<IProps> {
               { required: true, message: 'Please select a model!' }]}
           >
             <SelectPerformerDropdown
+              showAll
               defaultValue={feed && (feed?.fromSourceId || '')}
               onSelect={(val) => this.setFormVal('fromSourceId', val)}
             />
@@ -343,7 +357,7 @@ export default class FormFeed extends PureComponent<IProps> {
           </Form.Item>
           {['photo', 'video'].includes(type) && (
           <Form.Item>
-            <Switch checkedChildren="PPV Content" unCheckedChildren="Free Content" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
+            <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
           </Form.Item>
           )}
           {isSale && (
@@ -352,32 +366,38 @@ export default class FormFeed extends PureComponent<IProps> {
             </Form.Item>
           )}
           {thumbnail && (
-            <Form.Item label="Thumbnail">
-              <a href={thumbnail} target="_blank" rel="noreferrer">
-                <img alt="thumbnail" src={thumbnail} width="100px" />
-              </a>
-            </Form.Item>
+          <Form.Item label="Thumbnail">
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, right: 2 }}><DeleteOutlined /></Button>
+              <img alt="thumbnail" src={(thumbnail?.thumbnails && thumbnail?.thumbnails[0]) || thumbnail?.url || thumbnail} width="200px" />
+            </div>
+          </Form.Item>
           )}
-          {this.teaser && (
+          {teaser && (
             <Form.Item label="Teaser">
               <div className="f-upload-list">
                 <div className="f-upload-item">
                   <div className="f-upload-thumb">
-                    <a href={this.teaser?.url} target="_blank" rel="noreferrer">
+                    <a href={teaser?.url} target="_blank" rel="noreferrer">
                       <span className="f-thumb-vid">
                         <PlayCircleOutlined />
                       </span>
                     </a>
                   </div>
                   <div className="f-upload-name">
-                    <Tooltip title={this.teaser?.name}>{this.teaser?.name}</Tooltip>
+                    <Tooltip title={teaser?.name}>{teaser?.name}</Tooltip>
                   </div>
                   <div className="f-upload-size">
-                    {(this.teaser.size / (1024 * 1024)).toFixed(2)}
+                    {(teaser.size / (1024 * 1024)).toFixed(2)}
                     {' '}
                     MB
                   </div>
-                  {this.teaser.percent && <Progress percent={Math.round(this.teaser.percent)} />}
+                  <span className="f-remove">
+                    <Button type="primary" onClick={() => this.handleDeleteFile('teaser')}>
+                      <DeleteOutlined />
+                    </Button>
+                  </span>
+                  {teaser.percent && <Progress percent={Math.round(teaser.percent)} />}
                 </div>
               </div>
             </Form.Item>
@@ -405,15 +425,25 @@ export default class FormFeed extends PureComponent<IProps> {
                         </span>
                       )}
                   </div>
+                  <Form.Item
+                    name="pollDescription"
+                    className="form-item-no-pad"
+                    validateTrigger={['onChange', 'onBlur']}
+                    rules={[
+                      { required: true, message: 'Please add a question' }
+                    ]}
+                  >
+                    <Input placeholder="Question" />
+                  </Form.Item>
                   {/* eslint-disable-next-line no-nested-ternary */}
-                  <Input disabled={!!feed?._id} className="poll-input" value={pollList && pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
+                  <Input disabled={!!feed?._id} className="poll-input" placeholder="Poll 1" value={pollList && pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
                   {/* eslint-disable-next-line no-nested-ternary */}
-                  <Input disabled={!!feed?._id || !pollList.length} className="poll-input" value={pollList && pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
+                  <Input disabled={!!feed?._id || !pollList.length} className="poll-input" placeholder="Poll 2" value={pollList && pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
 
                   {pollList.map((poll, index) => {
                     if (index === 0 || index === 1) return null;
                     // eslint-disable-next-line react/no-array-index-key
-                    return <Input disabled={!!feed?._id} key={`poll_${index}`} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
+                    return <Input disabled={!!feed?._id} key={`poll_${index}`} placeholder={`Poll ${index + 1}`} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
                   })}
                   {!feed && pollList.length > 1 && (
                   <p style={{ display: 'flex', justifyContent: 'space-between' }}>

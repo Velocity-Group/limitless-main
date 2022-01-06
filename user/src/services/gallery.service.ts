@@ -1,8 +1,7 @@
-import { IGalleryCreate } from 'src/interfaces';
 import { APIRequest } from './api-request';
 
 class GalleryService extends APIRequest {
-  create(payload: IGalleryCreate) {
+  create(payload) {
     return this.post('/performer/performer-assets/galleries', payload);
   }
 
@@ -14,7 +13,7 @@ class GalleryService extends APIRequest {
     return this.get(this.buildUrl('/user/performer-assets/galleries/search', param));
   }
 
-  update(id: string, payload: IGalleryCreate) {
+  update(id: string, payload) {
     return this.put(`/performer/performer-assets/galleries/${id}`, payload);
   }
 

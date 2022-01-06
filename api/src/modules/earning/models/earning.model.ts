@@ -4,13 +4,9 @@ import { ObjectId } from 'mongodb';
 export class EarningModel extends Document {
   transactionId: ObjectId;
 
-  orderId: ObjectId;
-
   performerId: ObjectId;
 
   userId: ObjectId;
-
-  agentId: ObjectId;
 
   sourceType: string;
 
@@ -20,15 +16,7 @@ export class EarningModel extends Document {
 
   netPrice: number;
 
-  referralPrice: number;
-
-  agentPrice: number;
-
   siteCommission: number;
-
-  referralCommission: number;
-
-  agentCommission: number;
 
   isPaid: boolean;
 

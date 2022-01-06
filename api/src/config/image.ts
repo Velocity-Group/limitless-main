@@ -3,16 +3,16 @@ export default {
     width: 500,
     height: 500
   },
-  videoThumbnail: {
-    width: 500,
-    height: 500
+  blurThumbnail: {
+    width: 65,
+    height: 65
   },
-  productThumbnail: {
+  originThumbnail: {
     width: 500,
     height: 500
   },
   coverThumbnail: {
-    width: 1600,
-    height: 400
+    width: 900,
+    height: 225
   }
 };

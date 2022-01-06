@@ -2,7 +2,8 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import {
-  PageableData
+  PageableData,
+  EntityNotFoundException
   // AgendaService
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
@@ -17,7 +18,8 @@ import { SubscriptionModel } from '../models/subscription.model';
 import { SUBSCRIPTION_MODEL_PROVIDER } from '../providers/subscription.provider';
 import {
   SubscriptionCreatePayload,
-  SubscriptionSearchRequestPayload
+  SubscriptionSearchRequestPayload,
+  SubscriptionUpdatePayload
 } from '../payloads';
 import { SubscriptionDto } from '../dtos/subscription.dto';
 import {
@@ -162,6 +164,28 @@ export class SubscriptionService {
       this.userService.updateStats(newSubscription.userId, { 'stats.totalSubscriptions': 1 })
     ]);
     return new SubscriptionDto(newSubscription);
+  }
+
+  public async adminUpdate(
+    subscriptionId: string,
+    data: SubscriptionUpdatePayload
+  ): Promise<SubscriptionDto> {
+    const subscription = await this.subscriptionModel.findById(subscriptionId);
+    if (!subscription) {
+      throw new EntityNotFoundException();
+    }
+
+    const payload = { ...data } as any;
+    subscription.expiredAt = new Date(payload.expiredAt);
+    subscription.updatedAt = new Date();
+    subscription.subscriptionType = payload.subscriptionType;
+    subscription.status = payload.status;
+    await Promise.all([
+      this.performerService.updateSubscriptionStat(subscription.performerId, -1),
+      this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
+    ]);
+    await subscription.save();
+    return new SubscriptionDto(subscription);
   }
 
   public async adminSearch(

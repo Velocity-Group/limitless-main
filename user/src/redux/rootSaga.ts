@@ -7,7 +7,6 @@ import videoSagas from './video/sagas';
 import productSagas from './product/sagas';
 import commentSagas from './comment/sagas';
 import gallerySagas from './gallery/sagas';
-import bannerSagas from './banner/sagas';
 import messageSagas from './message/sagas';
 import feedSagas from './feed/sagas';
 import streamChatSagas from './stream-chat/sagas';
@@ -22,7 +21,6 @@ function* rootSaga() {
       ...productSagas,
       ...commentSagas,
       ...gallerySagas,
-      ...bannerSagas,
       ...messageSagas,
       ...feedSagas,
       ...streamChatSagas

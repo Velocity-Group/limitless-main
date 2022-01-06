@@ -28,7 +28,9 @@ import { UserService } from 'src/modules/user/services';
 import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
-import { isObjectId } from 'src/kernel/helpers/string.helper';
+import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
+import { Storage } from 'src/modules/storage/contants';
+import { StripeService } from 'src/modules/payment/services';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
@@ -74,6 +76,8 @@ export class PerformerService {
     private readonly fileService: FileService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
+    @Inject(forwardRef(() => StripeService))
+    private readonly stripeService: StripeService,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>,
     private readonly queueEventService: QueueEventService,
@@ -182,74 +186,57 @@ export class PerformerService {
     return performers.map((p) => new PerformerDto(p));
   }
 
-  public async getDetails(id: string | ObjectId, jwtToken: string): Promise<PerformerDto> {
+  public async getDetails(id: string, jwToken: string): Promise<PerformerDto> {
     const performer = await this.performerModel.findById(id);
     if (!performer) {
       throw new EntityNotFoundException();
     }
     const [
-      avatar,
-      documentVerification,
-      idVerification,
-      cover,
-      welcomeVideo
+      avatar, documentVerification, idVerification, cover, welcomeVideo,
+      paypalSetting, commissionSetting, stripeAccount, blockCountries
     ] = await Promise.all([
-      performer.avatarId ? this.fileService.findById(performer.avatarId) : null,
-      performer.documentVerificationId
-        ? this.fileService.findById(performer.documentVerificationId)
-        : null,
-      performer.idVerificationId
-        ? this.fileService.findById(performer.idVerificationId)
-        : null,
-      performer.coverId ? this.fileService.findById(performer.coverId) : null,
-      performer.welcomeVideoId
-        ? this.fileService.findById(performer.welcomeVideoId)
-        : null
+      performer.avatarId && this.fileService.findById(performer.avatarId),
+      performer.documentVerificationId && this.fileService.findById(performer.documentVerificationId),
+      performer.idVerificationId && this.fileService.findById(performer.idVerificationId),
+      performer.coverId && this.fileService.findById(performer.coverId),
+      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId),
+      this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'paypal' }),
+      this.commissionSettingModel.findOne({ performerId: id }),
+      this.stripeService.getConnectAccount(performer._id),
+      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id })
     ]);
 
     // TODO - update kernel for file dto
     const dto = new PerformerDto(performer);
     dto.avatar = avatar ? FileDto.getPublicUrl(avatar.path) : null; // TODO - get default avatar
     dto.cover = cover ? FileDto.getPublicUrl(cover.path) : null;
-    dto.welcomeVideoPath = welcomeVideo
-      ? FileDto.getPublicUrl(welcomeVideo.path)
-      : null;
-    dto.idVerification = idVerification
-      ? {
+    dto.welcomeVideoName = welcomeVideo ? welcomeVideo.name : null;
+    if (idVerification) {
+      let fileUrl = idVerification.getUrl(true);
+      if (idVerification.server !== Storage.S3) {
+        fileUrl = `${fileUrl}?documentId=${idVerification._id}&token=${jwToken}`;
+      }
+      dto.idVerification = {
         _id: idVerification._id,
-        url: jwtToken ? `${FileDto.getPublicUrl(idVerification.path)}?documentId=${idVerification._id}&token=${jwtToken}` : FileDto.getPublicUrl(idVerification.path),
+        url: fileUrl,
         mimeType: idVerification.mimeType
+      };
+    }
+    if (documentVerification) {
+      let fileUrl = documentVerification.getUrl(true);
+      if (documentVerification.server !== Storage.S3) {
+        fileUrl = `${fileUrl}?documentId=${documentVerification._id}&token=${jwToken}`;
       }
-      : null;
-    dto.documentVerification = documentVerification
-      ? {
+      dto.documentVerification = {
         _id: documentVerification._id,
-        url: jwtToken ? `${FileDto.getPublicUrl(documentVerification.path)}?documentId=${documentVerification._id}&token=${jwtToken}` : FileDto.getPublicUrl(documentVerification.path),
+        url: fileUrl,
         mimeType: documentVerification.mimeType
-      }
-      : null;
-
-    // dto.ccbillSetting = await this.paymentGatewaySettingModel.findOne({
-    //   performerId: id,
-    //   key: 'ccbill'
-    // });
-
-    dto.paypalSetting = await this.paymentGatewaySettingModel.findOne({
-      performerId: id,
-      key: 'paypal'
-    });
-
-    dto.commissionSetting = await this.commissionSettingModel.findOne({
-      performerId: id
-    });
-
-    // dto.bankingInformation = await this.bankingSettingModel.findOne({
-    //   performerId: id
-    // });
-
-    dto.blockCountries = await this.performerBlockService.findOneBlockCountriesByQuery({
-      sourceId: id
-    });
+      };
+    }
+    dto.paypalSetting = paypalSetting;
+    dto.commissionSetting = commissionSetting;
+    dto.stripeAccount = stripeAccount;
+    dto.blockCountries = blockCountries;
     return dto;
   }
 
@@ -551,6 +538,7 @@ export class PerformerService {
     }
     const data = { ...payload } as any;
     delete data.balance;
+    delete data.welcomeVideoId;
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
@@ -602,7 +590,7 @@ export class PerformerService {
       });
     }
     // update auth key if username or email has changed
-    if (performer.username && performer.username.trim() !== newPerformer.username) {
+    if (performer.username && performer.username !== newPerformer.username) {
       await this.authService.updateKey({
         source: 'performer',
         sourceId: newPerformer._id,
@@ -663,8 +651,31 @@ export class PerformerService {
       itemId: user._id,
       itemType: REF_TYPE.PERFORMER
     });
-    if (user.welcomeVideoId) {
+    if (user.welcomeVideoId && `${user.welcomeVideoId}` !== `${file._id}`) {
       await this.fileService.remove(user.welcomeVideoId);
+    }
+    await this.fileService.queueProcessVideo(file._id);
+    return file;
+  }
+
+  public async adminUpdateWelcomeVideo(performerId: string, file: FileDto) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
+    await this.performerModel.updateOne(
+      { _id: performerId },
+      {
+        welcomeVideoId: file._id,
+        welcomeVideoPath: file.path
+      }
+    );
+
+    await this.fileService.addRef(file._id, {
+      itemId: toObjectId(performerId),
+      itemType: REF_TYPE.PERFORMER
+    });
+
+    if (performer.welcomeVideoId && `${performer.welcomeVideoId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.welcomeVideoId);
     }
     await this.fileService.queueProcessVideo(file._id);
     return file;

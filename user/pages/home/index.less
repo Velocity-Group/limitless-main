@@ -133,7 +133,7 @@
       border-bottom: 2px solid @secondary-color;
     }
   }
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: @mobile-screen) {
     .ant-btn {
       margin: 0;
     }
@@ -187,5 +187,28 @@
         border: 2px solid @grey-color;
       }
     }
+  }
+  @media screen and (max-width: @mobile-screen) {
+    display: none;
+  }
+}
+.home-footer {
+  transform: translate(9999px);
+  transition: all 0.5s ease-in-out;
+  .main-footer {
+    ul li {
+      font-size: 11px;
+    }
+    .footer-content {
+      font-size: 11px;
+    }
+  }
+
+  &.active {
+    transform: translate(0);
+  }
+
+  @media screen and (max-width: @mobile-screen) {
+    display: none;
   }
 }

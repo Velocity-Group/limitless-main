@@ -1,5 +1,5 @@
 import {
-  Layout, Tabs, Button, Menu, message, Modal, Dropdown, Image, Popover, Tooltip
+  Layout, Tabs, Button, message, Modal, Image, Popover, Tooltip
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -14,7 +14,7 @@ import {
 import Head from 'next/head';
 import {
   ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined,
-  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, MoreOutlined
+  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined
 } from '@ant-design/icons';
 import { TickIcon, ShareIcon, MessageIcon } from 'src/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
@@ -228,7 +228,7 @@ class PerformerProfile extends PureComponent<IProps> {
       return;
     }
     if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
-      message.error('Please add payment card');
+      message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
     }
@@ -251,7 +251,7 @@ class PerformerProfile extends PureComponent<IProps> {
   async sendTip(price: number) {
     const { performer, currentUser, updateBalance: handleUpdateBalance } = this.props;
     if (currentUser.balance < price) {
-      message.error('Your balance token is not enough');
+      message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
       return;
     }
@@ -335,7 +335,7 @@ class PerformerProfile extends PureComponent<IProps> {
       galleryState
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Model profile was not found'} />;
+      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
     }
     const { items: feeds = [], total: totalFeed = 0, requesting: loadingFeed } = feedState;
     const { items: videos = [], total: totalVideos = 0, requesting: loadingVideo } = videoState;
@@ -361,6 +361,7 @@ class PerformerProfile extends PureComponent<IProps> {
             content={`${performer?.username}, ${performer?.name}`}
           />
           <meta name="description" content={performer?.bio} />
+          <meta property="og:type" content="website" />
           <meta
             property="og:title"
             content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
@@ -370,6 +371,7 @@ class PerformerProfile extends PureComponent<IProps> {
             property="og:description"
             content={performer?.bio}
           />
+          <meta name="twitter:card" content="summary" />
           <meta
             name="twitter:title"
             content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
@@ -438,24 +440,6 @@ class PerformerProfile extends PureComponent<IProps> {
                   </div>
                 </div>
               </div>
-              {!currentUser.isPerformer && (
-                <div className="drop-actions">
-                  <Dropdown overlay={(
-                    <Menu key="menu_actions">
-                      <Menu.Item key="book_mark">
-                        <a aria-hidden onClick={this.handleBookmark.bind(this)}>
-                          {!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}
-                        </a>
-                      </Menu.Item>
-                    </Menu>
-                )}
-                  >
-                    <a aria-hidden className="dropdown-options" onClick={(e) => e.preventDefault()}>
-                      <MoreOutlined />
-                    </a>
-                  </Dropdown>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -484,40 +468,50 @@ class PerformerProfile extends PureComponent<IProps> {
                 </h5>
               </div>
             </div>
-            {currentUser._id && !currentUser.isPerformer && (
-              <div className="btn-grp">
-                <div style={{ marginBottom: '4px' }}>
-                  <Tooltip title="Send Tip">
-                    <Button
-                      className="normal"
-                      onClick={() => this.setState({ openTipModal: true })}
-                    >
-                      <DollarOutlined />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="Send Message">
-                    <Button
-                      className="normal"
-                      onClick={() => Router.push({
-                        pathname: '/messages',
-                        query: {
-                          toSource: 'performer',
-                          toId: (performer?._id) || ''
-                        }
-                      })}
-                    >
-                      <MessageIcon />
-                    </Button>
-                  </Tooltip>
-                  <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
-                    <Button
-                      className="normal"
-                    >
-                      <ShareIcon />
-                    </Button>
-                  </Popover>
-                </div>
-                {/* {performer?.isSubscribed && (
+            <div className="btn-grp">
+              <div style={{ marginBottom: '4px' }}>
+                <Tooltip title="Send Tip">
+                  <Button
+                    disabled={!currentUser._id || currentUser.isPerformer}
+                    className="normal"
+                    onClick={() => this.setState({ openTipModal: true })}
+                  >
+                    <DollarOutlined />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Send Message">
+                  <Button
+                    disabled={!currentUser._id || currentUser.isPerformer}
+                    className="normal"
+                    onClick={() => Router.push({
+                      pathname: '/messages',
+                      query: {
+                        toSource: 'performer',
+                        toId: (performer?._id) || ''
+                      }
+                    })}
+                  >
+                    <MessageIcon />
+                  </Button>
+                </Tooltip>
+                <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                  <Button
+                    disabled={!currentUser._id || currentUser.isPerformer}
+                    className={isBookMarked ? 'active' : ''}
+                    onClick={() => this.handleBookmark()}
+                  >
+                    <BookOutlined />
+                  </Button>
+                </Tooltip>
+                <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
+                  <Button
+                    className="normal"
+                  >
+                    <ShareIcon />
+                  </Button>
+                </Popover>
+              </div>
+              {/* {performer?.isSubscribed && (
                       <div className="stream-btns">
                         <Button
                           type="link"
@@ -536,8 +530,7 @@ class PerformerProfile extends PureComponent<IProps> {
                         </Button>
                       </div>
                     )} */}
-              </div>
-            )}
+            </div>
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={ui?.countries || []} performer={performer} />
             </div>
@@ -587,7 +580,7 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR FREE IN
+                  SUBSCRIBE FOR FREE FOR
                   {' '}
                   {performer?.durationFreeSubscriptionDays || 1}
                   {' '}
@@ -596,7 +589,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   THEN $
                   {performer?.monthlyPrice.toFixed(2)}
                   {' '}
-                  MONTHLY LATER
+                  PER MONTH
                 </button>
               </div>
             )}
@@ -617,7 +610,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalFeed > 0 && totalFeed}
                     {' '}
-                    POST
+                    {totalFeed > 1 ? 'POSTS' : 'POST'}
                   </h4>
                   <SearchPostBar searching={loadingFeed} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
                 </div>
@@ -637,7 +630,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalVideos > 0 && totalVideos}
                     {' '}
-                    VIDEO
+                    {totalVideos > 1 ? 'VIDEOS' : 'VIDEO'}
                   </h4>
                   <SearchPostBar searching={loadingVideo} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
                 </div>
@@ -655,7 +648,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalGalleries > 0 && totalGalleries}
                     {' '}
-                    GALLERY
+                    {totalGalleries > 1 ? 'GALLERIES' : 'GALLERY'}
                   </h4>
                   <SearchPostBar searching={loadingGallery} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
                 </div>
@@ -673,7 +666,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalProducts > 0 && totalProducts}
                     {' '}
-                    PRODUCT
+                    {totalProducts > 1 ? 'PRODUCTS' : 'PRODUCT'}
                   </h4>
                   <SearchPostBar searching={loadingPrd} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} />
                 </div>
@@ -687,15 +680,21 @@ class PerformerProfile extends PureComponent<IProps> {
             </Tabs>
           </div>
         </div>
-        {performer
+        {
+          performer
           && performer?.welcomeVideoPath
-          && performer?.activateWelcomeVideo && (
+          && performer?.activateWelcomeVideo
+          && (
             <Modal
               key="welcome-video"
+              className="welcome-video"
               destroyOnClose
-              width={768}
+              closable={false}
+              maskClosable={false}
+              width={767}
               visible={showWelcomVideo}
               title={null}
+              centered
               onCancel={() => this.setState({ showWelcomVideo: false })}
               footer={[
                 <Button
@@ -710,13 +709,12 @@ class PerformerProfile extends PureComponent<IProps> {
                   className="primary"
                   onClick={this.handleViewWelcomeVideo.bind(this)}
                 >
-                  Don&apos;t show me again
+                  Don&apos;t show this again
                 </Button>
               ]}
             >
               <VideoPlayer {...{
                 key: `${performer._id}`,
-                autoplay: true,
                 controls: true,
                 playsinline: true,
                 sources: [
@@ -728,11 +726,13 @@ class PerformerProfile extends PureComponent<IProps> {
               }}
               />
             </Modal>
-        )}
+          )
+        }
         <Modal
           key="tip_performer"
           className="subscription-modal"
           visible={openTipModal}
+          centered
           onOk={() => this.setState({ openTipModal: false })}
           footer={null}
           width={350}
@@ -749,6 +749,7 @@ class PerformerProfile extends PureComponent<IProps> {
           key="subscribe_performer"
           className="subscription-modal"
           width={500}
+          centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
@@ -761,7 +762,7 @@ class PerformerProfile extends PureComponent<IProps> {
             onFinish={this.subscribe.bind(this)}
           />
         </Modal>
-        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );
   }

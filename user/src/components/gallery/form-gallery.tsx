@@ -6,7 +6,7 @@ import {
 import { InboxOutlined } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Router from 'next/router';
-import UploadList from '@components/file/upload-list';
+import PhotoUploadList from '@components/file/upload-list';
 import './gallery.less';
 
 interface IProps {
@@ -39,13 +39,14 @@ const FormGallery = ({
       name="galleryForm"
       onFinish={onFinish.bind(this)}
       initialValues={
-          gallery || {
-            title: '', status: 'active', description: '', price: 4.99, isSale: false
-          }
+        gallery || {
+          title: '', status: 'active', description: '', price: 4.99, isSale: false
         }
+      }
       labelCol={{ span: 24 }}
       wrapperCol={{ span: 24 }}
       className="account-form"
+      scrollToFirstError
     >
       <Form.Item
         name="title"
@@ -64,7 +65,7 @@ const FormGallery = ({
         name="isSale"
         label="For sale?"
       >
-        <Switch checkedChildren="Sale" unCheckedChildren="Free" checked={isSale} onChange={(val) => setSale(val)} />
+        <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={(val) => setSale(val)} />
       </Form.Item>
       {isSale && (
         <Form.Item
@@ -103,12 +104,12 @@ const FormGallery = ({
             <InboxOutlined />
           </p>
           <p className="ant-upload-text">
-            Drag & drop photos to this area or browser to upload
+            Drag and drop your photos to this area, or browse your computer to upload
           </p>
         </Dragger>
       )}
       {filesList && filesList.length > 0 && (
-        <UploadList
+        <PhotoUploadList
           files={filesList}
           setCover={setCover && setCover.bind(this)}
           remove={removePhoto && removePhoto.bind(this)}

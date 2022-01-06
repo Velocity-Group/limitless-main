@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { PureComponent, createRef } from 'react';
 import {
-  Form, message, Button, Select, Upload
+  Form, message, Button, Select, Upload, Input, Row, Col
 } from 'antd';
 import Page from '@components/common/layout/page';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
@@ -9,7 +9,9 @@ import { FormInstance } from 'antd/lib/form';
 import { UploadOutlined } from '@ant-design/icons';
 import { photoService } from '@services/photo.service';
 import { SelectGalleryDropdown } from '@components/gallery/common/select-gallery-dropdown';
+import { BreadcrumbComponent } from '@components/common';
 import Router from 'next/router';
+import { getGlobalConfig } from '@services/config';
 
 const layout = {
   labelCol: { span: 24 },
@@ -21,9 +23,17 @@ const validateMessages = {
 };
 
 const { Dragger } = Upload;
+
+function getBase64(img, callback) {
+  const reader = new FileReader();
+  reader.addEventListener('load', () => callback(reader.result));
+  reader.readAsDataURL(img);
+}
+
 interface IProps {
   galleryId: string;
 }
+
 class BulkUploadPhoto extends PureComponent<IProps> {
   state = {
     uploading: false,
@@ -38,9 +48,8 @@ class BulkUploadPhoto extends PureComponent<IProps> {
   }
 
   onUploading(file, resp: any) {
-    const data = file;
-    data.percent = resp.percentage;
-    if (file.percent === 100) data.status = 'done';
+    // eslint-disable-next-line no-param-reassign
+    file.percent = resp.percentage;
     this.forceUpdate();
   }
 
@@ -52,13 +61,21 @@ class BulkUploadPhoto extends PureComponent<IProps> {
     if (field === 'performerId') this.setState({ selectedPerformerId: val });
   }
 
-  async beforeUpload(file, fileList) {
-    if (file.size / 1024 / 1024 > (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
-      message.error(`${file.name} is over ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+  async beforeUpload(file, listFile) {
+    const config = getGlobalConfig();
+    if (file.size / 1024 / 1024 > (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5)) {
+      message.error(`${file.name} is over ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB`);
+      return false;
     }
-    this.setState({
-      fileList: fileList.filter((f) => f.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5))
+    getBase64(file, (imageUrl) => {
+      // eslint-disable-next-line no-param-reassign
+      file.thumbUrl = imageUrl;
     });
+    const { fileList } = this.state;
+    this.setState({
+      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5))]
+    });
+    return true;
   }
 
   remove(file) {
@@ -68,38 +85,55 @@ class BulkUploadPhoto extends PureComponent<IProps> {
 
   async submit(data: any) {
     const { fileList } = this.state;
-    const uploadFiles = fileList.filter((f) => !['uploading', 'done'].includes(f.status));
-    if (!uploadFiles.length) {
-      message.error('Please select photos');
+    if (!data.performerId) {
+      message.error('Please select model!');
       return;
     }
-
+    if (!data.galleryId) {
+      message.error('Please select gallery!');
+      return;
+    }
+    if (!fileList.length) {
+      message.error('Please select photo!');
+      return;
+    }
+    const uploadFiles = fileList.filter((f) => !['uploading', 'done'].includes(f.status));
+    if (!uploadFiles.length) {
+      message.error('Please select new file!');
+      return;
+    }
     await this.setState({ uploading: true });
+
     // eslint-disable-next-line no-restricted-syntax
     for (const file of uploadFiles) {
       try {
-        if (['uploading', 'done'].includes(file.status)) return;
+        // eslint-disable-next-line no-continue
+        if (['uploading', 'done'].includes(file.status)) continue;
         file.status = 'uploading';
-        photoService.uploadPhoto(file, data, this.onUploading.bind(this, file));
+        // eslint-disable-next-line no-await-in-loop
+        await photoService.uploadPhoto(file, data, this.onUploading.bind(this, file));
+        file.status = 'done';
+        file.response = { status: 'success' };
       } catch (e) {
         file.status = 'error';
         message.error(`File ${file.name} error!`);
       }
     }
-    message.success('Photos have been uploaded!');
-    Router.push('/gallery');
+    message.success('Photos has been uploaded!');
+    Router.push('/photos');
   }
 
   render() {
     if (!this.formRef) this.formRef = createRef();
-    const { uploading, selectedPerformerId } = this.state;
+    const { uploading, fileList, selectedPerformerId } = this.state;
     const { galleryId } = this.props;
     return (
       <>
         <Head>
-          <title>Upload photos</title>
+          <title>Bulk Upload Photos</title>
         </Head>
         <Page>
+          <BreadcrumbComponent breadcrumbs={[{ title: 'Photos' }]} />
           <Form
             {...layout}
             onFinish={this.submit.bind(this)}
@@ -111,26 +145,34 @@ class BulkUploadPhoto extends PureComponent<IProps> {
               galleryId: galleryId || ''
             }}
           >
-            <Form.Item name="performerId" label="Performer" rules={[{ required: true }]}>
-              <SelectPerformerDropdown
-                onSelect={(val) => this.setFormVal('performerId', val)}
-                disabled={uploading}
-                defaultValue=""
-              />
+            <Row>
+              <Col md={12} xs={12}>
+                <Form.Item name="performerId" label="Performer" rules={[{ required: true }]}>
+                  <SelectPerformerDropdown
+                    onSelect={(val) => this.setFormVal('performerId', val)}
+                    disabled={uploading}
+                    defaultValue=""
+                  />
+                </Form.Item>
+              </Col>
+              <Col md={12} xs={12}>
+                <Form.Item
+                  name="galleryId"
+                  label="Gallery"
+                  rules={[{ required: true, message: 'Please select a gallery' }]}
+                >
+                  <SelectGalleryDropdown
+                    performerId={selectedPerformerId}
+                    onSelect={(val) => this.setFormVal('galleryId', val)}
+                    defaultValue={galleryId || ''}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item name="description" label="Description">
+              <Input.TextArea rows={3} />
             </Form.Item>
-            <Form.Item
-              name="galleryId"
-              label="Gallery"
-              rules={[{ required: true, message: 'Please select a gallery' }]}
-            >
-              <SelectGalleryDropdown
-                performerId={selectedPerformerId}
-                disabled={uploading || !selectedPerformerId}
-                onSelect={(val) => this.setFormVal('galleryId', val)}
-                defaultValue={galleryId || ''}
-              />
-            </Form.Item>
-            <Form.Item name="status" label="Default status" rules={[{ required: true }]}>
+            <Form.Item name="status" label="Status" rules={[{ required: true }]}>
               <Select disabled={uploading}>
                 <Select.Option key="active" value="active">
                   Active
@@ -146,17 +188,18 @@ class BulkUploadPhoto extends PureComponent<IProps> {
                 beforeUpload={this.beforeUpload.bind(this)}
                 multiple
                 showUploadList
+                fileList={fileList}
+                onRemove={this.remove.bind(this)}
                 disabled={uploading}
                 listType="picture"
               >
                 <p className="ant-upload-drag-icon">
                   <UploadOutlined />
                 </p>
-                <p className="ant-upload-text">Click or drag-drop file to this area to upload</p>
-                <p className="ant-upload-hint">Photo is 5MB or below</p>
+                <p className="ant-upload-text">Click or drag and drop files to this area to upload image files only</p>
               </Dragger>
             </Form.Item>
-            <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+            <Form.Item className="text-center">
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading}>
                 UPLOAD ALL
               </Button>

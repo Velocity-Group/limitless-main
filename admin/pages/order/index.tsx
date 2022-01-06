@@ -25,7 +25,7 @@ class ModelOrderPage extends PureComponent<IProps> {
     list: [] as any,
     limit: 10,
     filter: {} as any,
-    sortBy: 'createdAt',
+    sortBy: 'updatedAt',
     sort: 'desc'
   };
 
@@ -37,12 +37,12 @@ class ModelOrderPage extends PureComponent<IProps> {
     this.search();
   }
 
-  handleTableChange = (pagination, filters, sorter) => {
+  handleTableChange = async (pagination, filters, sorter) => {
     const pager = { ...pagination };
     pager.current = pagination.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
-      sortBy: sorter.field || 'createdAt',
+      sortBy: sorter.field || 'updatedAt',
       sort: sorter.order
         ? sorter.order === 'descend'
           ? 'desc'
@@ -71,7 +71,7 @@ class ModelOrderPage extends PureComponent<IProps> {
         sort,
         sortBy
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data,
         pagination: {
@@ -82,7 +82,7 @@ class ModelOrderPage extends PureComponent<IProps> {
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
@@ -92,13 +92,13 @@ class ModelOrderPage extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Orders</title>
+          <title>Order History</title>
         </Head>
         <Page>
           <div className="main-container">
             <BreadcrumbComponent
               breadcrumbs={[
-                { title: 'Orders', href: '/order' }
+                { title: 'Order History', href: '/order' }
               ]}
             />
             <OrderSearchFilter

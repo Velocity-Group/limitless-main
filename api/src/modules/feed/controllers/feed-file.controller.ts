@@ -10,6 +10,7 @@ import {
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
 import { FileDto, FileUploaded, FileUploadInterceptor } from 'src/modules/file';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { Roles } from 'src/modules/auth';
 import { FeedFileService } from '../services';
 
@@ -27,14 +28,14 @@ export class FeedFileController {
   @UseInterceptors(
     FileUploadInterceptor('feed-photo', 'file', {
       destination: getConfig('file').feedProtectedDir,
-      replaceWithoutExif: true
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
     })
   )
   async uploadImage(
     @FileUploaded() file: FileDto
   ): Promise<any> {
     await this.feedFileService.validatePhoto(file);
-
     return DataResponse.ok({
       success: true,
       ...file.toResponse(),
@@ -49,14 +50,14 @@ export class FeedFileController {
   @UseInterceptors(
     FileUploadInterceptor('feed-video', 'file', {
       destination: getConfig('file').feedProtectedDir,
-      convertMp4: true
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
     })
   )
   async uploadVideo(
     @FileUploaded() file: FileDto
   ): Promise<any> {
-    await this.feedFileService.validateVideo(file);
-
+    await this.feedFileService.validateTeaser(file);
     return DataResponse.ok({
       success: true,
       ...file.toResponse(),
@@ -70,14 +71,15 @@ export class FeedFileController {
   @Roles('admin', 'performer')
   @UseInterceptors(
     FileUploadInterceptor('feed-audio', 'file', {
-      destination: getConfig('file').feedProtectedDir
+      destination: getConfig('file').feedProtectedDir,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
     })
   )
   async uploadAudio(
     @FileUploaded() file: FileDto
   ): Promise<any> {
     await this.feedFileService.validateAudio(file);
-
     return DataResponse.ok({
       success: true,
       ...file.toResponse(),
@@ -92,19 +94,14 @@ export class FeedFileController {
   @UseInterceptors(
     FileUploadInterceptor('feed-photo', 'file', {
       destination: getConfig('file').feedDir,
-      replaceWithThumbail: false,
-      generateThumbnail: true,
-      thumbnailSize: {
-        width: 900,
-        height: 300
-      }
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadThumb(
     @FileUploaded() file: FileDto
   ): Promise<any> {
-    await this.feedFileService.validatePhoto(file);
-
+    await this.feedFileService.validateThumbnail(file);
     return DataResponse.ok({
       success: true,
       ...file.toResponse(),
@@ -119,7 +116,8 @@ export class FeedFileController {
   @UseInterceptors(
     FileUploadInterceptor('feed-video', 'file', {
       destination: getConfig('file').feedDir,
-      convertMp4: true
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadTeaser(

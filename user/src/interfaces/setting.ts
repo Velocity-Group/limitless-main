@@ -14,6 +14,7 @@ export interface ISettings {
   googleReCaptchaSiteKey: string;
   enableGoogleReCaptcha: boolean;
   googleClientId: string;
+  twitterClientId: string;
   tokenConversionRate: number;
   stripePublishableKey: string;
   stripeEnable: boolean;

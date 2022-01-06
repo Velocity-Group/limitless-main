@@ -6,6 +6,7 @@ import { SubscriptionService } from 'src/modules/subscription/services/subscript
 import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { STATUS } from 'src/kernel/constants';
 import { uniq } from 'lodash';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
@@ -40,6 +41,7 @@ export class VideoSearchService {
         {
           title: { $regex: regexp }
         },
+        { tags: { $elemMatch: { $regex: regexp } } },
         {
           description: { $regex: regexp }
         }
@@ -69,6 +71,7 @@ export class VideoSearchService {
     data.forEach((v) => {
       v.thumbnailId && fileIds.push(v.thumbnailId);
       v.fileId && fileIds.push(v.fileId);
+      v.teaserId && fileIds.push(v.teaserId);
     });
 
     const [performers, files] = await Promise.all([
@@ -81,9 +84,7 @@ export class VideoSearchService {
       const performer = performers.find((p) => p._id.toString() === v.performerId.toString());
       if (performer) {
         // eslint-disable-next-line no-param-reassign
-        v.performer = {
-          username: performer.username
-        };
+        v.performer = new PerformerDto(performer).toResponse();
       }
 
       if (v.thumbnailId) {
@@ -91,6 +92,7 @@ export class VideoSearchService {
         if (thumbnail) {
           // eslint-disable-next-line no-param-reassign
           v.thumbnail = {
+            name: thumbnail.name,
             url: thumbnail.getUrl(),
             thumbnails: thumbnail.getThumbnails()
           };
@@ -101,9 +103,22 @@ export class VideoSearchService {
         if (video) {
           // eslint-disable-next-line no-param-reassign
           v.video = {
-            url: video.getUrl(),
+            name: video.name,
+            url: null,
             thumbnails: video.getThumbnails(),
             duration: video.duration
+          };
+        }
+      }
+      if (v.teaserId) {
+        const teaser = files.find((f) => f._id.toString() === v.teaserId.toString());
+        if (teaser) {
+          // eslint-disable-next-line no-param-reassign
+          v.teaser = {
+            name: teaser.name,
+            url: null,
+            thumbnails: teaser.getThumbnails(),
+            duration: teaser.duration
           };
         }
       }
@@ -126,6 +141,7 @@ export class VideoSearchService {
         {
           title: { $regex: regexp }
         },
+        { tags: { $elemMatch: { $regex: regexp } } },
         {
           description: { $regex: regexp }
         }
@@ -167,6 +183,7 @@ export class VideoSearchService {
         if (thumbnail) {
           // eslint-disable-next-line no-param-reassign
           v.thumbnail = {
+            name: thumbnail.name,
             url: thumbnail.getUrl(),
             thumbnails: thumbnail.getThumbnails()
           };
@@ -177,7 +194,8 @@ export class VideoSearchService {
         if (teaser) {
           // eslint-disable-next-line no-param-reassign
           v.teaser = {
-            url: teaser.getUrl(),
+            name: teaser.name,
+            url: null,
             thumbnails: teaser.getThumbnails()
           };
         }
@@ -187,7 +205,8 @@ export class VideoSearchService {
         if (video) {
           // eslint-disable-next-line no-param-reassign
           v.video = {
-            url: video.getUrl(),
+            name: video.name,
+            url: null,
             thumbnails: video.getThumbnails(),
             duration: video.duration
           };
@@ -214,6 +233,7 @@ export class VideoSearchService {
         {
           title: { $regex: regexp }
         },
+        { tags: { $elemMatch: { $regex: regexp } } },
         {
           description: { $regex: regexp }
         }

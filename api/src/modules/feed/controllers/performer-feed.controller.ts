@@ -13,9 +13,9 @@ import {
   Delete,
   Get,
   Query,
-  Request,
   forwardRef,
-  Inject
+  Inject,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
@@ -23,8 +23,7 @@ import { CurrentUser, Roles } from 'src/modules/auth';
 import { AuthService } from 'src/modules/auth/services';
 import { UserDto } from 'src/modules/user/dtos';
 import {
-  FeedCreatePayload, FeedSearchRequest,
-  PollCreatePayload
+  FeedCreatePayload, FeedSearchRequest, PollCreatePayload
 } from '../payloads';
 import { FeedDto } from '../dtos';
 import { FeedService } from '../services';
@@ -65,8 +64,8 @@ export class PerformerFeedController {
     @CurrentUser() performer: UserDto,
     @Request() req: any
   ): Promise<DataResponse<PageableData<any>>> {
-    const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = await this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
     const data = await this.feedService.search(query, performer, jwToken);
     return DataResponse.ok(data);
   }
@@ -81,8 +80,8 @@ export class PerformerFeedController {
     @Param('id') id: string,
     @Request() req: any
   ): Promise<DataResponse<FeedDto>> {
-    const auth = { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
-    const jwToken = this.authService.generateJWT(auth, { expiresIn: 4 * 60 * 60 });
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
     const data = await this.feedService.findOne(id, user, jwToken);
     return DataResponse.ok(data);
   }

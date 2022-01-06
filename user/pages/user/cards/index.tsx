@@ -12,13 +12,14 @@ import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
 import Link from 'next/link';
 import './index.less';
+import PageHeading from '@components/common/page-heading';
 
 interface IProps {
   ui: IUIConfig;
 }
 
 class CardsPage extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
   state = {
     cards: [],
@@ -31,7 +32,7 @@ class CardsPage extends PureComponent<IProps> {
   }
 
   async handleRemoveCard(cardId: string) {
-    if (!window.confirm('Are you sure to remove this card')) return;
+    if (!window.confirm('Are you sure to remove this payment card?')) return;
     try {
       await this.setState({ submiting: true });
       await paymentService.removeStripeCard(cardId);
@@ -73,21 +74,15 @@ class CardsPage extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | My Card
+            | My Payment Card
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>
-              <CreditCardOutlined />
-              {' '}
-              My Card
-            </span>
-          </div>
+          <PageHeading title="My Payment Card" icon={<CreditCardOutlined />} />
           <div className="card-list">
             {!loading && !cards.length && (
               <p>
-                No authorised card was found,
+                No payment card found,
                 {' '}
                 <Link href="/user/cards/add-card">
                   <a>
@@ -110,7 +105,7 @@ class CardsPage extends PureComponent<IProps> {
                   <span className="card-brand">{card.brand}</span>
                 </div>
                 <div className="card-holder-name">
-                  {card.name || 'Unknow'}
+                  {card.name || 'Unknown'}
                 </div>
               </div>
             ))}

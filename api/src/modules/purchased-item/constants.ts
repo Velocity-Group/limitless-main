@@ -60,11 +60,4 @@ export enum PURCHASE_ITEM_TARGET_SOURCE {
 
 export const PURCHASED_ITEM_SUCCESS_CHANNEL = 'PURCHASED_ITEM_SUCCESS_CHANNEL';
 
-export const OVER_PRODUCT_STOCK = 'OVER_PRODUCT_STOCK';
-export const ITEM_NOT_PURCHASED = 'ITEM_NOT_PURCHASED';
-
-export enum ROLE {
-  USER = 'user',
-  PERFORMER = 'performer',
-  AGENT = 'agent'
-}
+export const OVER_PRODUCT_STOCK = 'Not Enough Stock!';

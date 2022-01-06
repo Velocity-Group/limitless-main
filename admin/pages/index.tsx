@@ -58,7 +58,7 @@ export default class Dashboard extends PureComponent<any> {
         </Head>
         <Row className="dashboard-stats">
           <Col md={8} xs={12}>
-            <Link href="/users">
+            <Link href={{ pathname: '/users', query: { status: 'active' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -72,7 +72,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/users">
+            <Link href={{ pathname: '/users', query: { status: 'inactive' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -86,7 +86,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/users">
+            <Link href={{ pathname: '/users', query: { status: 'pending-email-confirmation' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -100,7 +100,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/model">
+            <Link href={{ pathname: '/model', query: { status: 'active' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -115,7 +115,7 @@ export default class Dashboard extends PureComponent<any> {
 
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/model">
+            <Link href={{ pathname: '/model', query: { status: 'inactive' } }}>
               <a>
                 <Card>
                   <Statistic
@@ -129,7 +129,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/model">
+            <Link href={{ pathname: '/model', query: { verifiedDocument: false } }}>
               <a>
                 <Card>
                   <Statistic
@@ -147,7 +147,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="POSTS"
+                    title="TOTAL POSTS"
                     value={stats.totalPosts}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -161,7 +161,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="GALLERIES"
+                    title="TOTAL GALLERIES"
                     value={stats.totalGalleries}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -175,7 +175,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="PHOTOS"
+                    title="TOTAL PHOTOS"
                     value={stats.totalPhotos}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -189,7 +189,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="VIDEOS"
+                    title="TOTAL VIDEOS"
                     value={stats.totalVideos}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -203,7 +203,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="PRODUCTS"
+                    title="TOTAL PRODUCTS"
                     value={stats.totalProducts}
                     valueStyle={{ color: '#5399d0' }}
                     prefix={<PieChartOutlined />}
@@ -255,7 +255,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col> */}
           <Col md={8} xs={12}>
-            <Link href="/earning/money">
+            <Link href="/earnings/money">
               <a>
                 <Card>
                   <Statistic
@@ -269,7 +269,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/money">
+            <Link href="/earnings/money">
               <a>
                 <Card>
                   <Statistic
@@ -283,11 +283,11 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/money">
+            <Link href="/earnings/money">
               <a>
                 <Card>
                   <Statistic
-                    title="MODEL COMMISSION $"
+                    title="MODELS COMMISSION $"
                     value={`${stats?.totalNetPrice.toFixed(2)}`}
                     valueStyle={{ color: '#fb2b2b' }}
                     prefix="$"
@@ -297,7 +297,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/token">
+            <Link href="/earnings/token">
               <a>
                 <Card>
                   <Statistic
@@ -311,7 +311,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/token">
+            <Link href="/earnings/token">
               <a>
                 <Card>
                   <Statistic
@@ -325,11 +325,11 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earning/token">
+            <Link href="/earnings/token">
               <a>
                 <Card>
                   <Statistic
-                    title="MODEL COMMISSION TOKEN"
+                    title="MODELS COMMISSION TOKEN"
                     value={`${stats?.totalNetToken.toFixed(2)}`}
                     valueStyle={{ color: '#fb2b2b' }}
                     prefix={<img alt="coin" src="/coin-ico.png" width="20px" />}
@@ -343,7 +343,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="SHIPPING ORDERS"
+                    title="SHIPPED ORDERS"
                     value={stats.totalShippingdOrders}
                     valueStyle={{ color: '#c8d841' }}
                     prefix={<AreaChartOutlined />}

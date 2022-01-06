@@ -128,7 +128,7 @@ class Categories extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -136,7 +136,7 @@ class Categories extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <Dropdown

@@ -17,20 +17,7 @@ class CreateToken extends PureComponent {
         this.setState({ submiting: true });
         await tokenService.create(data);
         message.success('Created successfully');
-        // TODO - redirect
-        await this.setState(
-          {
-            submiting: false
-          },
-          () => window.setTimeout(() => {
-            Router.push(
-              {
-                pathname: '/token-package'
-              },
-              '/token-package'
-            );
-          }, 1000)
-        );
+        Router.push('/token-package');
       } catch (e) {
         // TODO - check and show error here
         const err = (await Promise.resolve(e)) || {};

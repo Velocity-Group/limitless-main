@@ -6,6 +6,7 @@
  * @param {String} message The warning message.
  * @returns {void}
  */
+
 export const warning = function (...args) {
   // debug on development and staging.
   if (process.env.NODE_ENV === 'production') return;

@@ -1,5 +1,5 @@
 import { PureComponent } from 'react';
-import { Table, Tag } from 'antd';
+import { Table, Tag, Image } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ export class TableListBanner extends PureComponent<IProps> {
         title: '',
         dataIndex: 'thumbnail',
         render(data, record) {
-          return <img src={record?.photo?.url || './banner-image.jpg'} style={{ width: '100px' }} alt="thumb" />;
+          return <Image src={record?.photo?.url || './banner-image.jpg'} alt="thumb" width="100px" />;
         }
       },
       {
@@ -47,7 +47,7 @@ export class TableListBanner extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -55,7 +55,7 @@ export class TableListBanner extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <DropdownAction
@@ -66,10 +66,10 @@ export class TableListBanner extends PureComponent<IProps> {
                 children: (
                   <Link
                     href={{
-                      pathname: '/banner/update',
+                      pathname: '/banners/update',
                       query: { id }
                     }}
-                    as={`/banner/update?id=${id}`}
+                    as={`/banners/update?id=${id}`}
                   >
                     <a>
                       <EditOutlined />

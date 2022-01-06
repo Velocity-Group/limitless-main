@@ -16,22 +16,32 @@ import { BreadcrumbComponent, DropdownAction } from '@components/common';
 import { IPerformer } from 'src/interfaces';
 import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
 
-export default class Performers extends PureComponent<any> {
+interface IProps {
+  status: string;
+  verifiedDocument: string;
+}
+
+export default class Performers extends PureComponent<IProps> {
   _selectedUser: IPerformer;
+
+  static async getInitialProps({ ctx }) {
+    return ctx.query;
+  }
 
   state = {
     pagination: {} as any,
     searching: false,
     list: [],
     limit: 10,
-    filter: {} as any,
+    filter: { } as any,
     sortBy: 'updatedAt',
     sort: 'desc',
     openChangeTokenLogModal: false
   };
 
   componentDidMount() {
-    this.search();
+    const { status, verifiedDocument } = this.props;
+    this.setState({ filter: { status: status || '', verifiedDocument: verifiedDocument || '' } }, () => this.search());
   }
 
   async handleTableChange(pagination, filters, sorter) {
@@ -39,9 +49,9 @@ export default class Performers extends PureComponent<any> {
     pager.current = pagination.current;
     await this.setState({
       pagination: pager,
-      sortBy: sorter.field || '',
+      sortBy: sorter.field || 'updatedAt',
       // eslint-disable-next-line no-nested-ternary
-      sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : ''
+      sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : 'desc'
     });
     this.search(pager.current);
   }
@@ -97,6 +107,7 @@ export default class Performers extends PureComponent<any> {
   }
 
   render() {
+    const { status: defaultStatus, verifiedDocument: documentVerified } = this.props;
     const {
       list, searching, pagination, openChangeTokenLogModal
     } = this.state;
@@ -104,12 +115,12 @@ export default class Performers extends PureComponent<any> {
     // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = [
       {
-        title: '#',
+        title: 'Avatar',
         dataIndex: 'avatar',
         render: (avatar) => <Avatar src={avatar || '/no-avatar.png'} />
       },
       {
-        title: 'Display name',
+        title: 'Display Name',
         dataIndex: 'name',
         render(name: string) {
           return <span>{name}</span>;
@@ -131,15 +142,15 @@ export default class Performers extends PureComponent<any> {
             case 'active':
               return <Tag color="green">Active</Tag>;
             case 'inactive':
-              return <Tag color="red">Deactive</Tag>;
+              return <Tag color="red">Inactive</Tag>;
             case 'pending-email-confirmation':
-              return <Tag color="default">Pending email verification</Tag>;
+              return <Tag color="default">Not verified email</Tag>;
             default: return <Tag color="default">{status}</Tag>;
           }
         }
       },
       {
-        title: 'Email verification',
+        title: 'Verified Email?',
         dataIndex: 'verifiedEmail',
         render(verifiedEmail) {
           switch (verifiedEmail) {
@@ -152,7 +163,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'ID verification',
+        title: 'Verified ID?',
         dataIndex: 'verifiedDocument',
         render(verifiedDocument) {
           switch (verifiedDocument) {
@@ -165,7 +176,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Account verification',
+        title: 'Verified Account?',
         dataIndex: 'verifiedAccount',
         render(verifiedAccount) {
           switch (verifiedAccount) {
@@ -178,7 +189,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -186,7 +197,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: '#',
+        title: 'Action',
         dataIndex: '_id',
         render(id: string, record) {
           return (
@@ -317,17 +328,17 @@ export default class Performers extends PureComponent<any> {
                     </Link>
                   )
                 }
-              // {
-              //   key: 'change-token-logs',
-              //   name: 'Token balance change logs',
-              //   children: (
-              //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
-              //       <HistoryOutlined />
-              //       {' '}
-              //       Token Change Logs
-              //     </a>
-              //   )
-              // }
+                // {
+                //   key: 'change-token-logs',
+                //   name: 'Token balance change logs',
+                //   children: (
+                //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
+                //       <HistoryOutlined />
+                //       {' '}
+                //       Token Change Logs
+                //     </a>
+                //   )
+                // }
               ]}
             />
           );
@@ -342,7 +353,13 @@ export default class Performers extends PureComponent<any> {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Models' }]} />
         <Page>
-          <SearchFilter onSubmit={this.handleFilter.bind(this)} />
+          <SearchFilter
+            onSubmit={this.handleFilter.bind(this)}
+            defaultValue={{
+              status: defaultStatus || '',
+              verifiedDocument: documentVerified || ''
+            }}
+          />
           <div className="table-responsive custom">
             <Table
               dataSource={list}

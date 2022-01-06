@@ -56,7 +56,7 @@ class Banners extends PureComponent<IProps> {
         sort,
         sortBy
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data,
         pagination: {
@@ -67,7 +67,7 @@ class Banners extends PureComponent<IProps> {
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
@@ -76,7 +76,7 @@ class Banners extends PureComponent<IProps> {
       pagination
     } = this.state;
     if (!window.confirm('Are you sure you want to delete this banner?')) {
-      return false;
+      return;
     }
     try {
       await bannerService.delete(id);
@@ -86,7 +86,6 @@ class Banners extends PureComponent<IProps> {
       const err = (await Promise.resolve(e)) || {};
       message.error(err.message || 'An error occurred, please try again!');
     }
-    return undefined;
   }
 
   render() {

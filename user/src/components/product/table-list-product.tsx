@@ -28,7 +28,7 @@ export class TableListProduct extends PureComponent<IProps> {
     } = this.props;
     const columns = [
       {
-        title: '#',
+        title: 'Thumbnail',
         dataIndex: 'image',
         render(data, record) {
           return (
@@ -110,7 +110,7 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -118,7 +118,7 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <div style={{ whiteSpace: 'nowrap' }}>

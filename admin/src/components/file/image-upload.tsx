@@ -1,6 +1,7 @@
 import { Upload, message } from 'antd';
 import { LoadingOutlined, CameraOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
+import { getGlobalConfig } from '@services/config';
 
 function getBase64(img, callback) {
   const reader = new FileReader();
@@ -17,9 +18,10 @@ function beforeUpload(file) {
   // if (isImageAccept === -1) {
   //   message.error(`You can only upload ${env.imageAccept} file!`);
   // }
-  const isMaxSize = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+  const config = getGlobalConfig();
+  const isMaxSize = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isMaxSize) {
-    message.error(`Image must smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+    message.error(`Image must smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
   }
   return isMaxSize;
 }

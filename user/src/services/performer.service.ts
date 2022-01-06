@@ -1,5 +1,6 @@
 import { IPerformer } from 'src/interfaces';
 import { APIRequest, IResponse } from './api-request';
+import { getGlobalConfig } from './config';
 
 export class PerformerService extends APIRequest {
   search(query?: { [key: string]: any }) {
@@ -19,19 +20,23 @@ export class PerformerService extends APIRequest {
   }
 
   getAvatarUploadUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/performers/avatar/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/performers/avatar/upload`;
   }
 
   getCoverUploadUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/performers/cover/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/performers/cover/upload`;
   }
 
   getVideoUploadUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/performers/welcome-video/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/performers/welcome-video/upload`;
   }
 
   getDocumentUploadUrl() {
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/performers/documents/upload`;
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/performers/documents/upload`;
   }
 
   updateMe(id: string, payload: any) {

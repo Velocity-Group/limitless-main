@@ -34,11 +34,13 @@ class UserCreate extends PureComponent<IProps> {
   async submit(data: any) {
     try {
       if (data.password !== data.rePassword) {
-        return message.error('Confirm password mismatch!');
+        message.error('Confirm password is mismatched!');
+        return;
       }
 
       if (!validateUsername(data.username)) {
-        return message.error('Username must contain only Alphabets & Numbers');
+        message.error('Username must contain only alphanumerics');
+        return;
       }
 
       this.setState({ creating: true });
@@ -59,15 +61,11 @@ class UserCreate extends PureComponent<IProps> {
     } finally {
       this.setState({ creating: false });
     }
-    return undefined;
   }
 
   render() {
     const { creating } = this.state;
     const { countries } = this.props;
-    // const uploadHeaders = {
-    //   authorization: authService.getToken()
-    // };
     return (
       <>
         <Head>

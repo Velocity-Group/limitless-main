@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { PureComponent, Fragment, createRef } from 'react';
+import { PureComponent, createRef } from 'react';
 import { Tabs, message } from 'antd';
 import Page from '@components/common/layout/page';
 import { AccountForm } from '@components/performer/AccountForm';
@@ -123,7 +123,7 @@ class PerformerUpdate extends PureComponent<IProps> {
         status: 'active',
         value: data
       });
-      message.success('Paypal settings updated success');
+      message.success('Updated successfully!');
     } catch (error) {
       message.error('An error occurred, please try again!');
     } finally {
@@ -136,7 +136,7 @@ class PerformerUpdate extends PureComponent<IProps> {
     try {
       await this.setState({ settingUpdating: true });
       await performerService.updateCommissionSetting(id, { ...data, performerId: id });
-      message.success('Commission settings has been updated!');
+      message.success('Updated successfully!');
     } catch (error) {
       message.error('An error occurred, please try again!');
     } finally {
@@ -149,7 +149,7 @@ class PerformerUpdate extends PureComponent<IProps> {
     try {
       await this.setState({ settingUpdating: true });
       await performerService.updateBankingSetting(id, { ...data, performerId: id });
-      message.success('Banking settings has been updated!');
+      message.success('Updated successfully!');
     } catch (error) {
       message.error('An error occurred, please try again!');
     } finally {
@@ -190,6 +190,7 @@ class PerformerUpdate extends PureComponent<IProps> {
     const {
       countries, languages, heights, weights
     } = this.props;
+
     return (
       <>
         <Head>

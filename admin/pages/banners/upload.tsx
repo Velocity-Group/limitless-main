@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { PureComponent, Fragment, createRef } from 'react';
+import { PureComponent, createRef } from 'react';
 import { message } from 'antd';
 import Page from '@components/common/layout/page';
 import { FormInstance } from 'antd/lib/form';
@@ -42,27 +42,19 @@ class UploadBanner extends PureComponent<IProps> {
 
   async submit(data: any) {
     if (!this._banner) {
-      message.error('Please select banner!');
+      message.error('Please select a banner!');
       return;
     }
-
     await this.setState({
       uploading: true
     });
     try {
       await bannerService.uploadBanner(this._banner, data, this.onUploading.bind(this));
       message.success('Banner has been uploaded');
-      Router.push(
-        {
-          pathname: '/banner'
-        },
-        '/banner'
-      );
+      Router.push('/banners');
     } catch (error) {
       message.error('An error occurred, please try again!');
-      this.setState({
-        uploading: false
-      });
+      this.setState({ uploading: false });
     }
   }
 
@@ -74,7 +66,7 @@ class UploadBanner extends PureComponent<IProps> {
         <Head>
           <title>Upload banner</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Banners', href: '/banner' }, { title: 'New banner' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Banners', href: '/banners' }, { title: 'New banner' }]} />
         <Page>
           <FormUploadBanner
             submit={this.submit.bind(this)}

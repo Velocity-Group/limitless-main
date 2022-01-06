@@ -1,8 +1,9 @@
 import { PureComponent } from 'react';
 import { DeleteOutlined, PlusOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import {
-  Progress, Button, Upload, Tooltip, Image
+  Progress, Button, Upload, Tooltip, Image, Modal
 } from 'antd';
+import { VideoPlayer } from '@components/common';
 import '../post/index.less';
 
 interface IProps {
@@ -13,6 +14,11 @@ interface IProps {
   type?: string;
 }
 export default class UploadList extends PureComponent<IProps> {
+  state = {
+    isShowPreview: false,
+    previewUrl: ''
+  }
+
   beforeUpload(file, fileList) {
     const { onAddMore: handleAddMore } = this.props;
     handleAddMore(file, fileList);
@@ -22,6 +28,7 @@ export default class UploadList extends PureComponent<IProps> {
     const {
       files, remove: handleRemove, uploading, type
     } = this.props;
+    const { isShowPreview, previewUrl } = this.state;
     return (
       <div className="f-upload-list">
         {files && files.map((file) => (
@@ -29,9 +36,9 @@ export default class UploadList extends PureComponent<IProps> {
             <div className="f-upload-thumb">
               {/* eslint-disable-next-line no-nested-ternary */}
               {(file.type.includes('feed-photo') || file.type.includes('image'))
-                ? <Image placeholder preview={false} alt="img" src={file.url ? file.url : file.thumbnail} width="100%" />
+                ? <Image placeholder alt="img" src={file.url ? file.url : file.thumbnail} width="100%" />
                 : file.type.includes('video') ? (
-                  <span className="f-thumb-vid">
+                  <span className="f-thumb-vid" aria-hidden onClick={() => this.setState({ isShowPreview: true, previewUrl: file?.url })}>
                     <PlayCircleOutlined />
                   </span>
                 ) : <img alt="img" src="/static/no-image.jpg" width="100%" />}
@@ -55,6 +62,7 @@ export default class UploadList extends PureComponent<IProps> {
             {file.percent && <Progress percent={Math.round(file.percent)} />}
           </div>
         ))}
+        {(type === 'photo' || (type === 'video' && !files.length)) && (
         <div className="add-more">
           <Upload
             customRequest={() => true}
@@ -73,6 +81,30 @@ export default class UploadList extends PureComponent<IProps> {
             {type === 'photo' ? 'photos' : type === 'video' ? 'video' : 'files'}
           </Upload>
         </div>
+        )}
+        <Modal
+          width={767}
+          footer={null}
+          onOk={() => this.setState({ isShowPreview: false })}
+          onCancel={() => this.setState({ isShowPreview: false })}
+          visible={isShowPreview}
+          destroyOnClose
+        >
+          <VideoPlayer
+            {...{
+              autoplay: true,
+              controls: true,
+              playsinline: true,
+              fluid: true,
+              sources: [
+                {
+                  src: previewUrl,
+                  type: 'video/mp4'
+                }
+              ]
+            }}
+          />
+        </Modal>
       </div>
     );
   }

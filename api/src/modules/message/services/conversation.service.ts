@@ -12,8 +12,6 @@ import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { StreamDto } from 'src/modules/stream/dtos';
-import { PerformerSearchPayload } from 'src/modules/performer/payloads';
-import { UserSearchRequestPayload } from 'src/modules/user/payloads';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { PerformerBlockService } from 'src/modules/block/services';
 import { ConversationSearchPayload, ConversationUpdatePayload } from '../payloads';
@@ -154,10 +152,10 @@ export class ConversationService {
     if (req.keyword) {
       let usersSearch = null;
       if (sender.source === 'user') {
-        usersSearch = await this.performerSearchService.searchByKeyword({ q: req.keyword } as PerformerSearchPayload);
+        usersSearch = await this.performerSearchService.searchByKeyword({ q: req.keyword } as any);
       }
       if (sender.source === 'performer') {
-        usersSearch = await this.userSearchService.searchByKeyword({ q: req.keyword } as UserSearchRequestPayload);
+        usersSearch = await this.userSearchService.searchByKeyword({ q: req.keyword } as any);
       }
       const Ids = usersSearch ? usersSearch.map((u) => u._id) : [];
       query = {
@@ -237,7 +235,7 @@ export class ConversationService {
         const recipientInfo = recipients.find((r) => `${r._id}` === `${recipient.sourceId}`);
         if (recipientInfo) {
           // eslint-disable-next-line no-param-reassign
-          conversation.recipientInfo = new UserDto(recipientInfo).toResponse();
+          conversation.recipientInfo = recipient.source === 'user' ? new UserDto(recipientInfo).toResponse() : new PerformerDto(recipientInfo).toResponse();
           if (sender.source === 'user') {
             let isBlocked = false;
             if (blockedUsers.length) {

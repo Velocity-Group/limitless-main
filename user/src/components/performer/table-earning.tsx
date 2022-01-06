@@ -49,6 +49,10 @@ export class TableListEarning extends PureComponent<IProps> {
               return <Tag color="orange">Gift</Tag>;
             case 'message':
               return <Tag color="pink">Message</Tag>;
+            case 'product':
+              return <Tag color="blue">Product</Tag>;
+            case 'gallery':
+              return <Tag color="success">Gallery</Tag>;
           }
           return <Tag color="success">{type}</Tag>;
         }
@@ -115,9 +119,9 @@ export class TableListEarning extends PureComponent<IProps> {
         render(type: string) {
           switch (type) {
             case 'monthly_subscription':
-              return <Tag color="red">Monthly Sub</Tag>;
+              return <Tag color="blue">Monthly</Tag>;
             case 'yearly_subscription':
-              return <Tag color="red">Yearly Sub</Tag>;
+              return <Tag color="red">Yearly</Tag>;
           }
           return <Tag color="#936dc9">{type}</Tag>;
         }
@@ -135,18 +139,6 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'NET',
-        dataIndex: 'netPrice',
-        render(netPrice: number, record: any) {
-          return (
-            <span style={{ whiteSpace: 'nowrap' }}>
-              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
-              {(netPrice || 0).toFixed(2)}
-            </span>
-          );
-        }
-      },
-      {
         title: 'Commission',
         dataIndex: 'siteCommission',
         render(commission: number) {
@@ -154,6 +146,18 @@ export class TableListEarning extends PureComponent<IProps> {
             <span style={{ whiteSpace: 'nowrap' }}>
               {commission * 100}
               %
+            </span>
+          );
+        }
+      },
+      {
+        title: 'NET',
+        dataIndex: 'netPrice',
+        render(netPrice: number, record: any) {
+          return (
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
+              {(netPrice || 0).toFixed(2)}
             </span>
           );
         }

@@ -1,4 +1,5 @@
 import { APIRequest } from './api-request';
+import { getGlobalConfig } from './config';
 
 export class UserService extends APIRequest {
   me(headers?: { [key: string]: string }): Promise<any> {
@@ -10,10 +11,11 @@ export class UserService extends APIRequest {
   }
 
   getAvatarUploadUrl(userId?: string) {
+    const config = getGlobalConfig();
     if (userId) {
-      return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/${userId}/avatar/upload`;
+      return `${config.NEXT_PUBLIC_API_ENDPOINT}/users/${userId}/avatar/upload`;
     }
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/avatar/upload`;
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/users/avatar/upload`;
   }
 
   search(query?: { [key: string]: any }) {

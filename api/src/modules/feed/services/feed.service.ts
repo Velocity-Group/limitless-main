@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import {
   Injectable, Inject, forwardRef, HttpException
 } from '@nestjs/common';
@@ -13,7 +12,6 @@ import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
 import { ReactionService } from 'src/modules/reaction/services/reaction.service';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
-import { FileDto } from 'src/modules/file';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION } from 'src/modules/reaction/constants';
 import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
@@ -24,6 +22,7 @@ import { PurchasedItemSearchService, PaymentTokenService } from 'src/modules/pur
 import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import * as moment from 'moment';
+import { Storage } from 'src/modules/storage/contants';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
@@ -120,10 +119,9 @@ export class FeedService {
     return data;
   }
 
-  public async findByIds(ids, user, jwToken) {
+  public async findByIds(ids: string[] | ObjectId[]) {
     const data = await this.feedModel.find({ _id: { $in: ids } });
-    const result = await this.populateFeedData(data as any, user, jwToken);
-    return result;
+    return data;
   }
 
   public async handleCommentStat(feedId: string, num = 1) {
@@ -137,7 +135,7 @@ export class FeedService {
     // TODO - validate for other
   }
 
-  private async populateFeedData(feeds: FeedModel[], user: UserDto, jwtToken) {
+  public async populateFeedData(feeds: any, user: UserDto, jwToken?: string) {
     const performerIds = uniq(
       feeds.map((f) => f.fromSourceId.toString())
     );
@@ -182,34 +180,45 @@ export class FeedService {
       const bookmarked = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.BOOK_MARK);
       feed.isBookMarked = !!bookmarked;
       const subscribed = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
-      feed.isSubscribed = !!((subscribed || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))));
+      feed.isSubscribed = !!subscribed;
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
-      feed.isBought = !!((bought || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))));
+      feed.isBought = !!bought;
       const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
       const feedPollStringIds = (f.pollIds || []).map((pollId) => pollId.toString());
       feed.polls = polls.filter((p) => feedPollStringIds.includes(p._id.toString()));
       const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
+      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'));
+      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))) {
+        feed.isSubscribed = true;
+        feed.isBought = true;
+      }
       if (feedFiles.length) {
         feed.files = feedFiles.map((file) => {
-          let fileUrl = file.getUrl();
-          if (jwtToken) {
-            fileUrl = `${fileUrl}?feedId=${feed._id}&token=${jwtToken}`;
+          // track server s3 or local, assign jwtoken if local
+          let fileUrl = file.getUrl(canView);
+          if (file.server !== Storage.S3) {
+            fileUrl = `${fileUrl}?feedId=${feed._id}&token=${jwToken}`;
           }
           return {
             ...file.toResponse(),
-            thumbnails: (file.thumbnails || []).map((thumb) => FileDto.getPublicUrl(thumb.path)),
+            thumbnails: file.getThumbnails(),
             url: fileUrl
           };
         });
       }
       if (feed.thumbnailId) {
         const thumbnail = files.find((file) => file._id.toString() === feed.thumbnailId.toString());
-        feed.thumbnailUrl = (thumbnail && FileDto.getPublicUrl(thumbnail.path)) || '';
+        feed.thumbnail = thumbnail && {
+          ...thumbnail.toResponse(),
+          thumbnails: thumbnail.getThumbnails(),
+          url: thumbnail.getUrl()
+        };
       }
       if (feed.teaserId) {
         const teaser = files.find((file) => file._id.toString() === feed.teaserId.toString());
-        feed.teaser = {
+        feed.teaser = teaser && {
           ...teaser,
+          thumbnails: teaser.getThumbnails(),
           url: teaser.getUrl()
         };
       }
@@ -217,13 +226,13 @@ export class FeedService {
     });
   }
 
-  public async findOne(id, user, jwtToken): Promise<FeedDto> {
+  public async findOne(id: string, user: UserDto, jwToken: string): Promise<FeedDto> {
     const query = isObjectId(id) ? { _id: id } : { slug: id };
     const feed = await this.feedModel.findOne(query);
     if (!feed) {
       throw new EntityNotFoundException();
     }
-    const newFeed = await this.populateFeedData([feed], user, jwtToken);
+    const newFeed = await this.populateFeedData([feed], user, jwToken);
     return new FeedDto(newFeed[0]);
   }
 
@@ -234,7 +243,7 @@ export class FeedService {
     const performer = await this.performerService.findById(fromSourceId);
     if (!performer) throw new EntityNotFoundException();
     const data = { ...payload } as any;
-    data.slug = `post-${StringHelper.randomString(8, '0123456789')}`;
+    data.slug = `${StringHelper.randomString(8, '0123456789')}`;
     const slugCheck = await this.feedModel.countDocuments({
       slug: data.slug
     });
@@ -243,7 +252,7 @@ export class FeedService {
     }
     const feed = await this.feedModel.create({
       ...data,
-      orientation: performer.gender,
+      orientation: performer.sexualOrientation,
       fromSource: 'performer',
       fromSourceId
     } as any);
@@ -273,7 +282,7 @@ export class FeedService {
     return feed;
   }
 
-  public async search(req: FeedSearchRequest, user: UserDto, jwtToken) {
+  public async search(req: FeedSearchRequest, user: UserDto, jwToken: string) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER
     } as any;
@@ -328,12 +337,12 @@ export class FeedService {
 
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data as any, user, jwtToken),
+      data: await this.populateFeedData(data, user, jwToken),
       total
     };
   }
 
-  public async userSearchFeeds(req: FeedSearchRequest, user: UserDto, jwtToken) {
+  public async userSearchFeeds(req: FeedSearchRequest, user: UserDto, jwToken: string) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER,
       status: STATUS.ACTIVE
@@ -392,12 +401,12 @@ export class FeedService {
     ]);
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data as any, user, jwtToken),
+      data: await this.populateFeedData(data, user, jwToken),
       total
     };
   }
 
-  public async searchSubscribedPerformerFeeds(req: FeedSearchRequest, user: UserDto, jwtToken: string) {
+  public async searchSubscribedPerformerFeeds(req: FeedSearchRequest, user: UserDto, jwToken: string) {
     const query = {
       fromSource: FEED_SOURCE.PERFORMER,
       status: STATUS.ACTIVE
@@ -445,7 +454,7 @@ export class FeedService {
     ]);
     // populate video, photo, etc...
     return {
-      data: await this.populateFeedData(data, user, jwtToken),
+      data: await this.populateFeedData(data, user, jwToken),
       total
     };
   }
@@ -469,10 +478,18 @@ export class FeedService {
     if (payload.fileIds && payload.fileIds.length) {
       const ids = feed.fileIds.map((_id) => _id.toString());
       const Ids = payload.fileIds.filter((_id) => !ids.includes(_id));
+      const deleteIds = feed.fileIds.filter((_id) => !payload.fileIds.includes(_id.toString()));
       await Promise.all(Ids.map((fileId) => this.fileService.addRef((fileId as any), {
         itemId: feed._id,
         itemType: REF_TYPE.FEED
       })));
+      await Promise.all(deleteIds.map((_id) => this.fileService.remove(_id)));
+    }
+    if ((feed.thumbnailId && `${feed.thumbnailId}` !== `${data.thumbnailId}`) || (feed.thumbnailId && !data.thumbnailId)) {
+      await this.fileService.remove(feed.thumbnailId);
+    }
+    if ((feed.teaserId && `${feed.teaserId}` !== `${data.teaserId}`) || (feed.teaserId && !data.teaserId)) {
+      await this.fileService.remove(feed.teaserId);
     }
     return { updated: true };
   }
@@ -487,6 +504,11 @@ export class FeedService {
       throw new HttpException('You don\'t have permission to remove this post', 403);
     }
     await feed.remove();
+    await Promise.all([
+      feed.thumbnailId && this.fileService.remove(feed.thumbnailId),
+      feed.teaserId && this.fileService.remove(feed.teaserId)
+    ]);
+    await Promise.all(feed.fileIds.map((_id) => this.fileService.remove(_id)));
     await this.queueEventService.publish(
       new QueueEvent({
         channel: PERFORMER_FEED_CHANNEL,
@@ -511,8 +533,6 @@ export class FeedService {
     if (user._id.toString() === feed.fromSourceId.toString()) {
       return true;
     }
-    const performer = await this.performerService.findById(feed.fromSourceId);
-    if (`${performer?.agentId}` === `${user._id}`) return true;
     if (!feed.isSale) {
       // check subscription
       const subscribed = await this.subscriptionService.checkSubscribed(

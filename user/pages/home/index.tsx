@@ -6,11 +6,11 @@ import { connect } from 'react-redux';
 import Head from 'next/head';
 import { HomePerformers } from '@components/performer';
 import { Banner } from '@components/common';
-import { getBanners } from '@redux/banner/actions';
+import HomeFooter from '@components/common/layout/footer';
 import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
-import { performerService, feedService } from '@services/index';
+import { performerService, feedService, bannerService } from '@services/index';
 import {
-  IFeed, IPerformer, ISettings, IUser
+  IFeed, IPerformer, ISettings, IUser, IBanner, IUIConfig
 } from 'src/interfaces';
 import ScrollListFeed from '@components/post/scroll-list';
 import {
@@ -21,11 +21,10 @@ import { debounce } from 'lodash';
 import './index.less';
 
 interface IProps {
-  ui: any;
+  banners: IBanner[];
+  ui: IUIConfig;
   settings: ISettings;
   user: IUser;
-  bannerState: any;
-  getBanners: Function;
   performers: IPerformer[];
   getFeeds: Function;
   moreFeeds: Function;
@@ -33,10 +32,27 @@ interface IProps {
   removeFeedSuccess: Function;
 }
 
+function isInViewport(el) {
+  const rect = el.getBoundingClientRect();
+  const bodyHeight = window.innerHeight || document.documentElement.clientHeight;
+  return (
+    rect.bottom <= bodyHeight + 250
+  );
+}
+
 class HomePage extends PureComponent<IProps> {
   static authenticate = true;
 
   static noredirect = true;
+
+  static async getInitialProps() {
+    const [banners] = await Promise.all([
+      bannerService.search({ limit: 99 })
+    ]);
+    return {
+      banners: banners?.data?.data || []
+    };
+  }
 
   state = {
     itemPerPage: 12,
@@ -46,13 +62,27 @@ class HomePage extends PureComponent<IProps> {
     randomPerformers: [],
     orientation: '',
     keyword: '',
-    openSearch: false
+    openSearch: false,
+    showFooter: false
   }
 
   componentDidMount() {
-    this.getBanners();
     this.getPerformers();
     this.getFeeds();
+    window.addEventListener('scroll', this.handleScroll);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.handleScroll);
+  }
+
+  handleScroll = () => {
+    const footer = document.getElementById('main-footer');
+    if (isInViewport(footer)) {
+      this.setState({ showFooter: false });
+    } else {
+      this.setState({ showFooter: true });
+    }
   }
 
   async onGetFreePerformers() {
@@ -63,10 +93,10 @@ class HomePage extends PureComponent<IProps> {
 
   async onDeleteFeed(feed: IFeed) {
     const { removeFeedSuccess: handleRemoveFeed } = this.props;
-    if (!window.confirm('Are you sure to delete this post?')) return;
+    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) return;
     try {
       await feedService.delete(feed._id);
-      message.success('Removed post successfully');
+      message.success('Post deleted successfully');
       handleRemoveFeed({ feed });
     } catch (e) {
       message.error('Something went wrong, please try again later');
@@ -95,11 +125,6 @@ class HomePage extends PureComponent<IProps> {
       offset: itemPerPage * feedPage,
       isHome: !!user.verifiedEmail
     });
-  }
-
-  getBanners() {
-    const { getBanners: handleGetBanners } = this.props;
-    handleGetBanners({ limit: 99 });
   }
 
   async getPerformers() {
@@ -131,17 +156,12 @@ class HomePage extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, feedState, user, bannerState, settings
+      ui, feedState, user, settings, banners
     } = this.props;
-    const { items: banners } = bannerState;
     const { items: feeds, total: totalFeeds, requesting: loadingFeed } = feedState;
     const topBanners = banners && banners.length > 0 && banners.filter((b) => b.position === 'top');
-    // const leftBanners = banners && banners.length > 0 && banners.filter(b => b.position === 'left')
-    // const rightBanners = banners && banners.length > 0 && banners.filter(b => b.position === 'right')
-    // const middleBanners = banners && banners.length > 0 && banners.filter(b => b.position === 'middle')
-    // const bottomBanners = banners && banners.length > 0 && banners.filter((b) => b.position === 'bottom');
     const {
-      randomPerformers, loadingPerformer, isFreeSubscription, openSearch
+      randomPerformers, loadingPerformer, isFreeSubscription, openSearch, showFooter
     } = this.state;
     return (
       <Layout>
@@ -154,100 +174,87 @@ class HomePage extends PureComponent<IProps> {
         </Head>
         <div className="home-page">
           <Banner banners={topBanners} />
-          <div style={{ position: 'relative' }}>
-            <div className="main-container">
-              <div className="home-heading">
-                <h3>
-                  HOME
-                </h3>
-                <div className="search-bar-feed">
-                  <Input
-                    className={openSearch ? 'active' : ''}
-                    prefix={<SearchOutlined />}
-                    placeholder="Type to search here ..."
-                    onChange={(e) => {
-                      e.persist();
-                      this.onSearchFeed(e.target.value);
-                    }}
-                  />
-                  <a aria-hidden className="open-search" onClick={() => this.setState({ openSearch: !openSearch })}>
-                    {!openSearch ? <SearchOutlined /> : <CloseOutlined />}
-                  </a>
-                </div>
+          <div className="main-container">
+            <div className="home-heading">
+              <h3>
+                HOME
+              </h3>
+              <div className="search-bar-feed">
+                <Input
+                  className={openSearch ? 'active' : ''}
+                  prefix={<SearchOutlined />}
+                  placeholder="Type to search here ..."
+                  onChange={(e) => {
+                    e.persist();
+                    this.onSearchFeed(e.target.value);
+                  }}
+                />
+                <a aria-hidden className="open-search" onClick={() => this.setState({ openSearch: !openSearch })}>
+                  {!openSearch ? <SearchOutlined /> : <CloseOutlined />}
+                </a>
               </div>
-              <div className="home-container">
-                <div className="left-container">
-                  {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
-                  <div className="visit-history">
-                    <div className="top-story">
-                      <a>Suggested Models</a>
-                      <a href="/model"><small>View all</small></a>
-                    </div>
-                    <div className="story-list">
-                      {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
-                        <Link key={per._id} href={{ pathname: '/model/profile', query: { username: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
-                          <div className="story-per-card" title={per?.name || per?.username || 'N/A'}>
-                            <span className={per?.isOnline > 0 ? 'online-status active' : 'online-status'} />
-                            <img className="per-avatar" alt="avatar" src={per?.avatar || '/static/no-avatar.png'} />
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                    {loadingPerformer && <div className="text-center" style={{ margin: 32 }}><Spin /></div>}
-                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center" style={{ margin: '30px 0' }}>No profile was found</p>}
+            </div>
+            <div className="home-container">
+              <div className="left-container">
+                {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
+                <div className="visit-history">
+                  <div className="top-story">
+                    <a>Suggested Models</a>
+                    <a href="/model"><small>View all</small></a>
                   </div>
-                  {/* <div className="filter-feed">
-                    <FilterOutlined />
-                    <Button disabled={loadingFeed} className={orientation === '' ? 'active' : ''} onClick={() => this.onFilterFeed('')}>All</Button>
-                    <Button disabled={loadingFeed} className={orientation === 'female' ? 'active' : ''} onClick={() => this.onFilterFeed('female')}>Female</Button>
-                    <Button disabled={loadingFeed} className={orientation === 'male' ? 'active' : ''} onClick={() => this.onFilterFeed('male')}>Male</Button>
-                    <Button disabled={loadingFeed} className={orientation === 'couple' ? 'active' : ''} onClick={() => this.onFilterFeed('couple')}>Couples</Button>
-                    <Button disabled={loadingFeed} className={orientation === 'transgender' ? 'active' : ''} onClick={() => this.onFilterFeed('transgender')}>Trans</Button>
-                  </div> */}
-                  {!loadingFeed && !totalFeeds && (
-                    <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
-                      <Alert
-                        type="warning"
-                        message={(
-                          <a href="/model">
-                            <SearchOutlined />
-                            {' '}
-                            Find someone to follow
-                          </a>
-                        )}
-                      />
-                    </div>
-                  )}
-                  <ScrollListFeed
-                    items={feeds}
-                    canLoadmore={feeds && feeds.length < totalFeeds}
-                    loading={loadingFeed}
-                    onDelete={this.onDeleteFeed.bind(this)}
-                    loadMore={this.loadmoreFeeds.bind(this)}
-                  />
+                  <div className="story-list">
+                    {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
+                      <Link key={per._id} href={{ pathname: '/model/profile', query: { username: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
+                        <div className="story-per-card" title={per?.name || per?.username || 'N/A'}>
+                          <span className={per?.isOnline > 0 ? 'online-status active' : 'online-status'} />
+                          <img className="per-avatar" alt="avatar" src={per?.avatar || '/static/no-avatar.png'} />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  {loadingPerformer && <div className="text-center" style={{ margin: 32 }}><Spin /></div>}
+                  {!loadingPerformer && !randomPerformers?.length && <p className="text-center" style={{ margin: '30px 0' }}>No profile was found</p>}
                 </div>
-                <div className="right-container" id="home-right-container">
-                  <div className="suggestion-bl">
-                    <div className="sug-top">
-                      <span className="sug-text">SUGGESTIONS</span>
-                      <span className="btns-grp" style={{ textAlign: randomPerformers.length < 6 ? 'right' : 'left' }}>
-                        <a aria-hidden className="free-btn" onClick={this.onGetFreePerformers.bind(this)}><Tooltip title={isFreeSubscription ? 'Show all' : 'Show only free'}><TagOutlined className={isFreeSubscription ? 'active' : ''} /></Tooltip></a>
-                        <a aria-hidden className="reload-btn" onClick={this.getPerformers.bind(this)}><Tooltip title="Refresh"><SyncOutlined spin={loadingPerformer} /></Tooltip></a>
-                      </span>
-                    </div>
-                    <HomePerformers performers={randomPerformers} />
-                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
+                {!loadingFeed && !totalFeeds && (
+                  <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
+                    <Alert
+                      type="warning"
+                      message={(
+                        <a href="/model">
+                          <SearchOutlined />
+                          {' '}
+                          Find someone to follow
+                        </a>
+                      )}
+                    />
+                  </div>
+                )}
+                <ScrollListFeed
+                  items={feeds}
+                  canLoadmore={feeds && feeds.length < totalFeeds}
+                  loading={loadingFeed}
+                  onDelete={this.onDeleteFeed.bind(this)}
+                  loadMore={this.loadmoreFeeds.bind(this)}
+                />
+              </div>
+              <div className="right-container" id="home-right-container">
+                <div className="suggestion-bl">
+                  <div className="sug-top">
+                    <span className="sug-text">SUGGESTIONS</span>
+                    <span className="btns-grp" style={{ textAlign: randomPerformers.length < 5 ? 'right' : 'left' }}>
+                      <a aria-hidden className="free-btn" onClick={this.onGetFreePerformers.bind(this)}><Tooltip title={isFreeSubscription ? 'Show all' : 'Show only free'}><TagOutlined className={isFreeSubscription ? 'active' : ''} /></Tooltip></a>
+                      <a aria-hidden className="reload-btn" onClick={this.getPerformers.bind(this)}><Tooltip title="Refresh"><SyncOutlined spin={loadingPerformer} /></Tooltip></a>
+                    </span>
+                  </div>
+                  <HomePerformers performers={randomPerformers} />
+                  {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
+                  <div className={!showFooter ? 'home-footer' : 'home-footer active'}>
+                    <HomeFooter id="home-footer" />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          {/* {middleBanners && middleBanners.length > 0 && (
-                <Banner banners={middleBanners} />
-              )}
-              {bottomBanners && bottomBanners.length > 0 && (
-                <Banner banners={bottomBanners} />
-              )} */}
         </div>
       </Layout>
     );
@@ -256,13 +263,12 @@ class HomePage extends PureComponent<IProps> {
 
 const mapStates = (state: any) => ({
   ui: { ...state.ui },
-  bannerState: { ...state.banner.listBanners },
   user: { ...state.user.current },
   feedState: { ...state.feed.feeds },
   settings: { ...state.settings }
 });
 
 const mapDispatch = {
-  getBanners, getFeeds, moreFeeds, removeFeedSuccess
+  getFeeds, moreFeeds, removeFeedSuccess
 };
 export default connect(mapStates, mapDispatch)(HomePage);

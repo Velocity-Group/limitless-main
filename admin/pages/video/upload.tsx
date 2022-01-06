@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import Head from 'next/head';
 import { PureComponent } from 'react';
 import { message } from 'antd';
@@ -48,7 +46,6 @@ class UploadVideo extends PureComponent {
       message.error('Invalid amount of tokens');
       return;
     }
-    data.tags = [...data.tags];
     const files = Object.keys(this._files).reduce((f, key) => {
       if (this._files[key]) {
         f.push({

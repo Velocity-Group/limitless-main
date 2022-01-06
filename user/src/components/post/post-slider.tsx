@@ -50,7 +50,6 @@ export default class FeedSlider extends PureComponent<IProps> {
                     preview={{ maskClosable: false }}
                     key={img._id}
                     src={img.url}
-                    placeholder
                     fallback="/static/no-image.jpg"
                     title={img.name}
                     width="100%"
@@ -60,26 +59,24 @@ export default class FeedSlider extends PureComponent<IProps> {
               </Carousel>
             </Image.PreviewGroup>
             )}
-            {videos && videos.length > 0 && videos.map((vid) => {
-              const thumbnailUrl = feed?.thumbnailUrl || (vid?.thumbnails && vid?.thumbnails[0]);
-              return (
-                <VideoPlayer
-                  key={vid._id}
-                  {...{
-                    autoplay: false,
-                    controls: true,
-                    playsinline: true,
-                    poster: thumbnailUrl,
-                    sources: [
-                      {
-                        src: vid.url,
-                        type: 'video/mp4'
-                      }
-                    ]
-                  }}
-                />
-              );
-            })}
+            {videos && videos.length > 0 && videos.map((vid) => (
+              <VideoPlayer
+                key={vid._id}
+                {...{
+                  autoplay: false,
+                  controls: true,
+                  playsinline: true,
+                  poster: feed?.thumbnail?.url,
+                  fluid: true,
+                  sources: [
+                    {
+                      src: vid.url,
+                      type: 'video/mp4'
+                    }
+                  ]
+                }}
+              />
+            ))}
             {audios && audios.length > 0 && audios.map((audio) => <AudioPlayer key={audio._id} source={audio?.url} />)}
           </>
         )}

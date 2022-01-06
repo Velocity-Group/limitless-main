@@ -1,5 +1,6 @@
 import { IUser } from 'src/interfaces';
 import { APIRequest, IResponse } from './api-request';
+import { getGlobalConfig } from './config';
 
 export class UserService extends APIRequest {
   me(headers?: { [key: string]: string }): Promise<IResponse<IUser>> {
@@ -19,10 +20,11 @@ export class UserService extends APIRequest {
   }
 
   getAvatarUploadUrl(userId?: string) {
+    const config = getGlobalConfig();
     if (userId) {
-      return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/admin/users/${userId}/avatar/upload`;
+      return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/users/${userId}/avatar/upload`;
     }
-    return `${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/avatar/upload`;
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/users/avatar/upload`;
   }
 
   uploadAvatarUser(file: File, userId?: string) {

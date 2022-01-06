@@ -13,10 +13,10 @@ import {
   Param,
   Query,
   UseInterceptors,
-  Request,
   Inject,
   forwardRef,
-  Delete
+  Delete,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import {
@@ -26,6 +26,7 @@ import { CurrentUser, Roles } from 'src/modules/auth';
 import { AuthService } from 'src/modules/auth/services';
 import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { FileUploadInterceptor, FileUploaded, FileDto } from 'src/modules/file';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
@@ -147,13 +148,15 @@ export class AdminPerformerController {
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('performer-document', 'file', {
-      destination: getConfig('file').documentDir
+      destination: getConfig('file').documentDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerDocument(
     @FileUploaded() file: FileDto,
-    @Param('performerId') id: any,
-    @Request() req: any
+    @Param('performerId') id: any
   ): Promise<any> {
     await this.fileService.addRef(file._id, {
       itemId: id,
@@ -161,7 +164,7 @@ export class AdminPerformerController {
     });
     return DataResponse.ok({
       ...file,
-      url: `${file.getUrl()}?documentId=${file._id}&token=${req.jwToken}`
+      url: `${file.getUrl(true)}`
     });
   }
 
@@ -172,9 +175,9 @@ export class AdminPerformerController {
   @UseInterceptors(
     FileUploadInterceptor('avatar', 'avatar', {
       destination: getConfig('file').avatarDir,
-      generateThumbnail: true,
-      replaceWithThumbail: true,
-      thumbnailSize: getConfig('image').avatar
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerAvatar(@FileUploaded() file: FileDto): Promise<any> {
@@ -191,10 +194,10 @@ export class AdminPerformerController {
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('cover', 'cover', {
-      destination: getConfig('file').coverDir
-      // generateThumbnail: true,
-      // replaceWithThumbail: true,
-      // thumbnailSize: getConfig('image').coverThumbnail
+      destination: getConfig('file').coverDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
     })
   )
   async uploadPerformerCover(@FileUploaded() file: FileDto): Promise<any> {
@@ -202,6 +205,29 @@ export class AdminPerformerController {
     return DataResponse.ok({
       ...file,
       url: file.getUrl()
+    });
+  }
+
+  @Post('/:id/welcome-video/upload')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('admin')
+  @UseInterceptors(
+    FileUploadInterceptor('performer-welcome-video', 'welcome-video', {
+      destination: getConfig('file').videoDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+    })
+  )
+  async uploadPerformerVideo(
+    @FileUploaded() file: FileDto,
+    @Param('id') performerId: string
+  ): Promise<any> {
+    // TODO - define url for perfomer id if have?
+    await this.performerService.adminUpdateWelcomeVideo(performerId, file);
+    return DataResponse.ok({
+      ...file,
+      url: file.getUrl(true)
     });
   }
 

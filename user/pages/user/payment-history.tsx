@@ -70,7 +70,6 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
     }
     const { filter: values } = this.state;
     await this.setState({ filter: { ...values, ...filter } });
-    this.setState({ filter });
     this.userSearchTransactions();
   }
 
@@ -86,7 +85,8 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
         limit: pagination.pageSize,
         offset: (pagination.current - 1) * pagination.pageSize
       });
-      return await this.setState({
+      await this.setState({
+        loading: false,
         paymentList: resp.data.data,
         pagination: {
           ...pagination,
@@ -94,8 +94,7 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
         }
       });
     } catch (error) {
-      return message.error(getResponseError(error));
-    } finally {
+      message.error(getResponseError(await error));
       this.setState({ loading: false });
     }
   }
@@ -108,7 +107,7 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
     const statuses = [
       {
         key: '',
-        text: 'All Status'
+        text: 'All Statuses'
       },
       {
         key: 'created',
@@ -132,7 +131,7 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
       },
       {
         key: 'canceled',
-        text: 'Canceled'
+        text: 'Cancelled'
       }
     ];
     return (

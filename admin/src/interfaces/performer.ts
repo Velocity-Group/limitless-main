@@ -19,7 +19,6 @@ export interface IPerformer {
   zipcode: string;
   address: string;
   languages: string[];
-  studioId: string;
   categoryIds: string[];
   timezone: string;
   noteForUser: string;
@@ -61,6 +60,7 @@ export interface IPerformer {
   googleConnected: boolean;
   welcomeVideoId: string;
   welcomeVideoPath: string;
+  welcomeVideoname: string;
   activateWelcomeVideo: boolean;
   isBookMarked: boolean;
   isSubscribed: boolean;
@@ -88,50 +88,6 @@ export interface IPerformer {
   commissionSetting: any;
   ccbillSetting: any;
   paypalSetting: any;
-}
-
-export interface IUpdatePerformer {
-  _id: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  phoneCode: string;
-  gender: string;
-  country: string;
-  city: string;
-  state: string;
-  zipcode: string;
-  address: string;
-  languages: string[];
-  studioId: string;
-  categoryIds: string[];
-  timezone: string;
-  noteForUser: string;
-  height: string;
-  weight: string;
-  bio: string;
-  eyes: string;
-  sexualOrientation: string;
-  isFreeSubscription: boolean;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  bankingInformation: IBankingSetting;
-  welcomeVideoId: string;
-  welcomeVideoPath: string;
-  activateWelcomeVideo: boolean;
-  publicChatPrice: number;
-  groupChatPrice: number;
-  privateChatPrice: number;
-  socialsLink: {
-    facebook: string;
-    google: string;
-    instagram: string;
-    twitter: string;
-    linkedIn: string;
-  }
-  idVerification: any;
-  documentVerification: any
 }
 
 export interface IBankingSetting {

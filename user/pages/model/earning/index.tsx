@@ -29,7 +29,7 @@ interface IStates {
   stats: IPerformerStats;
   sortBy: string;
   sort: string;
-  sourceType: string;
+  type: string;
   dateRange: any;
   isToken: boolean;
 }
@@ -48,7 +48,7 @@ const initialState = {
   },
   sortBy: 'createdAt',
   sort: 'desc',
-  sourceType: '',
+  type: '',
   dateRange: null
 };
 
@@ -68,7 +68,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
   async handleFilter(data) {
     const { dateRange } = this.state;
     await this.setState({
-      sourceType: data.type,
+      type: data.type,
       dateRange: {
         ...dateRange,
         fromDate: data.fromDate,
@@ -95,7 +95,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
 
   async getData() {
     const {
-      pagination, sort, sortBy, sourceType, dateRange, isToken
+      pagination, sort, sortBy, type, dateRange, isToken
     } = this.state;
     try {
       const { current, pageSize } = pagination;
@@ -104,29 +104,29 @@ class EarningPage extends PureComponent<IProps, IStates> {
         offset: (current - 1) * pageSize,
         sort,
         sortBy,
-        sourceType,
+        type,
         isToken,
         ...dateRange
       });
-      await this.setState({
+      this.setState({
         earning: earning.data.data,
-        pagination: { ...pagination, total: earning.data.total }
+        pagination: { ...pagination, total: earning.data.total },
+        loading: false
       });
     } catch (error) {
-      message.error(getResponseError(error));
-    } finally {
+      message.error(getResponseError(await error));
       this.setState({ loading: false });
     }
   }
 
   async getPerformerStats() {
-    const { dateRange, sourceType, isToken } = this.state;
+    const { dateRange, type, isToken } = this.state;
     const resp = await earningService.performerStarts({
       isToken,
-      sourceType,
+      type,
       ...dateRange
     });
-    await this.setState({ stats: resp.data });
+    resp.data && this.setState({ stats: resp.data });
   }
 
   render() {
@@ -138,7 +138,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${isToken ? 'Token Earning Report' : 'USD Earning Report'}`}
+            {`${ui?.siteName} | ${isToken ? 'Token Earnings Report' : 'USD Earnings Report'}`}
           </title>
         </Head>
         <div className="main-container">
@@ -164,7 +164,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
           </div>
           <SearchFilter
             type={isToken ? [
-              { key: '', text: 'All type' },
+              { key: '', text: 'All types' },
               // { key: 'private_chat', text: 'Private Chat' },
               // { key: 'group_chat', text: 'Group Chat' },
               // { key: 'public_chat', text: 'Public Chat' },
@@ -176,7 +176,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
               // { key: 'gift', text: 'Gift' },
               // { key: 'message', text: 'Message' }
             ] : [
-              { key: '', text: 'All type' },
+              { key: '', text: 'All types' },
               { key: 'monthly_subscription', text: 'Monthly Subscription' },
               { key: 'yearly_subscription', text: 'Yearly Subscription' }
             ]}
@@ -191,13 +191,13 @@ class EarningPage extends PureComponent<IProps, IStates> {
               precision={2}
             />
             <Statistic
-              title="Admin earned"
+              title="Platform commission"
               prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
               value={stats?.totalSiteCommission || 0}
               precision={2}
             />
             <Statistic
-              title="You earned"
+              title="Your Earnings"
               prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
               value={stats?.totalNetPrice || 0}
               precision={2}

@@ -240,7 +240,7 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
     } = this.props;
     if (!activeConversation?.data?.streamId) return;
     if (user.balance < performer.groupChatPrice) {
-      message.error('Your token balance is not enough!', 15);
+      message.error('You have an insufficient token balance. Please top up.', 15);
       Router.push('/token-package');
       return;
     }
@@ -306,7 +306,7 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
     } = this.props;
     if (!activeConversation || !activeConversation.data || !activeConversation.data._id) return;
     if (user.balance < token) {
-      message.error('Your token balance is not enough!');
+      message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
       return;
     }
@@ -417,6 +417,7 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
             </Col>
           </Row>
           <Modal
+            centered
             key="update_stream"
             title={`Confirm to join ${performer?.name || performer?.username || 'N/A'} group chat`}
             visible={openPriceModal}
@@ -426,6 +427,7 @@ class UserGroupChat extends PureComponent<IProps, IStates> {
             <PurchaseStreamForm streamType="group" submiting={processing} performer={performer} onFinish={this.joinGroupChat.bind(this)} />
           </Modal>
           <Modal
+            centered
             key="tip"
             title={null}
             visible={openTipModal}

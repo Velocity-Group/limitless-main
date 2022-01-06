@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Form, Button, Row, Col, message, Progress, Image
+  Form, Button, Row, Col, message, Image
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import { ImageUpload } from '@components/file';
@@ -15,7 +15,7 @@ const layout = {
 interface IProps {
   onFinish: Function;
   user: IPerformer;
-  updating?: boolean;
+  updating: boolean;
 }
 
 export class PerformerVerificationForm extends PureComponent<IProps> {
@@ -25,10 +25,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
 
   state = {
     idImage: '',
-    documentImage: '',
-    isUploading: false,
-    idImgProgress: 0,
-    documentImgProgress: 0
+    documentImage: ''
   }
 
   componentDidMount() {
@@ -59,7 +56,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
       onFinish, updating
     } = this.props;
     const {
-      isUploading, idImage, documentImage, idImgProgress, documentImgProgress
+      idImage, documentImage
     } = this.state;
     const documentUploadUrl = performerService.getDocumentUploadUrl();
     const headers = {
@@ -85,40 +82,53 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
           <Col xs={24} sm={24} md={12}>
             <Form.Item
               labelCol={{ span: 24 }}
-              label="ID photo"
-              valuePropName="fileList"
+              label="Your government issued ID"
               className="model-photo-verification"
-              help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'idFile')} />
                 {idImage ? (
-                  <Image alt="id-img" src={idImage} style={{ margin: 5, height: '140px' }} />
-                ) : <img src="/static/front-id.jpeg" height="140px" alt="id-img" />}
+                  <Image alt="id-img" src={idImage} style={{ margin: 5, height: '150px' }} />
+                ) : <img src="/static/front-id.png" height="150px" alt="id-img" />}
               </div>
-              {idImgProgress > 0 && <Progress percent={idImgProgress} />}
+              <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
+                <ul className="list-issued-id">
+                  <li>Government-issued ID card</li>
+                  <li>National Id card</li>
+                  <li>Passport</li>
+                  <li>Driving license</li>
+                </ul>
+              </div>
             </Form.Item>
           </Col>
           <Col xs={24} sm={24} md={12}>
             <Form.Item
               labelCol={{ span: 24 }}
-              label="Holding ID photo"
-              valuePropName="fileList"
+              label="Your selfie with your ID and handwritten note"
               className="model-photo-verification"
-              help="Upload a photo of yourself holding your indentity document next to your face"
             >
               <div className="document-upload">
                 <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'documentFile')} />
                 {documentImage ? (
-                  <Image alt="id-img" src={documentImage} style={{ margin: 5, height: '140px' }} />
-                ) : <img src="/static/holding-id.jpeg" height="140px" alt="holding-id" />}
+                  <Image alt="id-img" src={documentImage} style={{ margin: 5, height: '150px' }} />
+                ) : <img src="/static/holding-id.jpg" height="150px" alt="holding-id" />}
               </div>
-              {documentImgProgress > 0 && <Progress percent={documentImgProgress} />}
+              <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
+                <ul className="list-issued-id">
+                  <li>
+                    On a blank piece of white paper write your name, today&apos;s date and our website address
+                    {' '}
+                    {window.location.hash}
+                  </li>
+                  <li>Hold your paper and your ID so we can clearly see hoth</li>
+                  <li>Take a selfie of you, your ID and your handwritten note. All three elements (you, your ID and your writting) must be clearly visible without copying or editing</li>
+                </ul>
+              </div>
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
-          <Button className="primary" type="primary" htmlType="submit" disabled={updating || isUploading} loading={updating || isUploading}>
+        <Form.Item className="text-center">
+          <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>
             Submit
           </Button>
         </Form.Item>

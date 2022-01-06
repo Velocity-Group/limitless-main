@@ -12,7 +12,6 @@ import gallery from './gallery/reducers';
 import product from './product/reducers';
 import comment from './comment/reducers';
 import cart from './cart/reducers';
-import banner from './banner/reducers';
 import message from './message/reducers';
 import feed from './feed/reducers';
 import streaming from './streaming/reducers';
@@ -29,7 +28,6 @@ const reducers = merge(
   product,
   comment,
   cart,
-  banner,
   message,
   feed,
   streaming,

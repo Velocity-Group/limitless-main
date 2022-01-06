@@ -66,7 +66,7 @@ class TokenPackages extends PureComponent<IProps> {
       isApliedCode, paymentGateway = 'stripe', couponCode, selectedPackage
     } = this.state;
     if (!user.stripeCardIds || !user.stripeCardIds.length) {
-      message.error('Please add payment card');
+      message.error('Please add a payment card to complete your purchase');
       Router.push('/user/cards');
       return;
     }
@@ -87,6 +87,7 @@ class TokenPackages extends PureComponent<IProps> {
 
   async applyCoupon() {
     const { couponCode } = this.state;
+    if (!couponCode) return;
     try {
       const resp = await paymentService.applyCoupon(couponCode);
       this.setState({ isApliedCode: true, coupon: resp.data });
@@ -100,7 +101,7 @@ class TokenPackages extends PureComponent<IProps> {
   render() {
     const { ui, user, settings } = this.props;
     const {
-      list, searching, openPurchaseModal, submiting,
+      list, searching, openPurchaseModal, submiting, couponCode,
       selectedPackage, isApliedCode, paymentGateway, coupon
     } = this.state;
     return (
@@ -148,6 +149,7 @@ class TokenPackages extends PureComponent<IProps> {
             ))}
           </Row>
           <Modal
+            centered
             key={`token_package_${selectedPackage?._id}`}
             title={`Purchase Token Package ${selectedPackage?.name}`}
             visible={openPurchaseModal}
@@ -193,7 +195,7 @@ class TokenPackages extends PureComponent<IProps> {
                     )}
                   </Col>
                   <Col span={6}>
-                    {!isApliedCode ? <Button onClick={this.applyCoupon.bind(this)}>Apply Code!</Button>
+                    {!isApliedCode ? <Button disabled={!couponCode} onClick={this.applyCoupon.bind(this)}>Apply!</Button>
                       : <Button onClick={() => this.setState({ isApliedCode: false, couponCode: '', coupon: null })}>Use Later!</Button>}
                   </Col>
                 </Row>
@@ -214,9 +216,9 @@ class TokenPackages extends PureComponent<IProps> {
               )}
             </div>
           </Modal>
-          {searching && <div><Spin /></div>}
+          {searching && <div className="text-center" style={{ margin: '30px 0' }}><Spin /></div>}
           {!searching && !list.length && <p className="text-center" style={{ margin: '30px 0' }}>No token package was found</p>}
-          {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+          {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
         </div>
       </Layout>
     );

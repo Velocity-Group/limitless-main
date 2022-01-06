@@ -1,5 +1,5 @@
 import { PureComponent } from 'react';
-import { Table, Tag } from 'antd';
+import { Table, Tag, Avatar } from 'antd';
 import { formatDate } from '@lib/date';
 
 interface IProps {
@@ -20,6 +20,8 @@ export class TableListEarning extends PureComponent<IProps> {
         render(performerInfo) {
           return (
             <div>
+              <Avatar src={performerInfo?.avatar || '/no-avatar.png'} />
+              {' '}
               {performerInfo?.name || performerInfo?.username || 'N/A'}
             </div>
           );
@@ -32,6 +34,8 @@ export class TableListEarning extends PureComponent<IProps> {
         render(userInfo) {
           return (
             <div>
+              <Avatar src={userInfo?.avatar || '/no-avatar.png'} />
+              {' '}
               {userInfo?.name || userInfo?.username || 'N/A'}
             </div>
           );
@@ -50,19 +54,7 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'NET',
-        dataIndex: 'netPrice',
-        render(netPrice, record) {
-          return (
-            <span>
-              {record.isToken ? <img src="/coin-ico.png" width="15px" alt="coin" /> : '$'}
-              {(netPrice || 0).toFixed(2)}
-            </span>
-          );
-        }
-      },
-      {
-        title: 'Site_Commission',
+        title: 'Platform Commission %',
         dataIndex: 'siteCommission',
         render(commission) {
           return (
@@ -74,52 +66,33 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Model Earnings',
+        dataIndex: 'netPrice',
+        render(netPrice, record) {
+          return (
+            <span>
+              {record.isToken ? <img src="/coin-ico.png" width="15px" alt="coin" /> : '$'}
+              {(netPrice || 0).toFixed(2)}
+            </span>
+          );
+        }
+      },
+      {
         title: 'Type',
         dataIndex: 'type',
         render(type: string) {
           switch (type) {
             case 'monthly_subscription':
-              return <Tag color="#936dc9">Monthly Subscription</Tag>;
+              return <Tag color="blue">Monthly Sub</Tag>;
             case 'yearly_subscription':
-              return <Tag color="#936dc9">Yearly Subscription</Tag>;
-            case 'product':
-              return <Tag color="#FFCF00">Product</Tag>;
-            case 'gallery':
-              return <Tag color="#FFCF00">Gallery</Tag>;
-            case 'feed':
-              return <Tag color="green">Post</Tag>;
-            case 'tip':
-              return <Tag color="#00dcff">Tip</Tag>;
-            case 'video':
-              return <Tag color="blue">Video</Tag>;
+              return <Tag color="red">Yearly Sub</Tag>;
             default: return <Tag color="#00dcff">{type}</Tag>;
           }
         }
       },
-      // {
-      //   title: 'Paid status',
-      //   dataIndex: 'isPaid',
-      //   sorter: true,
-      //   render(isPaid: boolean) {
-      //     switch (isPaid) {
-      //       case true:
-      //         return <Tag color="green">Paid</Tag>;
-      //       case false:
-      //         return <Tag color="red">Unpaid</Tag>;
-      //     }
-      //   }
-      // },
-      // {
-      //   title: 'Paid at',
-      //   dataIndex: 'paidAt',
-      //   sorter: true,
-      //   render(paidAt: Date) {
-      //     return <span>{formatDate(paidAt)}</span>;
-      //   }
-      // },
       {
-        title: 'Date',
-        dataIndex: 'createdAt',
+        title: 'Updated On',
+        dataIndex: 'updatedAt',
         sorted: true,
         render(createdAt: Date) {
           return <span>{formatDate(createdAt)}</span>;

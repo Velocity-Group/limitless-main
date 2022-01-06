@@ -17,3 +17,4 @@ export * from './email-template.service';
 export * from './payout-request.service';
 export * from './purchase-item.service';
 export * from './token-package.service';
+export * from './config';

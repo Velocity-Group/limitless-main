@@ -1,11 +1,13 @@
 import { Upload, message } from 'antd';
 import { LoadingOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
+import { getGlobalConfig } from '@services/config';
 
 function beforeUpload(file) {
-  const isLt5M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+  const config = getGlobalConfig();
+  const isLt5M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isLt5M) {
-    message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+    message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
   }
   return isLt5M;
 }

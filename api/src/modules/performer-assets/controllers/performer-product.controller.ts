@@ -13,13 +13,15 @@ import {
   Param,
   Query,
   UseInterceptors,
-  Delete
+  Delete,
+  Request
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
 import { UserDto } from 'src/modules/user/dtos';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { ProductService } from '../services/product.service';
 import { ProductCreatePayload, ProductSearchRequest } from '../payloads';
 import { ProductSearchService } from '../services/product-search.service';
@@ -44,16 +46,21 @@ export class PerformerProductController {
         fieldName: 'image',
         options: {
           destination: getConfig('file').imageDir,
+          uploadImmediately: true,
           generateThumbnail: true,
-          replaceWithThumbail: true,
-          thumbnailSize: getConfig('image').productThumbnail
+          thumbnailSize: getConfig('image').originThumbnail,
+          acl: S3ObjectCannelACL.PublicRead,
+          server: Storage.S3
         }
       },
       {
         type: 'performer-product-digital',
         fieldName: 'digitalFile',
         options: {
-          destination: getConfig('file').digitalProductDir
+          destination: getConfig('file').digitalProductDir,
+          uploadImmediately: true,
+          acl: S3ObjectCannelACL.AuthenticatedRead,
+          server: Storage.S3
         }
       }
     ])
@@ -85,16 +92,21 @@ export class PerformerProductController {
         fieldName: 'image',
         options: {
           destination: getConfig('file').imageDir,
+          uploadImmediately: true,
           generateThumbnail: true,
-          replaceWithThumbail: true,
-          thumbnailSize: getConfig('image').productThumbnail
+          thumbnailSize: getConfig('image').originThumbnail,
+          acl: S3ObjectCannelACL.PublicRead,
+          server: Storage.S3
         }
       },
       {
         type: 'performer-product-digital',
         fieldName: 'digitalFile',
         options: {
-          destination: getConfig('file').digitalProductDir
+          destination: getConfig('file').digitalProductDir,
+          uploadImmediately: true,
+          acl: S3ObjectCannelACL.AuthenticatedRead,
+          server: Storage.S3
         }
       }
     ])
@@ -143,9 +155,10 @@ export class PerformerProductController {
   @HttpCode(HttpStatus.OK)
   async details(
     @Param('id') id: string,
-    @CurrentUser() user: UserDto
+    @CurrentUser() user: UserDto,
+    @Request() req: any
   ): Promise<any> {
-    const resp = await this.productService.getDetails(id, user);
+    const resp = await this.productService.getDetails(id, user, req.jwToken);
     return DataResponse.ok(resp);
   }
 }

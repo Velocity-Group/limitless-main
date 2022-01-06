@@ -13,9 +13,9 @@ interface IProps {
   post: IPostResponse;
 }
 class PostDetail extends PureComponent<IProps> {
-  static authenticate: boolean = true;
+  static authenticate = true;
 
-  static noredirect: boolean = true;
+  static noredirect = true;
 
   static async getInitialProps({ ctx }: any) {
     const { query } = ctx;

@@ -30,8 +30,12 @@ class CreatePost extends PureComponent<IProps> {
   componentDidMount() {
     const { user } = this.props;
     if (!user || !user.verifiedDocument) {
-      message.warning('Your ID documents are not verified yet! You could not post any content right now. Please upload your ID documents to get approval then start making money.');
+      message.warning('Your ID documents are not verified yet! You could not post any content right now.');
       Router.back();
+    }
+    if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
+      message.warning('You have not connected with stripe. So you cannot post any content right now!');
+      Router.push('/model/banking');
     }
   }
 
@@ -54,7 +58,7 @@ class CreatePost extends PureComponent<IProps> {
               <div className="story-switch-type">
                 <div aria-hidden className="type-item left" onClick={() => this.setState({ type: 'photo', chosenType: true })}>
                   <span><PictureOutlined /></span>
-                  <p>Create a Photos post</p>
+                  <p>Create a Photo post</p>
                 </div>
                 <div aria-hidden className="type-item right" onClick={() => this.setState({ type: 'video', chosenType: true })}>
                   <span><VideoCameraOutlined /></span>

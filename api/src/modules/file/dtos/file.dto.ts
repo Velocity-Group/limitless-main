@@ -1,6 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { getConfig } from 'src/kernel';
 import { isUrl } from 'src/kernel/helpers/string.helper';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
+import { S3Service } from 'src/modules/storage/services';
 import { FileModel } from '../models';
 
 export class FileDto {
@@ -34,6 +36,12 @@ export class FileDto {
 
   thumbnails?: Record<string, any>[];
 
+  refItems: any;
+
+  acl?: string;
+
+  metadata?: any;
+
   createdBy?: ObjectId;
 
   updatedBy?: ObjectId;
@@ -41,8 +49,6 @@ export class FileDto {
   createdAt?: Date;
 
   updatedAt?: Date;
-
-  refItems?: any;
 
   constructor(init?: Partial<FileDto>) {
     if (init) {
@@ -61,12 +67,14 @@ export class FileDto {
       this.path = init.path;
       this.absolutePath = init.absolutePath;
       this.thumbnails = init.thumbnails;
+      this.refItems = init.refItems;
       this.status = init.status;
+      this.acl = init.acl;
+      this.metadata = init.metadata;
       this.createdBy = init.createdBy;
       this.updatedBy = init.updatedBy;
       this.createdAt = init.createdAt;
       this.updatedAt = init.updatedAt;
-      this.refItems = init.refItems;
     }
   }
 
@@ -82,14 +90,35 @@ export class FileDto {
     return this.path || '';
   }
 
-  public getUrl(): string {
+  public getUrl(authenticated = false): string {
     if (!this.path) return '';
-    if (isUrl(this.path)) return this.path;
+    if (isUrl(this.path) && this.server !== Storage.S3) {
+      return this.path;
+    }
 
-    return new URL(
-      this.path,
-      getConfig('app').baseUrl
-    ).href;
+    if (isUrl(this.path) && this.server === Storage.S3) {
+      if (this.acl === S3ObjectCannelACL.PublicRead) {
+        return this.path;
+      }
+
+      if (!authenticated || !this.metadata) {
+        return this.path;
+      }
+
+      const { bucket, expires, endpoint } = this.metadata;
+      return S3Service.getSignedUrl(
+        {
+          Bucket: bucket,
+          Key: this.absolutePath,
+          Expires: parseInt(expires, 10) || 60
+        },
+        {
+          endpoint
+        }
+      );
+    }
+
+    return new URL(this.path, getConfig('app').baseUrl).href;
   }
 
   public getThumbnails(): string[] {
@@ -100,10 +129,7 @@ export class FileDto {
     return this.thumbnails.map((t) => {
       if (isUrl(t.path)) return t.path;
 
-      return new URL(
-        t.path,
-        getConfig('app').baseUrl
-      ).href;
+      return new URL(t.path, getConfig('app').baseUrl).href;
     });
   }
 
@@ -117,12 +143,12 @@ export class FileDto {
     return (this.mimeType || '').toLowerCase().includes('video');
   }
 
-  public isAudio() {
-    return (this.mimeType || '').toLowerCase().includes('audio');
-  }
-
   public isImage() {
     return (this.mimeType || '').toLowerCase().includes('image');
+  }
+
+  public isAudio() {
+    return (this.mimeType || '').toLowerCase().includes('audio');
   }
 
   public toResponse() {

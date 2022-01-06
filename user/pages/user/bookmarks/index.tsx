@@ -1,5 +1,5 @@
 import {
-  Layout, message, Tabs, Tooltip
+  Layout, message, Tabs
 } from 'antd';
 import { PureComponent } from 'react';
 import PageHeading from '@components/common/page-heading';
@@ -115,11 +115,11 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
     const { user } = this.props;
     const { feeds } = this.state;
     if (user._id !== feed.fromSourceId) return;
-    if (!window.confirm('Are you sure to delete this post?')) return;
+    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) return;
     try {
       await feedService.delete(feed._id);
       feeds.filter((f) => f._id !== feed._id);
-      message.success('Removed successfully');
+      message.success('Post deleted successfully');
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Something went wrong, please try again later');
@@ -266,14 +266,21 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="BookMarks" icon={<BookOutlined />} />
+          <PageHeading title="Bookmarks" icon={<BookOutlined />} />
           <div className="user-account">
             <Tabs
               defaultActiveKey={tab || 'feeds'}
               size="large"
               onChange={this.onTabsChange.bind(this)}
             >
-              <Tabs.TabPane tab={<Tooltip title="Feeds"><FireOutlined /></Tooltip>} key="feeds">
+              <Tabs.TabPane tab={<FireOutlined />} key="feeds">
+                <div className="heading-tab">
+                  <h4>
+                    {totalFeeds > 0 && totalFeeds}
+                    {' '}
+                    {totalFeeds > 1 ? 'POSTS' : 'POST'}
+                  </h4>
+                </div>
                 <ScrollListFeed
                   isGrid
                   items={feeds.map((f) => f.objectInfo)}
@@ -281,36 +288,65 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   canLoadmore={totalFeeds > feeds.length}
                   onDelete={this.onDeleteFeed.bind(this)}
                   loadMore={this.handlePagechange.bind(this, 'feeds')}
+                  notFoundText="No bookmarked posts found"
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Videos"><VideoCameraOutlined /></Tooltip>} key="videos">
+              <Tabs.TabPane tab={<VideoCameraOutlined />} key="videos">
+                <div className="heading-tab">
+                  <h4>
+                    {totalVideos > 0 && totalVideos}
+                    {' '}
+                    {totalVideos > 1 ? 'VIDEOS' : 'VIDEO'}
+                  </h4>
+                </div>
                 <ScrollListVideo
                   items={videos.map((f) => f.objectInfo)}
                   loading={loading}
                   canLoadmore={totalVideos > videos.length}
                   loadMore={this.handlePagechange.bind(this, 'videos')}
+                  notFoundText="No bookmarked videos found"
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Galleries"><PictureOutlined /></Tooltip>} key="galleries">
+              <Tabs.TabPane tab={<PictureOutlined />} key="galleries">
+                <div className="heading-tab">
+                  <h4>
+                    {totalGalleries > 0 && totalGalleries}
+                    {' '}
+                    {totalGalleries > 1 ? 'GALLERIES' : 'GALLERY'}
+                  </h4>
+                </div>
                 <ScrollListGallery
                   items={galleries.map((f) => f.objectInfo)}
                   loading={loading}
                   canLoadmore={totalGalleries > galleries.length}
                   loadMore={this.handlePagechange.bind(this, 'galleries')}
+                  notFoundText="No bookmarked galleries found"
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Shop"><ShopOutlined /></Tooltip>} key="products">
+              <Tabs.TabPane tab={<ShopOutlined />} key="products">
+                <div className="heading-tab">
+                  <h4>
+                    {totalProducts > 0 && totalProducts}
+                    {' '}
+                    {totalProducts > 1 ? 'PRODUCTS' : 'PRODUCT'}
+                  </h4>
+                </div>
                 <ScrollListProduct
                   loading={loading}
                   items={products.map((p) => p.objectInfo)}
                   canLoadmore={totalProducts > products.length}
-                  loadMore={this.handlePagechange.bind(
-                    this,
-                    'products'
-                  )}
+                  loadMore={this.handlePagechange.bind(this, 'products')}
+                  notFoundText="No bookmarked products found"
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<Tooltip title="Models"><ModelIcon /></Tooltip>} key="performers">
+              <Tabs.TabPane tab={<ModelIcon />} key="performers">
+                <div className="heading-tab">
+                  <h4>
+                    {totalPerformers > 0 && totalPerformers}
+                    {' '}
+                    {totalPerformers > 1 ? 'MODELS' : 'MODEL'}
+                  </h4>
+                </div>
                 <UserPerformerBookmarks
                   loading={loading}
                   performers={performers.map((p) => p.objectInfo)}
@@ -319,6 +355,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                     this,
                     'performers'
                   )}
+                  notFoundText="No bookmarked profiles found"
                 />
               </Tabs.TabPane>
             </Tabs>

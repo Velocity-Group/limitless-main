@@ -6,18 +6,20 @@ import {
   Post,
   HttpCode,
   HttpStatus,
-  Request,
   Get,
   Param,
   Query,
   UseInterceptors,
-  Delete
+  Delete,
+  Request,
+  Put
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
 import { UserDto } from 'src/modules/user/dtos';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { VideoCreatePayload } from '../payloads/video-create.payload';
 import { VideoService } from '../services/video.service';
 import { VideoSearchRequest, VideoUpdatePayload } from '../payloads';
@@ -43,14 +45,18 @@ export class PerformerVideosController {
           type: 'performer-video',
           fieldName: 'video',
           options: {
-            destination: getConfig('file').videoProtectedDir
+            destination: getConfig('file').videoProtectedDir,
+            acl: S3ObjectCannelACL.AuthenticatedRead,
+            server: Storage.S3
           }
         },
         {
           type: 'performer-video-teaser',
           fieldName: 'teaser',
           options: {
-            destination: getConfig('file').videoDir
+            destination: getConfig('file').videoDir,
+            acl: S3ObjectCannelACL.PublicRead,
+            server: Storage.S3
           }
         },
         {
@@ -58,13 +64,14 @@ export class PerformerVideosController {
           fieldName: 'thumbnail',
           options: {
             destination: getConfig('file').imageDir,
+            uploadImmediately: true,
             generateThumbnail: true,
-            replaceWithThumbail: false,
-            thumbnailSize: getConfig('image').videoThumbnail
+            thumbnailSize: getConfig('image').blurThumbnail,
+            acl: S3ObjectCannelACL.PublicRead,
+            server: Storage.S3
           }
         }
-      ],
-      {}
+      ]
     )
   )
   async uploadVideo(
@@ -90,8 +97,7 @@ export class PerformerVideosController {
     @Param('id') id: string,
     @Request() req: any
   ) {
-    const jwToken = req.jwToken || null;
-    const details = await this.videoService.getDetails(id, jwToken);
+    const details = await this.videoService.getDetails(id, req.jwToken);
     return DataResponse.ok(details);
   }
 
@@ -107,7 +113,7 @@ export class PerformerVideosController {
     return DataResponse.ok(resp);
   }
 
-  @Post('/edit/:id')
+  @Put('/edit/:id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
   @Roles('performer')
@@ -119,14 +125,18 @@ export class PerformerVideosController {
           type: 'performer-video',
           fieldName: 'video',
           options: {
-            destination: getConfig('file').videoProtectedDir
+            destination: getConfig('file').videoProtectedDir,
+            acl: S3ObjectCannelACL.AuthenticatedRead,
+            server: Storage.S3
           }
         },
         {
           type: 'performer-video-teaser',
           fieldName: 'teaser',
           options: {
-            destination: getConfig('file').videoDir
+            destination: getConfig('file').videoDir,
+            acl: S3ObjectCannelACL.PublicRead,
+            server: Storage.S3
           }
         },
         {
@@ -135,12 +145,13 @@ export class PerformerVideosController {
           options: {
             destination: getConfig('file').imageDir,
             generateThumbnail: true,
-            replaceWithThumbail: false,
-            thumbnailSize: getConfig('image').videoThumbnail
+            uploadImmediately: true,
+            thumbnailSize: getConfig('image').blurThumbnail,
+            acl: S3ObjectCannelACL.PublicRead,
+            server: Storage.S3
           }
         }
-      ],
-      {}
+      ]
     )
   )
   async update(
@@ -161,6 +172,19 @@ export class PerformerVideosController {
     @Param('id') id: string
   ) {
     const details = await this.videoService.delete(id);
+    return DataResponse.ok(details);
+  }
+
+  @Delete('/remove-file/:id')
+  @HttpCode(HttpStatus.OK)
+  @Roles('performer')
+  @UseGuards(RoleGuard)
+  async removeFile(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDto,
+    @Body() payload: { type: string }
+  ) {
+    const details = await this.videoService.deleteFile(id, payload.type, user);
     return DataResponse.ok(details);
   }
 }

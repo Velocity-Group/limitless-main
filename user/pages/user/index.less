@@ -20,7 +20,7 @@
       }
 
       .ant-tabs-tab {
-        width: 20%;
+        width: 50%;
         border-bottom: 1px solid;
         font-size: 25px;
         font-weight: 600;
@@ -39,22 +39,28 @@
     }
 
     .ant-tabs-nav-wrap {
-      overflow: auto !important;
+      padding: 0 30px;
 
-      // &::before {
-      //   opacity: 1;
-      //   box-shadow: none;
-      //   border-bottom: 1px solid @gray;
-      // }
+      &::before {
+        opacity: 1;
+        box-shadow: none;
+        border-bottom: 1px solid @gray;
+      }
 
-      // &::after {
-      //   opacity: 1;
-      //   box-shadow: none;
-      //   border-bottom: 1px solid @gray;
-      // }
+      &::after {
+        opacity: 1;
+        box-shadow: none;
+        border-bottom: 1px solid @gray;
+      }
 
       @media screen and (max-width: @mobile-screen) {
         padding: 0;
+        &::before {
+          opacity: 0;
+        }
+        &::after {
+          opacity: 0;
+        }
       }
     }
 
@@ -72,7 +78,7 @@
     &.custom {
       .ant-tabs-nav {
         .ant-tabs-tab {
-          font-size: 15px;
+          font-size: 14px;
         }
       }
     }

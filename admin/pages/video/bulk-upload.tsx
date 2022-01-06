@@ -1,8 +1,5 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-continue */
-/* eslint-disable no-await-in-loop */
 import Head from 'next/head';
-import { PureComponent, Fragment, createRef } from 'react';
+import { PureComponent, createRef } from 'react';
 import {
   message, Form, Upload, Button
 } from 'antd';
@@ -14,6 +11,7 @@ import { FormInstance } from 'antd/lib/form';
 import { UploadOutlined } from '@ant-design/icons';
 import VideoUploadList from '@components/file/video-upload-list';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
+import { getGlobalConfig } from '@services/config';
 
 const { Dragger } = Upload;
 
@@ -38,9 +36,8 @@ class BulkUploadVideo extends PureComponent<IProps> {
   }
 
   onUploading(file, resp: any) {
-    const a = file;
-    a.percent = resp.percentage;
-    if (file.percent === 100) a.status = 'done';
+    // eslint-disable-next-line no-param-reassign
+    file.percent = resp.percentage;
     this.forceUpdate();
   }
 
@@ -51,8 +48,17 @@ class BulkUploadVideo extends PureComponent<IProps> {
     });
   }
 
-  beforeUpload(file, fileList) {
-    this.setState({ fileList });
+  beforeUpload(file, listFile) {
+    const config = getGlobalConfig();
+    if (file.size / 1024 / 1024 > (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000)) {
+      message.error(`${file.name} is over ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB`);
+      return false;
+    }
+    const { fileList } = this.state;
+    this.setState({
+      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000))]
+    });
+    return true;
   }
 
   remove(file) {
@@ -67,12 +73,14 @@ class BulkUploadVideo extends PureComponent<IProps> {
       message.error('Please select new video!');
       return;
     }
-
     await this.setState({ uploading: true });
+    // eslint-disable-next-line no-restricted-syntax
     for (const file of uploadFiles) {
       try {
-        if (['uploading', 'done'].includes(file.status)) return;
+        // eslint-disable-next-line no-continue
+        if (['uploading', 'done'].includes(file.status)) continue;
         file.status = 'uploading';
+        // eslint-disable-next-line no-await-in-loop
         await videoService.uploadVideo(
           [
             {
@@ -93,8 +101,10 @@ class BulkUploadVideo extends PureComponent<IProps> {
           },
           this.onUploading.bind(this, file)
         );
+        file.status = 'done';
       } catch (e) {
         message.error(`File ${file.name} error!`);
+        file.status = 'error';
       }
     }
     message.success('Files has been uploaded!');
@@ -141,13 +151,13 @@ class BulkUploadVideo extends PureComponent<IProps> {
                 <p className="ant-upload-drag-icon">
                   <UploadOutlined />
                 </p>
-                <p className="ant-upload-text">Click or drag-drop files to this area to upload</p>
+                <p className="ant-upload-text">Click or drag and drop files to this area to upload video file only</p>
               </Dragger>
               <VideoUploadList files={fileList} remove={this.remove.bind(this)} />
             </Form.Item>
-            <Form.Item style={{ textAlign: 'center' }}>
+            <Form.Item className="text-center">
               <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading || !fileList.length}>
-                UPLOAD
+                UPLOAD ALL
               </Button>
             </Form.Item>
           </Form>

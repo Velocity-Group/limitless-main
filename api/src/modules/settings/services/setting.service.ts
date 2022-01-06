@@ -96,11 +96,13 @@ export class SettingService {
     if (!setting) {
       throw new EntityNotFoundException();
     }
+    const oldValue = setting.value;
     data.description && setting.set('description', data.description);
     data.name && setting.set('name', data.name);
     setting.set('value', data.value);
     await setting.save();
     const dto = new SettingDto(setting);
+    dto.oldValue = oldValue;
     await this.publishChange(dto);
     return dto;
   }

@@ -5,6 +5,7 @@ import {
 } from 'antd';
 import { IUser, ICountry } from 'src/interfaces';
 import { AvatarUpload } from '@components/user/avatar-upload';
+import { getGlobalConfig } from '@services/config';
 
 const layout = {
   labelCol: { span: 24 },
@@ -42,8 +43,9 @@ export class AccountForm extends PureComponent<IProps> {
       onFinish, user, updating, options
     } = this.props;
     const {
-      uploadHeaders, avatarUploadUrl, beforeUpload
+      uploadHeaders, avatarUploadUrl, beforeUpload, onAvatarUploaded
     } = options;
+    const config = getGlobalConfig();
     return (
       <Form
         {...layout}
@@ -71,7 +73,7 @@ export class AccountForm extends PureComponent<IProps> {
                     /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                   ),
                   message:
-                'First name can not contain number and special character'
+                    'First name can not contain number and special character'
                 }
               ]}
             >
@@ -90,7 +92,7 @@ export class AccountForm extends PureComponent<IProps> {
                     /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                   ),
                   message:
-                'Last name can not contain number and special character'
+                    'Last name can not contain number and special character'
                 }
               ]}
             >
@@ -119,7 +121,7 @@ export class AccountForm extends PureComponent<IProps> {
                 {
                   pattern: new RegExp(/^(?=.*\S).+$/g),
                   message:
-                'Display name can not contain only whitespace'
+                    'Display name can not contain only whitespace'
                 },
                 {
                   min: 3,
@@ -158,12 +160,32 @@ export class AccountForm extends PureComponent<IProps> {
           </Col>
           {!user && [
             <Col xs={12} md={12}>
-              <Form.Item name="password" label="Password" rules={[{ required: true }, { min: 6 }]}>
+              <Form.Item
+                name="password"
+                label="Password"
+                rules={[
+                  {
+                    pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                    message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                  },
+                  { required: true, message: 'Please enter your password!' }
+                ]}
+              >
                 <Input.Password placeholder="User password" />
               </Form.Item>
             </Col>,
             <Col xs={12} md={12}>
-              <Form.Item name="rePassword" label="Confirm password" rules={[{ required: true }, { min: 6 }]}>
+              <Form.Item
+                name="rePassword"
+                label="Confirm password"
+                rules={[
+                  {
+                    pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                    message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                  },
+                  { required: true, message: 'Please confirm your password!' }
+                ]}
+              >
                 <Input.Password placeholder="Confirm user password" />
               </Form.Item>
             </Col>
@@ -201,12 +223,13 @@ export class AccountForm extends PureComponent<IProps> {
           <Col xs={12} md={12}>
             <Form.Item
               label="Avatar"
-              help={`Avatar must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`}
+              help={`Avatar must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`}
             >
               <AvatarUpload
                 headers={uploadHeaders}
                 uploadUrl={avatarUploadUrl}
                 onBeforeUpload={beforeUpload}
+                onUploaded={onAvatarUploaded}
                 image={options?.avatarUrl}
               />
             </Form.Item>

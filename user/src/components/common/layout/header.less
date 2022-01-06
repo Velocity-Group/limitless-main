@@ -3,6 +3,11 @@
 .main-header {
   border-bottom: 1px solid @light-grey;
   background-color: @white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
 }
 
 .header.ant-layout-header {
@@ -151,10 +156,6 @@
 
     .anticon {
       font-size: 25px;
-
-      &.anticon-custom {
-        font-size: 30px;
-      }
     }
 
     .cart-total {
@@ -193,20 +194,6 @@
   .active {
     color: @primary-color;
     border-bottom: 2px solid;
-  }
-
-  @media (max-width: @mobile-screen) {
-    width: 100%;
-    justify-content: space-between;
-
-    li {
-      padding: 0 5px;
-
-      .cart-total {
-        top: -2px;
-        right: 2px;
-      }
-    }
   }
 }
 
@@ -329,10 +316,6 @@
         .anticon {
           font-size: 18px;
           color: @dark-grey;
-
-          &.anticon-custom {
-            font-size: 20px;
-          }
         }
       }
 
@@ -354,29 +337,11 @@
 }
 
 @media (max-width: @mobile-screen) {
-  .main-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 999;
-  }
-
-  .ant-btn.info,
-  .ant-btn.secondary-custom {
-    margin-bottom: 5px;
-  }
-
-  .ant-col-offset-4 {
-    margin-left: 0;
-  }
-
-  .switch-grp {
-    margin-bottom: 10px;
-  }
-
   .nav-bar {
     .nav-icons {
+      width: 100%;
+      justify-content: space-between;
+
       li {
         font-size: 14px;
         padding: 2px 12px;
@@ -384,10 +349,15 @@
         span {
           font-size: 25px;
         }
+
+        .cart-total {
+          top: -2px;
+          right: 2px;
+        }
       }
 
       .logo-nav {
-        width: 55%;
+        width: 50%;
 
         img {
           height: 23px;

@@ -16,7 +16,7 @@ const deliveryStatuses = [
   },
   {
     key: 'shipping',
-    text: 'Shipping'
+    text: 'Shipped'
   },
   {
     key: 'delivered',

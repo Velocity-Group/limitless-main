@@ -3,19 +3,19 @@ import {
   Form, Input, Button, Select, Col, Row, Popover
 } from 'antd';
 import { AvatarUpload } from '@components/user/avatar-upload';
-import { IUser, IUserFormData } from 'src/interfaces';
+import { IUser } from 'src/interfaces';
 import {
-  TwitterOutlined, CheckCircleOutlined, IssuesCloseOutlined, GoogleOutlined
+  TwitterOutlined, GoogleOutlined
 } from '@ant-design/icons';
 
 interface UserAccountFormIProps {
   user: IUser;
   updating: boolean;
-  onFinish(data: IUserFormData): Function;
+  onFinish: Function;
   options?: {
     uploadHeader: any;
     avatarUrl: string;
-    uploadAvatar(): Function;
+    uploadAvatar: Function;
   };
   onVerifyEmail: Function;
   countTime: number;
@@ -33,14 +33,14 @@ export const UserAccountForm = ({
   user,
   options,
   onVerifyEmail,
-  countTime = 60,
-  onSwitchToPerformer
+  countTime = 60
 }: UserAccountFormIProps) => (
   <Form
     className="account-form"
     {...layout}
     name="user-account-form"
-    onFinish={onFinish}
+    onFinish={(data) => onFinish(data)}
+    scrollToFirstError
     initialValues={user}
   >
     <Row>
@@ -63,6 +63,8 @@ export const UserAccountForm = ({
         >
           <Input placeholder="First Name" />
         </Form.Item>
+      </Col>
+      <Col xs={24} sm={12}>
         <Form.Item
           hasFeedback
           name="lastName"
@@ -81,6 +83,8 @@ export const UserAccountForm = ({
         >
           <Input placeholder="Last Name" />
         </Form.Item>
+      </Col>
+      <Col xs={24} sm={12}>
         <Form.Item
           name="username"
           label="Username"
@@ -98,15 +102,17 @@ export const UserAccountForm = ({
         >
           <Input placeholder="mirana, invoker123, etc..." />
         </Form.Item>
+      </Col>
+      <Col xs={24} sm={12}>
         <Form.Item
           name="email"
           label={(
-            <span>
+            <span style={{ fontSize: 10 }}>
               Email Address
               {'  '}
               {user.verifiedEmail ? (
                 <Popover title="Your email address is verified" content={null}>
-                  <a><CheckCircleOutlined /></a>
+                  <a className="success-color">Verified!</a>
                 </Popover>
               ) : (
                 <Popover
@@ -122,13 +128,13 @@ export const UserAccountForm = ({
                       {' '}
                       {countTime < 60 ? 'resend' : 'send'}
                       {' '}
-                      an email to verify your email address
+                      the verification link
                       {' '}
                       {countTime < 60 && `${countTime}s`}
                     </Button>
                     )}
                 >
-                  <a style={{ fontSize: 18 }}><IssuesCloseOutlined /></a>
+                  <a className="error-color">Not verified!</a>
                 </Popover>
               )}
             </span>
@@ -143,7 +149,7 @@ export const UserAccountForm = ({
       <Col xs={24} sm={12}>
         <Form.Item
           name="name"
-          label="Display name"
+          label="Display Name"
           validateTrigger={['onChange', 'onBlur']}
           rules={[
             { required: true, message: 'Please input your display name!' },
@@ -158,8 +164,10 @@ export const UserAccountForm = ({
           ]}
           hasFeedback
         >
-          <Input placeholder="Display name" />
+          <Input placeholder="Display Name" />
         </Form.Item>
+      </Col>
+      <Col xs={24} sm={12}>
         <Form.Item
           name="gender"
           label="Gender"
@@ -177,6 +185,44 @@ export const UserAccountForm = ({
             </Select.Option>
           </Select>
         </Form.Item>
+      </Col>
+      <Col md={12} xs={24}>
+        <Form.Item
+          label="New Password"
+          name="password"
+          hasFeedback
+          rules={[
+            {
+              pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+              message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+            }
+          ]}
+        >
+          <Input.Password placeholder="New password" />
+        </Form.Item>
+      </Col>
+      <Col md={12} xs={24}>
+        <Form.Item
+          label="Confirm new password"
+          name="confirm-password"
+          dependencies={['password']}
+          hasFeedback
+          rules={[
+            ({ getFieldValue }) => ({
+              validator(rule, value) {
+                if (!value || getFieldValue('password') === value) {
+                  return Promise.resolve();
+                }
+                // eslint-disable-next-line prefer-promise-reject-errors
+                return Promise.reject('Passwords do not match together!');
+              }
+            })
+          ]}
+        >
+          <Input.Password placeholder="Confirm new password" />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12}>
         <Form.Item label="Avatar">
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
             <AvatarUpload
@@ -187,6 +233,8 @@ export const UserAccountForm = ({
             />
           </div>
         </Form.Item>
+      </Col>
+      <Col xs={24} sm={12}>
         {user.twitterConnected && (
           <Form.Item>
             <p>

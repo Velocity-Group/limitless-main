@@ -15,10 +15,8 @@ import { ISettings, IUIConfig } from 'src/interfaces';
 import Router from 'next/router';
 import { TwitterOutlined } from '@ant-design/icons';
 import GoogleLogin from 'react-google-login';
-import { isEmail } from '@lib/string';
 import Loader from '@components/common/base/loader';
 import './auth/index.less';
-// import { GoogleReCaptcha } from '@components/common';
 
 interface IProps {
   loginAuth: any;
@@ -32,20 +30,21 @@ interface IProps {
 }
 
 class Login extends PureComponent<IProps> {
-  static authenticate: boolean = false;
+  static authenticate = false;
 
   static layout = 'blank';
 
   recaptchaSuccess = false;
 
   static async getInitialProps({ ctx }) {
-    return ctx.query;
+    return {
+      ...ctx.query
+    };
   }
 
   state = {
     loginAs: 'user',
-    isLoading: true,
-    loginInput: ''
+    isLoading: true
   }
 
   async componentDidMount() {
@@ -55,19 +54,7 @@ class Login extends PureComponent<IProps> {
 
   async handleLogin(values: any) {
     const { login: handleLogin } = this.props;
-    const { loginInput } = this.state;
-    // if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
-    //   return message.error('Are you a robot?');
-    // }
-    const data = values;
-    const isInputEmail = isEmail(loginInput);
-    data.loginUsername = !isInputEmail;
-    if (isInputEmail) {
-      data.email = loginInput;
-    } else {
-      data.username = loginInput;
-    }
-    return handleLogin(data);
+    return handleLogin(values);
   }
 
   async handleVerifyCapcha(resp: any) {
@@ -95,11 +82,6 @@ class Login extends PureComponent<IProps> {
     } finally {
       this.setState({ isLoading: false });
     }
-  }
-
-  onInputChange(e) {
-    if (!e.target.value) return;
-    this.setState({ loginInput: e.target.value });
   }
 
   async redirectLogin() {
@@ -176,6 +158,7 @@ class Login extends PureComponent<IProps> {
             content={settings && settings.metaDescription}
           />
           {/* OG tags */}
+          <meta property="og:type" content="website" />
           <meta
             property="og:title"
             content={ui && ui.siteName}
@@ -186,6 +169,7 @@ class Login extends PureComponent<IProps> {
             content={settings && settings.metaDescription}
           />
           {/* Twitter tags */}
+          <meta name="twitter:card" content="summary" />
           <meta
             name="twitter:title"
             content={ui && ui.siteName}
@@ -214,18 +198,18 @@ class Login extends PureComponent<IProps> {
                 lg={12}
               >
                 <div className="login-content right">
-                  {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
+                  <div className="login-logo"><a href="/">{ui.logo ? <img alt="logo" src={ui.logo} height="80px" /> : ui.siteName}</a></div>
                   <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
                   <div className="social-login">
-                    <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
+                    <button type="button" disabled={!settings.twitterClientId} onClick={() => this.loginTwitter()} className="twitter-button">
                       <TwitterOutlined />
                       {' '}
-                      SIGN IN/ SIGN UP WITH TWITTER
+                      LOGIN IN / SIGN UP WITH TWITTER
                     </button>
                     <GoogleLogin
                       className="google-button"
                       clientId={settings.googleClientId}
-                      buttonText="SIGN IN/ SIGN UP WITH GOOGLE"
+                      buttonText="LOG IN / SIGN UP WITH GOOGLE"
                       onSuccess={this.onGoogleLogin.bind(this)}
                       onFailure={this.onGoogleLogin.bind(this)}
                       cookiePolicy="single_host_origin"
@@ -240,17 +224,16 @@ class Login extends PureComponent<IProps> {
                       onFinish={this.handleLogin.bind(this)}
                     >
                       <Form.Item
-                        hasFeedback
+                        name="username"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
                           { required: true, message: 'Email or Username is missing' }
                         ]}
                       >
-                        <Input disabled={loginAuth.requesting || isLoading} onChange={this.onInputChange.bind(this)} placeholder="Email or Username" />
+                        <Input disabled={loginAuth.requesting || isLoading} placeholder="Email or Username" />
                       </Form.Item>
                       <Form.Item
                         name="password"
-                        hasFeedback
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
                           { required: true, message: 'Please enter your password!' }
@@ -270,7 +253,7 @@ class Login extends PureComponent<IProps> {
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                       <Form.Item style={{ textAlign: 'center' }}>
                         <Button disabled={loginAuth.requesting || isLoading} loading={loginAuth.requesting || isLoading} type="primary" htmlType="submit" className="login-form-button">
-                          LOGIN
+                          LOG IN
                         </Button>
                         <p style={{ fontSize: 11 }}>
                           Visit

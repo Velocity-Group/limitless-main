@@ -1,6 +1,6 @@
 import Head from 'next/head';
-import { PureComponent, Fragment, createRef } from 'react';
-import { message, Tabs } from 'antd';
+import { PureComponent, createRef } from 'react';
+import { message, Layout } from 'antd';
 import Page from '@components/common/layout/page';
 import {
   ICountry, ILangguges, IPerformerCategory, IHeight, IWeight
@@ -19,6 +19,7 @@ interface IProps {
   heights?: IHeight[];
   weights?: IWeight[];
 }
+
 class PerformerCreate extends PureComponent<IProps> {
   static async getInitialProps() {
     const [countries, languages, heights, weights] = await Promise.all([
@@ -93,7 +94,7 @@ class PerformerCreate extends PureComponent<IProps> {
       countries, languages, categories, heights, weights
     } = this.props;
     return (
-      <>
+      <Layout>
         <Head>
           <title>New Model</title>
         </Head>
@@ -101,25 +102,21 @@ class PerformerCreate extends PureComponent<IProps> {
           breadcrumbs={[{ title: 'Models', href: '/model' }, { title: 'New model' }]}
         />
         <Page>
-          <Tabs defaultActiveKey="basic" tabPosition="top">
-            <Tabs.TabPane tab={<span>Basic info</span>} key="basic">
-              <AccountForm
-                ref={this.formRef}
-                onUploaded={this.onUploaded.bind(this)}
-                onFinish={this.submit.bind(this)}
-                submiting={creating}
-                countries={countries}
-                languages={languages}
-                categories={categories}
-                heights={heights}
-                weights={weights}
-                avatarUrl={avatarUrl}
-                coverUrl={coverUrl}
-              />
-            </Tabs.TabPane>
-          </Tabs>
+          <AccountForm
+            ref={this.formRef}
+            onUploaded={this.onUploaded.bind(this)}
+            onFinish={this.submit.bind(this)}
+            submiting={creating}
+            countries={countries}
+            languages={languages}
+            categories={categories}
+            heights={heights}
+            weights={weights}
+            avatarUrl={avatarUrl}
+            coverUrl={coverUrl}
+          />
         </Page>
-      </>
+      </Layout>
     );
   }
 }

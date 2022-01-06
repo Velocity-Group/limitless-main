@@ -11,7 +11,6 @@ import { paymentService, subscriptionService } from '@services/index';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
 import { SearchFilter } from '@components/common';
-import { updateBalance } from '@redux/user/actions';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import Loader from '@components/common/base/loader';
 import Router from 'next/router';
@@ -19,26 +18,10 @@ import Router from 'next/router';
 interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
-  updateBalance: Function;
-}
-interface IStates {
-  subscriptionList: ISubscription[];
-  loading: boolean;
-  submiting: boolean;
-  pagination: {
-    pageSize: number;
-    current: number;
-    total: number;
-  };
-  sort: string;
-  sortBy: string;
-  filter: any;
-  openSubscriptionModal: boolean;
-  selectedSubscription: ISubscription;
 }
 
-class SubscriptionPage extends PureComponent<IProps, IStates> {
-  static authenticate: boolean = true;
+class SubscriptionPage extends PureComponent<IProps> {
+  static authenticate = true;
 
   state = {
     subscriptionList: [],
@@ -102,16 +85,12 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
 
   async cancelSubscription(subscription: ISubscription) {
     try {
-      await this.setState({ submiting: true });
-      const resp = await (await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway))
-        .data;
-      resp.success && message.success('Cancel subscription success');
+      await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
+      message.success('Subscription cancelled successfully');
       this.getData();
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Error occured, please try again later');
-    } finally {
-      this.setState({ submiting: false });
     }
   }
 
@@ -132,13 +111,18 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
       return;
     }
     if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
-      message.error('Please add payment card');
+      message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
     }
     try {
       await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({ type: subscriptionType, performerId: performer._id });
+      await paymentService.subscribePerformer({
+        type: subscriptionType,
+        performerId: performer._id,
+        paymentGateway: 'stripe',
+        stripeCardId: currentUser.stripeCardIds[0]
+      });
       this.setState({ openSubscriptionModal: false });
     } catch (e) {
       const err = await e;
@@ -179,8 +163,9 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
             />
           </div>
           <Modal
+            centered
             key="subscribe_performer"
-            title={`Confirm ${selectedSubscription?.subscriptionType} subscription ${selectedSubscription?.performerInfo?.name}`}
+            title={null}
             visible={openSubscriptionModal}
             confirmLoading={submiting}
             footer={null}
@@ -193,7 +178,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
               onFinish={this.subscribe.bind(this)}
             />
           </Modal>
-          {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+          {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
         </div>
       </Layout>
     );
@@ -204,5 +189,5 @@ const mapState = (state: any) => ({
   ui: { ...state.ui },
   currentUser: { ...state.user.current }
 });
-const mapDispatch = { updateBalance };
+const mapDispatch = { };
 export default connect(mapState, mapDispatch)(SubscriptionPage);

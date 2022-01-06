@@ -1,14 +1,13 @@
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Button, Select, DatePicker, message
+  Form, Button, Select, DatePicker
 } from 'antd';
 import { ISubscriptionCreate } from 'src/interfaces';
 import { FormInstance } from 'antd/lib/form';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
-import { userService } from '@services/user.service';
+import { SelectUserDropdown } from '@components/user/common/select-user-dropdown';
 import moment from 'moment';
 
-const { Option } = Select;
 interface IProps {
   onFinish: Function;
   submiting?: boolean;
@@ -22,11 +21,31 @@ export class FormSubscription extends PureComponent<IProps> {
   timeout = 0;
 
   state = {
-    users: []
-  };
+    isDisabledExpired: false
+  }
 
   componentDidMount() {
     if (!this.formRef) this.formRef = createRef();
+  }
+
+  onTypeChange(val: 'free' | 'monthly' | 'yearly') {
+    if (val === 'free') {
+      this.setState({ isDisabledExpired: false });
+      return;
+    }
+    const instance = this.formRef.current as FormInstance;
+    if (val === 'monthly') {
+      instance.setFieldsValue({
+        expiredAt: moment().add(1, 'M')
+      });
+    }
+
+    if (val === 'yearly') {
+      instance.setFieldsValue({
+        expiredAt: moment().add(1, 'y')
+      });
+    }
+    this.setState({ isDisabledExpired: true });
   }
 
   setFormVal(field: string, val: any) {
@@ -36,28 +55,16 @@ export class FormSubscription extends PureComponent<IProps> {
     });
   }
 
+  disableExpiredField = () => {
+    const instance = this.formRef.current as FormInstance;
+    if (instance.getFieldValue('subscriptionType') === 'free') return false;
+    return true;
+  }
+
   render() {
     if (!this.formRef) this.formRef = createRef();
     const { onFinish, submiting } = this.props;
-    const { users } = this.state;
-    const handleSearch = async (value: string) => {
-      try {
-        if (this.timeout) clearTimeout(this.timeout);
-        // await this.setState({ searching: true });
-        this.timeout = window.setTimeout(async () => {
-          const result = await userService.search({
-            q: value,
-            limit: 5,
-            sortBy: 'updatedAt',
-            sort: 'desc'
-          });
-          this.setState({ users: result.data.data });
-        }, 300);
-      } catch (error) {
-        message.error('An error occurred, please try again!');
-        // await this.setState({ searching: false });
-      }
-    };
+    const { isDisabledExpired } = this.state;
     return (
       <Form
         ref={this.formRef}
@@ -74,39 +81,20 @@ export class FormSubscription extends PureComponent<IProps> {
         layout="vertical"
       >
         <Form.Item name="subscriptionType" label="Type" rules={[{ required: true, message: 'Please select type!' }]}>
-          <Select>
+          <Select onChange={(val: 'free' | 'monthly' | 'yearly') => this.onTypeChange(val)}>
             <Select.Option key="free" value="free">
               Free
             </Select.Option>
-            <Select.Option key="monthly" value="monthly" disabled>
+            <Select.Option key="monthly" value="monthly">
               Monthly
             </Select.Option>
-            <Select.Option key="yearly" value="yearly" disabled>
+            <Select.Option key="yearly" value="yearly">
               Yearly
             </Select.Option>
           </Select>
         </Form.Item>
         <Form.Item name="userId" label="User" rules={[{ required: true }]}>
-          <Select
-            showSearch
-            defaultActiveFirstOption={false}
-            showArrow
-            onSearch={handleSearch}
-            onChange={(val) => this.setFormVal('userId', val)}
-            notFoundContent={null}
-            allowClear
-          >
-            {users.map((u) => (
-              <Option key={u._id} value={u._id}>
-                <span>
-                  <strong>{u.username}</strong>
-                  {' '}
-                  /
-                  <span>{u.name}</span>
-                </span>
-              </Option>
-            ))}
-          </Select>
+          <SelectUserDropdown onSelect={(val) => this.setFormVal('userId', val)} showAll />
         </Form.Item>
         <Form.Item name="performerId" label="Performer" rules={[{ required: true }]}>
           <SelectPerformerDropdown onSelect={(val) => this.setFormVal('performerId', val)} />
@@ -126,7 +114,7 @@ export class FormSubscription extends PureComponent<IProps> {
           label="Expried Date"
           rules={[{ required: true, message: 'Please input select expried date of subscription!' }]}
         >
-          <DatePicker format="YYYY-MM-DD" disabledDate={disabledDate} />
+          <DatePicker format="YYYY-MM-DD" disabledDate={disabledDate} disabled={isDisabledExpired} />
         </Form.Item>
         <Form.Item wrapperCol={{ span: 20, offset: 4 }}>
           <Button type="primary" htmlType="submit" loading={submiting}>

@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Table, Tag, Button
+  Table, Tag, Button, Avatar
 } from 'antd';
 import {
   EyeOutlined, DeleteOutlined
@@ -31,13 +31,15 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         render(data, record: IPayoutRequest) {
           return (
             <span>
+              <Avatar src={record?.sourceInfo?.avatar || '/no-avatar.png'} />
+              {' '}
               {record?.sourceInfo?.name || record?.sourceInfo?.username || 'N/A'}
             </span>
           );
         }
       },
       {
-        title: 'Request Tokens',
+        title: 'Requested Tokens',
         dataIndex: 'requestTokens',
         key: 'requestTokens',
         render(requestTokens: number) {
@@ -93,7 +95,7 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last Updated at',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -101,7 +103,7 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render(id: string, record) {
           return [

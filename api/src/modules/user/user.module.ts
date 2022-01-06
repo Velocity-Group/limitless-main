@@ -10,7 +10,7 @@ import {
 import { UserService, UserSearchService } from './services';
 import { AuthModule } from '../auth/auth.module';
 import { FileModule } from '../file/file.module';
-import { UserConnectedListener } from './listeners/user-connected.listener';
+import { UserConnectedListener, StripeSettingsUpdatedListener } from './listeners';
 import { PerformerModule } from '../performer/performer.module';
 import { ChangeTokenLogModule } from '../change-token-logs/change-token-log.module';
 import { BlockModule } from '../block/block.module';
@@ -29,7 +29,8 @@ import { BlockModule } from '../block/block.module';
     ...userProviders,
     UserService,
     UserSearchService,
-    UserConnectedListener
+    UserConnectedListener,
+    StripeSettingsUpdatedListener
   ],
   controllers: [
     UserController,

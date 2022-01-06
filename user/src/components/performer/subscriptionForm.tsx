@@ -49,17 +49,18 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
         initialValues={user}
         labelAlign="left"
         className="account-form"
+        scrollToFirstError
       >
         <Row>
           <Col xl={12} md={12} xs={24}>
             <Form.Item>
-              <Switch unCheckedChildren="Non-free Subscription" checkedChildren="Free Subcription" checked={isFreeSubscription} onChange={() => this.setState({ isFreeSubscription: !isFreeSubscription })} />
+              <Switch unCheckedChildren="Unpaid Subscription" checkedChildren="Paid Subcription" checked={isFreeSubscription} onChange={() => this.setState({ isFreeSubscription: !isFreeSubscription })} />
             </Form.Item>
             {isFreeSubscription && (
             <Form.Item
               name="durationFreeSubscriptionDays"
               label="Duration (days)"
-              help="Free subscription in xx days then $xx monthly later"
+              help="Try free subscription for xx days, then $xx per month"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />

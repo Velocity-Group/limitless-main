@@ -3,7 +3,7 @@ import React from 'react';
 import { Table, Tag } from 'antd';
 import { ITransaction } from 'src/interfaces';
 import { formatDate } from '@lib/date';
-import Link from 'next/link';
+// import Link from 'next/link';
 
 interface IProps {
   dataSource: ITransaction[];
@@ -27,9 +27,9 @@ const PaymentTableList = ({
       key: '_id',
       render(id) {
         return (
-          <span style={{ whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
+          <a style={{ whiteSpace: 'nowrap', textTransform: 'uppercase' }}>
             {id.slice(16, 24)}
-          </span>
+          </a>
         );
       }
     },
@@ -37,7 +37,7 @@ const PaymentTableList = ({
       title: 'Description',
       key: 'description',
       render(record: any) {
-        return <span>{record?.products[0]?.description}</span>;
+        return <span>{record?.products && record?.products[0]?.description}</span>;
       }
     },
     {
@@ -107,7 +107,7 @@ const PaymentTableList = ({
           case 'processing':
             return <Tag color="orange">Processing</Tag>;
           case 'canceled':
-            return <Tag color="pink">Canceled</Tag>;
+            return <Tag color="pink">Cancelled</Tag>;
           case 'refunded':
             return <Tag color="violet">Refunded</Tag>;
           case 'created':
@@ -120,22 +120,22 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Update at',
+      title: 'Update on',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
         return <span>{formatDate(date)}</span>;
       }
-    },
-    {
-      title: 'Actions',
-      render(record) {
-        if (record.status === 'require_authentication' && record.stripeConfirmUrl) {
-          return <Link href={record.stripeConfirmUrl}><a>Confirm payment</a></Link>;
-        }
-        return null;
-      }
     }
+    // {
+    //   title: 'Action',
+    //   render(record) {
+    //     if (record.status === 'require_authentication' && record.stripeConfirmUrl) {
+    //       return <Link href={record.stripeConfirmUrl}><a>Confirm payment</a></Link>;
+    //     }
+    //     return null;
+    //   }
+    // }
   ];
   return (
     <div className="table-responsive">

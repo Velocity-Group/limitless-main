@@ -162,10 +162,8 @@ export class TransactionEarningListener {
       const netPrice = transaction.totalPrice - transaction.totalPrice * commission;
       const newEarning = new this.PerformerEarningModel();
       newEarning.set('siteCommission', commission);
-      newEarning.set('referralCommission', 0);
       newEarning.set('grossPrice', transaction.totalPrice);
       newEarning.set('netPrice', netPrice);
-      newEarning.set('referralPrice', 0);
       newEarning.set('performerId', transaction.performerId);
       newEarning.set('userId', transaction?.sourceId || null);
       newEarning.set('transactionId', transaction?._id || null);
@@ -174,11 +172,8 @@ export class TransactionEarningListener {
       newEarning.set('createdAt', transaction.createdAt);
       newEarning.set('updatedAt', transaction.updatedAt);
       newEarning.set('transactionStatus', transaction.status);
-      newEarning.set('isPaid', false);
+      newEarning.set('isPaid', true);
       newEarning.set('isToken', false);
-      newEarning.set('agentId', null);
-      newEarning.set('agentCommission', 0);
-      newEarning.set('agentPrice', 0);
       await newEarning.save();
     } catch (e) {
       // eslint-disable-next-line no-console

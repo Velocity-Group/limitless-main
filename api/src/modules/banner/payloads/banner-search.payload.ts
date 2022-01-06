@@ -7,4 +7,9 @@ export class BannerSearchRequest extends SearchRequest {
   @IsString()
   @IsOptional()
   status: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  position: string;
 }

@@ -54,7 +54,7 @@ export class CouponService {
     };
     const existedCode = await this.checkExistingCode(payload.code);
     if (existedCode) {
-      throw new ConflictException('Code is duplicated');
+      throw new ConflictException('Coupon code was existed, please add another one');
     }
     const coupon = await this.couponModel.create(data);
     return new CouponDto(coupon);
@@ -70,7 +70,7 @@ export class CouponService {
     }
     const existedCode = await this.checkExistingCode(payload.code, id);
     if (existedCode) {
-      throw new ConflictException('Code is duplicated');
+      throw new ConflictException('Coupon code was existed, please add another one');
     }
 
     const data = {
@@ -86,7 +86,7 @@ export class CouponService {
     const coupon = id instanceof CouponModel ? id : await this.findByIdOrCode(id);
     if (!coupon) {
       // should log?
-      throw new NotFoundException('Coupon not found');
+      throw new NotFoundException('Coupon was not found');
     }
     await this.couponModel.deleteOne({ _id: id });
     return true;
@@ -98,17 +98,17 @@ export class CouponService {
   ): Promise<CouponDto> {
     const coupon = await this.findByIdOrCode(code);
     if (!coupon) {
-      throw new NotFoundException('Coupon not found');
+      throw new NotFoundException('Invalid coupon code');
     }
     if (moment().isAfter(coupon.expiredDate)) {
-      throw new NotAcceptableException('Coupon expired');
+      throw new NotAcceptableException('Coupon was expired');
     }
     if (coupon.numberOfUses <= 0) {
-      throw new NotAcceptableException('Coupon expired');
+      throw new NotAcceptableException('Coupon was reached the limit of using');
     }
     const usedCoupon = await this.checkUsedCoupon(code, userId);
     if (usedCoupon) {
-      throw new NotAcceptableException('You have used this coupon');
+      throw new NotAcceptableException('You used to use this coupon');
     }
     return new CouponDto(coupon);
   }

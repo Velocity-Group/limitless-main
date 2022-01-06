@@ -71,6 +71,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       const {
         filter, sort, sortBy, pagination
       } = this.state;
+      await this.setState({ loading: true });
       const resp = await purchaseTokenService.userSearch({
         ...filter,
         sort,
@@ -100,11 +101,15 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     const type = [
       {
         key: '',
-        text: 'All type'
+        text: 'All types'
       },
       {
         key: 'tip',
         text: 'Tip'
+      },
+      {
+        key: 'feed',
+        text: 'Post'
       },
       {
         key: 'product',
@@ -117,10 +122,6 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       {
         key: 'video',
         text: 'Video'
-      },
-      {
-        key: 'feed',
-        text: 'Feed Post'
       }
       // {
       //   key: 'message',
@@ -141,6 +142,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
           <PageHeading title="Token Transactions" icon={<HistoryOutlined />} />
           <SearchFilter
             type={type}
+            searchWithPerformer
             onSubmit={this.handleFilter.bind(this)}
             dateRange
           />

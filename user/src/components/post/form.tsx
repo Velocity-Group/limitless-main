@@ -1,12 +1,12 @@
 /* eslint-disable no-await-in-loop */
 import { PureComponent } from 'react';
 import {
-  Upload, message, Button, Tooltip, Select, Row, Col,
-  Input, Form, InputNumber, Switch, Progress, Popover
+  Upload, message, Button, Tooltip, Select, Modal, Image,
+  Input, Form, InputNumber, Switch, Progress, Popover, Row, Col
 } from 'antd';
 import {
   BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
-  PlayCircleOutlined, SmileOutlined
+  PlayCircleOutlined, SmileOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import UploadList from '@components/file/list-media';
 import { IFeed } from 'src/interfaces';
@@ -15,6 +15,8 @@ import Router from 'next/router';
 import moment from 'moment';
 import { formatDate } from '@lib/date';
 import { Emotions } from '@components/messages/emotions';
+import { getGlobalConfig } from '@services/config';
+import { VideoPlayer } from '@components/common';
 import AddPollDurationForm from './add-poll-duration';
 import './index.less';
 
@@ -38,15 +40,14 @@ interface IProps {
 export default class FeedForm extends PureComponent<IProps> {
   pollIds = [];
 
-  thumbnailId = '';
+  thumbnailId = null;
 
-  teaserId = '';
-
-  teaser = null;
+  teaserId = null;
 
   state = {
     uploading: false,
     thumbnail: null,
+    teaser: null,
     fileList: [],
     fileIds: [],
     pollList: [],
@@ -55,7 +56,8 @@ export default class FeedForm extends PureComponent<IProps> {
     openPollDuration: false,
     expirePollTime: 7,
     expiredPollAt: moment().endOf('day').add(7, 'days'),
-    text: ''
+    text: '',
+    isShowPreviewTeaser: false
   };
 
   componentDidMount() {
@@ -67,10 +69,23 @@ export default class FeedForm extends PureComponent<IProps> {
         isSale: feed.isSale,
         addPoll: !!feed.pollIds.length,
         pollList: feed.polls,
-        thumbnail: feed.thumbnailUrl,
+        thumbnail: feed.thumbnail,
+        teaser: feed.teaser,
         text: feed.text
       });
-      this.teaser = feed.teaser;
+      this.teaserId = feed.teaserId;
+      this.thumbnailId = feed.thumbnailId;
+    }
+  }
+
+  handleDeleteFile(field: string) {
+    if (field === 'thumbnail') {
+      this.setState({ thumbnail: null });
+      this.thumbnailId = null;
+    }
+    if (field === 'teaser') {
+      this.setState({ teaser: null });
+      this.teaserId = null;
     }
   }
 
@@ -84,7 +99,7 @@ export default class FeedForm extends PureComponent<IProps> {
 
   async onAddPoll() {
     const { addPoll } = this.state;
-    await this.setState({ addPoll: !addPoll });
+    this.setState({ addPoll: !addPoll });
     if (!addPoll) {
       this.pollIds = [];
       this.setState({ pollList: [] });
@@ -106,7 +121,7 @@ export default class FeedForm extends PureComponent<IProps> {
       await this.setState({ uploading: true });
       !feed ? await feedService.create({ ...values, type }) : await feedService.update(feed._id, { ...values, type: feed.type });
       message.success('Posted successfully!');
-      Router.back();
+      Router.push('/model/my-post');
     } catch {
       message.success('Something went wrong, please try again later');
       this.setState({ uploading: false });
@@ -137,18 +152,19 @@ export default class FeedForm extends PureComponent<IProps> {
   }
 
   async beforeUpload(file, listFile) {
+    const config = getGlobalConfig();
     const { fileList, fileIds } = this.state;
     if (file.type.includes('image')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!valid) {
-        message.error(`Image ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+        message.error(`Image ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
         return false;
       }
     }
     if (file.type.includes('video')) {
-      const valid = (file.size / 1024 / 1024) < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+      const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
       if (!valid) {
-        message.error(`Video ${file.name} must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
+        message.error(`Video ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
         return false;
       }
     }
@@ -162,10 +178,10 @@ export default class FeedForm extends PureComponent<IProps> {
         return newFile;
       }));
       await this.setState({
-        fileList: [...fileList, ...files],
+        fileList: file.type.includes('video') ? files : [...fileList, ...files],
         uploading: true
       });
-      const newFileIds = [...fileIds];
+      const newFileIds = file.type.includes('video') ? [] : [...fileIds];
       // eslint-disable-next-line no-restricted-syntax
       for (const fileItem of listFile) {
         try {
@@ -196,13 +212,14 @@ export default class FeedForm extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    const config = getGlobalConfig();
+    const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isLt2M) {
-      message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+      message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
       return;
     }
     const reader = new FileReader();
-    reader.addEventListener('load', () => { this.setState({ thumbnail: reader.result }); });
+    reader.addEventListener('load', () => { this.setState({ thumbnail: { url: reader.result } }); });
     reader.readAsDataURL(file);
     try {
       const resp = await feedService.uploadThumbnail(
@@ -222,17 +239,18 @@ export default class FeedForm extends PureComponent<IProps> {
     if (!file) {
       return;
     }
-    this.teaser = file;
-    const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    const config = getGlobalConfig();
+    const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!isLt2M) {
-      message.error(`Teaser is too large please provide an video ${process.env.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
+      message.error(`Teaser is too large please provide an video ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
       return;
     }
+    this.setState({ teaser: file });
     try {
       const resp = await feedService.uploadTeaser(
         file,
         {},
-        this.onUploading.bind(this, this.teaser)
+        this.onUploading.bind(this, file)
       ) as any;
       this.teaserId = resp.data._id;
     } catch (e) {
@@ -260,12 +278,8 @@ export default class FeedForm extends PureComponent<IProps> {
       message.error('Amount of tokens must be greater than 1');
       return;
     }
-    if (this.teaserId) {
-      formValues.teaserId = this.teaserId;
-    }
-    if (this.thumbnailId) {
-      formValues.thumbnailId = this.thumbnailId;
-    }
+    formValues.teaserId = this.teaserId;
+    formValues.thumbnailId = this.thumbnailId;
     formValues.isSale = isSale;
     formValues.text = text;
     formValues.fileIds = fileIds;
@@ -308,8 +322,8 @@ export default class FeedForm extends PureComponent<IProps> {
   render() {
     const { feed, type, discard } = this.props;
     const {
-      uploading, fileList, fileIds, isSale, pollList, text,
-      addPoll, openPollDuration, expirePollTime, thumbnail
+      uploading, fileList, fileIds, isSale, pollList, text, isShowPreviewTeaser,
+      addPoll, openPollDuration, expirePollTime, thumbnail, teaser
     } = this.state;
     return (
       <div className="feed-form">
@@ -325,11 +339,16 @@ export default class FeedForm extends PureComponent<IProps> {
             isSale: false,
             status: 'active'
           })}
+          scrollToFirstError
         >
-          <Form.Item rules={[{ required: true, message: 'Please add a description' }]}>
+          <Form.Item
+            name="text"
+            validateTrigger={['onChange', 'onBlur']}
+            rules={[{ required: true, message: 'Please add a description' }]}
+          >
             <div className="input-f-desc">
               <TextArea showCount value={text} onChange={(e) => this.setState({ text: e.target.value })} className="feed-input" minLength={1} maxLength={300} rows={3} placeholder={!fileIds.length ? 'Compose new post...' : 'Add a description'} allowClear />
-              <Popover content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null}>
+              <Popover className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
                 <span className="grp-emotions">
                   <SmileOutlined />
                 </span>
@@ -342,110 +361,119 @@ export default class FeedForm extends PureComponent<IProps> {
           </Form.Item>
           )}
           {isSale && (
-            <Form.Item label="Amount of Tokens" name="price" rules={[{ required: isSale, message: 'Please add tokens' }]}>
+            <Form.Item label="Amount of Tokens" name="price" rules={[{ required: true, message: 'Please add amount of tokens' }]}>
               <InputNumber min={1} />
             </Form.Item>
           )}
-          <Form.Item
-            name="status"
-            label="Status"
-          >
-            <Select>
-              <Select.Option key="active" value="active">
-                Active
-              </Select.Option>
-              <Select.Option key="inactive" value="inactive">
-                Inactive
-              </Select.Option>
-            </Select>
-          </Form.Item>
           {['video', 'photo'].includes(feed?.type || type) && (
-          <UploadList
-            type={feed?.type || type}
-            files={fileList}
-            remove={this.remove.bind(this)}
-            onAddMore={this.beforeUpload.bind(this)}
-            uploading={uploading}
-          />
+          <Form.Item label="Files">
+            <UploadList
+              type={feed?.type || type}
+              files={fileList}
+              remove={this.remove.bind(this)}
+              onAddMore={this.beforeUpload.bind(this)}
+              uploading={uploading}
+            />
+          </Form.Item>
           )}
           <Row>
             {addPoll
               && (
-                <Col lg={8} md={8} xs={24}>
-                  <Form.Item label="Polls">
-                    <div className="poll-form">
-                      <div className="poll-top">
-                        {!feed ? (
-                          <>
-                            <span aria-hidden="true" onClick={() => this.setState({ openPollDuration: true })}>
-                              Poll duration -
-                              {' '}
-                              {!expirePollTime ? 'No limit' : `${expirePollTime} days`}
-                            </span>
-                            <a aria-hidden="true" onClick={this.onAddPoll.bind(this)}>x</a>
-                          </>
-                        )
-                          : (
-                            <span>
-                              Poll expiration
-                              {' '}
-                              {formatDate(feed?.pollExpiredAt)}
-                            </span>
-                          )}
-                      </div>
-                      {/* eslint-disable-next-line no-nested-ternary */}
-                      <Input disabled={!!feed?._id} className="poll-input" value={pollList && pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
-                      {/* eslint-disable-next-line no-nested-ternary */}
-                      <Input disabled={!!feed?._id || !pollList.length} className="poll-input" value={pollList && pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
-                      {pollList.map((poll, index) => {
-                        if (index === 0 || index === 1) return null;
-                        return <Input disabled={!!feed?._id} key={poll?.description || poll} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
-                      })}
-                      {!feed && pollList.length > 1 && (
-                        <p style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <a aria-hidden onClick={() => this.setState({ pollList: pollList.concat(['']) })}>Add another option</a>
-                          <a aria-hidden onClick={this.onClearPolls.bind(this)}>
-                            Clear polls
-                          </a>
-                        </p>
+              <Col md={8} xs={24}>
+                <div className="poll-form">
+                  <div className="poll-top">
+                    {!feed ? (
+                      <>
+                        <span aria-hidden="true" onClick={() => this.setState({ openPollDuration: true })}>
+                          Poll duration -
+                          {' '}
+                          {!expirePollTime ? 'No limit' : `${expirePollTime} days`}
+                        </span>
+                        <a aria-hidden="true" onClick={this.onAddPoll.bind(this)}>x</a>
+                      </>
+                    )
+                      : (
+                        <span>
+                          Poll expiration
+                          {' '}
+                          {formatDate(feed?.pollExpiredAt)}
+                        </span>
                       )}
-                    </div>
+                  </div>
+                  <Form.Item
+                    name="pollDescription"
+                    className="form-item-no-pad"
+                    validateTrigger={['onChange', 'onBlur']}
+                    rules={[
+                      { required: true, message: 'Please add a question' }
+                    ]}
+                  >
+                    <Input placeholder="Question" />
                   </Form.Item>
-                </Col>
+                  {/* eslint-disable-next-line no-nested-ternary */}
+                  <Input disabled={!!feed?._id} className="poll-input" placeholder="Poll 1" value={pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
+                  {/* eslint-disable-next-line no-nested-ternary */}
+                  <Input disabled={!!feed?._id || !pollList.length} placeholder="Poll 2" className="poll-input" value={pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
+                  {pollList.map((poll, index) => {
+                    if (index === 0 || index === 1) return null;
+                    return <Input autoFocus disabled={!!feed?._id} placeholder={`Poll ${index + 1}`} key={poll?.description || poll} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
+                  })}
+                  {!feed && pollList.length > 1 && (
+                    <p style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <a aria-hidden onClick={() => this.setState({ pollList: pollList.concat(['']) })}>Add another option</a>
+                      <a aria-hidden onClick={this.onClearPolls.bind(this)}>
+                        Clear polls
+                      </a>
+                    </p>
+                  )}
+                </div>
+              </Col>
               )}
             {thumbnail && (
-              <Col lg={8} md={8} xs={24}>
-                <Form.Item label="Thumbnail">
-                  <img alt="thumbnail" src={thumbnail} width="100px" />
-                </Form.Item>
-              </Col>
+            <Col md={8} xs={12}>
+              <Form.Item label="Thumbnail">
+                <div style={{ position: 'relative' }}>
+                  <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, left: 2 }}><DeleteOutlined /></Button>
+                  <Image alt="thumbnail" src={thumbnail?.url} width="150px" />
+                </div>
+              </Form.Item>
+            </Col>
             )}
-            {this.teaser && (
-              <Col lg={8} md={8} xs={24}>
-                <Form.Item label="Teaser">
-                  <div className="f-upload-list">
-                    <div className="f-upload-item">
-                      <div className="f-upload-thumb">
-                        <span className="f-thumb-vid">
-                          <PlayCircleOutlined />
-                        </span>
-                      </div>
-                      <div className="f-upload-name">
-                        <Tooltip title={this.teaser?.name}>{this.teaser?.name}</Tooltip>
-                      </div>
-                      <div className="f-upload-size">
-                        {(this.teaser.size / (1024 * 1024)).toFixed(2)}
-                        {' '}
-                        MB
-                      </div>
-                      {this.teaser.percent ? <Progress percent={Math.round(this.teaser.percent)} /> : null}
+            {teaser && (
+            <Col md={8} xs={12}>
+              <Form.Item label="Teaser">
+                <div className="f-upload-list">
+                  <div className="f-upload-item">
+                    <div
+                      className="f-upload-thumb"
+                      aria-hidden
+                      onClick={() => this.setState({ isShowPreviewTeaser: !!teaser })}
+                    >
+                      <span className="f-thumb-vid">
+                        <PlayCircleOutlined />
+                      </span>
                     </div>
+                    <div className="f-upload-name">
+                      <Tooltip title={teaser?.name}>{teaser?.name}</Tooltip>
+                    </div>
+                    <div className="f-upload-size">
+                      {(teaser.size / (1024 * 1024)).toFixed(2)}
+                      {' '}
+                      MB
+                    </div>
+                    <span className="f-remove">
+                      <Button type="primary" onClick={() => this.handleDeleteFile('teaser')}>
+                        <DeleteOutlined />
+                      </Button>
+                    </span>
+                    {teaser.percent ? <Progress percent={Math.round(teaser.percent)} /> : null}
                   </div>
-                </Form.Item>
-              </Col>
+                </div>
+              </Form.Item>
+            </Col>
             )}
           </Row>
-          <div style={{ display: 'flex', margin: '15px 0' }}>
+          <div className="submit-btns">
             {['video', 'photo'].includes(feed?.type || type) && [
               <Upload
                 key="upload_thumb"
@@ -457,7 +485,7 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Button type="primary" style={{ marginLeft: 15 }}>
+                <Button type="primary">
                   <PictureOutlined />
                   {' '}
                   Add thumbnail
@@ -475,21 +503,34 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Button type="primary" style={{ marginLeft: 15 }}>
+                <Button type="primary">
                   <VideoCameraAddOutlined />
                   {' '}
                   Add teaser
                 </Button>
               </Upload>
             ]}
-            <Button disabled={addPoll || (!!(feed && feed._id))} type="primary" style={{ marginLeft: '15px' }} onClick={this.onAddPoll.bind(this)}>
+            <Button disabled={(!!(feed && feed._id))} type="primary" onClick={this.onAddPoll.bind(this)}>
               <BarChartOutlined style={{ transform: 'rotate(90deg)' }} />
               {' '}
               Add polls
             </Button>
           </div>
           <AddPollDurationForm onAddPollDuration={this.onChangePollDuration.bind(this)} openDurationPollModal={openPollDuration} />
-          <div className="submit-btns">
+          <Form.Item
+            name="status"
+            label="Status"
+          >
+            <Select>
+              <Select.Option key="active" value="active">
+                Active
+              </Select.Option>
+              <Select.Option key="inactive" value="inactive">
+                Inactive
+              </Select.Option>
+            </Select>
+          </Form.Item>
+          <div className="submit-btns custom">
             <Button
               className="primary"
               htmlType="submit"
@@ -509,6 +550,29 @@ export default class FeedForm extends PureComponent<IProps> {
             )}
           </div>
         </Form>
+        <Modal
+          width={767}
+          footer={null}
+          onOk={() => this.setState({ isShowPreviewTeaser: false })}
+          onCancel={() => this.setState({ isShowPreviewTeaser: false })}
+          visible={isShowPreviewTeaser}
+          destroyOnClose
+        >
+          <VideoPlayer
+            {...{
+              autoplay: true,
+              controls: true,
+              playsinline: true,
+              fluid: true,
+              sources: [
+                {
+                  src: teaser?.url,
+                  type: 'video/mp4'
+                }
+              ]
+            }}
+          />
+        </Modal>
       </div>
     );
   }

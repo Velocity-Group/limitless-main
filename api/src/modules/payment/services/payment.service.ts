@@ -135,7 +135,7 @@ export class PaymentService {
           price: totalPrice,
           quantity: 1,
           name: `${subscriptionType} ${performer?.name || performer?.username}`,
-          description: `${subscriptionType} ${performer?.name || performer?.username}`,
+          description: `${subscriptionType} ${performer?.name || performer?.username} ${subscriptionType === PAYMENT_TYPE.FREE_SUBSCRIPTION ? `in ${performer?.durationFreeSubscriptionDays} days` : null}`,
           productId: performer._id,
           productType: PAYMENT_TARGET_TYPE.PERFORMER,
           performerId: performer._id

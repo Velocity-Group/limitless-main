@@ -28,7 +28,7 @@ export class TableListVideo extends PureComponent<IProps> {
     } = this.props;
     const columns = [
       {
-        title: '#',
+        title: 'Thumbnail',
         render(record: any) {
           return (
             <Link href={{ pathname: '/video', query: { id: record.slug || record._id } }} as={`/video/${record.slug || record._id}`}><a><ThumbnailVideo video={record} /></a></Link>
@@ -54,7 +54,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'PPV',
+        title: 'Sale?',
         dataIndex: 'isSale',
         render(isSale: boolean) {
           switch (isSale) {
@@ -67,15 +67,16 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Tokens',
-        dataIndex: 'price',
-        render(price: number) {
-          return (
-            <span style={{ whiteSpace: 'nowrap' }}>
-              <img src="/static/coin-ico.png" alt="coin" width="20px" />
-              {(price || 0).toFixed(2)}
-            </span>
-          );
+        title: 'Schedule?',
+        dataIndex: 'isSchedule',
+        render(isSchedule: boolean) {
+          switch (isSchedule) {
+            case true:
+              return <Tag color="green">Y</Tag>;
+            case false:
+              return <Tag color="red">N</Tag>;
+            default: return <Tag color="orange">{isSchedule}</Tag>;
+          }
         }
       },
       {
@@ -93,7 +94,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -101,7 +102,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <div style={{ whiteSpace: 'nowrap' }}>

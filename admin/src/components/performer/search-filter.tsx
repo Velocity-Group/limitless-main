@@ -5,47 +5,54 @@ import {
 
 interface IProps {
   onSubmit: Function;
+  defaultValue?: {
+    status?: string,
+    verifiedDocument?: string
+  };
 }
 
 export class SearchFilter extends PureComponent<IProps> {
-  state = {
-    q: '',
-    gender: '',
-    status: ''
-  };
+  componentDidMount() {
+    const { defaultValue } = this.props;
+    defaultValue && this.setState({ ...defaultValue });
+  }
 
   render() {
-    const { onSubmit } = this.props;
+    const { onSubmit, defaultValue } = this.props;
+    const {
+      status = '', verifiedDocument = ''
+    } = defaultValue;
+
     return (
       <Row gutter={24}>
-        <Col lg={8} xs={24}>
+        <Col lg={6} xs={24}>
           <Input
             placeholder="Enter keyword"
             onChange={(evt) => this.setState({ q: evt.target.value })}
             onPressEnter={() => onSubmit(this.state, () => onSubmit(this.state))}
           />
         </Col>
-        <Col lg={8} xs={24}>
+        <Col lg={6} xs={24}>
           <Select
-            defaultValue=""
+            defaultValue={status}
             style={{ width: '100%' }}
-            onChange={(status) => this.setState({ status }, () => onSubmit(this.state))}
+            onChange={(val) => this.setState({ status: val }, () => onSubmit(this.state))}
           >
-            <Select.Option value="">Status</Select.Option>
+            <Select.Option value="">All Statuses</Select.Option>
             <Select.Option value="active">Active</Select.Option>
-            <Select.Option value="inactive">Suspend</Select.Option>
+            <Select.Option value="inactive">Inactive</Select.Option>
             <Select.Option value="pending-email-confirmation">
-              Pending Email Confirmation
+              Not verified email
             </Select.Option>
           </Select>
         </Col>
-        <Col lg={8} xs={24}>
+        <Col lg={6} xs={24}>
           <Select
             defaultValue=""
             style={{ width: '100%' }}
-            onChange={(gender) => this.setState({ gender }, () => onSubmit(this.state))}
+            onChange={(val) => this.setState({ gender: val }, () => onSubmit(this.state))}
           >
-            <Select.Option value="">Gender</Select.Option>
+            <Select.Option value="">All Genders</Select.Option>
             <Select.Option key="male" value="male">
               Male
             </Select.Option>
@@ -54,6 +61,21 @@ export class SearchFilter extends PureComponent<IProps> {
             </Select.Option>
             <Select.Option key="transgender" value="transgender">
               Transgender
+            </Select.Option>
+          </Select>
+        </Col>
+        <Col lg={6} xs={24}>
+          <Select
+            defaultValue={verifiedDocument}
+            style={{ width: '100%' }}
+            onChange={(val) => this.setState({ verifiedDocument: val }, () => onSubmit(this.state))}
+          >
+            <Select.Option value="">All verified ID statuses</Select.Option>
+            <Select.Option key="verified" value="true">
+              Verified ID
+            </Select.Option>
+            <Select.Option key="notVerified" value="false">
+              Not Verified ID
             </Select.Option>
           </Select>
         </Col>

@@ -49,7 +49,7 @@
         border-radius: 50%;
         position: absolute;
         bottom: 15px;
-        left: 30px;
+        left: 32px;
 
         &.active {
           animation-name: twinkle;
@@ -138,6 +138,7 @@
           &.ant-btn-link {
             font-size: 12px;
             color: @white;
+
             .anticon {
               font-size: 14px;
             }
@@ -172,6 +173,7 @@
       font-size: 12px;
       color: @dark-grey;
       white-space: pre-line;
+
       &::first-letter {
         text-transform: capitalize;
       }
@@ -198,7 +200,8 @@
           font-size: 20px;
         }
 
-        &:hover, &.active {
+        &:hover,
+        &.active {
           color: @theme-color
         }
       }
@@ -213,26 +216,15 @@
   }
 
   .videojs-player {
-    width: 100%;
-
     .video-js {
-      height: 400px;
       width: 100%;
+      max-height: 100vh;
       border-radius: 3px;
       overflow: hidden;
-
-      .vjs-big-play-button {
-        top: calc(50% - 24px);
-        left: calc(50% - 45px)
-      }
 
       .vjs-poster {
         border-radius: 3px;
         border: none
-      }
-
-      @media screen and (max-width: @mobile-screen) {
-        height: 215px;
       }
     }
   }
@@ -269,7 +261,12 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background: @white;
+        background-color: @white;
+        cursor: pointer;
+
+        &:hover {
+          background-color: @light-grey;
+        }
 
         .anticon {
           color: @theme-color;
@@ -324,13 +321,15 @@
 
     .slick-slide {
       height: auto;
+      line-height: normal;
 
       &>div {
         height: 100%;
         display: flex;
         align-items: center;
 
-        a, img {
+        a,
+        img {
           height: 100%;
         }
       }
@@ -434,7 +433,6 @@
 
 .poll-form {
   width: 100%;
-  max-width: 320px;
   padding: 5px;
   border-radius: 5px;
   background-color: @light-blue;
@@ -464,29 +462,51 @@
   .poll-input {
     margin-bottom: 10px;
   }
-}
 
-.feed-poll {
-  display: flex;
-  background-color: @aliceblue;
-  padding: 5px;
-  border-radius: 3px;
-  justify-content: space-between;
-  cursor: pointer;
-  margin: 3px 0;
-
-  &:hover {
-    opacity: 0.8;
+  .form-item-no-pad {
+    .ant-col {
+      padding: 5px 0;
+    }
   }
 }
 
-.total-vote {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  font-size: 10px;
-  color: @gray;
+.feed-polls {
+  max-width: 400px;
+  margin: 10px auto;
+  .p-question {
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .p-item {
+    display: flex;
+    background-color: @aliceblue;
+    padding: 5px;
+    border-radius: 3px;
+    justify-content: space-between;
+    cursor: pointer;
+    margin: 3px 0;
+
+    .p-desc {
+      font-size: 11px;
+      &::first-letter {
+        text-transform: capitalize;
+      }
+    }
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  .total-vote {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 10px;
+    color: @gray;
+  }
 }
 
 .story-switch-type {
@@ -548,8 +568,16 @@
 .submit-btns {
   justify-content: space-around;
   margin: 10px auto;
-  width: 200px;
+  width: 450px;
   display: flex;
+
+  &.custom {
+    width: 200px;
+  }
+
+  @media screen and (max-width: @mobile-screen) {
+    width: 100%;
+  }
 }
 
 
@@ -642,6 +670,7 @@
       padding: 20px;
       border-radius: 5px;
       cursor: pointer;
+      overflow: hidden;
 
       .card-middle {
         position: relative;

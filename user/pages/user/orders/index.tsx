@@ -37,11 +37,11 @@ class UserOrderPage extends PureComponent<IProps> {
     this.search();
   }
 
-  handleTableChange = (pagination, filters, sorter) => {
+  handleTableChange = async (pagination, filters, sorter) => {
     const { pagination: paginationState } = this.state;
     const pager = { ...paginationState };
     pager.current = pagination.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
       sortBy: sorter.field || 'createdAt',
       // eslint-disable-next-line no-nested-ternary
@@ -73,7 +73,7 @@ class UserOrderPage extends PureComponent<IProps> {
         sort,
         sortBy
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data,
         pagination: {
@@ -84,7 +84,7 @@ class UserOrderPage extends PureComponent<IProps> {
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 

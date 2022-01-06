@@ -30,6 +30,16 @@ export class FeedCreatePayload {
   fileIds: string[];
 
   @ApiProperty()
+  @IsString()
+  @IsOptional()
+  thumbnailId: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  teaserId: string;
+
+  @ApiProperty()
   @IsString({ each: true })
   @IsOptional()
   pollIds: string[];

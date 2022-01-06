@@ -22,7 +22,6 @@ export interface IPerformerResponse {
   zipcode?: string;
   address?: string;
   languages?: string[];
-  agentId?: ObjectId;
   categoryIds?: ObjectId[];
   height?: string;
   weight?: string;
@@ -82,9 +81,8 @@ export interface IPerformerResponse {
     google: String;
     instagram: String;
     linkedIn: String;
-  },
-  invitationId?: ObjectId;
-  referralId?: ObjectId;
+  };
+  stripeAccount?: any;
 }
 
 export class PerformerDto {
@@ -149,8 +147,6 @@ export class PerformerDto {
   address?: string;
 
   languages?: string[];
-
-  agentId?: ObjectId;
 
   categoryIds?: ObjectId[];
 
@@ -226,6 +222,8 @@ export class PerformerDto {
 
   welcomeVideoPath?: string;
 
+  welcomeVideoName?: string;
+
   activateWelcomeVideo?: boolean;
 
   isBookMarked?: boolean;
@@ -283,8 +281,6 @@ export class PerformerDto {
         'zipcode',
         'address',
         'languages',
-        'agentId',
-        'agentInfo',
         'categoryIds',
         'height',
         'weight',
@@ -320,6 +316,7 @@ export class PerformerDto {
         'isOnline',
         'welcomeVideoId',
         'welcomeVideoPath',
+        'welcomeVideoName',
         'activateWelcomeVideo',
         'isBookMarked',
         'isSubscribed',
@@ -343,13 +340,11 @@ export class PerformerDto {
       cover: FileDto.getPublicUrl(this.coverPath),
       username: this.username,
       gender: this.gender,
-      firstName: this.firstName,
-      lastName: this.lastName,
       country: this.country,
       stats: this.stats,
-      blockCountries: this.blockCountries,
       isOnline: this.isOnline,
       welcomeVideoPath: FileDto.getPublicUrl(this.welcomeVideoPath),
+      welcomeVideoName: this.welcomeVideoName,
       activateWelcomeVideo: this.activateWelcomeVideo,
       verifiedAccount: this.verifiedAccount,
       isSubscribed: this.isSubscribed,
@@ -377,6 +372,8 @@ export class PerformerDto {
       isPerformer: true
     };
     const privateInfo = {
+      firstName: this.firstName,
+      lastName: this.lastName,
       balance: this.balance,
       twitterConnected: this.twitterConnected,
       googleConnected: this.googleConnected,
@@ -386,7 +383,7 @@ export class PerformerDto {
       phone: this.phone,
       phoneCode: this.phoneCode,
       status: this.status,
-      name: this.getName(),
+      blockCountries: this.blockCountries,
       city: this.city,
       state: this.state,
       zipcode: this.zipcode,
@@ -401,7 +398,6 @@ export class PerformerDto {
       stripeAccount: this.stripeAccount,
       welcomeVideoId: this.welcomeVideoId,
       paypalSetting: this.paypalSetting,
-      agentId: this.agentId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

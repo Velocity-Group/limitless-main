@@ -102,7 +102,6 @@ class Dashboard extends PureComponent<IProps> {
                       Model Signup
                     </button>
                   </div>
-
                   <div className="welcome-box">
                     <h3>
                       {loginAs === 'user' ? 'Fan' : 'Model'}
@@ -156,6 +155,12 @@ class Dashboard extends PureComponent<IProps> {
                       </div>
                     )}
                   </div>
+                  <p className="text-center">
+                    Have an account already?
+                    <Link href="/">
+                      <a> Log in here.</a>
+                    </Link>
+                  </p>
                 </div>
               </Col>
             </Row>

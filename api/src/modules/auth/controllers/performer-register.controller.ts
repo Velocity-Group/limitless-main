@@ -20,6 +20,7 @@ import {
 import { FileService } from 'src/modules/file/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { PERFORMER_STATUSES } from 'src/modules/performer/constants';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { PerformerRegisterPayload } from '../payloads';
 import { AuthService } from '../services';
 
@@ -43,18 +44,23 @@ export class PerformerRegisterController {
           type: 'performer-document',
           fieldName: 'idVerification',
           options: {
-            destination: getConfig('file').documentDir
+            destination: getConfig('file').documentDir,
+            uploadImmediately: true,
+            acl: S3ObjectCannelACL.AuthenticatedRead,
+            server: Storage.S3
           }
         },
         {
           type: 'performer-document',
           fieldName: 'documentVerification',
           options: {
-            destination: getConfig('file').documentDir
+            destination: getConfig('file').documentDir,
+            uploadImmediately: true,
+            acl: S3ObjectCannelACL.AuthenticatedRead,
+            server: Storage.S3
           }
         }
-      ],
-      {}
+      ]
     )
   )
   async performerRegister(

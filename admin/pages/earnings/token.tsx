@@ -7,7 +7,7 @@ import {
 import Page from '@components/common/layout/page';
 import { earningService } from '@services/earning.service';
 import { SearchFilter } from '@components/common/search-filter';
-import { TableListEarning } from '@components/earning/table-list-earning';
+import { TableListTokenEarning } from '@components/earning/table-list-token-earning';
 import { BreadcrumbComponent } from '@components/common';
 
 interface IEarningStatResponse {
@@ -32,7 +32,7 @@ class Earning extends PureComponent<IProps> {
     list: [] as any,
     limit: 10,
     filter: {} as any,
-    sortBy: 'createdAt',
+    sortBy: 'updatedAt',
     sort: 'desc',
     stats: {
       totalGrossPrice: 0,
@@ -52,7 +52,7 @@ class Earning extends PureComponent<IProps> {
     pager.current = pagi.current;
     this.setState({
       pagination: pager,
-      sortBy: sorter.field || 'createdAt',
+      sortBy: sorter.field || 'updatedAt',
       sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : 'desc'
     });
     this.search(pager.current);
@@ -73,7 +73,7 @@ class Earning extends PureComponent<IProps> {
       await this.setState({ searching: true });
       const resp = await earningService.search({
         ...filter,
-        isToken: false,
+        isToken: true,
         limit,
         offset: (page - 1) * limit,
         sort,
@@ -99,7 +99,7 @@ class Earning extends PureComponent<IProps> {
     try {
       const resp = await earningService.stats({
         ...filter,
-        isToken: false
+        isToken: true
       });
       await this.setState({
         stats: resp.data
@@ -113,37 +113,50 @@ class Earning extends PureComponent<IProps> {
     const {
       list, searching, pagination, stats
     } = this.state;
+
     const type = [
       {
         key: '',
-        text: 'All Type'
+        text: 'All Types'
       },
       {
-        key: 'monthly_subscription',
-        text: 'Monthly Subscription'
+        key: 'video',
+        text: 'Video'
       },
       {
-        key: 'yearly_subscription',
-        text: 'Yearly Subscription'
+        key: 'product',
+        text: 'Product'
+      },
+      {
+        key: 'gallery',
+        text: 'Gallery'
+      },
+      {
+        key: 'feed',
+        text: 'Post'
+      },
+      {
+        key: 'tip',
+        text: 'Tip'
       }
     ];
 
     return (
       <>
         <Head>
-          <title>Money Earnings Report</title>
+          <title>Token Earnings Report</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Money Earnings Report' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Token Earnings Report' }]} />
         <Page>
           <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={8}>
-              <Statistic title="Total price" prefix="$" value={stats?.totalGrossPrice || 0} precision={2} />
+              <Statistic title="Total Earnings" prefix={<img alt="coin" src="/coin-ico.png" width="20px" />} value={stats?.totalGrossPrice || 0} precision={2} />
             </Col>
             <Col span={8}>
-              <Statistic title="Admin earned" prefix="$" value={stats?.totalSiteCommission || 0} precision={2} />
+              <Statistic title="Platform Earnings" prefix={<img alt="coin" src="/coin-ico.png" width="20px" />} value={stats?.totalSiteCommission || 0} precision={2} />
             </Col>
             <Col span={8}>
-              <Statistic title="Model earned" prefix="$" value={stats?.totalNetPrice || 0} precision={2} />
+              <Statistic title="Models Earnings" prefix={<img alt="coin" src="/coin-ico.png" width="20px" />} value={stats?.totalNetPrice || 0} precision={2} />
             </Col>
           </Row>
           <SearchFilter
@@ -154,7 +167,7 @@ class Earning extends PureComponent<IProps> {
           />
           <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
-            <TableListEarning
+            <TableListTokenEarning
               dataSource={list}
               rowKey="_id"
               loading={searching}

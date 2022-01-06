@@ -12,7 +12,6 @@ export interface IGallery {
   performer?: any;
   coverPhoto: { thumbnails: string[]; url: string };
   isBookMarked: boolean;
-  tagline: string;
   isSubscribed: boolean;
   isBought: boolean;
   numOfItems: number;
@@ -21,18 +20,4 @@ export interface IGallery {
   }
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface IGalleryCreate {
-  title: string;
-  description: string;
-  price: number;
-  status: string;
-  tagline: string;
-  isSale: boolean;
-}
-
-export interface IGallerySearch extends ISearch {
-  sort: string;
-  sortBy: string;
 }

@@ -7,6 +7,7 @@ import Head from 'next/head';
 import { login } from '@redux/auth/actions';
 import Link from 'next/link';
 import './index.less';
+import { getGlobalConfig } from '@services/config';
 
 const FormItem = Form.Item;
 
@@ -40,10 +41,11 @@ class Login extends PureComponent<IProps> {
     const {
       loginAuth = { requesting: false, error: null, success: false }
     } = this.props;
+    const config = getGlobalConfig();
     return (
       <Layout>
         <Head>
-          <title>Login</title>
+          <title>Log in</title>
         </Head>
         <div className="form-body">
           <div className="form">
@@ -54,20 +56,19 @@ class Login extends PureComponent<IProps> {
             <Form
               onFinish={(values) => handlerLogin(values)}
               initialValues={{
-                email: '',
+                username: '',
                 password: ''
               }}
             >
               <FormItem
                 hasFeedback
-                name="email"
+                name="username"
                 rules={[
-                  { required: true, message: 'Please input your email!' },
-                  { type: 'email', message: 'Invalid email address' }
+                  { required: true, message: 'Email or Username is missing' }
                 ]}
               >
                 <Input
-                  placeholder="youremail@example.com"
+                  placeholder="Email address or Username"
                 />
               </FormItem>
               <FormItem
@@ -85,9 +86,10 @@ class Login extends PureComponent<IProps> {
                 <Button
                   type="primary"
                   loading={loginAuth.requesting}
+                  disabled={loginAuth.requesting}
                   htmlType="submit"
                 >
-                  Sign in
+                  Log in
                 </Button>
               </Row>
             </Form>
@@ -101,7 +103,7 @@ class Login extends PureComponent<IProps> {
         <div className="footer">
           Version
           {' '}
-          {process.env.NEXT_PUBLIC_BUILD_VERSION}
+          {config.NEXT_PUBLIC_BUILD_VERSION}
           {' '}
           - Copy right
           {' '}

@@ -16,7 +16,7 @@ import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { FileService } from 'src/modules/file/services';
 import { FileResponseDto, FileDto } from 'src/modules/file';
 import { PostDto } from '../dtos';
-import { PostCreatePayload } from '../payloads/post-create.payload';
+import { PostCreatePayload, PostUpdatePayload } from '../payloads';
 import { PostModel, PostMetaModel } from '../models';
 import { POST_MODEL_PROVIDER, POST_META_MODEL_PROVIDER } from '../providers';
 import { POST_CATEGORY_CHANNEL, CATEGORY_EVENTS } from '../constants';
@@ -105,7 +105,7 @@ export class PostService {
 
   public async update(
     id: string | ObjectId,
-    payload: PostCreatePayload,
+    payload: PostUpdatePayload,
     user?: UserDto
   ): Promise<PostModel> {
     const post = await this.findByIdOrSlug(id);

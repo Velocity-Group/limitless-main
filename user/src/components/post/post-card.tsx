@@ -1,12 +1,12 @@
 /* eslint-disable no-prototype-builtins */
 import { Component } from 'react';
 import {
-  Menu, Dropdown, Divider, message, Modal, Tooltip, Button, Collapse
+  Menu, Dropdown, Divider, message, Modal, Tooltip, Button
 } from 'antd';
 import {
   HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined, EyeOutlined,
   MoreOutlined, DollarOutlined, LockOutlined, FlagOutlined,
-  FileImageOutlined, VideoCameraOutlined, CaretDownOutlined
+  FileImageOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import Link from 'next/link';
@@ -44,6 +44,7 @@ interface IProps {
   deleteComment: Function;
   commentMapping: any;
   comment: any;
+  siteName: string;
 }
 
 class FeedCard extends Component<IProps> {
@@ -154,7 +155,7 @@ class FeedCard extends Component<IProps> {
   async handleReport(reason: string) {
     const { feed } = this.props;
     if (!reason || reason.length < 20) {
-      message.error('Please fill out at least 20 characters');
+      message.error('You report must be at least 20 characters');
       return;
     }
     try {
@@ -252,8 +253,12 @@ class FeedCard extends Component<IProps> {
 
   async sendTip(price) {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user._id === feed?.performer?._id) {
+      message.error('Models cannot tip for themselves');
+      return;
+    }
     if (user.balance < price) {
-      message.error('Your balance token is not enough');
+      message.error('Your token balance is not enough');
       Router.push('/token-package');
       return;
     }
@@ -273,7 +278,7 @@ class FeedCard extends Component<IProps> {
   async purchaseFeed() {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < feed.price) {
-      message.error('Your balance token is not enough');
+      message.error('Your token balance is not enough');
       Router.push('/token-package');
       return;
     }
@@ -296,7 +301,7 @@ class FeedCard extends Component<IProps> {
     const { polls } = this.state;
     const isExpired = new Date(feed.pollExpiredAt) < new Date();
     if (isExpired) {
-      message.error('Poll was expired to vote');
+      message.error('The poll is now closed');
       return;
     }
     if (!window.confirm('Vote it?')) return;
@@ -318,7 +323,7 @@ class FeedCard extends Component<IProps> {
 
   render() {
     const {
-      feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment
+      feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment, siteName
     } = this.props;
     const { performer } = feed;
     const { requesting: commenting } = comment;
@@ -328,12 +333,16 @@ class FeedCard extends Component<IProps> {
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
-      openTeaser, openSubscriptionModal, openReportModal
+      openTeaser, openSubscriptionModal, openReportModal, requesting
     } = this.state;
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
-    const thumbUrl = feed?.thumbnailUrl || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0]) || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0]) || '/static/leaf.jpg';
+    const thumbUrl = (feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0])
+      || (images && images[0] && images[0]?.thumbnails && images[0]?.thumbnails[0])
+      || (feed?.teaser && feed?.teaser?.thumbnails && feed?.teaser?.thumbnails[0])
+      || (videos && videos[0] && videos[0]?.thumbnails && videos[0]?.thumbnails[0])
+      || '/static/leaf.jpg';
     let totalVote = 0;
     polls && polls.forEach((poll) => {
       totalVote += poll.totalVote;
@@ -412,6 +421,33 @@ class FeedCard extends Component<IProps> {
         <div className="feed-container">
           <div className="feed-text">
             {feed.text}
+            {polls && polls.length > 0 && (
+              <div className="feed-polls">
+                {feed.pollDescription && <h4 className="p-question">{feed.pollDescription}</h4>}
+                {polls.map((poll) => (
+                  <div aria-hidden className="p-item" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
+                    <span className="p-desc">{poll?.description}</span>
+                    {' '}
+                    <span>{poll?.totalVote || 0}</span>
+                  </div>
+                ))}
+                <div className="total-vote">
+                  <span>
+                    Total
+                    {' '}
+                    {shortenLargeNumber(totalVote)}
+                    {' '}
+                    {totalVote < 1 ? 'vote' : 'votes'}
+                  </span>
+                  {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
+                    <span>
+                      {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}d `}
+                      <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
+                    </span>
+                  ) : <span>Closed</span>}
+                </div>
+              </div>
+            )}
           </div>
           {canView && (
             <div className="feed-content">
@@ -421,34 +457,34 @@ class FeedCard extends Component<IProps> {
           {!canView && (
             <div className="lock-content">
               {/* eslint-disable-next-line no-nested-ternary */}
-              <div className="feed-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
+              <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
               <div className="lock-middle">
                 {(isHovered || canView) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
-                <Button
-                  onMouseEnter={() => this.setState({ isHovered: true })}
-                  onMouseLeave={() => this.setState({ isHovered: false })}
-                  disabled={user.isPerformer}
-                  className="secondary"
-                  onClick={() => this.setState({ openSubscriptionModal: true })}
-                >
-                  Subcribe to unlock
-                </Button>
+                  <Button
+                    onMouseEnter={() => this.setState({ isHovered: true })}
+                    onMouseLeave={() => this.setState({ isHovered: false })}
+                    disabled={user.isPerformer}
+                    className="secondary"
+                    onClick={() => this.setState({ openSubscriptionModal: true })}
+                  >
+                    Subcribe to unlock
+                  </Button>
                 )}
                 {feed.isSale && !isBought && (
-                <Button
-                  onMouseEnter={() => this.setState({ isHovered: true })}
-                  onMouseLeave={() => this.setState({ isHovered: false })}
-                  disabled={user.isPerformer}
-                  className="secondary"
-                  onClick={() => this.setState({ openPurchaseModal: true })}
-                >
-                  Pay&nbsp;
-                  <img alt="coin" src="/static/coin-ico.png" width="15px" />
-                  {feed.price.toFixed(2)}
-                  {' '}
-                  to unlock
-                </Button>
+                  <Button
+                    onMouseEnter={() => this.setState({ isHovered: true })}
+                    onMouseLeave={() => this.setState({ isHovered: false })}
+                    disabled={user.isPerformer}
+                    className="secondary"
+                    onClick={() => this.setState({ openPurchaseModal: true })}
+                  >
+                    Pay&nbsp;
+                    <img alt="coin" src="/static/coin-ico.png" width="15px" />
+                    {feed.price.toFixed(2)}
+                    {' '}
+                    to unlock
+                  </Button>
                 )}
                 {feed.teaser && (
                   <Button type="link" onClick={() => this.setState({ openTeaser: true })}>
@@ -457,55 +493,31 @@ class FeedCard extends Component<IProps> {
                   </Button>
                 )}
               </div>
-                {feed.files && feed.files.length > 0 && (
-                  <div className="count-media">
-                    <span className="count-media-item">
-                      {images.length > 0 && (
-                        <span>
-                          {images.length}
-                          {' '}
-                          <FileImageOutlined />
-                          {' '}
-                        </span>
-                      )}
-                      {videos.length > 0 && images.length > 0 && '|'}
-                      {videos.length > 0 && (
-                        <span>
-                          {videos.length > 1 && videos.length}
-                          {' '}
-                          <VideoCameraOutlined />
-                          {' '}
-                          {videos.length === 1 && videoDuration(videos[0].duration)}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                )}
+              {feed.files && feed.files.length > 0 && (
+                <div className="count-media">
+                  <span className="count-media-item">
+                    {images.length > 0 && (
+                      <span>
+                        {images.length}
+                        {' '}
+                        <FileImageOutlined />
+                        {' '}
+                      </span>
+                    )}
+                    {videos.length > 0 && images.length > 0 && '|'}
+                    {videos.length > 0 && (
+                      <span>
+                        {videos.length > 1 && videos.length}
+                        {' '}
+                        <VideoCameraOutlined />
+                        {' '}
+                        {videos.length === 1 && videoDuration(videos[0].duration)}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-          {polls && polls.length > 0 && polls.map((poll) => (
-            <div aria-hidden className="feed-poll" key={poll._id} onClick={this.votePoll.bind(this, poll)}>
-              <span>{poll?.description}</span>
-              {' '}
-              <span>{poll?.totalVote || 0}</span>
-            </div>
-          ))}
-          {polls && polls.length > 0 && (
-          <div className="total-vote">
-            <span>
-              Total
-              {' '}
-              {shortenLargeNumber(totalVote)}
-              {' '}
-              votes
-            </span>
-            {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
-              <span>
-                {`${moment(feed.pollExpiredAt).diff(moment(), 'days')} days `}
-                <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
-              </span>
-            ) : <span>Expired</span>}
-          </div>
           )}
         </div>
         <div className="feed-bottom">
@@ -546,6 +558,7 @@ class FeedCard extends Component<IProps> {
                 objectId={feed._id}
                 objectType="feed"
                 requesting={commenting}
+                siteName={siteName}
               />
               <ListComments
                 key={`list_comments_${feed._id}_${comments.length}`}
@@ -570,31 +583,29 @@ class FeedCard extends Component<IProps> {
           footer={null}
           onCancel={() => this.setState({ openTipModal: false })}
         >
-          <TipPerformerForm performer={performer} submiting={submiting} onFinish={this.sendTip.bind(this)} />
+          <TipPerformerForm performer={performer} submiting={requesting} onFinish={this.sendTip.bind(this)} />
         </Modal>
         <Modal
           key="purchase_post"
           className="subscription-modal"
           title={null}
           visible={openPurchaseModal}
-          confirmLoading={submiting}
           footer={null}
           destroyOnClose
           onCancel={() => this.setState({ openPurchaseModal: false })}
         >
-          <PurchaseFeedForm feed={feed} submiting={submiting} onFinish={this.purchaseFeed.bind(this)} />
+          <PurchaseFeedForm feed={feed} submiting={requesting} onFinish={this.purchaseFeed.bind(this)} />
         </Modal>
         <Modal
           key="report_post"
           className="subscription-modal"
           title={null}
           visible={openReportModal}
-          confirmLoading={submiting}
           footer={null}
           destroyOnClose
           onCancel={() => this.setState({ openReportModal: false })}
         >
-          <ReportForm performer={performer} submiting={submiting} onFinish={this.handleReport.bind(this)} />
+          <ReportForm performer={performer} submiting={requesting} onFinish={this.handleReport.bind(this)} />
         </Modal>
         <Modal
           key="subscribe_performer"
@@ -628,6 +639,7 @@ class FeedCard extends Component<IProps> {
               autoplay: true,
               controls: true,
               playsinline: true,
+              fluid: true,
               sources: [
                 {
                   src: feed?.teaser?.url,
@@ -637,7 +649,7 @@ class FeedCard extends Component<IProps> {
             }}
           />
         </Modal>
-        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </div>
     );
   }
@@ -646,6 +658,7 @@ class FeedCard extends Component<IProps> {
 const mapStates = (state: any) => {
   const { commentMapping, comment } = state.comment;
   return {
+    siteName: state.ui.siteName,
     user: state.user.current,
     commentMapping,
     comment

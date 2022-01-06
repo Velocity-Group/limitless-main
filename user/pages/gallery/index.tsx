@@ -157,7 +157,7 @@ class GalleryViewPage extends PureComponent<IProps> {
   async purchaseGallery() {
     const { gallery, user, updateBalance: handleUpdateBalance } = this.props;
     if (user?.balance < gallery.price) {
-      message.error('Your token balance is not enough');
+      message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
       return;
     }
@@ -183,7 +183,7 @@ class GalleryViewPage extends PureComponent<IProps> {
         return;
       }
       if (!user.stripeCardIds || !user.stripeCardIds.length) {
-        message.error('Please add payment card');
+        message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
       }
@@ -222,7 +222,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal, isBookmarked
     } = this.state;
     const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && gallery?.isSubscribed);
-    const thumbUrl = gallery?.coverPhoto?.thumbnails[0] || gallery?.coverPhoto?.url;
+    const thumbUrl = gallery?.coverPhoto?.url || ui?.logo;
     return (
       <Layout>
         <Head>
@@ -320,14 +320,14 @@ class GalleryViewPage extends PureComponent<IProps> {
                   )}
                   {!gallery?.performer?.isFreeSubscription && gallery?.performer.yearlyPrice && (
                   <Button
-                    className="btn btn-yellow"
+                    className="secondary"
                     disabled={!user || !user._id || (submiting && this.subscriptionType === 'yearly')}
                     onClick={() => {
                       this.subscriptionType = 'yearly';
                       this.setState({ openSubscriptionModal: true });
                     }}
                   >
-                    YEARLY SUBSCRIPTON FOR
+                    YEARLY SUBSCRIPTON FOR $
                     {(gallery?.performer?.yearlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
@@ -372,7 +372,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                   <button
                     type="button"
                     className={isBookmarked ? 'react-btn active' : 'react-btn'}
-                    disabled={submiting}
+                    disabled={requesting}
                     onClick={this.handleBookmark.bind(this)}
                   >
                     <BookOutlined />
@@ -409,6 +409,7 @@ class GalleryViewPage extends PureComponent<IProps> {
           className="subscription-modal"
           width={500}
           title={null}
+          centered
           visible={openSubscriptionModal}
           footer={null}
           onCancel={() => this.setState({ openSubscriptionModal: false })}
@@ -421,15 +422,16 @@ class GalleryViewPage extends PureComponent<IProps> {
           />
         </Modal>
         <Modal
+          centered
           key="purchase_post"
-          title={`Unlock gallery ${gallery?.title}`}
+          title={null}
           visible={openPurchaseModal}
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}
         >
-          <PurchaseGalleryForm gallery={gallery} submiting={submiting} onFinish={this.purchaseGallery.bind(this)} />
+          <PurchaseGalleryForm gallery={gallery} submiting={requesting} onFinish={this.purchaseGallery.bind(this)} />
         </Modal>
-        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );
   }

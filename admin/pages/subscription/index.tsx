@@ -8,8 +8,9 @@ import { TableListSubscription } from '@components/subscription/table-list-subsc
 import { ISubscription } from 'src/interfaces';
 import { subscriptionService } from '@services/subscription.service';
 import { getResponseError } from '@lib/utils';
+import moment from 'moment';
 
-interface IProps {}
+interface IProps { }
 interface IStates {
   subscriptionList: ISubscription[];
   loading: boolean;
@@ -57,13 +58,43 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
   }
 
   async onCancelSubscription(subscription: ISubscription) {
-    if (!window.confirm('Are you sure you want to de-activate this subscription?')) {
+    if (!window.confirm('Are you sure to cancel the subscription?')) {
       return;
     }
     try {
       await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
       this.getData();
-      message.success('This subscription have been deactived');
+      message.success('The subscription has been cancelled');
+    } catch (error) {
+      const err = await Promise.resolve(error);
+      message.error(getResponseError(err));
+    }
+  }
+
+  async onRenewSubscription(subscription: ISubscription) {
+    if (!window.confirm('Are you sure you want to re-activate this subscription?')) {
+      return;
+    }
+    try {
+      const {
+        subscriptionType
+      } = subscription;
+      if (subscriptionType === 'yearly') {
+        await subscriptionService.update(subscription._id, {
+          expiredAt: moment().add(1, 'y'), subscriptionType, status: 'active'
+        });
+      } else if (subscriptionType === 'monthly') {
+        await subscriptionService.update(subscription._id, {
+          expiredAt: moment().add(1, 'M'), subscriptionType, status: 'active'
+        });
+      } else {
+        await subscriptionService.update(subscription._id, {
+          expiredAt: moment().add(1, 'd'), subscriptionType, status: 'active'
+        });
+      }
+
+      this.getData();
+      message.success('This subscription have been reactivate');
     } catch (error) {
       const err = await Promise.resolve(error);
       message.error(getResponseError(err));
@@ -83,7 +114,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
         limit: pagination.pageSize,
         offset: (pagination.current - 1) * pagination.pageSize
       });
-      console.log(resp);
+
       await this.setState({
         subscriptionList: resp.data.data,
         pagination: { ...pagination, total: resp.data.total }
@@ -100,7 +131,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
     return (
       <>
         <Head>
-          <title>Subscriptions </title>
+          <title>Subscriptions</title>
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Subscriptions' }]} />
         <Page>
@@ -114,6 +145,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
               onChange={this.handleTabChange.bind(this)}
               rowKey="_id"
               onCancelSubscription={this.onCancelSubscription.bind(this)}
+              onRenewSubscription={this.onRenewSubscription.bind(this)}
             />
           </div>
         </Page>

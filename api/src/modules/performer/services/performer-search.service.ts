@@ -46,6 +46,9 @@ export class PerformerSearchService {
         query[f] = req[f];
       }
     });
+    if (req.verifiedDocument) {
+      query.verifiedDocument = req.verifiedDocument === 'true';
+    }
     if (req.fromAge && req.toAge) {
       query.dateOfBirth = {
         $gte: new Date(req.fromAge),
@@ -124,7 +127,7 @@ export class PerformerSearchService {
     if (req.performerIds) {
       query._id = { $in: req.performerIds.split(',') };
     }
-    ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender', 'status',
+    ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender',
       'height', 'weight', 'eyes', 'butt', 'sexualOrientation'].forEach((f) => {
       if (req[f]) {
         query[f] = req[f];

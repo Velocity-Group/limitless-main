@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Tooltip } from 'antd';
-import { PictureOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons';
+import {
+  PictureOutlined,
+  LockOutlined,
+  UnlockOutlined
+} from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Link from 'next/link';
 import './gallery.less';
@@ -11,11 +15,17 @@ interface GalleryCardIProps {
 
 const GalleryCard = ({ gallery }: GalleryCardIProps) => {
   const [isHovered, setHover] = useState(false);
-  const canView = (!gallery.isSale && gallery.isSubscribed) || (gallery.isSale && gallery.isBought);
-  const thumbUrl = (gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]) || '/static/no-image.jpg';
+  const canView = (!gallery.isSale && gallery.isSubscribed)
+    || (gallery.isSale && gallery.isBought);
+  const thumbUrl = (!canView
+    ? gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]
+    : gallery?.coverPhoto?.url) || '/static/no-image.jpg';
   return (
     <Link
-      href={{ pathname: '/gallery', query: { id: gallery?.slug || gallery?._id } }}
+      href={{
+        pathname: '/gallery',
+        query: { id: gallery?.slug || gallery?._id }
+      }}
       as={`/gallery/${gallery?.slug || gallery?._id}`}
     >
       <div
@@ -24,15 +34,21 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
         onMouseLeave={() => setHover(false)}
       >
         {gallery?.isSale && gallery?.price > 0 && (
-        <span className="gallery-price">
-          <div className="label-price">
-            <img alt="coin" src="/static/coin-ico.png" width="15px" />
-            {gallery?.price.toFixed(2)}
-          </div>
-        </span>
+          <span className="gallery-price">
+            <div className="label-price">
+              <img alt="coin" src="/static/coin-ico.png" width="15px" />
+              {gallery?.price.toFixed(2)}
+            </div>
+          </span>
         )}
         <div className="gallery-thumb">
-          <div className="card-bg" style={canView ? { backgroundImage: `url(${thumbUrl})` } : { backgroundImage: `url(${thumbUrl})`, filter: 'blur(20px)' }} />
+          <div
+            className="card-bg"
+            style={{
+              backgroundImage: `url(${thumbUrl})`,
+              filter: canView ? 'blur(0px)' : 'blur(20px)'
+            }}
+          />
           <div className="gallery-stats">
             <a>
               <PictureOutlined />
@@ -41,9 +57,7 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
             </a>
           </div>
           <div className="lock-middle">
-            {(canView || isHovered) ? <UnlockOutlined /> : <LockOutlined />}
-            {/* {(!gallery.isSale && !gallery.isSubscribed) && <Button type="link">Subscribe to unlock</Button>}
-            {(gallery.isSale && !gallery.isBought) && <Button type="link">Pay now to unlock</Button>} */}
+            {canView || isHovered ? <UnlockOutlined /> : <LockOutlined />}
           </div>
         </div>
         <Tooltip title={gallery?.title}>

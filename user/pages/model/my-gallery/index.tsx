@@ -65,10 +65,10 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
   }
 
   async handleDeleteGallery(id: string) {
-    if (!window.confirm('Are you sure to delete this gallery?')) return;
+    if (!window.confirm('Are you sure you want to delete this gallery?')) return;
     try {
       await galleryService.delete(id);
-      message.success('Deleted success!');
+      message.success('Your gallery was deleted successfully');
       this.search();
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};

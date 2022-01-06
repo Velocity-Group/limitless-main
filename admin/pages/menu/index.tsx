@@ -8,15 +8,9 @@ import { SearchFilter } from '@components/common/search-filter';
 import { TableListMenu } from '@components/menu/table-list';
 import { BreadcrumbComponent } from '@components/common';
 
-interface IProps {
-  performerId: string;
-}
+interface IProps { }
 
 class Menus extends PureComponent<IProps> {
-  static async getInitialProps({ ctx }) {
-    return ctx.query;
-  }
-
   state = {
     pagination: {} as any,
     searching: false,
@@ -28,23 +22,13 @@ class Menus extends PureComponent<IProps> {
   };
 
   async componentDidMount() {
-    const { performerId } = this.props;
-    const { filter } = this.state;
-    if (performerId) {
-      await this.setState({
-        filter: {
-          ...filter,
-          ...{ performerId }
-        }
-      });
-    }
     this.search();
   }
 
-  handleTableChange = (pagination, filters, sorter) => {
+  handleTableChange = async (pagination, filters, sorter) => {
     const pager = { ...pagination };
     pager.current = pagination.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
       sortBy: sorter.field || 'createdAt',
       sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : 'desc'
@@ -71,7 +55,7 @@ class Menus extends PureComponent<IProps> {
         sort,
         sortBy
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data,
         pagination: {
@@ -88,7 +72,7 @@ class Menus extends PureComponent<IProps> {
 
   async deleteMenu(id: string) {
     const { pagination } = this.state;
-    if (!window.confirm('Are you sure you want to delete this menu?')) {
+    if (!window.confirm('Are you sure to delete this menu?')) {
       return;
     }
     try {
@@ -107,9 +91,9 @@ class Menus extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Menus</title>
+          <title>Menu Options</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Menus' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Menu Options' }]} />
         <Page>
           <SearchFilter onSubmit={this.handleFilter.bind(this)} />
           <div style={{ marginBottom: '20px' }} />

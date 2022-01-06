@@ -10,9 +10,9 @@ import {
 import { AvatarUpload } from '@components/user/avatar-upload';
 import { CoverUpload } from '@components/user/cover-upload';
 import {
-  UploadOutlined, TwitterOutlined, CheckCircleOutlined,
-  IssuesCloseOutlined, GoogleOutlined
+  UploadOutlined, TwitterOutlined, GoogleOutlined
 } from '@ant-design/icons';
+import { getGlobalConfig } from '@services/config';
 import moment from 'moment';
 
 const { Option } = Select;
@@ -61,13 +61,15 @@ export class PerformerAccountForm extends PureComponent<IProps> {
   state = {
     isUploadingVideo: false,
     uploadVideoPercentage: 0,
-    previewVideo: null
+    previewVideoUrl: null,
+    previewVideoName: null
   }
 
   componentDidMount() {
     const { user } = this.props;
-    user && user.welcomeVideoPath && this.setState({
-      previewVideo: user.welcomeVideoPath
+    this.setState({
+      previewVideoUrl: user?.welcomeVideoPath,
+      previewVideoName: user?.welcomeVideoName
     });
   }
 
@@ -78,10 +80,24 @@ export class PerformerAccountForm extends PureComponent<IProps> {
       return;
     }
     if (info.file.status === 'done') {
-      message.success('Welcome video uploaded');
-      this.setState({ isUploadingVideo: false, previewVideo: info.file.response.data && info.file.response.data.url });
+      message.success('Intro video was uploaded');
+      this.setState({
+        isUploadingVideo: false,
+        previewVideoUrl: info?.file?.response?.data.url,
+        previewVideoName: info?.file?.response?.data.name
+      });
     }
   };
+
+  beforeUploadVideo = (file) => {
+    const isValid = file.size / 1024 / 1024 < (getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    if (!isValid) {
+      message.error(`File is too large please provide an file ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
+      return false;
+    }
+    this.setState({ previewVideoName: file.name });
+    return true;
+  }
 
   render() {
     const {
@@ -96,7 +112,9 @@ export class PerformerAccountForm extends PureComponent<IProps> {
       onCoverUploaded,
       videoUploadUrl
     } = options;
-    const { isUploadingVideo, uploadVideoPercentage, previewVideo } = this.state;
+    const {
+      isUploadingVideo, uploadVideoPercentage, previewVideoUrl, previewVideoName
+    } = this.state;
     return (
       <Form
         {...layout}
@@ -105,9 +123,9 @@ export class PerformerAccountForm extends PureComponent<IProps> {
         validateMessages={validateMessages}
         initialValues={{
           ...user,
-          dateOfBirth: (user.dateOfBirth && moment(user.dateOfBirth)) || '',
-          bodyType: 'slim'
+          dateOfBirth: (user.dateOfBirth && moment(user.dateOfBirth)) || ''
         }}
+        scrollToFirstError
         className="account-form"
       >
         <div
@@ -181,7 +199,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
           <Col lg={12} md={12} xs={24}>
             <Form.Item
               name="name"
-              label="Display name"
+              label="Display Name"
               validateTrigger={['onChange', 'onBlur']}
               rules={[
                 { required: true, message: 'Please input your display name!' },
@@ -223,12 +241,12 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             <Form.Item
               name="email"
               label={(
-                <span>
+                <span style={{ fontSize: 10 }}>
                   Email Address
                   {'  '}
                   {user.verifiedEmail ? (
                     <Popover title="Your email address is verified" content={null}>
-                      <a style={{ fontSize: 18 }}><CheckCircleOutlined /></a>
+                      <a className="success-color">Verified!</a>
                     </Popover>
                   ) : (
                     <Popover
@@ -244,13 +262,13 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                           {' '}
                           {countTime < 60 ? 'resend' : 'send'}
                           {' '}
-                          an email to verify your email address
+                          the verification link
                           {' '}
                           {countTime < 60 && `${countTime}s`}
                         </Button>
                       )}
                     >
-                      <a style={{ fontSize: 18 }}><IssuesCloseOutlined /></a>
+                      <a className="error-color">Not verified!</a>
                     </Popover>
                   )}
                 </span>
@@ -346,8 +364,53 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col span={24}>
-            <Form.Item name="bio" label="Bio">
+            <Form.Item
+              name="bio"
+              label="Bio"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter your bio!'
+                }
+              ]}
+            >
               <TextArea rows={3} placeholder="Tell people something about you..." />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item
+              label="New Password"
+              name="password"
+              hasFeedback
+              rules={[
+                {
+                  pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
+                  message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                }
+              ]}
+            >
+              <Input.Password placeholder="New password" />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item
+              label="Confirm new Password"
+              name="confirm"
+              dependencies={['password']}
+              hasFeedback
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (!value || getFieldValue('password') === value) {
+                      return Promise.resolve();
+                    }
+                    // eslint-disable-next-line prefer-promise-reject-errors
+                    return Promise.reject('Passwords do not match together!');
+                  }
+                })
+              ]}
+            >
+              <Input.Password placeholder="Confirm new password" />
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
@@ -360,7 +423,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
               <Input />
             </Form.Item>
           </Col>
-          <Col lg={12} md={12} xs={24}>
+          <Col lg={24} md={24} xs={24}>
             <Form.Item name="address" label="Address">
               <Input />
             </Form.Item>
@@ -542,23 +605,37 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>
-            <Form.Item label="Welcome Video" help={previewVideo ? <a rel="noreferrer" href={previewVideo} target="_blank">Video welcome video</a> : null}>
+            <Form.Item label="Intro Video">
               <Upload
                 accept={'video/*'}
                 name="welcome-video"
+                listType="picture-card"
+                className="avatar-uploader"
                 showUploadList={false}
                 action={videoUploadUrl}
                 headers={uploadHeaders}
+                beforeUpload={(file) => this.beforeUploadVideo(file)}
                 onChange={this.handleVideoChange.bind(this)}
               >
                 <UploadOutlined />
               </Upload>
+              <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
+                {((previewVideoUrl || previewVideoName) && <a rel="noreferrer" href={previewVideoUrl} target="_blank">{previewVideoName || 'Click here to preview'}</a>)
+                 || (
+                 <a>
+                   Intro video is
+                   {' '}
+                   {getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}
+                   MB or below
+                 </a>
+                 )}
+              </div>
               {uploadVideoPercentage ? (
                 <Progress percent={Math.round(uploadVideoPercentage)} />
               ) : null}
             </Form.Item>
             <Form.Item name="activateWelcomeVideo" valuePropName="checked">
-              <Checkbox>Activate welcome video</Checkbox>
+              <Checkbox>Activate intro video</Checkbox>
             </Form.Item>
           </Col>
           <Col lg={12} md={12} xs={24}>

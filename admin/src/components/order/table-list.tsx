@@ -1,5 +1,5 @@
 /* eslint-disable react/destructuring-assignment */
-import { Table, Tag } from 'antd';
+import { Table, Tag, Avatar } from 'antd';
 import {
   EyeOutlined
 } from '@ant-design/icons';
@@ -26,7 +26,10 @@ const OrderTableList = ({
     {
       title: 'Order ID',
       dataIndex: 'orderNumber',
-      key: 'orderNumber'
+      key: 'orderNumber',
+      render(orderNumber, record) {
+        return <Link href={{ pathname: '/order/detail', query: { id: record._id } }}><a>{orderNumber}</a></Link>;
+      }
     },
     {
       title: 'User',
@@ -35,6 +38,8 @@ const OrderTableList = ({
       render(userInfo) {
         return (
           <span>
+            <Avatar src={userInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {`${userInfo?.name || userInfo?.username || 'N/A'}`}
           </span>
         );
@@ -47,6 +52,8 @@ const OrderTableList = ({
       render(performerInfo) {
         return (
           <span>
+            <Avatar src={performerInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {`${performerInfo?.name || performerInfo?.username || 'N/A'}`}
           </span>
         );
@@ -55,7 +62,7 @@ const OrderTableList = ({
     {
       title: 'Product',
       dataIndex: 'productInfo',
-      key: 'performerInfo',
+      key: 'productInfo',
       render(productInfo) {
         return (
           <span>
@@ -65,7 +72,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Total_Price',
+      title: 'Tokens',
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
@@ -77,7 +84,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Delivery_Status',
+      title: 'Delivery Status',
       dataIndex: 'deliveryStatus',
       render(status: string) {
         switch (status) {
@@ -86,7 +93,7 @@ const OrderTableList = ({
           case 'processing':
             return <Tag color="#FFCF00">Processing</Tag>;
           case 'shipping':
-            return <Tag color="#00dcff">Shipping</Tag>;
+            return <Tag color="#00dcff">Shipped</Tag>;
           case 'delivered':
             return <Tag color="#00c12c">Delivered</Tag>;
           case 'refunded':
@@ -96,7 +103,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Updated_at',
+      title: 'Updated On',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
@@ -104,7 +111,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Actions',
+      title: 'Action',
       dataIndex: '_id',
       render(id: string) {
         return <Link href={{ pathname: '/order/detail', query: { id } }}><a><EyeOutlined /></a></Link>;

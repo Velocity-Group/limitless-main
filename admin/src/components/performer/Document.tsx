@@ -1,14 +1,9 @@
-/* eslint-disable no-empty */
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable react/destructuring-assignment */
 import { PureComponent } from 'react';
 import {
-  Form, Button, Row, Col
+  Form, Button, Row, Col, Image
 } from 'antd';
-import { FileOutlined } from '@ant-design/icons';
 import { IPerformer } from 'src/interfaces';
 import { performerService, authService } from '@services/index';
-import { FileUpload } from '@components/file/file-upload';
 import { ImageUpload } from '@components/file/image-upload';
 
 const layout = {
@@ -18,10 +13,11 @@ const layout = {
 
 interface IProps {
   onUploaded: Function;
-  performer?: IPerformer;
-  onFinish?: Function;
-  submiting?: boolean;
+  performer: IPerformer;
+  onFinish: Function;
+  submiting: boolean;
 }
+
 export class PerformerDocument extends PureComponent<IProps> {
   state = {
     idVerificationUrl: '',
@@ -47,8 +43,11 @@ export class PerformerDocument extends PureComponent<IProps> {
     return (
       <Form {...layout} name="form-performer" onFinish={onFinish.bind(this)}>
         <Row>
-          <Col span={24}>
-            <Form.Item label="ID verification photo">
+          <Col md={12} xs={24}>
+            <Form.Item
+              style={{ textAlign: 'center' }}
+              label="Govt issued ID photo"
+            >
               <ImageUpload
                 uploadUrl={`${performerService.getUploadDocumentUrl()}/${performer._id}`}
                 headers={uploadHeaders}
@@ -57,17 +56,17 @@ export class PerformerDocument extends PureComponent<IProps> {
                   onUploaded('idVerificationId', resp);
                 }}
               />
-              {idVerificationUrl && (
-              <a href={idVerificationUrl} target="_.blank" title="Click to view">
-                <img src={idVerificationUrl} height="100px" alt="photoVefication" />
-                <p>Click to view</p>
-              </a>
-              )}
+              {idVerificationUrl ? (
+                <Image alt="id-img" src={idVerificationUrl} style={{ margin: 5, height: '150px' }} />
+              ) : <img src="/front-id.png" height="150px" alt="id-img" />}
             </Form.Item>
           </Col>
-          <Col span={24}>
-            <Form.Item label="Document verification file">
-              <FileUpload
+          <Col md={12} xs={24}>
+            <Form.Item
+              style={{ textAlign: 'center' }}
+              label="Selfie with ID photo and handwritten note"
+            >
+              <ImageUpload
                 uploadUrl={`${performerService.getUploadDocumentUrl()}/${performer._id}`}
                 headers={uploadHeaders}
                 onUploaded={(resp) => {
@@ -77,16 +76,13 @@ export class PerformerDocument extends PureComponent<IProps> {
                   onUploaded('documentVerificationId', resp);
                 }}
               />
-              {documentVerificationUrl && (
-              <a href={documentVerificationUrl} target="_.blank" title="Click to view">
-                <FileOutlined style={{ fontSize: 50 }} />
-                <p>Click to download</p>
-              </a>
-              )}
+              {documentVerificationUrl ? (
+                <Image alt="id-img" src={documentVerificationUrl} style={{ margin: 5, height: '150px' }} />
+              ) : <img src="/holding-id.jpg" height="150px" alt="holding-id" />}
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+        <Form.Item className="text-center">
           <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
             Submit
           </Button>

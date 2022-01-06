@@ -19,7 +19,8 @@ import {
 import { PerformerService } from 'src/modules/performer/services';
 import { PERFORMER_STATUSES } from 'src/modules/performer/constants';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
-import { AuthGooglePayload, LoginByEmailPayload, LoginByUsernamePayload } from '../payloads';
+import { isEmail } from 'src/kernel/helpers/string.helper';
+import { AuthGooglePayload, LoginByUsernamePayload } from '../payloads';
 import { AuthService } from '../services';
 import {
   PasswordIncorrectException,
@@ -37,97 +38,34 @@ export class LoginController {
     private readonly authService: AuthService
   ) { }
 
-  @Post('login/email')
+  @Post('login')
   @HttpCode(HttpStatus.OK)
-  public async loginByEmail(
-    @Body() req: LoginByEmailPayload
-  ): Promise<DataResponse<{ token: string }>> {
-    const [user, performer] = await Promise.all([
-      this.userService.findOne({ email: req.email }),
-      this.performerService.findOne({ email: req.email })
-    ]);
-    if (!user && !performer) {
-      throw new HttpException('This account is not found. Please sign up', 404);
-    }
-    if ((user && user.status === STATUS_INACTIVE) || (performer && performer.status === PERFORMER_STATUSES.INACTIVE)) {
-      throw new AccountInactiveException();
-    }
-    const requireEmailVerification = SettingService.getValueByKey(
-      SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION
-    );
-    if ((requireEmailVerification && user && !user.verifiedEmail) || (requireEmailVerification && performer && !performer.verifiedEmail)) {
-      throw new EmailNotVerifiedException();
-    }
-    const [authUser, authPerformer] = await Promise.all([
-      user && this.authService.findBySource({
-        source: 'user',
-        sourceId: user._id,
-        type: 'email'
-      }),
-      performer && this.authService.findBySource({
-        source: 'performer',
-        sourceId: performer._id,
-        type: 'email'
-      })
-    ]);
-    if (!authUser && !authPerformer) {
-      throw new HttpException('This account is not found. Please Sign up', 404);
-    }
-    if (authUser && !this.authService.verifyPassword(req.password, authUser)) {
-      throw new PasswordIncorrectException();
-    }
-    if (authPerformer && !this.authService.verifyPassword(req.password, authPerformer)) {
-      throw new PasswordIncorrectException();
-    }
-    // TODO - check for user status here
-
-    let token = null;
-    // auth token expired in 30d
-    if (authUser) {
-      token = this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 30 });
-    }
-    if (!authUser && authPerformer) {
-      token = this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 30 });
-    }
-
-    return DataResponse.ok({ token });
-  }
-
-  @Post('login/username')
-  @HttpCode(HttpStatus.OK)
-  public async loginByUsername(
+  public async login(
     @Body() req: LoginByUsernamePayload
   ): Promise<DataResponse<{ token: string }>> {
+    const query = isEmail(req.username) ? { email: req.username.toLowerCase() } : { username: req.username };
     const [user, performer] = await Promise.all([
-      this.userService.findOne({ username: req.username }),
-      this.performerService.findOne({ username: req.username })
+      this.userService.findOne(query),
+      this.performerService.findOne(query)
     ]);
     if (!user && !performer) {
-      throw new HttpException('This account is not found. Please Sign up', 404);
+      throw new HttpException('This account is not found, please sign up', 404);
     }
     if ((user && user.status === STATUS_INACTIVE) || (performer && performer.status === PERFORMER_STATUSES.INACTIVE)) {
       throw new AccountInactiveException();
     }
-    const requireEmailVerification = SettingService.getValueByKey(
-      SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION
-    );
-    if ((requireEmailVerification && user && !user.verifiedEmail) || (requireEmailVerification && performer && !performer.verifiedEmail)) {
-      throw new EmailNotVerifiedException();
-    }
     const [authUser, authPerformer] = await Promise.all([
       user && this.authService.findBySource({
         source: 'user',
-        sourceId: user._id,
-        type: 'username'
+        sourceId: user._id
       }),
       performer && this.authService.findBySource({
         source: 'performer',
-        sourceId: performer._id,
-        type: 'username'
+        sourceId: performer._id
       })
     ]);
     if (!authUser && !authPerformer) {
-      throw new HttpException('This account is not found. Please Sign up', 404);
+      throw new HttpException('This account is not found, please sign up', 404);
     }
     if (authUser && !this.authService.verifyPassword(req.password, authUser)) {
       throw new PasswordIncorrectException();
@@ -135,13 +73,19 @@ export class LoginController {
     if (authPerformer && !this.authService.verifyPassword(req.password, authPerformer)) {
       throw new PasswordIncorrectException();
     }
+    const requireEmailVerification = SettingService.getValueByKey(
+      SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION
+    );
+    if ((requireEmailVerification && user && !user.verifiedEmail) || (requireEmailVerification && performer && !performer.verifiedEmail)) {
+      throw new EmailNotVerifiedException();
+    }
     let token = null;
-    // auth token expired in 30d
+    // auth token expired in 7d
     if (authUser) {
-      token = this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 30 });
+      token = this.authService.generateJWT(authUser, { expiresIn: 60 * 60 * 24 * 7 });
     }
     if (!authUser && authPerformer) {
-      token = this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 30 });
+      token = this.authService.generateJWT(authPerformer, { expiresIn: 60 * 60 * 24 * 7 });
     }
 
     return DataResponse.ok({ token });

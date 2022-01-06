@@ -32,13 +32,13 @@ export default class FormTokenPackage extends PureComponent<IProps> {
         }
         layout="vertical"
       >
-        <Form.Item name="name" rules={[{ required: true, message: 'Please input name of token package!' }]} label="Name">
-          <Input placeholder="Enter token package name" />
+        <Form.Item name="name" rules={[{ required: true, message: 'Please input token package name' }]} label="Name">
+          <Input placeholder="Token package name" />
         </Form.Item>
         <Form.Item name="description" label="Description" rules={[{ required: true, message: 'Please input description!' }]}>
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item name="price" label="Price ($)" rules={[{ required: true, message: 'Please input price!' }]}>
+        <Form.Item name="price" label="Price ($)" rules={[{ required: true, message: 'Please input the price!' }]}>
           <InputNumber min={1} />
         </Form.Item>
         <Form.Item name="tokens" label="Amount of Tokens" rules={[{ required: true, message: 'Please input amount of tokens!' }]}>
@@ -47,13 +47,13 @@ export default class FormTokenPackage extends PureComponent<IProps> {
         <Form.Item name="isActive" label="Status" valuePropName="checked">
           <Switch
             checkedChildren="Activate"
-            unCheckedChildren="Inactivate"
+            unCheckedChildren="Deactivate"
           />
         </Form.Item>
         <Form.Item name="ordering" label="Ordering">
           <InputNumber />
         </Form.Item>
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+        <Form.Item className="text-center">
           <Button type="primary" htmlType="submit" loading={submiting}>
             Submit
           </Button>

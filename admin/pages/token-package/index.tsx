@@ -28,13 +28,13 @@ class Tokens extends PureComponent<IProps> {
     pager.current = pagination.current;
     await this.setState({
       pagination: pager,
-      sortBy: sorter.field || 'createdAt',
+      sortBy: sorter.field || 'ordering',
       // eslint-disable-next-line no-nested-ternary
       sort: sorter.order
         ? sorter.order === 'descend'
           ? 'desc'
           : 'asc'
-        : 'desc'
+        : 'asc'
     });
     this.search(pager.current);
   };

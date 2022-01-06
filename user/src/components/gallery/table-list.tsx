@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import { Table, Tag, Button } from 'antd';
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
 import { CoverGallery } from '@components/gallery/cover-gallery';
@@ -26,7 +26,7 @@ export class TableListGallery extends PureComponent<IProps> {
     } = this.props;
     const columns = [
       {
-        title: '#',
+        title: 'Thumbnail',
         render(data, record) {
           return (
             <Link
@@ -94,7 +94,7 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -102,7 +102,7 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (data, record) => (
           <div style={{ whiteSpace: 'nowrap' }}>

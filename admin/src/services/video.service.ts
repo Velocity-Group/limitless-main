@@ -19,7 +19,8 @@ export class VideoService extends APIRequest {
   ) {
     return this.upload(`/admin/performer-assets/videos/edit/${id}`, files, {
       onProgress,
-      customData: payload
+      customData: payload,
+      method: 'PUT'
     });
   }
 
@@ -36,6 +37,10 @@ export class VideoService extends APIRequest {
 
   delete(id: string) {
     return this.del(`/admin/performer-assets/videos/${id}`);
+  }
+
+  deleteFile(id: string, type: string) {
+    return this.del(`/admin/performer-assets/videos/remove-file/${id}`, { type });
   }
 }
 

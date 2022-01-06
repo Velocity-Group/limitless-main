@@ -17,6 +17,8 @@ export class FeedDto {
 
   text: string;
 
+  pollDescription: string;
+
   fileIds: Array<string | ObjectId>;
 
   pollIds: Array<string | ObjectId>;
@@ -57,7 +59,7 @@ export class FeedDto {
 
   thumbnailId: ObjectId;
 
-  thumbnailUrl: string;
+  thumbnail: any;
 
   isPinned: boolean;
 
@@ -82,6 +84,7 @@ export class FeedDto {
         'title',
         'slug',
         'text',
+        'pollDescription',
         'fileIds',
         'pollIds',
         'totalLike',
@@ -102,7 +105,7 @@ export class FeedDto {
         'teaserId',
         'teaser',
         'thumbnailId',
-        'thumbnailUrl',
+        'thumbnail',
         'isPinned',
         'pinnedAt',
         'status',

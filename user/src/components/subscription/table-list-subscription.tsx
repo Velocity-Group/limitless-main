@@ -25,7 +25,7 @@ export const TableListSubscription = ({
   const onCancel = (value) => {
     if (
       !window.confirm(
-        'Confirm to cancel this model subscription?'
+        'Confirm to cancel this subscription!'
       )
     ) {
       return;
@@ -93,7 +93,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Updated At',
+      title: 'Updated at',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
@@ -133,24 +133,19 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Actions',
+      title: 'Action',
       dataIndex: '_id',
-      sorter: false,
       render(_id, record) {
         return (
           <>
-            {!['free', 'system'].includes(record.subscriptionType) && (
-              <>
-                {record.status !== 'deactivated' ? (
-                  <Button danger onClick={() => onCancel(record)}>
-                    Cancel subscription
-                  </Button>
-                ) : (
-                  <Button type="primary" onClick={() => activeSubscription(record)}>
-                    Activate subscription
-                  </Button>
-                )}
-              </>
+            {record.status !== 'deactivated' ? (
+              <Button danger onClick={() => onCancel(record)}>
+                Cancel subscription
+              </Button>
+            ) : (
+              <Button type="primary" onClick={() => activeSubscription(record)}>
+                Activate subscription
+              </Button>
             )}
           </>
         );

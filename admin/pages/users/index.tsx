@@ -3,18 +3,25 @@ import {
   Table, message, Tag, Modal, Avatar
 } from 'antd';
 import Page from '@components/common/layout/page';
-import { SearchFilter } from '@components/performer/search-filter';
 import {
   EditOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
-import { BreadcrumbComponent, DropdownAction } from '@components/common';
+import { BreadcrumbComponent, DropdownAction, SearchFilter } from '@components/common';
 import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
 import { userService } from '@services/user.service'; import Head from 'next/head';
 import Link from 'next/link';
 
-export default class Performers extends PureComponent<any> {
+interface IProps {
+  status: string
+}
+
+export default class Performers extends PureComponent<IProps> {
   _selectedUser: any;
+
+  static async getInitialProps({ ctx }) {
+    return ctx.query;
+  }
 
   state = {
     pagination: {} as any,
@@ -28,7 +35,8 @@ export default class Performers extends PureComponent<any> {
   };
 
   componentDidMount() {
-    this.search();
+    const { status } = this.props;
+    this.setState({ filter: { status: status || '' } }, () => this.search());
   }
 
   async handleTableChange(pagination, filters, sorter) {
@@ -36,9 +44,9 @@ export default class Performers extends PureComponent<any> {
     pager.current = pagination.current;
     await this.setState({
       pagination: pager,
-      sortBy: sorter.field || '',
+      sortBy: sorter.field || 'updatedAt',
       // eslint-disable-next-line no-nested-ternary
-      sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : ''
+      sort: sorter.order ? (sorter.order === 'descend' ? 'desc' : 'asc') : 'desc'
     });
     this.search(pager.current);
   }
@@ -94,6 +102,7 @@ export default class Performers extends PureComponent<any> {
   }
 
   render() {
+    const { status: defaultStatus } = this.props;
     const {
       list, searching, pagination, openChangeTokenLogModal
     } = this.state;
@@ -101,7 +110,7 @@ export default class Performers extends PureComponent<any> {
     // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = [
       {
-        title: '#',
+        title: 'Avatar',
         dataIndex: 'avatar',
         render: (avatar) => <Avatar src={avatar || '/no-avatar.png'} />
       },
@@ -125,15 +134,15 @@ export default class Performers extends PureComponent<any> {
             case 'active':
               return <Tag color="green">Active</Tag>;
             case 'inactive':
-              return <Tag color="red">Inactive</Tag>;
+              return <Tag color="red">Suspend</Tag>;
             case 'pending-email-confirmation':
-              return <Tag color="default">Pending verify email</Tag>;
+              return <Tag color="default">Not verified email</Tag>;
             default: return <Tag color="default">{status}</Tag>;
           }
         }
       },
       {
-        title: 'Email verification',
+        title: 'Verified Email?',
         dataIndex: 'verifiedEmail',
         render(verifiedEmail) {
           switch (verifiedEmail) {
@@ -146,7 +155,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Update at',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -154,7 +163,7 @@ export default class Performers extends PureComponent<any> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render(id: string, record) {
           return (
@@ -207,6 +216,26 @@ export default class Performers extends PureComponent<any> {
         }
       }
     ];
+
+    const statuses = [
+      {
+        key: '',
+        text: 'All statuses'
+      },
+      {
+        key: 'active',
+        text: 'Active'
+      },
+      {
+        key: 'inactive',
+        text: 'Inactive'
+      },
+      {
+        key: 'pending-email-confirmation',
+        text: 'Not verified email'
+      }
+    ];
+
     return (
       <>
         <Head>
@@ -214,7 +243,7 @@ export default class Performers extends PureComponent<any> {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Users' }]} />
         <Page>
-          <SearchFilter onSubmit={this.handleFilter.bind(this)} />
+          <SearchFilter keyword onSubmit={this.handleFilter.bind(this)} statuses={statuses} defaultStatus={defaultStatus || ''} />
           <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
             <Table

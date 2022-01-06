@@ -57,7 +57,13 @@ export const SETTING_KEYS = {
   BITPAY_API_TOKEN: 'bitpayApiToken',
   TOKEN_CONVERSION_RATE: 'tokenConversionRate',
   STRIPE_PUBLISHABLE_KEY: 'stripePublishableKey',
-  STRIPE_SECRET_KEY: 'stripeSecretKey'
+  STRIPE_SECRET_KEY: 'stripeSecretKey',
+  AWS_S3_REGION_NAME: 's3RegionName',
+  AWS_S3_ACCESS_KEY_ID: 's3AccessKeyId',
+  AWS_S3_SECRET_ACCESS_KEY: 's3SecretAccessKey',
+  AWS_S3_BUCKET_ENDPOINT: 's3BucketEnpoint',
+  AWS_S3_BUCKET_NAME: 's3BucketName',
+  AWS_S3_ENABLE: 's3Enabled'
 };
 
 export const MENU_SECTION = {

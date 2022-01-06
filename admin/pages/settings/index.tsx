@@ -211,12 +211,12 @@ class Settings extends PureComponent {
       case 'mixed':
         return (
           <div className="ant-row ant-form-item ant-form-item-with-help" key={setting._id} style={{ margin: '15px 0' }}>
-            <div className="ant-col ant-col-4 ant-form-item-label">
+            <div className="ant-col ant-col-24 ant-form-item-label">
               <label>
                 {setting.name}
               </label>
             </div>
-            <div className="ant-col ant-col-20 ant-form-item-control">
+            <div className="ant-col ant-col-24 ant-form-item-control">
               <div className="ant-form-item">
                 <div>
                   <label>
@@ -256,12 +256,10 @@ class Settings extends PureComponent {
                   />
                 </div>
               </div>
-              <div className="ant-form-item-explain">{setting.description}</div>
-
+              {setting.description && <div className="ant-form-item-explain">{setting.description}</div>}
               <div>
                 <Button disabled={updating} loading={updating} onClick={this.verifyMailer.bind(this)} type="link">Once saved, click here to send a test email.</Button>
               </div>
-
             </div>
           </div>
         );
@@ -318,6 +316,7 @@ class Settings extends PureComponent {
               <Menu.Item key="mailer">SMTP</Menu.Item>
               <Menu.Item key="custom">SEO</Menu.Item>
               <Menu.Item key="commission">Commission</Menu.Item>
+              {/* <Menu.Item key="s3">S3</Menu.Item> */}
               <Menu.Item key="stripe">Stripe</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>

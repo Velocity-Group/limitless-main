@@ -1,5 +1,6 @@
 import { Schema } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import { Storage } from 'src/modules/storage/contants';
 
 export const FileSchema = new Schema({
   type: {
@@ -9,7 +10,7 @@ export const FileSchema = new Schema({
   name: String,
   description: String,
   mimeType: String,
-  server: String,
+  server: { type: String, index: true, default: Storage.DiskStorage },
   path: String,
   absolutePath: String,
   width: Number,
@@ -26,6 +27,11 @@ export const FileSchema = new Schema({
     itemType: String,
     _id: false
   }],
+  acl: {
+    type: String,
+    index: true
+  },
+  metadata: Schema.Types.Mixed,
   createdBy: ObjectId,
   updatedBy: ObjectId,
   createdAt: { type: Date, default: Date.now },

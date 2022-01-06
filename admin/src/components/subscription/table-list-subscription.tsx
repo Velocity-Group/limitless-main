@@ -1,5 +1,7 @@
-import { Table, Tag, Button } from 'antd';
-import { StopOutlined } from '@ant-design/icons';
+import {
+  Table, Tag, Button, Avatar
+} from 'antd';
+import { StopOutlined, RightCircleOutlined } from '@ant-design/icons';
 import { ISubscription } from 'src/interfaces';
 import { formatDate } from '@lib/date';
 
@@ -10,6 +12,7 @@ interface IProps {
   onChange(): Function;
   loading: boolean;
   onCancelSubscription: Function;
+  onRenewSubscription: Function;
 }
 
 export const TableListSubscription = ({
@@ -18,7 +21,8 @@ export const TableListSubscription = ({
   rowKey,
   onChange,
   loading,
-  onCancelSubscription
+  onCancelSubscription,
+  onRenewSubscription
 }: IProps) => {
   const columns = [
     {
@@ -27,6 +31,8 @@ export const TableListSubscription = ({
       render(data, records) {
         return (
           <span>
+            <Avatar src={records?.userInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {`${records?.userInfo?.name || records?.userInfo?.username || 'N/A'}`}
           </span>
         );
@@ -38,6 +44,8 @@ export const TableListSubscription = ({
       render(data, records) {
         return (
           <span>
+            <Avatar src={records?.performerInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {`${records?.performerInfo?.name || records?.performerInfo?.username || 'N/A'}`}
           </span>
         );
@@ -67,7 +75,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Start Recurring Date',
+      title: 'Subscription start Date”',
       dataIndex: 'startRecurringDate',
       sorter: true,
       render(date: Date, record) {
@@ -75,7 +83,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Next Recurring Date',
+      title: 'Renews On',
       dataIndex: 'nextRecurringDate',
       sorter: true,
       render(date: Date, record) {
@@ -114,7 +122,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Last Update',
+      title: 'Updated On',
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
@@ -122,11 +130,18 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Actions',
+      title: 'Action',
       dataIndex: 'status',
       render(data, records) {
         return (
           <span>
+            {records?.status === 'deactivated' ? (
+              <Button type="primary" onClick={() => onRenewSubscription(records)}>
+                <RightCircleOutlined />
+                {' '}
+                Reactivate subscription
+              </Button>
+            ) : null}
             {records?.status === 'active' ? (
               <Button type="primary" onClick={() => onCancelSubscription(records)}>
                 <StopOutlined />

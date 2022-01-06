@@ -4,6 +4,7 @@
   float: left;
   width: unset;
 }
+
 .ant-form-item {
   margin-bottom: 5px;
   .ant-form-item-label {
@@ -12,6 +13,17 @@
       font-size: 11px;
     }
   }
+  .ant-select-multiple .ant-select-selection-item {
+    height: auto;
+  }
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mar-10 {
+  margin: 10px;
 }
 
 .ant-col {
@@ -57,6 +69,10 @@
       position: relative;
       top: 0;
       left: 0
+    }
+    
+    &.anticon-file-add {
+      background-color: @success-color;
     }
   }
 }

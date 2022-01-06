@@ -57,7 +57,7 @@ export class UserService {
     return this.userModel.findById(id);
   }
 
-  public async getMe(id: string | ObjectId, jwToken: string): Promise<any> {
+  public async getMe(id: string, jwToken: string): Promise<any> {
     const user = await this.userModel.findById(id);
     if (user) {
       return new UserDto(user).toResponse(true);

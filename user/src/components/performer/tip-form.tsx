@@ -75,7 +75,7 @@ export class TipPerformerForm extends PureComponent<IProps> {
         </div>
         <div className="info-body">
           <div style={{ margin: '0 0 20px', textAlign: 'center' }}>
-            <p>Enter your tip amount tokens</p>
+            <p>Enter your tip amount in tokens</p>
             <InputNumber min={1} onChange={this.onChangeValue.bind(this)} value={price} />
           </div>
         </div>

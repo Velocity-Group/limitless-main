@@ -136,7 +136,7 @@ class RegisterPerformer extends PureComponent<IProps> {
             </div>
             <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
             <div className="social-login">
-              <button type="button" onClick={() => this.loginTwitter()} className="twitter-button">
+              <button type="button" disabled={!settings.twitterClientId} onClick={() => this.loginTwitter()} className="twitter-button">
                 <TwitterOutlined />
                 {' '}
                 SIGN UP WITH TWITTER
@@ -159,6 +159,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                 dateOfBirth: ''
               }}
               onFinish={this.register}
+              scrollToFirstError
             >
               <Row>
                 <Col
@@ -182,7 +183,6 @@ class RegisterPerformer extends PureComponent<IProps> {
                               'First name can not contain number and special character'
                           }
                         ]}
-                        hasFeedback
                       >
                         <Input placeholder="First name" />
                       </Form.Item>
@@ -201,7 +201,6 @@ class RegisterPerformer extends PureComponent<IProps> {
                               'Last name can not contain number and special character'
                           }
                         ]}
-                        hasFeedback
                       >
                         <Input placeholder="Last name" />
                       </Form.Item>
@@ -222,7 +221,6 @@ class RegisterPerformer extends PureComponent<IProps> {
                             message: 'Display name must containt at least 3 characters'
                           }
                         ]}
-                        hasFeedback
                       >
                         <Input placeholder="Display name" />
                       </Form.Item>
@@ -240,7 +238,6 @@ class RegisterPerformer extends PureComponent<IProps> {
                           },
                           { min: 3, message: 'username must containt at least 3 characters' }
                         ]}
-                        hasFeedback
                       >
                         <Input placeholder="Username" />
                       </Form.Item>
@@ -268,7 +265,6 @@ class RegisterPerformer extends PureComponent<IProps> {
                       <Form.Item
                         name="dateOfBirth"
                         validateTrigger={['onChange', 'onBlur']}
-                        hasFeedback
                         rules={[
                           {
                             required: true,
@@ -283,15 +279,15 @@ class RegisterPerformer extends PureComponent<IProps> {
                       </Form.Item>
                     </Col>
                     <Col span={12}>
-                      <Form.Item name="country" rules={[{ required: true }]} hasFeedback>
+                      <Form.Item name="country" rules={[{ required: true }]}>
                         <Select
                           showSearch
-                          filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                          optionFilterProp="label"
                         >
                           {ui.countries
                             && ui.countries.length > 0
                             && ui.countries.map((c) => (
-                              <Option value={c.code} key={c.code}>
+                              <Option value={c.code} key={c.code} label={c.name}>
                                 <img alt="country_flag" src={c.flag} width="25px" />
                                 {' '}
                                 {c.name}
@@ -305,7 +301,6 @@ class RegisterPerformer extends PureComponent<IProps> {
                         name="gender"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[{ required: true, message: 'Please select your gender' }]}
-                        hasFeedback
                       >
                         <Select>
                           <Option value="male" key="male">Male</Option>
@@ -318,7 +313,6 @@ class RegisterPerformer extends PureComponent<IProps> {
                       <Form.Item
                         name="password"
                         validateTrigger={['onChange', 'onBlur']}
-                        hasFeedback
                         rules={[
                           {
                             pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
@@ -334,7 +328,6 @@ class RegisterPerformer extends PureComponent<IProps> {
                       <Form.Item
                         name="confirm"
                         dependencies={['password']}
-                        hasFeedback
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
                           {
@@ -367,22 +360,22 @@ class RegisterPerformer extends PureComponent<IProps> {
                       labelCol={{ span: 24 }}
                       name="idVerificationId"
                       className="model-photo-verification"
-                      help="Please upload proof of one of either of the following: social security number or national insurance number or passport or a different photographic id to your photo verification"
+                      help="Your government issued ID card, National ID card, Passport or Driving license"
                     >
                       <div className="id-block">
                         <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} />
-                        <img alt="id-img" className="img-id" src="/static/front-id.jpeg" />
+                        <img alt="id-img" className="img-id" src="/static/front-id.png" />
                       </div>
                     </Form.Item>
                     <Form.Item
                       labelCol={{ span: 24 }}
                       name="documentVerificationId"
                       className="model-photo-verification"
-                      help="Upload a photo of yourself holding your indentity document next to your face"
+                      help="Your selfie with your ID and handwritten note"
                     >
                       <div className="id-block">
                         <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'documentFile')} />
-                        <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpeg" />
+                        <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpg" />
                       </div>
                     </Form.Item>
                   </div>
@@ -395,6 +388,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                   disabled={registerPerformerData.requesting || isLoading}
                   loading={registerPerformerData.requesting || isLoading}
                   className="login-form-button"
+                  style={{ maxWidth: 300 }}
                 >
                   CREATE YOUR ACCOUNT
                 </Button>
@@ -405,13 +399,13 @@ class RegisterPerformer extends PureComponent<IProps> {
                   {' '}
                   and
                   {' '}
-                  <a href="/page/privacy-policy" target="_blank">Privacy & Policy</a>
+                  <a href="/page/privacy-policy" target="_blank">Privacy Policy</a>
                   , and confirm that you are at least 18 years old.
                 </p>
                 <p>
                   Have an account already?
                   <Link href="/">
-                    <a> Login here.</a>
+                    <a> Log in here.</a>
                   </Link>
                 </p>
                 <p>

@@ -4,6 +4,7 @@ import { authService } from '@services/auth.service';
 import { connect } from 'react-redux';
 import { warning, debug } from './utils';
 import { SocketContext } from './SocketContext';
+import { getGlobalConfig } from '@services/config';
 
 interface ISocketProps {
   uri?: string;
@@ -47,7 +48,8 @@ class Socket extends Component<ISocketProps> {
     if (!process.browser || !token) {
       return;
     }
-    const { uri = process.env.NEXT_PUBLIC_SOCKET_ENDPOINT } = this.props;
+    const config = getGlobalConfig();
+    const { uri = config.NEXT_PUBLIC_SOCKET_ENDPOINT } = this.props;
     const options = {
       transports: ['websocket', 'polling', 'long-polling'],
       query: token ? `token=${token}` : ''

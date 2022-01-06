@@ -7,7 +7,7 @@ import Sider from '@components/common/layout/sider';
 import { IUIConfig } from 'src/interfaces/ui-config';
 import {
   PieChartOutlined, ContainerOutlined, UserOutlined, WomanOutlined,
-  VideoCameraOutlined, CameraOutlined, BlockOutlined, FileImageOutlined,
+  VideoCameraOutlined, CameraOutlined, StopOutlined, FileImageOutlined,
   SkinOutlined, DollarOutlined, HeartOutlined, MenuOutlined,
   FireOutlined, MailOutlined, LinkOutlined, NotificationOutlined
 } from '@ant-design/icons';
@@ -79,36 +79,36 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
     const sliderMenus = [
       {
         id: 'blockCountry',
-        name: 'Blacklist Country',
-        icon: <BlockOutlined />,
+        name: 'Block Countries',
+        icon: <StopOutlined />,
         children: [
           {
             id: 'blockCountry',
-            name: 'Listing',
-            route: '/block-country'
+            name: 'List countries',
+            route: '/block-countries'
           }
         ]
       },
       {
         id: 'email-template',
-        name: 'Email templates',
+        name: 'Email Templates',
         icon: <MailOutlined />,
         children: [
           {
             id: 'email-templates-listing',
-            name: 'List',
+            name: 'All email templates',
             route: '/email-templates'
           }
         ]
       },
       {
         id: 'posts',
-        name: 'Static Pages',
+        name: 'Posts',
         icon: <ContainerOutlined />,
         children: [
           {
             id: 'post-page',
-            name: 'Listing',
+            name: 'All posts',
             route: '/posts?type=page'
           },
           {
@@ -120,12 +120,12 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
       },
       {
         id: 'menu',
-        name: 'FE Menu',
+        name: 'Existing Menu Options',
         icon: <MenuOutlined />,
         children: [
           {
             id: 'menu-listing',
-            name: 'Listing',
+            name: 'All menu options',
             route: '/menu'
           },
           {
@@ -142,7 +142,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'coupon-listing',
-            name: 'Listing',
+            name: 'All coupons',
             route: '/coupon'
           },
           {
@@ -159,13 +159,13 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'banner-listing',
-            name: 'Listing',
-            route: '/banner'
+            name: 'All banners',
+            route: '/banners'
           },
           {
             name: 'Upload new',
             id: 'upload-banner',
-            route: '/banner/upload'
+            route: '/banners/upload'
           }
         ]
       },
@@ -175,7 +175,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         icon: <UserOutlined />,
         children: [
           {
-            name: 'Listing',
+            name: 'All users',
             id: 'users',
             route: '/users'
           },
@@ -191,13 +191,8 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         name: 'Models',
         icon: <WomanOutlined />,
         children: [
-          // {
-          //   name: 'Categories',
-          //   id: 'performer-categories',
-          //   route: '/model/category'
-          // },
           {
-            name: 'Listing',
+            name: 'All models',
             id: 'performers',
             route: '/model'
           },
@@ -215,7 +210,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'posts',
-            name: 'All Posts',
+            name: 'All posts',
             route: '/feed'
           },
           // {
@@ -230,7 +225,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
           // },
           {
             id: 'create_post',
-            name: 'Create New',
+            name: 'Create new',
             route: '/feed/create'
           }
         ]
@@ -242,17 +237,17 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'video-listing',
-            name: 'Videos',
+            name: 'All videos',
             route: '/video'
           },
           {
             id: 'video-upload',
-            name: 'Upload',
+            name: 'Upload new',
             route: '/video/upload'
           },
           {
             id: 'video-bulk-upload',
-            name: 'Bulk Upload',
+            name: 'Bulk upload',
             route: '/video/bulk-upload'
           }
         ]
@@ -264,11 +259,11 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'gallery-listing',
-            name: 'Listing',
+            name: 'All galleries',
             route: '/gallery'
           },
           {
-            name: 'New Gallery',
+            name: 'Create new gallery',
             id: 'create-galleries',
             route: '/gallery/create'
           },
@@ -278,7 +273,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
           //   route: '/photos'
           // },
           {
-            name: 'Upload photo',
+            name: 'Upload new photo',
             id: 'upload-photo',
             route: '/photos/upload'
           },
@@ -296,13 +291,25 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'product-listing',
-            name: 'Products',
+            name: 'All products',
             route: '/product'
           },
           {
-            name: 'Create',
+            name: 'Create new',
             id: 'create-product',
             route: '/product/create'
+          }
+        ]
+      },
+      {
+        id: 'report',
+        name: 'Reports',
+        icon: <NotificationOutlined />,
+        children: [
+          {
+            id: 'Report',
+            name: 'All reports',
+            route: '/report'
           }
         ]
       },
@@ -313,7 +320,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'token-package',
-            name: 'Listing',
+            name: 'All token packages',
             route: '/token-package'
           },
           {
@@ -325,30 +332,30 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
       },
       {
         id: 'order',
-        name: 'Orders',
+        name: 'Order History',
         icon: <ContainerOutlined />,
         children: [
           {
             id: 'order',
-            name: 'Listing',
+            name: 'All orders',
             route: '/order'
           }
         ]
       },
       {
         id: 'earning',
-        name: 'Earnings',
+        name: 'Earning History',
         icon: <DollarOutlined />,
         children: [
           {
             id: 'earning-token',
-            name: 'Token',
-            route: '/earning/token'
+            name: 'Token earnings',
+            route: '/earnings/token'
           },
           {
             id: 'earning-money',
-            name: 'Money',
-            route: '/earning/money'
+            name: 'Cash earnings',
+            route: '/earnings/cash'
           }
         ]
       },
@@ -358,7 +365,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         icon: <HeartOutlined />,
         children: [
           {
-            name: 'Listing',
+            name: 'All subscriptions',
             id: 'subscription',
             route: '/subscription'
           },
@@ -376,8 +383,8 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'payment',
-            name: 'Listing',
-            route: '/payment-history'
+            name: 'All cash payments',
+            route: '/cash-payments'
           }
         ]
       },
@@ -387,8 +394,8 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         icon: <DollarOutlined />,
         children: [
           {
-            id: 'payment',
-            name: 'Listing',
+            id: 'transactions',
+            name: 'All token transactions',
             route: '/token-transactions'
           }
         ]
@@ -400,20 +407,8 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'payout',
-            name: 'Listing',
+            name: 'All payout requests',
             route: '/payout-request'
-          }
-        ]
-      },
-      {
-        id: 'report',
-        name: 'Reports',
-        icon: <NotificationOutlined />,
-        children: [
-          {
-            id: 'Report',
-            name: 'Listing',
-            route: '/report'
           }
         ]
       },
@@ -426,12 +421,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
             id: 'system-settings',
             route: '/settings',
             as: '/settings',
-            name: 'System settings'
-          },
-          {
-            name: 'Account settings',
-            id: 'account-settings',
-            route: '/account/settings'
+            name: 'Settings'
           }
         ]
       }

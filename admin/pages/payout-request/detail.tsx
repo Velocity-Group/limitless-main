@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import {
   Layout, message, Select, Button, PageHeader,
-  Input, Space, Statistic, Divider
+  Input, Space, Statistic, Divider, Avatar
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
@@ -13,6 +13,7 @@ import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
 import { formatDate } from 'src/lib/date';
 import './index.less';
+import { getGlobalConfig } from '@services/config';
 
 const { Content } = Layout;
 
@@ -132,10 +133,11 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
       request, adminNote, loading, statsPayout, status
     } = this.state;
     const paymentAccountInfo = request?.paymentAccountInfo;
+    const config = getGlobalConfig();
     return (
       <Layout>
         <Head>
-          <title>Request Details</title>
+          <title>Payout Request Details</title>
         </Head>
         <Content>
           <div className="main-container">
@@ -143,30 +145,30 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
               breadcrumbs={[
                 { title: 'Payout Requests', href: '/payout-request' },
                 {
-                  title: 'Request Details'
+                  title: 'Payout Request Details'
                 }
               ]}
             />
             {request ? (
               <Page>
-                <PageHeader title="Payout Request Informations" />
+                <PageHeader title="Payout Request Details" />
                 <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
                   <Space size="large">
                     <Statistic
                       prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Total Earned Tokens"
+                      title="Total Tokens"
                       value={statsPayout?.totalEarnedTokens || 0}
                       precision={2}
                     />
                     <Statistic
                       prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Previous paid out tokens"
+                      title="Paid Out Tokens"
                       value={statsPayout?.previousPaidOutTokens || 0}
                       precision={2}
                     />
                     <Statistic
                       prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Remaining unpaid tokens"
+                      title="Remaining Tokens"
                       value={statsPayout?.remainingUnpaidTokens || 0}
                       precision={2}
                     />
@@ -175,10 +177,14 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 <p>
                   Model:
                   {' '}
-                  <strong>{request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}</strong>
+                  <strong>
+                    <Avatar src={request?.sourceInfo?.avatar || '/no-avatar.png'} />
+                    {' '}
+                    {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
+                  </strong>
                 </p>
                 <p>
-                  Requested tokens:
+                  Requested amount of tokens:
                   {' '}
                   {request.requestTokens || 0}
                 </p>
@@ -186,68 +192,68 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   Conversion rate:
                   {' '}
                   $
-                  {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                  {((request.requestTokens || 0) * (request.tokenConversionRate || 1)).toFixed(2)}
                 </p>
                 <p>
-                  Requested at:
+                  Requested on:
                   {' '}
                   {formatDate(request.createdAt)}
                 </p>
                 <p>
-                  Model Note:
+                  Note from the model
                   {' '}
                   {request.requestNote}
                 </p>
                 <Divider />
                 {request.paymentAccountType === 'paypal' && (
-                <div>
-                  <h2>Confirm payout via Paypal</h2>
-                  <p>
-                    Account:
-                    {' '}
-                    {paymentAccountInfo?.value?.email || 'N/A'}
-                  </p>
-                  <p>
-                    Amount: $
-                    {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
-                  </p>
-                  <form action={process.env.NEXT_PUBLIC_PAYPAY_PAYOUT_URL || 'https://www.paypal.com/cgi-bin/webscr'} method="post" className="paypal-payout">
-                    <input type="hidden" name="cmd" value="_xclick" />
-                    <input type="hidden" name="return" value={window.location.href} />
-                    <input type="hidden" name="cancel_return" value={window.location.href} />
-                    <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
-                    <input type="hidden" name="item_number" value={request._id} />
-                    <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
-                    <input type="hidden" name="currency_code" value="USD" />
-                    <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
-                    <input disabled={loading || request?.status !== 'pending'} type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
-                  </form>
-                  <p style={{ color: 'red' }}>
-                    <small>Please update status manually after transaction success!</small>
-                  </p>
-                </div>
+                  <div>
+                    <h2>Confirm payout via Paypal</h2>
+                    <p>
+                      Account:
+                      {' '}
+                      {paymentAccountInfo?.value?.email || 'N/A'}
+                    </p>
+                    <p>
+                      Amount: $
+                      {((request.requestTokens || 0) * (request.tokenConversionRate || 1)).toFixed(2)}
+                    </p>
+                    <form action={config.NEXT_PUBLIC_PAYPAY_PAYOUT_URL || 'https://www.paypal.com/cgi-bin/webscr'} method="post" className="paypal-payout">
+                      <input type="hidden" name="cmd" value="_xclick" />
+                      <input type="hidden" name="return" value={window.location.href} />
+                      <input type="hidden" name="cancel_return" value={window.location.href} />
+                      <input type="hidden" name="business" value={paymentAccountInfo?.value?.email} />
+                      <input type="hidden" name="item_number" value={request._id} />
+                      <input type="hidden" name="item_name" value={`Payout to ${request?.sourceInfo?.name || request?.sourceInfo?.username || `${request?.sourceInfo?.firstname} ${request?.sourceInfo?.lastName}`}`} placeholder="Description" />
+                      <input type="hidden" name="currency_code" value="USD" />
+                      <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
+                      <input disabled={loading || request?.status !== 'pending'} type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
+                    </form>
+                    <p style={{ color: 'red' }}>
+                      <small>Please update status manually after transaction success!</small>
+                    </p>
+                  </div>
                 )}
                 {request.paymentAccountType === 'stripe' && (
-                <div>
-                  <h2>
-                    Confirm transfer via Stripe Connect
-                  </h2>
                   <div>
-                    <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
-                      Click here to transfer $
-                      {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
-                      {' '}
-                      to
-                      {' '}
-                      {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
-                    </Button>
+                    <h2>
+                      Confirm transfer via Stripe Connect
+                    </h2>
+                    <div>
+                      <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
+                        Click here to transfer $
+                        {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                        {' '}
+                        to
+                        {' '}
+                        {request?.sourceInfo?.name || request?.sourceInfo?.username || 'N/A'}
+                      </Button>
+                    </div>
                   </div>
-                </div>
                 )}
                 <Divider />
                 <div style={{ marginBottom: '10px' }}>
                   <p>
-                    Update status here
+                    Please update the below status manually after the transaction is processed
                   </p>
                   <Select
                     disabled={loading || ['done', 'rejected'].includes(request?.status)}
@@ -270,14 +276,14 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   </Select>
                 </div>
                 <div style={{ marginBottom: '10px' }}>
-                  <p>Note to model: </p>
+                  <p>Note to the model: </p>
                   <Input.TextArea
                     defaultValue={adminNote}
                     style={{ width: '100%' }}
                     onChange={(v) => {
                       this.setState({ adminNote: v.target.value });
                     }}
-                    placeholder="Note something to model"
+                    placeholder="Write your message here"
                     autoSize={{ minRows: 3 }}
                   />
                 </div>

@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import { loadMoreMessages } from '@redux/message/actions';
 import Link from 'next/link';
+import Router from 'next/router';
 import Compose from './Compose';
 import Message from './Message';
 import './MessageList.less';
@@ -144,7 +145,7 @@ class MessageList extends PureComponent<IProps> {
          ? (
            <>
              <div className="message-list-container">
-               <div className="mess-recipient">
+               <div aria-hidden className="mess-recipient" onClick={() => conversation?.recipientInfo?.isPerformer && Router.push({ pathname: '/model/profile', query: { username: conversation?.recipientInfo?.username || conversation?.recipientInfo?._id } }, `/${conversation?.recipientInfo?.username || conversation?.recipientInfo?._id}`)}>
                  <Avatar alt="avatar" src={conversation?.recipientInfo?.avatar || '/static/no-avatar.png'} />
                  {' '}
                  {conversation?.recipientInfo?.name || conversation?.recipientInfo?.username || 'N/A'}

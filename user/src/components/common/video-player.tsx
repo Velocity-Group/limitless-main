@@ -8,10 +8,9 @@ export class VideoPlayer extends PureComponent<any> {
   player: any;
 
   componentDidMount() {
-    this.player = videojs(this.videoNode, this.props);
+    this.player = videojs(this.videoNode, { ...this.props });
   }
 
-  // destroy player on unmount
   componentWillUnmount() {
     if (this.player) {
       this.player.dispose();

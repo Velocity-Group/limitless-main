@@ -1,6 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
-import { Table, Tag } from 'antd';
+import { Table, Tag, Avatar } from 'antd';
 import { IPaymentTokenHistory } from 'src/interfaces';
+import { getGlobalConfig } from '@services/index';
 import { formatDate } from '@lib/date';
 
 interface IProps {
@@ -20,36 +21,64 @@ const PaymentTableList = ({
 }: IProps) => {
   const columns = [
     {
-      title: 'Transaction_ID',
+      title: 'ID',
       dataIndex: '_id',
       key: 'id',
       render(data, record) {
+        let path = '';
+        switch (record.target) {
+          case 'feed':
+            path = `/post/${record?.targetId}`;
+            break;
+          case 'product':
+            path = `/store/${record?.targetId}`;
+            break;
+          case 'video':
+            path = `/video/${record?.targetId}`;
+            break;
+          case 'gallery':
+            path = `/gallery/${record?.targetId}`;
+            break;
+          case 'performer':
+            path = `/${record?.targetId}`;
+            break;
+          default: path = '/home';
+        }
         return (
-          <a style={{ textTransform: 'uppercase', fontWeight: 600 }}>
+          <a
+            style={{ textTransform: 'uppercase', fontWeight: 600 }}
+            target="_blank"
+            href={`${getGlobalConfig().NEXT_PUBLIC_SITE_URL}${path}`}
+            rel="noreferrer"
+          >
             {record._id.slice(16, 24)}
           </a>
         );
       }
     },
     {
-      title: 'Buyer',
+      title: 'User',
       dataIndex: 'sourceInfo',
       key: 'user',
       render(sourceInfo) {
         return (
           <span>
+            <Avatar src={sourceInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {sourceInfo?.name || sourceInfo?.username || 'N/A'}
           </span>
         );
       }
     },
     {
-      title: 'Seller',
+      title: 'Model',
       dataIndex: 'performerInfo',
       key: 'performerInfo',
       render(data, record) {
         return (
           <span>
+            <Avatar src={record?.performerInfo?.avatar || '/no-avatar.png'} />
+            {' '}
             {record?.performerInfo?.name || record?.performerInfo?.username || 'N/A'}
           </span>
         );
@@ -87,11 +116,7 @@ const PaymentTableList = ({
       render(type: string) {
         switch (type) {
           case 'feed':
-            return <Tag color="#1da3f1">Feed Post</Tag>;
-          case 'monthly_subscription':
-            return <Tag color="#ca50c6">Monthly Subscription</Tag>;
-          case 'yearly_subscription':
-            return <Tag color="#ca50c6">Yearly Subscription</Tag>;
+            return <Tag color="#1da3f1">Feed</Tag>;
           case 'video':
             return <Tag color="#00dcff">Video</Tag>;
           case 'gallery':
@@ -131,8 +156,8 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Date',
-      dataIndex: 'createdAt',
+      title: 'Updated On',
+      dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {
         return <span>{formatDate(date)}</span>;

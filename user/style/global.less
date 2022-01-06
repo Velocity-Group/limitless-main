@@ -1,9 +1,5 @@
 @import './vars.less';
 
-.ant-layout {
-  background-color: @white;
-}
-
 .theme-color {
   color: @theme-color  !important
 }
@@ -20,19 +16,13 @@
   color: @secondary-color  !important
 }
 
-.container {
-  width: 100%;
-  margin: auto;
+.success-color {
+  color: @success-color !important
 }
 
 .ant-layout-content {
-  min-height: calc(100vh - 160px);
-  padding: 0;
-}
-
-.ant-layout-footer {
-  padding: 7px 20px 7px;
-  background-color: @light-blue;
+  min-height: 100vh;
+  padding: 42px 0 0;
 }
 
 .ant-drawer {
@@ -63,27 +53,28 @@
   line-height: 30px;
 }
 
-.ant-modal-body {
-  .videojs-player {
-    .video-js {
-      width: 100%;
-      height: 405px;
-
-      .vjs-big-play-button {
-        top: calc(50% - 24px);
-        left: calc(50% - 45px);
-      }
+.videojs-player {
+  .video-js {
+    .vjs-big-play-button {
+      top: calc(50% - 24px);
+      left: calc(50% - 45px);
     }
   }
 }
 
 .page-container {
-  padding: 50px 10px
+  .page-content {
+    padding: 5px 0;
+    color: @text-color;
+    ul li {
+      list-style: auto;
+    }
+  }
 }
 
 .main-footer {
-  margin-top: 15px;
   padding: 10px 0;
+  margin-top: 5px;
   background-color: @light-blue;
 
   ul {
@@ -132,11 +123,6 @@
       color: @grey-color;
     }
   }
-
-}
-
-.container {
-  padding: 0 !important;
 }
 
 .main-container {
@@ -263,7 +249,7 @@
 .ant-table-tbody>tr>td,
 .ant-table tfoot>tr>th,
 .ant-table tfoot>tr>td {
-  background-color: #fafafa;
+  background-color: @darkmode-color;
 }
 
 .ant-table-thead>tr>th {
@@ -476,7 +462,8 @@
   font-size: 0.9em;
   font-weight: 600;
   border-radius: 0.5em;
-  height: 40px;
+  min-height: 40px;
+  height: auto;
 }
 
 .ant-btn.success {
@@ -488,7 +475,8 @@
   font-size: 0.9em;
   font-weight: 600;
   border-radius: 0.5em;
-  height: 40px;
+  min-height: 40px;
+  height: auto;
 }
 
 .ant-btn.error {
@@ -500,7 +488,8 @@
   font-size: 0.9em;
   font-weight: 600;
   border-radius: 0.5em;
-  height: 40px;
+  min-height: 40px;
+  height: auto;
 }
 
 .ant-btn.secondary {
@@ -510,7 +499,8 @@
   font-size: 0.9em;
   font-weight: 600;
   border-radius: 0.5em;
-  height: 40px;
+  min-height: 40px;
+  height: auto;
   color: @white;
 
   &.active {
@@ -522,7 +512,8 @@
   border: none;
   color: @white;
   padding: 0px 8px;
-  height: 30px;
+  min-height: 30px;
+  height: auto;
   background-color: @secondary-color;
   margin-right: 5px;
 }
@@ -531,7 +522,8 @@
   border: none;
   color: @white;
   padding: 0px 8px;
-  height: 30px;
+  min-height: 30px;
+  height: auto;
   background-color: @info-color;
   margin-right: 5px;
 }
@@ -540,7 +532,8 @@
   border: none;
   color: @white;
   padding: 0px 8px;
-  height: 30px;
+  min-height: 30px;
+  height: auto;
   background-color: @highlight-color;
   margin-right: 5px;
 }
@@ -559,12 +552,13 @@
   .slick-prev {
     top: calc(50% - 15px);
     left: 0;
-    background-color: rgba(0,0,0,.2);
+    background-color: rgba(0, 0, 0, .2);
     padding: 15px;
     z-index: 1;
 
-    &:hover, &:focus {
-      background-color: rgba(0,0,0,.5);
+    &:hover,
+    &:focus {
+      background-color: rgba(0, 0, 0, .5);
     }
 
     &::before {
@@ -584,12 +578,13 @@
   .slick-next {
     top: calc(50% - 15px);
     right: 0;
-    background-color: rgba(0,0,0,.2);
+    background-color: rgba(0, 0, 0, .2);
     padding: 15px;
     z-index: 1;
 
-    &:hover, &:focus {
-      background-color: rgba(0,0,0,.5);
+    &:hover,
+    &:focus {
+      background-color: rgba(0, 0, 0, .5);
     }
 
     &::before {
@@ -656,6 +651,7 @@
   text-align: center;
   color: @white;
   background-color: @highlight-color;
+  margin-bottom: 10px;
 
   p {
     margin: 0;
@@ -734,7 +730,7 @@
     width: 15%;
 
     button {
-      border: 1px solid @light-grey !important;
+      border: 1px solid @light-grey  !important;
       height: 40px;
       width: 100px;
     }
@@ -765,7 +761,7 @@
 }
 
 .ant-image-preview-operations {
-  background-color: rgba(1,1,1,.3);
+  background-color: rgba(1, 1, 1, .3);
 }
 
 .related-items {
@@ -854,4 +850,42 @@
     font-size: 22px;
     color: @primary-color;
   }
+}
+
+.ant-popover {
+  .ant-popover-inner-content {
+    padding: 0;
+  }
+}
+
+.emoji-mart {
+  .emoji-mart-preview-emoji {
+    left: 5px
+  }
+  .emoji-mart-preview-data {
+    left: 55px;
+    right: 25px;
+    .emoji-mart-title-label {
+      font-size: 14px;
+      word-break: break-word;
+    }
+  }
+  .emoji-mart-preview-skins {
+    right: 10px
+  }
+}
+
+.heading-tab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+
+  h4 {
+    white-space: nowrap;
+    font-size: 20px;
+  }
+}
+.ant-modal-footer .ant-btn + .ant-btn:not(.ant-dropdown-trigger) {
+  margin-left: 0;
 }

@@ -47,13 +47,12 @@ export class VideoFileService {
     }
   }
 
-  public async getDuration(filePath: string): Promise<number> {
+  public async getMetaData(filePath: string): Promise<any> {
     return new Promise((resolve, reject) => ffmpeg.ffprobe(filePath, (err, metadata) => {
       if (err) {
         return reject(err);
       }
-
-      return resolve(parseInt(metadata.format.duration, 10));
+      return resolve(metadata);
     }));
   }
 
@@ -74,7 +73,7 @@ export class VideoFileService {
         folder: options.toFolder,
         filename: `${StringHelper.randomString(5)}-%s.png`,
         count: options.count || 3,
-        size: options.size || '640x480'
+        size: options.size || '500x500'
       }));
   }
 }

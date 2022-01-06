@@ -12,7 +12,7 @@ const deliveryStatuses = [
   },
   {
     key: 'shipping',
-    text: 'Shipping'
+    text: 'Shipped'
   },
   {
     key: 'delivered',
@@ -39,7 +39,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
   render() {
     const { onSubmit } = this.props;
     return (
-      <Row gutter={24}>
+      <Row className="search-filter">
         <Col lg={6} md={8} xs={12}>
           <Select
             onChange={(val) => this.setState({ deliveryStatus: val }, () => onSubmit(this.state))}
@@ -48,7 +48,7 @@ export class OrderSearchFilter extends PureComponent<IProps> {
             defaultValue=""
           >
             <Select.Option key="all" value="">
-              All delivery status
+              All delivery statuses
             </Select.Option>
             {deliveryStatuses.map((s) => (
               <Select.Option key={s.key} value={s.key}>

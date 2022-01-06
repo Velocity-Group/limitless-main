@@ -17,6 +17,7 @@ import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, getConfig } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
+import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { UserDto } from 'src/modules/user/dtos';
 import {
   BannerCreatePayload,
@@ -44,7 +45,10 @@ export class AdminBannerController {
         type: 'banner',
         fieldName: 'banner',
         options: {
-          destination: getConfig('file').bannerProtectedDir
+          destination: getConfig('file').imageDir,
+          uploadImmediately: true,
+          acl: S3ObjectCannelACL.PublicRead,
+          server: Storage.S3
         }
       }
     ])

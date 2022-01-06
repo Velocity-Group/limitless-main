@@ -64,23 +64,23 @@ class PostListing extends PureComponent<IProps> {
       });
       await this.setState({
         items: resp.data.data,
-        pagination: { ...pagination, total: resp.data.total }
+        pagination: { ...pagination, total: resp.data.total },
+        loading: false
       });
     } catch (error) {
       const err = await error;
       message.error(err?.message || 'An error occured. Please try again.');
-    } finally {
       this.setState({ loading: false });
     }
   }
 
   async deleteFeed(feed) {
-    if (!window.confirm('All earnings are related to this post will be refunded. Are you sure to remove?')) {
+    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) {
       return;
     }
     try {
       await feedService.delete(feed._id);
-      message.success('Remove success');
+      message.success('Post deleted successfully');
       this.getData();
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
@@ -94,7 +94,7 @@ class PostListing extends PureComponent<IProps> {
     const type = [
       {
         key: '',
-        text: 'All type'
+        text: 'All types'
       },
       {
         key: 'text',

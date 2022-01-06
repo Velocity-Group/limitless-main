@@ -11,6 +11,7 @@ import Page from '@components/common/layout/page';
 import { postService } from '@services/post.service';
 import { formatDate } from '@lib/date';
 import { SearchFilter } from '@components/post/search-filter';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {}
 
@@ -29,10 +30,10 @@ class Posts extends PureComponent<IProps> {
     this.search();
   }
 
-  handleTableChange = (pagination, filters, sorter) => {
+  handleTableChange = async (pagination, filters, sorter) => {
     const pager = { ...pagination };
     pager.current = pagination.current;
-    this.setState({
+    await this.setState({
       pagination: pager,
       sortBy: sorter.field || '',
       // eslint-disable-next-line no-nested-ternary
@@ -117,10 +118,11 @@ class Posts extends PureComponent<IProps> {
         title: 'Link',
         dataIndex: 'link',
         render(data, record) {
+          const config = getGlobalConfig();
           return (
             <>
-              <a href={`${process.env.NEXT_PUBLIC_SITE_URL}/page/${record.slug}`} target="_blank" rel="noreferrer">
-                {`${process.env.NEXT_PUBLIC_SITE_URL}/page/${record.slug}`}
+              <a href={`${config.NEXT_PUBLIC_SITE_URL}/page/${record.slug}`} target="_blank" rel="noreferrer">
+                {`${config.NEXT_PUBLIC_SITE_URL}/page/${record.slug}`}
               </a>
             </>
           );
@@ -146,7 +148,7 @@ class Posts extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -154,7 +156,7 @@ class Posts extends PureComponent<IProps> {
         }
       },
       {
-        title: '#',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <Dropdown

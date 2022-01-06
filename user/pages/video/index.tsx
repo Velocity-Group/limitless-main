@@ -26,7 +26,7 @@ import { ListComments, CommentForm } from '@components/comment';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
 import {
-  IVideoResponse, IUser, IUIConfig, IPerformer
+  IVideo, IUser, IUIConfig, IPerformer
 } from 'src/interfaces';
 import Link from 'next/link';
 import Router from 'next/router';
@@ -47,7 +47,7 @@ interface IProps {
   moreComment: Function;
   createComment: Function;
   ui: IUIConfig;
-  video: IVideoResponse;
+  video: IVideo;
   deleteComment: Function;
   updateBalance: Function;
 }
@@ -66,7 +66,7 @@ class VideoViewPage extends PureComponent<IProps> {
         await videoService.findOne(query.id, {
           Authorization: ctx.token
         })
-      ).data) as IVideoResponse;
+      ).data);
       return { video };
     } catch (e) {
       return { error: await e };
@@ -86,6 +86,7 @@ class VideoViewPage extends PureComponent<IProps> {
     isSubscribed: false,
     totalComment: 0,
     submiting: false,
+    requesting: false,
     activeTab: 'description'
   };
 
@@ -186,7 +187,7 @@ class VideoViewPage extends PureComponent<IProps> {
           action,
           objectType: 'video'
         });
-        message.success(!isBookmarked ? 'Added to Bookmarks' : 'Remove form Bookmarks');
+        message.success(!isBookmarked ? 'Added to Bookmarks' : 'Removed from Bookmarks');
         this.setState({
           isBookmarked: !isBookmarked,
           videoStats: {
@@ -233,14 +234,14 @@ class VideoViewPage extends PureComponent<IProps> {
       return;
     }
     try {
-      await this.setState({ submiting: true });
+      await this.setState({ requesting: true });
       await (await purchaseTokenService.purchaseVideo(video._id, {})).data;
       message.success('Video is unlocked!');
       handleUpdateBalance({ token: video.price });
-      this.setState({ isBought: true });
+      this.setState({ isBought: true, requesting: false });
     } catch (e) {
       const error = await e;
-      this.setState({ submiting: false });
+      this.setState({ requesting: false });
       message.error(error.message || 'Error occured, please try again later');
     }
   }
@@ -254,7 +255,7 @@ class VideoViewPage extends PureComponent<IProps> {
         return;
       }
       if (!user.stripeCardIds || !user.stripeCardIds.length) {
-        message.error('Please add payment card');
+        message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
       }
@@ -296,29 +297,18 @@ class VideoViewPage extends PureComponent<IProps> {
     const comments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].items : [];
     const totalComments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].total : 0;
     const {
-      videoStats,
-      isLiked,
-      isBookmarked,
-      isSubscribed,
-      isBought,
-      submiting,
-      activeTab,
-      isFirstLoadComment
+      videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment
     } = this.state;
-    const thumbUrl = video?.thumbnail?.url || (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
-    const playSource = {
-      file: video?.video?.url || '',
-      image: thumbUrl,
-      teaser: video?.teaser?.url || ''
-    };
+    const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const videoJsOptions = {
       key: video._id,
+      autoplay: true,
       controls: true,
       playsinline: true,
       poster: thumbUrl,
       sources: [
         {
-          src: playSource.file,
+          src: video?.video?.url,
           type: 'video/mp4'
         }
       ]
@@ -330,7 +320,7 @@ class VideoViewPage extends PureComponent<IProps> {
       playsinline: true,
       sources: [
         {
-          src: playSource.teaser,
+          src: video?.teaser?.url,
           type: 'video/mp4'
         }
       ]
@@ -340,11 +330,7 @@ class VideoViewPage extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {ui.siteName}
-            {' '}
-            |
-            {' '}
-            {video.title || 'Video'}
+            {`${ui.siteName} | ${video.title}`}
           </title>
           <meta name="description" content={video.description} />
           {/* OG tags */}
@@ -372,15 +358,15 @@ class VideoViewPage extends PureComponent<IProps> {
           <PageHeading icon={<VideoCameraOutlined />} title={video.title || 'Video'} />
           <div className="vid-duration">
             <a>
+              <HourglassOutlined />
+              &nbsp;
+              {videoDuration(video?.video?.duration || 0)}
+              &nbsp;&nbsp;&nbsp;
               <EyeOutlined />
               &nbsp;
               {shortenLargeNumber(videoStats.views || 0)}
             </a>
             <a>
-              <HourglassOutlined />
-              &nbsp;
-              {videoDuration(video?.video?.duration || 0)}
-              &nbsp;&nbsp;&nbsp;
               <CalendarOutlined />
               &nbsp;
               {formatDate(video.updatedAt, 'll')}
@@ -388,80 +374,68 @@ class VideoViewPage extends PureComponent<IProps> {
           </div>
           <div className="vid-player">
             {((video.isSale && !isBought) || (!video.isSale && !isSubscribed) || video.isSchedule) && (
-              <div className="main-player">
-                <div className="vid-group">
-                  <div className="left-group">
-                    {video.teaser && video.teaserProcessing && (
-                      <div
-                        className="text-center"
-                        style={{
-                          position: 'absolute', top: 0, padding: 10, zIndex: 1
-                        }}
-                      >
-                        Teaser is currently on processing
-                        {' '}
-                        <Spin />
-                      </div>
-                    )}
-                    {video.teaser && !video.teaserProcessing && <VideoPlayer {...teaserOptions} />}
-                    {!video.teaser && (
-                      <div className="video-thumbs">
-                        <img alt="thumbnail" src={thumbUrl} />
-                      </div>
-                    )}
-                    <div className="vid-exl-group">
-                      {/* eslint-disable-next-line no-nested-ternary */}
-                      <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
-                      <div className="text-center">
-                        {video.isSale && !isBought && (
-                          <Button type="primary" loading={submiting} disabled={submiting} onClick={this.purchaseVideo.bind(this)}>
-                            PAY
-                            &nbsp;
-                            <img alt="token" src="/static/coin-ico.png" height="20px" />
-                            {' '}
-                            {video.price.toFixed(2)}
-                            {' '}
-                            TO UNLOCK
-                          </Button>
-                        )}
-                        {!video.isSale && !isSubscribed && (
-                          <ConfirmSubscriptionPerformerForm
-                            type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
-                            performer={video.performer}
-                            submiting={submiting}
-                            onFinish={this.subscribe.bind(this)}
-                          />
-                        )}
-                      </div>
-                      {video.isSchedule && (
-                        <h4>
-                          Main video will be premiered at
-                          {' '}
-                          {formatDate(video.scheduledAt, 'll')}
-                        </h4>
-                      )}
-                    </div>
-                  </div>
+            <div className="vid-group">
+              {video.teaser && video.teaserProcessing && (
+              <div className="vid-processing">
+                <div className="text-center">
+                  <Spin />
+                  <br />
+                  Teaser is currently on processing
                 </div>
               </div>
+              )}
+              {video.teaser && !video.teaserProcessing && <VideoPlayer {...teaserOptions} />}
+              {!video.teaser && (
+              <div className="video-thumbs">
+                <img alt="thumbnail" src={thumbUrl} />
+              </div>
+              )}
+              <div className="vid-exl-group">
+                {/* eslint-disable-next-line no-nested-ternary */}
+                <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
+                <div className="text-center">
+                  {video.isSale && !isBought && (
+                  <Button type="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
+                    PAY
+                    &nbsp;
+                    <img alt="token" src="/static/coin-ico.png" height="20px" />
+                    {' '}
+                    {video.price.toFixed(2)}
+                    {' '}
+                    TO UNLOCK
+                  </Button>
+                  )}
+                  {!video.isSale && !isSubscribed && (
+                  <ConfirmSubscriptionPerformerForm
+                    type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
+                    performer={video.performer}
+                    submiting={submiting}
+                    onFinish={this.subscribe.bind(this)}
+                  />
+                  )}
+                </div>
+                {video.isSchedule && (
+                <h4>
+                  Main video will be premiered at
+                  {' '}
+                  {formatDate(video.scheduledAt, 'll')}
+                </h4>
+                )}
+              </div>
+            </div>
             )}
             {((!video.isSale && isSubscribed && !video.isSchedule) || (video.isSale && isBought && !video.isSchedule)) && (
-              <div className="main-player">
-                <div className="vid-group">
-                  {video.processing ? (
-                    <div
-                      className="text-center"
-                      style={{
-                        position: 'absolute', top: 0, padding: 10, zIndex: 1
-                      }}
-                    >
-                      Video file is currently on processing
-                      {' '}
-                      <Spin />
-                    </div>
-                  ) : <VideoPlayer {...videoJsOptions} />}
+            <div className="vid-group">
+              {video.processing ? (
+                <div className="vid-processing">
+                  <div className="text-center">
+                    <Spin />
+                    <br />
+                    Video file is currently on processing
+                  </div>
                 </div>
-              </div>
+              ) : <VideoPlayer {...videoJsOptions} />}
+            </div>
             )}
           </div>
         </div>
@@ -527,15 +501,16 @@ class VideoViewPage extends PureComponent<IProps> {
           </div>
         </div>
         <div className="main-container">
+          {video.tags && video.tags.length > 0 && (
           <div className="vid-tags">
-            {video.tags && video.tags.length > 0
-              && video.tags.map((tag) => (
-                <a color="magenta" style={{ marginRight: 5 }}>
-                  #
-                  {tag || 'tag'}
-                </a>
-              ))}
+            {video.tags.map((tag) => (
+              <a color="magenta" key={tag} style={{ marginRight: 5 }}>
+                #
+                {tag || 'tag'}
+              </a>
+            ))}
           </div>
+          )}
           <Tabs
             defaultActiveKey="description"
             activeKey={activeTab}
@@ -594,6 +569,7 @@ class VideoViewPage extends PureComponent<IProps> {
                 objectId={video._id}
                 requesting={commenting}
                 objectType="video"
+                siteName={ui?.siteName}
               />
 
               <ListComments
@@ -626,7 +602,7 @@ class VideoViewPage extends PureComponent<IProps> {
             )}
           </div>
         </div>
-        {submiting && <Loader customText="Your payment is on processing, do not reload page until its done" />}
+        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );
   }

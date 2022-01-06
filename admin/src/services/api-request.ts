@@ -2,6 +2,7 @@ import fetch from 'isomorphic-unfetch';
 import Router from 'next/router';
 import cookie from 'js-cookie';
 import { isUrl } from '@lib/string';
+import { getGlobalConfig } from './config';
 
 export interface IResponse<T> {
   status: number;
@@ -70,7 +71,8 @@ export abstract class APIRequest {
       Authorization: APIRequest.token || cookie.get(TOKEN) || null,
       ...headers || {}
     };
-    return fetch(isUrl(url) ? url : `${!process.browser ? process.env.API_ENDPOINT : process.env.NEXT_PUBLIC_API_ENDPOINT}${url}`, {
+    const config = getGlobalConfig();
+    return fetch(isUrl(url) ? url : `${config.API_ENDPOINT || config.NEXT_PUBLIC_API_ENDPOINT}${url}`, {
       method: verb,
       headers: updatedHeader,
       body: body ? JSON.stringify(body) : null
@@ -127,7 +129,8 @@ export abstract class APIRequest {
       method: 'POST'
     }
   ) {
-    const uploadUrl = isUrl(url) ? url : `${!process.browser ? process.env.API_ENDPOINT : process.env.NEXT_PUBLIC_API_ENDPOINT}${url}`;
+    const config = getGlobalConfig();
+    const uploadUrl = isUrl(url) ? url : `${config.API_ENDPOINT || config.NEXT_PUBLIC_API_ENDPOINT}${url}`;
     return new Promise((resolve, reject) => {
       const req = new XMLHttpRequest();
 
@@ -171,13 +174,8 @@ export abstract class APIRequest {
       req.responseType = 'json';
       req.open(options.method || 'POST', uploadUrl);
 
-      let token: any = APIRequest.token || cookie.get(TOKEN);
-      if (!token) {
-        token = process.browser ? localStorage.getItem(TOKEN) : '';
-      }
-      if (token) {
-        req.setRequestHeader('Authorization', token);
-      }
+      const token: any = APIRequest.token || cookie.get(TOKEN);
+      req.setRequestHeader('Authorization', token || '');
       req.send(formData);
     });
   }

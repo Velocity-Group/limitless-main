@@ -61,7 +61,7 @@ export class TableListPhoto extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Last update',
+        title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -69,7 +69,7 @@ export class TableListPhoto extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Actions',
+        title: 'Action',
         dataIndex: '_id',
         render: (id: string) => (
           <DropdownAction

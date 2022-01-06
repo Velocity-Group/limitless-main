@@ -88,7 +88,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Last update',
+      title: 'Updated On',
       dataIndex: 'createdAt',
       sorter: true,
       render(date: Date) {
@@ -96,7 +96,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Actions',
+      title: 'Action',
       dataIndex: '_id',
       render(id: string) {
         return (

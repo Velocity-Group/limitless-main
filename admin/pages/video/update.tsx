@@ -62,10 +62,6 @@ class VideoUpdate extends PureComponent<IProps> {
   }
 
   async submit(data: IVideo) {
-    if (!this._files.video) {
-      message.error('Please select video!');
-      return;
-    }
     if ((data.isSale && !data.price) || (data.isSale && data.price < 1)) {
       message.error('Invalid amount of tokens');
       return;

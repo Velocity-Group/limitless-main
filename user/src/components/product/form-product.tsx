@@ -14,6 +14,7 @@ import {
 import { IProduct } from 'src/interfaces';
 import { FileAddOutlined, CameraOutlined } from '@ant-design/icons';
 import { FormInstance } from 'antd/lib/form';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   product?: IProduct;
@@ -63,19 +64,20 @@ export class FormProduct extends PureComponent<IProps> {
 
   beforeUpload(field, file) {
     const { beforeUpload } = this.props;
+    const config = getGlobalConfig();
     if (field === 'image') {
-      const isLt2M = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+      const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!isLt2M) {
-        message.error(`Image is too large please provide an image ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+        message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
         return false;
       }
       const reader = new FileReader();
       reader.addEventListener('load', () => this.setState({ previewImageProduct: reader.result }));
       reader.readAsDataURL(file);
     }
-    const isValid = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
+    const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
     if (!isValid) {
-      message.error(`File is too large please provide an file ${process.env.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
+      message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
       return false;
     }
     beforeUpload && beforeUpload(file, field);
@@ -112,6 +114,7 @@ export class FormProduct extends PureComponent<IProps> {
           })
         }
         className="account-form"
+        scrollToFirstError
       >
         <Row>
           <Col md={12} xs={24}>
@@ -191,7 +194,7 @@ export class FormProduct extends PureComponent<IProps> {
                   <img
                     src={previewImageProduct}
                     alt="file"
-                    style={{ width: '100px' }}
+                    style={{ width: '100%' }}
                   />
                 )}
                 <CameraOutlined />
@@ -206,12 +209,12 @@ export class FormProduct extends PureComponent<IProps> {
                 className="avatar-uploader"
                 multiple={false}
                 showUploadList
-                disabled={uploading || !!product?.digitalFileId}
+                disabled={uploading}
                 beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
               >
                 <FileAddOutlined />
               </Upload>
-              {product?.digitalFileId && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a download href={product?.digitalFileUrl}>Click to download</a></div>}
+              {product?.digitalFileId && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a download target="_blank" href={product?.digitalFileUrl} rel="noreferrer">Click to download</a></div>}
               {uploadPercentage ? (
                 <Progress percent={Math.round(uploadPercentage)} />
               ) : null}

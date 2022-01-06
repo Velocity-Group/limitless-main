@@ -29,6 +29,7 @@ export class ImageService {
 
   public async replaceWithoutExif(filePath: string) {
     return sharp(filePath)
+      .rotate()
       .toBuffer();
   }
 }

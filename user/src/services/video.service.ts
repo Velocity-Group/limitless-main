@@ -28,8 +28,13 @@ export class VideoService extends APIRequest {
   update(id: string, files: [{ fieldname: string; file: File }], payload: any, onProgress?: Function) {
     return this.upload(`/performer/performer-assets/videos/edit/${id}`, files, {
       onProgress,
-      customData: payload
+      customData: payload,
+      method: 'PUT'
     });
+  }
+
+  deleteFile(id: string, type: string) {
+    return this.del(`/performer/performer-assets/videos/remove-file/${id}`, { type });
   }
 
   uploadVideo(

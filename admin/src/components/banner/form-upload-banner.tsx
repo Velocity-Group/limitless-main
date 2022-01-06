@@ -5,6 +5,7 @@ import {
 import { IBannerUpdate, IBannerCreate } from 'src/interfaces';
 import { LoadingOutlined, UploadOutlined } from '@ant-design/icons';
 import ImgCrop from 'antd-img-crop';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   banner?: IBannerUpdate;
@@ -45,9 +46,10 @@ export class FormUploadBanner extends PureComponent<IProps> {
   };
 
   beforeUpload(file) {
-    const isMaxSize = file.size / 1024 / 1024 < (process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    const config = getGlobalConfig();
+    const isMaxSize = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isMaxSize) {
-      message.error(`Image must be smaller than ${process.env.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+      message.error(`Image must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
     }
     return isMaxSize;
   }
@@ -136,14 +138,10 @@ export class FormUploadBanner extends PureComponent<IProps> {
             </ImgCrop>
           )}
         </Form.Item>
-        {uploadPercentage ? <div><Progress percent={uploadPercentage} /></div> : null}
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+        {uploadPercentage ? <Progress percent={Math.round(uploadPercentage)} /> : null}
+        <Form.Item className="text-center">
           <Button type="primary" htmlType="submit" loading={uploading} disabled={uploading}>
             {haveBanner ? 'Update' : 'Upload'}
-          </Button>
-          &nbsp;
-          <Button disabled={uploading} href="/banner">
-            Cancel
           </Button>
         </Form.Item>
       </Form>
