@@ -26,7 +26,11 @@ export class PurchaseGalleryForm extends PureComponent<IProps> {
               marginBottom: 10
             }}
           />
-          <h4>{gallery?.title}</h4>
+          <h4>
+            Unlock Gallery:
+            {' '}
+            {gallery?.title}
+          </h4>
           <p>{gallery?.description}</p>
         </div>
         <div className="text-center">

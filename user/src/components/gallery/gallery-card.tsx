@@ -62,8 +62,6 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
         </div>
         <Tooltip title={gallery?.title}>
           <div className="gallery-info">
-            Unlock Gallery:
-            {' '}
             {gallery.title}
           </div>
         </Tooltip>
