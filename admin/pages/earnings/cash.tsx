@@ -81,7 +81,11 @@ class Earning extends PureComponent<IProps> {
       });
       await this.setState({
         searching: false,
-        list: resp.data.data,
+        list: resp.data.data.map((item) => {
+          const obj = item;
+          obj.siteEarning = (item.grossPrice.toFixed(2) - item.netPrice.toFixed(2)).toFixed(2);
+          return obj;
+        }),
         pagination: {
           ...pagination,
           total: resp.data.total,
