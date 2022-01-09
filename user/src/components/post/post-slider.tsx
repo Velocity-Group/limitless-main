@@ -34,30 +34,30 @@ export default class FeedSlider extends PureComponent<IProps> {
         {!processing && feed.files && feed.files.length && (
           <>
             {images && images.length > 0 && (
-            <Image.PreviewGroup>
-              <Carousel
-                adaptiveHeight
-                effect="fade"
-                draggable
-                swipe
-                swipeToSlide
-                arrows
-                dots={false}
-                infinite
-              >
-                {images.map((img) => (
-                  <Image
-                    preview={{ maskClosable: false }}
-                    key={img._id}
-                    src={img.url}
-                    fallback="/static/no-image.jpg"
-                    title={img.name}
-                    width="100%"
-                    alt="img"
-                  />
-                ))}
-              </Carousel>
-            </Image.PreviewGroup>
+              <Image.PreviewGroup>
+                <Carousel
+                  adaptiveHeight
+                  effect="fade"
+                  draggable
+                  swipe
+                  swipeToSlide
+                  arrows
+                  dots={false}
+                  infinite
+                >
+                  {images.map((img) => (
+                    <Image
+                      preview={{ maskClosable: false }}
+                      key={img._id}
+                      src={img.url}
+                      fallback="/static/no-image.jpg"
+                      title={img.name}
+                      width="100%"
+                      alt="img"
+                    />
+                  ))}
+                </Carousel>
+              </Image.PreviewGroup>
             )}
             {videos && videos.length > 0 && videos.map((vid) => (
               <VideoPlayer
@@ -81,10 +81,10 @@ export default class FeedSlider extends PureComponent<IProps> {
           </>
         )}
         {processing && (
-        <div className="proccessing">
-          <Spin />
-          <p>Your media is currently proccessing</p>
-        </div>
+          <div className="proccessing">
+            <Spin />
+            <p>Your media is currently proccessing</p>
+          </div>
         )}
       </div>
     );

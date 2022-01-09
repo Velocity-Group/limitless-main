@@ -204,7 +204,7 @@ class Login extends PureComponent<IProps> {
                     <button type="button" disabled={!settings.twitterClientId} onClick={() => this.loginTwitter()} className="twitter-button">
                       <TwitterOutlined />
                       {' '}
-                      LOGIN IN / SIGN UP WITH TWITTER
+                      LOG IN / SIGN UP WITH TWITTER
                     </button>
                     <GoogleLogin
                       className="google-button"

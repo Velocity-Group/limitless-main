@@ -186,7 +186,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 <p>
                   Requested amount of tokens:
                   {' '}
-                  {request.requestTokens || 0}
+                  {request.requestTokens.toFixed(2) || 0}
                 </p>
                 <p>
                   Conversion rate:
