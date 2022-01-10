@@ -181,8 +181,9 @@ export class SubscriptionService {
     subscription.subscriptionType = payload.subscriptionType;
     subscription.status = payload.status;
     await Promise.all([
-      this.performerService.updateSubscriptionStat(subscription.performerId, -1),
-      this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
+      // todo - should check admin renew or cancel subscription
+      this.performerService.updateSubscriptionStat(subscription.performerId, 1),
+      this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': 1 })
     ]);
     await subscription.save();
     return new SubscriptionDto(subscription);

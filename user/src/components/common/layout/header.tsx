@@ -152,6 +152,7 @@ class Header extends PureComponent<IProps> {
     const {
       totalNotReadMessage, openProfile, openStripeAlert
     } = this.state;
+    console.log(user);
 
     return (
       <div className="main-header">
