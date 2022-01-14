@@ -276,23 +276,30 @@ export class FileService {
     });
     await this.fileModel.deleteMany({ _id: files.map((f) => f._id) });
     // remove files
-    files.forEach((file) => {
-      const filePaths = [
-        {
-          absolutePath: file.absolutePath,
-          path: file.path
+    await Promise.all([
+      files.map((file) => {
+        const filePaths = [
+          {
+            absolutePath: file.absolutePath,
+            path: file.path
+          }
+        ].concat(file.thumbnails || []);
+        if (file.server === Storage.S3) {
+          const del = filePaths.map((fp) => ({ Key: fp.absolutePath }));
+          return this.s3StorageService.deleteObjects({ Objects: del });
         }
-      ].concat(file.thumbnails || []);
-      filePaths.forEach((fp) => {
-        if (existsSync(fp.absolutePath)) {
-          unlinkSync(fp.absolutePath);
-        } else {
-          const publicDir = this.config.get('file.publicDir');
-          const filePublic = join(publicDir, fp.path);
-          existsSync(filePublic) && unlinkSync(filePublic);
-        }
-      });
-    });
+        return filePaths.map((fp) => {
+          if (existsSync(fp.absolutePath)) {
+            unlinkSync(fp.absolutePath);
+          } else {
+            const publicDir = this.config.get('file.publicDir');
+            const filePublic = join(publicDir, fp.path);
+            existsSync(filePublic) && unlinkSync(filePublic);
+          }
+          return fp;
+        });
+      })
+    ]);
   }
 
   public async removeIfNotHaveRef(fileId: string | ObjectId) {
@@ -306,6 +313,12 @@ export class FileService {
     }
 
     await file.remove();
+
+    if (file.server === Storage.S3) {
+      const del = [{ Key: file.absolutePath }];
+      await this.s3StorageService.deleteObjects({ Objects: del });
+      return true;
+    }
 
     if (existsSync(file.absolutePath)) {
       unlinkSync(file.absolutePath);

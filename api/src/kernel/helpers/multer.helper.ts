@@ -1,6 +1,6 @@
+import { Express } from 'express';
 import * as StringHelper from './string.helper';
 
-// eslint-disable-next-line no-undef
 export const formatFileName = (file: Express.Multer.File) => {
   const ext = (
     StringHelper.getExt(file.originalname) || ''

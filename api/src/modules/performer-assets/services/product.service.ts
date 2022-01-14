@@ -18,7 +18,6 @@ import { PerformerDto } from 'src/modules/performer/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PaymentTokenService } from 'src/modules/purchased-item/services';
 import { PurchaseItemType } from 'src/modules/purchased-item/constants';
-import { AuthService } from 'src/modules/auth/services';
 import { Storage } from 'src/modules/storage/contants';
 import { PRODUCT_TYPE } from '../constants';
 import { ProductDto } from '../dtos';
@@ -32,8 +31,6 @@ export const PERFORMER_PRODUCT_CHANNEL = 'PERFORMER_PRODUCT_CHANNEL';
 @Injectable()
 export class ProductService {
   constructor(
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => ReactionService))
