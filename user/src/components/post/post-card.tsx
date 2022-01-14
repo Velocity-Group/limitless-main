@@ -437,7 +437,7 @@ class FeedCard extends Component<IProps> {
                     {' '}
                     {shortenLargeNumber(totalVote)}
                     {' '}
-                    {totalVote < 1 ? 'vote' : 'votes'}
+                    {totalVote < 2 ? 'vote' : 'votes'}
                   </span>
                   {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
                     <span>
@@ -468,7 +468,7 @@ class FeedCard extends Component<IProps> {
                     className="secondary"
                     onClick={() => this.setState({ openSubscriptionModal: true })}
                   >
-                    Subcribe to unlock
+                    Subscribe to unlock
                   </Button>
                 )}
                 {feed.isSale && !isBought && (
@@ -632,6 +632,7 @@ class FeedCard extends Component<IProps> {
           onCancel={() => this.setState({ openTeaser: false })}
           width={650}
           destroyOnClose
+          className="modal-teaser-preview"
         >
           <VideoPlayer
             key={feed?.teaser?._id}

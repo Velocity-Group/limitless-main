@@ -43,7 +43,7 @@ export const TableListSubscription = ({
               pathname: '/model/profile',
               query: { username: records?.performerInfo?.username || records?.performerInfo?._id }
             }}
-            as={`/model/${records?.performerInfo?.username || records?.performerInfo?._id}`}
+            as={`/${records?.performerInfo?.username || records?.performerInfo?._id}`}
           >
             <a>
               {records?.performerInfo?.name || records?.performerInfo?.username || 'N/A'}
