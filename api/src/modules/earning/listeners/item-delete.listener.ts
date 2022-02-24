@@ -21,6 +21,7 @@ import { ORDER_STATUS, REFUND_ORDER_CHANNEL } from 'src/modules/order/constants'
 import { OrderDto } from 'src/modules/order/dtos';
 import { ORDER_MODEL_PROVIDER } from 'src/modules/order/providers';
 import { OrderModel } from 'src/modules/order/models';
+import { ObjectId } from 'mongodb';
 import { EARNING_MODEL_PROVIDER } from '../providers/earning.provider';
 import { EarningModel } from '../models/earning.model';
 
@@ -84,8 +85,8 @@ export class HandleDeleteItemListener {
       await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
       await Promise.all(earnings.map((earning) => {
         this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
-        this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
-        this.notifyPerformerBalance(earning);
+        this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.grossPrice } });
+        this.notifyPerformerBalance(earning.performerId, -earning.grossPrice);
         this.notifyUserBalance(earning);
         return earning.remove();
       }));
@@ -115,8 +116,8 @@ export class HandleDeleteItemListener {
       await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
       await Promise.all(earnings.map(async (earning) => {
         this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
-        this.notifyPerformerBalance(earning);
-        this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } });
+        this.notifyPerformerBalance(earning.performerId, -earning.grossPrice);
+        this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.grossPrice } });
         this.notifyUserBalance(earning);
         return earning.remove();
       }));
@@ -138,14 +139,14 @@ export class HandleDeleteItemListener {
       this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } }),
       this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.grossPrice } }),
       this.notifyUserBalance(earning),
-      this.notifyPerformerBalance(earning),
+      this.notifyPerformerBalance(earning.performerId, -earning.grossPrice),
       earning.remove()
     ]);
   }
 
-  private async notifyPerformerBalance(earning: EarningModel) {
-    this.socketUserService.emitToUsers(earning.performerId, 'update_balance', {
-      token: -earning.grossPrice
+  private async notifyPerformerBalance(performerId: ObjectId, token: number) {
+    this.socketUserService.emitToUsers(performerId, 'update_balance', {
+      token
     });
   }
 
