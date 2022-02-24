@@ -136,7 +136,7 @@ export class HandleDeleteItemListener {
       this.orderModel.updateOne({ transactionId }, { deliveryStatus: ORDER_STATUS.REFUNDED }),
       this.paymentTokenModel.updateOne({ _id: transactionId }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
       this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } }),
-      this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.netPrice } }),
+      this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.grossPrice } }),
       this.notifyUserBalance(earning),
       this.notifyPerformerBalance(earning),
       earning.remove()
@@ -145,7 +145,7 @@ export class HandleDeleteItemListener {
 
   private async notifyPerformerBalance(earning: EarningModel) {
     this.socketUserService.emitToUsers(earning.performerId, 'update_balance', {
-      token: -earning.netPrice
+      token: -earning.grossPrice
     });
   }
 
