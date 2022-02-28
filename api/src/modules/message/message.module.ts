@@ -13,6 +13,7 @@ import { ConversationController } from './controllers/conversation.controller';
 import { MessageController } from './controllers/message.controller';
 import { BlockModule } from '../block/block.module';
 import { UtilsModule } from '../utils/utils.module';
+import { StreamModule } from '../stream/stream.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { UtilsModule } from '../utils/utils.module';
     forwardRef(() => UtilsModule),
     forwardRef(() => FileModule),
     forwardRef(() => SubscriptionModule),
-    forwardRef(() => BlockModule)
+    forwardRef(() => BlockModule),
+    forwardRef(() => StreamModule)
   ],
   providers: [
     ...messageProviders,

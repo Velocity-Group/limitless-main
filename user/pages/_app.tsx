@@ -110,7 +110,9 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
         SETTING_KEYS.OPTION_FOR_BROADCAST,
         SETTING_KEYS.OPTION_FOR_PRIVATE,
         SETTING_KEYS.SECURE_OPTION,
-        SETTING_KEYS.ANT_MEDIA_APPNAME
+        SETTING_KEYS.ANT_MEDIA_APPNAME,
+        SETTING_KEYS.AGORA_APPID,
+        SETTING_KEYS.AGORA_ENABLE
       ])
     )
   );

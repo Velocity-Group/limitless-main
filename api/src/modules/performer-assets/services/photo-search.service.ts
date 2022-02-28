@@ -7,10 +7,10 @@ import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { STATUS } from 'src/kernel/constants';
-import { PurchasedItemSearchService } from 'src/modules/purchased-item/services';
+import { TokenTransactionSearchService } from 'src/modules/token-transaction/services';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
-import { PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
+import { PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/token-transaction/constants';
 import { Storage } from 'src/modules/storage/contants';
 import { PERFORMER_PHOTO_MODEL_PROVIDER } from '../providers';
 import { PhotoModel } from '../models';
@@ -21,8 +21,8 @@ import { GalleryService } from './gallery.service';
 @Injectable()
 export class PhotoSearchService {
   constructor(
-    @Inject(forwardRef(() => PurchasedItemSearchService))
-    private readonly purchasedItemSearchService: PurchasedItemSearchService,
+    @Inject(forwardRef(() => TokenTransactionSearchService))
+    private readonly tokenTransactionSearchService: TokenTransactionSearchService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
     @Inject(forwardRef(() => PerformerService))
@@ -187,7 +187,7 @@ export class PhotoSearchService {
         expiredAt: { $gt: new Date() },
         status: SUBSCRIPTION_STATUS.ACTIVE
       }) : [],
-      user?._id ? this.purchasedItemSearchService.findByQuery({
+      user?._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,
         targetId: { $in: galleryIds },
         target: PURCHASE_ITEM_TARTGET_TYPE.GALLERY,

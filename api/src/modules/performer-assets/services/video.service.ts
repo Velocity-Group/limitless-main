@@ -17,12 +17,12 @@ import { ReactionService } from 'src/modules/reaction/services/reaction.service'
 import { PerformerService } from 'src/modules/performer/services';
 import { merge } from 'lodash';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
-import { PaymentTokenService } from 'src/modules/purchased-item/services';
+import { TokenTransactionService } from 'src/modules/token-transaction/services';
+import { PurchaseItemType } from 'src/modules/token-transaction/constants';
 import { EVENT } from 'src/kernel/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserDto } from 'src/modules/user/dtos';
-import { PurchaseItemType } from 'src/modules/purchased-item/constants';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
 import { Storage } from 'src/modules/storage/contants';
@@ -48,8 +48,8 @@ export class VideoService {
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
-    @Inject(forwardRef(() => PaymentTokenService))
-    private readonly checkPaymentService: PaymentTokenService,
+    @Inject(forwardRef(() => TokenTransactionService))
+    private readonly tokenTransactionService: TokenTransactionService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
     @Inject(PERFORMER_VIDEO_MODEL_PROVIDER)
@@ -352,7 +352,7 @@ export class VideoService {
       dto.isSubscribed = !!subscribed;
     }
     if (dto.isSale) {
-      const bought = currentUser && await this.checkPaymentService.checkBought(dto, PurchaseItemType.VIDEO, currentUser);
+      const bought = currentUser && await this.tokenTransactionService.checkBought(dto, PurchaseItemType.VIDEO, currentUser);
       dto.isBought = bought;
     }
     if (currentUser && currentUser.roles && currentUser.roles.includes('admin')) {
@@ -582,7 +582,7 @@ export class VideoService {
     }
     if (video.isSale) {
       // check bought
-      const bought = await this.checkPaymentService.checkBought(new VideoDto(video), PurchaseItemType.VIDEO, user);
+      const bought = await this.tokenTransactionService.checkBought(new VideoDto(video), PurchaseItemType.VIDEO, user);
       if (!bought) {
         throw new ForbiddenException();
       }

@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongoDBModule } from 'src/kernel';
-import { PurchasedItemModule } from 'src/modules/purchased-item/purchased-item.module';
+import { TokenTransactionModule } from 'src/modules/token-transaction/token-transaction.module';
 import { SocketModule } from '../socket/socket.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
@@ -22,7 +22,7 @@ import { OrderModule } from '../order/order.module';
     forwardRef(() => PerformerModule),
     forwardRef(() => PaymentModule),
     forwardRef(() => SettingModule),
-    forwardRef(() => PurchasedItemModule),
+    forwardRef(() => TokenTransactionModule),
     forwardRef(() => OrderModule)
   ],
   providers: [...earningProviders, EarningService, TransactionEarningListener, HandleDeleteItemListener],

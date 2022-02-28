@@ -4,7 +4,7 @@ import {
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { IUser, StreamSettings, IUIConfig } from 'src/interfaces';
+import { IUser, IUIConfig, StreamSettings } from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
@@ -13,7 +13,7 @@ import {
   LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined
 } from '@ant-design/icons';
 import {
-  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon
+  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon
 } from 'src/icons';
 import Router, { withRouter, Router as RouterEvent } from 'next/router';
 import {
@@ -21,11 +21,10 @@ import {
 } from 'src/services';
 import { Event, SocketContext } from 'src/socket';
 import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/actions';
-// import { PrivateCallCard } from '@components/streaming/private-call-request-card';
 import { updateUIValue } from 'src/redux/ui/actions';
 import { updateBalance } from '@redux/user/actions';
-import './header.less';
 import { shortenLargeNumber } from '@lib/number';
+import './header.less';
 
 interface IProps {
   updateBalance: Function;
@@ -53,8 +52,8 @@ class Header extends PureComponent<IProps> {
     if (user._id) {
       this.handleCountNotificationMessage();
       if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
-    || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
-      // eslint-disable-next-line react/no-did-update-set-state
+        || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
+        // eslint-disable-next-line react/no-did-update-set-state
         this.setState({ openStripeAlert: true });
       }
     }
@@ -66,7 +65,7 @@ class Header extends PureComponent<IProps> {
     if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
       if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
-      || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
+        || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
         // eslint-disable-next-line react/no-did-update-set-state
         this.setState({ openStripeAlert: true });
       }
@@ -147,7 +146,7 @@ class Header extends PureComponent<IProps> {
 
   render() {
     const {
-      user, router, ui
+      user, router, ui, settings
     } = this.props;
     const {
       totalNotReadMessage, openProfile, openStripeAlert
@@ -176,25 +175,26 @@ class Header extends PureComponent<IProps> {
             <div className="nav-bar">
               <ul className={user._id ? 'nav-icons' : 'nav-icons custom'}>
                 {user._id && (
-                <li className={router.pathname === '/home' ? 'active' : ''}>
-                  <Link href="/home">
-                    <a>
-                      <HomeIcon />
-                    </a>
-                  </Link>
-                </li>
+                  <li className={router.pathname === '/home' ? 'active' : ''}>
+                    <Link href="/home">
+                      <a>
+                        <HomeIcon />
+                      </a>
+                    </Link>
+                  </li>
                 )}
-                {user._id && user.isPerformer && (
+                {user._id && (
                   <>
-                    {/* <Tooltip key="live" title="Go Live">
+                    {settings?.agoraEnable && (
                       <li className={router.pathname === '/model/live' ? 'active' : ''}>
-                        <Link href="/home" as="/home">
+                        <Link href={user.isPerformer ? '/model/live' : '/streaming'} as={user.isPerformer ? '/model/live' : '/streaming'}>
                           <a>
-                            <VideoCameraAddOutlined />
+                            <LiveIcon />
                           </a>
                         </Link>
                       </li>
-                    </Tooltip> */}
+                    )}
+                    {user?.isPerformer && (
                     <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
                       <Link href="/model/my-post/create">
                         <a>
@@ -202,6 +202,7 @@ class Header extends PureComponent<IProps> {
                         </a>
                       </Link>
                     </li>
+                    )}
                   </>
                 )}
                 {user._id && !user.isPerformer && (
@@ -252,19 +253,6 @@ class Header extends PureComponent<IProps> {
               </ul>
             </div>
           </Layout.Header>
-          {/* <Drawer
-            title="Private Call Requests"
-            closable
-            onClose={() => this.setState({ openCallRequest: false })}
-            visible={openCallRequest}
-            key="private-call-drawer"
-            className={ui.theme === 'light' ? 'profile-drawer' : 'profile-drawer dark'}
-            width={280}
-          >
-            {privateRequests.length > 0 ? privateRequests.map((request) => (
-              <PrivateCallCard key={request.conversationId} request={request} settings={settings} onDecline={this.handleDeclineCall.bind(this)} />
-            )) : <p className="text-center">No Call Request</p>}
-          </Drawer> */}
           <Drawer
             title={(
               <>
@@ -318,6 +306,16 @@ class Header extends PureComponent<IProps> {
           >
             {user.isPerformer && (
               <div className="profile-menu-item">
+                {settings?.agoraEnable && (
+                <Link href={{ pathname: '/model/live' }} as="/model/live">
+                  <div className={router.asPath === '/model/live' ? 'menu-item active' : 'menu-item'}>
+                    <LiveIcon />
+                    {' '}
+                    Go Live
+                  </div>
+                </Link>
+                )}
+                <Divider />
                 <Link href={{ pathname: '/model/profile', query: { username: user.username || user._id } }} as={`/${user.username || user._id}`}>
                   <div className={router.asPath === `/${user.username || user._id}` ? 'menu-item active' : 'menu-item'}>
                     <HomeIcon />
@@ -336,7 +334,7 @@ class Header extends PureComponent<IProps> {
                   <div className={router.pathname === '/model/block-user' ? 'menu-item active' : 'menu-item'}>
                     <BlockOutlined />
                     {' '}
-                    Black List
+                    Blacklist
                   </div>
                 </Link>
                 <Link href={{ pathname: '/model/block-countries' }} as="/model/block-countries">
@@ -358,28 +356,28 @@ class Header extends PureComponent<IProps> {
                   <div className={router.pathname === '/model/my-post' ? 'menu-item active' : 'menu-item'}>
                     <FireOutlined />
                     {' '}
-                    Feeds
+                    My Feeds
                   </div>
                 </Link>
                 <Link href="/model/my-video" as="/model/my-video">
                   <div className={router.pathname === '/model/my-video' ? 'menu-item active' : 'menu-item'}>
                     <VideoCameraOutlined />
                     {' '}
-                    Videos
+                    My Videos
                   </div>
                 </Link>
                 <Link href="/model/my-store" as="/model/my-store">
                   <div className={router.pathname === '/model/my-store' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingOutlined />
                     {' '}
-                    Products
+                    My Products
                   </div>
                 </Link>
                 <Link href="/model/my-gallery" as="/model/my-gallery">
                   <div className={router.pathname === '/model/my-gallery' ? 'menu-item active' : 'menu-item'}>
                     <PictureOutlined />
                     {' '}
-                    Galleries
+                    My Galleries
                   </div>
                 </Link>
                 <Divider />
@@ -387,14 +385,14 @@ class Header extends PureComponent<IProps> {
                   <div className={router.pathname === '/model/my-order' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingCartOutlined />
                     {' '}
-                    Orders
+                    Order History
                   </div>
                 </Link>
                 <Link href="/model/earning" as="/model/earning">
                   <div className={router.pathname === '/model/earning' ? 'menu-item active' : 'menu-item'}>
                     <DollarOutlined />
                     {' '}
-                    Earnings
+                    Earning History
                   </div>
                 </Link>
                 <Link href="/model/payout-request" as="/model/payout-request">
@@ -414,6 +412,16 @@ class Header extends PureComponent<IProps> {
             )}
             {!user.isPerformer && (
               <div className="profile-menu-item">
+                {settings?.agoraEnable && (
+                <Link href={{ pathname: '/streaming' }} as="/streaming">
+                  <div className={router.asPath === '/streaming' ? 'menu-item active' : 'menu-item'}>
+                    <LiveIcon />
+                    {' '}
+                    Live Videos
+                  </div>
+                </Link>
+                )}
+                <Divider />
                 <Link href="/user/account" as="/user/account">
                   <div className={router.pathname === '/user/account' ? 'menu-item active' : 'menu-item'}>
                     <UserOutlined />
@@ -437,19 +445,12 @@ class Header extends PureComponent<IProps> {
                 </Link>
                 <Link href="/user/my-subscription" as="/user/my-subscription">
                   <div className={router.pathname === '/user/my-subscriptions' ? 'menu-item active' : 'menu-item'}>
-                    <BookOutlined />
+                    <HeartOutlined />
                     {' '}
                     Subscriptions
                   </div>
                 </Link>
                 <Divider />
-                <Link href="/user/token-transaction" as="/user/token-transaction">
-                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
-                    <DollarOutlined />
-                    {' '}
-                    Token Transactions
-                  </div>
-                </Link>
                 <Link href="/user/orders" as="/user/orders">
                   <div className={router.pathname === '/user/orders' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingCartOutlined />
@@ -462,6 +463,13 @@ class Header extends PureComponent<IProps> {
                     <HistoryOutlined />
                     {' '}
                     Payment History
+                  </div>
+                </Link>
+                <Link href="/user/token-transaction" as="/user/token-transaction">
+                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
+                    <DollarOutlined />
+                    {' '}
+                    Token Transactions
                   </div>
                 </Link>
                 <Divider />
@@ -520,8 +528,8 @@ class Header extends PureComponent<IProps> {
 Header.contextType = SocketContext;
 
 const mapState = (state: any) => ({
-  user: { ...state.user.current },
-  ui: { ...state.ui },
+  user: state.user.current,
+  ui: state.ui,
   ...state.streaming
 });
 const mapDispatch = {

@@ -11,7 +11,7 @@ import { PerformerModule } from '../performer/performer.module';
 import { UserModule } from '../user/user.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { EarningModule } from '../earning/earning.module';
-import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
+import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
 import { FeedModule } from '../feed/feed.module';
 import { OrderModule } from '../order/order.module';
 
@@ -23,7 +23,7 @@ import { OrderModule } from '../order/order.module';
     forwardRef(() => PerformerAssetsModule),
     forwardRef(() => SubscriptionModule),
     forwardRef(() => EarningModule),
-    forwardRef(() => PurchasedItemModule),
+    forwardRef(() => TokenTransactionModule),
     forwardRef(() => FeedModule),
     forwardRef(() => OrderModule)
   ],

@@ -1,31 +1,36 @@
 /* eslint-disable dot-notation */
-import React, { PureComponent } from 'react';
+import React, { PureComponent, createRef, forwardRef } from 'react';
 import Head from 'next/head';
 import {
-  Row, Col, Button, message, Modal, Alert, Layout
+  Row, Col, Button, message, Modal, Layout
 } from 'antd';
 import {
-  EditOutlined, ClockCircleOutlined, VideoCameraOutlined, PlayCircleOutlined
-  // CommentOutlined
+  ClockCircleOutlined, PlayCircleOutlined
 } from '@ant-design/icons';
+import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
 import {
-  IPerformer, IUIConfig, IUser, StreamSettings
+  IPerformer, IUIConfig, IUser, StreamSettings, IStream
 } from 'src/interfaces';
-import { messageService, streamService } from 'src/services';
-import LivePublisher from '@components/streaming/publisher';
+import { streamService } from 'src/services';
 import StreamPriceForm from '@components/streaming/set-price-session';
 import { SocketContext, Event } from 'src/socket';
 import {
-  getStreamConversation,
-  resetStreamMessage,
-  resetAllStreamMessage
+  getStreamConversation, resetStreamMessage, resetAllStreamMessage
 } from '@redux/stream-chat/actions';
-import { WEBRTC_ADAPTOR_INFORMATIONS } from 'src/antmedia/constants';
 import ChatBox from '@components/stream-chat/chat-box';
 import Router, { Router as RouterEvent } from 'next/router';
-import { getResponseError, videoDuration } from '@lib/index';
+import { videoDuration } from '@lib/index';
+import dynamic from 'next/dynamic';
 import './index.less';
+
+const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), { ssr: false });
+const Publisher = dynamic(() => import('@components/streaming/agora/publisher'), { ssr: false });
+const ForwardedPublisher = forwardRef((props: {
+  uid: string,
+  onStatusChange: Function,
+  conversationId: string;
+}, ref) => <Publisher {...props} forwardedRef={ref} />);
 
 // eslint-disable-next-line no-shadow
 enum EVENT_NAME {
@@ -47,13 +52,11 @@ interface IProps {
 interface IStates {
   loading: boolean;
   initialized: boolean;
-  total?: number;
-  members?: IUser[];
-  submiting: boolean;
+  total: number;
+  members: IUser[];
   openPriceModal: boolean;
-  conversationDescription: string;
   callTime: number;
-  isFree: boolean;
+  activeStream: IStream;
 }
 
 class PerformerLivePage extends PureComponent<IProps, IStates> {
@@ -61,13 +64,11 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
 
   static authenticate = true;
 
-  private publisherRef: any;
+  private publisherRef = createRef<HTMLButtonElement>();
 
-  private streamId: string;
+  private streamDurationTimeOut: any;
 
-  private interval: any;
-
-  private setTimeInterval: any;
+  private setDurationStreamTimeOut: any;
 
   state = {
     loading: false,
@@ -75,10 +76,8 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     total: 0,
     members: [],
     openPriceModal: false,
-    submiting: false,
-    conversationDescription: '',
     callTime: 0,
-    isFree: false
+    activeStream: null
   };
 
   componentDidMount() {
@@ -88,7 +87,6 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
       Router.back();
       return;
     }
-    this.joinPublicRoom();
     window.addEventListener('beforeunload', this.onbeforeunload.bind(this));
     RouterEvent.events.on('routeChangeStart', this.onbeforeunload.bind(this));
   }
@@ -98,97 +96,57 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     RouterEvent.events.off('routeChangeStart', this.onbeforeunload.bind(this));
   }
 
-  handler({ total, members, conversationId }) {
+  handleDuration() {
+    const { callTime } = this.state;
+    this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
+    this.setState({ callTime: callTime + 1 });
+    this.streamDurationTimeOut = setTimeout(this.handleDuration.bind(this), 1000);
+  }
+
+  onRoomChange = ({ total, members, conversationId }) => {
     const { activeConversation } = this.props;
     if (activeConversation?.data?._id && activeConversation.data._id === conversationId) {
       this.setState({ total, members });
     }
   }
 
+  onStreamStatusChange = (started: boolean) => {
+    if (started) {
+      this.setState({ initialized: true, loading: false });
+      this.handleDuration();
+      this.updateStreamDuration();
+    } else {
+      this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
+      this.setDurationStreamTimeOut && clearTimeout(this.setDurationStreamTimeOut);
+    }
+  }
+
   onbeforeunload = () => {
-    this.interval && clearInterval(this.interval);
-    this.setTimeInterval && clearInterval(this.setTimeInterval);
+    this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
+    this.setDurationStreamTimeOut && clearTimeout(this.setDurationStreamTimeOut);
     this.leavePublicRoom();
   }
 
-  adminEndStream({ streamId, conversationId }) {
-    const { activeConversation } = this.props;
-    if (streamId !== this.streamId || conversationId !== activeConversation?.data?._id) return;
-    message.warning('Administrator has ended your current stream session. If you have any questions, please contact us.', 15);
-    setTimeout(() => { Router.back(); }, 5000);
-  }
-
-  async start() {
-    await this.setState({ loading: true });
-    try {
-      const resp = await streamService.goLive();
-      const id = resp.data.sessionId;
-      this.streamId = id;
-      this.publisherRef && this.publisherRef.start(id);
-    } catch (e) {
-      const err = await e;
-      message.error(err?.message?.message || 'Stream server error!');
-    } finally {
-      this.setState({ loading: false });
-    }
-  }
-
-  callback(info: WEBRTC_ADAPTOR_INFORMATIONS) {
-    const { activeConversation } = this.props;
-    if (activeConversation && activeConversation.data && this.streamId) {
-      const socket = this.context;
-      if (info === WEBRTC_ADAPTOR_INFORMATIONS.INITIALIZED) {
-        this.setState({ initialized: true });
-        this.publisherRef && this.publisherRef.publish(this.streamId);
-      } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.PUBLISH_STARTED) {
-        const conversation = { ...activeConversation.data };
-        socket.emit('public-stream/live', { conversationId: conversation._id });
-        this.interval = setInterval(() => {
-          const { callTime } = this.state;
-          this.setState({ callTime: callTime + 1 });
-        }, 1000);
-        this.setTimeInterval = setInterval(this.updateStreamDuration.bind(this), 15 * 1000);
-        this.setState({ loading: false });
-      } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.PUBLISH_FINISHED) {
-        this.interval && clearInterval(this.interval);
-        this.setTimeInterval && clearInterval(this.setTimeInterval);
-        this.setState({ loading: false });
-      } else if (info === WEBRTC_ADAPTOR_INFORMATIONS.CLOSED) {
-        this.interval && clearInterval(this.interval);
-        this.setTimeInterval && clearInterval(this.setTimeInterval);
-        this.setState({ loading: false, initialized: false });
-      }
-    }
-  }
-
-  async joinPublicRoom() {
+  async joinPublicRoom(payload: any) {
     const { getStreamConversation: dispatchGetStreamConversation } = this.props;
     const socket = this.context;
     try {
       await this.setState({ loading: true });
-      const resp = await (await streamService.goLive()).data;
-      if (resp) {
-        const { conversation, sessionId, isFree } = resp;
-        this.streamId = sessionId;
-        this.setState({
-          openPriceModal: true,
-          conversationDescription: conversation.name,
-          isFree
-        });
-        if (conversation && conversation._id) {
-          dispatchGetStreamConversation({
-            conversation
-          });
-          socket && socket.emit('public-stream/join', {
-            conversationId: conversation._id
-          });
-        }
-      }
+      const resp = await (await streamService.goLive(payload)).data;
+      this.setState({
+        activeStream: resp,
+        openPriceModal: false
+      });
+      dispatchGetStreamConversation({
+        conversation: resp.conversation
+      });
+      socket && socket.emit('public-stream/join', {
+        conversationId: resp.conversation._id
+      });
+      this.publisherRef.current && this.publisherRef.current.click();
     } catch (e) {
       const error = await e;
-      message.error(error?.message?.message || 'Stream server error');
-      // Router.back();
-    } finally {
+      message.error(error?.message || 'Stream server error, please try again later');
       this.setState({ loading: false });
     }
   }
@@ -203,177 +161,122 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     }
   }
 
-  async updateStreamInfo(payload) {
-    const { activeConversation } = this.props;
-    const { conversationDescription, isFree } = this.state;
-    try {
-      await this.setState({ submiting: true });
-      if (payload.name && payload.name !== conversationDescription) {
-        const resp = await messageService.updateConversationName(activeConversation.data._id, { name: payload.name });
-        resp && this.setState({ conversationDescription: resp.data.name });
-      }
-      if (payload.isFree !== isFree) {
-        const resp = await streamService.updateStreamInfo({ streamId: this.streamId, isFree: payload.isFree });
-        resp && this.setState({ isFree: resp.data.isFree });
-      }
-    } catch (e) {
-      message.error(getResponseError(e) || 'Error occured, please try again later');
-    } finally {
-      this.setState({ submiting: false, openPriceModal: false });
-    }
-  }
-
   async updateStreamDuration() {
-    if (!this.streamId) {
-      this.setTimeInterval && clearInterval(this.setTimeInterval);
-      return;
-    }
-    const { callTime } = this.state;
-    await streamService.updateStreamDuration({ streamId: this.streamId, duration: callTime });
+    this.setDurationStreamTimeOut && clearTimeout(this.setDurationStreamTimeOut);
+    const { callTime, activeStream } = this.state;
+    if (!activeStream) return;
+    await streamService.updateStreamDuration({ streamId: activeStream._id, duration: callTime });
+    this.setDurationStreamTimeOut = setTimeout(this.updateStreamDuration.bind(this), 15 * 1000);
   }
 
   render() {
-    const { user, ui, settings } = this.props;
+    const { user, ui } = this.props;
     const {
-      loading, initialized, members, total, openPriceModal, submiting, isFree,
-      conversationDescription, callTime
+      loading, initialized, members, total, openPriceModal, callTime, activeStream
     } = this.state;
     return (
-      <Layout>
-        <Head>
-          <title>
-            {`${ui?.siteName} | Public Chat`}
-          </title>
-        </Head>
-        <Event
-          event={EVENT_NAME.ROOM_INFORMATIOM_CHANGED}
-          handler={this.handler.bind(this)}
-        />
-        <Event
-          event={EVENT_NAME.ADMIN_END_SESSION_STREAM}
-          handler={this.adminEndStream.bind(this)}
-        />
-        <Row>
-          <Col xs={24} sm={24} md={14}>
-            <Alert className="text-center" type="info" message={conversationDescription || `${user.name} Broadcast`} />
-            <LivePublisher
-              {...this.props}
-              // eslint-disable-next-line no-return-assign
-              ref={(ref) => this.publisherRef = ref}
-              callback={this.callback.bind(this)}
-              configs={{
-                debug: true,
-                bandwidth: 900,
-                localVideoId: 'publisher'
-              }}
-            />
-            {!initialized && <img alt="img" src="/static/offline.jpg" width="100%" style={{ margin: '5px 0' }} />}
-            <p className="stream-duration">
-              <span>
-                <ClockCircleOutlined />
-                {' '}
-                {videoDuration(callTime)}
-              </span>
-              <span>
-                <img src="/static/gem-ico.png" alt="gem" width="20px" />
-                {' '}
-                {(user?.balance).toFixed(2)}
-              </span>
-            </p>
-            <div className="stream-description">
-              {!initialized && (
-              <Button
-                key="start-btn"
-                className="primary"
-                onClick={this.start.bind(this)}
-                loading={loading}
-                disabled={loading}
-                block
-              >
-                <PlayCircleOutlined />
-                {' '}
-                Start Broadcasting
-              </Button>
-              )}
-              <Button
-                key="price-btn"
-                block
-                className="secondary"
-                disabled={loading}
-                onClick={() => this.setState({ openPriceModal: true })}
-              >
-                {isFree ? 'Free to view' : (
-                  <>
-                    <img alt="token" src="/static/gem-ico.png" width="20px" />
-                    {user.publicChatPrice}
+      <AgoraProvider config={{ mode: 'live', codec: 'h264', role: 'host' }}>
+        <Layout>
+          <Head>
+            <title>
+              {`${ui?.siteName} | Public Chat`}
+            </title>
+          </Head>
+          <Event
+            event={EVENT_NAME.ROOM_INFORMATIOM_CHANGED}
+            handler={this.onRoomChange.bind(this)}
+          />
+          <Row>
+            <Col xs={24} sm={24} md={16}>
+              <PageHeading title={activeStream?.title || `${user.name || user?.username} Broadcast`} />
+              <ForwardedPublisher
+                uid={user._id}
+                onStatusChange={(val) => this.onStreamStatusChange(val)}
+                ref={this.publisherRef}
+                conversationId={activeStream?.conversation?._id}
+              />
+              <p className="stream-duration">
+                <span>
+                  <ClockCircleOutlined />
+                  {' '}
+                  {videoDuration(callTime)}
+                </span>
+                <span>
+                  <img src="/static/coin-ico.png" alt="gem" width="20px" />
+                  {' '}
+                  {(user?.balance).toFixed(2)}
+                </span>
+              </p>
+              <div className="stream-description">
+                {!initialized ? (
+                  <Button
+                    key="start-btn"
+                    className="primary"
+                    onClick={() => this.setState({ openPriceModal: true })}
+                    disabled={loading}
+                    block
+                  >
+                    <PlayCircleOutlined />
                     {' '}
-                    per minute
-                  </>
+                    Start Broadcasting
+                  </Button>
+                ) : (
+                  <Button
+                    key="start-btn"
+                    className="primary"
+                    onClick={() => Router.push({ pathname: '/model/profile', query: { username: user?.username || user?._id } }, `/${user?.username || user?._id}`)}
+                    disabled={loading}
+                    block
+                  >
+                    <PlayCircleOutlined />
+                    {' '}
+                    Stop Broadcasting
+                  </Button>
                 )}
-                {' '}
-                <EditOutlined />
-              </Button>
-              <Button
-                key="group-btn"
-                block
-                className="secondary"
-                onClick={() => Router.push(
-                  {
-                    pathname: `/live/${settings.optionForPrivate === 'webrtc'
-                      ? 'webrtc/'
-                      : ''
-                    }groupchat`,
-                    query: { performer: JSON.stringify(user) }
-                  },
-                  `/live/${settings.optionForPrivate === 'webrtc'
-                    ? 'webrtc/'
-                    : ''
-                  }groupchat/${user?.username}`
+                {activeStream && (
+                  <Button
+                    key="price-btn"
+                    block
+                    className="secondary"
+                    disabled
+                  >
+                    {activeStream.isFree ? 'Free to join' : (
+                      <>
+                        <img alt="token" src="/static/coin-ico.png" width="20px" />
+                        {activeStream.price}
+                        {' '}
+                        per session
+                      </>
+                    )}
+                  </Button>
                 )}
-              >
-                <VideoCameraOutlined />
-                {' '}
-                Group Chat
-              </Button>
-            </div>
-          </Col>
-          <Col xs={24} sm={24} md={10}>
-            <ChatBox
-              {...this.props}
-              members={members}
-              totalParticipant={total}
-              hideMember={false}
-            />
-          </Col>
-          <Modal
-            centered
-            key="update_stream"
-            title="Update stream information"
-            visible={openPriceModal}
-            footer={null}
-            onCancel={() => this.setState({ openPriceModal: false })}
-          >
-            <StreamPriceForm
-              isFree={isFree}
-              conversationDescription={conversationDescription}
-              streamType="public"
-              submiting={loading || submiting}
-              performer={user}
-              onFinish={this.updateStreamInfo.bind(this)}
-            />
-          </Modal>
-          {/* {this.streamId && (
-          <Col span={24}>
-            <h4 className="page-heading">
-              <CommentOutlined />
-              {' '}
-              REVIEWS
-            </h4>
-            <ListStreamReviews newReview={null} objectId={this.streamId} objectType="stream" />
-          </Col>
-          )} */}
-        </Row>
-      </Layout>
+              </div>
+              <p>{activeStream?.description || 'No description'}</p>
+            </Col>
+            <Col xs={24} sm={24} md={8}>
+              <ChatBox
+                {...this.props}
+                members={members}
+                totalParticipant={total}
+              />
+            </Col>
+            <Modal
+              centered
+              key="update_stream"
+              title="Update stream information"
+              visible={openPriceModal}
+              footer={null}
+              onCancel={() => this.setState({ openPriceModal: false })}
+            >
+              <StreamPriceForm
+                submiting={loading}
+                performer={user}
+                onFinish={this.joinPublicRoom.bind(this)}
+              />
+            </Modal>
+          </Row>
+        </Layout>
+      </AgoraProvider>
     );
   }
 }

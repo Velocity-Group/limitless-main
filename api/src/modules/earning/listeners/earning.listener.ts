@@ -1,7 +1,7 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { QueueEventService, QueueEvent } from 'src/kernel';
-import { PURCHASED_ITEM_SUCCESS_CHANNEL, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TYPE } from 'src/modules/purchased-item/constants';
+import { TOKEN_TRANSACTION_SUCCESS_CHANNEL, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TYPE } from 'src/modules/token-transaction/constants';
 import { EVENT } from 'src/kernel/constants';
 import { PerformerService } from 'src/modules/performer/services';
 import { SettingService } from 'src/modules/settings';
@@ -32,7 +32,7 @@ export class TransactionEarningListener {
     private readonly socketUserService: SocketUserService
   ) {
     this.queueEventService.subscribe(
-      PURCHASED_ITEM_SUCCESS_CHANNEL,
+      TOKEN_TRANSACTION_SUCCESS_CHANNEL,
       EARNING_TOKEN_TOPIC,
       this.handleListenEarningToken.bind(this)
     );
@@ -53,7 +53,6 @@ export class TransactionEarningListener {
     if (!transaction || transaction.status !== PURCHASE_ITEM_STATUS.SUCCESS || !transaction.totalPrice) {
       return;
     }
-    if ([PURCHASE_ITEM_TYPE.FREE_SUBSCRIPTION].includes(transaction.type)) return;
 
     const [
       performerCommissions,

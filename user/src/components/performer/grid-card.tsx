@@ -25,6 +25,7 @@ export default class PerformerGridCard extends PureComponent<IProps> {
           <div className="grid-card" style={{ backgroundImage: `url(${performer?.avatar || '/static/no-avatar.png'})` }}>
             {performer?.isFreeSubscription && <span className="free-status">Free</span>}
             <span className={performer?.isOnline > 0 ? 'online-status active' : 'online-status'} />
+            {performer?.live > 0 && <span className="live-status">Live</span>}
             <div className="card-stat">
               <span>
                 {shortenLargeNumber(performer?.score || 0)}
@@ -38,7 +39,7 @@ export default class PerformerGridCard extends PureComponent<IProps> {
               )}
             </div>
             <div className="model-name">
-              <span>{performer?.name || performer?.username || 'N/A'}</span>
+              {performer?.name || performer?.username || 'N/A'}
               {performer?.verifiedAccount && <TickIcon />}
             </div>
           </div>

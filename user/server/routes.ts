@@ -37,12 +37,8 @@ export default routes()
   .add('my-subscriber', '/model/my-subscriber', '/model/my-subscriber')
   .add('story-manager', '/model/my-story', '/model/my-story')
   .add('payout-request', '/model/payout-request', '/model/payout-request')
-  .add('public-chat', '/model/live', '/model/live')
-  .add('model-private-chat', '/model/live/privatechat/:id', '/model/live/privatechat')
-  .add('webrtc-model-private-chat', '/model/live/webrtc/privatechat/:id', '/model/live/webrtc/privatechat')
-  // user
-  .add('public-stream', '/stream/:username', '/stream')
-  .add('user-private-chat', '/stream/privatechat/:username', '/stream/privatechat')
-  .add('webrtc-user-private-chat', '/stream/webrtc/privatechat/:username', '/stream/webrtc/privatechat')
+  .add('model-stream', '/model/live', '/model/live')
+  .add('user-stream', '/streaming', '/streaming')
+  .add('list-stream', '/streaming/:username', '/streaming/details')
   // must be in the last
   .add('model', '/:username', '/model/profile');

@@ -9,14 +9,20 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
+<<<<<<< HEAD
   performerService, purchaseTokenService, feedService, reactionService, paymentService
+=======
+  performerService, tokenTransctionService, feedService, reactionService, paymentService, utilsService
+>>>>>>> 34fcf442 (rename purchase item to token transaction)
 } from 'src/services';
 import Head from 'next/head';
 import {
   ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined
 } from '@ant-design/icons';
-import { TickIcon, ShareIcon, MessageIcon } from 'src/icons';
+import {
+  TickIcon, ShareIcon, MessageIcon
+} from 'src/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
@@ -179,6 +185,26 @@ class PerformerProfile extends PureComponent<IProps> {
     this.loadItems();
   }
 
+  handleJoinStream = () => {
+    const { currentUser, performer } = this.props;
+    if (!currentUser._id) {
+      message.error('Please log in or register!');
+      return;
+    }
+    if (currentUser.isPerformer) return;
+    if (!performer?.isSubscribed) {
+      message.error('Please subscribe to this model!');
+      return;
+    }
+    Router.push({
+      pathname: '/streaming/details',
+      query: {
+        performer: JSON.stringify(performer),
+        username: performer?.username || performer?._id
+      }
+    }, `/streaming/${performer?.username || performer?._id}`);
+  }
+
   async loadItems() {
     const {
       performer, getGalleries: handleGetGalleries, getVideos: handleGetVids, getFeeds: handleGetFeeds,
@@ -257,7 +283,7 @@ class PerformerProfile extends PureComponent<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await purchaseTokenService.sendTip(performer?._id, { performerId: performer?._id, price });
+      await tokenTransctionService.sendTip(performer?._id, { performerId: performer?._id, price });
       message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
     } catch (e) {
@@ -387,13 +413,6 @@ class PerformerProfile extends PureComponent<IProps> {
                   <ArrowLeftOutlined />
                 </a>
                 <div className="stats-row">
-                  <div className="t-user-name">
-                    {performer?.name || 'N/A'}
-                    {' '}
-                    {performer?.verifiedAccount && (
-                      <TickIcon />
-                    )}
-                  </div>
                   <div className="tab-stat">
                     <div className="tab-item">
                       <span>
@@ -460,7 +479,8 @@ class PerformerProfile extends PureComponent<IProps> {
                     <TickIcon />
                   )}
                   &nbsp;
-                  {currentUser._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
+                  {performer?.live > 0 && currentUser?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
+                  {currentUser?._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
                 </h4>
                 <h5 style={{ textTransform: 'none' }}>
                   @
@@ -504,32 +524,11 @@ class PerformerProfile extends PureComponent<IProps> {
                   </Button>
                 </Tooltip>
                 <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
-                  <Button
-                    className="normal"
-                  >
+                  <Button className="normal">
                     <ShareIcon />
                   </Button>
                 </Popover>
               </div>
-              {/* {performer?.isSubscribed && (
-                      <div className="stream-btns">
-                        <Button
-                          type="link"
-                          className={performer?.streamingStatus === 'public' ? 'secondary active' : 'secondary'}
-                          onClick={() => Router.push(
-                            {
-                              pathname: '/stream',
-                              query: { performer: JSON.stringify(performer) }
-                            },
-                            `/stream/${performer?.username}`
-                          )}
-                        >
-                          <VideoCameraOutlined />
-                          {' '}
-                          Public Chat
-                        </Button>
-                      </div>
-                    )} */}
             </div>
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={ui?.countries || []} performer={performer} />

@@ -66,7 +66,7 @@ export interface IPerformer {
   activateWelcomeVideo: boolean;
   isBookMarked: boolean;
   isSubscribed: boolean;
-  live: boolean;
+  live: number;
   streamingStatus: string;
   ethnicity: string;
   butt: string;

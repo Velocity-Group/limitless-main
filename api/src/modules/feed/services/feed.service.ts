@@ -14,11 +14,10 @@ import { ReactionService } from 'src/modules/reaction/services/reaction.service'
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION } from 'src/modules/reaction/constants';
-import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
+import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/token-transaction/constants';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
-import { SEARCH_CHANNEL } from 'src/modules/search/constants';
-import { PurchasedItemSearchService, PaymentTokenService } from 'src/modules/purchased-item/services';
+import { TokenTransactionSearchService, TokenTransactionService } from 'src/modules/token-transaction/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import * as moment from 'moment';
@@ -38,10 +37,10 @@ export class FeedService {
   constructor(
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
-    @Inject(forwardRef(() => PurchasedItemSearchService))
-    private readonly purchasedItemSearchService: PurchasedItemSearchService,
-    @Inject(forwardRef(() => PaymentTokenService))
-    private readonly paymentTokenService: PaymentTokenService,
+    @Inject(forwardRef(() => TokenTransactionSearchService))
+    private readonly tokenTransactionSearchService: TokenTransactionSearchService,
+    @Inject(forwardRef(() => TokenTransactionService))
+    private readonly paymentTokenService: TokenTransactionService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
     @Inject(forwardRef(() => SubscriptionService))
@@ -160,7 +159,7 @@ export class FeedService {
         expiredAt: { $gt: new Date() },
         status: SUBSCRIPTION_STATUS.ACTIVE
       }) : [],
-      user && user._id ? this.purchasedItemSearchService.findByQuery({
+      user && user._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,
         targetId: { $in: feedIds },
         target: PURCHASE_ITEM_TARTGET_TYPE.FEED,
@@ -360,17 +359,6 @@ export class FeedService {
       query.$or = [
         { text: searchValue }
       ];
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: SEARCH_CHANNEL,
-          eventName: EVENT.CREATED,
-          data: {
-            keyword: req.q,
-            fromSource: 'user',
-            fromSourceId: user?._id || null
-          }
-        })
-      );
     }
     if (req.orientation) {
       query.orientation = req.orientation;

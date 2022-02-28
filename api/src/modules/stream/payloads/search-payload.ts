@@ -1,5 +1,4 @@
 import {
-  IsBoolean,
   IsOptional,
   IsString
 } from 'class-validator';
@@ -23,9 +22,9 @@ export class SearchStreamPayload extends SearchRequest {
   type: string;
 
   @ApiProperty()
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  isFree: boolean;
+  isFree: string;
 
   @ApiProperty()
   @IsString()

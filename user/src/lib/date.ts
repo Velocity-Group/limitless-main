@@ -4,14 +4,6 @@ export function formatDate(date: Date, format = 'DD/MM/YYYY HH:mm:ss') {
   return moment(date).format(format);
 }
 
-export function formatDateNoTime(date: Date, format = 'DD/MM/YYYY') {
-  return moment(date).format(format);
-}
-
-export function formatDateShort(date: Date, format = 'MMM DD') {
-  return moment(date).format(format);
-}
-
 export function formatDateFromnow(date: Date) {
   return moment(date).fromNow();
 }

@@ -1,5 +1,4 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { ConfigService } from 'nestjs-config';
 import { getConfig } from 'src/kernel';
 import { PaymentDto } from 'src/modules/purchased-item/dtos';
 import axios from 'axios';
@@ -14,7 +13,6 @@ interface BitpaySinglePurchase {
 @Injectable()
 export class BitpayService {
   constructor(
-    private readonly config: ConfigService
   ) { }
 
   public async createInvoice(options: BitpaySinglePurchase) {

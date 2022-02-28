@@ -141,7 +141,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
             />
           </div>
           <div className="filter-item">
-            <Select style={{ width: '100%' }} defaultValue="" onChange={(val) => this.setState({ sortBy: val }, () => this.handleSubmit())}>
+            <Select style={{ width: '100%' }} defaultValue="live" onChange={(val) => this.setState({ sortBy: val }, () => this.handleSubmit())}>
               <Select.Option value="" disabled>
                 <FilterOutlined />
                 {' '}
@@ -155,6 +155,12 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               </Select.Option>
               <Select.Option value="oldest">
                 Oldest
+              </Select.Option>
+              <Select.Option value="online">
+                Online
+              </Select.Option>
+              <Select.Option value="live">
+                Live
               </Select.Option>
             </Select>
           </div>

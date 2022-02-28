@@ -11,7 +11,8 @@ const initialState = {
     optionForBroadcast: 'hls',
     optionForGroup: 'hls',
     optionForPrivate: 'hls',
-    secureOption: false
+    secureOption: false,
+    agoraEnable: false
   }
 };
 

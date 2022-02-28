@@ -14,9 +14,9 @@ import { CommentForm, ListComments } from '@components/comment';
 import {
   getComments, moreComment, createComment, deleteComment
 } from '@redux/comment/actions';
-import { formatDateShort, videoDuration, shortenLargeNumber } from '@lib/index';
+import { formatDate, videoDuration, shortenLargeNumber } from '@lib/index';
 import {
-  reactionService, feedService, purchaseTokenService, paymentService, reportService
+  reactionService, feedService, tokenTransctionService, paymentService, reportService
 } from '@services/index';
 import { connect } from 'react-redux';
 import { TipPerformerForm } from '@components/performer/tip-form';
@@ -264,7 +264,7 @@ class FeedCard extends Component<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await purchaseTokenService.sendTip(feed?.performer?._id, { performerId: feed?.performer?._id, price });
+      await tokenTransctionService.sendTip(feed?.performer?._id, { performerId: feed?.performer?._id, price });
       message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
     } catch (e) {
@@ -284,7 +284,7 @@ class FeedCard extends Component<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await purchaseTokenService.purchaseFeed(feed._id, {});
+      await tokenTransctionService.purchaseFeed(feed._id, {});
       message.success('Unlocked successfully!');
       this.setState({ isBought: true });
       handleUpdateBalance({ token: -feed.price });
@@ -414,7 +414,7 @@ class FeedCard extends Component<IProps> {
             </div>
           </Link>
           <div className="feed-top-right">
-            <span className="feed-time">{formatDateShort(feed.updatedAt)}</span>
+            <span className="feed-time">{formatDate(feed.updatedAt, 'MMM DD')}</span>
             {dropdown}
           </div>
         </div>

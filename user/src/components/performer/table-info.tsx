@@ -1,7 +1,7 @@
 import { Descriptions, Collapse } from 'antd';
 import { PureComponent } from 'react';
 import { ICountry, IPerformer } from 'src/interfaces';
-import { formatDateNoTime } from '@lib/date';
+import { formatDate } from '@lib/date';
 
 interface IProps {
   performer: IPerformer;
@@ -58,7 +58,7 @@ export class PerformerInfo extends PureComponent<IProps> {
                 </Descriptions.Item>
               )}
               {performer?.sexualOrientation && <Descriptions.Item label="Sexual orientation">{performer?.sexualOrientation}</Descriptions.Item>}
-              {performer?.dateOfBirth && <Descriptions.Item label="Date of Birth">{formatDateNoTime(performer?.dateOfBirth)}</Descriptions.Item>}
+              {performer?.dateOfBirth && <Descriptions.Item label="Date of Birth">{formatDate(performer?.dateOfBirth, 'DD/MM/YYYY')}</Descriptions.Item>}
               {performer?.bodyType && <Descriptions.Item label="Body Type">{performer?.bodyType}</Descriptions.Item>}
               {performer?.state && <Descriptions.Item label="State">{performer?.state}</Descriptions.Item>}
               {performer?.city && <Descriptions.Item label="City">{performer?.city}</Descriptions.Item>}

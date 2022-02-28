@@ -9,16 +9,13 @@ import { EVENT } from 'src/kernel/constants';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
-  VideoService,
-  ProductService,
-  GalleryService
+  VideoService, ProductService, GalleryService
 } from 'src/modules/performer-assets/services';
 import { GalleryDto, VideoDto } from 'src/modules/performer-assets/dtos';
 import { PerformerService } from 'src/modules/performer/services';
 import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
 import { FeedService } from 'src/modules/feed/services';
 import { FeedDto } from 'src/modules/feed/dtos';
-import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { toObjectId, generateUuid } from 'src/kernel/helpers/string.helper';
 import { StreamService } from 'src/modules/stream/services';
@@ -36,12 +33,10 @@ import {
   PURCHASE_ITEM_TARGET_SOURCE
 } from '../constants';
 import {
-  NotEnoughMoneyException,
-  OverProductStockException
+  NotEnoughMoneyException, OverProductStockException
 } from '../exceptions';
 import {
-  PurchaseProductsPayload,
-  SendTipsPayload
+  PurchaseProductsPayload, SendTipsPayload
 } from '../payloads';
 import { PaymentDto } from '../dtos';
 
@@ -70,52 +65,8 @@ export class PurchaseItemService {
     return this.TokenPaymentModel.findById(id);
   }
 
-  public async createSubscriptionPaymentTransaction(type: string, performer: any, user: UserDto) {
-    const paymentTransaction = new this.TokenPaymentModel({
-      source: PURCHASE_ITEM_TARGET_SOURCE.USER,
-      sourceId: user._id,
-      target: PURCHASE_ITEM_TARTGET_TYPE.PERFORMER,
-      targetId: performer._id,
-      performerId: performer._id,
-      type: type === SUBSCRIPTION_TYPE.MONTHLY
-        ? PURCHASE_ITEM_TYPE.MONTHLY_SUBSCRIPTION
-        : type === SUBSCRIPTION_TYPE.YEARLY
-          ? PURCHASE_ITEM_TYPE.YEARLY_SUBSCRIPTION
-          : PURCHASE_ITEM_TYPE.FREE_SUBSCRIPTION,
-      totalPrice: type === SUBSCRIPTION_TYPE.MONTHLY
-        ? performer.monthlyPrice.toFixed(2)
-        : type === SUBSCRIPTION_TYPE.YEARLY
-          ? performer.yearlyPrice.toFixed(2)
-          : 0,
-      originalPrice: type === SUBSCRIPTION_TYPE.MONTHLY
-        ? performer.monthlyPrice.toFixed(2)
-        : type === SUBSCRIPTION_TYPE.YEARLY
-          ? performer.yearlyPrice.toFixed(2)
-          : 0,
-
-      products: {
-        name: `${performer.name} @${performer.username}`,
-        description: `${type}_subscription ${performer.name}`,
-        price:
-          type === SUBSCRIPTION_TYPE.MONTHLY
-            ? performer.monthlyPrice.toFixed(2)
-            : type === SUBSCRIPTION_TYPE.YEARLY
-              ? performer.yearlyPrice.toFixed(2)
-              : 0,
-        productId: performer._id,
-        productType: PURCHASE_ITEM_TARTGET_TYPE.PERFORMER,
-        performerId: performer._id,
-        quantity: 1
-      },
-      status: PURCHASE_ITEM_STATUS.SUCCESS
-    });
-
-    await paymentTransaction.save();
-    return paymentTransaction;
-  }
-
   public async purchaseProduct(
-    id: string | ObjectId,
+    id: string,
     user: PerformerDto,
     payload: PurchaseProductsPayload
   ) {
@@ -214,12 +165,27 @@ export class PurchaseItemService {
   }
 
   public async createPaymentTokenStream(stream: StreamModel, purchaseItemType: string, price: number, performer: any, user: UserDto) {
-    const paymentTransaction = new this.TokenPaymentModel();
+    let paymentTransaction = await this.TokenPaymentModel.findOne({
+      sourceId: user._id,
+      target: PURCHASE_ITEM_TARTGET_TYPE.STREAM,
+      type: purchaseItemType,
+      targetId: stream._id,
+      sessionId: stream.sessionId
+    });
+    if (paymentTransaction) {
+      paymentTransaction.originalPrice += price;
+      paymentTransaction.totalPrice += price;
+      paymentTransaction.updatedAt = new Date();
+      await paymentTransaction.save();
+      return paymentTransaction;
+    }
+    paymentTransaction = new this.TokenPaymentModel();
     paymentTransaction.originalPrice = price;
     paymentTransaction.source = PURCHASE_ITEM_TARGET_SOURCE.USER;
     paymentTransaction.sourceId = user._id;
     paymentTransaction.target = PURCHASE_ITEM_TARTGET_TYPE.STREAM;
     paymentTransaction.targetId = stream._id;
+    paymentTransaction.sessionId = stream.sessionId;
     paymentTransaction.performerId = stream.performerId;
     paymentTransaction.type = purchaseItemType;
     paymentTransaction.totalPrice = price;

@@ -13,8 +13,8 @@ import { PerformerService } from 'src/modules/performer/services';
 import { EVENT } from 'src/kernel/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { REF_TYPE } from 'src/modules/file/constants';
-import { PaymentTokenService } from 'src/modules/purchased-item/services';
-import { PurchaseItemType } from 'src/modules/purchased-item/constants';
+import { TokenTransactionService } from 'src/modules/token-transaction/services';
+import { PurchaseItemType } from 'src/modules/token-transaction/constants';
 import { UserDto } from 'src/modules/user/dtos';
 import { Storage } from 'src/modules/storage/contants';
 import { PerformerDto } from 'src/modules/performer/dtos';
@@ -39,8 +39,8 @@ export class PhotoService {
     private readonly galleryService: GalleryService,
     @Inject(forwardRef(() => SubscriptionService))
     private readonly subscriptionService: SubscriptionService,
-    @Inject(forwardRef(() => PaymentTokenService))
-    private readonly paymentTokenService: PaymentTokenService,
+    @Inject(forwardRef(() => TokenTransactionService))
+    private readonly tokenTransactionService: TokenTransactionService,
     @Inject(PERFORMER_PHOTO_MODEL_PROVIDER)
     private readonly photoModel: Model<PhotoModel>,
     private readonly queueEventService: QueueEventService,
@@ -208,7 +208,7 @@ export class PhotoService {
     ]);
     if (performer) dto.performer = new PerformerDto(performer).toResponse();
     if (gallery) dto.gallery = new GalleryDto(gallery);
-    const isBought = user && gallery ? this.paymentTokenService.checkBought(new GalleryDto(gallery), PurchaseItemType.GALLERY, user) : false;
+    const isBought = user && gallery ? this.tokenTransactionService.checkBought(new GalleryDto(gallery), PurchaseItemType.GALLERY, user) : false;
     const canView = (gallery.isSale && isBought) || (!gallery.isSale && isSubscribed) || (`${user?._id}` === `${gallery?.performerId}`) || (user && user.roles && user.roles.includes('admin'));
     if (file) {
       let fileUrl = file.getUrl(canView);
@@ -295,7 +295,7 @@ export class PhotoService {
     }
     if (gallery.isSale) {
       // check bought
-      const checkBought = await this.paymentTokenService.checkBought(new GalleryDto(gallery), PurchaseItemType.GALLERY, user);
+      const checkBought = await this.tokenTransactionService.checkBought(new GalleryDto(gallery), PurchaseItemType.GALLERY, user);
       if (!checkBought) {
         throw new ForbiddenException();
       }

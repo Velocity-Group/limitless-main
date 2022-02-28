@@ -1,29 +1,38 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { QueueEvent, QueueEventService, StringHelper } from 'src/kernel';
 import { Model } from 'mongoose';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { ObjectId } from 'mongodb';
-import { MESSAGE_CHANNEL, MESSAGE_EVENT } from '../constants';
+import { StreamService } from 'src/modules/stream/services';
+import { MESSAGE_CHANNEL, MESSAGE_EVENT, MESSAGE_PRIVATE_STREAM_CHANNEL } from '../constants';
 import { MessageDto } from '../dtos';
 import { CONVERSATION_MODEL_PROVIDER, NOTIFICATION_MESSAGE_MODEL_PROVIDER } from '../providers';
 import { ConversationModel, NotificationMessageModel } from '../models';
 
 const MESSAGE_NOTIFY = 'MESSAGE_NOTIFY';
+const MESSAGE_STREAM_NOTIFY = 'MESSAGE_STREAM_NOTIFY';
 
 @Injectable()
 export class MessageListener {
   constructor(
-    private readonly queueEventService: QueueEventService,
-    private readonly socketUserService: SocketUserService,
+    @Inject(forwardRef(() => StreamService))
+    private readonly streamService: StreamService,
     @Inject(CONVERSATION_MODEL_PROVIDER)
     private readonly conversationModel: Model<ConversationModel>,
     @Inject(NOTIFICATION_MESSAGE_MODEL_PROVIDER)
-    private readonly NotificationModel: Model<NotificationMessageModel>
+    private readonly NotificationModel: Model<NotificationMessageModel>,
+    private readonly queueEventService: QueueEventService,
+    private readonly socketUserService: SocketUserService
   ) {
     this.queueEventService.subscribe(
       MESSAGE_CHANNEL,
       MESSAGE_NOTIFY,
       this.handleMessage.bind(this)
+    );
+    this.queueEventService.subscribe(
+      MESSAGE_PRIVATE_STREAM_CHANNEL,
+      MESSAGE_STREAM_NOTIFY,
+      this.handleStreamMessage.bind(this)
     );
   }
 
@@ -102,5 +111,12 @@ export class MessageListener {
 
   private async handleSent(recipientId, message): Promise<void> {
     await this.socketUserService.emitToUsers(recipientId, 'message_created', message);
+  }
+
+  private async handleStreamMessage(event: QueueEvent): Promise<void> {
+    if (![MESSAGE_EVENT.CREATED, MESSAGE_EVENT.DELETED].includes(event.eventName)) return;
+    const { message, conversation } = event.data;
+    const roomName = this.streamService.getRoomName(conversation._id, conversation.type);
+    await this.socketUserService.emitToRoom(roomName, `message_${event.eventName}_conversation_${conversation._id}`, message);
   }
 }

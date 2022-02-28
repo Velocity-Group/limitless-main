@@ -9,7 +9,7 @@ import { VideoService } from './services/video.service';
 import { AdminPerformerVideosController } from './controllers/admin-video.controller';
 import { PerformerModule } from '../performer/performer.module';
 import { MailerModule } from '../mailer/mailer.module';
-import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
+import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
 import { VideoSearchService } from './services/video-search.service';
 import { GalleryService } from './services/gallery.service';
 import { AdminPerformerGalleryController } from './controllers/admin-gallery.controller';
@@ -41,7 +41,7 @@ import { UserModule } from '../user/user.module';
     forwardRef(() => FileModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => ReactionModule),
-    forwardRef(() => PurchasedItemModule),
+    forwardRef(() => TokenTransactionModule),
     forwardRef(() => SubscriptionModule)
   ],
   providers: [
