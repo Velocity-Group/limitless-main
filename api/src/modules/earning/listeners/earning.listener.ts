@@ -68,8 +68,6 @@ export class TransactionEarningListener {
       this.settingService.getKeyValue(SETTING_KEYS.FEED_SALE_COMMISSION),
       this.settingService.getKeyValue(SETTING_KEYS.PRODUCT_SALE_COMMISSION),
       this.settingService.getKeyValue(SETTING_KEYS.TIP_COMMISSION),
-      this.settingService.getKeyValue(SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION),
-      this.settingService.getKeyValue(SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION),
       this.settingService.getKeyValue(SETTING_KEYS.VIDEO_SALE_COMMISSION),
       this.settingService.getKeyValue(SETTING_KEYS.GALLERY_SALE_COMMISSION),
       this.settingService.getKeyValue(SETTING_KEYS.STREAM_COMMISSION)
