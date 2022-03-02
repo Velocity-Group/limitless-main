@@ -31,7 +31,8 @@ module.exports.up = async function up(next) {
     username: 'admin',
     roles: ['admin'],
     status: 'active',
-    emailVerified: true
+    emailVerified: true,
+    verifiedEmail: true
   };
   const source = await DB.collection(COLLECTION.USER).findOne({
     $or: [

@@ -44,4 +44,8 @@ export class FileModel extends Document {
   createdAt: Date;
 
   updatedAt: Date;
+
+  acl: string;
+
+  metadata: any;
 }

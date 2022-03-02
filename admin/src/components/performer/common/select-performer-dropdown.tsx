@@ -22,7 +22,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
   loadPerformers = debounce(async (q) => {
     try {
       await this.setState({ loading: true });
-      const resp = await (await performerService.search({ q, limit: 99 })).data;
+      const resp = await (await performerService.search({ q, limit: 99, role: 'performer' })).data;
       this.setState({
         data: resp.data,
         loading: false,

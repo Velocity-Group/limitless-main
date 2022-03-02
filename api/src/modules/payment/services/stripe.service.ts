@@ -183,6 +183,7 @@ export class StripeService {
       const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
       const plan = await stripe.subscriptions.create({
         customer: user.stripeCustomerId,
+        // product detail
         items: [
           {
             price_data: {
@@ -199,6 +200,7 @@ export class StripeService {
         metadata: {
           transactionId: transaction._id.toString()
         },
+        // transfer money for model
         transfer_data: {
           destination: connectAccount.accountId,
           amount_percent: 100 - commission * 100 // % percentage
