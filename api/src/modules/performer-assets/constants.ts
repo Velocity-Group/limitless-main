@@ -29,3 +29,5 @@ export const PRODUCT_STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive'
 };
+
+export const DELETED_ASSETS_CHANNEL = 'DELETED_ASSETS_CHANNEL';

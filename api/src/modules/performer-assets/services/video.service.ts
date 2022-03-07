@@ -28,7 +28,7 @@ import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
 import { Storage } from 'src/modules/storage/contants';
 import { VideoUpdatePayload } from '../payloads';
 import { VideoDto, IVideoResponse } from '../dtos';
-import { VIDEO_STATUS } from '../constants';
+import { DELETED_ASSETS_CHANNEL, VIDEO_STATUS } from '../constants';
 import { VideoCreatePayload } from '../payloads/video-create.payload';
 import { VideoModel } from '../models';
 import { PERFORMER_VIDEO_MODEL_PROVIDER } from '../providers';
@@ -497,6 +497,13 @@ export class VideoService {
     await this.queueEventService.publish(
       new QueueEvent({
         channel: PERFORMER_COUNT_VIDEO_CHANNEL,
+        eventName: EVENT.DELETED,
+        data: new VideoDto(video)
+      })
+    );
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: DELETED_ASSETS_CHANNEL,
         eventName: EVENT.DELETED,
         data: new VideoDto(video)
       })

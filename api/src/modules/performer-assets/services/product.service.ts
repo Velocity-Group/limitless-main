@@ -19,7 +19,7 @@ import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PaymentTokenService } from 'src/modules/purchased-item/services';
 import { PurchaseItemType } from 'src/modules/purchased-item/constants';
 import { Storage } from 'src/modules/storage/contants';
-import { PRODUCT_TYPE } from '../constants';
+import { DELETED_ASSETS_CHANNEL, PRODUCT_TYPE } from '../constants';
 import { ProductDto } from '../dtos';
 import { ProductCreatePayload, ProductUpdatePayload } from '../payloads';
 import { InvalidFileException } from '../exceptions';
@@ -183,6 +183,13 @@ export class ProductService {
     await this.queueEventService.publish(
       new QueueEvent({
         channel: PERFORMER_PRODUCT_CHANNEL,
+        eventName: EVENT.DELETED,
+        data: new ProductDto(product)
+      })
+    );
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: DELETED_ASSETS_CHANNEL,
         eventName: EVENT.DELETED,
         data: new ProductDto(product)
       })

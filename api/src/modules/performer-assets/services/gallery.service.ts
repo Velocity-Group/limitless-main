@@ -6,6 +6,8 @@ import { Model } from 'mongoose';
 import {
   EntityNotFoundException,
   PageableData,
+  QueueEvent,
+  QueueEventService,
   StringHelper
 } from 'src/kernel';
 import { PerformerService } from 'src/modules/performer/services';
@@ -19,7 +21,7 @@ import { PaymentTokenService, PurchasedItemSearchService } from 'src/modules/pur
 import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { STATUS } from 'src/kernel/constants';
+import { EVENT, STATUS } from 'src/kernel/constants';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { GalleryUpdatePayload } from '../payloads/gallery-update.payload';
 import { GalleryDto } from '../dtos';
@@ -30,6 +32,7 @@ import {
   PERFORMER_PHOTO_MODEL_PROVIDER
 } from '../providers';
 import { PhotoService } from './photo.service';
+import { DELETED_ASSETS_CHANNEL } from '../constants';
 
 @Injectable()
 export class GalleryService {
@@ -50,7 +53,8 @@ export class GalleryService {
     private readonly galleryModel: Model<GalleryModel>,
     @Inject(PERFORMER_PHOTO_MODEL_PROVIDER)
     private readonly photoModel: Model<PhotoModel>,
-    private readonly fileService: FileService
+    private readonly fileService: FileService,
+    private readonly queueEventService: QueueEventService
   ) {}
 
   public async create(
@@ -494,6 +498,13 @@ export class GalleryService {
     }
     await gallery.remove();
     await this.photoService.deleteByGallery(gallery._id);
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: DELETED_ASSETS_CHANNEL,
+        eventName: EVENT.DELETED,
+        data: new GalleryDto(gallery)
+      })
+    );
     return true;
   }
 
