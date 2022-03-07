@@ -97,7 +97,7 @@ module.exports.up = async function up(next) {
     const key = parse(file).name;
     const exist = await DB.collection(COLLECTION.EMAIL_TEMPLATE).findOne({ key });
     if (!exist) {
-      await DB.collection(COLLECTION.EMAIL_TEMPLATE).insertOne({
+      templateMap[key] && await DB.collection(COLLECTION.EMAIL_TEMPLATE).insertOne({
         key,
         content,
         subject: templateMap[key] ? templateMap[key].subject : null,
