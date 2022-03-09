@@ -3,7 +3,7 @@ import { PureComponent, createRef } from 'react';
 import { message, Layout } from 'antd';
 import Page from '@components/common/layout/page';
 import {
-  ICountry, ILangguges, IBody
+  ICountry, ILangguges, IBody, IPhoneCodes
 } from 'src/interfaces';
 import Router from 'next/router';
 import { performerService } from '@services/index';
@@ -15,6 +15,7 @@ import { BreadcrumbComponent } from '@components/common';
 interface IProps {
   countries: ICountry[];
   languages: ILangguges[];
+  phoneCodes: IPhoneCodes[];
   bodyInfo: IBody;
 }
 
@@ -83,7 +84,7 @@ class PerformerCreate extends PureComponent<IProps> {
   render() {
     const { creating, avatarUrl, coverUrl } = this.state;
     const {
-      countries, languages, bodyInfo
+      countries, languages, bodyInfo, phoneCodes
     } = this.props;
     return (
       <Layout>
@@ -101,6 +102,7 @@ class PerformerCreate extends PureComponent<IProps> {
             submiting={creating}
             countries={countries}
             languages={languages}
+            phoneCodes={phoneCodes}
             bodyInfo={bodyInfo}
             avatarUrl={avatarUrl}
             coverUrl={coverUrl}
