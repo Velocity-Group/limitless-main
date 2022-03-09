@@ -14,7 +14,7 @@ interface IProps {
   notFoundText?: string;
 }
 
-const UserPerformerBookmarks = ({
+const ScrollListPerformers = ({
   loadMore, performers, total, loading, notFoundText
 }: IProps) => (
   <>
@@ -44,4 +44,4 @@ const UserPerformerBookmarks = ({
   </>
 );
 
-export default UserPerformerBookmarks;
+export default ScrollListPerformers;
