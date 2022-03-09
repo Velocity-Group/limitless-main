@@ -13,7 +13,6 @@ import {
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
-import { ObjectId } from 'mongodb';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserDto } from 'src/modules/user/dtos';
 import { PurchaseProductsPayload, SendTipsPayload } from '../payloads';
@@ -31,7 +30,7 @@ export class PaymentTokenController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async purchaseProduct(
     @CurrentUser() user: PerformerDto,
-    @Param('productId') productId: string | ObjectId,
+    @Param('productId') productId: string,
     @Body() payload: PurchaseProductsPayload
   ): Promise<DataResponse<any>> {
     const info = await this.paymentService.purchaseProduct(
@@ -49,7 +48,7 @@ export class PaymentTokenController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async purchaseVideo(
     @CurrentUser() user: PerformerDto,
-    @Param('videoId') videoId: string | ObjectId
+    @Param('videoId') videoId: string
   ): Promise<DataResponse<any>> {
     const info = await this.paymentService.purchaseVideo(videoId, user);
     return DataResponse.ok(info);

@@ -238,7 +238,7 @@ export class PurchaseItemService {
     return paymentTransaction.save();
   }
 
-  public async purchaseVideo(id: string | ObjectId, user: PerformerDto) {
+  public async purchaseVideo(id: string, user: PerformerDto) {
     const video = await this.videoService.findById(id);
     if (!video || (video && !video.isSale) || (video && !video.price)) {
       throw new EntityNotFoundException();

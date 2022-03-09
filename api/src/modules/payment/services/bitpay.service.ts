@@ -1,8 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from 'nestjs-config';
 import { getConfig } from 'src/kernel';
-import { PaymentDto } from 'src/modules/purchased-item/dtos';
 import axios from 'axios';
+import { PaymentDto } from '../dtos';
 
 interface BitpaySinglePurchase {
   bitpayApiToken: string;
