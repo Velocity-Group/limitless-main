@@ -7,8 +7,7 @@ import {
   IBanking,
   IUIConfig,
   ICountry,
-  IHeight,
-  IWeight
+  IBody
 } from 'src/interfaces';
 import {
   updatePerformer,
@@ -33,8 +32,7 @@ interface IProps {
   ui: IUIConfig;
   updateCurrentUserCover: Function;
   countries: ICountry[];
-  heights: IHeight[];
-  weights: IWeight[];
+  bodyInfo: IBody;
 }
 class AccountSettings extends PureComponent<IProps> {
   static authenticate = true;
@@ -42,15 +40,13 @@ class AccountSettings extends PureComponent<IProps> {
   static onlyPerformer = true;
 
   static async getInitialProps() {
-    const [countries, heights, weights] = await Promise.all([
+    const [countries, bodyInfo] = await Promise.all([
       utilsService.countriesList(),
-      utilsService.heightList(),
-      utilsService.weightList()
+      utilsService.bodyInfo()
     ]);
     return {
-      countries: countries && countries.data ? countries.data : [],
-      heights: heights && heights.data ? heights.data : [],
-      weights: weights && weights.data ? weights.data : []
+      countries: countries?.data || [],
+      bodyInfo: bodyInfo?.data
     };
   }
 
@@ -122,7 +118,7 @@ class AccountSettings extends PureComponent<IProps> {
 
   render() {
     const {
-      currentUser, updating, ui, countries, heights, weights
+      currentUser, updating, ui, countries, bodyInfo
     } = this.props;
     const { emailSending, countTime } = this.state;
     const uploadHeaders = {
@@ -163,8 +159,7 @@ class AccountSettings extends PureComponent<IProps> {
                   videoUploadUrl: performerService.getVideoUploadUrl()
                 }}
                 countries={countries}
-                weights={weights}
-                heights={heights}
+                bodyInfo={bodyInfo}
               />
             </Tabs.TabPane>
             <Tabs.TabPane tab={<span>ID Documents</span>} key="verification">

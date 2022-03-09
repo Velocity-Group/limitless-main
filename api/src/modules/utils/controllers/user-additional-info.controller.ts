@@ -9,15 +9,9 @@ import { UserAdditionalInfoService } from '../services/user-additional-info.serv
 export class UserAdditionalInfoController {
   constructor(private readonly userAdditionalInfoService: UserAdditionalInfoService) {}
 
-  @Get('heights')
+  @Get('')
   @HttpCode(HttpStatus.OK)
   listHeight() {
-    return DataResponse.ok(this.userAdditionalInfoService.getHeightList());
-  }
-
-  @Get('weights')
-  @HttpCode(HttpStatus.OK)
-  listWeight() {
-    return DataResponse.ok(this.userAdditionalInfoService.getWeightList());
+    return DataResponse.ok(this.userAdditionalInfoService.getBodyInfo());
   }
 }

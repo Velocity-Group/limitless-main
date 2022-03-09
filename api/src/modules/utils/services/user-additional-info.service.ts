@@ -1,31 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { HEIGHTLIST, WEIGHTLIST } from '../constants';
+import {
+  WEIGHTS, HEIGHTS, AGES, ETHNICITIES, EYES, HAIRS,
+  BUTTS, PUBIC_HAIRS, BODY_TYPES, GENDERS, SEXUAL_ORIENTATIONS
+} from '../constants';
 
 @Injectable()
 export class UserAdditionalInfoService {
-  private heightList;
-
-  private weightList;
-
-  public getHeightList() {
-    if (this.heightList) {
-      return this.heightList;
-    }
-
-    this.heightList = HEIGHTLIST.map((h: string) => ({
-      text: h
-    }));
-    return this.heightList;
-  }
-
-  public getWeightList() {
-    if (this.weightList) {
-      return this.weightList;
-    }
-
-    this.weightList = WEIGHTLIST.map((w: string) => ({
-      text: w
-    }));
-    return this.weightList;
+  public getBodyInfo() {
+    return {
+      heights: HEIGHTS,
+      weights: WEIGHTS,
+      ages: AGES,
+      butts: BUTTS,
+      eyes: EYES,
+      ethnicities: ETHNICITIES,
+      genders: GENDERS,
+      hairs: HAIRS,
+      pubicHairs: PUBIC_HAIRS,
+      bodyTypes: BODY_TYPES,
+      sexualOrientations: SEXUAL_ORIENTATIONS
+    };
   }
 }

@@ -11,7 +11,7 @@ import {
   feedService, productService, galleryService, videoService, performerService
 } from 'src/services';
 import Head from 'next/head';
-import UserPerformerBookmarks from '@components/user/bookmarks/performer-bookmarks';
+import ScrollListPerformers from '@components/performer/scroll-list';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
@@ -347,7 +347,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                     {totalPerformers > 1 ? 'MODELS' : 'MODEL'}
                   </h4>
                 </div>
-                <UserPerformerBookmarks
+                <ScrollListPerformers
                   loading={loading}
                   performers={performers.map((p) => p.objectInfo)}
                   total={totalPerformers}

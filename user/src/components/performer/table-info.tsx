@@ -67,7 +67,6 @@ export class PerformerInfo extends PureComponent<IProps> {
               {performer?.eyes && <Descriptions.Item label="Eye color">{performer?.eyes}</Descriptions.Item>}
               {performer?.ethnicity && <Descriptions.Item label="Ethnicity">{performer?.ethnicity}</Descriptions.Item>}
               {performer?.hair && <Descriptions.Item label="Hair color">{performer?.hair}</Descriptions.Item>}
-              {performer?.pubicHair && <Descriptions.Item label="Pubic Hair">{performer?.pubicHair}</Descriptions.Item>}
               {performer?.butt && <Descriptions.Item label="Butt size">{performer?.butt}</Descriptions.Item>}
             </Descriptions>
           </Collapse.Panel>

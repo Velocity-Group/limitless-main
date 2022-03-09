@@ -1,48 +1,47 @@
-import { PureComponent } from 'react';
-import {
-  Alert, Spin, Row, Col
-} from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { IPerformer } from 'src/interfaces';
-import PerformerCard from './card';
+import PerformerCard from '@components/performer/grid-card';
+import {
+  Row, Col, Alert, Spin
+} from 'antd';
 
 interface IProps {
-  items: IPerformer[];
-  canLoadmore: boolean;
+  performers: IPerformer[];
+  total: number;
   loadMore(): Function;
   loading: boolean;
+  // eslint-disable-next-line react/require-default-props
+  notFoundText?: string;
 }
 
-export class ScrollListPerformer extends PureComponent<IProps> {
-  render() {
-    const {
-      items = [], loadMore, canLoadmore = false, loading = false
-    } = this.props;
-    return (
-      <>
-        <InfiniteScroll
-          dataLength={items.length}
-          hasMore={canLoadmore}
-          loader={null}
-          next={loadMore}
-          endMessage={null}
-          scrollThreshold={0.9}
-        >
-          <Row>
-            {items.length > 0 && items.map((performer) => (
-              <Col xs={12} sm={12} md={8} lg={8} key={performer._id}>
-                <PerformerCard performer={performer} />
-              </Col>
-            ))}
-          </Row>
-          {!loading && !items.length && (
-          <div className="main-container custom">
-            <Alert className="text-center" type="info" message="No data was found" />
-          </div>
-          )}
-          {loading && <div className="text-center"><Spin /></div>}
-        </InfiniteScroll>
-      </>
-    );
-  }
-}
+const UserPerformerBookmarks = ({
+  loadMore, performers, total, loading, notFoundText
+}: IProps) => (
+  <>
+    <InfiniteScroll
+      dataLength={performers.length}
+      hasMore={performers && performers.length < total}
+      loader={null}
+      next={loadMore}
+      endMessage={null}
+      scrollThreshold={0.9}
+    >
+      <Row>
+        {performers.length > 0
+          && performers.map((p: any) => (
+            <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
+              <PerformerCard performer={p} />
+            </Col>
+          ))}
+      </Row>
+    </InfiniteScroll>
+    {!performers.length && !loading && <div className="main-container custom text-center"><Alert type="info" message={notFoundText || 'No profile was found'} /></div>}
+    {loading && (
+    <div className="text-center">
+      <Spin />
+    </div>
+    )}
+  </>
+);
+
+export default UserPerformerBookmarks;

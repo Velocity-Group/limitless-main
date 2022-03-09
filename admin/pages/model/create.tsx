@@ -3,7 +3,7 @@ import { PureComponent, createRef } from 'react';
 import { message, Layout } from 'antd';
 import Page from '@components/common/layout/page';
 import {
-  ICountry, ILangguges, IPerformerCategory, IHeight, IWeight
+  ICountry, ILangguges, IBody
 } from 'src/interfaces';
 import Router from 'next/router';
 import { performerService } from '@services/index';
@@ -15,30 +15,22 @@ import { BreadcrumbComponent } from '@components/common';
 interface IProps {
   countries: ICountry[];
   languages: ILangguges[];
-  categories: IPerformerCategory[];
-  heights?: IHeight[];
-  weights?: IWeight[];
+  bodyInfo: IBody;
 }
 
 class PerformerCreate extends PureComponent<IProps> {
   static async getInitialProps() {
-    const [countries, languages, heights, weights] = await Promise.all([
+    const [countries, languages, phoneCodes, bodyInfo] = await Promise.all([
       utilsService.countriesList(),
       utilsService.languagesList(),
-      utilsService.heightList(),
-      utilsService.weightList()
-      // performerCategoryService.search({
-      //   sortBy: 'ordering',
-      //   sort: 'asc',
-      //   limit: 100
-      // })
+      utilsService.phoneCodesList(),
+      utilsService.bodyInfo()
     ]);
     return {
-      countries: countries && countries.data ? countries.data : [],
-      languages: languages && languages.data ? languages.data : [],
-      heights: heights && heights.data ? heights.data : [],
-      weights: weights && weights.data ? weights.data : []
-      // categories: categories.data && categories.data.data ? categories.data.data : []
+      countries: countries?.data || [],
+      languages: languages?.data || [],
+      phoneCodes: phoneCodes?.data || [],
+      bodyInfo: bodyInfo?.data
     };
   }
 
@@ -91,7 +83,7 @@ class PerformerCreate extends PureComponent<IProps> {
   render() {
     const { creating, avatarUrl, coverUrl } = this.state;
     const {
-      countries, languages, categories, heights, weights
+      countries, languages, bodyInfo
     } = this.props;
     return (
       <Layout>
@@ -109,9 +101,7 @@ class PerformerCreate extends PureComponent<IProps> {
             submiting={creating}
             countries={countries}
             languages={languages}
-            categories={categories}
-            heights={heights}
-            weights={weights}
+            bodyInfo={bodyInfo}
             avatarUrl={avatarUrl}
             coverUrl={coverUrl}
           />

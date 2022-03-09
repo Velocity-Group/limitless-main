@@ -9,17 +9,30 @@ import Head from 'next/head';
 import { PerformerAdvancedFilter } from '@components/common/base/performer-advanced-filter';
 import PageHeading from '@components/common/page-heading';
 import { IUIConfig } from 'src/interfaces/';
-import { performerService } from '@services/index';
+import { performerService, utilsService } from 'src/services';
 import '@components/performer/performer.less';
 
 interface IProps {
   ui: IUIConfig;
+  countries: any;
+  bodyInfo: any;
 }
 
 class Performers extends PureComponent<IProps> {
   static authenticate = true;
 
   static noredirect = true;
+
+  static async getInitialProps() {
+    const [countries, bodyInfo] = await Promise.all([
+      utilsService.countriesList(),
+      utilsService.bodyInfo()
+    ]);
+    return {
+      countries: countries?.data || [],
+      bodyInfo: bodyInfo?.data
+    };
+  }
 
   state = {
     offset: 0,
@@ -67,7 +80,7 @@ class Performers extends PureComponent<IProps> {
 
   render() {
     const {
-      ui
+      ui, countries, bodyInfo
     } = this.props;
     const {
       limit, offset, performers, fetching, total
@@ -86,7 +99,8 @@ class Performers extends PureComponent<IProps> {
           <PageHeading title="Models" icon={<ModelIcon />} />
           <PerformerAdvancedFilter
             onSubmit={this.handleFilter.bind(this)}
-            countries={ui?.countries || []}
+            countries={countries}
+            bodyInfo={bodyInfo}
           />
           <Row>
             {performers && performers.length > 0 && performers.map((p) => (

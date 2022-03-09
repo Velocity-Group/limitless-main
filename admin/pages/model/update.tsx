@@ -12,9 +12,7 @@ import {
   ILangguges,
   IPhoneCodes,
   IPerformer,
-  IPerformerCategory,
-  IHeight,
-  IWeight
+  IBody
 } from 'src/interfaces';
 import { authService, performerService } from '@services/index';
 import Loader from '@components/common/base/loader';
@@ -28,31 +26,21 @@ interface IProps {
   countries: ICountry[];
   languages: ILangguges[];
   phoneCodes: IPhoneCodes[];
-  categories: IPerformerCategory[];
-  heights?: IHeight[];
-  weights?: IWeight[];
+  bodyInfo: IBody;
 }
 class PerformerUpdate extends PureComponent<IProps> {
   static async getInitialProps({ ctx }) {
-    const [countries, languages, phoneCodes, heights, weights] = await Promise.all([
+    const [countries, languages, phoneCodes, bodyInfo] = await Promise.all([
       utilsService.countriesList(),
       utilsService.languagesList(),
       utilsService.phoneCodesList(),
-      utilsService.heightList(),
-      utilsService.weightList()
-      // performerCategoryService.search({
-      //   sortBy: 'ordering',
-      //   sort: 'asc',
-      //   limit: 100
-      // })
+      utilsService.bodyInfo()
     ]);
     return {
-      countries: countries && countries.data ? countries.data : [],
-      languages: languages && languages.data ? languages.data : [],
-      phoneCodes: phoneCodes && phoneCodes.data ? phoneCodes.data : [],
-      heights: heights && heights.data ? heights.data : [],
-      weights: weights && weights.data ? weights.data : [],
-      // categories: categories && categories.data && categories.data.data ? categories.data.data : [],
+      countries: countries?.data || [],
+      languages: languages?.data || [],
+      phoneCodes: phoneCodes?.data || [],
+      bodyInfo: bodyInfo?.data,
       ...ctx.query
     };
   }
@@ -184,11 +172,10 @@ class PerformerUpdate extends PureComponent<IProps> {
 
   render() {
     const {
-      pwUpdating, performer, updating, fetching, settingUpdating,
-      avatarUrl, coverUrl
+      pwUpdating, performer, updating, fetching, settingUpdating, avatarUrl, coverUrl
     } = this.state;
     const {
-      countries, languages, heights, weights
+      countries, languages, bodyInfo, phoneCodes
     } = this.props;
 
     return (
@@ -216,12 +203,10 @@ class PerformerUpdate extends PureComponent<IProps> {
                   submiting={updating}
                   countries={countries}
                   languages={languages}
-                  heights={heights}
-                  weights={weights}
+                  bodyInfo={bodyInfo}
                   avatarUrl={avatarUrl}
                   coverUrl={coverUrl}
-                  // phoneCodes={phoneCodes}
-                  // categories={categories}
+                  phoneCodes={phoneCodes}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<span>ID Documents</span>} key="document">

@@ -9,7 +9,7 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, purchaseTokenService, feedService, reactionService, paymentService
+  performerService, purchaseTokenService, feedService, reactionService, paymentService, utilsService
 } from 'src/services';
 import Head from 'next/head';
 import {
@@ -28,7 +28,7 @@ import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
 import { VideoPlayer } from '@components/common';
 import {
-  IPerformer, IUser, IUIConfig, IFeed, StreamSettings
+  IPerformer, IUser, IUIConfig, IFeed, StreamSettings, ICountry
 } from 'src/interfaces';
 import { shortenLargeNumber } from '@lib/index';
 import Link from 'next/link';
@@ -56,6 +56,7 @@ interface IProps {
   removeFeedSuccess: Function;
   updateBalance: Function;
   settings: StreamSettings;
+  countries: ICountry[];
 }
 
 const { TabPane } = Tabs;
@@ -92,13 +93,15 @@ class PerformerProfile extends PureComponent<IProps> {
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
     try {
-      const performer = (await (
-        await performerService.findOne(query.username, {
+      const [performer, countries] = await Promise.all([
+        performerService.findOne(query.username, {
           Authorization: ctx.token || ''
-        })
-      ).data) as IPerformer;
+        }),
+        utilsService.countriesList()
+      ]);
       return {
-        performer
+        performer: performer?.data,
+        countries: countries?.data || []
       };
     } catch (e) {
       const error = await Promise.resolve(e);
@@ -332,7 +335,8 @@ class PerformerProfile extends PureComponent<IProps> {
       feedState,
       videoState,
       productState,
-      galleryState
+      galleryState,
+      countries
     } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
@@ -532,7 +536,7 @@ class PerformerProfile extends PureComponent<IProps> {
                     )} */}
             </div>
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
-              <PerformerInfo countries={ui?.countries || []} performer={performer} />
+              <PerformerInfo countries={countries} performer={performer} />
             </div>
             {!performer?.isSubscribed && (
               <div className="subscription-bl">
@@ -546,7 +550,9 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR $
+                  SUBSCRIBE FOR
+                  {' '}
+                  $
                   {performer && performer?.monthlyPrice.toFixed(2)}
                 </button>
               </div>
@@ -563,7 +569,9 @@ class PerformerProfile extends PureComponent<IProps> {
                     this.setState({ openSubscriptionModal: true });
                   }}
                 >
-                  SUBSCRIBE FOR $
+                  SUBSCRIBE FOR
+                  {' '}
+                  $
                   {performer?.yearlyPrice.toFixed(2)}
                 </button>
               </div>

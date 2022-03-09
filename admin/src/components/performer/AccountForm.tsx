@@ -3,7 +3,7 @@ import {
   Form, Input, Button, Select, message, Switch, Row, Col, DatePicker, InputNumber, Upload, Checkbox, Progress
 } from 'antd';
 import {
-  IPerformer, ICountry, ILangguges, IPhoneCodes, IPerformerCategory, IHeight, IWeight
+  IPerformer, ICountry, ILangguges, IPhoneCodes, IBody
 } from 'src/interfaces';
 import {
   UploadOutlined
@@ -33,21 +33,18 @@ const validateMessages = {
 };
 
 const { TextArea } = Input;
-const { Option } = Select;
 
 interface IProps {
   onFinish: Function;
   onUploaded: Function;
   performer?: IPerformer;
-  submiting?: boolean;
+  submiting: boolean;
   countries: ICountry[];
   languages: ILangguges[];
-  phoneCodes?: IPhoneCodes[];
-  categories?: IPerformerCategory[];
-  heights?: IHeight[];
-  weights?: IWeight[];
-  avatarUrl?: string;
-  coverUrl?: string;
+  phoneCodes: IPhoneCodes[];
+  bodyInfo: IBody;
+  avatarUrl: string;
+  coverUrl: string;
 }
 
 export class AccountForm extends PureComponent<IProps> {
@@ -94,9 +91,12 @@ export class AccountForm extends PureComponent<IProps> {
 
   render() {
     const {
-      performer, onFinish, submiting, countries, onUploaded, heights, weights,
-      avatarUrl, coverUrl
+      performer, onFinish, submiting, countries, onUploaded, bodyInfo, avatarUrl, coverUrl
     } = this.props;
+    const {
+      heights = [], weights = [], bodyTypes = [], genders = [], sexualOrientations = [], ethnicities = [],
+      hairs = [], eyes = [], butts = []
+    } = bodyInfo;
     const {
       uploadVideoPercentage, isUploadingVideo, previewVideoName, previewVideoUrl
     } = this.state;
@@ -240,8 +240,6 @@ export class AccountForm extends PureComponent<IProps> {
             <Form.Item
               label="Date of Birth"
               name="dateOfBirth"
-              validateTrigger={['onChange', 'onBlur']}
-              hasFeedback
               rules={[
                 {
                   required: true,
@@ -268,30 +266,22 @@ export class AccountForm extends PureComponent<IProps> {
           <Col xs={12} md={12}>
             <Form.Item name="gender" label="Gender" required>
               <Select>
-                <Select.Option key="male" value="male">
-                  Male
-                </Select.Option>
-                <Select.Option key="female" value="female">
-                  Female
-                </Select.Option>
-                <Select.Option key="transgender" value="transgender">
-                  Transgender
-                </Select.Option>
+                {genders.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
             <Form.Item name="sexualOrientation" label="Sexual orientation">
               <Select>
-                <Select.Option key="male" value="male">
-                  Male
-                </Select.Option>
-                <Select.Option key="female" value="female">
-                  Female
-                </Select.Option>
-                <Select.Option key="transgender" value="transgender">
-                  Transgender
-                </Select.Option>
+                {sexualOrientations.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
@@ -311,25 +301,6 @@ export class AccountForm extends PureComponent<IProps> {
               <Input style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-          {/* {categories && categories.length > 0 && (
-          <Form.Item
-            name="categoryIds"
-            label="Categories"
-            rules={[
-              {
-                type: 'array'
-              }
-            ]}
-          >
-            <Select mode="multiple">
-              {categories.map((cat) => (
-                <Select.Option key={cat.slug} value={cat._id}>
-                  {cat.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        )} */}
           {!performer && [
             <Col xs={12} md={12}>
               <Form.Item
@@ -399,171 +370,77 @@ export class AccountForm extends PureComponent<IProps> {
           <Col xs={12} md={12}>
             <Form.Item name="ethnicity" label="Ethnicity">
               <Select>
-                <Option key="white" value="white">
-                  White
-                </Option>
-                <Option key="Asian" value="asian">
-                  Asian
-                </Option>
-                <Option key="latino" value="latino">
-                  Latino
-                </Option>
-                <Option key="hispanic" value="hispanic">
-                  Hispanic
-                </Option>
-                <Option key="blackOrAfricanAmerican" value="black or african american">
-                  Black or African American
-                </Option>
-                <Option key="native hawaiian or other pacific islander" value="native hawaiian or other pacific islander">
-                  Native Hawaiian or Other Pacific Islander
-                </Option>
+                {ethnicities.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
             <Form.Item name="bodyType" label="Body Type">
               <Select>
-                <Option key="slim" value="slim">
-                  Slim
-                </Option>
-                <Option key="petite" value="petite">
-                  Petite
-                </Option>
-                <Option key="curvy" value="curvy">
-                  Curvy
-                </Option>
-                <Option key="large" value="large">
-                  Large
-                </Option>
-                <Option key="toned" value="toned">
-                  Toned
-                </Option>
-                <Option key="fit" value="fit">
-                  Fit
-                </Option>
-                <Option key="gymBody" value="gymBody">
-                  Gym Body
-                </Option>
-                <Option key="muscular" value="muscular">
-                  Muscular
-                </Option>
-                <Option key="ripped" value="ripped">
-                  Ripped
-                </Option>
-                <Option key="tanned" value="tanned">
-                  Tanned
-                </Option>
-                <Option key="runner" value="runner">
-                  Runner
-                </Option>
-                <Option key="swimmer" value="swimmer">
-                  Swimmer
-                </Option>
+                {bodyTypes.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
             <Form.Item name="height" label="Height">
               <Select showSearch>
-                {heights
-                  && heights.map((h: IHeight) => (
-                    <Option key={h.text} value={h.text}>
-                      {h.text}
-                    </Option>
-                  ))}
+                {heights.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
             <Form.Item name="weight" label="Weight">
               <Select showSearch>
-                {weights
-                  && weights.map((w: IWeight) => (
-                    <Option key={w.text} value={w.text}>
-                      {w.text}
-                    </Option>
-                  ))}
+                {weights.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
             <Form.Item name="eyes" label="Eyes">
               <Select>
-                <Option key="blue" value="blue">
-                  Blue
-                </Option>
-                <Option key="brown" value="brown">
-                  Brown
-                </Option>
-                <Option key="green" value="green">
-                  Green
-                </Option>
-                <Option key="amber" value="amber">
-                  Amber
-                </Option>
-                <Option key="gray" value="gray">
-                  Gray
-                </Option>
-                <Option key="hazel" value="hazel">
-                  Hazel
-                </Option>
-                <Option key="red" value="red">
-                  Red
-                </Option>
+                {eyes.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
-            <Form.Item name="hair" label="Hair">
+            <Form.Item name="hair" label="Hair color">
               <Select>
-                <Option key="blonde" value="blonde">
-                  Blond
-                </Option>
-                <Option key="brown" value="brown">
-                  Brown
-                </Option>
-                <Option key="brunet" value="brunet">
-                  Brunet
-                </Option>
-                <Option key="black" value="black">
-                  Black
-                </Option>
-                <Option key="red" value="red">
-                  Red Head
-                </Option>
-                <Option key="blue" value="blue">
-                  Blue
-                </Option>
-                <Option key="green" value="green">
-                  Green
-                </Option>
-                <Option key="pink" value="pink">
-                  Pink
-                </Option>
-                <Option key="white" value="white">
-                  White
-                </Option>
-                <Option key="ginger" value="ginger">
-                  Ginger
-                </Option>
-                <Option key="multiColored" value="multiColored">
-                  MultiColored
-                </Option>
+                {hairs.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
             <Form.Item name="butt" label="Butt size">
               <Select>
-                <Option key="large" value="large">
-                  Large
-                </Option>
-                <Option key="medium" value="medium">
-                  Medium
-                </Option>
-                <Option key="small" value="small">
-                  Small
-                </Option>
+                {butts.map((s) => (
+                  <Select.Option key={s.value} value={s.value}>
+                    {s.text}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>

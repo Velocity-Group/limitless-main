@@ -6,7 +6,7 @@ import withReduxSaga from '@redux/withReduxSaga';
 import { Store } from 'redux';
 import BaseLayout from '@layouts/base-layout';
 import {
-  authService, userService, settingService, utilsService
+  authService, userService, settingService
 } from '@services/index';
 import Router from 'next/router';
 import { NextPageContext } from 'next';
@@ -179,11 +179,10 @@ class Application extends App<IApp> {
     // server side to load settings, once time only
     let settings = {};
     if (!process.browser) {
-      const [setting, countryList] = await Promise.all([
-        settingService.all('all', true),
-        utilsService.countriesList()
+      const [setting] = await Promise.all([
+        settingService.all('all', true)
       ]);
-      settings = { ...setting.data, countries: countryList.data };
+      settings = { ...setting.data };
       await updateSettingsStore(ctx, settings);
     }
     let pageProps = {};

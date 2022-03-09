@@ -2,7 +2,6 @@ import { merge } from 'lodash';
 import { createReducers } from '@lib/redux';
 import { updateUIValue, loadUIValue } from './actions';
 
-// TODO -
 const initialState = {
   theme: 'light',
   siteName: '',
@@ -10,7 +9,6 @@ const initialState = {
   menus: [],
   favicon: '/static/favicon.ico',
   loginPlaceholderImage: '',
-  countries: [],
   footerContent: '',
   modelBenefit: '',
   userBenefit: ''

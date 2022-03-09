@@ -8,9 +8,11 @@ import { HomePerformers } from '@components/performer';
 import { Banner } from '@components/common';
 import HomeFooter from '@components/common/layout/footer';
 import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
-import { performerService, feedService, bannerService } from '@services/index';
 import {
-  IFeed, IPerformer, ISettings, IUser, IBanner, IUIConfig
+  performerService, feedService, bannerService, utilsService
+} from '@services/index';
+import {
+  IFeed, IPerformer, ISettings, IUser, IBanner, IUIConfig, ICountry
 } from 'src/interfaces';
 import ScrollListFeed from '@components/post/scroll-list';
 import {
@@ -21,6 +23,7 @@ import { debounce } from 'lodash';
 import './index.less';
 
 interface IProps {
+  countries: ICountry[];
   banners: IBanner[];
   ui: IUIConfig;
   settings: ISettings;
@@ -46,11 +49,13 @@ class HomePage extends PureComponent<IProps> {
   static noredirect = true;
 
   static async getInitialProps() {
-    const [banners] = await Promise.all([
-      bannerService.search({ limit: 99 })
+    const [banners, countries] = await Promise.all([
+      bannerService.search({ limit: 99 }),
+      utilsService.countriesList()
     ]);
     return {
-      banners: banners?.data?.data || []
+      banners: banners?.data?.data || [],
+      countries: countries?.data || []
     };
   }
 
@@ -156,7 +161,7 @@ class HomePage extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, feedState, user, settings, banners
+      ui, feedState, user, settings, banners, countries
     } = this.props;
     const { items: feeds, total: totalFeeds, requesting: loadingFeed } = feedState;
     const topBanners = banners && banners.length > 0 && banners.filter((b) => b.position === 'top');
@@ -246,7 +251,7 @@ class HomePage extends PureComponent<IProps> {
                       <a aria-hidden className="reload-btn" onClick={this.getPerformers.bind(this)}><Tooltip title="Refresh"><SyncOutlined spin={loadingPerformer} /></Tooltip></a>
                     </span>
                   </div>
-                  <HomePerformers performers={randomPerformers} />
+                  <HomePerformers countries={countries} performers={randomPerformers} />
                   {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
                   <div className={!showFooter ? 'home-footer' : 'home-footer active'}>
                     <HomeFooter id="home-footer" />
