@@ -43,7 +43,7 @@ class EmailVerifiedSuccess extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, user } = this.props;
+    const { ui } = this.props;
     const { siteName } = ui;
     return (
       <>
@@ -63,11 +63,11 @@ class EmailVerifiedSuccess extends PureComponent<IProps> {
                 <a> click here to login</a>
               </Link>
             </p>
-            {user._id && (
+            {/* {user._id && (
               <div>
                 <Button className="primary" style={{ height: 60 }} onClick={this.handleSwitchToPerformer.bind(this)}>BECOME A MODEL</Button>
               </div>
-            )}
+            )} */}
           </div>
         </Layout>
       </>
