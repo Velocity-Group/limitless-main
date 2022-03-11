@@ -106,11 +106,7 @@ export class PerformerSearchService {
       const searchValue = { $regex: regexp };
       query.$or = [
         { name: searchValue },
-        { username: searchValue },
-        { bodyType: searchValue },
-        { gender: searchValue },
-        { ethnicity: searchValue },
-        { sexualOrientation: searchValue }
+        { username: searchValue }
       ];
       await this.queueEventService.publish(
         new QueueEvent({
@@ -150,11 +146,7 @@ export class PerformerSearchService {
       };
     }
     if (req.isFreeSubscription) {
-      if (typeof req.isFreeSubscription === 'string') {
-        query.isFreeSubscription = req.isFreeSubscription === 'true';
-      } else {
-        query.isFreeSubscription = req.isFreeSubscription;
-      }
+      query.isFreeSubscription = req.isFreeSubscription === 'true';
     }
     let sort = {
       isOnline: -1,
