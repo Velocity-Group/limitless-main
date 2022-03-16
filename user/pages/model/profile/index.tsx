@@ -9,11 +9,7 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-<<<<<<< HEAD
-  performerService, purchaseTokenService, feedService, reactionService, paymentService
-=======
-  performerService, tokenTransctionService, feedService, reactionService, paymentService, utilsService
->>>>>>> 34fcf442 (rename purchase item to token transaction)
+  performerService, tokenTransctionService, feedService, reactionService, paymentService
 } from 'src/services';
 import Head from 'next/head';
 import {
