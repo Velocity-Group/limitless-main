@@ -38,7 +38,7 @@ class Performers extends PureComponent<IProps> {
     offset: 0,
     limit: 12,
     filter: {
-      sortBy: 'popular'
+      sortBy: 'live'
     } as any,
     performers: [],
     total: 0,

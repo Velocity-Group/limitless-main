@@ -9,7 +9,7 @@ import { OrderService } from './services';
 import { OrderController } from './controllers';
 import { OrderListener } from './listeners';
 import { UserModule } from '../user/user.module';
-import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
+import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
 import { PerformerAssetsModule } from '../performer-assets/performer-assets.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { FileModule } from '../file/file.module';
@@ -22,7 +22,7 @@ import { FileModule } from '../file/file.module';
     forwardRef(() => UserModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => PerformerAssetsModule),
-    forwardRef(() => PurchasedItemModule),
+    forwardRef(() => TokenTransactionModule),
     forwardRef(() => MailerModule),
     forwardRef(() => FileModule)
   ],

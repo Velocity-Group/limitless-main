@@ -69,7 +69,7 @@ export class SubscriptionForm extends PureComponent<IProps> {
             <Form.Item
               key="yearly"
               name="yearlyPrice"
-              label="Yearly Subscription Price $"
+              label="Yearly Subscription Price ($)"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
@@ -77,22 +77,22 @@ export class SubscriptionForm extends PureComponent<IProps> {
             <Form.Item
               key="monthly"
               name="monthlyPrice"
-              label="Monthly Subscription Price $"
+              label="Monthly Subscription Price ($)"
+              rules={[{ required: true }]}
+            >
+              <InputNumber min={1} />
+            </Form.Item>
+            <Form.Item
+              key="publicChatPrice"
+              name="publicChatPrice"
+              label="Default Streaming Price (token)"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
             </Form.Item>
           </Col>
-          {/* <Col xs={24} md={12}>
-            <Form.Item
-              key="publicChatPrice"
-              name="publicChatPrice"
-              label="Token per minute Public Chat"
-              rules={[{ required: true }]}
-            >
-              <InputNumber min={1} />
-            </Form.Item>
-            <Form.Item
+          <Col xs={24} md={12}>
+            {/* <Form.Item
               key="groupChatPrice"
               name="groupChatPrice"
               label="Token per minute Group Chat"
@@ -115,8 +115,8 @@ export class SubscriptionForm extends PureComponent<IProps> {
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
-            </Form.Item>
-          </Col> */}
+            </Form.Item> */}
+          </Col>
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>

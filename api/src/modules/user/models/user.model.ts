@@ -53,7 +53,6 @@ export class UserModel extends Document {
   stripeCustomerId?: string;
 
   stats: {
-    totalViewTime: number;
     totalSubscriptions: number;
   }
 }

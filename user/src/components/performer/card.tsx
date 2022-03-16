@@ -37,6 +37,7 @@ export default class PerformerCard extends PureComponent<IProps> {
                 <span>Free</span>
               </div>
               )}
+              {performer?.live > 0 && <span className="live-status">Live</span>}
               {country && (
               <span className="card-country">
                 <img alt="performer-country" src={country?.flag} />

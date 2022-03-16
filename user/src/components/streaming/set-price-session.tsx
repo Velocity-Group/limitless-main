@@ -1,8 +1,8 @@
-import { PureComponent } from 'react';
+import { useState } from 'react';
 import {
-  Switch, Button, Form, Input
+  Switch, Button, Form, Input, InputNumber
 } from 'antd';
-import { IPerformer } from 'src/interfaces/performer';
+import { IPerformer } from 'src/interfaces';
 
 const layout = {
   labelCol: { span: 24 },
@@ -13,73 +13,61 @@ interface IProps {
   performer: IPerformer;
   onFinish: Function;
   submiting: boolean;
-  streamType: string;
-  isFree?: boolean;
-  conversationDescription?: string;
 }
 
-export default class StreamPriceForm extends PureComponent<IProps> {
-  state = {
-    isFree: false
-  }
+const StreamPriceForm = ({
+  onFinish, submiting, performer
+}: IProps) => {
+  const [isFree, setFree] = useState(true);
+  return (
+    <Form
+      {...layout}
+      name="nest-messages"
+      onFinish={onFinish.bind(this)}
+      initialValues={{
+        title: '',
+        description: '',
+        isFree: true,
+        price: performer.publicChatPrice
+      }}
+      className="account-form"
+    >
+      <Form.Item
+        name="title"
+        label="Title"
+        rules={[{ required: true, message: 'Please enter stream title!' }]}
+      >
+        <Input min={10} maxLength={100} />
+      </Form.Item>
+      <Form.Item
+        name="description"
+        label="Description"
+        rules={[{ required: true, message: 'Please enter stream description!' }]}
+      >
+        <Input.TextArea rows={2} maxLength={200} />
+      </Form.Item>
+      <Form.Item
+        name="isFree"
+        label="Select an option"
+        valuePropName="checked"
+      >
+        <Switch unCheckedChildren="Pay Per Live for Subscribers" checkedChildren=" Free for Subscribers" checked={isFree} onChange={(val) => setFree(val)} />
+      </Form.Item>
+      {!isFree && (
+      <Form.Item
+        name="price"
+        label="Amount of Tokens"
+      >
+        <InputNumber min={1} />
+      </Form.Item>
+      )}
+      <Form.Item>
+        <Button type="primary" htmlType="submit" loading={submiting} disabled={submiting}>
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+};
 
-  componentDidMount() {
-    const { isFree } = this.props;
-    isFree !== undefined && this.setState({ isFree });
-  }
-
-  render() {
-    const {
-      onFinish, submiting = false, conversationDescription, performer, streamType
-    } = this.props;
-    const { isFree } = this.state;
-    const price = () => {
-      switch (streamType) {
-        case 'public': return (performer?.publicChatPrice || 0).toFixed(2);
-        case 'group': return (performer?.groupChatPrice || 0).toFixed(2);
-        case 'private': return (performer?.privateChatPrice || 0).toFixed(2);
-        default: return 0;
-      }
-    };
-    return (
-      <div>
-        <Form
-          {...layout}
-          name="nest-messages"
-          onFinish={onFinish.bind(this)}
-          initialValues={{
-            name: conversationDescription || '',
-            isFree
-          }}
-          className="account-form"
-        >
-          <Form.Item
-            name="name"
-            label="Conversation description"
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="isFree"
-            label="Free Session?"
-          >
-            <Switch unCheckedChildren="Non-free" checkedChildren="Free" checked={isFree} onChange={(val) => this.setState({ isFree: val })} />
-          </Form.Item>
-          {!isFree && (
-          <p>
-            <img alt="token" src="/static/gem-ico.png" width="20px" />
-            {price()}
-            {' '}
-            per minute
-          </p>
-          )}
-          <Form.Item>
-            <Button className="primary" type="primary" htmlType="submit" loading={submiting} disabled={submiting}>
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </div>
-    );
-  }
-}
+export default StreamPriceForm;

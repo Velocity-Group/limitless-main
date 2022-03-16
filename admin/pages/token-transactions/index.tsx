@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import { Layout, message } from 'antd';
 import Head from 'next/head';
 import Page from '@components/common/layout/page';
-import { purchaseItemService } from 'src/services';
+import { tokenTransactionService } from 'src/services';
 import { IPaymentTokenHistory } from 'src/interfaces';
 import { SearchFilter } from '@components/common/search-filter';
 import PaymentTableList from '@components/purchase-item/payment-token-history-table';
@@ -69,7 +69,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         filter, sort, sortBy, pagination
       } = this.state;
       await this.setState({ searching: true });
-      const resp = await purchaseItemService.search({
+      const resp = await tokenTransactionService.search({
         ...filter,
         sort,
         sortBy,
@@ -100,10 +100,6 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         text: 'All types'
       },
       {
-        key: 'tip',
-        text: 'Tip'
-      },
-      {
         key: 'feed',
         text: 'Post'
       },
@@ -114,10 +110,6 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       // {
       //   key: 'message',
       //   text: 'Message'
-      // },
-      // {
-      //   key: 'public_chat',
-      //   text: 'Public Chat'
       // },
       // {
       //   key: 'group_chat',
@@ -138,6 +130,19 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       {
         key: 'gallery',
         text: 'Gallery'
+      },
+
+      {
+        key: 'tip',
+        text: 'Model Tip'
+      },
+      {
+        key: 'stream_tip',
+        text: 'Streaming Tip'
+      },
+      {
+        key: 'public_chat',
+        text: 'Paid Streaming'
       }
     ];
     return (

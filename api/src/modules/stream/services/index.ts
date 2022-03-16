@@ -1,2 +1,2 @@
 export * from './stream.service';
-export * from './request.service';
+export * from './agora.service';

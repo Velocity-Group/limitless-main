@@ -13,7 +13,6 @@ interface IProps {
   activeConversation?: any;
   totalParticipant?: number;
   members?: IUser[];
-  hideMember?: boolean;
 }
 
 const checkPermission = (user, conversation) => {
@@ -28,8 +27,7 @@ const ChatBox = ({
   user,
   activeConversation,
   totalParticipant,
-  members,
-  hideMember = false
+  members
 }: IProps) => {
   const [removing, setRemoving] = useState(false);
   const [canReset, setCanReset] = useState(false);
@@ -63,7 +61,7 @@ const ChatBox = ({
 
   return (
     <>
-      <div className={hideMember ? 'conversation-stream active' : 'conversation-stream'}>
+      <div className="conversation-stream">
         <Tabs defaultActiveKey="chat_content">
           <Tabs.TabPane tab="CHAT" key="chat_content">
             {activeConversation
@@ -72,11 +70,9 @@ const ChatBox = ({
               <StreamMessenger streamId={activeConversation.data.streamId} />
               ) : <p className="text-center">Let start a converstion</p>}
           </Tabs.TabPane>
-          {!hideMember && (
           <Tabs.TabPane tab={`USERS (${totalParticipant || 0})`} key="chat_user">
             <StreamingChatUsers members={members} />
           </Tabs.TabPane>
-          )}
         </Tabs>
       </div>
       {canReset && (
@@ -99,8 +95,7 @@ ChatBox.defaultProps = {
   members: [],
   activeConversation: null,
   user: null,
-  resetAllStreamMessage: null,
-  hideMember: false
+  resetAllStreamMessage: null
 };
 
 export default ChatBox;

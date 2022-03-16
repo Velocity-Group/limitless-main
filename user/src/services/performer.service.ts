@@ -16,7 +16,7 @@ export class PerformerService extends APIRequest {
   }
 
   findOne(id: string, headers?: { [key: string]: string }) {
-    return this.get(`/performers/${encodeURI(id)}`, headers);
+    return this.get(`/performers/${id}`, headers);
   }
 
   getAvatarUploadUrl() {

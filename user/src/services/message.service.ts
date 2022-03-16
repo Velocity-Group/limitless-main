@@ -63,10 +63,6 @@ export class MessageService extends APIRequest {
     return this.del(`/messages/${id}`);
   }
 
-  deleteStreamMessage(id: string) {
-    return this.del(`/messages/stream/${id}`);
-  }
-
   deleteAllMessageInConversation(conversationId) {
     return this.del(`/messages/${conversationId}/remove-all-message`);
   }

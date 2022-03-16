@@ -16,8 +16,8 @@ import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
-import { PaymentTokenService } from 'src/modules/purchased-item/services';
-import { PurchaseItemType } from 'src/modules/purchased-item/constants';
+import { TokenTransactionService } from 'src/modules/token-transaction/services';
+import { PurchaseItemType } from 'src/modules/token-transaction/constants';
 import { Storage } from 'src/modules/storage/contants';
 import { DELETED_ASSETS_CHANNEL, PRODUCT_TYPE } from '../constants';
 import { ProductDto } from '../dtos';
@@ -35,8 +35,8 @@ export class ProductService {
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => ReactionService))
     private readonly reactionService: ReactionService,
-    @Inject(forwardRef(() => PaymentTokenService))
-    private readonly checkPaymentService: PaymentTokenService,
+    @Inject(forwardRef(() => TokenTransactionService))
+    private readonly tokenTransactionService: TokenTransactionService,
     @Inject(PERFORMER_PRODUCT_MODEL_PROVIDER)
     private readonly productModel: Model<ProductModel>,
     private readonly fileService: FileService,
@@ -214,7 +214,7 @@ export class ProductService {
     dto.isBookMarked = !!bookmark;
     dto.image = image ? image.getUrl() : null;
     if (digitalFile) {
-      const bought = await this.checkPaymentService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
+      const bought = await this.tokenTransactionService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
       const canView = !!bought || (user && `${user._id}` === `${product.performerId}`) || (user && user.roles && user.roles.includes('admin'));
       let fileUrl = digitalFile.getUrl(canView);
       if (digitalFile.server !== Storage.S3) {
@@ -287,7 +287,7 @@ export class ProductService {
     if (!product.digitalFileId) throw new EntityNotFoundException();
     const file = await this.fileService.findById(product.digitalFileId);
     if (!file) throw new EntityNotFoundException();
-    const bought = await this.checkPaymentService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
+    const bought = await this.tokenTransactionService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
     const canView = !!bought || (`${user._id}` === `${product.performerId}`) || (user && user.roles && user.roles.includes('admin'));
     let fileUrl = file.getUrl(canView);
     if (file.server !== Storage.S3) {
@@ -311,7 +311,7 @@ export class ProductService {
       return true;
     }
     // check bought
-    const bought = await this.checkPaymentService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
+    const bought = await this.tokenTransactionService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
     if (!bought) {
       throw new ForbiddenException();
     }

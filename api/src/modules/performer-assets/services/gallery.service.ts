@@ -17,8 +17,8 @@ import { merge } from 'lodash';
 import { FileService } from 'src/modules/file/services';
 import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
-import { PaymentTokenService, PurchasedItemSearchService } from 'src/modules/purchased-item/services';
-import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
+import { TokenTransactionSearchService, TokenTransactionService } from 'src/modules/token-transaction/services';
+import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/token-transaction/constants';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { EVENT, STATUS } from 'src/kernel/constants';
@@ -45,10 +45,10 @@ export class GalleryService {
     private readonly reactionService: ReactionService,
     @Inject(forwardRef(() => PhotoService))
     private readonly photoService: PhotoService,
-    @Inject(forwardRef(() => PaymentTokenService))
-    private readonly paymentTokenService: PaymentTokenService,
-    @Inject(forwardRef(() => PurchasedItemSearchService))
-    private readonly purchasedItemSearchService: PurchasedItemSearchService,
+    @Inject(forwardRef(() => TokenTransactionService))
+    private readonly tokenTransactionService: TokenTransactionService,
+    @Inject(forwardRef(() => TokenTransactionSearchService))
+    private readonly tokenTransactionSearchService: TokenTransactionSearchService,
     @Inject(PERFORMER_GALLERY_MODEL_PROVIDER)
     private readonly galleryModel: Model<GalleryModel>,
     @Inject(PERFORMER_PHOTO_MODEL_PROVIDER)
@@ -161,7 +161,7 @@ export class GalleryService {
       user?._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id, performerId: { $in: performerIds }, expiredAt: { $gt: new Date() }
       }) : [],
-      user?._id ? this.purchasedItemSearchService.findByQuery({
+      user?._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,
         targetId: { $in: galleryIds },
         target: PURCHASE_ITEM_TARTGET_TYPE.GALLERY,
@@ -229,7 +229,7 @@ export class GalleryService {
     dto.isBookMarked = !!bookmark;
     const subscribed = user && await this.subscriptionService.checkSubscribed(dto.performerId, user._id);
     dto.isSubscribed = !!subscribed;
-    const isBought = user && await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
+    const isBought = user && await this.tokenTransactionService.checkBought(gallery, PurchaseItemType.GALLERY, user);
     dto.isBought = !!isBought;
     if (user && user.roles && user.roles.includes('admin')) {
       dto.isBought = true;
@@ -258,7 +258,7 @@ export class GalleryService {
       if (!isSubscribed) throw new HttpException('Please subscribe model before downloading', 403);
     }
     if (gallery.isSale) {
-      const isBought = await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
+      const isBought = await this.tokenTransactionService.checkBought(gallery, PurchaseItemType.GALLERY, user);
       if (!isBought) throw new HttpException('Please unlock gallery before downloading', 403);
     }
     const photos = await this.photoModel.find({ galleryId });

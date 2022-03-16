@@ -25,6 +25,12 @@ interface IProps {
   deleteMessageSuccess: Function;
 }
 
+interface IUserJoinedChat {
+  user: IUser;
+  role: 'member' | 'model',
+  conversationId: string
+}
+
 class MessageList extends PureComponent<IProps> {
   messagesRef: any;
 
@@ -83,7 +89,7 @@ class MessageList extends PureComponent<IProps> {
       const previous = messages[i - 1];
       const current = messages[i];
       const next = messages[i + 1];
-      const isMine = current?.senderId === user?._id || user?.roles.includes('admin');
+      const isMine = current?.senderId === user?._id;
       const currentMoment = moment(current.createdAt);
       let prevBySameAuthor = false;
       let nextBySameAuthor = false;
@@ -118,7 +124,7 @@ class MessageList extends PureComponent<IProps> {
       if (current._id) {
         tempMessages.push(
           <Message
-            onDelete={this.onDelete.bind(this, current._id)}
+            onDelete={() => this.onDelete(current._id)}
             isOwner={conversation.performerId === current.senderId}
             key={current.isDeleted ? `${current._id}_deleted_${i}` : `${current._id}_${i}`}
             isMine={isMine}
@@ -143,6 +149,11 @@ class MessageList extends PureComponent<IProps> {
     type === 'created' && create(message);
     type === 'deleted' && remove(message);
   };
+
+  onUserJoined = ({ user, role, conversationId }: IUserJoinedChat) => {
+    // TODO display something
+    console.log(`${user?.name || user?.username} joined chat`);
+  }
 
   scrollToBottom(toBot = true) {
     const { message: { fetching } } = this.props;
@@ -169,6 +180,7 @@ class MessageList extends PureComponent<IProps> {
       >
         <Event event={`message_created_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'created')} />
         <Event event={`message_deleted_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'deleted')} />
+        <Event event={`user_joined_${conversation._id}`} handler={this.onUserJoined.bind(this)} />
         {conversation && conversation._id && (
           <>
             <div className="message-list-container">

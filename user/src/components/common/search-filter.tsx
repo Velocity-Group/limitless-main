@@ -18,19 +18,10 @@ interface IProps {
   searchWithPerformer?: boolean;
   searchWithKeyword?: boolean;
   dateRange?: boolean;
+  isFree?: boolean;
 }
 
 export class SearchFilter extends PureComponent<IProps> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      q: '',
-      performerId: '',
-      status: '',
-      type: ''
-    };
-  }
-
   render() {
     const {
       statuses = [],
@@ -38,6 +29,7 @@ export class SearchFilter extends PureComponent<IProps> {
       searchWithPerformer,
       searchWithKeyword,
       dateRange,
+      isFree,
       onSubmit
     } = this.props;
     return (
@@ -101,6 +93,26 @@ export class SearchFilter extends PureComponent<IProps> {
                 toDate: dateStrings[1]
               }, () => onSubmit(this.state))}
             />
+          </Col>
+        )}
+        {isFree && (
+          <Col lg={8} md={8} xs={12}>
+            <Select
+              onChange={(val) => this.setState({ isFree: val }, () => onSubmit(this.state))}
+              style={{ width: '100%' }}
+              placeholder="Select type"
+              defaultValue=""
+            >
+              <Select.Option key="" value="">
+                All Type
+              </Select.Option>
+              <Select.Option key="free" value="true">
+                Free
+              </Select.Option>
+              <Select.Option key="paid" value="false">
+                Paid
+              </Select.Option>
+            </Select>
           </Col>
         )}
       </Row>

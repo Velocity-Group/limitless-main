@@ -9,9 +9,9 @@ import { PERFORMER_MODEL_PROVIDER } from 'src/modules/performer/providers';
 import { PerformerModel } from 'src/modules/performer/models';
 import {
   PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE
-} from 'src/modules/purchased-item/constants';
-import { PAYMENT_TOKEN_MODEL_PROVIDER } from 'src/modules/purchased-item/providers';
-import { PaymentTokenModel } from 'src/modules/purchased-item/models';
+} from 'src/modules/token-transaction/constants';
+import { PAYMENT_TOKEN_MODEL_PROVIDER } from 'src/modules/token-transaction/providers';
+import { TokenTransactionModel } from 'src/modules/token-transaction/models';
 import { MESSAGE_CHANNEL } from 'src/modules/message/constants';
 import { MessageModel } from 'src/modules/message/models';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
@@ -41,7 +41,7 @@ export class HandleDeleteItemListener {
     @Inject(USER_MODEL_PROVIDER)
     private readonly userModel: Model<UserModel>,
     @Inject(PAYMENT_TOKEN_MODEL_PROVIDER)
-    private readonly paymentTokenModel: Model<PaymentTokenModel>,
+    private readonly tokenTransactionModel: Model<TokenTransactionModel>,
     private readonly queueEventService: QueueEventService,
     private readonly socketUserService: SocketUserService
   ) {
@@ -67,13 +67,13 @@ export class HandleDeleteItemListener {
       return;
     }
     const { _id }: FeedDto = event.data;
-    const total = await this.paymentTokenModel.countDocuments({
+    const total = await this.tokenTransactionModel.countDocuments({
       target: PURCHASE_ITEM_TARTGET_TYPE.FEED,
       targetId: _id,
       status: PURCHASE_ITEM_STATUS.SUCCESS
     });
     for (let i = 0; i <= total / 90; i += 1) {
-      const transactions = await this.paymentTokenModel.find({
+      const transactions = await this.tokenTransactionModel.find({
         target: PURCHASE_ITEM_TARTGET_TYPE.FEED,
         targetId: _id,
         status: PURCHASE_ITEM_STATUS.SUCCESS
@@ -82,7 +82,7 @@ export class HandleDeleteItemListener {
       const earnings = await this.earningModel.find({
         transactionId: { $in: transactionIds }
       });
-      await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
+      await this.tokenTransactionModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
       await Promise.all(earnings.map((earning) => {
         this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
         this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.grossPrice } });
@@ -98,13 +98,13 @@ export class HandleDeleteItemListener {
       return;
     }
     const { _id }: MessageModel = event.data;
-    const total = await this.paymentTokenModel.countDocuments({
+    const total = await this.tokenTransactionModel.countDocuments({
       target: PURCHASE_ITEM_TARTGET_TYPE.MESSAGE,
       targetId: _id,
       status: PURCHASE_ITEM_STATUS.SUCCESS
     });
     for (let i = 0; i <= total / 90; i += 1) {
-      const transactions = await this.paymentTokenModel.find({
+      const transactions = await this.tokenTransactionModel.find({
         target: PURCHASE_ITEM_TARTGET_TYPE.MESSAGE,
         targetId: _id,
         status: PURCHASE_ITEM_STATUS.SUCCESS
@@ -113,7 +113,7 @@ export class HandleDeleteItemListener {
       const earnings = await this.earningModel.find({
         transactionId: { $in: transactionIds }
       });
-      await this.paymentTokenModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
+      await this.tokenTransactionModel.updateMany({ _id: { $in: transactionIds } }, { status: PURCHASE_ITEM_STATUS.REFUNDED });
       await Promise.all(earnings.map(async (earning) => {
         this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } });
         this.notifyPerformerBalance(earning.performerId, -earning.grossPrice);
@@ -135,7 +135,7 @@ export class HandleDeleteItemListener {
     if (!earning) return;
     await Promise.all([
       this.orderModel.updateOne({ transactionId }, { deliveryStatus: ORDER_STATUS.REFUNDED }),
-      this.paymentTokenModel.updateOne({ _id: transactionId }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
+      this.tokenTransactionModel.updateOne({ _id: transactionId }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
       this.userModel.updateOne({ _id: earning.userId }, { $inc: { balance: earning.grossPrice } }),
       this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.grossPrice } }),
       this.notifyUserBalance(earning),

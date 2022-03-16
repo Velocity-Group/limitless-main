@@ -59,7 +59,9 @@ export const SETTING_KEYS = {
   TOKEN_CONVERSION_RATE: 'tokenConversionRate',
   STRIPE_PUBLISHABLE_KEY: 'stripePublishableKey',
   STRIPE_SECRET_KEY: 'stripeSecretKey',
-  STRIPE_ENABLE: 'stripeEnable'
+  STRIPE_ENABLE: 'stripeEnable',
+  AGORA_APPID: 'agoraAppId',
+  AGORA_ENABLE: 'agoraEnable'
 };
 
 export const MENU_SECTION = {

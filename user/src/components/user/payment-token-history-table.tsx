@@ -36,6 +36,13 @@ const PaymentTableList = ({
               username: record?.performerInfo?.username || record?.performerInfo?._id
             };
             break;
+          case 'stream':
+            url = '/model/profile';
+            as = `/${record?.performerInfo?.username || record?.performerInfo?._id}`;
+            query = {
+              username: record?.performerInfo?.username || record?.performerInfo?._id
+            };
+            break;
           case 'message':
             url = '/messages';
             as = `/messages?toId=${record?.performerId}&toSource=performer`;
@@ -121,7 +128,7 @@ const PaymentTableList = ({
           case 'feed':
             return <Tag color="blue">Post</Tag>;
           case 'video':
-            return <Tag color="green">Video</Tag>;
+            return <Tag color="pink">Video</Tag>;
           case 'product':
             return <Tag color="orange">Product</Tag>;
           case 'gallery':
@@ -129,7 +136,11 @@ const PaymentTableList = ({
           case 'message':
             return <Tag color="red">Message</Tag>;
           case 'tip':
-            return <Tag color="green">Tip</Tag>;
+            return <Tag color="red">Model Tip</Tag>;
+          case 'stream_tip':
+            return <Tag color="red">Streaming Tip</Tag>;
+          case 'public_chat':
+            return <Tag color="pink">Paid Streaming</Tag>;
           default: return <Tag color="default">{type}</Tag>;
         }
       }

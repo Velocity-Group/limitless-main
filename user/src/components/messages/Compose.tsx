@@ -6,7 +6,7 @@ import {
 import { sendMessage, sentFileSuccess } from '@redux/message/actions';
 import { SmileOutlined, SendOutlined } from '@ant-design/icons';
 import { ImageMessageUpload } from '@components/messages/uploadPhoto';
-import { authService, messageService, purchaseTokenService } from '@services/index';
+import { authService, messageService, tokenTransctionService } from '@services/index';
 import { TipPerformerForm } from '@components/performer/tip-form';
 import { IUIConfig } from 'src/interfaces';
 import { updateBalance } from '@redux/user/actions';
@@ -91,7 +91,7 @@ class Compose extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      await purchaseTokenService.sendTip(conversation?.recipientInfo?._id, { conversationId: conversation?._id, price });
+      await tokenTransctionService.sendTip(conversation?.recipientInfo?._id, { conversationId: conversation?._id, price });
       message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
     } catch (e) {

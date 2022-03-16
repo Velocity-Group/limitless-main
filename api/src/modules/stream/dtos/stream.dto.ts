@@ -5,9 +5,10 @@ export declare type StreamType = 'public' | 'group' | 'private';
 
 export interface IStream {
   _id?: ObjectId
-  performerId?: string | ObjectId;
+  performerId?: ObjectId;
   type?: string;
-  userIds?: ObjectId[];
+  title?: string;
+  description?: string;
   sessionId?: string;
   isStreaming?: number;
   streamingTime?: number;
@@ -15,18 +16,23 @@ export interface IStream {
   price?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  stats?: {
+    members: number;
+    likes: number;
+  }
+  isSubscribed?: boolean;
 }
 
 export class StreamDto {
   _id: ObjectId
 
-  performerId: string | ObjectId;
+  performerId: ObjectId;
 
   performerInfo: any;
 
-  userIds: ObjectId[];
+  title: string;
 
-  streamIds: string[];
+  description: string;
 
   type: string;
 
@@ -40,9 +46,18 @@ export class StreamDto {
 
   isFree: boolean;
 
+  price: number;
+
   createdAt: Date;
 
   updatedAt: Date;
+
+  stats: {
+    members: number;
+    likes: number;
+  }
+
+  isSubscribed: boolean;
 
   constructor(data: Partial<IStream>) {
     Object.assign(
@@ -51,16 +66,19 @@ export class StreamDto {
         '_id',
         'performerId',
         'performerInfo',
-        'userIds',
+        'title',
+        'description',
         'type',
-        'streamIds',
         'sessionId',
         'isStreaming',
         'streamingTime',
         'lastStreamingTime',
         'isFree',
+        'price',
         'createdAt',
-        'updatedAt'
+        'updatedAt',
+        'stats',
+        'isSubscribed'
       ])
     );
   }
@@ -68,12 +86,19 @@ export class StreamDto {
   toResponse(includePrivateInfo = false) {
     const publicInfo = {
       _id: this._id,
+      title: this.title,
+      description: this.description,
       isStreaming: this.isStreaming,
-      streamingTime: this.streamingTime,
-      lastStreamingTime: this.lastStreamingTime,
       isFree: this.isFree,
+      price: this.price,
       performerId: this.performerId,
-      performerInfo: this.performerInfo
+      performerInfo: this.performerInfo,
+      type: this.type,
+      sessionId: this.sessionId,
+      stats: this.stats,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      isSubscribed: this.isSubscribed
     };
     if (!includePrivateInfo) {
       return publicInfo;
@@ -81,12 +106,8 @@ export class StreamDto {
 
     return {
       ...publicInfo,
-      userIds: this.userIds,
-      type: this.type,
-      streamIds: this.streamIds,
-      sessionId: this.sessionId,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt
+      streamingTime: this.streamingTime,
+      lastStreamingTime: this.lastStreamingTime
     };
   }
 }

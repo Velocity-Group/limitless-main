@@ -2,9 +2,9 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { QueueEventService, QueueEvent } from 'src/kernel';
 import {
-  PURCHASED_ITEM_SUCCESS_CHANNEL, PURCHASE_ITEM_TYPE,
+  TOKEN_TRANSACTION_SUCCESS_CHANNEL, PURCHASE_ITEM_TYPE,
   PURCHASE_ITEM_STATUS
-} from 'src/modules/purchased-item/constants';
+} from 'src/modules/token-transaction/constants';
 import { EVENT } from 'src/kernel/constants';
 import { ProductService } from 'src/modules/performer-assets/services';
 import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
@@ -25,7 +25,7 @@ export class OrderListener {
     private readonly queueEventService: QueueEventService
   ) {
     this.queueEventService.subscribe(
-      PURCHASED_ITEM_SUCCESS_CHANNEL,
+      TOKEN_TRANSACTION_SUCCESS_CHANNEL,
       ORDER_TOPIC,
       this.handleListen.bind(this)
     );

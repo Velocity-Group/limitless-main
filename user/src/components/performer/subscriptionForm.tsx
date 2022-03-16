@@ -68,27 +68,28 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             )}
             <Form.Item
               name="monthlyPrice"
-              label="Monthly Subscription price ($)"
+              label="Monthly Subscription Price ($)"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
             </Form.Item>
             <Form.Item
               name="yearlyPrice"
-              label="Yearly Subscription price ($)"
+              label="Yearly Subscription Price ($)"
+              rules={[{ required: true }]}
+            >
+              <InputNumber min={1} />
+            </Form.Item>
+            <Form.Item
+              key="publicChatPrice"
+              name="publicChatPrice"
+              label="Default Streaming Price (token)"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
             </Form.Item>
           </Col>
           {/* <Col xl={12} md={12} xs={24}>
-            <Form.Item
-              name="publicChatPrice"
-              label="Tokens per minute Public Chat"
-              rules={[{ required: true }]}
-            >
-              <InputNumber min={1} />
-            </Form.Item>
             <Form.Item
               name="privateChatPrice"
               label="Tokens per minute Private Chat"

@@ -1,5 +1,5 @@
 import {
-  Layout, message, Tooltip, Alert, Input, Spin
+  Layout, message, Tooltip, Alert, Input
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -9,22 +9,24 @@ import { Banner } from '@components/common';
 import HomeFooter from '@components/common/layout/footer';
 import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
 import {
-  performerService, feedService, bannerService, utilsService
+  performerService, feedService, bannerService, utilsService, streamService
 } from '@services/index';
 import {
-  IFeed, IPerformer, ISettings, IUser, IBanner, IUIConfig, ICountry
+  IFeed, IPerformer, ISettings, IUser, IBanner, IUIConfig, ICountry, IStream
 } from 'src/interfaces';
 import ScrollListFeed from '@components/post/scroll-list';
 import {
   SyncOutlined, TagOutlined, SearchOutlined, CloseOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
+import Router from 'next/router';
 import { debounce } from 'lodash';
 import './index.less';
 
 interface IProps {
   countries: ICountry[];
   banners: IBanner[];
+  streams: IStream[];
   ui: IUIConfig;
   settings: ISettings;
   user: IUser;
@@ -49,13 +51,15 @@ class HomePage extends PureComponent<IProps> {
   static noredirect = true;
 
   static async getInitialProps() {
-    const [banners, countries] = await Promise.all([
+    const [banners, countries, streams] = await Promise.all([
       bannerService.search({ limit: 99 }),
-      utilsService.countriesList()
+      utilsService.countriesList(),
+      streamService.search({ limit: 99 })
     ]);
     return {
       banners: banners?.data?.data || [],
-      countries: countries?.data || []
+      countries: countries?.data || [],
+      streams: streams?.data?.data || []
     };
   }
 
@@ -89,6 +93,32 @@ class HomePage extends PureComponent<IProps> {
       this.setState({ showFooter: true });
     }
   }
+
+  handleClick = (stream: IStream) => {
+    const { user } = this.props;
+    if (!user._id) {
+      message.error('Please log in or register!', 5);
+      Router.push('/');
+      return;
+    }
+    if (user.isPerformer) return;
+    if (!stream?.isSubscribed) {
+      message.error('Please subscribe to join live chat!', 5);
+      Router.push({
+        pathname: '/model/profile',
+        query: {
+          username: stream?.performerInfo?.username || stream?.performerInfo?._id
+        }
+      }, `/streaming/${stream?.performerInfo?.username || stream?.performerInfo?._id}`);
+      return;
+    }
+    Router.push({
+      pathname: '/streaming/details',
+      query: {
+        username: stream?.performerInfo?.username || stream?.performerInfo?._id
+      }
+    }, `/streaming/${stream?.performerInfo?.username || stream?.performerInfo?._id}`);
+  };
 
   async onGetFreePerformers() {
     const { isFreeSubscription } = this.state;
@@ -161,7 +191,7 @@ class HomePage extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, feedState, user, settings, banners, countries
+      ui, feedState, user, settings, banners, countries, streams
     } = this.props;
     const { items: feeds, total: totalFeeds, requesting: loadingFeed } = feedState;
     const topBanners = banners && banners.length > 0 && banners.filter((b) => b.position === 'top');
@@ -204,21 +234,24 @@ class HomePage extends PureComponent<IProps> {
                 {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
                 <div className="visit-history">
                   <div className="top-story">
-                    <a>Suggested Models</a>
-                    <a href="/model"><small>View all</small></a>
+                    <a>Live Videos</a>
+                    <a href="/streaming"><small>View all</small></a>
                   </div>
                   <div className="story-list">
-                    {!loadingPerformer && randomPerformers.length > 0 && randomPerformers.map((per) => (
-                      <Link key={per._id} href={{ pathname: '/model/profile', query: { username: per?.username || per?._id } }} as={`${per?.username || per?._id}`}>
-                        <div className="story-per-card" title={per?.name || per?.username || 'N/A'}>
-                          <span className={per?.isOnline > 0 ? 'online-status active' : 'online-status'} />
-                          <img className="per-avatar" alt="avatar" src={per?.avatar || '/static/no-avatar.png'} />
-                        </div>
-                      </Link>
+                    {streams.length > 0 && streams.map((s) => (
+                      <div
+                        aria-hidden
+                        onClick={() => this.handleClick(s)}
+                        key={s._id}
+                        className="story-per-card"
+                        title={s?.performerInfo?.name || s?.performerInfo?.username || 'N/A'}
+                      >
+                        <div className="blink-border" />
+                        <img className="per-avatar" alt="avatar" src={s?.performerInfo?.avatar || '/static/no-avatar.png'} />
+                      </div>
                     ))}
                   </div>
-                  {loadingPerformer && <div className="text-center" style={{ margin: 32 }}><Spin /></div>}
-                  {!loadingPerformer && !randomPerformers?.length && <p className="text-center" style={{ margin: '30px 0' }}>No profile was found</p>}
+                  {!streams?.length && <p className="text-center" style={{ margin: '30px 0' }}>No live for now</p>}
                 </div>
                 {!loadingFeed && !totalFeeds && (
                   <div className="main-container custom text-center" style={{ margin: '10px 0' }}>

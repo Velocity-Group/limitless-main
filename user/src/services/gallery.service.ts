@@ -18,11 +18,11 @@ class GalleryService extends APIRequest {
   }
 
   findById(id: string) {
-    return this.get(`/performer/performer-assets/galleries/${encodeURI(id)}/view`);
+    return this.get(`/performer/performer-assets/galleries/${id}/view`);
   }
 
   userViewDetails(id: string, headers?: any) {
-    return this.get(`/user/performer-assets/galleries/${encodeURI(id)}/view`, headers);
+    return this.get(`/user/performer-assets/galleries/${id}/view`, headers);
   }
 
   delete(id: string) {

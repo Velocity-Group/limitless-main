@@ -31,8 +31,11 @@
 
 .ant-drawer {
   .ant-drawer-close {
-    z-index: 9999;
+    z-index: 1;
     padding: 10px;
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   .ant-drawer-header {
@@ -892,4 +895,8 @@
 }
 .ant-modal-footer .ant-btn + .ant-btn:not(.ant-dropdown-trigger) {
   margin-left: 0;
+}
+
+.hidden {
+  visibility: hidden;
 }

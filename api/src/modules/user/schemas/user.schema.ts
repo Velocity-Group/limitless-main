@@ -64,10 +64,6 @@ export const userSchema = new mongoose.Schema({
     type: Date
   },
   stats: {
-    totalViewTime: {
-      type: Number,
-      default: 0
-    },
     totalSubscriptions: {
       type: Number,
       default: 0

@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { QueueEventService, QueueEvent } from 'src/kernel';
-import { PURCHASED_ITEM_SUCCESS_CHANNEL, PURCHASE_ITEM_TYPE } from 'src/modules/purchased-item/constants';
+import { TOKEN_TRANSACTION_SUCCESS_CHANNEL, PURCHASE_ITEM_TYPE } from 'src/modules/token-transaction/constants';
 import { FileDto } from 'src/modules/file';
 import { FileService } from 'src/modules/file/services';
 import { EVENT } from 'src/kernel/constants';
@@ -28,7 +28,7 @@ export class StockProductListener {
     private readonly userService: UserService
   ) {
     this.queueEventService.subscribe(
-      PURCHASED_ITEM_SUCCESS_CHANNEL,
+      TOKEN_TRANSACTION_SUCCESS_CHANNEL,
       UPDATE_STOCK_CHANNEL,
       this.handleStockProducts.bind(this)
     );
