@@ -30,6 +30,11 @@ export default function Subscriber({
 
   const onbeforeunload = () => {
     client?.uid && client.leave();
+    if (client?.remoteUsers) {
+      client.remoteUsers.forEach((remoteUser) => {
+        remoteUser.audioTrack.stop();
+      });
+    }
   };
 
   const subscribe = async (

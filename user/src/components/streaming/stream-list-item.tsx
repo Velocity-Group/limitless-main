@@ -33,6 +33,11 @@ export default function StreamListItem({ stream, user }: Props) {
     if (client && client.uid) {
       await client.leave();
     }
+    if (client?.remoteUsers) {
+      client.remoteUsers.forEach((remoteUser) => {
+        remoteUser.audioTrack.stop();
+      });
+    }
     setModalShow(false);
   };
 
