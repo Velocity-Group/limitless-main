@@ -208,8 +208,8 @@ class HomePage extends PureComponent<IProps> {
           </title>
         </Head>
         <div className="home-page">
-          <Banner banners={topBanners} />
           <div className="main-container">
+            <Banner banners={topBanners} />
             <div className="home-heading">
               <h3>
                 HOME
