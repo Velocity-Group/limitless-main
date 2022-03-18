@@ -112,8 +112,6 @@ class LivePage extends PureComponent<IProps> {
     }
     Router.events.on('routeChangeStart', this.onbeforeunload.bind(this));
     window.addEventListener('beforeunload', this.onbeforeunload.bind(this));
-    this.joinConversation();
-    this.subscribeStream({ performerId: performer._id });
   }
 
   componentWillUnmount() {
@@ -152,7 +150,7 @@ class LivePage extends PureComponent<IProps> {
 
   async purchaseStream() {
     const {
-      activeStream, initialized
+      activeStream
     } = this.state;
     const { user, updateBalance: handleUpdateBalance } = this.props;
     if (activeStream.isFree || !activeStream.sessionId) return;
@@ -165,7 +163,7 @@ class LivePage extends PureComponent<IProps> {
       await this.setState({ submiting: true });
       await tokenTransctionService.purchaseStream(activeStream._id);
       handleUpdateBalance({ token: -activeStream.price });
-      !initialized && this.subscriberRef.current && this.subscriberRef.current.click();
+      await this.joinConversation(true);
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Error occured, please try again later');
@@ -183,28 +181,31 @@ class LivePage extends PureComponent<IProps> {
     const { initialized } = this.state;
     try {
       const resp = await streamService.joinPublicChat(performerId);
-      const {
-        isFree, streamingTime
-      } = resp.data;
+      const { streamingTime } = resp.data;
       this.setState({ activeStream: resp.data, sessionDuration: streamingTime || 0 });
-      if (isFree) {
-        !initialized && this.subscriberRef.current && this.subscriberRef.current.click();
-      } else {
-        this.setState({ openPurchaseModal: true });
-      }
+      !initialized && this.subscriberRef.current && this.subscriberRef.current.click();
     } catch (err) {
       const error = await Promise.resolve(err);
       message.error(getResponseError(error));
     }
   }
 
-  async joinConversation() {
+  async joinConversation(purchased = false) {
     const {
       performer, loadStreamMessages: dispatchLoadStreamMessages,
       getStreamConversationSuccess: dispatchGetStreamConversationSuccess
     } = this.props;
     const socket = this.context;
+
     try {
+      if (!purchased) {
+        const { data } = await streamService.joinPublicChat(performer._id);
+        const { isFree } = data;
+        if (!isFree) {
+          this.setState({ openPurchaseModal: true });
+          return;
+        }
+      }
       const resp = await messageService.findPublicConversationPerformer(
         performer._id
       );
@@ -331,9 +332,9 @@ class LivePage extends PureComponent<IProps> {
                   <Button
                     block
                     className="primary"
-                    onClick={() => Router.push('/streaming')}
+                    onClick={this.joinConversation.bind(this)}
                   >
-                    Leave Chat
+                    Join Chat
                   </Button>
                   <Button
                     block
