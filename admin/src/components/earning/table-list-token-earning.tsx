@@ -108,19 +108,19 @@ export class TableListTokenEarning extends PureComponent<IProps> {
           }
         }
       },
-      {
-        title: 'Paid Status',
-        dataIndex: 'isPaid',
-        render(isPaid: boolean) {
-          switch (isPaid) {
-            case true:
-              return <Tag color="green">Paid</Tag>;
-            case false:
-              return <Tag color="red">Unpaid</Tag>;
-            default: return null;
-          }
-        }
-      },
+      // {
+      //   title: 'Paid Status',
+      //   dataIndex: 'isPaid',
+      //   render(isPaid: boolean) {
+      //     switch (isPaid) {
+      //       case true:
+      //         return <Tag color="green">Paid</Tag>;
+      //       case false:
+      //         return <Tag color="red">Unpaid</Tag>;
+      //       default: return null;
+      //     }
+      //   }
+      // },
       {
         title: 'Updated On',
         dataIndex: 'updatedAt',
