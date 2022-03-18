@@ -1,7 +1,6 @@
 import { streamService } from '@services/stream.service';
 import { IAgoraRTCRemoteUser, UID } from 'agora-rtc-sdk-ng';
-import { Button } from 'antd';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Player, useAgora } from 'src/agora';
 import { Router } from 'next/router';
 
@@ -85,17 +84,10 @@ export default function Subscriber({
     };
   }, []);
 
-  return (
-    // <AgoraProvider config={{ mode: 'live', codec: 'h264', role: 'host' }}>
-    <>
-      <Player tracks={tracks} />
-      <Button
-        hidden
-        style={{ display: 'none' }}
-        onClick={join}
-        ref={forwardedRef}
-      />
-    </>
-    // </AgoraProvider>
-  );
+  React.useImperativeHandle(forwardedRef, () => ({
+    join,
+    unsubscribe
+  }));
+
+  return <Player tracks={tracks} />;
 }

@@ -56,7 +56,7 @@ class LivePage extends PureComponent<IProps> {
 
   static authenticate = true;
 
-  private subscriberRef = createRef<HTMLButtonElement>();
+  private subscriberRef = createRef<{join: any, unsubscribe: any}>();
 
   private streamDurationTimeOut: any;
 
@@ -183,7 +183,7 @@ class LivePage extends PureComponent<IProps> {
       const resp = await streamService.joinPublicChat(performerId);
       const { streamingTime } = resp.data;
       this.setState({ activeStream: resp.data, sessionDuration: streamingTime || 0 });
-      !initialized && this.subscriberRef.current && this.subscriberRef.current.click();
+      !initialized && this.subscriberRef.current && this.subscriberRef.current.join();
     } catch (err) {
       const error = await Promise.resolve(err);
       message.error(getResponseError(error));

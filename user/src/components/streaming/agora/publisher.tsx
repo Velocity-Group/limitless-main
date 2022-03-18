@@ -1,4 +1,3 @@
-import { Button } from 'antd';
 import React, {
   useContext, useEffect, useRef, useState
 } from 'react';
@@ -90,19 +89,10 @@ export default function Publisher({
     };
   }, []);
 
-  return (
-    // <AgoraProvider config={{ mode: 'live', codec: 'h264', role: 'host' }}>
-    <>
-      <Player tracks={tracks} />
-      <Button
-        hidden
-        style={{ display: 'none' }}
-        ref={forwardedRef}
-        onClick={() => {
-          !tracks.length ? publish() : leave();
-        }}
-      />
-    </>
-    // </AgoraProvider>
-  );
+  React.useImperativeHandle(forwardedRef, () => ({
+    publish,
+    leave
+  }));
+
+  return <Player tracks={tracks} />;
 }

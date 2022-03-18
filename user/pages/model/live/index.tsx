@@ -64,7 +64,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
 
   static authenticate = true;
 
-  private publisherRef = createRef<HTMLButtonElement>();
+  private publisherRef = createRef<{publish: any, leave: any}>();
 
   private streamDurationTimeOut: any;
 
@@ -96,6 +96,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     RouterEvent.events.off('routeChangeStart', this.onbeforeunload.bind(this));
   }
 
+  // eslint-disable-next-line react/sort-comp
   handleDuration() {
     const { callTime } = this.state;
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
@@ -143,7 +144,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
       socket && socket.emit('public-stream/join', {
         conversationId: resp.conversation._id
       });
-      this.publisherRef.current && this.publisherRef.current.click();
+      this.publisherRef.current && this.publisherRef.current.publish();
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Stream server error, please try again later');
