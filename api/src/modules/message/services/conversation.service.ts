@@ -301,4 +301,8 @@ export class ConversationService {
   ) {
     return this.conversationModel.updateOne({ _id: conversationId }, { $addToSet: { recipients: recipient } });
   }
+
+  public async findByStreamIds(ids) {
+    return this.conversationModel.find({ streamId: { $in: ids } }).lean();
+  }
 }

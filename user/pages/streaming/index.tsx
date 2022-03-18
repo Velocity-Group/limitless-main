@@ -7,10 +7,13 @@ import { connect } from 'react-redux';
 import Head from 'next/head';
 import PageHeading from '@components/common/page-heading';
 import { SearchFilter } from '@components/common/search-filter';
-import StreamCard from '@components/streaming/stream-card';
 import { IUIConfig, IUser } from 'src/interfaces/';
 import { streamService } from 'src/services';
 import '@components/performer/performer.less';
+import dynamic from 'next/dynamic';
+
+const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), { ssr: false });
+const StreamCard = dynamic(() => import('@components/streaming/stream-card'), { ssr: false });
 
 interface IProps {
   ui: IUIConfig;
@@ -78,33 +81,35 @@ class Streaming extends PureComponent<IProps> {
 
     return (
       <Layout>
-        <Head>
-          <title>
-            {`${ui.siteName} | Live Videos`}
-          </title>
-        </Head>
-        <div className="main-container">
-          <PageHeading title="Live Videos" icon={<LiveIcon />} />
-          <SearchFilter searchWithPerformer isFree searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
-          {streams.map((s) => (
-            <StreamCard loading={fetching} stream={s} user={user} key={s._id} />
-          ))}
-          {!total && !fetching && <p className="text-center" style={{ margin: 20 }}>No stream was found</p>}
-          {fetching && (
+        <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
+          <Head>
+            <title>
+              {`${ui.siteName} | Live Videos`}
+            </title>
+          </Head>
+          <div className="main-container">
+            <PageHeading title="Live Videos" icon={<LiveIcon />} />
+            <SearchFilter searchWithPerformer isFree searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
+            {streams.map((s) => (
+              <StreamCard loading={fetching} stream={s} user={user} key={s._id} />
+            ))}
+            {!total && !fetching && <p className="text-center" style={{ margin: 20 }}>No stream was found</p>}
+            {fetching && (
             <div className="text-center" style={{ margin: 30 }}>
               <Spin />
             </div>
-          )}
-          {total && total > limit ? (
-            <Pagination
-              showQuickJumper
-              defaultCurrent={offset + 1}
-              total={total}
-              pageSize={limit}
-              onChange={this.pageChanged}
-            />
-          ) : null}
-        </div>
+            )}
+            {total && total > limit ? (
+              <Pagination
+                showQuickJumper
+                defaultCurrent={offset + 1}
+                total={total}
+                pageSize={limit}
+                onChange={this.pageChanged}
+              />
+            ) : null}
+          </div>
+        </AgoraProvider>
       </Layout>
     );
   }

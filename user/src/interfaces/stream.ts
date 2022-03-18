@@ -89,4 +89,5 @@ export interface IStream {
   isSubscribed: boolean;
   createdAt: Date;
   updatedAt: Date;
+  conversationId: string;
 }

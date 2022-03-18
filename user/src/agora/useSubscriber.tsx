@@ -90,7 +90,6 @@ export default function useSubscriber({
     tracks,
     client,
     status,
-    join,
-    subscribe
+    join
   };
 }

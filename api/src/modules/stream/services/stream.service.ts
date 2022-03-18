@@ -143,14 +143,15 @@ export class StreamService {
     ]);
     const performerIds = uniq(data.map((d) => d.performerId));
     const streams = data.map((d) => new StreamDto(d));
-    const [performers, subscriptions] = await Promise.all([
+    const [performers, subscriptions, conversations] = await Promise.all([
       this.performerService.findByIds(performerIds),
       user ? this.subscriptionService.findSubscriptionList({
         performerId: { $in: performerIds },
         userId: user._id,
         status: SUBSCRIPTION_STATUS.ACTIVE,
         expiredAt: { $gt: new Date() }
-      }) : []
+      }) : [],
+      this.conversationService.findByStreamIds(streams.map((s) => s._id))
     ]);
     streams.forEach((stream) => {
       const performer = stream.performerId && performers.find((p) => `${p._id}` === `${stream.performerId}`);
@@ -159,6 +160,9 @@ export class StreamService {
       stream.performerInfo = performer ? new PerformerDto(performer).toResponse() : null;
       // eslint-disable-next-line no-param-reassign
       stream.isSubscribed = !!subscription;
+      const conversation = conversations.find((c) => c.streamId.equals(stream._id));
+      // eslint-disable-next-line no-param-reassign
+      stream.conversationId = conversation && conversation._id;
     });
     return {
       data: streams,

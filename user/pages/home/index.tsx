@@ -22,6 +22,10 @@ import Link from 'next/link';
 import Router from 'next/router';
 import { debounce } from 'lodash';
 import './index.less';
+import dynamic from 'next/dynamic';
+
+const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), { ssr: false });
+const StreamListItem = dynamic(() => import('@components/streaming/stream-list-item'), { ssr: false });
 
 interface IProps {
   countries: ICountry[];
@@ -85,6 +89,7 @@ class HomePage extends PureComponent<IProps> {
     window.removeEventListener('scroll', this.handleScroll);
   }
 
+  // eslint-disable-next-line react/sort-comp
   handleScroll = () => {
     const footer = document.getElementById('main-footer');
     if (isInViewport(footer)) {
@@ -200,60 +205,52 @@ class HomePage extends PureComponent<IProps> {
     } = this.state;
     return (
       <Layout>
-        <Head>
-          <title>
-            {ui && ui.siteName}
-            {' '}
-            | Home
-          </title>
-        </Head>
-        <div className="home-page">
-          <div className="main-container">
-            <Banner banners={topBanners} />
-            <div className="home-heading">
-              <h3>
-                HOME
-              </h3>
-              <div className="search-bar-feed">
-                <Input
-                  className={openSearch ? 'active' : ''}
-                  prefix={<SearchOutlined />}
-                  placeholder="Type to search here ..."
-                  onChange={(e) => {
-                    e.persist();
-                    this.onSearchFeed(e.target.value);
-                  }}
-                />
-                <a aria-hidden className="open-search" onClick={() => this.setState({ openSearch: !openSearch })}>
-                  {!openSearch ? <SearchOutlined /> : <CloseOutlined />}
-                </a>
-              </div>
-            </div>
-            <div className="home-container">
-              <div className="left-container">
-                {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
-                <div className="visit-history">
-                  <div className="top-story">
-                    <a>Live Videos</a>
-                    <a href="/streaming"><small>View all</small></a>
-                  </div>
-                  <div className="story-list">
-                    {streams.length > 0 && streams.map((s) => (
-                      <div
-                        aria-hidden
-                        onClick={() => this.handleClick(s)}
-                        key={s._id}
-                        className="story-per-card"
-                        title={s?.performerInfo?.name || s?.performerInfo?.username || 'N/A'}
-                      >
-                        <div className="blink-border" />
-                        <img className="per-avatar" alt="avatar" src={s?.performerInfo?.avatar || '/static/no-avatar.png'} />
-                      </div>
-                    ))}
-                  </div>
-                  {!streams?.length && <p className="text-center" style={{ margin: '30px 0' }}>No live for now</p>}
+        <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
+          <Head>
+            <title>
+              {ui && ui.siteName}
+              {' '}
+              | Home
+            </title>
+          </Head>
+          <div className="home-page">
+            <div className="main-container">
+              <Banner banners={topBanners} />
+              <div className="home-heading">
+                <h3>
+                  HOME
+                </h3>
+                <div className="search-bar-feed">
+                  <Input
+                    className={openSearch ? 'active' : ''}
+                    prefix={<SearchOutlined />}
+                    placeholder="Type to search here ..."
+                    onChange={(e) => {
+                      e.persist();
+                      this.onSearchFeed(e.target.value);
+                    }}
+                  />
+                  <a aria-hidden className="open-search" onClick={() => this.setState({ openSearch: !openSearch })}>
+                    {!openSearch ? <SearchOutlined /> : <CloseOutlined />}
+                  </a>
                 </div>
-                {!loadingFeed && !totalFeeds && (
+              </div>
+              <div className="home-container">
+                <div className="left-container">
+                  {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
+                  <div className="visit-history">
+                    <div className="top-story">
+                      <a>Live Videos</a>
+                      <a href="/streaming"><small>View all</small></a>
+                    </div>
+                    <div className="story-list">
+                      {streams.length > 0 && streams.map((s) => (
+                        <StreamListItem stream={s} user={user} />
+                      ))}
+                    </div>
+                    {!streams?.length && <p className="text-center" style={{ margin: '30px 0' }}>No live for now</p>}
+                  </div>
+                  {!loadingFeed && !totalFeeds && (
                   <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
                     <Alert
                       type="warning"
@@ -266,34 +263,35 @@ class HomePage extends PureComponent<IProps> {
                       )}
                     />
                   </div>
-                )}
-                <ScrollListFeed
-                  items={feeds}
-                  canLoadmore={feeds && feeds.length < totalFeeds}
-                  loading={loadingFeed}
-                  onDelete={this.onDeleteFeed.bind(this)}
-                  loadMore={this.loadmoreFeeds.bind(this)}
-                />
-              </div>
-              <div className="right-container" id="home-right-container">
-                <div className="suggestion-bl">
-                  <div className="sug-top">
-                    <span className="sug-text">SUGGESTIONS</span>
-                    <span className="btns-grp" style={{ textAlign: randomPerformers.length < 5 ? 'right' : 'left' }}>
-                      <a aria-hidden className="free-btn" onClick={this.onGetFreePerformers.bind(this)}><Tooltip title={isFreeSubscription ? 'Show all' : 'Show only free'}><TagOutlined className={isFreeSubscription ? 'active' : ''} /></Tooltip></a>
-                      <a aria-hidden className="reload-btn" onClick={this.getPerformers.bind(this)}><Tooltip title="Refresh"><SyncOutlined spin={loadingPerformer} /></Tooltip></a>
-                    </span>
-                  </div>
-                  <HomePerformers countries={countries} performers={randomPerformers} />
-                  {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
-                  <div className={!showFooter ? 'home-footer' : 'home-footer active'}>
-                    <HomeFooter id="home-footer" />
+                  )}
+                  <ScrollListFeed
+                    items={feeds}
+                    canLoadmore={feeds && feeds.length < totalFeeds}
+                    loading={loadingFeed}
+                    onDelete={this.onDeleteFeed.bind(this)}
+                    loadMore={this.loadmoreFeeds.bind(this)}
+                  />
+                </div>
+                <div className="right-container" id="home-right-container">
+                  <div className="suggestion-bl">
+                    <div className="sug-top">
+                      <span className="sug-text">SUGGESTIONS</span>
+                      <span className="btns-grp" style={{ textAlign: randomPerformers.length < 5 ? 'right' : 'left' }}>
+                        <a aria-hidden className="free-btn" onClick={this.onGetFreePerformers.bind(this)}><Tooltip title={isFreeSubscription ? 'Show all' : 'Show only free'}><TagOutlined className={isFreeSubscription ? 'active' : ''} /></Tooltip></a>
+                        <a aria-hidden className="reload-btn" onClick={this.getPerformers.bind(this)}><Tooltip title="Refresh"><SyncOutlined spin={loadingPerformer} /></Tooltip></a>
+                      </span>
+                    </div>
+                    <HomePerformers countries={countries} performers={randomPerformers} />
+                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
+                    <div className={!showFooter ? 'home-footer' : 'home-footer active'}>
+                      <HomeFooter id="home-footer" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </AgoraProvider>
       </Layout>
     );
   }

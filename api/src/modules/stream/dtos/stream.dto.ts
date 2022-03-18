@@ -52,6 +52,8 @@ export class StreamDto {
 
   updatedAt: Date;
 
+  conversationId: string;
+
   stats: {
     members: number;
     likes: number;
@@ -78,7 +80,8 @@ export class StreamDto {
         'createdAt',
         'updatedAt',
         'stats',
-        'isSubscribed'
+        'isSubscribed',
+        'conversationId'
       ])
     );
   }
@@ -98,7 +101,8 @@ export class StreamDto {
       stats: this.stats,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      isSubscribed: this.isSubscribed
+      isSubscribed: this.isSubscribed,
+      conversationId: this.conversationId
     };
     if (!includePrivateInfo) {
       return publicInfo;
