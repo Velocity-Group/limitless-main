@@ -5,6 +5,9 @@ import { message, Modal } from 'antd';
 import { useState } from 'react';
 import { Player } from 'src/agora';
 import useSubscriber from 'src/agora/useSubscriber';
+import Router from 'next/router';
+import { useDispatch } from 'react-redux';
+import { showSubscribePerformerModal } from '@redux/subscription/actions';
 
 type Props = {
   stream: IStream;
@@ -18,9 +21,36 @@ export default function StreamListItem({ stream, user }: Props) {
     conversationId: stream.conversationId
   });
   const [showModal, setModalShow] = useState(false);
+  const dispatch = useDispatch();
   const watchNow = async () => {
     try {
-      // TODO check supscription
+      if (!user._id) {
+        message.error('Please log in or register!', 5);
+        Router.push('/');
+        return;
+      }
+      if (user.isPerformer) return;
+      if (!stream?.isSubscribed) {
+        message.error('Please subscribe to join live chat!', 5);
+        dispatch(showSubscribePerformerModal(stream.performerId));
+        return;
+      }
+      if (!stream.isFree) {
+        Router.push(
+          {
+            pathname: '/streaming/details',
+            query: {
+              performer: JSON.stringify(stream?.performerInfo),
+              username:
+                stream?.performerInfo?.username || stream?.performerInfo?._id
+            }
+          },
+          `/streaming/${
+            stream?.performerInfo?.username || stream?.performerInfo?._id
+          }`
+        );
+        return;
+      }
       join();
       setModalShow(true);
     } catch (err) {
@@ -51,7 +81,7 @@ export default function StreamListItem({ stream, user }: Props) {
     >
       <div className="blink-border" />
       <img className="per-avatar" alt="avatar" src={stream?.performerInfo?.avatar || '/static/no-avatar.png'} />
-      <Modal visible={showModal} onCancel={stopWatch}>
+      <Modal visible={showModal} onCancel={stopWatch} width={640}>
         <Player tracks={tracks} />
       </Modal>
     </div>

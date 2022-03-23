@@ -13,8 +13,8 @@ class StreamService extends APIRequest {
     return this.post('/streaming/live', data);
   }
 
-  joinPublicChat(performerId: string) {
-    return this.post(`/streaming/join/${performerId}`);
+  joinPublicChat(performerId: string, headers?: any) {
+    return this.post(`/streaming/join/${performerId}`, headers);
   }
 
   fetchAgoraAppToken(data) {

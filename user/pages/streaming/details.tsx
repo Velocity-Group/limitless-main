@@ -48,6 +48,7 @@ interface IProps {
   ui: IUIConfig;
   user: IUser;
   performer: IPerformer;
+  stream: IStream;
   settings: StreamSettings;
 }
 
@@ -74,8 +75,11 @@ class LivePage extends PureComponent<IProps> {
         query.username,
         headers
       );
+
+      const stream = await streamService.joinPublicChat(resp.data._id, headers);
       return {
-        performer: resp.data
+        performer: resp.data,
+        stream: stream.data
       };
     } catch (e) {
       if (process.browser) {
@@ -95,8 +99,7 @@ class LivePage extends PureComponent<IProps> {
     openPurchaseModal: false,
     submiting: false,
     openTipModal: false,
-    initialized: false,
-    activeStream: null as IStream
+    initialized: false
   };
 
   componentDidMount() {
@@ -150,8 +153,8 @@ class LivePage extends PureComponent<IProps> {
 
   async purchaseStream() {
     const {
-      activeStream
-    } = this.state;
+      stream: activeStream
+    } = this.props;
     const { user, updateBalance: handleUpdateBalance } = this.props;
     if (activeStream.isFree || !activeStream.sessionId) return;
     if (user.balance < activeStream.price) {
@@ -182,7 +185,7 @@ class LivePage extends PureComponent<IProps> {
     try {
       const resp = await streamService.joinPublicChat(performerId);
       const { streamingTime } = resp.data;
-      this.setState({ activeStream: resp.data, sessionDuration: streamingTime || 0 });
+      this.setState({ sessionDuration: streamingTime || 0 });
       !initialized && this.subscriberRef.current && this.subscriberRef.current.join();
     } catch (err) {
       const error = await Promise.resolve(err);
@@ -193,15 +196,14 @@ class LivePage extends PureComponent<IProps> {
   async joinConversation(purchased = false) {
     const {
       performer, loadStreamMessages: dispatchLoadStreamMessages,
-      getStreamConversationSuccess: dispatchGetStreamConversationSuccess
+      getStreamConversationSuccess: dispatchGetStreamConversationSuccess,
+      stream
     } = this.props;
     const socket = this.context;
 
     try {
       if (!purchased) {
-        const { data } = await streamService.joinPublicChat(performer._id);
-        const { isFree } = data;
-        if (!isFree) {
+        if (!stream.isFree) {
           this.setState({ openPurchaseModal: true });
           return;
         }
@@ -253,7 +255,7 @@ class LivePage extends PureComponent<IProps> {
     const {
       performer, user, updateBalance: handleUpdateBalance, activeConversation
     } = this.props;
-    const { activeStream } = this.state;
+    const { stream: activeStream } = this.props;
     if (user.balance < token) {
       message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
@@ -279,11 +281,11 @@ class LivePage extends PureComponent<IProps> {
 
   render() {
     const {
-      performer, user, ui, activeConversation
+      performer, user, ui, activeConversation, stream: activeStream
     } = this.props;
     const {
       members, total, openPurchaseModal,
-      sessionDuration, submiting, openTipModal, activeStream
+      sessionDuration, submiting, openTipModal
     } = this.state;
     return (
       <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
@@ -332,7 +334,7 @@ class LivePage extends PureComponent<IProps> {
                   <Button
                     block
                     className="primary"
-                    onClick={this.joinConversation.bind(this)}
+                    onClick={() => this.joinConversation()}
                   >
                     Join Chat
                   </Button>
