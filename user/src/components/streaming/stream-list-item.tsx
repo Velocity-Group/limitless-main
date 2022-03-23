@@ -81,6 +81,7 @@ export default function StreamListItem({ stream, user }: Props) {
     >
       <div className="blink-border" />
       <img className="per-avatar" alt="avatar" src={stream?.performerInfo?.avatar || '/static/no-avatar.png'} />
+      <div className="live-tag">LIVE</div>
       <Modal visible={showModal} onCancel={stopWatch} width={640}>
         <Player tracks={tracks} />
       </Modal>

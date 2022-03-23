@@ -3,10 +3,11 @@
 .conversation-stream {
   width: 100%;
   min-height: 375px;
+  max-height: 600px;
+  height: 600px;
   border: solid 1px @primary-color;
   border-radius: 5px;
   position: relative;
-  height: 100%;
   .tablist {
     margin: 0;
   }
@@ -15,8 +16,8 @@
   }
   .ant-tabs-nav-list {
     width: 100%;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
     overflow: hidden;
     .ant-tabs-tab {
       width: 50%;
@@ -35,6 +36,31 @@
   &.active {
     .ant-tabs-tab {
       width: 100%;
+    }
+  }
+
+  .tip-box {
+    margin: 3px 0;
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .conversation-stream {
+    height: 440px;
+
+    .message-stream {
+      height: 340px;
+    }
+  }
+}
+
+@media screen and (max-width: 990px) {
+  .conversation-stream {
+    height: 340px;
+
+    .message-stream {
+      height: 240px;
     }
   }
 }

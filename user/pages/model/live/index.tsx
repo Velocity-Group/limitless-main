@@ -5,7 +5,7 @@ import {
   Row, Col, Button, message, Modal, Layout, Card
 } from 'antd';
 import {
-  ClockCircleOutlined, PlayCircleOutlined, EditOutlined
+  ClockCircleOutlined, PlayCircleOutlined, EditOutlined, EyeOutlined
 } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import {
@@ -205,102 +205,109 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
             event={EVENT_NAME.ROOM_INFORMATIOM_CHANGED}
             handler={this.onRoomChange.bind(this)}
           />
-          <Row>
-            <Col xs={24} sm={24} md={16}>
-              <ForwardedPublisher
-                uid={user._id}
-                onStatusChange={(val) => this.onStreamStatusChange(val)}
-                ref={this.publisherRef}
-                conversationId={activeStream?.conversation?._id}
-              />
-              <p className="stream-duration">
-                <span>
-                  <ClockCircleOutlined />
-                  {' '}
-                  {videoDuration(callTime)}
-                </span>
-                <span>
-                  <img src="/static/coin-ico.png" alt="gem" width="20px" />
-                  {' '}
-                  {(user?.balance).toFixed(2)}
-                </span>
-              </p>
-              <div className="stream-description">
-                {!initialized ? (
-                  <Button
-                    key="start-btn"
-                    className="primary"
-                    onClick={() => this.setState({ openPriceModal: true })}
-                    disabled={loading}
-                    block
-                  >
-                    <PlayCircleOutlined />
-                    {' '}
-                    Start Broadcasting
-                  </Button>
-                ) : (
-                  <Button
-                    key="start-btn"
-                    className="primary"
-                    onClick={() => Router.push({ pathname: '/model/profile', query: { username: user?.username || user?._id } }, `/${user?.username || user?._id}`)}
-                    disabled={loading}
-                    block
-                  >
-                    <PlayCircleOutlined />
-                    {' '}
-                    Stop Broadcasting
-                  </Button>
-                )}
-              </div>
-              <Card bordered={false} bodyStyle={{ padding: 0 }}>
-                <Card.Meta
-                  title={activeStream?.title}
-                  description={activeStream?.description && (
-                  <p>
-                    {editting ? (
-                      <Row>
-                        <Col xs={24}>
-                          <textarea className="ant-input" ref={this.descriptionRef} defaultValue={activeStream.description} />
-                        </Col>
-                        <Col xs={24}>
-                          <Button className="primary" icon={<EditOutlined />} onClick={() => this.editLive()}>Update</Button>
-                        </Col>
-                      </Row>
-                    ) : (
-                      <>
-                        {activeStream.description}
-                        {' '}
-                        <EditOutlined onClick={() => this.setState({ editting: true })} />
-                      </>
-                    )}
-                  </p>
-                  )}
+          <div style={{ padding: 10 }}>
+            <Row>
+              <Col xs={24} sm={24} md={16} style={{ padding: 10 }}>
+                <ForwardedPublisher
+                  uid={user._id}
+                  onStatusChange={(val) => this.onStreamStatusChange(val)}
+                  ref={this.publisherRef}
+                  conversationId={activeStream?.conversation?._id}
                 />
+                <p className="stream-duration">
+                  <span>
+                    <ClockCircleOutlined />
+                    {' '}
+                    {videoDuration(callTime)}
+                  </span>
+                  <span>
+                    <img src="/static/coin-ico.png" alt="gem" width="20px" />
+                    {' '}
+                    {(user?.balance).toFixed(2)}
+                  </span>
+                  <span>
+                    <EyeOutlined />
+                    {' '}
+                    {total}
+                  </span>
+                </p>
+                <div className="stream-description">
+                  {!initialized ? (
+                    <Button
+                      key="start-btn"
+                      className="primary"
+                      onClick={() => this.setState({ openPriceModal: true })}
+                      disabled={loading}
+                      block
+                    >
+                      <PlayCircleOutlined />
+                      {' '}
+                      Start Broadcasting
+                    </Button>
+                  ) : (
+                    <Button
+                      key="start-btn"
+                      className="primary"
+                      onClick={() => Router.push({ pathname: '/model/profile', query: { username: user?.username || user?._id } }, `/${user?.username || user?._id}`)}
+                      disabled={loading}
+                      block
+                    >
+                      <PlayCircleOutlined />
+                      {' '}
+                      Stop Broadcasting
+                    </Button>
+                  )}
+                </div>
+                <Card bordered={false} bodyStyle={{ padding: 0 }}>
+                  <Card.Meta
+                    title={activeStream?.title}
+                    description={activeStream?.description && (
+                    <p>
+                      {editting ? (
+                        <Row>
+                          <Col xs={24}>
+                            <textarea className="ant-input" ref={this.descriptionRef} defaultValue={activeStream.description} />
+                          </Col>
+                          <Col xs={24}>
+                            <Button className="primary" icon={<EditOutlined />} onClick={() => this.editLive()}>Update</Button>
+                          </Col>
+                        </Row>
+                      ) : (
+                        <>
+                          {activeStream.description}
+                          {' '}
+                          <EditOutlined onClick={() => this.setState({ editting: true })} />
+                        </>
+                      )}
+                    </p>
+                    )}
+                  />
 
-              </Card>
-            </Col>
-            <Col xs={24} sm={24} md={8}>
-              <ChatBox
-                {...this.props}
-                members={members}
-                totalParticipant={total}
-              />
-            </Col>
-            <Modal
-              centered
-              key="update_stream"
-              title="Update stream information"
-              visible={openPriceModal}
-              footer={null}
-              onCancel={() => this.setState({ openPriceModal: false })}
-            >
-              <StreamPriceForm
-                submiting={loading}
-                performer={user}
-                onFinish={this.joinPublicRoom.bind(this)}
-              />
-            </Modal>
-          </Row>
+                </Card>
+              </Col>
+              <Col xs={24} sm={24} md={8} style={{ padding: 10 }}>
+                <ChatBox
+                  {...this.props}
+                  members={members}
+                  totalParticipant={total}
+                />
+              </Col>
+              <Modal
+                centered
+                key="update_stream"
+                title="Update stream information"
+                visible={openPriceModal}
+                footer={null}
+                onCancel={() => this.setState({ openPriceModal: false })}
+              >
+                <StreamPriceForm
+                  submiting={loading}
+                  performer={user}
+                  onFinish={this.joinPublicRoom.bind(this)}
+                />
+              </Modal>
+            </Row>
+          </div>
         </Layout>
       </AgoraProvider>
     );
