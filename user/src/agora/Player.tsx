@@ -51,7 +51,7 @@ export const Player: React.FC<Props> = ({ tracks }: Props) => {
     <div className="publisher-player">
       <video
         ref={player}
-        className="video-js vjs-fluid"
+        className="video-js vjs-16-9"
         controls
         autoPlay
         muted
