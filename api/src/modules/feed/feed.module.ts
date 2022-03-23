@@ -9,7 +9,8 @@ import {
 } from './controllers';
 import {
   ReactionFeedListener, CommentFeedListener, PollFeedListener, UpdatePerformerGenderListener,
-  DeletePerformerFeedListener
+  DeletePerformerFeedListener,
+  StreamFeedListener
 } from './listeners';
 import { FileModule } from '../file/file.module';
 import { PerformerModule } from '../performer/performer.module';
@@ -31,7 +32,7 @@ import { TokenTransactionModule } from '../token-transaction/token-transaction.m
   providers: [...feedProviders, ...pollProviders, ...voteProviders,
     FeedService, FeedFileService,
     ReactionFeedListener, CommentFeedListener, PollFeedListener,
-    UpdatePerformerGenderListener, DeletePerformerFeedListener],
+    UpdatePerformerGenderListener, DeletePerformerFeedListener, StreamFeedListener],
   controllers: [PerformerFeedController, FeedFileController, UserFeedController],
   exports: [...feedProviders, FeedService, FeedFileService]
 })

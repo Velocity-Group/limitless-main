@@ -59,6 +59,7 @@ export const FeedSchema = new Schema({
   isSale: { type: Boolean, default: false },
   price: { type: Number, default: 0 },
   isSchedule: { type: Boolean, default: false },
+  targetId: { type: Schema.Types.ObjectId },
   scheduleAt: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

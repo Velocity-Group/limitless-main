@@ -28,13 +28,18 @@ export default function Subscriber({
     await client.join(agoraAppId, conversationId, resp.data, localUId);
   };
 
-  const onbeforeunload = () => {
+  const leave = () => {
     client?.uid && client.leave();
+    setTracks([]);
     if (client?.remoteUsers) {
       client.remoteUsers.forEach((remoteUser) => {
         remoteUser.audioTrack.stop();
       });
     }
+  };
+
+  const onbeforeunload = () => {
+    leave();
   };
 
   const subscribe = async (
@@ -49,7 +54,7 @@ export default function Subscriber({
     if (remoteUser) {
       if (mediaType === 'audio') remoteUser.audioTrack.play();
       if (mediaType === 'video') setTracks([remoteUser.videoTrack]);
-      onStreamStatusChange(true);
+      onStreamStatusChange && onStreamStatusChange(true);
     }
   };
 
@@ -57,7 +62,7 @@ export default function Subscriber({
     const remoteUser = user.uid === remoteUId;
     if (remoteUser) {
       setTracks([]);
-      onStreamStatusChange(false);
+      onStreamStatusChange && onStreamStatusChange(false);
     }
   };
 
@@ -91,7 +96,7 @@ export default function Subscriber({
 
   React.useImperativeHandle(forwardedRef, () => ({
     join,
-    unsubscribe
+    leave
   }));
 
   return <Player tracks={tracks} />;

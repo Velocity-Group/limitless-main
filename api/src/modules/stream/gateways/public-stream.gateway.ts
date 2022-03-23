@@ -12,8 +12,11 @@ import { PerformerService } from 'src/modules/performer/services';
 import { ConversationService } from 'src/modules/message/services';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
-import { StreamModel } from '../models';
+import { QueueEventService } from 'src/kernel';
+import { STREAM_FEED_CHANNEL } from 'src/modules/feed/constants';
+import { EVENT } from 'src/kernel/constants';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
+import { StreamModel } from '../models';
 
 @WebSocketGateway()
 export class PublicStreamWsGateway {
@@ -30,7 +33,8 @@ export class PublicStreamWsGateway {
     private readonly socketService: SocketUserService,
     @Inject(STREAM_MODEL_PROVIDER)
     private readonly streamModel: Model<StreamModel>,
-    private readonly streamService: StreamService
+    private readonly streamService: StreamService,
+    private readonly queueEventService: QueueEventService
   ) {}
 
   @SubscribeMessage('public-stream/live')
@@ -43,12 +47,15 @@ export class PublicStreamWsGateway {
     if (!token) return;
     const user = await this.authService.getSourceFromJWT(token);
     if (!user) return;
+    const stream = await this.streamService.findOne({ _id: conversation.streamId });
+    if (!stream) return;
     const roomName = this.streamService.getRoomName(conversation._id, conversation.type);
     this.socketService.emitToRoom(roomName, 'join-broadcaster', {
       performerId: user._id,
       conversationId
     });
     await Promise.all([
+      this.queueEventService.publish({ channel: STREAM_FEED_CHANNEL, eventName: EVENT.CREATED, data: { conversation, stream } }),
       this.performerService.goLive(user._id),
       this.streamModel.updateOne({ _id: conversation.streamId }, { $set: { isStreaming: 1 } })
     ]);
@@ -151,7 +158,7 @@ export class PublicStreamWsGateway {
     }
 
     const { performerId, type } = conversation;
-    const authUser = token && await this.authService.getSourceFromJWT(token);
+    const authUser = token && await this.authService.verifyJWT(token);
     let user = await this.performerService.findById(authUser?.sourceId) as any;
     if (!user) {
       user = await this.userService.findById(authUser?.sourceId);
@@ -188,7 +195,8 @@ export class PublicStreamWsGateway {
               this.socketService.emitToRoom(roomName, 'model-left', {
                 performerId,
                 conversationId
-              })
+              }),
+              this.queueEventService.publish({ channel: STREAM_FEED_CHANNEL, eventName: EVENT.DELETED, data: { conversation } })
             ]);
           } else if (role === 'member') {
             this.streamModel.updateOne(

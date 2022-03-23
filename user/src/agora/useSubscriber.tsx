@@ -32,6 +32,7 @@ export default function useSubscriber({
 
   const onbeforeunload = () => {
     client?.uid && client.leave();
+    setTracks([]);
     if (client?.remoteUsers) {
       client.remoteUsers.forEach((remoteUser) => {
         remoteUser.audioTrack.stop();

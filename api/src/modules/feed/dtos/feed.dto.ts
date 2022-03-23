@@ -71,6 +71,8 @@ export class FeedDto {
 
   scheduleAt: Date;
 
+  targetId: ObjectId;
+
   constructor(data: Partial<FeedDto>) {
     Object.assign(
       this,
@@ -110,7 +112,8 @@ export class FeedDto {
         'pinnedAt',
         'status',
         'isSchedule',
-        'scheduleAt'
+        'scheduleAt',
+        'targetId'
       ])
     );
   }

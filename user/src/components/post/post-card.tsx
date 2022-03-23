@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { Component } from 'react';
+import { Component, createRef, forwardRef } from 'react';
 import {
   Menu, Dropdown, Divider, message, Modal, Tooltip, Button
 } from 'antd';
@@ -29,9 +29,13 @@ import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
 import Loader from '@components/common/base/loader';
 import { IFeed, IUser } from 'src/interfaces';
+import dynamic from 'next/dynamic';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
 import './index.less';
+
+const Subscriber = dynamic(() => import('@components/streaming/agora/subscriber'), { ssr: false });
+const ForwardedSubscriber = forwardRef((props: any, ref) => <Subscriber {...props} forwardedRef={ref} />);
 
 interface IProps {
   feed: IFeed;
@@ -48,6 +52,8 @@ interface IProps {
 }
 
 class FeedCard extends Component<IProps> {
+  private subscriberRef = createRef<{join: any, leave: any}>();
+
   subscriptionType = 'monthly';
 
   state = {
@@ -96,6 +102,7 @@ class FeedCard extends Component<IProps> {
     }
   }
 
+  // eslint-disable-next-line react/sort-comp
   async handleLike() {
     const { feed } = this.props;
     const { isLiked, totalLike, requesting } = this.state;
@@ -393,6 +400,90 @@ class FeedCard extends Component<IProps> {
         </a>
       </Dropdown>
     );
+
+    if (feed.type === 'stream') {
+      return (
+        <div className="feed-card">
+          <div className="feed-top">
+            <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
+              <div className="feed-top-left">
+                <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
+                <div className="feed-name">
+                  <h4>
+                    {performer?.name || 'N/A'}
+                    {' '}
+                    {performer?.verifiedAccount && <TickIcon />}
+                  </h4>
+                  <h5>
+                    @
+                    {performer?.username || 'n/a'}
+                  </h5>
+                </div>
+                {!performer?.isOnline ? <span className="online-status" /> : <span className="online-status active" />}
+              </div>
+            </Link>
+            <div className="feed-top-right">
+              <span className="feed-time">{formatDate(feed.updatedAt, 'MMM DD')}</span>
+              {dropdown}
+            </div>
+          </div>
+          <div className="feed-container">
+            <div className="feed-text">
+              Live
+            </div>
+            {!feed.isSubscribed ? (
+              <div className="lock-content">
+                <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
+                <Button
+                  onMouseEnter={() => this.setState({ isHovered: true })}
+                  onMouseLeave={() => this.setState({ isHovered: false })}
+                  disabled={user.isPerformer}
+                  className="secondary"
+                  onClick={() => this.setState({ openSubscriptionModal: true })}
+                >
+                  Subscribe to unlock
+                </Button>
+              </div>
+            ) : (
+              <div className="feed-content">
+                {!feed.isSale ? (
+                  <>
+                    <ForwardedSubscriber
+                      ref={this.subscriberRef}
+                      {...{
+                        localUId: user._id,
+                        remoteUId: performer._id,
+                        conversationId: (feed as any).targetId
+                      }}
+                    />
+                    <Button block className="primary" onClick={() => this.subscriberRef.current.join()}>join</Button>
+                    <Button block className="secondary" onClick={() => this.subscriberRef.current.leave()}>Leave</Button>
+                  </>
+                ) : (
+                  <Button onClick={() => Router.push(
+                    {
+                      pathname: '/streaming/details',
+                      query: {
+                        performer: JSON.stringify(performer),
+                        username:
+                      performer?.username || performer?._id
+                      }
+                    },
+                    `/streaming/${
+                      performer?.username || performer?._id
+                    }`
+                  )}
+                  >
+                    View full content
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="feed-card">
         <div className="feed-top">

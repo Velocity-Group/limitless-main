@@ -108,11 +108,11 @@ class LivePage extends PureComponent<IProps> {
       Router.back();
       return;
     }
-    // if (!performer.isSubscribed) {
-    //   message.error('Please subscribe to join live chat!', 5);
-    //   Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`);
-    //   return;
-    // }
+    if (!performer.isSubscribed) {
+      message.error('Please subscribe to join live chat!', 5);
+      Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`);
+      return;
+    }
     Router.events.on('routeChangeStart', this.onbeforeunload.bind(this));
     window.addEventListener('beforeunload', this.onbeforeunload.bind(this));
   }
