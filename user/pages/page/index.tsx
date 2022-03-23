@@ -23,7 +23,13 @@ class PostDetail extends PureComponent<IProps> {
       const post = await (await postService.findById(query.id)).data;
       return { post };
     } catch (e) {
-      return Router.replace('/404');
+      if (process.browser) {
+        return Router.replace('/404');
+      }
+
+      ctx.res.writeHead && ctx.res.writeHead(302, { Location: '/404' });
+      ctx.res.end && ctx.res.end();
+      return {};
     }
   }
 
