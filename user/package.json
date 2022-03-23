@@ -60,6 +60,7 @@
     "@types/node-fetch": "^2.5.7",
     "@types/react": "^16.9.25",
     "@types/react-redux": "^7.1.22",
+    "@types/video.js": "^7.3.32",
     "@typescript-eslint/eslint-plugin": "^4.2.0",
     "@typescript-eslint/parser": "^4.2.0",
     "@zeit/next-css": "^1.0.1",

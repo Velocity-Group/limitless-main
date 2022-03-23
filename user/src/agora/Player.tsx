@@ -5,6 +5,7 @@ import {
   IRemoteAudioTrack
 } from 'agora-rtc-sdk-ng';
 import React, { useRef, useEffect } from 'react';
+import videojs from 'video.js';
 import './index.less';
 
 interface Props {
@@ -20,23 +21,37 @@ interface Props {
 export const Player: React.FC<Props> = ({ tracks }: Props) => {
   const player = useRef<HTMLVideoElement>(null);
 
+  const ref = useRef<videojs.Player>();
+
   useEffect(() => {
-    if (player.current) {
+    ref.current = videojs(player.current, {
+      bigPlayButton: false,
+      controls: true,
+      controlBar: {
+        playToggle: false,
+        pictureInPictureToggle: false
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (ref.current) {
       if (tracks.length) {
         const mediaStreamTracks = tracks.map((track) => track.getMediaStreamTrack());
         const mediaStream = new MediaStream(mediaStreamTracks);
-        player.current.srcObject = mediaStream;
+        (ref.current.tech().el() as HTMLVideoElement).srcObject = mediaStream;
       } else {
-        player.current.srcObject = null;
-        player.current.poster = '/static/offline.jpg';
+        (ref.current.tech().el() as HTMLVideoElement).srcObject = null;
+        (ref.current.tech().el() as HTMLVideoElement).poster = '/static/offline.jpg';
       }
     }
-  }, [player, tracks]);
+  }, [ref, tracks]);
 
   return (
     <div className="publisher-player">
       <video
         ref={player}
+        className="video-js vjs-fluid"
         controls
         autoPlay
         muted
