@@ -22,7 +22,7 @@ import { UserInterceptor } from 'src/modules/auth/interceptors';
 import { UserDto } from 'src/modules/user/dtos';
 import { StreamService } from '../services/stream.service';
 import {
-  StartStreamPayload, SetDurationPayload, SearchStreamPayload
+  StartStreamPayload, SetDurationPayload, SearchStreamPayload, UpdateStreamPayload
 } from '../payloads';
 import { StreamDto } from '../dtos';
 
@@ -77,6 +77,19 @@ export class StreamController {
     @Body() payload: StartStreamPayload
   ) {
     const data = await this.streamService.goLive(payload, performer);
+    return DataResponse.ok(data);
+  }
+
+  @Put('/live/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async editLive(
+    @Param('id') id,
+    @Body() payload: UpdateStreamPayload
+  ) {
+    const data = await this.streamService.editLive(id, payload);
     return DataResponse.ok(data);
   }
 

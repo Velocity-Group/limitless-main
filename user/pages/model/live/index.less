@@ -11,7 +11,7 @@
 }
 .stream-duration {
   display: flex;
-  justify-content: space-between;
+  justify-content: start;
   align-items: center;
   .anticon-clock-circle, .ant-rate-star-full .anticon {
     color: @theme-color;
@@ -19,4 +19,9 @@
   font-size: 11px;
   color: @grey-color;
   margin: 0;
+
+
+  > * {
+    margin-right: 10px;
+  }
 }

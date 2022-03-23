@@ -13,6 +13,8 @@ import './index.less';
 import { Player } from 'src/agora';
 import useSubscriber from 'src/agora/useSubscriber';
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { showSubscribePerformerModal } from '@redux/subscription/actions';
 
 interface IProps {
   stream: IStream;
@@ -27,6 +29,7 @@ const StreamCard = ({ stream, user, loading }: IProps) => {
     conversationId: stream.conversationId
   });
   const [showModal, setModalShow] = useState(false);
+  const dispatch = useDispatch();
   const handleClick = () => {
     if (!user._id) {
       message.error('Please log in or register!', 5);
@@ -36,16 +39,7 @@ const StreamCard = ({ stream, user, loading }: IProps) => {
     if (user.isPerformer) return;
     if (!stream?.isSubscribed) {
       message.error('Please subscribe to join live chat!', 5);
-      Router.push(
-        {
-          pathname: '/model/profile',
-          query: {
-            username:
-              stream?.performerInfo?.username || stream?.performerInfo?._id
-          }
-        },
-        `/${stream?.performerInfo?.username || stream?.performerInfo?._id}`
-      );
+      dispatch(showSubscribePerformerModal(stream.performerId));
       return;
     }
     Router.push(
@@ -65,7 +59,35 @@ const StreamCard = ({ stream, user, loading }: IProps) => {
 
   const watchNow = async () => {
     try {
-      // TODO check supscription
+      if (!user._id) {
+        message.error('Please log in or register!', 5);
+        Router.push('/');
+        return;
+      }
+      if (user.isPerformer) return;
+      if (!stream?.isSubscribed) {
+        message.error('Please subscribe to join live chat!', 5);
+        dispatch(showSubscribePerformerModal(stream.performerId));
+        return;
+      }
+
+      if (!stream.isFree) {
+        Router.push(
+          {
+            pathname: '/streaming/details',
+            query: {
+              performer: JSON.stringify(stream?.performerInfo),
+              username:
+                stream?.performerInfo?.username || stream?.performerInfo?._id
+            }
+          },
+          `/streaming/${
+            stream?.performerInfo?.username || stream?.performerInfo?._id
+          }`
+        );
+        return;
+      }
+
       join();
       setModalShow(true);
     } catch (err) {
@@ -122,8 +144,8 @@ const StreamCard = ({ stream, user, loading }: IProps) => {
         {stream?.isFree ? 'Free' : (stream?.price || 0).toFixed(2)}
       </span>
       <Button onClick={handleClick}>Join Chat</Button>
-      <Button onClick={watchNow}>Watch Now</Button>
-      <Modal visible={showModal} onCancel={stopWatch}>
+      {stream?.isFree && <Button onClick={watchNow}>Watch Now</Button>}
+      <Modal visible={showModal} onCancel={stopWatch} width={640}>
         <Player tracks={tracks} />
       </Modal>
     </Card>

@@ -25,6 +25,7 @@ import { updateUIValue } from 'src/redux/ui/actions';
 import { updateBalance } from '@redux/user/actions';
 import { shortenLargeNumber } from '@lib/number';
 import './header.less';
+import { SubscribePerformerModal } from 'src/components/subscription/subscribe-performer-modal';
 
 interface IProps {
   updateBalance: Function;
@@ -89,6 +90,13 @@ class Header extends PureComponent<IProps> {
 
   handleMessage = async (event) => {
     event && this.setState({ totalNotReadMessage: event.total });
+  };
+
+  handleSubscribe = (username) => {
+    Router.push(
+      { pathname: '/streaming/details', query: { username } },
+      `/streaming/${username}`
+    );
   };
 
   async handleCountNotificationMessage() {
@@ -519,6 +527,7 @@ class Header extends PureComponent<IProps> {
               </div>
             </div>
           </Modal>
+          <SubscribePerformerModal onSubscribed={this.handleSubscribe} />
         </div>
       </div>
     );
