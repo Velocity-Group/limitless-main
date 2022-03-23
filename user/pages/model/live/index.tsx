@@ -2,12 +2,11 @@
 import React, { PureComponent, createRef, forwardRef } from 'react';
 import Head from 'next/head';
 import {
-  Row, Col, Button, message, Modal, Layout
+  Row, Col, Button, message, Modal, Layout, Card
 } from 'antd';
 import {
   ClockCircleOutlined, PlayCircleOutlined, EditOutlined
 } from '@ant-design/icons';
-import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
 import {
   IPerformer, IUIConfig, IUser, StreamSettings, IStream
@@ -208,7 +207,6 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
           />
           <Row>
             <Col xs={24} sm={24} md={16}>
-              <PageHeading title={activeStream?.title || `${user.name || user?.username} Broadcast`} />
               <ForwardedPublisher
                 uid={user._id}
                 onStatusChange={(val) => this.onStreamStatusChange(val)}
@@ -254,26 +252,32 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
                   </Button>
                 )}
               </div>
-              {activeStream?.description && (
-              <p>
-                {editting ? (
-                  <Row>
-                    <Col xs={24}>
-                      <textarea className="ant-input" ref={this.descriptionRef} defaultValue={activeStream.description} />
-                    </Col>
-                    <Col xs={24}>
-                      <Button className="primary" icon={<EditOutlined />} onClick={() => this.editLive()}>Update</Button>
-                    </Col>
-                  </Row>
-                ) : (
-                  <>
-                    {activeStream.description}
-                    {' '}
-                    <EditOutlined onClick={() => this.setState({ editting: true })} />
-                  </>
-                )}
-              </p>
-              )}
+              <Card bordered={false} bodyStyle={{ padding: 0 }}>
+                <Card.Meta
+                  title={activeStream?.title}
+                  description={activeStream?.description && (
+                  <p>
+                    {editting ? (
+                      <Row>
+                        <Col xs={24}>
+                          <textarea className="ant-input" ref={this.descriptionRef} defaultValue={activeStream.description} />
+                        </Col>
+                        <Col xs={24}>
+                          <Button className="primary" icon={<EditOutlined />} onClick={() => this.editLive()}>Update</Button>
+                        </Col>
+                      </Row>
+                    ) : (
+                      <>
+                        {activeStream.description}
+                        {' '}
+                        <EditOutlined onClick={() => this.setState({ editting: true })} />
+                      </>
+                    )}
+                  </p>
+                  )}
+                />
+
+              </Card>
             </Col>
             <Col xs={24} sm={24} md={8}>
               <ChatBox
