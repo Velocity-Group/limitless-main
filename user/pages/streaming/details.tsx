@@ -2,9 +2,9 @@
 import { PureComponent, createRef, forwardRef } from 'react';
 import Head from 'next/head';
 import {
-  Layout, Row, Col, message, Button, Alert, Modal
+  Layout, Row, Col, message, Button, Modal, Card
 } from 'antd';
-import { ClockCircleOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, EyeOutlined } from '@ant-design/icons';
 import { IResponse } from 'src/services/api-request';
 import {
   IPerformer, IUser, StreamSettings, IUIConfig, IStream
@@ -308,7 +308,6 @@ class LivePage extends PureComponent<IProps> {
           <div>
             <Row className="streaming-container">
               <Col md={16} xs={24}>
-                <Alert style={{ margin: '0 0 10px', textAlign: 'center' }} type="info" message={activeStream?.title || `${performer?.name || performer?.username} Live`} />
                 <div className="stream-video">
                   <ForwardedSubscriber
                     localUId={user?._id}
@@ -329,25 +328,38 @@ class LivePage extends PureComponent<IProps> {
                     {' '}
                     {(user?.balance || 0).toFixed(2)}
                   </span>
+                  <span>
+                    <EyeOutlined />
+                    {' '}
+                    {total}
+                  </span>
                 </div>
-                <div style={{ margin: 10, display: 'flex' }}>
-                  <Button
-                    block
-                    className="primary"
-                    onClick={() => this.joinConversation()}
-                  >
-                    Join Chat
-                  </Button>
-                  <Button
-                    block
-                    className="secondary"
-                    disabled={submiting}
-                    onClick={() => this.setState({ openTipModal: true })}
-                  >
-                    Send Tip
-                  </Button>
-                </div>
-                <p>{activeStream?.description || 'No description'}</p>
+                <Row>
+                  <Col lg={16} xs={24}>
+                    <Card bordered={false} bodyStyle={{ padding: 0 }}>
+                      <Card.Meta title={activeStream?.title || `${performer?.name || performer?.username} Live`} description={activeStream?.description || 'No description'} />
+                    </Card>
+                  </Col>
+                  <Col lg={8} xs={24}>
+                    <div>
+                      <Button
+                        block
+                        className="primary"
+                        onClick={() => this.joinConversation()}
+                      >
+                        Join Chat
+                      </Button>
+                      <Button
+                        block
+                        className="secondary"
+                        disabled={submiting}
+                        onClick={() => this.setState({ openTipModal: true })}
+                      >
+                        Send Tip
+                      </Button>
+                    </div>
+                  </Col>
+                </Row>
               </Col>
               <Col md={8} xs={24}>
                 <ChatBox

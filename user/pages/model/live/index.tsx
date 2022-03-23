@@ -5,7 +5,7 @@ import {
   Row, Col, Button, message, Modal, Layout
 } from 'antd';
 import {
-  ClockCircleOutlined, PlayCircleOutlined
+  ClockCircleOutlined, PlayCircleOutlined, EditOutlined
 } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
@@ -57,6 +57,7 @@ interface IStates {
   openPriceModal: boolean;
   callTime: number;
   activeStream: IStream;
+  editting: boolean;
 }
 
 class PerformerLivePage extends PureComponent<IProps, IStates> {
@@ -70,6 +71,8 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
 
   private setDurationStreamTimeOut: any;
 
+  private descriptionRef = createRef<any>();
+
   state = {
     loading: false,
     initialized: false,
@@ -77,7 +80,8 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     members: [],
     openPriceModal: false,
     callTime: 0,
-    activeStream: null
+    activeStream: null,
+    editting: false
   };
 
   componentDidMount() {
@@ -170,10 +174,25 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     this.setDurationStreamTimeOut = setTimeout(this.updateStreamDuration.bind(this), 15 * 1000);
   }
 
+  async editLive() {
+    try {
+      const { activeStream } = this.state;
+      if (!activeStream) return;
+      const description = this.descriptionRef.current.value;
+      await streamService.editLive(activeStream._id, { description });
+      this.setState({ activeStream: { ...activeStream, description } });
+    } catch (e) {
+      const error = await e;
+      message.error(error?.message || 'Stream server error, please try again later');
+    } finally {
+      this.setState({ editting: false });
+    }
+  }
+
   render() {
     const { user, ui } = this.props;
     const {
-      loading, initialized, members, total, openPriceModal, callTime, activeStream
+      loading, initialized, members, total, openPriceModal, callTime, activeStream, editting
     } = this.state;
     return (
       <AgoraProvider config={{ mode: 'live', codec: 'h264', role: 'host' }}>
@@ -234,25 +253,27 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
                     Stop Broadcasting
                   </Button>
                 )}
-                {activeStream && (
-                  <Button
-                    key="price-btn"
-                    block
-                    className="secondary"
-                    disabled
-                  >
-                    {activeStream.isFree ? 'Free to join' : (
-                      <>
-                        <img alt="token" src="/static/coin-ico.png" width="20px" />
-                        {activeStream.price}
-                        {' '}
-                        per session
-                      </>
-                    )}
-                  </Button>
-                )}
               </div>
-              <p>{activeStream?.description || 'No description'}</p>
+              {activeStream?.description && (
+              <p>
+                {editting ? (
+                  <Row>
+                    <Col xs={24}>
+                      <textarea className="ant-input" ref={this.descriptionRef} defaultValue={activeStream.description} />
+                    </Col>
+                    <Col xs={24}>
+                      <Button className="primary" icon={<EditOutlined />} onClick={() => this.editLive()}>Update</Button>
+                    </Col>
+                  </Row>
+                ) : (
+                  <>
+                    {activeStream.description}
+                    {' '}
+                    <EditOutlined onClick={() => this.setState({ editting: true })} />
+                  </>
+                )}
+              </p>
+              )}
             </Col>
             <Col xs={24} sm={24} md={8}>
               <ChatBox

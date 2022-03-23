@@ -13,7 +13,7 @@ import { ConversationService } from 'src/modules/message/services';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import * as moment from 'moment';
-import { uniq } from 'lodash';
+import { merge, uniq } from 'lodash';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
@@ -28,7 +28,7 @@ import {
   StreamOfflineException
 } from '../exceptions';
 import {
-  SearchStreamPayload, SetDurationPayload, StartStreamPayload
+  SearchStreamPayload, SetDurationPayload, StartStreamPayload, UpdateStreamPayload
 } from '../payloads';
 
 @Injectable()
@@ -244,6 +244,14 @@ export class StreamService {
       conversation,
       ...new StreamDto(stream).toResponse(true)
     };
+  }
+
+  public async editLive(id, payload: UpdateStreamPayload) {
+    const stream = await this.streamModel.findById(id);
+    if (!stream) throw new EntityNotFoundException();
+    merge(stream, payload);
+    await stream.save();
+    return new StreamDto(stream).toResponse(true);
   }
 
   public async joinPublicChat(performerId: string) {

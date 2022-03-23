@@ -28,3 +28,25 @@ export class StartStreamPayload {
   @IsNotEmpty()
   description: string;
 }
+
+export class UpdateStreamPayload {
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  price: number;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  isFree: boolean;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  title: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  description: string;
+}
