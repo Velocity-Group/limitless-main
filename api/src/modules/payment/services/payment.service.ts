@@ -466,10 +466,10 @@ export class PaymentService {
     const subscriptionId = data?.object?.id;
     const transactionId = data?.object?.metadata?.transactionId;
     if (!subscriptionId && !transactionId) {
-      return { ok: false };
+      throw HttpException('Missing subscriptionId or transactionId', 404);
     }
     const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
-    if (!subscription) return { ok: false };
+    if (!subscription) throw HttpException('Subscription was not found', 404);
     if (data?.object?.status !== 'active') {
       subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
       await subscription.save();
@@ -480,7 +480,7 @@ export class PaymentService {
       existedTransaction.updatedAt = new Date();
       await existedTransaction.save();
     }
-    return { ok: true };
+    return { success: true };
   }
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
@@ -489,13 +489,13 @@ export class PaymentService {
     const transactionId = data?.object?.metadata?.transactionId;
     const stripeInvoiceId = data?.object?.invoice || data?.object?.id;
     if (!stripeInvoiceId && !transactionId) {
-      return { ok: false };
+      throw HttpException('Missing invoiceId or transactionId', 404);
     }
     let transaction = transactionId && await this.TransactionModel.findOne({ _id: transactionId });
     if (!transaction) {
       transaction = stripeInvoiceId && await this.TransactionModel.findOne({ stripeInvoiceId });
     }
-    if (!transaction) return { ok: false };
+    if (!transaction) throw HttpException('Transaction was not found', 404);
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();
     transaction.liveMode = livemode;
@@ -535,7 +535,7 @@ export class PaymentService {
     }
     await transaction.save();
     redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
-    return { ok: true };
+    return { success: true };
   }
 
   public async stripeCancelSubscription(id: any, user: UserDto) {
