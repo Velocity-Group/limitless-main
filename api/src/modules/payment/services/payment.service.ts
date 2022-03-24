@@ -466,10 +466,10 @@ export class PaymentService {
     const subscriptionId = data?.object?.id;
     const transactionId = data?.object?.metadata?.transactionId;
     if (!subscriptionId && !transactionId) {
-      throw HttpException('Missing subscriptionId or transactionId', 404);
+      throw new HttpException('Missing subscriptionId or transactionId', 404);
     }
     const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
-    if (!subscription) throw HttpException('Subscription was not found', 404);
+    if (!subscription) throw new HttpException('Subscription was not found', 404);
     if (data?.object?.status !== 'active') {
       subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
       await subscription.save();
@@ -489,13 +489,13 @@ export class PaymentService {
     const transactionId = data?.object?.metadata?.transactionId;
     const stripeInvoiceId = data?.object?.invoice || data?.object?.id;
     if (!stripeInvoiceId && !transactionId) {
-      throw HttpException('Missing invoiceId or transactionId', 404);
+      throw new HttpException('Missing invoiceId or transactionId', 404);
     }
     let transaction = transactionId && await this.TransactionModel.findOne({ _id: transactionId });
     if (!transaction) {
       transaction = stripeInvoiceId && await this.TransactionModel.findOne({ stripeInvoiceId });
     }
-    if (!transaction) throw HttpException('Transaction was not found', 404);
+    if (!transaction) throw new HttpException('Transaction was not found', 404);
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();
     transaction.liveMode = livemode;
