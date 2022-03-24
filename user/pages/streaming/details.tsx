@@ -64,6 +64,11 @@ class LivePage extends PureComponent<IProps> {
   static async getInitialProps({ ctx }) {
     try {
       const { query } = ctx;
+      if (process.browser && query.performer) {
+        return {
+          performer: JSON.parse(query.performer)
+        };
+      }
       const { token } = nextCookie(ctx);
       const headers = { Authorization: token };
       const resp: IResponse<IPerformer> = await performerService.findOne(

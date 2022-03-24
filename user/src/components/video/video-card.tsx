@@ -21,7 +21,7 @@ export class VideoCard extends PureComponent<IProps> {
     const { video } = this.props;
     const { isHovered } = this.state;
     const canView = (!video.isSale && video.isSubscribed) || (video.isSale && video.isBought);
-    const thumbUrl = (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0]) || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
+    const thumbUrl = (canView ? video?.thumbnail?.url : (video?.thumbnail?.thumbnails && video?.thumbnail?.thumbnails[0])) || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     return (
       <Link
         href={{ pathname: '/video', query: { id: video.slug || video._id } }}

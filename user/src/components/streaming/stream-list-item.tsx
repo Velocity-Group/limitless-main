@@ -40,7 +40,6 @@ export default function StreamListItem({ stream, user }: Props) {
           {
             pathname: '/streaming/details',
             query: {
-              performer: JSON.stringify(stream?.performerInfo),
               username:
                 stream?.performerInfo?.username || stream?.performerInfo?._id
             }

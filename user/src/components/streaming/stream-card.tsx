@@ -46,7 +46,6 @@ const StreamCard = ({ stream, user, loading }: IProps) => {
       {
         pathname: '/streaming/details',
         query: {
-          performer: JSON.stringify(stream?.performerInfo),
           username:
             stream?.performerInfo?.username || stream?.performerInfo?._id
         }
@@ -76,7 +75,6 @@ const StreamCard = ({ stream, user, loading }: IProps) => {
           {
             pathname: '/streaming/details',
             query: {
-              performer: JSON.stringify(stream?.performerInfo),
               username:
                 stream?.performerInfo?.username || stream?.performerInfo?._id
             }

@@ -112,7 +112,7 @@ export class FileService {
       if (options.generateThumbnail) {
         const thumbBuffer = await this.imageService.createThumbnail(
           multerData.path,
-          options.thumbnailSize || { width: 250, height: 250 }
+          options.thumbnailSize || { width: 500, height: 500 }
         ) as Buffer;
         const thumbName = `${StringHelper.randomString(5)}_thumb${StringHelper.getExt(multerData.path)}`;
         if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
@@ -126,7 +126,7 @@ export class FileService {
           ]);
           if (uploadThumb.Key && uploadThumb.Location) {
             thumbnails.push({
-              thumbnailSize: options.thumbnailSize,
+              thumbnailSize: options.thumbnailSize || { width: 500, height: 500 },
               path: uploadThumb.Location,
               absolutePath: uploadThumb.Key
             });
@@ -134,7 +134,7 @@ export class FileService {
         } else {
           writeFileSync(join(photoDir, thumbName), thumbBuffer);
           thumbnails.push({
-            thumbnailSize: options.thumbnailSize,
+            thumbnailSize: options.thumbnailSize || { width: 500, height: 500 },
             path: join(photoDir, thumbName).replace(publicDir, ''),
             absolutePath: join(photoDir, thumbName)
           });
@@ -686,8 +686,8 @@ export class FileService {
       const thumbBuffer = await this.imageService.createThumbnail(
         photoPath,
         options.thumbnailSize || {
-          width: 250,
-          height: 250
+          width: 500,
+          height: 500
         }
       ) as Buffer;
 

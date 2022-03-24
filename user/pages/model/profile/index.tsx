@@ -73,8 +73,6 @@ class PerformerProfile extends PureComponent<IProps> {
 
   static noredirect = true;
 
-  subscriptionType = 'monthly';
-
   state = {
     itemPerPage: 12,
     videoPage: 0,
@@ -89,7 +87,8 @@ class PerformerProfile extends PureComponent<IProps> {
     openSubscriptionModal: false,
     tab: 'post',
     filter: initialFilter,
-    isGrid: false
+    isGrid: false,
+    subscriptionType: 'monthly'
   };
 
   static async getInitialProps({ ctx }) {
@@ -247,6 +246,7 @@ class PerformerProfile extends PureComponent<IProps> {
 
   async subscribe() {
     const { performer, currentUser } = this.props;
+    const { subscriptionType } = this.state;
     if (!currentUser._id) {
       message.error('Please log in');
       Router.push('/auth/login');
@@ -258,9 +258,9 @@ class PerformerProfile extends PureComponent<IProps> {
       return;
     }
     try {
-      await this.setState({ submiting: true });
+      this.setState({ submiting: true });
       await paymentService.subscribePerformer({
-        type: this.subscriptionType,
+        type: subscriptionType,
         performerId: performer._id,
         paymentGateway: 'stripe',
         stripeCardId: currentUser.stripeCardIds[0] // TODO user can choose card
@@ -374,7 +374,8 @@ class PerformerProfile extends PureComponent<IProps> {
       isBookMarked,
       openSubscriptionModal,
       tab,
-      isGrid
+      isGrid,
+      subscriptionType
     } = this.state;
     return (
       <Layout>
@@ -539,10 +540,9 @@ class PerformerProfile extends PureComponent<IProps> {
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting && this.subscriptionType === 'monthly')}
+                  disabled={(submiting)}
                   onClick={() => {
-                    this.subscriptionType = 'monthly';
-                    this.setState({ openSubscriptionModal: true });
+                    this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
                   }}
                 >
                   SUBSCRIBE FOR
@@ -558,10 +558,9 @@ class PerformerProfile extends PureComponent<IProps> {
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting && this.subscriptionType === 'yearly')}
+                  disabled={(submiting)}
                   onClick={() => {
-                    this.subscriptionType = 'yearly';
-                    this.setState({ openSubscriptionModal: true });
+                    this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
                   }}
                 >
                   SUBSCRIBE FOR
@@ -577,10 +576,9 @@ class PerformerProfile extends PureComponent<IProps> {
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting && this.subscriptionType === 'free')}
+                  disabled={(submiting)}
                   onClick={() => {
-                    this.subscriptionType = 'free';
-                    this.setState({ openSubscriptionModal: true });
+                    this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
                   }}
                 >
                   SUBSCRIBE FOR FREE FOR
@@ -759,7 +757,7 @@ class PerformerProfile extends PureComponent<IProps> {
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm
-            type={this.subscriptionType || 'monthly'}
+            type={subscriptionType}
             performer={performer}
             submiting={submiting}
             onFinish={this.subscribe.bind(this)}
