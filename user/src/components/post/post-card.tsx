@@ -52,7 +52,7 @@ interface IProps {
 }
 
 class FeedCard extends Component<IProps> {
-  private subscriberRef = createRef<{join: any, leave: any}>();
+  private subscriberRef = createRef<{ join: any, leave: any }>();
 
   subscriptionType = 'monthly';
 
@@ -464,13 +464,10 @@ class FeedCard extends Component<IProps> {
                     {
                       pathname: '/streaming/details',
                       query: {
-                        performer: JSON.stringify(performer),
-                        username:
-                      performer?.username || performer?._id
+                        username: performer?.username || performer?._id
                       }
                     },
-                    `/streaming/${
-                      performer?.username || performer?._id
+                    `/streaming/${performer?.username || performer?._id
                     }`
                   )}
                   >
