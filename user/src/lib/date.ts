@@ -11,3 +11,7 @@ export function formatDateFromnow(date: Date) {
 export function dobToAge(date: Date) {
   return moment().diff(moment(date), 'years') > 0 && `${moment().diff(moment(date), 'years')}+`;
 }
+
+export function nowIsBefore(date: Date) {
+  return moment().isBefore(date);
+}
