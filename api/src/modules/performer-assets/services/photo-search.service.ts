@@ -203,7 +203,7 @@ export class PhotoSearchService {
         if (gallery) v.gallery = gallery;
       }
       const subscription = subscriptions.find((s) => `${s.performerId}` === `${v.performerId}`);
-      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${v._id}`);
+      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${v.galleryId}`);
       const canView = (v.gallery && !v.gallery.isSale && !!subscription) || (v.gallery && v.gallery.isSale && !!bought) || (user && `${user._id}` === `${v.performerId}`) || (user && user.roles && user.roles.includes('admin'));
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
