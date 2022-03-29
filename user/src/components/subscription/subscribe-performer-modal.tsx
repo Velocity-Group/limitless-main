@@ -55,7 +55,7 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
     try {
       setSubmiting(subscriptionType);
       await paymentService.subscribePerformer({
-        subscriptionType,
+        type: subscriptionType,
         performerId: performer._id,
         paymentGateway: 'stripe',
         stripeCardId: currentUser.stripeCardIds[0] // TODO user can choose card
