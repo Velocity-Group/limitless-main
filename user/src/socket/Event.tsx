@@ -21,8 +21,6 @@ class Event extends PureComponent<IEventProps> {
       return;
     }
 
-    console.log(event, handler);
-
     socket.on(event, handler);
   }
 

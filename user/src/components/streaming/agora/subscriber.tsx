@@ -47,8 +47,6 @@ export default function Subscriber({
     user: IAgoraRTCRemoteUser,
     mediaType: 'audio' | 'video'
   ) => {
-    console.log('subscribe');
-
     if (!client) return;
 
     await client.subscribe(user, mediaType);
