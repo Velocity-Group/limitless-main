@@ -105,7 +105,12 @@ export class PerformerSearchPayload extends SearchRequest {
   @ApiProperty()
   @IsOptional()
   @IsDateString()
-  toAge: string
+  toAge: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  role: string;
 
   ids: ObjectId[] | string[];
 }

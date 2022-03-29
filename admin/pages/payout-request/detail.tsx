@@ -186,7 +186,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 <p>
                   Requested amount of tokens:
                   {' '}
-                  {request.requestTokens || 0}
+                  {request.requestTokens.toFixed(2) || 0}
                 </p>
                 <p>
                   Conversion rate:
@@ -241,7 +241,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     <div>
                       <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
                         Click here to transfer $
-                        {(request.requestTokens || 0) * (request.tokenConversionRate || 1)}
+                        {((request.requestTokens || 0) * (request.tokenConversionRate || 1) || 0).toFixed(2)}
                         {' '}
                         to
                         {' '}
