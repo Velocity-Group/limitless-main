@@ -151,6 +151,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Stream server error, please try again later');
+    } finally {
       this.setState({ loading: false });
     }
   }

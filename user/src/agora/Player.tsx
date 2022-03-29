@@ -27,9 +27,11 @@ export const Player: React.FC<Props> = ({ tracks }: Props) => {
     ref.current = videojs(player.current, {
       bigPlayButton: false,
       controls: true,
+      muted: true,
       controlBar: {
         playToggle: false,
-        pictureInPictureToggle: false
+        pictureInPictureToggle: false,
+        volumePanel: false
       }
     });
   }, []);

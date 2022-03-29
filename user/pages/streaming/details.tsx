@@ -64,11 +64,6 @@ class LivePage extends PureComponent<IProps> {
   static async getInitialProps({ ctx }) {
     try {
       const { query } = ctx;
-      if (process.browser && query.performer) {
-        return {
-          performer: JSON.parse(query.performer)
-        };
-      }
       const { token } = nextCookie(ctx);
       const headers = { Authorization: token };
       const resp: IResponse<IPerformer> = await performerService.findOne(
@@ -113,6 +108,9 @@ class LivePage extends PureComponent<IProps> {
       Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`);
       return;
     }
+
+    this.joinConversation();
+
     Router.events.on('routeChangeStart', this.onbeforeunload.bind(this));
     window.addEventListener('beforeunload', this.onbeforeunload.bind(this));
   }
@@ -186,6 +184,7 @@ class LivePage extends PureComponent<IProps> {
       const resp = await streamService.joinPublicChat(performerId);
       const { streamingTime } = resp.data;
       this.setState({ sessionDuration: streamingTime || 0 });
+
       !initialized && this.subscriberRef.current && this.subscriberRef.current.join();
     } catch (err) {
       const error = await Promise.resolve(err);
@@ -199,11 +198,12 @@ class LivePage extends PureComponent<IProps> {
       getStreamConversationSuccess: dispatchGetStreamConversationSuccess,
       stream
     } = this.props;
+
     const socket = this.context;
 
     try {
       if (!purchased) {
-        if (!stream.isFree) {
+        if (!stream.isFree && !stream.hasPurchased) {
           this.setState({ openPurchaseModal: true });
           return;
         }
@@ -245,10 +245,11 @@ class LivePage extends PureComponent<IProps> {
   }
 
   modelLeftHandler() {
+    const { performer } = this.props;
     this.setState({ sessionDuration: 0 });
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
     message.info('Streaming session ended! Redirecting after 10s', 10);
-    setTimeout(() => { Router.push('/live-chat'); }, 10);
+    setTimeout(() => { Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`); }, 10 * 1000);
   }
 
   async sendTip(token) {
@@ -265,8 +266,8 @@ class LivePage extends PureComponent<IProps> {
       await this.setState({ submiting: true });
       await tokenTransctionService.sendTip(performer?._id, {
         price: token,
-        conversationId: activeConversation.data._id,
-        sessionId: activeStream.sessionId,
+        conversationId: activeConversation?.data?._id,
+        sessionId: activeStream?.sessionId,
         streamType: 'stream_public'
       });
       message.success('Thank you for the tip!');
@@ -288,23 +289,23 @@ class LivePage extends PureComponent<IProps> {
       sessionDuration, submiting, openTipModal
     } = this.state;
     return (
-      <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
-        <Layout>
-          <Head>
-            <title>{`${ui?.siteName || ''} | ${performer?.name || performer?.username} Broadcast`}</title>
-          </Head>
-          <Event
-            event={STREAM_EVENT.JOIN_BROADCASTER}
-            handler={this.subscribeStream.bind(this)}
-          />
-          <Event
-            event={STREAM_EVENT.MODEL_LEFT}
-            handler={this.modelLeftHandler.bind(this)}
-          />
-          <Event
-            event={STREAM_EVENT.ROOM_INFORMATIOM_CHANGED}
-            handler={this.onChangeMembers.bind(this)}
-          />
+      <Layout>
+        <Head>
+          <title>{`${ui?.siteName || ''} | ${performer?.name || performer?.username} Broadcast`}</title>
+        </Head>
+        <Event
+          event={STREAM_EVENT.JOIN_BROADCASTER}
+          handler={this.subscribeStream.bind(this)}
+        />
+        <Event
+          event={STREAM_EVENT.MODEL_LEFT}
+          handler={this.modelLeftHandler.bind(this)}
+        />
+        <Event
+          event={STREAM_EVENT.ROOM_INFORMATIOM_CHANGED}
+          handler={this.onChangeMembers.bind(this)}
+        />
+        <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
           <div>
             <Row className="streaming-container">
               <Col md={16} xs={24}>
@@ -345,9 +346,9 @@ class LivePage extends PureComponent<IProps> {
                       <Button
                         block
                         className="primary"
-                        onClick={() => this.joinConversation()}
+                        onClick={() => Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`)}
                       >
-                        Join Chat
+                        Leave Chat
                       </Button>
                       <Button
                         block
@@ -399,8 +400,8 @@ class LivePage extends PureComponent<IProps> {
               />
             </Modal>
           </div>
-        </Layout>
-      </AgoraProvider>
+        </AgoraProvider>
+      </Layout>
     );
   }
 }

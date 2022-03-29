@@ -29,6 +29,7 @@ export default function usePublisher({ uid, conversationId }: Props) {
     audioTrack: null
   });
   const [status, setStatus] = useState<PublisherState>();
+  const clientRef = useRef<any>();
   const publish = async () => {
     if (!client || !conversationId) return;
 
@@ -70,8 +71,8 @@ export default function usePublisher({ uid, conversationId }: Props) {
     localTracks.current = { videoTrack: null, audioTrack: null };
     setTracks([]);
     setStatus(false);
-    if (client && client.uid) {
-      await client.leave();
+    if (clientRef.current && clientRef.current.uid) {
+      await clientRef.current.leave();
     }
   };
 
@@ -80,6 +81,7 @@ export default function usePublisher({ uid, conversationId }: Props) {
   };
 
   useEffect(() => {
+    clientRef.current = client;
     if (!client) return;
 
     client.on('connection-state-change', (state) => {

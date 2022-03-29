@@ -17,19 +17,20 @@ import { merge, uniq } from 'lodash';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
+import { TokenTransactionService } from 'src/modules/token-transaction/services';
+import { PURCHASE_ITEM_STATUS } from 'src/modules/token-transaction/constants';
 import { SocketUserService } from '../../socket/services/socket-user.service';
-import {
-  PUBLIC_CHAT
-} from '../constant';
-import { IStream, StreamDto } from '../dtos';
+import { PUBLIC_CHAT } from '../constant';
 import { StreamModel } from '../models';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
+import { StreamOfflineException } from '../exceptions';
 import {
-  StreamOfflineException
-} from '../exceptions';
-import {
-  SearchStreamPayload, SetDurationPayload, StartStreamPayload, UpdateStreamPayload
+  SearchStreamPayload,
+  SetDurationPayload,
+  StartStreamPayload,
+  UpdateStreamPayload
 } from '../payloads';
+import { StreamDto } from '../dtos';
 
 @Injectable()
 export class StreamService {
@@ -43,8 +44,10 @@ export class StreamService {
     @Inject(STREAM_MODEL_PROVIDER)
     private readonly streamModel: Model<StreamModel>,
     private readonly conversationService: ConversationService,
-    private readonly socketUserService: SocketUserService
-  ) { }
+    private readonly socketUserService: SocketUserService,
+    @Inject(forwardRef(() => TokenTransactionService))
+    private readonly tokenTransactionService: TokenTransactionService
+  ) {}
 
   public async findOne(query): Promise<StreamModel> {
     const stream = await this.streamModel.findOne(query);
@@ -56,7 +59,9 @@ export class StreamService {
     return streams;
   }
 
-  async adminSearch(req: SearchStreamPayload): Promise<PageableData<StreamDto>> {
+  async adminSearch(
+    req: SearchStreamPayload
+  ): Promise<PageableData<StreamDto>> {
     const query = {} as any;
     if (req.q) {
       const regexp = new RegExp(
@@ -64,10 +69,7 @@ export class StreamService {
         'i'
       );
       const searchValue = { $regex: regexp };
-      query.$or = [
-        { title: searchValue },
-        { description: searchValue }
-      ];
+      query.$or = [{ title: searchValue }, { description: searchValue }];
     }
     if (req.performerId) {
       query.performerId = req.performerId;
@@ -100,9 +102,12 @@ export class StreamService {
       this.performerService.findByIds(performerIds)
     ]);
     streams.forEach((stream) => {
-      const performer = stream.performerId && performers.find((p) => `${p._id}` === `${stream.performerId}`);
+      const performer = stream.performerId
+        && performers.find((p) => `${p._id}` === `${stream.performerId}`);
       // eslint-disable-next-line no-param-reassign
-      stream.performerInfo = performer ? new PerformerDto(performer).toResponse() : null;
+      stream.performerInfo = performer
+        ? new PerformerDto(performer).toResponse()
+        : null;
     });
     return {
       data: streams,
@@ -110,7 +115,10 @@ export class StreamService {
     };
   }
 
-  async userSearch(req: SearchStreamPayload, user: UserDto): Promise<PageableData<StreamDto>> {
+  async userSearch(
+    req: SearchStreamPayload,
+    user: UserDto
+  ): Promise<PageableData<StreamDto>> {
     const query = {
       isStreaming: 1
     } as any;
@@ -120,10 +128,7 @@ export class StreamService {
         'i'
       );
       const searchValue = { $regex: regexp };
-      query.$or = [
-        { title: searchValue },
-        { description: searchValue }
-      ];
+      query.$or = [{ title: searchValue }, { description: searchValue }];
     }
     if (req.performerId) {
       query.performerId = req.performerId;
@@ -145,19 +150,26 @@ export class StreamService {
     const streams = data.map((d) => new StreamDto(d));
     const [performers, subscriptions, conversations] = await Promise.all([
       this.performerService.findByIds(performerIds),
-      user ? this.subscriptionService.findSubscriptionList({
-        performerId: { $in: performerIds },
-        userId: user._id,
-        status: SUBSCRIPTION_STATUS.ACTIVE,
-        expiredAt: { $gt: new Date() }
-      }) : [],
+      user
+        ? this.subscriptionService.findSubscriptionList({
+          performerId: { $in: performerIds },
+          userId: user._id,
+          status: SUBSCRIPTION_STATUS.ACTIVE,
+          expiredAt: { $gt: new Date() }
+        })
+        : [],
       this.conversationService.findByStreamIds(streams.map((s) => s._id))
     ]);
     streams.forEach((stream) => {
-      const performer = stream.performerId && performers.find((p) => `${p._id}` === `${stream.performerId}`);
-      const subscription = subscriptions.find((s) => `${s.performerId}` === `${stream.performerId}`);
+      const performer = stream.performerId
+        && performers.find((p) => `${p._id}` === `${stream.performerId}`);
+      const subscription = subscriptions.find(
+        (s) => `${s.performerId}` === `${stream.performerId}`
+      );
       // eslint-disable-next-line no-param-reassign
-      stream.performerInfo = performer ? new PerformerDto(performer).toResponse() : null;
+      stream.performerInfo = performer
+        ? new PerformerDto(performer).toResponse()
+        : null;
       // eslint-disable-next-line no-param-reassign
       stream.isSubscribed = !!subscription;
       const conversation = conversations.find((c) => c.streamId.equals(stream._id));
@@ -178,7 +190,9 @@ export class StreamService {
     if (!stream.isStreaming) {
       throw new StreamOfflineException();
     }
-    const conversation = await this.conversationService.findOne({ streamId: stream._id });
+    const conversation = await this.conversationService.findOne({
+      streamId: stream._id
+    });
     if (!conversation) {
       throw new EntityNotFoundException();
     }
@@ -212,14 +226,12 @@ export class StreamService {
     });
     const sessionId = uuidv4();
     if (!stream) {
-      const data: IStream = {
+      // eslint-disable-next-line new-cap
+      stream = new this.streamModel({
         sessionId,
         performerId: performer._id,
-        type: PUBLIC_CHAT,
-        isStreaming: 1
-      };
-      // eslint-disable-next-line new-cap
-      stream = new this.streamModel(data);
+        type: PUBLIC_CHAT
+      });
     }
     stream.sessionId = sessionId;
     stream.streamingTime = 0;
@@ -237,7 +249,9 @@ export class StreamService {
       streamId: stream._id
     });
     if (!conversation) {
-      conversation = await this.conversationService.createStreamConversation(new StreamDto(stream));
+      conversation = await this.conversationService.createStreamConversation(
+        new StreamDto(stream)
+      );
     }
 
     return {
@@ -254,10 +268,13 @@ export class StreamService {
     return new StreamDto(stream).toResponse(true);
   }
 
-  public async joinPublicChat(performerId: string) {
-    const stream = await this.streamModel.findOne({
-      performerId, type: PUBLIC_CHAT
-    });
+  public async joinPublicChat(performerId: string, user: UserDto) {
+    const stream = await this.streamModel
+      .findOne({
+        performerId,
+        type: PUBLIC_CHAT
+      })
+      .lean();
 
     if (!stream) {
       throw new EntityNotFoundException();
@@ -266,14 +283,28 @@ export class StreamService {
       throw new StreamOfflineException();
     }
 
-    return new StreamDto(stream).toResponse();
+    const hasSubscribed = this.subscriptionService.checkSubscribed(
+      performerId,
+      user._id
+    );
+    if (!hasSubscribed) throw new ForbiddenException();
+
+    const hasPurchased = !stream.isFree && !!(await this.tokenTransactionService.findOne({
+      status: PURCHASE_ITEM_STATUS.SUCCESS,
+      sourceId: user._id,
+      sessionId: stream.sessionId
+    }));
+    return new StreamDto({ ...stream, hasPurchased }).toResponse();
   }
 
   public getRoomName(id: string | ObjectId, roomType: string) {
     return `conversation-${roomType}-${id}`;
   }
 
-  public async updateStreamDuration(payload: SetDurationPayload, performer: PerformerDto) {
+  public async updateStreamDuration(
+    payload: SetDurationPayload,
+    performer: PerformerDto
+  ) {
     const { streamId, duration } = payload;
     const stream = await this.streamModel.findById(streamId);
     if (!stream) {

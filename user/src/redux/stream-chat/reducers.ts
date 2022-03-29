@@ -139,7 +139,6 @@ const streamMessageReducer = [
           items: []
         };
       }
-      console.log(data.payload);
       nextState.conversationMap[conversationId].items.push(
         data.payload
       );

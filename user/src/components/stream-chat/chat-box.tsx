@@ -71,9 +71,6 @@ const ChatBox = ({
               <StreamMessenger streamId={activeConversation.data.streamId} />
               ) : <p className="text-center">Let start a converstion</p>}
           </Tabs.TabPane>
-          <Tabs.TabPane tab={`USERS (${totalParticipant || 0})`} key="chat_user">
-            <StreamingChatUsers members={members} />
-          </Tabs.TabPane>
         </Tabs>
       </div>
       {canReset && (

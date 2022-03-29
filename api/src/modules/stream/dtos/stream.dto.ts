@@ -21,6 +21,7 @@ export interface IStream {
     likes: number;
   }
   isSubscribed?: boolean;
+  hasPurchased: boolean;
 }
 
 export class StreamDto {
@@ -61,6 +62,8 @@ export class StreamDto {
 
   isSubscribed: boolean;
 
+  hasPurchased: boolean;
+
   constructor(data: Partial<IStream>) {
     Object.assign(
       this,
@@ -81,7 +84,8 @@ export class StreamDto {
         'updatedAt',
         'stats',
         'isSubscribed',
-        'conversationId'
+        'conversationId',
+        'hasPurchased'
       ])
     );
   }
@@ -102,7 +106,8 @@ export class StreamDto {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       isSubscribed: this.isSubscribed,
-      conversationId: this.conversationId
+      conversationId: this.conversationId,
+      hasPurchased: this.hasPurchased
     };
     if (!includePrivateInfo) {
       return publicInfo;

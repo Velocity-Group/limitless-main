@@ -14,6 +14,7 @@ import { StreamConnectListener } from './listeners';
 import { SettingModule } from '../settings/setting.module';
 import { PaymentModule } from '../payment/payment.module';
 import { UserModule } from '../user/user.module';
+import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
 
 const agent = new https.Agent({
   rejectUnauthorized: process.env.REJECT_UNAUTHORIZED !== 'false'
@@ -36,7 +37,8 @@ const agent = new https.Agent({
     forwardRef(() => PerformerModule),
     forwardRef(() => MessageModule),
     forwardRef(() => SettingModule),
-    forwardRef(() => PaymentModule)
+    forwardRef(() => PaymentModule),
+    forwardRef(() => TokenTransactionModule)
   ],
   providers: [
     ...assetsProviders,

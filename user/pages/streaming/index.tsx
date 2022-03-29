@@ -12,7 +12,6 @@ import { streamService } from 'src/services';
 import '@components/performer/performer.less';
 import dynamic from 'next/dynamic';
 
-const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), { ssr: false });
 const StreamCard = dynamic(() => import('@components/streaming/stream-card'), { ssr: false });
 
 interface IProps {
@@ -81,7 +80,7 @@ class Streaming extends PureComponent<IProps> {
 
     return (
       <Layout>
-        <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
+        <>
           <Head>
             <title>
               {`${ui.siteName} | Live Videos`}
@@ -109,7 +108,7 @@ class Streaming extends PureComponent<IProps> {
               />
             ) : null}
           </div>
-        </AgoraProvider>
+        </>
       </Layout>
     );
   }

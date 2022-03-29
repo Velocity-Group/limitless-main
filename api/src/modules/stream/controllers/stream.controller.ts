@@ -10,16 +10,16 @@ import {
   ValidationPipe,
   Get,
   Param,
-  UseInterceptors,
   Put,
-  Query
+  Query,
+  UseInterceptors
 } from '@nestjs/common';
-import { LoadUser, RoleGuard } from 'src/modules/auth/guards';
+import { AuthGuard, RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { UserInterceptor } from 'src/modules/auth/interceptors';
 import { UserDto } from 'src/modules/user/dtos';
+import { UserInterceptor } from 'src/modules/auth/interceptors';
 import { StreamService } from '../services/stream.service';
 import {
   StartStreamPayload, SetDurationPayload, SearchStreamPayload, UpdateStreamPayload
@@ -45,7 +45,7 @@ export class StreamController {
 
   @Get('/user/search')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(LoadUser)
+  @UseInterceptors(UserInterceptor)
   @UsePipes(new ValidationPipe({ transform: true }))
   async userList(
     @Query() req: SearchStreamPayload,
@@ -86,7 +86,7 @@ export class StreamController {
   @Roles('performer')
   @UsePipes(new ValidationPipe({ transform: true }))
   async editLive(
-    @Param('id') id,
+    @Param('id') id: string,
     @Body() payload: UpdateStreamPayload
   ) {
     const data = await this.streamService.editLive(id, payload);
@@ -95,13 +95,13 @@ export class StreamController {
 
   @Post('/join/:id')
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(UserInterceptor)
-  @UseGuards(LoadUser)
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async join(
-    @Param('id') performerId: string
+    @Param('id') performerId: string,
+    @CurrentUser() user: UserDto
   ) {
-    const data = await this.streamService.joinPublicChat(performerId);
+    const data = await this.streamService.joinPublicChat(performerId, user);
     return DataResponse.ok(data);
   }
 

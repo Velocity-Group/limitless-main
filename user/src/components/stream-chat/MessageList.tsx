@@ -95,7 +95,7 @@ class MessageList extends PureComponent<IProps> {
       let nextBySameAuthor = false;
       let startsSequence = true;
       let endsSequence = true;
-      let showTimestamp = true;
+      let showTimestamp = false;
       if (previous) {
         const previousMoment = moment(previous.createdAt);
         const previousDuration = moment.duration(
@@ -106,10 +106,10 @@ class MessageList extends PureComponent<IProps> {
         if (prevBySameAuthor && previousDuration.as('hours') < 1) {
           startsSequence = false;
         }
+      }
 
-        if (previousDuration.as('hours') < 1) {
-          showTimestamp = false;
-        }
+      if (previous && moment(current.createdAt).startOf('days').diff(moment(previous.createdAt).startOf('days')) > 0) {
+        showTimestamp = true;
       }
 
       if (next) {

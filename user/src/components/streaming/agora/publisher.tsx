@@ -28,6 +28,7 @@ export default function Publisher({
   const { agoraAppId } = appConfiguration;
   const socket = useContext(SocketContext);
   const localTracks = useRef<LocalTracks>({ videoTrack: null, audioTrack: null });
+  const clientRef = useRef<any>();
   const publish = async () => {
     if (!client || !conversationId) return;
 
@@ -60,8 +61,8 @@ export default function Publisher({
     localTracks.current = { videoTrack: null, audioTrack: null };
     setTracks([]);
     onStatusChange(false);
-    if (client && client.uid) {
-      await client.leave();
+    if (clientRef.current && clientRef.current.uid) {
+      await clientRef.current.leave();
     }
   };
 
@@ -70,6 +71,7 @@ export default function Publisher({
   };
 
   useEffect(() => {
+    clientRef.current = client;
     if (!client) return;
 
     client.on('connection-state-change', (state) => {

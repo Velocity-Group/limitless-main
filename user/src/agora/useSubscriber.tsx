@@ -1,6 +1,6 @@
 import { streamService } from '@services/stream.service';
 import { IAgoraRTCRemoteUser, UID } from 'agora-rtc-sdk-ng';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAgora } from 'src/agora';
 import { Router } from 'next/router';
 import { SubscriberState } from './types';
@@ -20,6 +20,7 @@ export default function useSubscriber({
   const { client, appConfiguration } = useAgora();
   const { agoraAppId } = appConfiguration;
   const [status, setStatus] = useState<SubscriberState>();
+  const clientRef = useRef<any>();
 
   const join = async () => {
     if (!client || !conversationId) return;
@@ -28,6 +29,16 @@ export default function useSubscriber({
       channelName: conversationId
     });
     await client.join(agoraAppId, conversationId, resp.data, localUId);
+  };
+
+  const leave = () => {
+    clientRef.current?.uid && clientRef.current.leave();
+    setTracks([]);
+    if (clientRef.current?.remoteUsers) {
+      clientRef.current.remoteUsers.forEach((remoteUser) => {
+        remoteUser.audioTrack.stop();
+      });
+    }
   };
 
   const onbeforeunload = () => {
@@ -96,6 +107,7 @@ export default function useSubscriber({
     tracks,
     client,
     status,
-    join
+    join,
+    leave
   };
 }
