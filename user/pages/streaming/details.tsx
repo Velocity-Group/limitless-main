@@ -307,7 +307,7 @@ class LivePage extends PureComponent<IProps> {
         />
         <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
           <div>
-            <Row className="streaming-container">
+            <Row className="main-container">
               <Col md={16} xs={24}>
                 <div className="stream-video">
                   <ForwardedSubscriber

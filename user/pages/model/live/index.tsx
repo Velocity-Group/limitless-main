@@ -207,8 +207,8 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
             event={EVENT_NAME.ROOM_INFORMATIOM_CHANGED}
             handler={this.onRoomChange.bind(this)}
           />
-          <div style={{ padding: 10 }}>
-            <Row>
+          <div>
+            <Row className="main-container">
               <Col xs={24} sm={24} md={16} style={{ padding: 10 }}>
                 <ForwardedPublisher
                   uid={user._id}
