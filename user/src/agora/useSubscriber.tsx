@@ -8,13 +8,13 @@ import { SubscriberState } from './types';
 type Props = {
   localUId: UID;
   remoteUId: UID;
-  conversationId: string;
+  sessionId: string;
 };
 
 export default function useSubscriber({
   localUId,
   remoteUId,
-  conversationId
+  sessionId
 }: Props) {
   const [tracks, setTracks] = useState([]);
   const { client, appConfiguration } = useAgora();
@@ -23,12 +23,12 @@ export default function useSubscriber({
   const clientRef = useRef<any>();
 
   const join = async () => {
-    if (!client || !conversationId) return;
+    if (!client || !sessionId) return;
 
     const resp = await streamService.fetchAgoraAppToken({
-      channelName: conversationId
+      channelName: sessionId
     });
-    await client.join(agoraAppId, conversationId, resp.data, localUId);
+    await client.join(agoraAppId, sessionId, resp.data, localUId);
   };
 
   const leave = () => {
@@ -87,7 +87,7 @@ export default function useSubscriber({
     client.on('user-unpublished', unsubscribe);
     client.on('token-privilege-will-expire', async () => {
       const resp = await streamService.fetchAgoraAppToken({
-        channelName: conversationId
+        channelName: sessionId
       });
       await client.renewToken(resp.data);
     });

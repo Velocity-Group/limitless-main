@@ -282,7 +282,7 @@ class LivePage extends PureComponent<IProps> {
 
   render() {
     const {
-      performer, user, ui, activeConversation, stream: activeStream
+      performer, user, ui, stream: activeStream
     } = this.props;
     const {
       members, total, openPurchaseModal,
@@ -314,7 +314,7 @@ class LivePage extends PureComponent<IProps> {
                     localUId={user?._id}
                     remoteUId={performer?._id}
                     ref={this.subscriberRef}
-                    conversationId={activeConversation?.data?._id}
+                    sessionId={activeStream?.sessionId}
                     onStreamStatusChange={(val) => this.onStreamStatusChange(val)}
                   />
                 </div>

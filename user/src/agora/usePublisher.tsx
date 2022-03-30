@@ -12,6 +12,7 @@ import { PublisherState } from './types';
 type Props = {
   uid: UID;
   conversationId: string;
+  sessionId: string;
 };
 
 type LocalTracks = {
@@ -19,7 +20,7 @@ type LocalTracks = {
   audioTrack: ILocalTrack;
 };
 
-export default function usePublisher({ uid, conversationId }: Props) {
+export default function usePublisher({ uid, conversationId, sessionId }: Props) {
   const [tracks, setTracks] = useState([]);
   const { client, appConfiguration, config } = useAgora();
   const { agoraAppId } = appConfiguration;
@@ -31,16 +32,16 @@ export default function usePublisher({ uid, conversationId }: Props) {
   const [status, setStatus] = useState<PublisherState>();
   const clientRef = useRef<any>();
   const publish = async () => {
-    if (!client || !conversationId) return;
+    if (!client || !conversationId || !sessionId) return;
 
     setStatus('publishing');
 
     // const uid = generateUid(performerId);
     const resp = await streamService.fetchAgoraAppToken({
-      channelName: conversationId
+      channelName: sessionId
     });
 
-    await client.join(agoraAppId, conversationId, resp.data, uid);
+    await client.join(agoraAppId, sessionId, resp.data, uid);
 
     const [microphoneTrack, cameraTrack] = await createLocalTracks(
       {},
@@ -90,7 +91,7 @@ export default function usePublisher({ uid, conversationId }: Props) {
     });
     client.on('token-privilege-will-expire', async () => {
       const resp = await streamService.fetchAgoraAppToken({
-        channelName: conversationId
+        channelName: sessionId
       });
       await client.renewToken(resp.data);
     });

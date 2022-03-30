@@ -13,6 +13,7 @@ type Props = {
   forwardedRef: any;
   onStatusChange: Function;
   conversationId: string;
+  sessionId: string;
 };
 
 type LocalTracks = {
@@ -21,7 +22,7 @@ type LocalTracks = {
 }
 
 export default function Publisher({
-  uid, forwardedRef, onStatusChange, conversationId
+  uid, forwardedRef, onStatusChange, conversationId, sessionId
 }: Props) {
   const [tracks, setTracks] = useState([]);
   const { client, appConfiguration } = useAgora();
@@ -30,14 +31,14 @@ export default function Publisher({
   const localTracks = useRef<LocalTracks>({ videoTrack: null, audioTrack: null });
   const clientRef = useRef<any>();
   const publish = async () => {
-    if (!client || !conversationId) return;
+    if (!client || !conversationId || !sessionId) return;
 
     // const uid = generateUid(performerId);
     const resp = await streamService.fetchAgoraAppToken({
-      channelName: conversationId
+      channelName: sessionId
     });
 
-    await client.join(agoraAppId, conversationId, resp.data, uid);
+    await client.join(agoraAppId, sessionId, resp.data, uid);
 
     const [microphoneTrack, cameraTrack] = await createLocalTracks(
       {},

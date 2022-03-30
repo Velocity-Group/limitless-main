@@ -9,11 +9,11 @@ export type SubscriberProps = {
   remoteUId: UID;
   forwardedRef?: any;
   onStreamStatusChange: Function;
-  conversationId: string;
+  sessionId: string;
 };
 
 export default function Subscriber({
-  localUId, remoteUId, forwardedRef, onStreamStatusChange, conversationId
+  localUId, remoteUId, forwardedRef, onStreamStatusChange, sessionId
 }: SubscriberProps) {
   const [tracks, setTracks] = useState([]);
   const { client, appConfiguration } = useAgora();
@@ -21,12 +21,12 @@ export default function Subscriber({
   const clientRef = useRef<any>();
 
   const join = async () => {
-    if (!client || !conversationId) return;
+    if (!client || !sessionId) return;
 
     const resp = await streamService.fetchAgoraAppToken({
-      channelName: conversationId
+      channelName: sessionId
     });
-    await client.join(agoraAppId, conversationId, resp.data, localUId);
+    await client.join(agoraAppId, sessionId, resp.data, localUId);
   };
 
   const leave = () => {

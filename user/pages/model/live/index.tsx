@@ -29,6 +29,7 @@ const ForwardedPublisher = forwardRef((props: {
   uid: string,
   onStatusChange: Function,
   conversationId: string;
+  sessionId: string;
 }, ref) => <Publisher {...props} forwardedRef={ref} />);
 
 // eslint-disable-next-line no-shadow
@@ -214,6 +215,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
                   onStatusChange={(val) => this.onStreamStatusChange(val)}
                   ref={this.publisherRef}
                   conversationId={activeStream?.conversation?._id}
+                  sessionId={activeStream?.sessionId}
                 />
                 <p className="stream-duration">
                   <span>
