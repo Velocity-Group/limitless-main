@@ -53,7 +53,7 @@ interface IStates {
   loading: boolean;
   initialized: boolean;
   total: number;
-  members: IUser[];
+  members?: IUser[];
   openPriceModal: boolean;
   callTime: number;
   activeStream: IStream;
@@ -77,7 +77,6 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     loading: false,
     initialized: false,
     total: 0,
-    members: [],
     openPriceModal: false,
     callTime: 0,
     activeStream: null,
@@ -108,10 +107,10 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     this.streamDurationTimeOut = setTimeout(this.handleDuration.bind(this), 1000);
   }
 
-  onRoomChange = ({ total, members, conversationId }) => {
+  onRoomChange = ({ total, conversationId }) => {
     const { activeConversation } = this.props;
     if (activeConversation?.data?._id && activeConversation.data._id === conversationId) {
-      this.setState({ total, members });
+      this.setState({ total });
     }
   }
 
@@ -193,7 +192,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
   render() {
     const { user, ui } = this.props;
     const {
-      loading, initialized, members, total, openPriceModal, callTime, activeStream, editting
+      loading, initialized, total, openPriceModal, callTime, activeStream, editting
     } = this.state;
     return (
       <AgoraProvider config={{ mode: 'live', codec: 'h264', role: 'host' }}>
@@ -291,8 +290,6 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
               <Col xs={24} sm={24} md={8} style={{ padding: 10 }}>
                 <ChatBox
                   {...this.props}
-                  members={members}
-                  totalParticipant={total}
                 />
               </Col>
               <Modal

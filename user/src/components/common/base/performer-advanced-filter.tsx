@@ -286,6 +286,20 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
               ))}
             </Select>
           </div>
+          <div className="filter-item">
+            <Select
+              onChange={(val) => this.setState({ streamingStatus: val }, () => this.handleSubmit())}
+              style={{ width: '100%' }}
+              defaultValue=""
+            >
+              <Select.Option key="streaming-all" value="">
+                All streaming status
+              </Select.Option>
+              <Select.Option key="streaming-live" value="public">
+                Live
+              </Select.Option>
+            </Select>
+          </div>
         </div>
       </div>
     );

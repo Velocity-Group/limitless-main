@@ -113,7 +113,7 @@ class HomePage extends PureComponent<IProps> {
         query: {
           username: stream?.performerInfo?.username || stream?.performerInfo?._id
         }
-      }, `/streaming/${stream?.performerInfo?.username || stream?.performerInfo?._id}`);
+      }, `/${stream?.performerInfo?.username || stream?.performerInfo?._id}`);
       return;
     }
     Router.push({
@@ -240,7 +240,7 @@ class HomePage extends PureComponent<IProps> {
                   <div className="visit-history">
                     <div className="top-story">
                       <a>Live Videos</a>
-                      <a href="/streaming"><small>View all</small></a>
+                      <a href="/model"><small>View all</small></a>
                     </div>
                     <div className="story-list">
                       {streams.length > 0 && streams.map((s) => (

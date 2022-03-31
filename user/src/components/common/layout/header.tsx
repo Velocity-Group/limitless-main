@@ -193,15 +193,6 @@ class Header extends PureComponent<IProps> {
                 )}
                 {user._id && (
                   <>
-                    {settings?.agoraEnable && user.isPerformer && (
-                      <li className={router.pathname === '/model/live' ? 'active' : ''}>
-                        <Link href="/model/live" as="/model/live">
-                          <a>
-                            <LiveIcon />
-                          </a>
-                        </Link>
-                      </li>
-                    )}
                     {user?.isPerformer && (
                     <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
                       <Link href="/model/my-post/create">

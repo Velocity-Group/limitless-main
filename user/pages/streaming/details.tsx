@@ -7,11 +7,18 @@ import {
 import { ClockCircleOutlined, EyeOutlined } from '@ant-design/icons';
 import { IResponse } from 'src/services/api-request';
 import {
-  IPerformer, IUser, StreamSettings, IUIConfig, IStream
+  IPerformer,
+  IUser,
+  StreamSettings,
+  IUIConfig,
+  IStream
 } from 'src/interfaces';
 import { connect } from 'react-redux';
 import {
-  streamService, performerService, messageService, tokenTransctionService
+  streamService,
+  performerService,
+  messageService,
+  tokenTransctionService
 } from 'src/services';
 import { SocketContext, Event } from 'src/socket';
 import nextCookie from 'next-cookies';
@@ -19,7 +26,9 @@ import Router from 'next/router';
 import ChatBox from '@components/stream-chat/chat-box';
 import { updateBalance } from '@redux/user/actions';
 import {
-  loadStreamMessages, getStreamConversationSuccess, resetStreamMessage
+  loadStreamMessages,
+  getStreamConversationSuccess,
+  resetStreamMessage
 } from '@redux/stream-chat/actions';
 import { getResponseError, videoDuration } from '@lib/index';
 import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
@@ -28,15 +37,22 @@ import dynamic from 'next/dynamic';
 import '../model/live/index.less';
 import { SubscriberProps } from '@components/streaming/agora/subscriber';
 
-const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), { ssr: false });
-const Subscriber = dynamic(() => import('@components/streaming/agora/subscriber'), { ssr: false });
-const ForwardedSubscriber = forwardRef((props: SubscriberProps, ref) => <Subscriber {...props} forwardedRef={ref} />);
+const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), {
+  ssr: false
+});
+const Subscriber = dynamic(
+  () => import('@components/streaming/agora/subscriber'),
+  { ssr: false }
+);
+const ForwardedSubscriber = forwardRef((props: SubscriberProps, ref) => (
+  <Subscriber {...props} forwardedRef={ref} />
+));
 
 // eslint-disable-next-line no-shadow
 enum STREAM_EVENT {
   JOIN_BROADCASTER = 'join-broadcaster',
   MODEL_LEFT = 'model-left',
-  ROOM_INFORMATIOM_CHANGED = 'public-room-changed'
+  ROOM_INFORMATIOM_CHANGED = 'public-room-changed',
 }
 
 interface IProps {
@@ -57,7 +73,7 @@ class LivePage extends PureComponent<IProps> {
 
   static authenticate = true;
 
-  private subscriberRef = createRef<{join: any, unsubscribe: any}>();
+  private subscriberRef = createRef<{ join: any; unsubscribe: any }>();
 
   private streamDurationTimeOut: any;
 
@@ -89,7 +105,6 @@ class LivePage extends PureComponent<IProps> {
 
   state = {
     total: 0,
-    members: [],
     sessionDuration: 0,
     openPurchaseModal: false,
     submiting: false,
@@ -105,7 +120,13 @@ class LivePage extends PureComponent<IProps> {
     }
     if (!performer.isSubscribed) {
       message.error('Please subscribe to join live chat!', 5);
-      Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`);
+      Router.push(
+        {
+          pathname: '/model/profile',
+          query: { username: performer?.username || performer?._id }
+        },
+        `/${performer?.username || performer?._id}`
+      );
       return;
     }
 
@@ -125,7 +146,10 @@ class LivePage extends PureComponent<IProps> {
     const { sessionDuration } = this.state;
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
     this.setState({ sessionDuration: sessionDuration + 1 });
-    this.streamDurationTimeOut = setTimeout(this.handleDuration.bind(this), 1000);
+    this.streamDurationTimeOut = setTimeout(
+      this.handleDuration.bind(this),
+      1000
+    );
   }
 
   onStreamStatusChange = (streaming: boolean) => {
@@ -135,28 +159,29 @@ class LivePage extends PureComponent<IProps> {
       this.setState({ initialized: true });
       !this.streamDurationTimeOut && this.handleDuration();
     }
-  }
+  };
 
   onbeforeunload = () => {
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
     this.leavePublicRoom();
   };
 
-  onChangeMembers({ total, members, conversationId }) {
+  onChangeMembers({ total, conversationId }) {
     const { activeConversation } = this.props;
     if (activeConversation?.data?._id === conversationId) {
-      this.setState({ total, members });
+      this.setState({ total });
     }
   }
 
   async purchaseStream() {
-    const {
-      stream: activeStream
-    } = this.props;
+    const { stream: activeStream } = this.props;
     const { user, updateBalance: handleUpdateBalance } = this.props;
     if (activeStream.isFree || !activeStream.sessionId) return;
     if (user.balance < activeStream.price) {
-      message.error('You have an insufficient token balance. Please top up.', 15);
+      message.error(
+        'You have an insufficient token balance. Please top up.',
+        15
+      );
       Router.push('/token-package');
       return;
     }
@@ -178,14 +203,26 @@ class LivePage extends PureComponent<IProps> {
     this.setState({ openPurchaseModal: false });
   }
 
+  retryJoin(n: number) {
+    if (n === 0) return;
+
+    if (!this.subscriberRef.current) {
+      setTimeout(() => this.retryJoin(n - 1), 3000);
+      return;
+    }
+
+    this.subscriberRef.current.join();
+  }
+
   async subscribeStream({ performerId }) {
     const { initialized } = this.state;
+
     try {
       const resp = await streamService.joinPublicChat(performerId);
       const { streamingTime } = resp.data;
       this.setState({ sessionDuration: streamingTime || 0 });
 
-      !initialized && this.subscriberRef.current && this.subscriberRef.current.join();
+      !initialized && this.retryJoin(3);
     } catch (err) {
       const error = await Promise.resolve(err);
       message.error(getResponseError(error));
@@ -194,7 +231,8 @@ class LivePage extends PureComponent<IProps> {
 
   async joinConversation(purchased = false) {
     const {
-      performer, loadStreamMessages: dispatchLoadStreamMessages,
+      performer,
+      loadStreamMessages: dispatchLoadStreamMessages,
       getStreamConversationSuccess: dispatchGetStreamConversationSuccess,
       stream
     } = this.props;
@@ -220,7 +258,10 @@ class LivePage extends PureComponent<IProps> {
           offset: 0,
           type: conversation.type
         });
-        socket && socket.emit('public-stream/join', { conversationId: conversation._id });
+        socket
+          && socket.emit('public-stream/join', {
+            conversationId: conversation._id
+          });
       } else {
         message.info('No available stream. Try again later');
       }
@@ -249,12 +290,23 @@ class LivePage extends PureComponent<IProps> {
     this.setState({ sessionDuration: 0 });
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
     message.info('Streaming session ended! Redirecting after 10s', 10);
-    setTimeout(() => { Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`); }, 10 * 1000);
+    setTimeout(() => {
+      Router.push(
+        {
+          pathname: '/model/profile',
+          query: { username: performer?.username || performer?._id }
+        },
+        `/${performer?.username || performer?._id}`
+      );
+    }, 10 * 1000);
   }
 
   async sendTip(token) {
     const {
-      performer, user, updateBalance: handleUpdateBalance, activeConversation
+      performer,
+      user,
+      updateBalance: handleUpdateBalance,
+      activeConversation
     } = this.props;
     const { stream: activeStream } = this.props;
     if (user.balance < token) {
@@ -285,13 +337,21 @@ class LivePage extends PureComponent<IProps> {
       performer, user, ui, stream: activeStream
     } = this.props;
     const {
-      members, total, openPurchaseModal,
-      sessionDuration, submiting, openTipModal
+      total,
+      openPurchaseModal,
+      sessionDuration,
+      submiting,
+      openTipModal
     } = this.state;
     return (
       <Layout>
         <Head>
-          <title>{`${ui?.siteName || ''} | ${performer?.name || performer?.username} Broadcast`}</title>
+          <title>
+            {`${ui?.siteName || ''} | ${
+              performer?.name || performer?.username
+            } Broadcast`}
+
+          </title>
         </Head>
         <Event
           event={STREAM_EVENT.JOIN_BROADCASTER}
@@ -305,7 +365,9 @@ class LivePage extends PureComponent<IProps> {
           event={STREAM_EVENT.ROOM_INFORMATIOM_CHANGED}
           handler={this.onChangeMembers.bind(this)}
         />
-        <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
+        <AgoraProvider
+          config={{ codec: 'h264', mode: 'live', role: 'audience' }}
+        >
           <div>
             <Row className="main-container">
               <Col md={16} xs={24}>
@@ -338,7 +400,15 @@ class LivePage extends PureComponent<IProps> {
                 <Row>
                   <Col lg={16} xs={24}>
                     <Card bordered={false} bodyStyle={{ padding: 0 }}>
-                      <Card.Meta title={activeStream?.title || `${performer?.name || performer?.username} Live`} description={activeStream?.description || 'No description'} />
+                      <Card.Meta
+                        title={
+                          activeStream?.title
+                          || `${performer?.name || performer?.username} Live`
+                        }
+                        description={
+                          activeStream?.description || 'No description'
+                        }
+                      />
                     </Card>
                   </Col>
                   <Col lg={8} xs={24}>
@@ -346,7 +416,15 @@ class LivePage extends PureComponent<IProps> {
                       <Button
                         block
                         className="primary"
-                        onClick={() => Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`)}
+                        onClick={() => Router.push(
+                          {
+                            pathname: '/model/profile',
+                            query: {
+                              username: performer?.username || performer?._id
+                            }
+                          },
+                          `/${performer?.username || performer?._id}`
+                        )}
                       >
                         Leave Chat
                       </Button>
@@ -363,11 +441,7 @@ class LivePage extends PureComponent<IProps> {
                 </Row>
               </Col>
               <Col md={8} xs={24}>
-                <ChatBox
-                  {...this.props}
-                  members={members}
-                  totalParticipant={total}
-                />
+                <ChatBox {...this.props} />
               </Col>
             </Row>
             <Modal
@@ -379,12 +453,18 @@ class LivePage extends PureComponent<IProps> {
               footer={null}
               onCancel={() => this.setState({ openTipModal: false })}
             >
-              <TipPerformerForm performer={performer} submiting={submiting} onFinish={this.sendTip.bind(this)} />
+              <TipPerformerForm
+                performer={performer}
+                submiting={submiting}
+                onFinish={this.sendTip.bind(this)}
+              />
             </Modal>
             <Modal
               centered
               key="confirm_join_stream"
-              title={`Join ${performer?.name || performer?.username || 'N/A'} live chat`}
+              title={`Join ${
+                performer?.name || performer?.username || 'N/A'
+              } live chat`}
               visible={openPurchaseModal}
               footer={null}
               destroyOnClose

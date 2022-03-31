@@ -108,7 +108,7 @@ export class PerformerSearchService {
       query._id = { $in: req.performerIds.split(',') };
     }
     ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender',
-      'height', 'weight', 'eyes', 'butt', 'sexualOrientation'].forEach((f) => {
+      'height', 'weight', 'eyes', 'butt', 'sexualOrientation', 'streamingStatus'].forEach((f) => {
       if (req[f]) {
         query[f] = req[f];
       }
