@@ -32,7 +32,7 @@ const streamMessageReducer = [
     reducer(state: any) {
       return {
         ...state,
-        activeConversation: { fetching: true }
+        activeConversation: { ...state.activeConversation, fetching: true }
       };
     }
   },

@@ -28,6 +28,7 @@ import { updateBalance } from '@redux/user/actions';
 import {
   loadStreamMessages,
   getStreamConversationSuccess,
+  getStreamConversation,
   resetStreamMessage
 } from '@redux/stream-chat/actions';
 import { getResponseError, videoDuration } from '@lib/index';
@@ -60,6 +61,7 @@ interface IProps {
   resetStreamMessage: Function;
   getStreamConversationSuccess: Function;
   loadStreamMessages: Function;
+  getStreamConversation: Function;
   activeConversation: any;
   ui: IUIConfig;
   user: IUser;
@@ -214,8 +216,11 @@ class LivePage extends PureComponent<IProps> {
     this.subscriberRef.current.join();
   }
 
-  async subscribeStream({ performerId }) {
+  async subscribeStream({ performerId, conversationId }) {
     const { initialized } = this.state;
+    const { activeConversation } = this.props;
+
+    if (activeConversation?.data?._id !== conversationId) return;
 
     try {
       const resp = await streamService.joinPublicChat(performerId);
@@ -232,8 +237,8 @@ class LivePage extends PureComponent<IProps> {
   async joinConversation(purchased = false) {
     const {
       performer,
-      loadStreamMessages: dispatchLoadStreamMessages,
       getStreamConversationSuccess: dispatchGetStreamConversationSuccess,
+      getStreamConversation: dispatchGetStreamConversation,
       stream
     } = this.props;
 
@@ -252,11 +257,8 @@ class LivePage extends PureComponent<IProps> {
       const conversation = resp.data;
       if (conversation && conversation._id) {
         dispatchGetStreamConversationSuccess({ data: conversation });
-        dispatchLoadStreamMessages({
-          conversationId: conversation._id,
-          limit: 25,
-          offset: 0,
-          type: conversation.type
+        dispatchGetStreamConversation({
+          conversation
         });
         socket
           && socket.emit('public-stream/join', {
@@ -285,8 +287,15 @@ class LivePage extends PureComponent<IProps> {
     }
   }
 
-  modelLeftHandler() {
-    const { performer } = this.props;
+  modelLeftHandler({ conversationId, performerId }) {
+    const { performer, activeConversation } = this.props;
+    if (
+      activeConversation?.data?._id !== conversationId
+      || performer?._id !== performerId
+    ) {
+      return;
+    }
+
     this.setState({ sessionDuration: 0 });
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
     message.info('Streaming session ended! Redirecting after 10s', 10);
@@ -350,7 +359,6 @@ class LivePage extends PureComponent<IProps> {
             {`${ui?.siteName || ''} | ${
               performer?.name || performer?.username
             } Broadcast`}
-
           </title>
         </Head>
         <Event
@@ -498,6 +506,7 @@ const mapDispatch = {
   updateBalance,
   loadStreamMessages,
   getStreamConversationSuccess,
-  resetStreamMessage
+  resetStreamMessage,
+  getStreamConversation
 };
 export default connect(mapStateToProps, mapDispatch)(LivePage);
