@@ -139,9 +139,15 @@ const streamMessageReducer = [
           items: []
         };
       }
-      nextState.conversationMap[conversationId].items.push(
-        data.payload
-      );
+
+      nextState.conversationMap[conversationId] = {
+        ...nextState.conversationMap[conversationId],
+        items: [
+          ...nextState.conversationMap[conversationId].items,
+          data.payload
+        ],
+        fetching: false
+      };
       return {
         ...nextState,
         receiveMessage: data.payload

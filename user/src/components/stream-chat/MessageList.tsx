@@ -25,34 +25,32 @@ interface IProps {
   deleteMessageSuccess: Function;
 }
 
-interface IUserJoinedChat {
-  user: IUser;
-  role: 'member' | 'model',
-  conversationId: string
-}
-
 class MessageList extends PureComponent<IProps> {
   messagesRef: any;
 
   state = {
-    offset: 0
+    offset: 0,
+    onloadmore: false
   };
 
   async componentDidMount() {
     if (!this.messagesRef) this.messagesRef = createRef();
   }
 
-  async componentDidUpdate(prevProps) {
-    const { message, sendMessage } = this.props;
-    if ((prevProps.message.total === 0 && message.total !== 0) || (prevProps.message.total === message.total)) {
-      if (prevProps.sendMessage?.data?._id !== sendMessage?.data?._id) {
-        this.scrollToBottom(true);
-        return;
+  componentDidUpdate(prevProps: IProps) {
+    const { message } = this.props;
+    const { onloadmore } = this.state;
+    const messages = message.items;
+    if (messages !== prevProps.message.items) {
+      if (onloadmore) {
+        // eslint-disable-next-line react/no-did-update-set-state
+        this.setState({ onloadmore: false });
       }
-      this.scrollToBottom(false);
+      this.scrollToBottom();
     }
   }
 
+  // eslint-disable-next-line react/sort-comp
   async handleScroll(conversation, event) {
     const {
       message: { fetching, items, total },
@@ -63,7 +61,7 @@ class MessageList extends PureComponent<IProps> {
     const ele = event.target;
     if (!canloadmore) return;
     if (ele.scrollTop === 0 && conversation._id && !fetching && canloadmore) {
-      await this.setState({ offset: offset + 1 });
+      await this.setState({ offset: offset + 1, onloadmore: true });
       loadMore({
         conversationId: conversation._id,
         limit: 25,
@@ -150,18 +148,13 @@ class MessageList extends PureComponent<IProps> {
     type === 'deleted' && remove(message);
   };
 
-  onUserJoined = ({ user, role, conversationId }: IUserJoinedChat) => {
-    // TODO display something
-    console.log(`${user?.name || user?.username} joined chat`);
-  }
-
-  scrollToBottom(toBot = true) {
+  scrollToBottom() {
     const { message: { fetching } } = this.props;
-    const { offset } = this.state;
-    if (!fetching && this.messagesRef && this.messagesRef.current) {
+    const { onloadmore } = this.state;
+    if (!onloadmore && !fetching && this.messagesRef && this.messagesRef.current) {
       const ele = this.messagesRef.current;
       window.setTimeout(() => {
-        ele.scrollTop = toBot ? ele.scrollHeight : (ele.scrollHeight / (offset + 1) - 150);
+        ele.scrollTop = ele.scrollHeight;
       }, 300);
     }
   }
@@ -180,7 +173,7 @@ class MessageList extends PureComponent<IProps> {
       >
         <Event event={`message_created_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'created')} />
         <Event event={`message_deleted_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'deleted')} />
-        <Event event={`user_joined_${conversation._id}`} handler={this.onUserJoined.bind(this)} />
+        {/* <Event event={`user_joined_${conversation._id}`} handler={this.onUserJoined.bind(this)} /> */}
         {conversation && conversation._id && (
           <>
             <div className="message-list-container">
