@@ -35,6 +35,8 @@ class MessageList extends PureComponent<IProps> {
 
   async componentDidMount() {
     if (!this.messagesRef) this.messagesRef = createRef();
+
+    this.scrollToBottom();
   }
 
   componentDidUpdate(prevProps: IProps) {
@@ -151,11 +153,16 @@ class MessageList extends PureComponent<IProps> {
   scrollToBottom() {
     const { message: { fetching } } = this.props;
     const { onloadmore } = this.state;
-    if (!onloadmore && !fetching && this.messagesRef && this.messagesRef.current) {
-      const ele = this.messagesRef.current;
+    if (onloadmore || fetching) return;
+
+    if (this.messagesRef && this.messagesRef.current) {
+      const ele: HTMLDivElement = this.messagesRef.current;
       window.setTimeout(() => {
-        ele.scrollTop = ele.scrollHeight;
-      }, 300);
+        ele.scroll({
+          top: ele.scrollHeight,
+          behavior: 'auto'
+        });
+      }, 100);
     }
   }
 
