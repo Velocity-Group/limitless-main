@@ -120,6 +120,7 @@ class PerformerProfile extends PureComponent<IProps> {
     }
   }
 
+  // eslint-disable-next-line react/sort-comp
   handleViewWelcomeVideo() {
     const { performer } = this.props;
     const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');

@@ -29,6 +29,7 @@ const ForwardedPublisher = forwardRef((props: {
   uid: string,
   onStatusChange: Function,
   conversationId: string;
+  sessionId: string;
 }, ref) => <Publisher {...props} forwardedRef={ref} />);
 
 // eslint-disable-next-line no-shadow
@@ -52,7 +53,7 @@ interface IStates {
   loading: boolean;
   initialized: boolean;
   total: number;
-  members: IUser[];
+  members?: IUser[];
   openPriceModal: boolean;
   callTime: number;
   activeStream: IStream;
@@ -76,7 +77,6 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     loading: false,
     initialized: false,
     total: 0,
-    members: [],
     openPriceModal: false,
     callTime: 0,
     activeStream: null,
@@ -107,10 +107,10 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     this.streamDurationTimeOut = setTimeout(this.handleDuration.bind(this), 1000);
   }
 
-  onRoomChange = ({ total, members, conversationId }) => {
+  onRoomChange = ({ total, conversationId }) => {
     const { activeConversation } = this.props;
     if (activeConversation?.data?._id && activeConversation.data._id === conversationId) {
-      this.setState({ total, members });
+      this.setState({ total });
     }
   }
 
@@ -151,6 +151,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     } catch (e) {
       const error = await e;
       message.error(error?.message || 'Stream server error, please try again later');
+    } finally {
       this.setState({ loading: false });
     }
   }
@@ -191,7 +192,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
   render() {
     const { user, ui } = this.props;
     const {
-      loading, initialized, members, total, openPriceModal, callTime, activeStream, editting
+      loading, initialized, total, openPriceModal, callTime, activeStream, editting
     } = this.state;
     return (
       <AgoraProvider config={{ mode: 'live', codec: 'h264', role: 'host' }}>
@@ -205,14 +206,15 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
             event={EVENT_NAME.ROOM_INFORMATIOM_CHANGED}
             handler={this.onRoomChange.bind(this)}
           />
-          <div style={{ padding: 10 }}>
-            <Row>
+          <div>
+            <Row className="main-container">
               <Col xs={24} sm={24} md={16} style={{ padding: 10 }}>
                 <ForwardedPublisher
                   uid={user._id}
                   onStatusChange={(val) => this.onStreamStatusChange(val)}
                   ref={this.publisherRef}
                   conversationId={activeStream?.conversation?._id}
+                  sessionId={activeStream?.sessionId}
                 />
                 <p className="stream-duration">
                   <span>
@@ -288,8 +290,6 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
               <Col xs={24} sm={24} md={8} style={{ padding: 10 }}>
                 <ChatBox
                   {...this.props}
-                  members={members}
-                  totalParticipant={total}
                 />
               </Col>
               <Modal

@@ -15,6 +15,7 @@ import { UserDto } from 'src/modules/user/dtos';
 import { QueueEventService } from 'src/kernel';
 import { STREAM_FEED_CHANNEL } from 'src/modules/feed/constants';
 import { EVENT } from 'src/kernel/constants';
+import { PerformerDto } from 'src/modules/performer/dtos';
 import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
 import { StreamModel } from '../models';
 
@@ -192,10 +193,6 @@ export class PublicStreamWsGateway {
                 { _id: stream._id },
                 { $set: { lastStreamingTime: new Date(), isStreaming: 0, streamingTime: streamTime / 1000 } }
               ),
-              this.socketService.emitToRoom(roomName, 'model-left', {
-                performerId,
-                conversationId
-              }),
               this.queueEventService.publish({ channel: STREAM_FEED_CHANNEL, eventName: EVENT.DELETED, data: { conversation } })
             ]);
           } else if (role === 'member') {
@@ -229,6 +226,10 @@ export class PublicStreamWsGateway {
       total: members.length,
       members: members.map((m) => new UserDto(m).toResponse())
     };
+
+    if (memberIds.length && user instanceof PerformerDto) {
+      await this.socketService.emitToUsers(memberIds, 'model-left', { conversationId, performerId });
+    }
     await this.socketService.emitToRoom(roomName, 'public-room-changed', data);
   }
 }

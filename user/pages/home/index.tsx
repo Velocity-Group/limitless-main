@@ -24,7 +24,6 @@ import { debounce } from 'lodash';
 import './index.less';
 import dynamic from 'next/dynamic';
 
-const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), { ssr: false });
 const StreamListItem = dynamic(() => import('@components/streaming/stream-list-item'), { ssr: false });
 
 interface IProps {
@@ -114,7 +113,7 @@ class HomePage extends PureComponent<IProps> {
         query: {
           username: stream?.performerInfo?.username || stream?.performerInfo?._id
         }
-      }, `/streaming/${stream?.performerInfo?.username || stream?.performerInfo?._id}`);
+      }, `/${stream?.performerInfo?.username || stream?.performerInfo?._id}`);
       return;
     }
     Router.push({
@@ -205,7 +204,7 @@ class HomePage extends PureComponent<IProps> {
     } = this.state;
     return (
       <Layout>
-        <AgoraProvider config={{ codec: 'h264', mode: 'live', role: 'audience' }}>
+        <>
           <Head>
             <title>
               {ui && ui.siteName}
@@ -241,14 +240,14 @@ class HomePage extends PureComponent<IProps> {
                   <div className="visit-history">
                     <div className="top-story">
                       <a>Live Videos</a>
-                      <a href="/streaming"><small>View all</small></a>
+                      <a href="/model"><small>View all</small></a>
                     </div>
                     <div className="story-list">
                       {streams.length > 0 && streams.map((s) => (
-                        <StreamListItem stream={s} user={user} />
+                        <StreamListItem stream={s} user={user} key={s._id} />
                       ))}
+                      {!streams?.length && <p className="text-center" style={{ margin: '30px 0' }}>No live for now</p>}
                     </div>
-                    {!streams?.length && <p className="text-center" style={{ margin: '30px 0' }}>No live for now</p>}
                   </div>
                   {!loadingFeed && !totalFeeds && (
                   <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
@@ -291,7 +290,7 @@ class HomePage extends PureComponent<IProps> {
               </div>
             </div>
           </div>
-        </AgoraProvider>
+        </>
       </Layout>
     );
   }

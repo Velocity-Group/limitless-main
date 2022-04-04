@@ -1,6 +1,6 @@
 import { streamService } from '@services/stream.service';
 import { IAgoraRTCRemoteUser, UID } from 'agora-rtc-sdk-ng';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Player, useAgora } from 'src/agora';
 import { Router } from 'next/router';
 
@@ -9,30 +9,31 @@ export type SubscriberProps = {
   remoteUId: UID;
   forwardedRef?: any;
   onStreamStatusChange: Function;
-  conversationId: string;
+  sessionId: string;
 };
 
 export default function Subscriber({
-  localUId, remoteUId, forwardedRef, onStreamStatusChange, conversationId
+  localUId, remoteUId, forwardedRef, onStreamStatusChange, sessionId
 }: SubscriberProps) {
   const [tracks, setTracks] = useState([]);
   const { client, appConfiguration } = useAgora();
   const { agoraAppId } = appConfiguration;
+  const clientRef = useRef<any>();
 
   const join = async () => {
-    if (!client || !conversationId) return;
+    if (!client || !sessionId) return;
 
     const resp = await streamService.fetchAgoraAppToken({
-      channelName: conversationId
+      channelName: sessionId
     });
-    await client.join(agoraAppId, conversationId, resp.data, localUId);
+    await client.join(agoraAppId, sessionId, resp.data, localUId);
   };
 
   const leave = () => {
-    client?.uid && client.leave();
+    clientRef.current?.uid && clientRef.current.leave();
     setTracks([]);
-    if (client?.remoteUsers) {
-      client.remoteUsers.forEach((remoteUser) => {
+    if (clientRef.current?.remoteUsers) {
+      clientRef.current.remoteUsers.forEach((remoteUser) => {
         remoteUser.audioTrack.stop();
       });
     }
@@ -67,6 +68,7 @@ export default function Subscriber({
   };
 
   useEffect(() => {
+    clientRef.current = client;
     if (!client) return;
 
     client.on('connection-state-change', (state) => {

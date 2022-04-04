@@ -90,4 +90,5 @@ export interface IStream {
   createdAt: Date;
   updatedAt: Date;
   conversationId: string;
+  hasPurchased: boolean;
 }

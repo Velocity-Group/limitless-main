@@ -20,6 +20,7 @@ import { PaymentTokenListener } from './listeners';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { StreamModule } from '../stream/stream.module';
 import { UserModule } from '../user/user.module';
+import { MessageModule } from '../message/message.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { UserModule } from '../user/user.module';
     forwardRef(() => SocketModule),
     forwardRef(() => FeedModule),
     forwardRef(() => SubscriptionModule),
-    forwardRef(() => StreamModule)
+    forwardRef(() => StreamModule),
+    forwardRef(() => MessageModule)
   ],
   providers: [
     ...paymentTokenProviders,

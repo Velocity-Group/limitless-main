@@ -113,4 +113,9 @@ export class PerformerSearchPayload extends SearchRequest {
   role: string;
 
   ids: ObjectId[] | string[];
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  streamingStatus: string;
 }

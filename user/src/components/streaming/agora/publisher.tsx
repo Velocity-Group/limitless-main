@@ -13,6 +13,7 @@ type Props = {
   forwardedRef: any;
   onStatusChange: Function;
   conversationId: string;
+  sessionId: string;
 };
 
 type LocalTracks = {
@@ -21,22 +22,23 @@ type LocalTracks = {
 }
 
 export default function Publisher({
-  uid, forwardedRef, onStatusChange, conversationId
+  uid, forwardedRef, onStatusChange, conversationId, sessionId
 }: Props) {
   const [tracks, setTracks] = useState([]);
   const { client, appConfiguration } = useAgora();
   const { agoraAppId } = appConfiguration;
   const socket = useContext(SocketContext);
   const localTracks = useRef<LocalTracks>({ videoTrack: null, audioTrack: null });
+  const clientRef = useRef<any>();
   const publish = async () => {
-    if (!client || !conversationId) return;
+    if (!client || !conversationId || !sessionId) return;
 
     // const uid = generateUid(performerId);
     const resp = await streamService.fetchAgoraAppToken({
-      channelName: conversationId
+      channelName: sessionId
     });
 
-    await client.join(agoraAppId, conversationId, resp.data, uid);
+    await client.join(agoraAppId, sessionId, resp.data, uid);
 
     const [microphoneTrack, cameraTrack] = await createLocalTracks(
       {},
@@ -60,8 +62,8 @@ export default function Publisher({
     localTracks.current = { videoTrack: null, audioTrack: null };
     setTracks([]);
     onStatusChange(false);
-    if (client && client.uid) {
-      await client.leave();
+    if (clientRef.current && clientRef.current.uid) {
+      await clientRef.current.leave();
     }
   };
 
@@ -70,6 +72,7 @@ export default function Publisher({
   };
 
   useEffect(() => {
+    clientRef.current = client;
     if (!client) return;
 
     client.on('connection-state-change', (state) => {

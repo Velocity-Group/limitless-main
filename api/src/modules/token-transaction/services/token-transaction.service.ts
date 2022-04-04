@@ -9,7 +9,9 @@ import { EVENT } from 'src/kernel/constants';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import {
-  VideoService, ProductService, GalleryService
+  VideoService,
+  ProductService,
+  GalleryService
 } from 'src/modules/performer-assets/services';
 import { GalleryDto, VideoDto } from 'src/modules/performer-assets/dtos';
 import { PerformerService } from 'src/modules/performer/services';
@@ -17,12 +19,18 @@ import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
 import { FeedService } from 'src/modules/feed/services';
 import { FeedDto } from 'src/modules/feed/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { toObjectId, generateUuid } from 'src/kernel/helpers/string.helper';
+import { toObjectId } from 'src/kernel/helpers/string.helper';
 import { StreamService } from 'src/modules/stream/services';
 import { StreamModel } from 'src/modules/stream/models';
-import { GROUP_CHAT, PRIVATE_CHAT, PUBLIC_CHAT } from 'src/modules/stream/constant';
+import {
+  GROUP_CHAT,
+  PRIVATE_CHAT,
+  PUBLIC_CHAT
+} from 'src/modules/stream/constant';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { UserDto } from 'src/modules/user/dtos';
+import { MessageService } from 'src/modules/message/services';
+import { MESSAGE_TYPE } from 'src/modules/message/constants';
 import { PAYMENT_TOKEN_MODEL_PROVIDER } from '../providers';
 import { TokenTransactionModel } from '../models';
 import {
@@ -34,11 +42,10 @@ import {
   PurchaseItemType
 } from '../constants';
 import {
-  NotEnoughMoneyException, OverProductStockException
+  NotEnoughMoneyException,
+  OverProductStockException
 } from '../exceptions';
-import {
-  PurchaseProductsPayload, SendTipsPayload
-} from '../payloads';
+import { PurchaseProductsPayload, SendTipsPayload } from '../payloads';
 import { TokenTransactionDto } from '../dtos';
 
 @Injectable()
@@ -59,20 +66,21 @@ export class TokenTransactionService {
     @Inject(forwardRef(() => FeedService))
     private readonly feedService: FeedService,
     @Inject(forwardRef(() => StreamService))
-    private readonly streamService: StreamService
-  ) { }
+    private readonly streamService: StreamService,
+    @Inject(forwardRef(() => MessageService))
+    private readonly messageSerice: MessageService
+  ) {}
 
   public async findById(id: string | ObjectId) {
     return this.TokenPaymentModel.findById(id);
   }
 
-  public async checkBought(
-    item: any,
-    type: PurchaseItemType,
-    user: UserDto
-  ) {
+  public async checkBought(item: any, type: PurchaseItemType, user: UserDto) {
     if (!user) return false;
-    if (`${user._id}` === `${item.performerId}` || `${user._id}` === `${item.fromSourceId}`) return true;
+    if (
+      `${user._id}` === `${item.performerId}`
+      || `${user._id}` === `${item.fromSourceId}`
+    ) { return true; }
     const transaction = await this.TokenPaymentModel.findOne({
       type,
       targetId: item._id,
@@ -116,7 +124,10 @@ export class TokenTransactionService {
       new QueueEvent({
         channel: TOKEN_TRANSACTION_SUCCESS_CHANNEL,
         eventName: EVENT.CREATED,
-        data: { ...new TokenTransactionDto(transaction), ...{ shippingInfo: payload } }
+        data: {
+          ...new TokenTransactionDto(transaction),
+          ...{ shippingInfo: payload }
+        }
       })
     );
     return transaction;
@@ -161,11 +172,17 @@ export class TokenTransactionService {
       case PRIVATE_CHAT:
         purchaseItemType = PURCHASE_ITEM_TYPE.PRIVATE_CHAT;
         break;
-      default: break;
+      default:
+        break;
     }
 
     if (user.balance < stream.price) throw new NotEnoughMoneyException();
-    const transaction = await this.createPaymentTokenStream(stream, purchaseItemType, performer, user);
+    const transaction = await this.createPaymentTokenStream(
+      stream,
+      purchaseItemType,
+      performer,
+      user
+    );
     // TODO - earning listener, order listener
     await this.queueEventService.publish(
       new QueueEvent({
@@ -177,7 +194,12 @@ export class TokenTransactionService {
     return transaction;
   }
 
-  public async createPaymentTokenStream(stream: StreamModel, purchaseItemType: string, performer: any, user: UserDto) {
+  public async createPaymentTokenStream(
+    stream: StreamModel,
+    purchaseItemType: string,
+    performer: any,
+    user: UserDto
+  ) {
     const paymentTransaction = new this.TokenPaymentModel();
     paymentTransaction.originalPrice = stream.price;
     paymentTransaction.source = PURCHASE_ITEM_TARGET_SOURCE.USER;
@@ -190,8 +212,12 @@ export class TokenTransactionService {
     paymentTransaction.totalPrice = stream.price;
     paymentTransaction.products = [
       {
-        name: `${purchaseItemType} ${performer?.name || performer?.username || 'N/A'}`,
-        description: `${purchaseItemType} ${performer?.name || performer?.username || 'N/A'}`,
+        name: `${purchaseItemType} ${performer?.name
+          || performer?.username
+          || 'N/A'}`,
+        description: `${purchaseItemType} ${performer?.name
+          || performer?.username
+          || 'N/A'}`,
         price: stream.price,
         productId: stream._id,
         productType: PURCHASE_ITEM_TARTGET_TYPE.STREAM,
@@ -295,7 +321,7 @@ export class TokenTransactionService {
     return paymentTransaction.save();
   }
 
-  async sendTips(user: PerformerDto, performerId: string, payload: SendTipsPayload) {
+  async sendTips(user: UserDto, performerId: string, payload: SendTipsPayload) {
     const {
       price, conversationId, streamType, sessionId
     } = payload;
@@ -313,15 +339,21 @@ export class TokenTransactionService {
     paymentTransaction.totalPrice = price;
     paymentTransaction.source = 'user';
     paymentTransaction.sourceId = user._id;
-    paymentTransaction.target = conversationId && streamType ? PURCHASE_ITEM_TARTGET_TYPE.STREAM : PURCHASE_ITEM_TARTGET_TYPE.PERFORMER;
+    paymentTransaction.target = conversationId && streamType
+      ? PURCHASE_ITEM_TARTGET_TYPE.STREAM
+      : PURCHASE_ITEM_TARTGET_TYPE.PERFORMER;
     paymentTransaction.targetId = performer._id;
     paymentTransaction.performerId = performer._id;
     paymentTransaction.sessionId = sessionId;
-    paymentTransaction.type = conversationId && streamType ? PURCHASE_ITEM_TYPE.STREAM_TIP : PURCHASE_ITEM_TYPE.TIP;
+    paymentTransaction.type = conversationId && streamType
+      ? PURCHASE_ITEM_TYPE.STREAM_TIP
+      : PURCHASE_ITEM_TYPE.TIP;
     paymentTransaction.products = [
       {
         name: `Tip to ${performer.name || performer.username || performer._id}`,
-        description: `Tip ${price} tokens to ${performer.name || performer.username || performer._id}`,
+        description: `Tip ${price} tokens to ${performer.name
+          || performer.username
+          || performer._id}`,
         price,
         productId: performer._id,
         productType: PURCHASE_ITEM_TARTGET_TYPE.PERFORMER,
@@ -340,16 +372,17 @@ export class TokenTransactionService {
     );
     if (conversationId && streamType) {
       // send notification to room chat
-      const roomName = this.streamService.getRoomName(conversationId, streamType);
-      await this.socketService.emitToRoom(
-        roomName,
-        `message_created_conversation_${conversationId}`,
+      await this.messageSerice.createStreamMessageFromConversation(
+        conversationId,
         {
-          text: `${user?.name || user?.username} tipped ${price.toFixed(2)}`,
-          _id: generateUuid(),
-          conversationId: payload.conversationId,
-          isTip: true
-        }
+          type: MESSAGE_TYPE.TIP,
+          text: `${user?.name || user?.username} tipped ${price.toFixed(2)}`
+        },
+        {
+          source: paymentTransaction.source,
+          sourceId: paymentTransaction.sourceId
+        },
+        user
       );
     }
     return paymentTransaction;
@@ -455,10 +488,7 @@ export class TokenTransactionService {
     return transaction;
   }
 
-  public async createPaymentTokenFeed(
-    feed: FeedDto,
-    user: PerformerDto
-  ) {
+  public async createPaymentTokenFeed(feed: FeedDto, user: PerformerDto) {
     const paymentTransaction = new this.TokenPaymentModel();
     paymentTransaction.originalPrice = feed.price;
     paymentTransaction.source = PURCHASE_ITEM_TARGET_SOURCE.USER;
@@ -531,4 +561,8 @@ export class TokenTransactionService {
   //   paymentTransaction.status = PURCHASE_ITEM_STATUS.SUCCESS;
   //   return paymentTransaction.save();
   // }
+
+  findOne(filter) {
+    return this.TokenPaymentModel.findOne(filter);
+  }
 }

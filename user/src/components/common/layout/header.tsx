@@ -193,15 +193,6 @@ class Header extends PureComponent<IProps> {
                 )}
                 {user._id && (
                   <>
-                    {settings?.agoraEnable && (
-                      <li className={router.pathname === '/model/live' ? 'active' : ''}>
-                        <Link href={user.isPerformer ? '/model/live' : '/streaming'} as={user.isPerformer ? '/model/live' : '/streaming'}>
-                          <a>
-                            <LiveIcon />
-                          </a>
-                        </Link>
-                      </li>
-                    )}
                     {user?.isPerformer && (
                     <li className={router.pathname === '/model/my-post/create' ? 'active' : ''}>
                       <Link href="/model/my-post/create">
@@ -420,16 +411,6 @@ class Header extends PureComponent<IProps> {
             )}
             {!user.isPerformer && (
               <div className="profile-menu-item">
-                {settings?.agoraEnable && (
-                <Link href={{ pathname: '/streaming' }} as="/streaming">
-                  <div className={router.asPath === '/streaming' ? 'menu-item active' : 'menu-item'}>
-                    <LiveIcon />
-                    {' '}
-                    Live Videos
-                  </div>
-                </Link>
-                )}
-                <Divider />
                 <Link href="/user/account" as="/user/account">
                   <div className={router.pathname === '/user/account' ? 'menu-item active' : 'menu-item'}>
                     <UserOutlined />

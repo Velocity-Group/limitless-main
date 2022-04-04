@@ -24,6 +24,9 @@ export class StreamFeedListener {
   }
 
   async handler(event: QueueEvent) {
+    return;
+
+    // eslint-disable-next-line no-unreachable
     try {
       const { eventName, data } = event;
 

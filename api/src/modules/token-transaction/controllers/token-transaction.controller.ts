@@ -99,7 +99,7 @@ export class PaymentTokenController {
   @Roles('user')
   @UsePipes(new ValidationPipe({ transform: true }))
   async tip(
-    @CurrentUser() user: PerformerDto,
+    @CurrentUser() user: UserDto,
     @Param('performerId') performerId: string,
     @Body() payload: SendTipsPayload
   ): Promise<DataResponse<any>> {

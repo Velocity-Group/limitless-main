@@ -2,7 +2,7 @@
 import React from 'react';
 import moment from 'moment';
 import { EllipsisOutlined } from '@ant-design/icons';
-import { Menu, Dropdown } from 'antd';
+import { Menu, Dropdown, Divider } from 'antd';
 import '@components/messages/Message.less';
 
 interface IProps {
@@ -33,6 +33,8 @@ export default function Message(props: IProps) {
       </Menu.Item>
     </Menu>
   );
+  const isTip = data?.type === 'tip';
+
   return (
     <div
       className={[
@@ -41,7 +43,10 @@ export default function Message(props: IProps) {
         `${endsSequence ? 'end' : ''}`
       ].join(' ')}
     >
-      {data.text && !data.isSystem && !data.isTip && !data.isGift && (
+      {showTimestamp && (
+        <Divider className="timestamp">{friendlyTimestamp}</Divider>
+      )}
+      {data.text && !data.isSystem && !isTip && !data.isGift && (
         <div className={isOwner ? 'bubble-container owner' : 'bubble-container'}>
           <span className="sender-info">
             <img alt="" src={data?.senderInfo?.avatar || '/static/no-avatar.png'} className="avatar" />
@@ -62,7 +67,7 @@ export default function Message(props: IProps) {
           )}
         </div>
       )}
-      {data.text && data.isTip && (
+      {data.text && isTip && (
       <div className="tip-box">
         <span>
           {data.text}
@@ -75,9 +80,6 @@ export default function Message(props: IProps) {
       <div className="tip-box">
         <span dangerouslySetInnerHTML={{ __html: data.text }} />
       </div>
-      )}
-      {showTimestamp && (
-        <div className="timestamp">{friendlyTimestamp}</div>
       )}
     </div>
   );

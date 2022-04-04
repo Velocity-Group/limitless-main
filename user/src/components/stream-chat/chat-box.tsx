@@ -2,18 +2,14 @@ import { useState, useEffect } from 'react';
 import { Button, message } from 'antd';
 import Tabs from 'src/components/common/base/tabs';
 import StreamMessenger from '@components/stream-chat/Messenger';
-import { IUser } from 'src/interfaces';
 import { getResponseError } from '@lib/utils';
 import { messageService } from 'src/services';
-import StreamingChatUsers from './streaming-chat-view';
 import './chat-box.less';
 
 interface IProps {
   resetAllStreamMessage?: Function;
   user?: any;
   activeConversation?: any;
-  totalParticipant?: number;
-  members?: IUser[];
 }
 
 const checkPermission = (user, conversation) => {
@@ -26,9 +22,7 @@ const checkPermission = (user, conversation) => {
 const ChatBox = ({
   resetAllStreamMessage,
   user,
-  activeConversation,
-  totalParticipant,
-  members
+  activeConversation
 }: IProps) => {
   const [removing, setRemoving] = useState(false);
   const [canReset, setCanReset] = useState(false);
@@ -71,9 +65,6 @@ const ChatBox = ({
               <StreamMessenger streamId={activeConversation.data.streamId} />
               ) : <p className="text-center">Let start a converstion</p>}
           </Tabs.TabPane>
-          <Tabs.TabPane tab={`USERS (${totalParticipant || 0})`} key="chat_user">
-            <StreamingChatUsers members={members} />
-          </Tabs.TabPane>
         </Tabs>
       </div>
       {canReset && (
@@ -92,8 +83,6 @@ const ChatBox = ({
 };
 
 ChatBox.defaultProps = {
-  totalParticipant: 0,
-  members: [],
   activeConversation: null,
   user: null,
   resetAllStreamMessage: null

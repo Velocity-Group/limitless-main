@@ -27,9 +27,11 @@ export const Player: React.FC<Props> = ({ tracks }: Props) => {
     ref.current = videojs(player.current, {
       bigPlayButton: false,
       controls: true,
+      muted: true,
       controlBar: {
         playToggle: false,
-        pictureInPictureToggle: false
+        pictureInPictureToggle: false,
+        volumePanel: false
       }
     });
   }, []);
@@ -42,7 +44,7 @@ export const Player: React.FC<Props> = ({ tracks }: Props) => {
         (ref.current.tech().el() as HTMLVideoElement).srcObject = mediaStream;
       } else {
         (ref.current.tech().el() as HTMLVideoElement).srcObject = null;
-        (ref.current.tech().el() as HTMLVideoElement).poster = '/static/offline.jpg';
+        (ref.current.tech().el() as HTMLVideoElement).poster = '/static/processed.jpeg';
       }
     }
   }, [ref, tracks]);
