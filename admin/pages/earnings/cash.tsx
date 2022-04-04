@@ -70,7 +70,7 @@ class Earning extends PureComponent<IProps> {
       filter, limit, sort, sortBy, pagination
     } = this.state;
     try {
-      await this.setState({ searching: true });
+      this.setState({ searching: true });
       const resp = await earningService.search({
         ...filter,
         isToken: false,
@@ -79,11 +79,11 @@ class Earning extends PureComponent<IProps> {
         sort,
         sortBy
       });
-      await this.setState({
+      this.setState({
         searching: false,
         list: resp.data.data.map((item) => {
           const obj = item;
-          obj.siteEarning = (item.grossPrice.toFixed(2) - item.netPrice.toFixed(2)).toFixed(2);
+          obj.siteEarning = (item.grossPrice - item.netPrice);
           return obj;
         }),
         pagination: {
@@ -94,7 +94,7 @@ class Earning extends PureComponent<IProps> {
       });
     } catch (e) {
       message.error('An error occurred, please try again!');
-      await this.setState({ searching: false });
+      this.setState({ searching: false });
     }
   }
 
@@ -105,7 +105,7 @@ class Earning extends PureComponent<IProps> {
         ...filter,
         isToken: false
       });
-      await this.setState({
+      this.setState({
         stats: resp.data
       });
     } catch (e) {
