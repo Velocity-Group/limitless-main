@@ -102,7 +102,7 @@ export class MessageController {
   async countTotalNotReadMessage(
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
-    const data = await this.notificationMessageService.countTotalNotReadMessage(user._id.toString());
+    const data = await this.notificationMessageService.countTotalNotReadMessage(user._id);
     return DataResponse.ok(data);
   }
 
