@@ -355,11 +355,11 @@ export class VideoService {
       const bought = currentUser && await this.tokenTransactionService.checkBought(dto, PurchaseItemType.VIDEO, currentUser);
       dto.isBought = bought;
     }
-    if (currentUser && currentUser.roles && currentUser.roles.includes('admin')) {
+    if ((currentUser && currentUser.roles && currentUser.roles.includes('admin')) || (currentUser && `${currentUser._id}` === `${dto.performerId}`)) {
       dto.isBought = true;
       dto.isSubscribed = true;
     }
-    const canView = (!dto.isSale && dto.isBought) || (dto.isSale && dto.isBought);
+    const canView = (!dto.isSale && dto.isSubscribed) || (dto.isSale && dto.isBought);
     dto.thumbnail = thumbnailFile && {
       url: thumbnailFile.getUrl(),
       thumbnails: thumbnailFile.getThumbnails()
