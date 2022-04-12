@@ -373,7 +373,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       help="Your government issued ID card, National ID card, Passport or Driving license"
                     >
                       <div className="id-block">
-                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} />
+                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} uploadImmediately={false} />
                         <img alt="id-img" className="img-id" src="/static/front-id.png" />
                       </div>
                     </Form.Item>
@@ -384,7 +384,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       help="Your selfie with your ID and handwritten note"
                     >
                       <div className="id-block">
-                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'documentFile')} />
+                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'documentFile')} uploadImmediately={false} />
                         <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpg" />
                       </div>
                     </Form.Item>

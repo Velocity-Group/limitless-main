@@ -102,12 +102,16 @@ export class FileService {
     const options = { ...fileUploadOptions } || {};
     const publicDir = this.config.get('file.publicDir');
     const photoDir = this.config.get('file.photoDir');
+    const checkS3Settings = await this.s3StorageService.checkSetting();
     let absolutePath = multerData.path;
     let path = multerData.path.replace(publicDir, '');
     let { metadata = {} } = multerData;
     let server = options.server || Storage.DiskStorage;
+    if (server === Storage.S3 && !checkS3Settings) {
+      server = Storage.DiskStorage;
+    }
     const thumbnails = [];
-    const checkS3Settings = await this.s3StorageService.checkSetting();
+
     if (multerData.mimetype.includes('image') && options.uploadImmediately) {
       if (options.generateThumbnail) {
         const thumbBuffer = await this.imageService.createThumbnail(

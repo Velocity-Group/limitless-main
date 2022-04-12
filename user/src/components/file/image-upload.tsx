@@ -9,13 +9,13 @@ function getBase64(img, callback) {
   reader.readAsDataURL(img);
 }
 
-function beforeUpload(file) {
+function beforeUpload(file, uploadImmediately = true) {
   const config = getGlobalConfig();
   const isLt5M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isLt5M) {
     message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
   }
-  return isLt5M;
+  return uploadImmediately;
 }
 
 interface IState {
@@ -31,6 +31,7 @@ interface IProps {
   onUploaded?: Function;
   onFileReaded?: Function;
   options?: any;
+  uploadImmediately?: boolean;
 }
 
 export class ImageUpload extends PureComponent<IProps, IState> {
@@ -68,7 +69,7 @@ export class ImageUpload extends PureComponent<IProps, IState> {
 
   render() {
     const {
-      options = {}, accept, headers, uploadUrl
+      options = {}, accept, headers, uploadUrl, uploadImmediately
     } = this.props;
     const { imageUrl, loading } = this.state;
     const uploadButton = (
@@ -84,7 +85,7 @@ export class ImageUpload extends PureComponent<IProps, IState> {
         className="avatar-uploader"
         showUploadList={false}
         action={uploadUrl}
-        beforeUpload={beforeUpload}
+        beforeUpload={(file) => beforeUpload(file, typeof uploadImmediately === 'boolean' ? uploadImmediately : true)}
         onChange={this.handleChange}
         headers={headers}
       >
