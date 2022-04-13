@@ -21,16 +21,6 @@ interface IProps {
 }
 
 export class SearchFilter extends PureComponent<IProps> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      q: '',
-      performerId: '',
-      status: '',
-      type: ''
-    };
-  }
-
   render() {
     const {
       statuses = [],

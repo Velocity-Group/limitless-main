@@ -120,6 +120,19 @@ const PaymentTableList = ({
       }
     },
     {
+      title: 'Gateway',
+      dataIndex: 'paymentGateway',
+      render(paymentGateway: string) {
+        switch (paymentGateway) {
+          case 'stripe':
+            return <Tag color="blue">Stripe</Tag>;
+          case 'ccbill':
+            return <Tag color="orange">CCbill</Tag>;
+          default: return <Tag color="red">{paymentGateway}</Tag>;
+        }
+      }
+    },
+    {
       title: 'Update on',
       dataIndex: 'updatedAt',
       sorter: true,
@@ -127,15 +140,6 @@ const PaymentTableList = ({
         return <span>{formatDate(date)}</span>;
       }
     }
-    // {
-    //   title: 'Action',
-    //   render(record) {
-    //     if (record.status === 'require_authentication' && record.stripeConfirmUrl) {
-    //       return <Link href={record.stripeConfirmUrl}><a>Confirm payment</a></Link>;
-    //     }
-    //     return null;
-    //   }
-    // }
   ];
   return (
     <div className="table-responsive">

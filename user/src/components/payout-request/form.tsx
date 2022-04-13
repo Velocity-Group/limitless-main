@@ -10,7 +10,7 @@ import {
   Alert,
   Select
 } from 'antd';
-import { PayoutRequestInterface } from 'src/interfaces';
+import { PayoutRequestInterface, ISettings } from 'src/interfaces';
 import Router from 'next/router';
 
 interface Props {
@@ -22,11 +22,11 @@ interface Props {
     previousPaidOutTokens: number;
     remainingUnpaidTokens: number;
   };
-  tokenConversionRate: number;
+  settings: ISettings;
 }
 
 const PayoutRequestForm = ({
-  payout, submit, submiting, statsPayout, tokenConversionRate
+  payout, submit, submiting, statsPayout, settings
 }: Props) => {
   const [form] = Form.useForm();
   const {
@@ -45,7 +45,7 @@ const PayoutRequestForm = ({
       initialValues={{
         requestNote: requestNote || '',
         requestTokens: requestTokens || statsPayout?.remainingUnpaidTokens || 0,
-        paymentAccountType: paymentAccountType || 'stripe'
+        paymentAccountType: paymentAccountType || 'banking'
       }}
       scrollToFirstError
     >
@@ -71,10 +71,16 @@ const PayoutRequestForm = ({
           />
         </Space>
       </div>
-      <Form.Item label="Requested amount of tokens" name="requestTokens">
+      <Form.Item
+        label="Requested amount of tokens"
+        name="requestTokens"
+        rules={[{
+          required: true, message: 'Please enter amount of tokens!'
+        }]}
+      >
         <InputNumber style={{ width: '100%' }} disabled={payout && payout.status === 'done'} min={1} onChange={(val) => setToken(val)} max={statsPayout?.remainingUnpaidTokens} />
       </Form.Item>
-      <p className="error-color">{`Conversion rate of tokens to dollars: $${(tokenConversionRate * tokens).toFixed(2)}`}</p>
+      <p className="error-color">{`Conversion rate of tokens to dollars: $${((settings.tokenConversionRate || 1) * tokens).toFixed(2)}`}</p>
       <Form.Item label="Note to Admin" name="requestNote">
         <Input.TextArea disabled={payout && payout.status === 'done'} placeholder="Text something to admin here" rows={3} />
       </Form.Item>
@@ -90,10 +96,17 @@ const PayoutRequestForm = ({
       )}
       <Form.Item label="Select payout method" name="paymentAccountType">
         <Select>
+          {settings?.stripeEnable && (
           <Select.Option value="stripe" key="stripe">
             <img src="/static/stripe-icon.jpeg" width="30px" alt="stripe" />
             {' '}
             Stripe
+          </Select.Option>
+          )}
+          <Select.Option value="banking" key="banking">
+            <img src="/static/banking-ico.png" width="30px" alt="banking" />
+            {' '}
+            Banking
           </Select.Option>
           <Select.Option value="paypal" key="paypal">
             <img src="/static/paypal-ico.png" width="30px" alt="paypal" />

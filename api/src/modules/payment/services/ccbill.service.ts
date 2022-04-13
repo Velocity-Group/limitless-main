@@ -10,7 +10,7 @@ interface CCBillSubscription {
   flexformId: string;
   subAccountNumber: string;
   price: number;
-  transactionId: string | ObjectId;
+  transactionId: ObjectId;
   subscriptionType: string;
 }
 
@@ -18,7 +18,7 @@ interface CCBillSinglePurchase {
   salt: string;
   flexformId: string;
   subAccountNumber: string;
-  transactionId: string | ObjectId;
+  transactionId: ObjectId;
   price: number;
   currencyCode?: string;
 }
@@ -32,13 +32,14 @@ export class CCBillService {
     const initialPrice = price.toFixed(2);
     const initialPeriod = subscriptionType === SUBSCRIPTION_TYPE.MONTHLY ? 30 : 365;
     const currencyCode = '840'; // usd
+    const numRebills = '99';
     if (!salt || !flexformId || !subAccountNumber || !transactionId || !initialPrice) {
       throw new EntityNotFoundException();
     }
     const formDigest = crypto.createHash('md5')
-      .update(`${initialPrice}${initialPeriod}${initialPrice}${initialPeriod}99${currencyCode}${salt}`).digest('hex');
+      .update(`${initialPrice}${initialPeriod}${initialPrice}${initialPeriod}${numRebills}${currencyCode}${salt}`).digest('hex');
     return {
-      paymentUrl: `https://api.ccbill.com/wap-frontflex/flexforms/${flexformId}?transactionId=${transactionId}&initialPrice=${initialPrice}&initialPeriod=${initialPeriod}&recurringPrice=${initialPrice}&recurringPeriod=${initialPeriod}&numRebills=99&clientSubacc=${subAccountNumber}&currencyCode=${currencyCode}&formDigest=${formDigest}`
+      paymentUrl: `https://api.ccbill.com/wap-frontflex/flexforms/${flexformId}?transactionId=${transactionId}&initialPrice=${initialPrice}&initialPeriod=${initialPeriod}&recurringPrice=${initialPrice}&recurringPeriod=${initialPeriod}&numRebills=${numRebills}&clientSubacc=${subAccountNumber}&currencyCode=${currencyCode}&formDigest=${formDigest}`
     };
   }
 

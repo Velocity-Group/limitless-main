@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { PureComponent } from 'react';
 import {
-  Button, Avatar
+  Button, Avatar, Radio, Space
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import {
@@ -18,10 +18,15 @@ interface IProps {
 }
 
 export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
+  state = {
+    gateway: 'ccbill'
+  }
+
   render() {
     const {
       onFinish, submiting = false, performer, type
     } = this.props;
+    const { gateway } = this.state;
     return (
       <div className="confirm-subscription-form">
         <div className="text-center">
@@ -62,8 +67,26 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
               Cancel your subscription at any time
             </li>
           </ul>
+          <div className="text-center" style={{ margin: '10px 0' }}>
+            <Radio.Group onChange={(e) => this.setState({ gateway: e.target.value })} value={gateway}>
+              <Space size="large">
+                <Radio value="stripe" key="stripe">
+                  <img src="/static/stripe-icon.jpeg" height="40px" alt="stripe" />
+                </Radio>
+                <Radio value="ccbill" key="ccbill">
+                  <img src="/static/ccbill-ico.png" height="40px" alt="ccbill" />
+                </Radio>
+              </Space>
+            </Radio.Group>
+          </div>
         </div>
-        <Button className="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()} style={{ textTransform: 'uppercase', whiteSpace: 'pre-wrap', height: 'auto' }}>
+        <Button
+          className="primary"
+          disabled={submiting}
+          loading={submiting}
+          onClick={() => onFinish(gateway)}
+          style={{ textTransform: 'uppercase', whiteSpace: 'pre-wrap', height: 'auto' }}
+        >
           Confirm
           {' '}
           {type}
@@ -72,7 +95,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
           {' '}
           for
           {' '}
-          {type === 'monthly' ? `$${(performer?.monthlyPrice || 0).toFixed(2)}` : type === 'yearly' ? `$${(performer?.yearlyPrice || 0).toFixed(2)}` : `${performer?.durationFreeSubscriptionDays} day${performer?.durationFreeSubscriptionDays > 1 ? 's' : ''}, then $${(performer?.monthlyPrice || 0).toFixed(2)} per month`}
+          {type === 'monthly' ? `$${(performer?.monthlyPrice || 0).toFixed(2)}` : type === 'yearly' ? `$${(performer?.yearlyPrice || 0).toFixed(2)}` : `${performer?.durationFreeSubscriptionDays} day${performer?.durationFreeSubscriptionDays > 1 ? 's' : ''}`}
         </Button>
       </div>
     );

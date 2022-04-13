@@ -7,6 +7,8 @@ import { PerformerDocument } from '@components/performer/Document';
 import { SubscriptionForm } from '@components/performer/Subcription';
 import { PerformerPaypalForm } from '@components/performer/paypalForm';
 import { CommissionSettingForm } from '@components/performer/commission-setting';
+import { CCbillSettingForm } from '@components/performer/ccbill-setting';
+import { BankingForm } from '@components/performer/BankingForm';
 import {
   ICountry,
   ILangguges,
@@ -239,14 +241,6 @@ class PerformerUpdate extends PureComponent<IProps> {
                   performer={performer}
                 />
               </Tabs.TabPane>
-              {/* <Tabs.TabPane tab={<span>Banking</span>} key="banking">
-                <BankingForm
-                  submiting={settingUpdating}
-                  onFinish={this.updateBankingSetting.bind(this)}
-                  bankingInformation={performer.bankingInformation || null}
-                  countries={countries}
-                />
-              </Tabs.TabPane> */}
               <Tabs.TabPane tab={<span>Commission</span>} key="commission">
                 <CommissionSettingForm
                   submiting={settingUpdating}
@@ -254,13 +248,21 @@ class PerformerUpdate extends PureComponent<IProps> {
                   commissionSetting={performer.commissionSetting}
                 />
               </Tabs.TabPane>
-              {/* <Tabs.TabPane tab={<span>CCbill</span>} key="ccbill">
+              <Tabs.TabPane tab={<span>CCbill</span>} key="ccbill">
                 <CCbillSettingForm
                   submiting={settingUpdating}
                   onFinish={this.updatePaymentGatewaySetting.bind(this, 'ccbill')}
                   ccbillSetting={performer.ccbillSetting}
                 />
-              </Tabs.TabPane> */}
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={<span>Banking</span>} key="banking">
+                <BankingForm
+                  submiting={settingUpdating}
+                  onFinish={this.updateBankingSetting.bind(this)}
+                  bankingInformation={performer.bankingInformation || null}
+                  countries={countries}
+                />
+              </Tabs.TabPane>
               <Tabs.TabPane tab={<span>Paypal</span>} key="paypal">
                 <PerformerPaypalForm
                   updating={settingUpdating}

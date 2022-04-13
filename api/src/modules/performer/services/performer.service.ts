@@ -192,18 +192,21 @@ export class PerformerService {
       throw new EntityNotFoundException();
     }
     const [
-      avatar, documentVerification, idVerification, cover, welcomeVideo,
-      paypalSetting, commissionSetting, stripeAccount, blockCountries
+      avatar, documentVerification, idVerification, cover, welcomeVideo
     ] = await Promise.all([
       performer.avatarId && this.fileService.findById(performer.avatarId),
       performer.documentVerificationId && this.fileService.findById(performer.documentVerificationId),
       performer.idVerificationId && this.fileService.findById(performer.idVerificationId),
       performer.coverId && this.fileService.findById(performer.coverId),
-      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId),
+      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId)
+    ]);
+    const [paypalSetting, commissionSetting, stripeAccount, blockCountries, bankingInformation, ccbillSetting] = await Promise.all([
       this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'paypal' }),
       this.commissionSettingModel.findOne({ performerId: id }),
       this.stripeService.getConnectAccount(performer._id),
-      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id })
+      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id }),
+      this.getBankInfo(performer._id),
+      this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'ccbill' })
     ]);
 
     // TODO - update kernel for file dto
@@ -237,6 +240,8 @@ export class PerformerService {
     dto.commissionSetting = commissionSetting;
     dto.stripeAccount = stripeAccount;
     dto.blockCountries = blockCountries;
+    dto.bankingInformation = bankingInformation;
+    dto.ccbillSetting = ccbillSetting;
     return dto;
   }
 
@@ -804,7 +809,7 @@ export class PerformerService {
   ) {
     const performer = await this.performerModel.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
-    if (!currentUser?.roles.includes('admin') && `${currentUser._id}` !== `${performerId}`) {
+    if (currentUser?.roles && !currentUser?.roles.includes('admin') && `${currentUser._id}` !== `${performerId}`) {
       throw new HttpException('Permission denied', 403);
     }
     let item = await this.bankingSettingModel.findOne({

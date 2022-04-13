@@ -48,7 +48,7 @@ const PayoutRequestList = ({
       render: (requestTokens: number) => (
         <span>
           <img alt="token" src="/static/coin-ico.png" width="20px" />
-          {requestTokens.toFixed(2)}
+          {(requestTokens || 0).toFixed(2)}
         </span>
       )
     },
@@ -59,7 +59,7 @@ const PayoutRequestList = ({
       render: (tokenConversionRate: number, record) => (
         <span>
           $
-          {((tokenConversionRate || 1) * record.requestTokens).toFixed(2)}
+          {((tokenConversionRate || 1) * (record.requestTokens || 0)).toFixed(2)}
         </span>
       )
     },
@@ -69,6 +69,8 @@ const PayoutRequestList = ({
       key: 'paymentAccountType',
       render: (paymentAccountType: string) => {
         switch (paymentAccountType) {
+          case 'banking':
+            return <Tag color="gold">Banking</Tag>;
           case 'stripe':
             return <Tag color="#656fde">Stripe</Tag>;
           case 'paypal':
@@ -76,7 +78,7 @@ const PayoutRequestList = ({
           default:
             break;
         }
-        return <Tag color="default">{paymentAccountType}</Tag>;
+        return <Tag color="gold">{paymentAccountType}</Tag>;
       }
     },
     {

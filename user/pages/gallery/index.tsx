@@ -43,8 +43,6 @@ class GalleryViewPage extends PureComponent<IProps> {
 
   static noredirect = true;
 
-  subscriptionType = 'monthly';
-
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
     try {
@@ -71,10 +69,12 @@ class GalleryViewPage extends PureComponent<IProps> {
     submiting: false,
     requesting: false,
     openPurchaseModal: false,
-    openSubscriptionModal: false
+    openSubscriptionModal: false,
+    subscriptionType: 'monthly',
+    paymentUrl: ''
   };
 
-  async componentDidMount() {
+  componentDidMount() {
     this.handleUpdateState();
   }
 
@@ -174,27 +174,32 @@ class GalleryViewPage extends PureComponent<IProps> {
     }
   }
 
-  async subscribe() {
+  async subscribe(paymentGateway: string) {
     try {
       const { gallery, user } = this.props;
+      const { subscriptionType } = this.state;
       if (!user._id) {
         message.error('Please log in');
         Router.push('/auth/login');
         return;
       }
-      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      if (paymentGateway === 'stripe' && !user?.stripeCardIds?.length) {
         message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
       }
-      await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
-        type: this.subscriptionType,
+      this.setState({ submiting: true });
+      const resp = await paymentService.subscribePerformer({
+        type: subscriptionType,
         performerId: gallery.performerId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway,
+        stripeCardId: user.stripeCardIds && user.stripeCardIds[0]
       });
-      this.setState({ openSubscriptionModal: false });
+      if (paymentGateway === 'ccbill') {
+        this.setState({ paymentUrl: resp?.data?.paymentUrl, submiting: false });
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
@@ -219,7 +224,8 @@ class GalleryViewPage extends PureComponent<IProps> {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Galley was not found'} />;
     }
     const {
-      fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal, isBookmarked
+      fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal,
+      isBookmarked, paymentUrl, subscriptionType
     } = this.state;
     const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && gallery?.isSubscribed);
     const thumbUrl = gallery?.coverPhoto?.url || ui?.logo;
@@ -290,48 +296,47 @@ class GalleryViewPage extends PureComponent<IProps> {
                 className="subscription"
               >
                 <h3>Subscribe to view full content</h3>
-                <div style={{ marginBottom: '25px' }}>
                   {gallery?.performer?.isFreeSubscription && (
                   <Button
                     className="primary"
                     style={{ marginRight: '15px' }}
-                    disabled={!user || !user._id || (submiting && this.subscriptionType === 'free')}
+                    disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
                     onClick={() => {
-                      this.subscriptionType = 'free';
-                      this.setState({ openSubscriptionModal: true });
+                      this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
                     }}
                   >
                     SUBSCRIBE FOR FREE
+                    {' '}
+                    {gallery?.performer?.durationFreeSubscriptionDays || 1}
+                    {' '}
+                    {gallery?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
                   </Button>
                   )}
-                  {!gallery?.performer?.isFreeSubscription && gallery?.performer?.monthlyPrice && (
+                  {gallery?.performer?.monthlyPrice && (
                   <Button
                     className="primary"
                     style={{ marginRight: '15px' }}
-                    disabled={!user || !user._id || (submiting && this.subscriptionType === 'monthly')}
+                    disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
                     onClick={() => {
-                      this.subscriptionType = 'monthly';
-                      this.setState({ openSubscriptionModal: true });
+                      this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
                     }}
                   >
                     MONTHLY SUBSCRIPTION FOR $
                     {(gallery?.performer?.monthlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
-                  {!gallery?.performer?.isFreeSubscription && gallery?.performer.yearlyPrice && (
+                  {gallery?.performer.yearlyPrice && (
                   <Button
                     className="secondary"
-                    disabled={!user || !user._id || (submiting && this.subscriptionType === 'yearly')}
+                    disabled={!user || !user._id || (submiting && subscriptionType === 'yearly')}
                     onClick={() => {
-                      this.subscriptionType = 'yearly';
-                      this.setState({ openSubscriptionModal: true });
+                      this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
                     }}
                   >
                     YEARLY SUBSCRIPTON FOR $
                     {(gallery?.performer?.yearlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
-                </div>
               </div>
               )}
             </div>
@@ -407,19 +412,21 @@ class GalleryViewPage extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={500}
-          title={null}
+          width={!paymentUrl ? 500 : 990}
           centered
+          title={null}
           visible={openSubscriptionModal}
           footer={null}
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
-          <ConfirmSubscriptionPerformerForm
-            type={this.subscriptionType || 'monthly'}
-            performer={gallery?.performer}
-            submiting={submiting}
-            onFinish={this.subscribe.bind(this)}
-          />
+          {!paymentUrl ? (
+            <ConfirmSubscriptionPerformerForm
+              type={subscriptionType || 'monthly'}
+              performer={gallery?.performer}
+              submiting={submiting}
+              onFinish={this.subscribe.bind(this)}
+            />
+          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
         </Modal>
         <Modal
           centered

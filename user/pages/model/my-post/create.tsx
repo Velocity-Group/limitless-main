@@ -33,10 +33,10 @@ class CreatePost extends PureComponent<IProps> {
       message.warning('Your ID documents are not verified yet! You could not post any content right now.');
       Router.back();
     }
-    if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
-      message.warning('You have not connected with stripe. So you cannot post any content right now!');
-      Router.push('/model/banking');
-    }
+    // if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
+    //   message.warning('You have not connected with stripe. So you cannot post any content right now!');
+    //   Router.push('/model/banking');
+    // }
   }
 
   render() {

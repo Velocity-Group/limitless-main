@@ -5,7 +5,7 @@ import Head from 'next/head';
 import { HistoryOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { paymentService } from 'src/services';
-import { IOrder, IUIConfig } from 'src/interfaces';
+import { IUIConfig } from 'src/interfaces';
 import { SearchFilter } from '@components/common/search-filter';
 import PaymentTableList from '@components/payment/table-list';
 import { getResponseError } from '@lib/utils';
@@ -14,20 +14,8 @@ import { connect } from 'react-redux';
 interface IProps {
   ui: IUIConfig;
 }
-interface IStates {
-  loading: boolean;
-  paymentList: IOrder[];
-  pagination: {
-    total: number;
-    pageSize: number;
-    current: number;
-  };
-  sortBy: string;
-  sort: string;
-  filter: {};
-}
 
-class PaymentHistoryPage extends PureComponent<IProps, IStates> {
+class PaymentHistoryPage extends PureComponent<IProps> {
   state = {
     loading: true,
     paymentList: [],
@@ -61,13 +49,6 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
   };
 
   async handleFilter(filter) {
-    if (filter.performerId) {
-      filter.sellerId = filter.performerId;
-      delete filter.performerId;
-    } else {
-      delete filter.performerId;
-      delete filter.sellerId;
-    }
     const { filter: values } = this.state;
     await this.setState({ filter: { ...values, ...filter } });
     this.userSearchTransactions();
@@ -85,7 +66,7 @@ class PaymentHistoryPage extends PureComponent<IProps, IStates> {
         limit: pagination.pageSize,
         offset: (pagination.current - 1) * pagination.pageSize
       });
-      await this.setState({
+      this.setState({
         loading: false,
         paymentList: resp.data.data,
         pagination: {

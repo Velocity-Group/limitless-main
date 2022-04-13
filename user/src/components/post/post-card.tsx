@@ -48,8 +48,6 @@ interface IProps {
 }
 
 class FeedCard extends Component<IProps> {
-  subscriptionType = 'monthly';
-
   state = {
     isOpenComment: false,
     isLiked: false,
@@ -68,7 +66,9 @@ class FeedCard extends Component<IProps> {
     polls: [],
     requesting: false,
     openSubscriptionModal: false,
-    openReportModal: false
+    openReportModal: false,
+    subscriptionType: '',
+    paymentUrl: ''
   }
 
   componentDidMount() {
@@ -82,7 +82,6 @@ class FeedCard extends Component<IProps> {
         totalComment: feed.totalComment,
         polls: feed.polls ? feed.polls : []
       });
-      this.subscriptionType = feed?.performer?.isFreeSubscription ? 'free' : 'monthly';
     }
   }
 
@@ -222,28 +221,33 @@ class FeedCard extends Component<IProps> {
     handleDelete(item._id);
   }
 
-  async subscribe() {
+  async subscribe(paymentGateway: string) {
     const { feed, user } = this.props;
+    const { subscriptionType } = this.state;
     if (!user._id) {
       message.error('Please log in');
       Router.push('/auth/login');
       return;
     }
     if (user.isPerformer) return;
-    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+    if (paymentGateway === 'stripe' && !user?.stripeCardIds?.length) {
       message.error('Please add payment card');
       Router.push('/user/cards');
       return;
     }
     try {
-      await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
-        type: this.subscriptionType,
+      this.setState({ submiting: true });
+      const resp = await paymentService.subscribePerformer({
+        type: subscriptionType || 'monthly',
         performerId: feed.fromSourceId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway,
+        stripeCardId: user.stripeCardIds && user.stripeCardIds[0]
       });
-      this.setState({ openSubscriptionModal: false });
+      if (paymentGateway === 'ccbill') {
+        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -333,7 +337,7 @@ class FeedCard extends Component<IProps> {
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
-      openTeaser, openSubscriptionModal, openReportModal, requesting
+      openTeaser, openSubscriptionModal, openReportModal, requesting, subscriptionType, paymentUrl
     } = this.state;
     const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
@@ -610,19 +614,73 @@ class FeedCard extends Component<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={500}
+          width={!paymentUrl ? 500 : 990}
+          centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
           destroyOnClose
-          onCancel={() => this.setState({ openSubscriptionModal: false })}
+          onCancel={() => this.setState({ openSubscriptionModal: false, subscriptionType: '', paymentUrl: '' })}
         >
-          <ConfirmSubscriptionPerformerForm
-            type={this.subscriptionType || 'monthly'}
-            performer={performer}
-            submiting={submiting}
-            onFinish={this.subscribe.bind(this)}
-          />
+          {!paymentUrl ? (
+            <>
+              {!subscriptionType ? (
+                <div
+                  className="subscription-btn-grp"
+                >
+                  <h2 style={{ paddingTop: 25 }}>SUBSCRIBE TO UNLOCK</h2>
+                  {feed?.performer?.isFreeSubscription && (
+                    <Button
+                      className="primary"
+                      style={{ marginRight: '15px' }}
+                      disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
+                      onClick={() => {
+                        this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
+                      }}
+                    >
+                      SUBSCRIBE FOR FREE FOR
+                      {' '}
+                      {feed?.performer?.durationFreeSubscriptionDays || 1}
+                      {' '}
+                      {feed?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
+                    </Button>
+                  )}
+                  {feed?.performer?.monthlyPrice && (
+                    <Button
+                      className="primary"
+                      style={{ marginRight: '15px' }}
+                      disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
+                      onClick={() => {
+                        this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
+                      }}
+                    >
+                      MONTHLY SUBSCRIPTION FOR $
+                      {(feed?.performer?.monthlyPrice || 0).toFixed(2)}
+                    </Button>
+                  )}
+                  {feed?.performer.yearlyPrice && (
+                    <Button
+                      className="secondary"
+                      disabled={!user || !user._id || (submiting && subscriptionType === 'yearly')}
+                      onClick={() => {
+                        this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
+                      }}
+                    >
+                      YEARLY SUBSCRIPTON FOR $
+                      {(feed?.performer?.yearlyPrice || 0).toFixed(2)}
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <ConfirmSubscriptionPerformerForm
+                  type={subscriptionType}
+                  performer={performer}
+                  submiting={submiting}
+                  onFinish={this.subscribe.bind(this)}
+                />
+              )}
+            </>
+          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
         </Modal>
         <Modal
           key="teaser_video"

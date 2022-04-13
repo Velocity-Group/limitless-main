@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import {
-  Layout, Tabs, message, Button, Spin, Tooltip, Avatar
+  Layout, Tabs, message, Button, Spin, Tooltip, Avatar, Modal
 } from 'antd';
 import {
   BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined,
@@ -57,8 +57,6 @@ class VideoViewPage extends PureComponent<IProps> {
 
   static noredirect = true;
 
-  subscriptionType = 'monthly';
-
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
     try {
@@ -87,7 +85,10 @@ class VideoViewPage extends PureComponent<IProps> {
     totalComment: 0,
     submiting: false,
     requesting: false,
-    activeTab: 'description'
+    activeTab: 'description',
+    openSubscriptionModal: false,
+    subscriptionType: 'monthly',
+    paymentUrl: ''
   };
 
   componentDidMount() {
@@ -123,7 +124,8 @@ class VideoViewPage extends PureComponent<IProps> {
       isLiked: video.isLiked,
       isBookmarked: video.isBookmarked,
       isBought: video.isBought,
-      isSubscribed: video.isSubscribed
+      isSubscribed: video.isSubscribed,
+      subscriptionType: video?.performer?.isFreeSubscription ? 'free' : 'monthly'
     });
     handleGetRelated({
       performerId: video.performerId,
@@ -246,7 +248,7 @@ class VideoViewPage extends PureComponent<IProps> {
     }
   }
 
-  async subscribe() {
+  async subscribe(paymentGateway: string) {
     try {
       const { video, user } = this.props;
       if (!user._id) {
@@ -254,19 +256,22 @@ class VideoViewPage extends PureComponent<IProps> {
         Router.push('/auth/login');
         return;
       }
-      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      if (paymentGateway === 'stripe' && !user?.stripeCardIds?.length) {
         message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
       }
       const subscriptionType = video.performer.isFreeSubscription ? 'free' : 'monthly';
-      await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      this.setState({ submiting: true });
+      const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: video.performerId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway,
+        stripeCardId: user.stripeCardIds && user.stripeCardIds[0]
       });
+      if (paymentGateway === 'ccbill') {
+        this.setState({ paymentUrl: resp?.data?.paymentUrl, submiting: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'Error occured, please try again later');
@@ -297,7 +302,8 @@ class VideoViewPage extends PureComponent<IProps> {
     const comments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].items : [];
     const totalComments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].total : 0;
     const {
-      videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment
+      videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment,
+      openSubscriptionModal, paymentUrl, subscriptionType
     } = this.state;
     const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const videoJsOptions = {
@@ -406,12 +412,53 @@ class VideoViewPage extends PureComponent<IProps> {
                   </Button>
                   )}
                   {!video.isSale && !isSubscribed && (
-                  <ConfirmSubscriptionPerformerForm
-                    type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
-                    performer={video.performer}
-                    submiting={submiting}
-                    onFinish={this.subscribe.bind(this)}
-                  />
+                  <div
+                    style={{ padding: '25px 5px' }}
+                    className="subscription-btn-grp"
+                  >
+                      {video?.performer?.isFreeSubscription && (
+                      <Button
+                        className="primary"
+                        style={{ marginRight: '15px' }}
+                        disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
+                        onClick={() => {
+                          this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
+                        }}
+                      >
+                        SUBSCRIBE FOR FREE FOR
+                        {' '}
+                        {video?.performer?.durationFreeSubscriptionDays || 1}
+                        {' '}
+                        {video?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
+                      </Button>
+                      )}
+                      {video?.performer?.monthlyPrice && (
+                      <Button
+                        className="primary"
+                        style={{ marginRight: '15px' }}
+                        disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
+                        onClick={() => {
+                          this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
+                        }}
+                      >
+                        MONTHLY SUBSCRIPTION FOR $
+                        {(video?.performer?.monthlyPrice || 0).toFixed(2)}
+                      </Button>
+                      )}
+                      {video?.performer.yearlyPrice && (
+                      <Button
+                        className="secondary"
+                        disabled={!user || !user._id || (submiting && subscriptionType === 'yearly')}
+                        onClick={() => {
+                          this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
+                        }}
+                      >
+                        YEARLY SUBSCRIPTON FOR $
+                        {(video?.performer?.yearlyPrice || 0).toFixed(2)}
+                      </Button>
+                      )}
+
+                  </div>
                   )}
                 </div>
                 {video.isSchedule && (
@@ -602,6 +649,25 @@ class VideoViewPage extends PureComponent<IProps> {
             )}
           </div>
         </div>
+        <Modal
+          key="subscribe_performer"
+          className="subscription-modal"
+          width={!paymentUrl ? 500 : 990}
+          centered
+          title={null}
+          visible={openSubscriptionModal}
+          footer={null}
+          onCancel={() => this.setState({ openSubscriptionModal: false })}
+        >
+          {!paymentUrl ? (
+            <ConfirmSubscriptionPerformerForm
+              type={subscriptionType || 'monthly'}
+              performer={video?.performer}
+              submiting={submiting}
+              onFinish={this.subscribe.bind(this)}
+            />
+          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
+        </Modal>
         {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );

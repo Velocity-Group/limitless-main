@@ -88,7 +88,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
             statsPayout={statsPayout}
             submit={this.submit.bind(this)}
             submiting={submiting}
-            tokenConversionRate={settings?.tokenConversionRate}
+            settings={settings}
           />
         </div>
       </>

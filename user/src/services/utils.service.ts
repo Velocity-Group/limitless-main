@@ -13,6 +13,14 @@ export class UtilsService extends APIRequest {
     return resp;
   }
 
+  async statesList(countryCode: string) {
+    return this.get(`/states/${countryCode}`);
+  }
+
+  async citiesList(countryCode: string, state: string) {
+    return this.get(`/cities/${countryCode}/${state}`);
+  }
+
   languagesList(): Promise<IResponse<ILangguges>> {
     return this.get('/languages/list');
   }
