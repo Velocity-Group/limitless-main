@@ -1,25 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
 
-export interface ISubscriptionResponse {
-  _id: ObjectId;
-  subscriptionType: string;
-  userId: ObjectId;
-  performerId: ObjectId;
-  subscriptionId: string;
-  transactionId: ObjectId;
-  paymentGateway: string;
-  status: string;
-  meta: any;
-  startRecurringDate: Date;
-  nextRecurringDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  expiredAt: Date;
-  userInfo: any;
-  performerInfo: any;
-}
-
 export class SubscriptionDto {
   _id: ObjectId;
 
