@@ -104,6 +104,10 @@ export class TableListTokenEarning extends PureComponent<IProps> {
               return <Tag color="#00dcff">Tip</Tag>;
             case 'video':
               return <Tag color="blue">Video</Tag>;
+            case 'stream_tip':
+              return <Tag color="red">Streaming Tip</Tag>;
+            case 'public_chat':
+              return <Tag color="pink">Paid Streaming</Tag>;
             default: return <Tag color="#00dcff">{type}</Tag>;
           }
         }

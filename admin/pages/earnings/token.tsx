@@ -142,7 +142,9 @@ class Earning extends PureComponent<IProps> {
       {
         key: 'tip',
         text: 'Tip'
-      }
+      },
+      { key: 'stream_tip', text: 'Streaming tip' },
+      { key: 'public_chat', text: 'Paid steaming' }
     ];
 
     return (
