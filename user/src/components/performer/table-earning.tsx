@@ -40,7 +40,7 @@ export class TableListEarning extends PureComponent<IProps> {
             // case 'group_chat':
             //   return <Tag color="violet">Group Chat</Tag>;
             case 'public_chat':
-              return <Tag color="violet">Paid steaming</Tag>;
+              return <Tag color="violet">Paid Streaming</Tag>;
             case 'feed':
               return <Tag color="green">Post</Tag>;
             case 'tip':

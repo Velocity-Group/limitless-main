@@ -199,7 +199,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
         <Layout>
           <Head>
             <title>
-              {`${ui?.siteName} | Public Chat`}
+              {`${ui?.siteName} | Live`}
             </title>
           </Head>
           <Event

@@ -26,29 +26,25 @@ interface IProps {
 }
 
 class MessageList extends PureComponent<IProps> {
-  messagesRef: any;
+  messagesRef = createRef<HTMLDivElement>();
 
   state = {
     offset: 0,
     onloadmore: false
   };
 
+  private resizeObserver: ResizeObserver;
+
   async componentDidMount() {
     if (!this.messagesRef) this.messagesRef = createRef();
 
-    this.scrollToBottom();
+    this.resizeObserver = new window.ResizeObserver(this.onResize);
+    this.resizeObserver.observe(document.querySelector('.message-list-container'));
   }
 
-  componentDidUpdate(prevProps: IProps) {
-    const { message } = this.props;
-    const { onloadmore } = this.state;
-    const messages = message.items;
-    if (messages !== prevProps.message.items) {
-      if (onloadmore) {
-        // eslint-disable-next-line react/no-did-update-set-state
-        this.setState({ onloadmore: false });
-      }
-      this.scrollToBottom();
+  componentWillUnmount() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
     }
   }
 
@@ -109,6 +105,7 @@ class MessageList extends PureComponent<IProps> {
       }
 
       if (previous && moment(current.createdAt).startOf('days').diff(moment(previous.createdAt).startOf('days')) > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         showTimestamp = true;
       }
 
@@ -130,7 +127,7 @@ class MessageList extends PureComponent<IProps> {
             isMine={isMine}
             startsSequence={startsSequence}
             endsSequence={endsSequence}
-            showTimestamp={showTimestamp}
+            showTimestamp={false}
             data={current}
           />
         );
@@ -150,19 +147,29 @@ class MessageList extends PureComponent<IProps> {
     type === 'deleted' && remove(message);
   };
 
-  scrollToBottom() {
+  onResize = () => {
+    const { onloadmore } = this.state;
+    if (onloadmore) {
+      this.setState({ onloadmore: false });
+    } else {
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom = () => {
     const { message: { fetching } } = this.props;
     const { onloadmore } = this.state;
-    if (onloadmore || fetching) return;
+
+    if (fetching || onloadmore) {
+      return;
+    }
 
     if (this.messagesRef && this.messagesRef.current) {
       const ele: HTMLDivElement = this.messagesRef.current;
-      window.setTimeout(() => {
-        ele.scroll({
-          top: ele.scrollHeight,
-          behavior: 'auto'
-        });
-      }, 100);
+      ele.scroll({
+        top: ele.scrollHeight,
+        behavior: 'auto'
+      });
     }
   }
 
