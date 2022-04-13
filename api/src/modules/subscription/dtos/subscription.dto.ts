@@ -2,58 +2,58 @@ import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
 
 export interface ISubscriptionResponse {
-  _id?: string | ObjectId;
-  subscriptionType?: string;
-  userId?: string | ObjectId;
-  performerId?: string | ObjectId;
-  subscriptionId?: string;
-  transactionId?: string | ObjectId;
-  paymentGateway?: string;
-  status?: string;
-  meta?: any;
-  startRecurringDate?: Date;
-  nextRecurringDate?: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
-  expiredAt?: Date;
-  userInfo?: any;
-  performerInfo?: any;
+  _id: ObjectId;
+  subscriptionType: string;
+  userId: ObjectId;
+  performerId: ObjectId;
+  subscriptionId: string;
+  transactionId: ObjectId;
+  paymentGateway: string;
+  status: string;
+  meta: any;
+  startRecurringDate: Date;
+  nextRecurringDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  expiredAt: Date;
+  userInfo: any;
+  performerInfo: any;
 }
 
 export class SubscriptionDto {
-  _id?: string | ObjectId;
+  _id: ObjectId;
 
-  subscriptionType?: string;
+  subscriptionType: string;
 
-  userId?: string | ObjectId;
+  userId: ObjectId;
 
-  performerId?: string | ObjectId;
+  performerId: ObjectId;
 
-  subscriptionId?: string;
+  subscriptionId: string;
 
-  transactionId?: string | ObjectId;
+  transactionId: ObjectId;
 
-  paymentGateway?: string;
+  paymentGateway: string;
 
-  status?: string;
+  status: string;
 
-  meta?: any;
+  meta: any;
 
-  startRecurringDate?: Date;
+  startRecurringDate: Date;
 
-  nextRecurringDate?: Date;
+  nextRecurringDate: Date;
 
-  createdAt?: Date;
+  createdAt: Date;
 
-  updatedAt?: Date;
+  updatedAt: Date;
 
-  expiredAt?: Date;
+  expiredAt: Date;
 
-  userInfo?: any;
+  userInfo: any;
 
-  performerInfo?: any;
+  performerInfo: any;
 
-  constructor(data?: Partial<SubscriptionDto>) {
+  constructor(data: Partial<SubscriptionDto>) {
     Object.assign(
       this,
       pick(data, [

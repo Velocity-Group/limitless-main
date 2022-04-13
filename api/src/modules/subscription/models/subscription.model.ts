@@ -2,29 +2,31 @@ import { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 export class SubscriptionModel extends Document {
-  subscriptionType?: string;
+  subscriptionType: string;
 
-  userId: string | ObjectId;
+  userId: ObjectId;
 
-  performerId: string | ObjectId;
+  performerId: ObjectId;
 
-  subscriptionId?: string;
+  subscriptionId: string;
 
-  transactionId?: string | ObjectId;
+  transactionId: ObjectId;
 
-  paymentGateway?: string;
+  paymentGateway: string;
 
-  status?: string;
+  status: string;
 
-  meta?: any;
+  meta: any;
 
-  startRecurringDate?: Date;
+  startRecurringDate: Date;
 
-  nextRecurringDate?: Date;
+  nextRecurringDate: Date;
 
-  createdAt?: Date;
+  createdAt: Date;
 
-  updatedAt?: Date;
+  updatedAt: Date;
 
-  expiredAt?: Date;
+  expiredAt: Date;
+
+  usedFreeSubscription: boolean;
 }

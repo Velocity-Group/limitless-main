@@ -31,6 +31,7 @@ import { PerformerBlockService } from 'src/modules/block/services';
 import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
 import { Storage } from 'src/modules/storage/contants';
 import { StripeService } from 'src/modules/payment/services';
+import * as moment from 'moment';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
@@ -118,7 +119,7 @@ export class PerformerService {
   public async findByUsername(
     username: string,
     countryCode?: string,
-    currentUser?: UserDto
+    user?: UserDto
   ): Promise<PerformerDto> {
     const query = !isObjectId(username) ? {
       username: username.trim()
@@ -126,29 +127,41 @@ export class PerformerService {
     const model = await this.performerModel.findOne(query).lean();
     if (!model) throw new EntityNotFoundException();
     let isBlocked = false;
-    if (countryCode && `${currentUser?._id}` !== `${model._id}`) {
+    if (countryCode && `${user?._id}` !== `${model._id}`) {
       isBlocked = await this.performerBlockService.checkBlockedCountryByIp(model._id, countryCode);
       if (isBlocked) {
         throw new HttpException('Your country has been blocked by this model', 403);
       }
     }
+    const dto = new PerformerDto(model);
     let isBlockedByPerformer = false;
     let isBookMarked = null;
     let isSubscribed = null;
-    if (currentUser) {
-      isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
+    if (user) {
+      isBlockedByPerformer = `${user?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
         model._id,
-        currentUser._id
+        user._id
       );
       if (isBlockedByPerformer) throw new HttpException('You has been blocked by this model', 403);
-      isSubscribed = await this.subscriptionService.checkSubscribed(model._id, currentUser._id);
+      const subscription = await this.subscriptionService.findOneSubscription({
+        performerId: model._id,
+        userId: user._id
+      });
+      if (subscription) {
+        isSubscribed = moment().isBefore(subscription.expiredAt);
+        if (subscription.usedFreeSubscription) {
+          dto.isFreeSubscription = false;
+        }
+      }
       isBookMarked = await this.reactionService.findOneQuery({
-        objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: currentUser._id, action: REACTION.BOOK_MARK
+        objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: user._id, action: REACTION.BOOK_MARK
       });
     }
-    const dto = new PerformerDto(model);
     dto.isSubscribed = !!isSubscribed;
     dto.isBookMarked = !!isBookMarked;
+    if (user && user.roles && user.roles.includes('admin')) {
+      dto.isSubscribed = true;
+    }
     if (model.avatarId) {
       const avatar = await this.fileService.findById(model.avatarId);
       dto.avatarPath = avatar ? avatar.path : null;
@@ -805,11 +818,11 @@ export class PerformerService {
   public async updateBankingSetting(
     performerId: string,
     payload: BankingSettingPayload,
-    currentUser: UserDto
+    user: UserDto
   ) {
     const performer = await this.performerModel.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
-    if (currentUser?.roles && !currentUser?.roles.includes('admin') && `${currentUser._id}` !== `${performerId}`) {
+    if (user?.roles && !user?.roles.includes('admin') && `${user._id}` !== `${performerId}`) {
       throw new HttpException('Permission denied', 403);
     }
     let item = await this.bankingSettingModel.findOne({

@@ -21,6 +21,7 @@ import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { STATUS } from 'src/kernel/constants';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
+import * as moment from 'moment';
 import { GalleryUpdatePayload } from '../payloads/gallery-update.payload';
 import { GalleryDto } from '../dtos';
 import { GalleryCreatePayload, GallerySearchRequest } from '../payloads';
@@ -223,13 +224,19 @@ export class GalleryService {
     }
     const bookmark = user && await this.reactionService.checkExisting(dto._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.GALLERY);
     dto.isBookMarked = !!bookmark;
-    const subscribed = user && await this.subscriptionService.checkSubscribed(dto.performerId, user._id);
-    dto.isSubscribed = !!subscribed;
+    const subscription = user && await this.subscriptionService.findOneSubscription({
+      performerId: dto.performerId,
+      userId: user._id
+    });
+    dto.isSubscribed = !!(subscription && moment().isBefore(subscription.expiredAt));
     const isBought = user && await this.paymentTokenService.checkBought(gallery, PurchaseItemType.GALLERY, user);
     dto.isBought = !!isBought;
     if (user && user.roles && user.roles.includes('admin')) {
       dto.isBought = true;
       dto.isSubscribed = true;
+    }
+    if (subscription && subscription.usedFreeSubscription) {
+      dto.performer.isFreeSubscription = false;
     }
     await this.galleryModel.updateOne({ _id: gallery._id }, { $inc: { 'stats.views': 1 } });
     return dto;

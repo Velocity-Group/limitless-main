@@ -54,6 +54,10 @@ const subscriptionSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  usedFreeSubscription: {
+    type: Boolean,
+    default: false
   }
 });
 
