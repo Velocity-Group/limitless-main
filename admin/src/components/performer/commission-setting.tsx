@@ -41,29 +41,29 @@ export class CommissionSettingForm extends PureComponent<IProps> {
           })
         }
       >
-        <Form.Item name="monthlySubscriptionCommission" label="Monthly Sub commission" help="Value is from 0.01 - 0.99 (1% - 99%)">
-          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} />
+        <Form.Item name="monthlySubscriptionCommission" label="Monthly Sub commission" help="Value is from 0 - 0.99 (1% - 99%)">
+          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item name="yearlySubscriptionCommission" label="Yearly Sub commission">
-          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} />
+          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item name="streamCommission" label="Streaming commission">
-          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} />
+          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item name="tipCommission" label="Tip commission">
-          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} />
+          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item name="feedSaleCommission" label="Feed sale commission">
-          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} />
+          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item name="productSaleCommission" label="Product sale commission">
-          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} />
+          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item name="videoSaleCommission" label="Video sale commission">
-          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} />
+          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item name="gallerySaleCommission" label="Gallery sale commission">
-          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} />
+          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item wrapperCol={{ ...layout.wrapperCol }}>
           <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>
