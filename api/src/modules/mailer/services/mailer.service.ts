@@ -138,7 +138,10 @@ export class MailerService {
         html: 'Hello, this is test email!'
       });
     } catch (e) {
-      throw new EmailVerificationFailureException(e);
+      return {
+        hasError: true,
+        error: e
+      };
     }
   }
 

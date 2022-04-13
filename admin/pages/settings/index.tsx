@@ -132,13 +132,17 @@ class Settings extends PureComponent {
   async verifyMailer() {
     try {
       this.setState({ updating: true });
-      await settingService.verifyMailer();
+      const resp = await settingService.verifyMailer();
+      if (resp.data.hasError) {
+        return message.error(JSON.stringify(resp.data.error || 'Could not verify this SMTP transporter'));
+      }
       message.success('We\'ve sent and test email, please check your email inbox or spam folder');
     } catch (e) {
       const err = await Promise.resolve(e);
       message.error(err ? JSON.stringify(err) : 'Could not verify this SMTP transporter');
     } finally {
-      this.setState({ updating: false });
+      // eslint-disable-next-line no-unsafe-finally
+      return this.setState({ updating: false });
     }
   }
 
