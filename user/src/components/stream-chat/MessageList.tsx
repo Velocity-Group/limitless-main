@@ -38,7 +38,7 @@ class MessageList extends PureComponent<IProps> {
   async componentDidMount() {
     if (!this.messagesRef) this.messagesRef = createRef();
 
-    this.resizeObserver = new window.ResizeObserver(this.onResize);
+    this.resizeObserver = new (window as any).ResizeObserver(this.onResize);
     this.resizeObserver.observe(document.querySelector('.message-list-container'));
   }
 
