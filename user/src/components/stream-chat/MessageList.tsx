@@ -26,14 +26,14 @@ interface IProps {
 }
 
 class MessageList extends PureComponent<IProps> {
-  messagesRef = createRef<HTMLDivElement>();
+  private messagesRef = createRef<HTMLDivElement>();
+
+  private resizeObserver: any;
 
   state = {
     offset: 0,
     onloadmore: false
   };
-
-  private resizeObserver: ResizeObserver;
 
   async componentDidMount() {
     if (!this.messagesRef) this.messagesRef = createRef();
