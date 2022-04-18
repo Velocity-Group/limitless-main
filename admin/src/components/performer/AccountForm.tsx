@@ -59,7 +59,7 @@ export class AccountForm extends PureComponent<IProps> {
     const { performer } = this.props;
     this.setState({
       previewVideoUrl: performer?.welcomeVideoPath,
-      previewVideoName: performer?.welcomeVideoname
+      previewVideoName: performer?.welcomeVideoName
     });
   }
 
