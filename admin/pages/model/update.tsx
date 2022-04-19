@@ -155,7 +155,7 @@ class PerformerUpdate extends PureComponent<IProps> {
       }
       await this.setState({ updating: true });
       const updated = await performerService.update(id, {
-        ...performer,
+        ...omit(performer, ['welcomeVideoId', 'welcomeVideoName', 'welcomeVideoPath']),
         ...newData,
         ...this.customFields
       });
