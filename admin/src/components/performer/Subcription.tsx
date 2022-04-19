@@ -60,7 +60,7 @@ export class SubscriptionForm extends PureComponent<IProps> {
             <Form.Item
               name="durationFreeSubscriptionDays"
               label="Duration (days)"
-              help="Free subscription for xx days, then $xx per month"
+              help="Free subscription for xx days"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
