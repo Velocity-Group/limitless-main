@@ -46,8 +46,8 @@ export const WEIGHTS = [
 ];
 
 export const AGES = [
-  { value: 'under_16', text: 'Under 16' },
-  { value: '17_19', text: '17 to 19' },
+  // { value: 'under_16', text: 'Under 16' },
+  { value: '18_19', text: '18 to 19' },
   { value: '20_22', text: '20 to 22' },
   { value: '23_25', text: '23 to 25' },
   { value: '26_28', text: '26 to 28' },
