@@ -349,7 +349,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 style={{ width: '100%' }}
                 placeholder="DD/MM/YYYY"
                 format="DD/MM/YYYY"
-                disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(14, 'year').endOf('day')}
+                disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(18, 'year').endOf('day')}
               />
             </Form.Item>
           </Col>

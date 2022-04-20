@@ -286,7 +286,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       >
                         <DatePicker
                           placeholder="Date of Birth"
-                          disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(14, 'year').endOf('day')}
+                          disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(18, 'year').endOf('day')}
                         />
                       </Form.Item>
                     </Col>
