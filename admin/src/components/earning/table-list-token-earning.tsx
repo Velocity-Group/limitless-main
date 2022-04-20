@@ -1,5 +1,7 @@
 import { PureComponent } from 'react';
-import { Table, Tag, Avatar } from 'antd';
+import {
+  Table, Tag, Avatar, Statistic
+} from 'antd';
 import { formatDate } from '@lib/date';
 
 interface IProps {
@@ -44,11 +46,15 @@ export class TableListTokenEarning extends PureComponent<IProps> {
       {
         title: 'Total Earnings',
         dataIndex: 'grossPrice',
-        render(grossPrice, record) {
+        render(grossPrice) {
           return (
             <span>
-              {record.isToken ? <img src="/coin-ico.png" width="15px" alt="coin" /> : '$'}
-              {(grossPrice || 0).toFixed(2)}
+              <Statistic
+                prefix={<img alt="coin" src="/coin-ico.png" width="15px" />}
+                value={grossPrice || 0}
+                valueStyle={{ fontSize: 13 }}
+                precision={2}
+              />
             </span>
           );
         }
@@ -68,11 +74,15 @@ export class TableListTokenEarning extends PureComponent<IProps> {
       {
         title: 'Platform Earning',
         dataIndex: 'siteEarning',
-        render(siteEarning, record) {
+        render(siteEarning) {
           return (
             <span>
-              {record.isToken ? <img src="/coin-ico.png" width="15px" alt="coin" /> : '$'}
-              {(siteEarning || 0)}
+              <Statistic
+                prefix={<img alt="coin" src="/coin-ico.png" width="15px" />}
+                value={siteEarning || 0}
+                valueStyle={{ fontSize: 13 }}
+                precision={2}
+              />
             </span>
           );
         }
@@ -80,11 +90,15 @@ export class TableListTokenEarning extends PureComponent<IProps> {
       {
         title: 'Model Earnings',
         dataIndex: 'netPrice',
-        render(netPrice, record) {
+        render(netPrice) {
           return (
             <span>
-              {record.isToken ? <img src="/coin-ico.png" width="15px" alt="coin" /> : '$'}
-              {(netPrice || 0).toFixed(2)}
+              <Statistic
+                prefix={<img alt="coin" src="/coin-ico.png" width="15px" />}
+                value={netPrice || 0}
+                valueStyle={{ fontSize: 13 }}
+                precision={2}
+              />
             </span>
           );
         }
