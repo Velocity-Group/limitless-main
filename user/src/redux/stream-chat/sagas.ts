@@ -127,7 +127,7 @@ const streamMessageSagas = [
     * worker(req: IReduxAction<any>) {
       try {
         const { messageId } = req.payload;
-        const resp = yield messageService.deleteStreamMessage(messageId);
+        const resp = yield messageService.deleteMessage(messageId);
         yield put(deleteMessageSuccess(resp.data));
       } catch (e) {
         yield put(deleteMessageFail(e));

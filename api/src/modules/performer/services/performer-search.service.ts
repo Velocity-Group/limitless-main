@@ -2,9 +2,6 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { PageableData } from 'src/kernel/common';
 import * as moment from 'moment';
-import { QueueEvent, QueueEventService } from 'src/kernel';
-import { EVENT } from 'src/kernel/constants';
-import { SEARCH_CHANNEL } from 'src/modules/search/constants';
 import { PerformerModel } from '../models';
 import { PERFORMER_MODEL_PROVIDER } from '../providers';
 import { PerformerDto, IPerformerResponse } from '../dtos';
@@ -15,8 +12,7 @@ import { PERFORMER_STATUSES } from '../constants';
 export class PerformerSearchService {
   constructor(
     @Inject(PERFORMER_MODEL_PROVIDER)
-    private readonly performerModel: Model<PerformerModel>,
-    private readonly queueEventService: QueueEventService
+    private readonly performerModel: Model<PerformerModel>
   ) { }
 
   public async adminSearch(
@@ -66,7 +62,7 @@ export class PerformerSearchService {
       };
     }
     let sort = {
-      isOnline: -1
+      updatedAt: -1
     } as any;
     if (req.sort && req.sortBy) {
       sort = {
@@ -91,8 +87,7 @@ export class PerformerSearchService {
 
   // TODO - should create new search service?
   public async search(
-    req: PerformerSearchPayload,
-    user?: PerformerDto
+    req: PerformerSearchPayload
   ): Promise<PageableData<any>> {
     const query = {
       status: PERFORMER_STATUSES.ACTIVE,
@@ -106,29 +101,14 @@ export class PerformerSearchService {
       const searchValue = { $regex: regexp };
       query.$or = [
         { name: searchValue },
-        { username: searchValue },
-        { bodyType: searchValue },
-        { gender: searchValue },
-        { ethnicity: searchValue },
-        { sexualOrientation: searchValue }
+        { username: searchValue }
       ];
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: SEARCH_CHANNEL,
-          eventName: EVENT.CREATED,
-          data: {
-            keyword: req.q,
-            fromSource: 'user',
-            fromSourceId: user?._id || null
-          }
-        })
-      );
     }
     if (req.performerIds) {
       query._id = { $in: req.performerIds.split(',') };
     }
     ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender',
-      'height', 'weight', 'eyes', 'butt', 'sexualOrientation'].forEach((f) => {
+      'height', 'weight', 'eyes', 'butt', 'sexualOrientation', 'streamingStatus'].forEach((f) => {
       if (req[f]) {
         query[f] = req[f];
       }
@@ -150,15 +130,10 @@ export class PerformerSearchService {
       };
     }
     if (req.isFreeSubscription) {
-      if (typeof req.isFreeSubscription === 'string') {
-        query.isFreeSubscription = req.isFreeSubscription === 'true';
-      } else {
-        query.isFreeSubscription = req.isFreeSubscription;
-      }
+      query.isFreeSubscription = req.isFreeSubscription === 'true';
     }
     let sort = {
-      isOnline: -1,
-      createdAt: -1
+      updatedAt: -1
     } as any;
     if (req.sort && req.sortBy) {
       sort = {

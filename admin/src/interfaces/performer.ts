@@ -60,7 +60,7 @@ export interface IPerformer {
   googleConnected: boolean;
   welcomeVideoId: string;
   welcomeVideoPath: string;
-  welcomeVideoname: string;
+  welcomeVideoName: string;
   activateWelcomeVideo: boolean;
   isBookMarked: boolean;
   isSubscribed: boolean;

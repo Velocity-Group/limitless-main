@@ -1,3 +1,5 @@
+import { IPerformer } from '.';
+
 /* eslint-disable no-shadow */
 export const PUBLIC_CHAT = 'public';
 export const PRIVATE_CHAT = 'private';
@@ -39,6 +41,7 @@ export interface StreamSettings {
   optionForGroup: 'hls' | 'webrtc';
   secureOption: boolean;
   AntMediaAppname: string;
+  agoraEnable: boolean;
 }
 
 export const HLS = 'hls';
@@ -65,3 +68,27 @@ export const defaultStreamValue = {
   webRTCViewerLimit: -1,
   hlsViewerLimit: -1
 };
+
+export interface IStream {
+  _id: string;
+  title: string;
+  description: string;
+  performerId: string;
+  performerInfo: IPerformer;
+  type: 'public' | 'group' | 'private';
+  sessionId: string;
+  isStreaming: number;
+  streamingTime: number;
+  lastStreamingTime: Date;
+  isFree: boolean;
+  price: number;
+  stats: {
+    members: number;
+    likes: number;
+  };
+  isSubscribed: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  conversationId: string;
+  hasPurchased: boolean;
+}

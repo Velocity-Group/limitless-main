@@ -1,6 +1,6 @@
 import { Table, Tag } from 'antd';
 import { ISubscription } from 'src/interfaces';
-import { formatDate } from '@lib/date';
+import { formatDate, nowIsBefore } from '@lib/date';
 
 interface IProps {
   dataSource: ISubscription[];
@@ -44,24 +44,24 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Expiry date',
-      dataIndex: 'expiredAt',
-      render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
-      }
-    },
-    {
-      title: 'Subscription Start Date',
+      title: 'Start Date',
       dataIndex: 'startRecurringDate',
-      render(date: Date, record) {
+      render(date: Date, record: ISubscription) {
         return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
       }
     },
     {
-      title: 'Renwes on',
-      dataIndex: 'nextRecurringDate',
-      render(date: Date, record) {
+      title: 'Expiry Date',
+      dataIndex: 'expiredAt',
+      render(date: Date, record: ISubscription) {
         return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
+      }
+    },
+    {
+      title: 'Renews On',
+      dataIndex: 'nextRecurringDate',
+      render(date: Date, record: ISubscription) {
+        return <span>{record.status === 'active' && nowIsBefore(record.expiredAt) ? formatDate(date, 'll') : 'N/A'}</span>;
       }
     },
     {
@@ -93,12 +93,15 @@ export const TableListSubscription = ({
     {
       title: 'Status',
       dataIndex: 'status',
-      render(status: string) {
+      render(status: string, record: ISubscription) {
+        if (!nowIsBefore(record.expiredAt)) {
+          return <Tag color="red">Suspended</Tag>;
+        }
         switch (status) {
           case 'active':
             return <Tag color="#00c12c">Active</Tag>;
           case 'deactivated':
-            return <Tag color="#FFCF00">Deactivated</Tag>;
+            return <Tag color="#FFCF00">Inactive</Tag>;
           default:
             return <Tag color="pink">{status}</Tag>;
         }

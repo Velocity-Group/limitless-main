@@ -172,7 +172,9 @@ class EarningPage extends PureComponent<IProps, IStates> {
               { key: 'gallery', text: 'Gallery' },
               { key: 'feed', text: 'Post' },
               { key: 'video', text: 'Video' },
-              { key: 'tip', text: 'Tip' }
+              { key: 'tip', text: 'Tip' },
+              { key: 'stream_tip', text: 'Streaming tip' },
+              { key: 'public_chat', text: 'Paid steaming' }
               // { key: 'gift', text: 'Gift' },
               // { key: 'message', text: 'Message' }
             ] : [

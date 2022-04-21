@@ -1,11 +1,15 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const { readdirSync } = require('fs');
+const { readdirSync, existsSync } = require('fs');
 const { readFileSync } = require('fs');
 const { join, parse } = require('path');
 const { DB, COLLECTION } = require('./lib');
 
-const TEMPLATE_DIR = join(__dirname, '..', 'src', 'templates', 'emails');
+const defaultDir = join(__dirname, '..', 'src', 'templates', 'emails');
+
+const TEMPLATE_DIR = existsSync(defaultDir)
+  ? defaultDir
+  : join(__dirname, '..', 'dist', 'templates', 'emails');
 
 const templateMap = {
   'admin-payment-success': {
@@ -97,7 +101,7 @@ module.exports.up = async function up(next) {
     const key = parse(file).name;
     const exist = await DB.collection(COLLECTION.EMAIL_TEMPLATE).findOne({ key });
     if (!exist) {
-      await DB.collection(COLLECTION.EMAIL_TEMPLATE).insertOne({
+      templateMap[key] && await DB.collection(COLLECTION.EMAIL_TEMPLATE).insertOne({
         key,
         content,
         subject: templateMap[key] ? templateMap[key].subject : null,

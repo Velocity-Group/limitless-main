@@ -1,35 +1,52 @@
 import {
   IsString,
-  IsIn,
   IsOptional,
-  IsNumber
+  IsNumber,
+  IsNotEmpty,
+  IsBoolean
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-const STREAM_TYPE = ['public', 'group', 'private'];
-
-export class StreamPayload {
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  @IsIn(STREAM_TYPE)
-  type: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  id: string;
-
-  @ApiProperty()
-  @IsOptional()
-  isStreaming: number;
-
-  @ApiProperty()
-  @IsOptional()
-  lastStreamingTime: Date;
-
+export class StartStreamPayload {
   @ApiProperty()
   @IsNumber()
   @IsOptional()
-  streamingTime: number;
+  price: number;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsNotEmpty()
+  isFree: boolean;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+}
+
+export class UpdateStreamPayload {
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  price: number;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  isFree: boolean;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  title: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  description: string;
 }

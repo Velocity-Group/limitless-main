@@ -32,7 +32,7 @@ const streamMessageReducer = [
     reducer(state: any) {
       return {
         ...state,
-        activeConversation: { fetching: true }
+        activeConversation: { ...state.activeConversation, fetching: true }
       };
     }
   },
@@ -139,9 +139,15 @@ const streamMessageReducer = [
           items: []
         };
       }
-      nextState.conversationMap[conversationId].items.push(
-        data.payload
-      );
+
+      nextState.conversationMap[conversationId] = {
+        ...nextState.conversationMap[conversationId],
+        items: [
+          ...nextState.conversationMap[conversationId].items,
+          data.payload
+        ],
+        fetching: false
+      };
       return {
         ...nextState,
         receiveMessage: data.payload

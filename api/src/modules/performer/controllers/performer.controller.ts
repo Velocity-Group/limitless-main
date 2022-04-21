@@ -79,10 +79,9 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async usearch(
-    @Query() query: PerformerSearchPayload,
-    @Request() req: any
+    @Query() query: PerformerSearchPayload
   ): Promise<DataResponse<PageableData<IPerformerResponse>>> {
-    const data = await this.performerSearchService.search(query, req.user);
+    const data = await this.performerSearchService.search(query);
     return DataResponse.ok({
       total: data.total,
       data: data.data.map((p) => new PerformerDto(p).toPublicDetailsResponse())

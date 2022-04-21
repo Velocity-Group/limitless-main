@@ -1,12 +1,11 @@
 /* eslint-disable no-nested-ternary */
 import { PureComponent } from 'react';
-import { Button, Form, Input } from 'antd';
-import { } from '@ant-design/icons';
-import { IPerformer } from 'src/interfaces/index';
+import { Button, Form } from 'antd';
+import { IPerformer, IStream } from 'src/interfaces';
 import '../post/index.less';
 
 interface IProps {
-  streamType: string;
+  activeStream: IStream;
   performer: IPerformer;
   onFinish: Function;
   submiting: boolean;
@@ -20,7 +19,7 @@ const layout = {
 export class PurchaseStreamForm extends PureComponent<IProps> {
   render() {
     const {
-      onFinish, performer, streamType, submiting
+      onFinish, performer, activeStream, submiting
     } = this.props;
     return (
       <div className="text-center">
@@ -39,23 +38,14 @@ export class PurchaseStreamForm extends PureComponent<IProps> {
           {...layout}
           name="nest-messages"
           onFinish={onFinish.bind(this)}
-          initialValues={{
-            userNote: ''
-          }}
+          initialValues={{ }}
         >
-          {streamType === 'private' && (
-          <Form.Item name="userNote">
-            <Input.TextArea rows={3} maxLength={100} placeholder="Note something..." />
-          </Form.Item>
-          )}
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Button className="primary" htmlType="submit" loading={submiting} disabled={submiting} block>
-              Confirm to join this session by
+              Confirm to join this session for
               &nbsp;
-              <img src="/static/gem-ico.png" alt="gem" width="20px" />
-              {streamType === 'public' ? (performer?.publicChatPrice || 0).toFixed(2) : streamType === 'group' ? (performer?.groupChatPrice || 0).toFixed(2) : (performer?.privateChatPrice || 0).toFixed(2)}
-              {' '}
-              per minute
+              <img src="/static/coin-ico.png" alt="gem" width="20px" />
+              {activeStream.price.toFixed(2)}
             </Button>
           </div>
         </Form>

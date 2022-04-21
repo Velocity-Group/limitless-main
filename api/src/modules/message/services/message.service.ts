@@ -166,15 +166,18 @@ export class MessageService {
     }
     await message.remove();
     message.fileId && await this.fileService.remove(message.fileId);
-    // Emit event to user
-    await this.queueEventService.publish({
-      channel: MESSAGE_PRIVATE_STREAM_CHANNEL,
-      eventName: MESSAGE_EVENT.DELETED,
-      data: new MessageDto(message)
-    });
+    if (message.conversationId) {
+      const conversation = await this.conversationService.findById(message.conversationId);
+      await this.queueEventService.publish({
+        channel: MESSAGE_PRIVATE_STREAM_CHANNEL,
+        eventName: MESSAGE_EVENT.DELETED,
+        data: { message, conversation }
+      });
+    }
     return message;
   }
 
+  // stream message
   public async loadPublicMessages(req: MessageListRequest) {
     const conversation = await this.conversationService.findById(
       req.conversationId
@@ -221,7 +224,7 @@ export class MessageService {
     };
   }
 
-  public async createPublicStreamMessageFromConversation(
+  public async createStreamMessageFromConversation(
     conversationId: string,
     payload: MessageCreatePayload,
     sender: IRecipient,
@@ -233,57 +236,18 @@ export class MessageService {
     if (!conversation) {
       throw new EntityNotFoundException();
     }
-
     const message = await this.messageModel.create({
       ...payload,
       senderId: sender.sourceId,
       senderSource: sender.source,
       conversationId: conversation._id
     });
-    await message.save();
-
     const dto = new MessageDto(message);
     dto.senderInfo = user;
     await this.queueEventService.publish({
       channel: MESSAGE_PRIVATE_STREAM_CHANNEL,
       eventName: MESSAGE_EVENT.CREATED,
-      data: dto
-    });
-    return dto;
-  }
-
-  public async createStreamMessageFromConversation(
-    conversationId: string | ObjectId,
-    payload: MessageCreatePayload,
-    sender: IRecipient
-  ) {
-    const conversation = await this.conversationService.findById(
-      conversationId
-    );
-    if (!conversation) {
-      throw new EntityNotFoundException();
-    }
-
-    const found = conversation.recipients.find(
-      (recipient) => recipient.sourceId.toString() === sender.sourceId.toString()
-    );
-    if (!found) {
-      throw new EntityNotFoundException();
-    }
-
-    const message = await this.messageModel.create({
-      ...payload,
-      senderId: sender.sourceId,
-      senderSource: sender.source,
-      conversationId: conversation._id
-    });
-    await message.save();
-
-    const dto = new MessageDto(message);
-    await this.queueEventService.publish({
-      channel: MESSAGE_PRIVATE_STREAM_CHANNEL,
-      eventName: MESSAGE_EVENT.CREATED,
-      data: dto
+      data: { message: dto, conversation }
     });
     return dto;
   }
@@ -299,8 +263,7 @@ export class MessageService {
       throw new EntityNotFoundException();
     }
     if (
-      user.isPerformer
-      && conversation.performerId.toString() !== user._id.toString()
+      conversation.performerId.toString() !== user._id.toString()
     ) {
       throw new ForbiddenException();
     }

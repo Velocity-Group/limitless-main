@@ -3,7 +3,7 @@ import {
 } from 'antd';
 import { StopOutlined, RightCircleOutlined } from '@ant-design/icons';
 import { ISubscription } from 'src/interfaces';
-import { formatDate } from '@lib/date';
+import { formatDate, nowIsBefore } from '@lib/date';
 
 interface IProps {
   dataSource: ISubscription[];
@@ -67,6 +67,14 @@ export const TableListSubscription = ({
       }
     },
     {
+      title: 'Start Date',
+      dataIndex: 'startRecurringDate',
+      sorter: true,
+      render(date: Date, record:ISubscription) {
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+      }
+    },
+    {
       title: 'Expiry Date',
       dataIndex: 'expiredAt',
       sorter: true,
@@ -75,19 +83,11 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Subscription start Date”',
-      dataIndex: 'startRecurringDate',
-      sorter: true,
-      render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
-      }
-    },
-    {
       title: 'Renews On',
       dataIndex: 'nextRecurringDate',
       sorter: true,
-      render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+      render(date: Date, record: ISubscription) {
+        return <span>{record.status === 'active' && nowIsBefore(record.expiredAt) && formatDate(date, 'LL')}</span>;
       }
     },
     {
@@ -111,13 +111,16 @@ export const TableListSubscription = ({
     {
       title: 'Status',
       dataIndex: 'status',
-      render(status: string) {
+      render(status: string, record: ISubscription) {
+        if (!nowIsBefore(record.expiredAt)) {
+          return <Tag color="red">Suspended</Tag>;
+        }
         switch (status) {
           case 'active':
             return <Tag color="green">Active</Tag>;
           case 'deactivated':
-            return <Tag color="red">Deactivated</Tag>;
-          default: return <Tag color="red">Deactivated</Tag>;
+            return <Tag color="red">Inactive</Tag>;
+          default: return <Tag color="red">Inactive</Tag>;
         }
       }
     },
@@ -132,23 +135,22 @@ export const TableListSubscription = ({
     {
       title: 'Action',
       dataIndex: 'status',
-      render(data, records) {
+      render(data, records: ISubscription) {
         return (
           <span>
-            {records?.status === 'deactivated' ? (
-              <Button type="primary" onClick={() => onRenewSubscription(records)}>
-                <RightCircleOutlined />
-                {' '}
-                Reactivate subscription
-              </Button>
-            ) : null}
-            {records?.status === 'active' ? (
+            {records?.status === 'active' && nowIsBefore(records.expiredAt) ? (
               <Button type="primary" onClick={() => onCancelSubscription(records)}>
                 <StopOutlined />
                 {' '}
                 Cancel subscription
               </Button>
-            ) : null}
+            ) : (
+              <Button type="primary" onClick={() => onRenewSubscription(records)}>
+                <RightCircleOutlined />
+                {' '}
+                Reactivate subscription
+              </Button>
+            )}
           </span>
         );
       }

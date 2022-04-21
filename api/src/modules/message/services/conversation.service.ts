@@ -61,7 +61,7 @@ export class ConversationService {
   public async createStreamConversation(stream: StreamDto, recipients?: any) {
     return this.conversationModel.create({
       streamId: stream._id,
-      performerId: stream.performerId && toObjectId(stream.performerId),
+      performerId: stream.performerId,
       recipients: recipients || [],
       name: `${stream.type} stream session ${stream.sessionId}`,
       type: `stream_${stream.type}`,
@@ -85,7 +85,7 @@ export class ConversationService {
             },
             {
               source: receiver.source,
-              sourceId: receiver.sourceId
+              sourceId: toObjectId(receiver.sourceId)
             }
           ]
         }
@@ -300,5 +300,9 @@ export class ConversationService {
     recipient: IRecipient
   ) {
     return this.conversationModel.updateOne({ _id: conversationId }, { $addToSet: { recipients: recipient } });
+  }
+
+  public async findByStreamIds(ids) {
+    return this.conversationModel.find({ streamId: { $in: ids } }).lean();
   }
 }

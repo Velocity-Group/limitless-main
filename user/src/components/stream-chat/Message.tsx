@@ -2,8 +2,7 @@
 import React from 'react';
 import moment from 'moment';
 import { EllipsisOutlined } from '@ant-design/icons';
-import { Menu, Dropdown } from 'antd';
-// import { chatBoxMessageClassName } from '@lib/utils';
+import { Menu, Dropdown, Divider } from 'antd';
 import '@components/messages/Message.less';
 
 interface IProps {
@@ -27,7 +26,6 @@ export default function Message(props: IProps) {
     onDelete
   } = props;
   const friendlyTimestamp = moment(data.createdAt).format('LLLL');
-  // const randomColor = Math.floor(Math.random() * 16777215).toString(16);
   const menu = (
     <Menu>
       <Menu.Item onClick={() => onDelete()}>
@@ -35,43 +33,46 @@ export default function Message(props: IProps) {
       </Menu.Item>
     </Menu>
   );
+  const isTip = data?.type === 'tip';
+
   return (
     <div
       className={[
         'message',
-        `${isMine || isOwner ? 'mine' : ''}`,
         `${startsSequence ? 'start' : ''}`,
         `${endsSequence ? 'end' : ''}`
       ].join(' ')}
     >
-      {data.text && !data.isSystem && !data.isTip && !data.isGift && (
+      {showTimestamp && (
+        <Divider className="timestamp">{friendlyTimestamp}</Divider>
+      )}
+      {data.text && !data.isSystem && !isTip && !data.isGift && (
         <div className={isOwner ? 'bubble-container owner' : 'bubble-container'}>
           <span className="sender-info">
             <img alt="" src={data?.senderInfo?.avatar || '/static/no-avatar.png'} className="avatar" />
-            <a>{data?.senderInfo?.name || data?.senderInfo?.username || 'N/A'}</a>
+            <a>
+              {data?.senderInfo?.name || data?.senderInfo?.username || 'N/A'}
+              :
+            </a>
           </span>
           <div className="bubble" title={friendlyTimestamp}>
             {data.text}
           </div>
           {isMine && !data.isDeleted && (
-          <Dropdown overlay={menu} placement="topRight">
-            <span>
-              <EllipsisOutlined />
-              {' '}
-            </span>
+          <Dropdown overlay={menu} placement="topRight" trigger={['click']}>
+            <a>
+              <EllipsisOutlined style={{ transform: 'rotate(90deg)' }} />
+            </a>
           </Dropdown>
           )}
         </div>
       )}
-      {data.text && data.isSystem && (
-        <p style={{ textAlign: 'center', fontSize: '10px' }}>{data.text}</p>
-      )}
-      {data.text && data.isTip && (
+      {data.text && isTip && (
       <div className="tip-box">
         <span>
           {data.text}
           {' '}
-          <img src="/static/gem-ico.png" width="20px" alt="" />
+          <img src="/static/coin-ico.png" width="20px" alt="" />
         </span>
       </div>
       )}
@@ -79,9 +80,6 @@ export default function Message(props: IProps) {
       <div className="tip-box">
         <span dangerouslySetInnerHTML={{ __html: data.text }} />
       </div>
-      )}
-      {showTimestamp && !data.isSystem && (
-        <div className="timestamp">{friendlyTimestamp}</div>
       )}
     </div>
   );

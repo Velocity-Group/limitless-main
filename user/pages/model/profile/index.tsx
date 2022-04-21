@@ -9,14 +9,16 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, purchaseTokenService, feedService, reactionService, paymentService
+  performerService, tokenTransctionService, feedService, reactionService, paymentService, utilsService
 } from 'src/services';
 import Head from 'next/head';
 import {
   ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined
 } from '@ant-design/icons';
-import { TickIcon, ShareIcon, MessageIcon } from 'src/icons';
+import {
+  TickIcon, ShareIcon, MessageIcon
+} from 'src/icons';
 import { ScrollListProduct } from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
@@ -28,7 +30,7 @@ import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
 import { VideoPlayer } from '@components/common';
 import {
-  IPerformer, IUser, IUIConfig, IFeed, StreamSettings
+  IPerformer, IUser, IUIConfig, IFeed, StreamSettings, ICountry
 } from 'src/interfaces';
 import { shortenLargeNumber } from '@lib/index';
 import Link from 'next/link';
@@ -56,6 +58,7 @@ interface IProps {
   removeFeedSuccess: Function;
   updateBalance: Function;
   settings: StreamSettings;
+  countries: ICountry[];
 }
 
 const { TabPane } = Tabs;
@@ -69,8 +72,6 @@ class PerformerProfile extends PureComponent<IProps> {
   static authenticate = true;
 
   static noredirect = true;
-
-  subscriptionType = 'monthly';
 
   state = {
     itemPerPage: 12,
@@ -86,19 +87,22 @@ class PerformerProfile extends PureComponent<IProps> {
     openSubscriptionModal: false,
     tab: 'post',
     filter: initialFilter,
-    isGrid: false
+    isGrid: false,
+    subscriptionType: 'monthly'
   };
 
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
     try {
-      const performer = (await (
-        await performerService.findOne(query.username, {
+      const [performer, countries] = await Promise.all([
+        performerService.findOne(query.username, {
           Authorization: ctx.token || ''
-        })
-      ).data) as IPerformer;
+        }),
+        utilsService.countriesList()
+      ]);
       return {
-        performer
+        performer: performer?.data,
+        countries: countries?.data || []
       };
     } catch (e) {
       const error = await Promise.resolve(e);
@@ -116,6 +120,7 @@ class PerformerProfile extends PureComponent<IProps> {
     }
   }
 
+  // eslint-disable-next-line react/sort-comp
   handleViewWelcomeVideo() {
     const { performer } = this.props;
     const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');
@@ -179,6 +184,26 @@ class PerformerProfile extends PureComponent<IProps> {
     this.loadItems();
   }
 
+  handleJoinStream = () => {
+    const { currentUser, performer } = this.props;
+    if (!currentUser._id) {
+      message.error('Please log in or register!');
+      return;
+    }
+    if (currentUser.isPerformer) return;
+    if (!performer?.isSubscribed) {
+      message.error('Please subscribe to this model!');
+      return;
+    }
+    Router.push({
+      pathname: '/streaming/details',
+      query: {
+        performer: JSON.stringify(performer),
+        username: performer?.username || performer?._id
+      }
+    }, `/streaming/${performer?.username || performer?._id}`);
+  }
+
   async loadItems() {
     const {
       performer, getGalleries: handleGetGalleries, getVideos: handleGetVids, getFeeds: handleGetFeeds,
@@ -222,6 +247,7 @@ class PerformerProfile extends PureComponent<IProps> {
 
   async subscribe() {
     const { performer, currentUser } = this.props;
+    const { subscriptionType } = this.state;
     if (!currentUser._id) {
       message.error('Please log in');
       Router.push('/auth/login');
@@ -233,9 +259,9 @@ class PerformerProfile extends PureComponent<IProps> {
       return;
     }
     try {
-      await this.setState({ submiting: true });
+      this.setState({ submiting: true });
       await paymentService.subscribePerformer({
-        type: this.subscriptionType,
+        type: subscriptionType,
         performerId: performer._id,
         paymentGateway: 'stripe',
         stripeCardId: currentUser.stripeCardIds[0] // TODO user can choose card
@@ -257,7 +283,7 @@ class PerformerProfile extends PureComponent<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await purchaseTokenService.sendTip(performer?._id, { performerId: performer?._id, price });
+      await tokenTransctionService.sendTip(performer?._id, { performerId: performer?._id, price });
       message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
     } catch (e) {
@@ -332,7 +358,8 @@ class PerformerProfile extends PureComponent<IProps> {
       feedState,
       videoState,
       productState,
-      galleryState
+      galleryState,
+      countries
     } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
@@ -348,7 +375,8 @@ class PerformerProfile extends PureComponent<IProps> {
       isBookMarked,
       openSubscriptionModal,
       tab,
-      isGrid
+      isGrid,
+      subscriptionType
     } = this.state;
     return (
       <Layout>
@@ -387,13 +415,6 @@ class PerformerProfile extends PureComponent<IProps> {
                   <ArrowLeftOutlined />
                 </a>
                 <div className="stats-row">
-                  <div className="t-user-name">
-                    {performer?.name || 'N/A'}
-                    {' '}
-                    {performer?.verifiedAccount && (
-                      <TickIcon />
-                    )}
-                  </div>
                   <div className="tab-stat">
                     <div className="tab-item">
                       <span>
@@ -460,7 +481,8 @@ class PerformerProfile extends PureComponent<IProps> {
                     <TickIcon />
                   )}
                   &nbsp;
-                  {currentUser._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
+                  {performer?.live > 0 && currentUser?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
+                  {currentUser?._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
                 </h4>
                 <h5 style={{ textTransform: 'none' }}>
                   @
@@ -504,35 +526,14 @@ class PerformerProfile extends PureComponent<IProps> {
                   </Button>
                 </Tooltip>
                 <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
-                  <Button
-                    className="normal"
-                  >
+                  <Button className="normal">
                     <ShareIcon />
                   </Button>
                 </Popover>
               </div>
-              {/* {performer?.isSubscribed && (
-                      <div className="stream-btns">
-                        <Button
-                          type="link"
-                          className={performer?.streamingStatus === 'public' ? 'secondary active' : 'secondary'}
-                          onClick={() => Router.push(
-                            {
-                              pathname: '/stream',
-                              query: { performer: JSON.stringify(performer) }
-                            },
-                            `/stream/${performer?.username}`
-                          )}
-                        >
-                          <VideoCameraOutlined />
-                          {' '}
-                          Public Chat
-                        </Button>
-                      </div>
-                    )} */}
             </div>
             <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
-              <PerformerInfo countries={ui?.countries || []} performer={performer} />
+              <PerformerInfo countries={countries} performer={performer} />
             </div>
             {!performer?.isSubscribed && (
               <div className="subscription-bl">
@@ -540,13 +541,14 @@ class PerformerProfile extends PureComponent<IProps> {
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting && this.subscriptionType === 'monthly')}
+                  disabled={(submiting)}
                   onClick={() => {
-                    this.subscriptionType = 'monthly';
-                    this.setState({ openSubscriptionModal: true });
+                    this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
                   }}
                 >
-                  SUBSCRIBE FOR $
+                  SUBSCRIBE FOR
+                  {' '}
+                  $
                   {performer && performer?.monthlyPrice.toFixed(2)}
                 </button>
               </div>
@@ -557,13 +559,14 @@ class PerformerProfile extends PureComponent<IProps> {
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting && this.subscriptionType === 'yearly')}
+                  disabled={(submiting)}
                   onClick={() => {
-                    this.subscriptionType = 'yearly';
-                    this.setState({ openSubscriptionModal: true });
+                    this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
                   }}
                 >
-                  SUBSCRIBE FOR $
+                  SUBSCRIBE FOR
+                  {' '}
+                  $
                   {performer?.yearlyPrice.toFixed(2)}
                 </button>
               </div>
@@ -574,10 +577,9 @@ class PerformerProfile extends PureComponent<IProps> {
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting && this.subscriptionType === 'free')}
+                  disabled={(submiting)}
                   onClick={() => {
-                    this.subscriptionType = 'free';
-                    this.setState({ openSubscriptionModal: true });
+                    this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
                   }}
                 >
                   SUBSCRIBE FOR FREE FOR
@@ -756,7 +758,7 @@ class PerformerProfile extends PureComponent<IProps> {
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm
-            type={this.subscriptionType || 'monthly'}
+            type={subscriptionType}
             performer={performer}
             submiting={submiting}
             onFinish={this.subscribe.bind(this)}

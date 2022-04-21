@@ -18,11 +18,11 @@ import Head from 'next/head';
 import Router from 'next/router';
 import { connect } from 'react-redux';
 import { registerPerformer, loginSocial } from '@redux/auth/actions';
-import { ISettings, IUIConfig } from 'src/interfaces';
+import { ISettings, IUIConfig, ICountry } from 'src/interfaces';
 import { ImageUpload } from '@components/file';
 import moment from 'moment';
 import GoogleLogin from 'react-google-login';
-import { authService } from '@services/auth.service';
+import { authService, utilsService } from 'src/services';
 import './index.less';
 
 const { Option } = Select;
@@ -32,7 +32,8 @@ interface IProps {
   registerPerformerData: any;
   registerPerformer: Function;
   ui: IUIConfig;
-  settings: ISettings
+  settings: ISettings;
+  countries: ICountry[]
 }
 
 class RegisterPerformer extends PureComponent<IProps> {
@@ -43,6 +44,15 @@ class RegisterPerformer extends PureComponent<IProps> {
   idVerificationFile = null;
 
   documentVerificationFile = null;
+
+  static async getInitialProps() {
+    const [countries] = await Promise.all([
+      utilsService.countriesList()
+    ]);
+    return {
+      countries: countries?.data || []
+    };
+  }
 
   state = {
     isLoading: false
@@ -117,7 +127,9 @@ class RegisterPerformer extends PureComponent<IProps> {
   }
 
   render() {
-    const { registerPerformerData = { requesting: false }, ui, settings } = this.props;
+    const {
+      registerPerformerData = { requesting: false }, ui, settings, countries
+    } = this.props;
     const { isLoading } = this.state;
 
     return (
@@ -274,7 +286,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       >
                         <DatePicker
                           placeholder="Date of Birth"
-                          disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(14, 'year').endOf('day')}
+                          disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(18, 'year').endOf('day')}
                         />
                       </Form.Item>
                     </Col>
@@ -284,15 +296,13 @@ class RegisterPerformer extends PureComponent<IProps> {
                           showSearch
                           optionFilterProp="label"
                         >
-                          {ui.countries
-                            && ui.countries.length > 0
-                            && ui.countries.map((c) => (
-                              <Option value={c.code} key={c.code} label={c.name}>
-                                <img alt="country_flag" src={c.flag} width="25px" />
-                                {' '}
-                                {c.name}
-                              </Option>
-                            ))}
+                          {countries.map((c) => (
+                            <Option value={c.code} key={c.code} label={c.name}>
+                              <img alt="country_flag" src={c.flag} width="25px" />
+                              {' '}
+                              {c.name}
+                            </Option>
+                          ))}
                         </Select>
                       </Form.Item>
                     </Col>
@@ -363,7 +373,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       help="Your government issued ID card, National ID card, Passport or Driving license"
                     >
                       <div className="id-block">
-                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} />
+                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} uploadImmediately={false} />
                         <img alt="id-img" className="img-id" src="/static/front-id.png" />
                       </div>
                     </Form.Item>
@@ -374,7 +384,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       help="Your selfie with your ID and handwritten note"
                     >
                       <div className="id-block">
-                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'documentFile')} />
+                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'documentFile')} uploadImmediately={false} />
                         <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpg" />
                       </div>
                     </Form.Item>

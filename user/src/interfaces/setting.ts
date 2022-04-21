@@ -22,4 +22,5 @@ export interface ISettings {
   bitpayEnable: boolean;
   metaKeywords: string;
   metaDescription: string;
+  agoraEnable: boolean;
 }

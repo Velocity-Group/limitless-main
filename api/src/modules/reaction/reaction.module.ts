@@ -8,7 +8,7 @@ import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
 import { PerformerAssetsModule } from '../performer-assets/performer-assets.module';
-import { DeletePerformerReactionListener } from './listeners/user-delete.listener';
+import { DeletePerformerReactionListener, DeleteAssetsListener } from './listeners';
 import { FileModule } from '../file/file.module';
 
 @Module({
@@ -22,7 +22,7 @@ import { FileModule } from '../file/file.module';
     forwardRef(() => FeedModule),
     forwardRef(() => FileModule)
   ],
-  providers: [...reactionProviders, ReactionService, DeletePerformerReactionListener],
+  providers: [...reactionProviders, ReactionService, DeletePerformerReactionListener, DeleteAssetsListener],
   controllers: [ReactionController],
   exports: [ReactionService]
 })

@@ -1,19 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Tabs, Button, message } from 'antd';
+import { Button, message } from 'antd';
+import Tabs from 'src/components/common/base/tabs';
 import StreamMessenger from '@components/stream-chat/Messenger';
-import { IUser } from 'src/interfaces';
 import { getResponseError } from '@lib/utils';
 import { messageService } from 'src/services';
-import StreamingChatUsers from './streaming-chat-view';
 import './chat-box.less';
 
 interface IProps {
   resetAllStreamMessage?: Function;
   user?: any;
   activeConversation?: any;
-  totalParticipant?: number;
-  members?: IUser[];
-  hideMember?: boolean;
 }
 
 const checkPermission = (user, conversation) => {
@@ -26,10 +22,7 @@ const checkPermission = (user, conversation) => {
 const ChatBox = ({
   resetAllStreamMessage,
   user,
-  activeConversation,
-  totalParticipant,
-  members,
-  hideMember = false
+  activeConversation
 }: IProps) => {
   const [removing, setRemoving] = useState(false);
   const [canReset, setCanReset] = useState(false);
@@ -63,7 +56,7 @@ const ChatBox = ({
 
   return (
     <>
-      <div className={hideMember ? 'conversation-stream active' : 'conversation-stream'}>
+      <div className="conversation-stream">
         <Tabs defaultActiveKey="chat_content">
           <Tabs.TabPane tab="CHAT" key="chat_content">
             {activeConversation
@@ -72,11 +65,6 @@ const ChatBox = ({
               <StreamMessenger streamId={activeConversation.data.streamId} />
               ) : <p className="text-center">Let start a converstion</p>}
           </Tabs.TabPane>
-          {!hideMember && (
-          <Tabs.TabPane tab={`USERS (${totalParticipant || 0})`} key="chat_user">
-            <StreamingChatUsers members={members} />
-          </Tabs.TabPane>
-          )}
         </Tabs>
       </div>
       {canReset && (
@@ -95,12 +83,9 @@ const ChatBox = ({
 };
 
 ChatBox.defaultProps = {
-  totalParticipant: 0,
-  members: [],
   activeConversation: null,
   user: null,
-  resetAllStreamMessage: null,
-  hideMember: false
+  resetAllStreamMessage: null
 };
 
 export default ChatBox;

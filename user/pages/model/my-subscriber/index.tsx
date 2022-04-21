@@ -63,7 +63,7 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
       const {
         filter, sort, sortBy, pagination
       } = this.state;
-      await this.setState({ loading: true });
+      this.setState({ loading: true });
       const resp = await subscriptionService.search({
         ...filter,
         sort,
@@ -71,13 +71,13 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
         limit: pagination.pageSize,
         offset: (pagination.current - 1) * pagination.pageSize
       });
-      await this.setState({
+      this.setState({
         subscriptionList: resp.data.data,
         pagination: { ...pagination, total: resp.data.total }
       });
     } catch (error) {
       message.error(
-        getResponseError(error) || 'An error occured. Please try again.'
+        getResponseError(await error) || 'An error occured. Please try again.'
       );
     } finally {
       this.setState({ loading: false });

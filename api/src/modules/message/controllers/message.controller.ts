@@ -148,30 +148,10 @@ export class MessageController {
   async createStreamMessage(
     @Body() payload: MessageCreatePayload,
     @Param('conversationId') conversationId: string,
-    @Request() req: any
-  ): Promise<DataResponse<any>> {
-    const data = await this.messageService.createStreamMessageFromConversation(
-      conversationId,
-      payload,
-      {
-        source: req.authUser.source,
-        sourceId: req.authUser.sourceId
-      }
-    );
-    return DataResponse.ok(data);
-  }
-
-  @Post('/stream/public/conversations/:conversationId')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async createPublicStreamMessage(
-    @Body() payload: MessageCreatePayload,
-    @Param('conversationId') conversationId: string,
     @Request() req: any,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
-    const data = await this.messageService.createPublicStreamMessageFromConversation(
+    const data = await this.messageService.createStreamMessageFromConversation(
       conversationId,
       payload,
       {
@@ -187,7 +167,7 @@ export class MessageController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async deletePublicMessage(
+  async deleteMessage(
     @Param('messageId') messageId: string,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {

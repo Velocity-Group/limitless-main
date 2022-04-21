@@ -35,12 +35,12 @@ export class TableListEarning extends PureComponent<IProps> {
         dataIndex: 'type',
         render(type: string) {
           switch (type) {
-            case 'private_chat':
-              return <Tag color="violet">Private Chat</Tag>;
-            case 'group_chat':
-              return <Tag color="violet">Group Chat</Tag>;
+            // case 'private_chat':
+            //   return <Tag color="violet">Private Chat</Tag>;
+            // case 'group_chat':
+            //   return <Tag color="violet">Group Chat</Tag>;
             case 'public_chat':
-              return <Tag color="violet">Public Chat</Tag>;
+              return <Tag color="violet">Paid Streaming</Tag>;
             case 'feed':
               return <Tag color="green">Post</Tag>;
             case 'tip':
@@ -53,6 +53,8 @@ export class TableListEarning extends PureComponent<IProps> {
               return <Tag color="blue">Product</Tag>;
             case 'gallery':
               return <Tag color="success">Gallery</Tag>;
+            case 'stream_tip':
+              return <Tag color="orange">Streaming tip</Tag>;
           }
           return <Tag color="success">{type}</Tag>;
         }

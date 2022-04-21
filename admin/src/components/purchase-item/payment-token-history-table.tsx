@@ -42,6 +42,9 @@ const PaymentTableList = ({
           case 'performer':
             path = `/${record?.targetId}`;
             break;
+          case 'stream':
+            path = `/${record?.performerId}`;
+            break;
           default: path = '/home';
         }
         return (
@@ -124,17 +127,19 @@ const PaymentTableList = ({
           case 'product':
             return <Tag color="#FFCF00">Product</Tag>;
           case 'tip':
-            return <Tag color="#dc3545">Tip</Tag>;
+            return <Tag color="#dc3545">Model Tip</Tag>;
           case 'gift':
             return <Tag color="#dc2244">Gift</Tag>;
           case 'message':
             return <Tag color="#46b545">Message</Tag>;
           case 'public_chat':
-            return <Tag color="#46c5ae">Public Chat</Tag>;
+            return <Tag color="#46c5ae">Paid Streaming</Tag>;
           case 'group_chat':
             return <Tag color="#3f9c8b">Group Chat</Tag>;
           case 'private_chat':
             return <Tag color="#157160">Private Chat</Tag>;
+          case 'stream_tip':
+            return <Tag color="#157160">Streaming Tip</Tag>;
           default: return <Tag color="default">{type}</Tag>;
         }
       }

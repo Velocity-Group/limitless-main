@@ -3,7 +3,7 @@ import { Layout, message } from 'antd';
 import Head from 'next/head';
 import { HistoryOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
-import { purchaseTokenService } from 'src/services';
+import { tokenTransctionService } from 'src/services';
 import { ITransaction, IUIConfig } from 'src/interfaces';
 import { SearchFilter } from '@components/common/search-filter';
 import PaymentTableList from '@components/user/payment-token-history-table';
@@ -72,7 +72,7 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         filter, sort, sortBy, pagination
       } = this.state;
       await this.setState({ loading: true });
-      const resp = await purchaseTokenService.userSearch({
+      const resp = await tokenTransctionService.userSearch({
         ...filter,
         sort,
         sortBy,
@@ -104,10 +104,6 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
         text: 'All types'
       },
       {
-        key: 'tip',
-        text: 'Tip'
-      },
-      {
         key: 'feed',
         text: 'Post'
       },
@@ -122,11 +118,19 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       {
         key: 'video',
         text: 'Video'
+      },
+      {
+        key: 'tip',
+        text: 'Model Tip'
+      },
+      {
+        key: 'stream_tip',
+        text: 'Streaming Tip'
+      },
+      {
+        key: 'public_chat',
+        text: 'Paid Streaming'
       }
-      // {
-      //   key: 'message',
-      //   text: 'Message'
-      // }
     ];
     return (
       <Layout>

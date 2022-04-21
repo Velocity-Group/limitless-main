@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import Head from 'next/head';
 import Link from 'next/link';
 import Error from 'next/error';
-import { productService, purchaseTokenService, reactionService } from '@services/index';
+import { productService, tokenTransctionService, reactionService } from '@services/index';
 import { PerformerListProduct } from '@components/product/performer-list-product';
 import { PurchaseProductForm } from '@components/product/confirm-purchase';
 import { updateBalance } from '@redux/user/actions';
@@ -137,7 +137,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     }
     try {
       await this.setState({ submiting: true });
-      await purchaseTokenService.purchaseProduct(product._id, payload);
+      await tokenTransctionService.purchaseProduct(product._id, payload);
       message.success('Payment success');
       handleUpdateBalance({ token: -product.price });
       Router.replace('/user/token-transaction');

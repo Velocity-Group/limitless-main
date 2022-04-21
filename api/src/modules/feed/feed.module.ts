@@ -9,12 +9,13 @@ import {
 } from './controllers';
 import {
   ReactionFeedListener, CommentFeedListener, PollFeedListener, UpdatePerformerGenderListener,
-  DeletePerformerFeedListener
+  DeletePerformerFeedListener,
+  StreamFeedListener
 } from './listeners';
 import { FileModule } from '../file/file.module';
 import { PerformerModule } from '../performer/performer.module';
 import { ReactionModule } from '../reaction/reaction.module';
-import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
+import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
 
 @Module({
   imports: [
@@ -26,12 +27,12 @@ import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
     forwardRef(() => PerformerModule),
     forwardRef(() => ReactionModule),
     forwardRef(() => SubscriptionModule),
-    forwardRef(() => PurchasedItemModule)
+    forwardRef(() => TokenTransactionModule)
   ],
   providers: [...feedProviders, ...pollProviders, ...voteProviders,
     FeedService, FeedFileService,
     ReactionFeedListener, CommentFeedListener, PollFeedListener,
-    UpdatePerformerGenderListener, DeletePerformerFeedListener],
+    UpdatePerformerGenderListener, DeletePerformerFeedListener, StreamFeedListener],
   controllers: [PerformerFeedController, FeedFileController, UserFeedController],
   exports: [...feedProviders, FeedService, FeedFileService]
 })

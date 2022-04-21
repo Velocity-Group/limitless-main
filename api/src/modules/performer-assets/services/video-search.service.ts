@@ -1,7 +1,7 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { PageableData } from 'src/kernel';
-import { PurchasedItemSearchService } from 'src/modules/purchased-item/services';
+import { TokenTransactionSearchService } from 'src/modules/token-transaction/services';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
@@ -10,7 +10,7 @@ import { PerformerDto } from 'src/modules/performer/dtos';
 import { STATUS } from 'src/kernel/constants';
 import { uniq } from 'lodash';
 import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
-import { PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/purchased-item/constants';
+import { PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/token-transaction/constants';
 import { VideoDto } from '../dtos';
 import { VideoSearchRequest } from '../payloads';
 import { VideoModel } from '../models';
@@ -19,8 +19,8 @@ import { PERFORMER_VIDEO_MODEL_PROVIDER } from '../providers';
 @Injectable()
 export class VideoSearchService {
   constructor(
-    @Inject(forwardRef(() => PurchasedItemSearchService))
-    private readonly purchasedItemSearchService: PurchasedItemSearchService,
+    @Inject(forwardRef(() => TokenTransactionSearchService))
+    private readonly tokenTransactionSearchService: TokenTransactionSearchService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => SubscriptionService))
@@ -288,7 +288,7 @@ export class VideoSearchService {
         expiredAt: { $gt: new Date() },
         status: SUBSCRIPTION_STATUS.ACTIVE
       }) : [],
-      user?._id ? this.purchasedItemSearchService.findByQuery({
+      user?._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,
         targetId: { $in: videoIds },
         target: PURCHASE_ITEM_TARTGET_TYPE.VIDEO,

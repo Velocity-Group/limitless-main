@@ -26,27 +26,29 @@ interface IProps {
 }
 
 class MessageList extends PureComponent<IProps> {
-  messagesRef: any;
+  private messagesRef = createRef<HTMLDivElement>();
+
+  private resizeObserver: any;
 
   state = {
-    offset: 0
+    offset: 0,
+    onloadmore: false
   };
 
   async componentDidMount() {
     if (!this.messagesRef) this.messagesRef = createRef();
+
+    this.resizeObserver = new (window as any).ResizeObserver(this.onResize);
+    this.resizeObserver.observe(document.querySelector('.message-list-container'));
   }
 
-  async componentDidUpdate(prevProps) {
-    const { message, sendMessage } = this.props;
-    if ((prevProps.message.total === 0 && message.total !== 0) || (prevProps.message.total === message.total)) {
-      if (prevProps.sendMessage?.data?._id !== sendMessage?.data?._id) {
-        this.scrollToBottom(true);
-        return;
-      }
-      this.scrollToBottom(false);
+  componentWillUnmount() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
     }
   }
 
+  // eslint-disable-next-line react/sort-comp
   async handleScroll(conversation, event) {
     const {
       message: { fetching, items, total },
@@ -57,7 +59,7 @@ class MessageList extends PureComponent<IProps> {
     const ele = event.target;
     if (!canloadmore) return;
     if (ele.scrollTop === 0 && conversation._id && !fetching && canloadmore) {
-      await this.setState({ offset: offset + 1 });
+      await this.setState({ offset: offset + 1, onloadmore: true });
       loadMore({
         conversationId: conversation._id,
         limit: 25,
@@ -83,13 +85,13 @@ class MessageList extends PureComponent<IProps> {
       const previous = messages[i - 1];
       const current = messages[i];
       const next = messages[i + 1];
-      const isMine = current?.senderId === user?._id || user?.roles.includes('admin');
+      const isMine = current?.senderId === user?._id;
       const currentMoment = moment(current.createdAt);
       let prevBySameAuthor = false;
       let nextBySameAuthor = false;
       let startsSequence = true;
       let endsSequence = true;
-      let showTimestamp = true;
+      let showTimestamp = false;
       if (previous) {
         const previousMoment = moment(previous.createdAt);
         const previousDuration = moment.duration(
@@ -100,10 +102,11 @@ class MessageList extends PureComponent<IProps> {
         if (prevBySameAuthor && previousDuration.as('hours') < 1) {
           startsSequence = false;
         }
+      }
 
-        if (previousDuration.as('hours') < 1) {
-          showTimestamp = false;
-        }
+      if (previous && moment(current.createdAt).startOf('days').diff(moment(previous.createdAt).startOf('days')) > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        showTimestamp = true;
       }
 
       if (next) {
@@ -118,13 +121,13 @@ class MessageList extends PureComponent<IProps> {
       if (current._id) {
         tempMessages.push(
           <Message
-            onDelete={this.onDelete.bind(this, current._id)}
+            onDelete={() => this.onDelete(current._id)}
             isOwner={conversation.performerId === current.senderId}
             key={current.isDeleted ? `${current._id}_deleted_${i}` : `${current._id}_${i}`}
             isMine={isMine}
             startsSequence={startsSequence}
             endsSequence={endsSequence}
-            showTimestamp={showTimestamp}
+            showTimestamp={false}
             data={current}
           />
         );
@@ -144,14 +147,29 @@ class MessageList extends PureComponent<IProps> {
     type === 'deleted' && remove(message);
   };
 
-  scrollToBottom(toBot = true) {
+  onResize = () => {
+    const { onloadmore } = this.state;
+    if (onloadmore) {
+      this.setState({ onloadmore: false });
+    } else {
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom = () => {
     const { message: { fetching } } = this.props;
-    const { offset } = this.state;
-    if (!fetching && this.messagesRef && this.messagesRef.current) {
-      const ele = this.messagesRef.current;
-      window.setTimeout(() => {
-        ele.scrollTop = toBot ? ele.scrollHeight : (ele.scrollHeight / (offset + 1) - 150);
-      }, 300);
+    const { onloadmore } = this.state;
+
+    if (fetching || onloadmore) {
+      return;
+    }
+
+    if (this.messagesRef && this.messagesRef.current) {
+      const ele: HTMLDivElement = this.messagesRef.current;
+      ele.scroll({
+        top: ele.scrollHeight,
+        behavior: 'auto'
+      });
     }
   }
 
@@ -169,6 +187,7 @@ class MessageList extends PureComponent<IProps> {
       >
         <Event event={`message_created_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'created')} />
         <Event event={`message_deleted_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'deleted')} />
+        {/* <Event event={`user_joined_${conversation._id}`} handler={this.onUserJoined.bind(this)} /> */}
         {conversation && conversation._id && (
           <>
             <div className="message-list-container">

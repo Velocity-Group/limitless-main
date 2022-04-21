@@ -46,6 +46,8 @@ export class FeedModel extends Document {
 
   pinnedAt: Date;
 
+  targetId: ObjectId;
+
   createdAt: Date;
 
   updatedAt: Date;

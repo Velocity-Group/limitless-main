@@ -63,7 +63,10 @@ export const SETTING_KEYS = {
   AWS_S3_SECRET_ACCESS_KEY: 's3SecretAccessKey',
   AWS_S3_BUCKET_ENDPOINT: 's3BucketEnpoint',
   AWS_S3_BUCKET_NAME: 's3BucketName',
-  AWS_S3_ENABLE: 's3Enabled'
+  AWS_S3_ENABLE: 's3Enabled',
+  AGORA_APPID: 'agoraAppId',
+  AGORA_CERTIFICATE: 'agoraCertificate',
+  AGORA_ENABLE: 'agoraEnable'
 };
 
 export const MENU_SECTION = {

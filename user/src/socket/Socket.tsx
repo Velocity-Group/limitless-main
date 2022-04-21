@@ -2,9 +2,9 @@ import { Component, Children } from 'react';
 import SocketIO from 'socket.io-client';
 import { authService } from '@services/auth.service';
 import { connect } from 'react-redux';
+import { getGlobalConfig } from '@services/config';
 import { warning, debug } from './utils';
 import { SocketContext } from './SocketContext';
-import { getGlobalConfig } from '@services/config';
 
 interface ISocketProps {
   uri?: string;
@@ -22,7 +22,7 @@ class Socket extends Component<ISocketProps> {
 
   shouldComponentUpdate(nextProps: any) {
     const { loggedIn } = this.props;
-    if (nextProps.loggedIn === loggedIn) {
+    if (nextProps.loggedIn !== loggedIn) {
       this.connect();
     }
     return true;

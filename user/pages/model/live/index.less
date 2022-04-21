@@ -1,26 +1,27 @@
 @import '../../../style/vars.less';
 
-.stream-show {
+.stream-video {
   display: block;
 }
 
-.stream-hide {
-  display: none;
-}
-
 .stream-description {
-  margin: 10px 0;
+  margin: 20px 0;
   display: flex;
   width: 100%;
 }
 .stream-duration {
   display: flex;
-  justify-content: space-between;
+  justify-content: start;
   align-items: center;
   .anticon-clock-circle, .ant-rate-star-full .anticon {
     color: @theme-color;
   }
-  font-size: 11px;
+  font-size: 14px;
   color: @grey-color;
   margin: 0;
+
+
+  > * {
+    margin-right: 10px;
+  }
 }

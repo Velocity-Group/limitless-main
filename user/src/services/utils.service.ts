@@ -21,12 +21,8 @@ export class UtilsService extends APIRequest {
     return this.get('/phone-codes/list');
   }
 
-  heightList(): Promise<IResponse<string>> {
-    return this.get('/user-additional/heights');
-  }
-
-  weightList(): Promise<IResponse<string>> {
-    return this.get('/user-additional/weights');
+  bodyInfo() {
+    return this.get('/user-additional');
   }
 
   verifyRecaptcha(token: string) {

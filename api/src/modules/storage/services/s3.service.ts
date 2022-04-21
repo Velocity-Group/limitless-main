@@ -95,7 +95,7 @@ export class S3Service {
 
 @Injectable()
 export class S3ConfigurationService {
-  private s3ConfigurationOptions: S3ServiceConfigurationOptions = {
+  public static s3ConfigurationOptions: S3ServiceConfigurationOptions = {
     params: {}
   };
 
@@ -113,9 +113,9 @@ export class S3ConfigurationService {
     this.update();
   }
 
-  private subscribeChange(event: QueueEvent) {
+  private async subscribeChange(event: QueueEvent) {
     const { value, key } = event.data as SettingDto;
-    const { s3ConfigurationOptions: options } = this;
+    const options = S3ConfigurationService.s3ConfigurationOptions;
     switch (key) {
       case SETTING_KEYS.AWS_S3_ACCESS_KEY_ID:
         AWS.config.update({ accessKeyId: value });
@@ -126,11 +126,11 @@ export class S3ConfigurationService {
         this.setCredential({ ...options, secretAccessKey: value });
         break;
       case SETTING_KEYS.AWS_S3_BUCKET_ENDPOINT:
-        this.s3ConfigurationOptions.endpoint = value;
+        S3ConfigurationService.s3ConfigurationOptions.endpoint = value;
         this.setCredential({ ...options, endpoint: value });
         break;
       case SETTING_KEYS.AWS_S3_BUCKET_NAME:
-        this.s3ConfigurationOptions.params.Bucket = value;
+        S3ConfigurationService.s3ConfigurationOptions.params.Bucket = value;
         this.setBucket(value);
         break;
       case SETTING_KEYS.AWS_S3_REGION_NAME:
@@ -143,11 +143,11 @@ export class S3ConfigurationService {
   }
 
   private setCredential(options: S3ServiceConfigurationOptions) {
-    this.s3ConfigurationOptions = options;
+    S3ConfigurationService.s3ConfigurationOptions = options;
   }
 
   public getCredential(): S3ServiceConfigurationOptions {
-    return this.s3ConfigurationOptions;
+    return S3ConfigurationService.s3ConfigurationOptions;
   }
 
   private setBucket(Bucket: string) {

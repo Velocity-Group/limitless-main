@@ -115,6 +115,10 @@ export class PerformerService {
     return data;
   }
 
+  public async updateOne(query: any, params: any, options: any): Promise<any> {
+    return this.performerModel.updateOne(query, params, options);
+  }
+
   public async findByUsername(
     username: string,
     countryCode?: string,
@@ -211,6 +215,7 @@ export class PerformerService {
     dto.avatar = avatar ? FileDto.getPublicUrl(avatar.path) : null; // TODO - get default avatar
     dto.cover = cover ? FileDto.getPublicUrl(cover.path) : null;
     dto.welcomeVideoName = welcomeVideo ? welcomeVideo.name : null;
+    dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : null;
     if (idVerification) {
       let fileUrl = idVerification.getUrl(true);
       if (idVerification.server !== Storage.S3) {

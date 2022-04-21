@@ -7,7 +7,7 @@ import { TransactionSubscriptionListener } from './listeners/transaction-update.
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
-import { PurchasedItemModule } from '../purchased-item/purchased-item.module';
+import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
 import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
@@ -18,7 +18,7 @@ import { MailerModule } from '../mailer/mailer.module';
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule),
-    forwardRef(() => PurchasedItemModule),
+    forwardRef(() => TokenTransactionModule),
     forwardRef(() => MailerModule)
   ],
   providers: [...subscriptionProviders, SubscriptionService, TransactionSubscriptionListener],

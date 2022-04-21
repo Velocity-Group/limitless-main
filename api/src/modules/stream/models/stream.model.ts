@@ -2,25 +2,32 @@ import { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 export class StreamModel extends Document {
-  performerId?: ObjectId;
+  performerId: ObjectId;
 
-  userIds?: ObjectId[];
+  title: string;
 
-  streamIds?: string[];
+  description: string;
 
-  type?: string;
+  type: string;
 
-  sessionId?: string;
+  sessionId: string;
 
-  isStreaming?: number;
+  isStreaming: number;
 
-  streamingTime?: number;
+  streamingTime: number;
 
-  lastStreamingTime?: Date;
+  lastStreamingTime: Date;
 
-  isFree?: boolean;
+  isFree: boolean;
 
-  createdAt?: Date;
+  price: number;
 
-  updatedAt?: Date;
+  stats: {
+    members: number;
+    likes: number;
+  }
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }

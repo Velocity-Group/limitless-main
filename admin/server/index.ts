@@ -2,7 +2,7 @@ import next from 'next';
 import express from 'express';
 import routes from './routes';
 
-require('dotenv');
+require('dotenv').config();
 
 const port = parseInt(process.env.PORT || '8082', 10);
 const dev = process.env.NODE_ENV !== 'production';

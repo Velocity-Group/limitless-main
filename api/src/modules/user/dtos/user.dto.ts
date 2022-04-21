@@ -41,10 +41,9 @@ export class UserDto {
 
   roles: string[] = ['user'];
 
-  avatarId?: string | ObjectId;
+  avatarId?: ObjectId;
 
   stats: {
-    totalViewTime: number;
     totalSubscriptions: number;
   }
 
