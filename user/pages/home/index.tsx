@@ -213,8 +213,8 @@ class HomePage extends PureComponent<IProps> {
             </title>
           </Head>
           <div className="home-page">
+            <Banner banners={topBanners} />
             <div className="main-container">
-              <Banner banners={topBanners} />
               <div className="home-heading">
                 <h3>
                   HOME
@@ -250,18 +250,18 @@ class HomePage extends PureComponent<IProps> {
                     </div>
                   </div>
                   {!loadingFeed && !totalFeeds && (
-                  <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
-                    <Alert
-                      type="warning"
-                      message={(
-                        <a href="/model">
-                          <SearchOutlined />
-                          {' '}
-                          Find someone to follow
-                        </a>
-                      )}
-                    />
-                  </div>
+                    <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
+                      <Alert
+                        type="warning"
+                        message={(
+                          <a href="/model">
+                            <SearchOutlined />
+                            {' '}
+                            Find someone to follow
+                          </a>
+                        )}
+                      />
+                    </div>
                   )}
                   <ScrollListFeed
                     items={feeds}
