@@ -115,6 +115,10 @@ export class PerformerService {
     return data;
   }
 
+  public async updateOne(query: any, params: any, options: any): Promise<any> {
+    return this.performerModel.updateOne(query, params, options);
+  }
+
   public async findByUsername(
     username: string,
     countryCode?: string,

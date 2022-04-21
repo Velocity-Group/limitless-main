@@ -70,6 +70,14 @@ export class SubscriptionController {
     return DataResponse.ok(data);
   }
 
+  @Get('/admin/update-count-subscription')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async adminUpdateUserStats(): Promise<DataResponse<any>> {
+    const data = await this.subscriptionService.adminUpdateUserStats();
+    return DataResponse.ok({ data });
+  }
+
   @Get('/performer/search')
   @HttpCode(HttpStatus.OK)
   @Roles('performer')

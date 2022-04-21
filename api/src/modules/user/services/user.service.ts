@@ -46,6 +46,14 @@ export class UserService {
     return this.userModel.findOne(params);
   }
 
+  public async updateOne(query: any, params: any, options: any): Promise<any> {
+    return this.userModel.updateOne(query, params, options);
+  }
+
+  public async updateMany(query: any, params: any, options: any): Promise<any> {
+    return this.userModel.updateMany(query, params, options);
+  }
+
   public async findByEmail(email: string): Promise<UserModel | null> {
     if (!email) {
       return null;

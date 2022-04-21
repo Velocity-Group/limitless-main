@@ -401,4 +401,41 @@ export class SubscriptionService {
     const data = await this.subscriptionModel.findById(id);
     return data;
   }
+
+  public async adminUpdateUserStats(): Promise<any> {
+    try {
+      const [allUsers, allPerformers] = await Promise.all([
+        this.userService.find({}),
+        this.performerService.find({})
+      ]);
+      await Promise.all([
+        allUsers.map(async (user) => {
+          const totalSub = await this.subscriptionModel.count({
+            userId: user._id,
+            status: SUBSCRIPTION_STATUS.ACTIVE
+          });
+          await this.userService.updateOne({ _id: user._id }, {
+            $set: {
+              'stats.totalSubscriptions': totalSub
+            }
+          }, {});
+        }),
+        allPerformers.map(async (performer) => {
+          const totalSub = await this.subscriptionModel.count({
+            performerId: performer._id,
+            status: SUBSCRIPTION_STATUS.ACTIVE
+          });
+          await this.performerService.updateOne({ _id: performer._id }, {
+            $set: {
+              'stats.subscribers': totalSub
+            }
+          }, {});
+        })
+      ]);
+
+      return { success: true };
+    } catch (error) {
+      return { error };
+    }
+  }
 }
