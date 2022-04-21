@@ -1,11 +1,15 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const { readdirSync } = require('fs');
+const { readdirSync, existsSync } = require('fs');
 const { readFileSync } = require('fs');
 const { join, parse } = require('path');
 const { DB, COLLECTION } = require('./lib');
 
-const TEMPLATE_DIR = join(__dirname, '..', 'src', 'templates', 'emails');
+const defaultDir = join(__dirname, '..', 'src', 'templates', 'emails');
+
+const TEMPLATE_DIR = existsSync(defaultDir)
+  ? defaultDir
+  : join(__dirname, '..', 'dist', 'templates', 'emails');
 
 const templateMap = {
   'admin-payment-success': {
