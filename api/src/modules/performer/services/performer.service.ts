@@ -215,6 +215,7 @@ export class PerformerService {
     dto.avatar = avatar ? FileDto.getPublicUrl(avatar.path) : null; // TODO - get default avatar
     dto.cover = cover ? FileDto.getPublicUrl(cover.path) : null;
     dto.welcomeVideoName = welcomeVideo ? welcomeVideo.name : null;
+    dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : null;
     if (idVerification) {
       let fileUrl = idVerification.getUrl(true);
       if (idVerification.server !== Storage.S3) {
