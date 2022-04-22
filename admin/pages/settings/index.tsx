@@ -318,7 +318,6 @@ class Settings extends PureComponent {
               <Menu.Item key="commission">Commission</Menu.Item>
               {/* <Menu.Item key="s3">S3</Menu.Item> */}
               <Menu.Item key="ccbill">CCbill</Menu.Item>
-              <Menu.Item key="stripe">Stripe</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>
               {/* <Menu.Item key="recaptcha">Re-Captcha</Menu.Item> */}

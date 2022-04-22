@@ -30,7 +30,12 @@ export class CCBillService {
       transactionId, price, flexformId, salt, subAccountNumber, subscriptionType
     } = options;
     const initialPrice = price.toFixed(2);
-    const initialPeriod = subscriptionType === SUBSCRIPTION_TYPE.MONTHLY ? 30 : 365;
+    const initialPeriod = [
+      SUBSCRIPTION_TYPE.MONTHLY,
+      'monthly_subscription'
+    ].includes(subscriptionType)
+      ? 30
+      : 365;
     const currencyCode = '840'; // usd
     const numRebills = '99';
     if (!salt || !flexformId || !subAccountNumber || !transactionId || !initialPrice) {

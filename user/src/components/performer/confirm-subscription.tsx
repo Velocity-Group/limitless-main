@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import { PureComponent } from 'react';
 import {
-  Button, Avatar, Radio, Space
+  Button, Avatar
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import {
@@ -67,18 +67,6 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
               Cancel your subscription at any time
             </li>
           </ul>
-          <div className="text-center" style={{ margin: '10px 0' }}>
-            <Radio.Group onChange={(e) => this.setState({ gateway: e.target.value })} value={gateway}>
-              <Space size="large">
-                <Radio value="stripe" key="stripe">
-                  <img src="/static/stripe-icon.jpeg" height="40px" alt="stripe" />
-                </Radio>
-                <Radio value="ccbill" key="ccbill">
-                  <img src="/static/ccbill-ico.png" height="40px" alt="ccbill" />
-                </Radio>
-              </Space>
-            </Radio.Group>
-          </div>
         </div>
         <Button
           className="primary"

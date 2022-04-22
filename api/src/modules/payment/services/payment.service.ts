@@ -85,7 +85,7 @@ export class PaymentService {
     }
     const flexformId = performerPaymentSetting?.value?.flexformId || await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_FLEXFORM_ID);
     const subAccountNumber = performerPaymentSetting?.value?.subscriptionSubAccountNumber;
-    const salt = performerPaymentSetting?.value?.salt;
+    const salt = performerPaymentSetting?.value?.salt || await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SALT);
     if (!flexformId || !subAccountNumber || !salt) {
       throw new MissingConfigPaymentException();
     }
@@ -361,7 +361,7 @@ export class PaymentService {
     if (!transactionId) {
       throw new BadRequestException();
     }
-    if (isObjectId(transactionId)) {
+    if (!isObjectId(transactionId)) {
       return { ok: false };
     }
     const transaction = await this.TransactionModel.findById(

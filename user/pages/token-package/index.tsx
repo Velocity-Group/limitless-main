@@ -31,7 +31,7 @@ class TokenPackages extends PureComponent<IProps> {
     couponCode: '',
     openPurchaseModal: false,
     selectedPackage: null,
-    paymentGateway: 'stripe',
+    paymentGateway: 'ccbill',
     paymentUrl: '',
     coupon: null
   };
@@ -103,7 +103,7 @@ class TokenPackages extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, user, settings } = this.props;
+    const { ui, user } = this.props;
     const {
       list, searching, openPurchaseModal, submiting, couponCode,
       selectedPackage, paymentGateway, coupon, paymentUrl
@@ -170,23 +170,6 @@ class TokenPackages extends PureComponent<IProps> {
                   </div>
                 </div>
                 <div style={{ margin: '20px 0' }}>
-                  <div className="payment-gateway">
-                    {settings.ccbillEnable && (
-                    <div aria-hidden onClick={() => this.onChangepaymentGateway('ccbill')} className={paymentGateway === 'ccbill' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
-                      <a><img src="/static/ccbill-ico.png" alt="ccbill" width="100%" /></a>
-                    </div>
-                    )}
-                    {settings.stripeEnable && (
-                    <div aria-hidden onClick={() => this.onChangepaymentGateway('stripe')} className={paymentGateway === 'stripe' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
-                      <a><img src="/static/stripe-card.png" alt="stripe" width="100%" /></a>
-                    </div>
-                    )}
-                    {/* {settings.bitpayEnable && (
-                  <div aria-hidden onClick={() => this.onChangepaymentGateway('bitpay')} className={paymentGateway === 'bitpay' ? 'paymentGateway-item active' : 'paymentGateway-item'}>
-                    <a><img src="/static/bitpay-ico.png" alt="bitpay" width="65px" /></a>
-                  </div>
-                  )} */}
-                  </div>
                   <Row>
                     <Col span={18}>
                       <Input disabled={!!coupon} placeholder="Enter coupon code here" onChange={(e) => this.setState({ couponCode: e.target.value })} />
