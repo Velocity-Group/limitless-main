@@ -31,6 +31,70 @@ This product is private. do NOT copy or use if have not license.
 
 ### Change log
 
+- 1.3.0
+
+* FS-293	Model Go live
+
+* FS-294	Model Live streaming Features
+
+* FS-295	Models - Tips and Chats
+
+* FS-296	Streaming - Model Earnings
+
+* FS-297	Users - Live streaming view
+
+* FS-299	Type of users who can avail live streaming
+
+* FS-300	Live streaming Users - Chats and Tips
+
+* FS-301	Streaming feature - User Transaction History
+
+* FS-302	Admin -Individual commission rate for streaming
+
+* FS-303	Admin, token transactions with streaming tip filter
+
+* FS-90	Payout page decimal can be upto digits only
+
+* FS-194	Model intro video once edited by model cant be viewed, the video disappears
+
+* FS-217	The subscription is not auto renewal
+
+* FS-289	The number of subscribers are not getting displayed correctly
+
+* FS-305	Admin - streaming config in System Settings
+
+* FS-313	Fix code errors & documentation in Obfuscated version.
+
+* FS-318	Agora Live Streaming Integration
+
+* FS-323	Token and chat UI /UX changes
+
+* FS-324	Live streaming box UI/UX changes
+
+* FS-325	Live streaming Issues
+
+* FS-329	Second set of Live streaming issues
+
+* FS-330	Live streaming subscription should be autorenewal if the user has subscribed for free trail (free trail to auto renewal)
+
+* FS-331	The chat box notofication is shown as 0 on the home page, even though there is notification in chat
+
+* FS-316	Admins ->Models ->The individual commission rate should be blank or set to 0
+
+* FS-327	UI - The close button on the users profile is on left in production, it looks odd
+
+* FS-304	Streaming Admin -token transactions and token earnings  to include paid streaming and streaming tip
+
+* FS-328	SEO setting - If we add Code to the custom tag header , its not getting reflected
+
+* FS-315	Need to increase the file sizes of Media files
+
+* FS-332	Change the age filter starting from 18
+
+* FS-333	Model is online , but it says offline and that green color denoting online is missing
+
+* FS-334	When the video is in .Webm  format it takes a long time to convert to MP4
+
 - 1.2.0
 
 * FS-90	Payout page decimal can be upto digits only
