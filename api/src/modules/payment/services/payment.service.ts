@@ -521,6 +521,10 @@ export class PaymentService {
         transaction.status = PAYMENT_STATUS.SUCCESS;
         if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
           transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
+          // save total price for free subscription, renew to month subscription
+          // convert from cent to usd
+          transaction.totalPrice = data?.object?.amount / 100 || data?.object?.amount_received / 100 || 0;
+          transaction.originalPrice = data?.object?.amount / 100 || data?.object?.amount_received / 100 || 0;
         }
         await this.queueEventService.publish(
           new QueueEvent({
