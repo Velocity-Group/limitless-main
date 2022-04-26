@@ -95,6 +95,10 @@ This product is private. do NOT copy or use if have not license.
 
 * FS-334	When the video is in .Webm  format it takes a long time to convert to MP4
 
+* FS-335	Production server- chat box image frame is in blue - it should be in grey
+
+* FS-336	After subscription gets renewed from Free->Monthly its not showing in Earning USD history 
+
 - 1.2.0
 
 * FS-90	Payout page decimal can be upto digits only
