@@ -19,7 +19,7 @@ import Router from 'next/router';
 import { connect } from 'react-redux';
 import { registerPerformer, loginSocial } from '@redux/auth/actions';
 import { ISettings, IUIConfig, ICountry } from 'src/interfaces';
-import { ImageUpload } from '@components/file';
+import { ImageUploadModel } from '@components/file';
 import moment from 'moment';
 import GoogleLogin from 'react-google-login';
 import { authService, utilsService } from 'src/services';
@@ -72,7 +72,7 @@ class RegisterPerformer extends PureComponent<IProps> {
     }
   }
 
-  onFileReaded = (type, file: File) => {
+  onFileReaded = (file: File, type: string) => {
     if (file && type === 'idFile') {
       this.idVerificationFile = file;
     }
@@ -131,7 +131,6 @@ class RegisterPerformer extends PureComponent<IProps> {
       registerPerformerData = { requesting: false }, ui, settings, countries
     } = this.props;
     const { isLoading } = this.state;
-
     return (
       <Layout>
         <Head>
@@ -373,7 +372,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       help="Your government issued ID card, National ID card, Passport or Driving license"
                     >
                       <div className="id-block">
-                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'idFile')} uploadImmediately={false} />
+                        <ImageUploadModel onFileReaded={(f) => this.onFileReaded(f, 'idFile')} />
                         <img alt="id-img" className="img-id" src="/static/front-id.png" />
                       </div>
                     </Form.Item>
@@ -384,7 +383,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       help="Your selfie with your ID and handwritten note"
                     >
                       <div className="id-block">
-                        <ImageUpload onFileReaded={this.onFileReaded.bind(this, 'documentFile')} uploadImmediately={false} />
+                        <ImageUploadModel onFileReaded={(f) => this.onFileReaded(f, 'documentFile')} />
                         <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpg" />
                       </div>
                     </Form.Item>
