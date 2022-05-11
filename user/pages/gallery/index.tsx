@@ -178,8 +178,8 @@ class GalleryViewPage extends PureComponent<IProps> {
     try {
       const { gallery, user } = this.props;
       if (!user._id) {
-        message.error('Please log in');
-        Router.push('/auth/login');
+        message.error('Please log in!');
+        Router.push('/');
         return;
       }
       if (!user.stripeCardIds || !user.stripeCardIds.length) {

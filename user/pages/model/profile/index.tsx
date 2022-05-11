@@ -249,8 +249,8 @@ class PerformerProfile extends PureComponent<IProps> {
     const { performer, currentUser } = this.props;
     const { subscriptionType } = this.state;
     if (!currentUser._id) {
-      message.error('Please log in');
-      Router.push('/auth/login');
+      message.error('Please log in!');
+      Router.push('/');
       return;
     }
     if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
