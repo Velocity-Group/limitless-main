@@ -248,7 +248,7 @@ export class PaymentService {
     paymentTransaction.targetId = products[0].productId;
     paymentTransaction.performerId = null;
     paymentTransaction.type = PAYMENT_TYPE.TOKEN_PACKAGE;
-    paymentTransaction.totalPrice = couponInfo ? totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2)) : totalPrice;
+    paymentTransaction.totalPrice = couponInfo ? Number((totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2))).toFixed(2)) : totalPrice;
     paymentTransaction.products = products;
     paymentTransaction.paymentResponseInfo = {};
     paymentTransaction.status = PAYMENT_STATUS.CREATED;
