@@ -30,7 +30,7 @@ import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
 import { VideoPlayer } from '@components/common';
 import {
-  IPerformer, IUser, IUIConfig, IFeed, StreamSettings, ICountry
+  IPerformer, IUser, IUIConfig, IFeed, ICountry
 } from 'src/interfaces';
 import { shortenLargeNumber } from '@lib/index';
 import Link from 'next/link';
@@ -57,7 +57,6 @@ interface IProps {
   moreFeeds: Function;
   removeFeedSuccess: Function;
   updateBalance: Function;
-  settings: StreamSettings;
   countries: ICountry[];
 }
 
@@ -776,8 +775,7 @@ const mapStates = (state: any) => ({
   feedState: { ...state.feed.feeds },
   productState: { ...state.product.products },
   galleryState: { ...state.gallery.galleries },
-  currentUser: { ...state.user.current },
-  ...state.streaming
+  currentUser: { ...state.user.current }
 });
 
 const mapDispatch = {

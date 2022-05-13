@@ -8,18 +8,18 @@ interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
   router: NextRouter;
-  id?: string;
+  customId?: string;
 }
 class Footer extends PureComponent<IProps> {
   render() {
     const {
-      ui, currentUser, router, id
+      ui, currentUser, router, customId
     } = this.props;
     const menus = ui.menus && ui.menus.length > 0
       ? ui.menus.filter((m) => m.section === 'footer')
       : [];
     return (
-      <div className="main-footer" id={id || 'main-footer'}>
+      <div className="main-footer" id={customId || 'main-footer'}>
         <div className="main-container">
           <ul>
             {!currentUser._id ? (
@@ -88,4 +88,4 @@ const mapState = (state: any) => ({
   currentUser: state.user.current,
   ui: { ...state.ui }
 });
-export default withRouter(connect(mapState)(Footer));
+export default withRouter(connect(mapState)(Footer)) as any;
