@@ -71,7 +71,7 @@ async function auth(
         redirectLogin(ctx);
         return;
       }
-      if (!user.data.isPerformer && onlyPerformer && !noredirect) {
+      if (!user.data.isPerformer && onlyPerformer) {
         redirectLogin(ctx);
         return;
       }
