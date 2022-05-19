@@ -107,8 +107,8 @@ class SubscriptionPage extends PureComponent<IProps> {
     const { performerInfo: performer, subscriptionType } = selectedSubscription;
     const { currentUser } = this.props;
     if (!currentUser._id) {
-      message.error('Please log in');
-      Router.push('/auth/login');
+      message.error('Please log in!');
+      Router.push('/');
       return;
     }
     if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {

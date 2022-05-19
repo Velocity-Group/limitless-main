@@ -283,7 +283,7 @@ class HomePage extends PureComponent<IProps> {
                     <HomePerformers countries={countries} performers={randomPerformers} />
                     {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
                     <div className={!showFooter ? 'home-footer' : 'home-footer active'}>
-                      <HomeFooter id="home-footer" />
+                      <HomeFooter customId="home-footer" />
                     </div>
                   </div>
                 </div>

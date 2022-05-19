@@ -232,8 +232,8 @@ class FeedCard extends Component<IProps> {
   async subscribe() {
     const { feed, user } = this.props;
     if (!user._id) {
-      message.error('Please log in');
-      Router.push('/auth/login');
+      message.error('Please log in!');
+      Router.push('/');
       return;
     }
     if (user.isPerformer) return;

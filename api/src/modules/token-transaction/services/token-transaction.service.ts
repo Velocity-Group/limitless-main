@@ -68,7 +68,7 @@ export class TokenTransactionService {
     @Inject(forwardRef(() => StreamService))
     private readonly streamService: StreamService,
     @Inject(forwardRef(() => MessageService))
-    private readonly messageSerice: MessageService
+    private readonly messageService: MessageService
   ) {}
 
   public async findById(id: string | ObjectId) {
@@ -372,7 +372,7 @@ export class TokenTransactionService {
     );
     if (conversationId && streamType) {
       // send notification to room chat
-      await this.messageSerice.createStreamMessageFromConversation(
+      await this.messageService.createStreamMessageFromConversation(
         conversationId,
         {
           type: MESSAGE_TYPE.TIP,

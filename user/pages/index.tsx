@@ -1,22 +1,18 @@
 /* eslint-disable camelcase */
-import {
-  Form, Input, Button, Row, Col, Divider, Layout, message
-} from 'antd';
+import { Form, Input, Button, Row, Col, Divider, Layout, message } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
-import {
-  login, loginSuccess, loginSocial
-} from '@redux/auth/actions';
+import { login, loginSuccess, loginSocial } from '@redux/auth/actions';
 import { updateCurrentUser } from '@redux/user/actions';
 import { authService, userService } from '@services/index';
 import Link from 'next/link';
 import { ISettings, IUIConfig } from 'src/interfaces';
 import Router from 'next/router';
-import { TwitterOutlined } from '@ant-design/icons';
-import GoogleLogin from 'react-google-login';
+import { TwitterOutlined, GoogleOutlined } from '@ant-design/icons';
 import Loader from '@components/common/base/loader';
 import './auth/index.less';
+import GoogleLoginButton from '@components/auth/google-login-button';
 
 interface IProps {
   loginAuth: any;
@@ -45,7 +41,7 @@ class Login extends PureComponent<IProps> {
   state = {
     loginAs: 'user',
     isLoading: true
-  }
+  };
 
   async componentDidMount() {
     this.redirectLogin();
@@ -66,12 +62,12 @@ class Login extends PureComponent<IProps> {
   }
 
   async onGoogleLogin(resp: any) {
-    if (!resp?.tokenId) {
+    if (!resp?.credential) {
       return;
     }
     const { loginSocial: handleLogin } = this.props;
     const { loginAs } = this.state;
-    const payload = { tokenId: resp.tokenId, role: loginAs };
+    const payload = { tokenId: resp.credential, role: loginAs };
     try {
       await this.setState({ isLoading: true });
       const response = await (await authService.loginGoogle(payload)).data;
@@ -100,7 +96,12 @@ class Login extends PureComponent<IProps> {
       if (!user || !user.data || !user.data._id) return;
       handleLogin();
       handleUpdateUser(user.data);
-      user.data.isPerformer ? Router.push({ pathname: '/model/profile', query: { username: user.data.username || user.data._id } }, `/${user.data.username || user.data._id}`) : Router.push('/home');
+      user.data.isPerformer
+        ? Router.push(
+            { pathname: '/model/profile', query: { username: user.data.username || user.data._id } },
+            `/${user.data.username || user.data._id}`
+          )
+        : Router.push('/home');
     } catch {
       this.setState({ isLoading: false });
     }
@@ -149,70 +150,49 @@ class Login extends PureComponent<IProps> {
     return (
       <Layout>
         <Head>
-          <title>
-            {ui && ui.siteName}
-          </title>
+          <title>{ui && ui.siteName}</title>
           <meta name="keywords" content={settings && settings.metaKeywords} />
-          <meta
-            name="description"
-            content={settings && settings.metaDescription}
-          />
+          <meta name="description" content={settings && settings.metaDescription} />
           {/* OG tags */}
           <meta property="og:type" content="website" />
-          <meta
-            property="og:title"
-            content={ui && ui.siteName}
-          />
+          <meta property="og:title" content={ui && ui.siteName} />
           <meta property="og:image" content={ui && ui.logo} />
-          <meta
-            property="og:description"
-            content={settings && settings.metaDescription}
-          />
+          <meta property="og:description" content={settings && settings.metaDescription} />
           {/* Twitter tags */}
           <meta name="twitter:card" content="summary" />
-          <meta
-            name="twitter:title"
-            content={ui && ui.siteName}
-          />
+          <meta name="twitter:title" content={ui && ui.siteName} />
           <meta name="twitter:image" content={ui && ui.logo} />
-          <meta
-            name="twitter:description"
-            content={settings && settings.metaDescription}
-          />
+          <meta name="twitter:description" content={settings && settings.metaDescription} />
         </Head>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <div className="main-container">
           <div className="login-box">
             <Row>
-              <Col
-                xs={24}
-                sm={24}
-                md={12}
-                lg={12}
-              >
-                <div className="login-content left" style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null} />
+              <Col xs={24} sm={24} md={12} lg={12}>
+                <div
+                  className="login-content left"
+                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
+                />
               </Col>
-              <Col
-                xs={24}
-                sm={24}
-                md={12}
-                lg={12}
-              >
+              <Col xs={24} sm={24} md={12} lg={12}>
                 <div className="login-content right">
-                  <div className="login-logo"><a href="/">{ui.logo ? <img alt="logo" src={ui.logo} height="80px" /> : ui.siteName}</a></div>
-                  <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
+                  <div className="login-logo">
+                    <a href="/">{ui.logo ? <img alt="logo" src={ui.logo} height="80px" /> : ui.siteName}</a>
+                  </div>
+                  <p className="text-center">
+                    <small>Sign up to make money and interact with your fans!</small>
+                  </p>
                   <div className="social-login">
-                    <button type="button" disabled={!settings.twitterClientId} onClick={() => this.loginTwitter()} className="twitter-button">
-                      <TwitterOutlined />
-                      {' '}
-                      LOG IN / SIGN UP WITH TWITTER
+                    <button
+                      type="button"
+                      disabled={!settings.twitterClientId}
+                      onClick={() => this.loginTwitter()}
+                      className="twitter-button">
+                      <TwitterOutlined /> LOG IN / SIGN UP WITH TWITTER
                     </button>
-                    <GoogleLogin
-                      className="google-button"
+                    <GoogleLoginButton
                       clientId={settings.googleClientId}
-                      buttonText="LOG IN / SIGN UP WITH GOOGLE"
-                      onSuccess={this.onGoogleLogin.bind(this)}
-                      onFailure={this.onGoogleLogin.bind(this)}
-                      cookiePolicy="single_host_origin"
+                      onGoogleLogin={this.onGoogleLogin.bind(this)}
                     />
                   </div>
                   <Divider>Or</Divider>
@@ -221,62 +201,46 @@ class Login extends PureComponent<IProps> {
                       name="normal_login"
                       className="login-form"
                       initialValues={{ remember: true }}
-                      onFinish={this.handleLogin.bind(this)}
-                    >
+                      onFinish={this.handleLogin.bind(this)}>
                       <Form.Item
                         name="username"
                         validateTrigger={['onChange', 'onBlur']}
-                        rules={[
-                          { required: true, message: 'Email or Username is missing' }
-                        ]}
-                      >
+                        rules={[{ required: true, message: 'Email or Username is missing' }]}>
                         <Input disabled={loginAuth.requesting || isLoading} placeholder="Email or Username" />
                       </Form.Item>
                       <Form.Item
                         name="password"
                         validateTrigger={['onChange', 'onBlur']}
-                        rules={[
-                          { required: true, message: 'Please enter your password!' }
-                        ]}
-                      >
+                        rules={[{ required: true, message: 'Please enter your password!' }]}>
                         <Input.Password disabled={loginAuth.requesting || isLoading} placeholder="Password" />
                       </Form.Item>
                       <p style={{ padding: '0 20px' }}>
                         <Link
                           href={{
                             pathname: '/auth/forgot-password'
-                          }}
-                        >
+                          }}>
                           <a className="sub-text">Forgot password?</a>
                         </Link>
                       </p>
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                       <Form.Item style={{ textAlign: 'center' }}>
-                        <Button disabled={loginAuth.requesting || isLoading} loading={loginAuth.requesting || isLoading} type="primary" htmlType="submit" className="login-form-button">
+                        <Button
+                          disabled={loginAuth.requesting || isLoading}
+                          loading={loginAuth.requesting || isLoading}
+                          type="primary"
+                          htmlType="submit"
+                          className="login-form-button">
                           LOG IN
                         </Button>
                         <p style={{ fontSize: 11 }}>
-                          Visit
-                          {' '}
-                          <a href="/page/help">Help Center</a>
-                          {' '}
-                          for any help if you are not able to login with your existing
-                          {' '}
-                          {ui?.siteName || 'Fanso'}
-                          {' '}
-                          account
+                          Visit <a href="/page/help">Help Center</a> for any help if you are not able to login with your
+                          existing {ui?.siteName || 'Fanso'} account
                         </p>
                         <Divider style={{ margin: '15px 0' }} />
-                        <p style={{ marginBottom: 5 }}>
-                          Don&apos;t have an account yet?
-                        </p>
+                        <p style={{ marginBottom: 5 }}>Don&apos;t have an account yet?</p>
                         <p>
                           <Link href="/auth/register">
-                            <a>
-                              Sign up for
-                              {' '}
-                              {ui?.siteName}
-                            </a>
+                            <a>Sign up for {ui?.siteName}</a>
                           </Link>
                         </p>
                       </Form.Item>
@@ -300,6 +264,9 @@ const mapStatesToProps = (state: any) => ({
 });
 
 const mapDispatchToProps = {
-  login, loginSocial, loginSuccess, updateCurrentUser
+  login,
+  loginSocial,
+  loginSuccess,
+  updateCurrentUser
 };
 export default connect(mapStatesToProps, mapDispatchToProps)(Login);
