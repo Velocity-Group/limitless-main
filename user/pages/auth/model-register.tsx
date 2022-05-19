@@ -1,16 +1,5 @@
 /* eslint-disable prefer-promise-reject-errors */
-import {
-  Row,
-  Col,
-  Button,
-  Layout,
-  Form,
-  Input,
-  Select,
-  message,
-  DatePicker,
-  Divider
-} from 'antd';
+import { Row, Col, Button, Layout, Form, Input, Select, message, DatePicker, Divider } from 'antd';
 import { TwitterOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import Link from 'next/link';
@@ -21,9 +10,9 @@ import { registerPerformer, loginSocial } from '@redux/auth/actions';
 import { ISettings, IUIConfig, ICountry } from 'src/interfaces';
 import { ImageUploadModel } from '@components/file';
 import moment from 'moment';
-import GoogleLogin from 'react-google-login';
 import { authService, utilsService } from 'src/services';
 import './index.less';
+import GoogleLoginButton from '@components/auth/google-login-button';
 
 const { Option } = Select;
 
@@ -33,7 +22,7 @@ interface IProps {
   registerPerformer: Function;
   ui: IUIConfig;
   settings: ISettings;
-  countries: ICountry[]
+  countries: ICountry[];
 }
 
 class RegisterPerformer extends PureComponent<IProps> {
@@ -46,9 +35,7 @@ class RegisterPerformer extends PureComponent<IProps> {
   documentVerificationFile = null;
 
   static async getInitialProps() {
-    const [countries] = await Promise.all([
-      utilsService.countriesList()
-    ]);
+    const [countries] = await Promise.all([utilsService.countriesList()]);
     return {
       countries: countries?.data || []
     };
@@ -60,11 +47,17 @@ class RegisterPerformer extends PureComponent<IProps> {
 
   componentDidUpdate(prevProps) {
     const { registerPerformerData, ui } = this.props;
-    if (!prevProps?.registerPerformerData?.success && prevProps?.registerPerformerData?.success !== registerPerformerData?.success) {
+    if (
+      !prevProps?.registerPerformerData?.success &&
+      prevProps?.registerPerformerData?.success !== registerPerformerData?.success
+    ) {
       message.success(
         <div>
           <h4>{`Thank you for applying to be an ${ui?.siteName || 'Fanso'} creator!`}</h4>
-          <p>{registerPerformerData?.data?.message || 'Your application will be processed withing 24 to 48 hours, most times sooner. You will get an email notification sent to your email address with the status update.'}</p>
+          <p>
+            {registerPerformerData?.data?.message ||
+              'Your application will be processed withing 24 to 48 hours, most times sooner. You will get an email notification sent to your email address with the status update.'}
+          </p>
         </div>,
         15
       );
@@ -79,14 +72,14 @@ class RegisterPerformer extends PureComponent<IProps> {
     if (file && type === 'documentFile') {
       this.documentVerificationFile = file;
     }
-  }
+  };
 
   async onGoogleLogin(resp: any) {
-    if (!resp?.tokenId) {
+    if (!resp?.credential) {
       return;
     }
     const { loginSocial: handleLogin } = this.props;
-    const payload = { tokenId: resp.tokenId, role: 'performer' };
+    const payload = { tokenId: resp.credential, role: 'performer' };
     try {
       await this.setState({ isLoading: true });
       const response = await (await authService.loginGoogle(payload)).data;
@@ -115,7 +108,10 @@ class RegisterPerformer extends PureComponent<IProps> {
       await this.setState({ isLoading: true });
       const resp = await (await authService.loginTwitter()).data;
       if (resp && resp.url) {
-        authService.setTwitterToken({ oauthToken: resp.oauthToken, oauthTokenSecret: resp.oauthTokenSecret }, 'performer');
+        authService.setTwitterToken(
+          { oauthToken: resp.oauthToken, oauthTokenSecret: resp.oauthTokenSecret },
+          'performer'
+        );
         window.location.href = resp.url;
       }
     } catch (e) {
@@ -127,39 +123,39 @@ class RegisterPerformer extends PureComponent<IProps> {
   }
 
   render() {
-    const {
-      registerPerformerData = { requesting: false }, ui, settings, countries
-    } = this.props;
+    const { registerPerformerData = { requesting: false }, ui, settings, countries } = this.props;
     const { isLoading } = this.state;
     return (
       <Layout>
         <Head>
-          <title>
-            {ui && ui.siteName}
-            {' '}
-            | Model Sign Up
-          </title>
+          <title>{ui && ui.siteName} | Model Sign Up</title>
         </Head>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <div className="main-container">
           <div className="login-box register-box">
             <div className="text-center">
               <span className="title">Model Sign Up</span>
             </div>
-            <p className="text-center"><small>Sign up to make money and interact with your fans!</small></p>
+            <p className="text-center">
+              <small>Sign up to make money and interact with your fans!</small>
+            </p>
             <div className="social-login">
-              <button type="button" disabled={!settings.twitterClientId} onClick={() => this.loginTwitter()} className="twitter-button">
-                <TwitterOutlined />
-                {' '}
-                SIGN UP WITH TWITTER
+              <button
+                type="button"
+                disabled={!settings.twitterClientId}
+                onClick={() => this.loginTwitter()}
+                className="twitter-button">
+                <TwitterOutlined /> SIGN UP WITH TWITTER
               </button>
-              <GoogleLogin
+              <GoogleLoginButton clientId={settings.googleClientId} onGoogleLogin={this.onGoogleLogin.bind(this)} />
+              {/* <GoogleLogin
                 className="google-button"
                 clientId={settings.googleClientId}
                 buttonText="SIGN UP WITH GOOGLE"
                 onSuccess={this.onGoogleLogin.bind(this)}
                 onFailure={this.onGoogleLogin.bind(this)}
                 cookiePolicy="single_host_origin"
-              />
+              /> */}
             </div>
             <Divider>Or</Divider>
             <Form
@@ -170,15 +166,9 @@ class RegisterPerformer extends PureComponent<IProps> {
                 dateOfBirth: ''
               }}
               onFinish={this.register}
-              scrollToFirstError
-            >
+              scrollToFirstError>
               <Row>
-                <Col
-                  xs={24}
-                  sm={24}
-                  md={14}
-                  lg={14}
-                >
+                <Col xs={24} sm={24} md={14} lg={14}>
                   <Row>
                     <Col span={12}>
                       <Form.Item
@@ -190,11 +180,9 @@ class RegisterPerformer extends PureComponent<IProps> {
                             pattern: new RegExp(
                               /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                             ),
-                            message:
-                              'First name can not contain number and special character'
+                            message: 'First name can not contain number and special character'
                           }
-                        ]}
-                      >
+                        ]}>
                         <Input placeholder="First name" />
                       </Form.Item>
                     </Col>
@@ -208,11 +196,9 @@ class RegisterPerformer extends PureComponent<IProps> {
                             pattern: new RegExp(
                               /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                             ),
-                            message:
-                              'Last name can not contain number and special character'
+                            message: 'Last name can not contain number and special character'
                           }
-                        ]}
-                      >
+                        ]}>
                         <Input placeholder="Last name" />
                       </Form.Item>
                     </Col>
@@ -224,15 +210,13 @@ class RegisterPerformer extends PureComponent<IProps> {
                           { required: true, message: 'Please input your display name!' },
                           {
                             pattern: new RegExp(/^(?=.*\S).+$/g),
-                            message:
-                              'Display name can not contain only whitespace'
+                            message: 'Display name can not contain only whitespace'
                           },
                           {
                             min: 3,
                             message: 'Display name must containt at least 3 characters'
                           }
-                        ]}
-                      >
+                        ]}>
                         <Input placeholder="Display name" />
                       </Form.Item>
                     </Col>
@@ -244,12 +228,10 @@ class RegisterPerformer extends PureComponent<IProps> {
                           { required: true, message: 'Please input your username!' },
                           {
                             pattern: new RegExp(/^[a-z0-9]+$/g),
-                            message:
-                              'Username must contain only lowercase alphanumerics only!'
+                            message: 'Username must contain only lowercase alphanumerics only!'
                           },
                           { min: 3, message: 'username must containt at least 3 characters' }
-                        ]}
-                      >
+                        ]}>
                         <Input placeholder="Username" />
                       </Form.Item>
                     </Col>
@@ -267,8 +249,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                             required: true,
                             message: 'Please input your E-mail!'
                           }
-                        ]}
-                      >
+                        ]}>
                         <Input placeholder="Email address" />
                       </Form.Item>
                     </Col>
@@ -281,25 +262,21 @@ class RegisterPerformer extends PureComponent<IProps> {
                             required: true,
                             message: 'Select your date of birth'
                           }
-                        ]}
-                      >
+                        ]}>
                         <DatePicker
                           placeholder="Date of Birth"
-                          disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(18, 'year').endOf('day')}
+                          disabledDate={currentDate =>
+                            currentDate && currentDate > moment().subtract(18, 'year').endOf('day')
+                          }
                         />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
                       <Form.Item name="country" rules={[{ required: true }]}>
-                        <Select
-                          showSearch
-                          optionFilterProp="label"
-                        >
-                          {countries.map((c) => (
+                        <Select showSearch optionFilterProp="label">
+                          {countries.map(c => (
                             <Option value={c.code} key={c.code} label={c.name}>
-                              <img alt="country_flag" src={c.flag} width="25px" />
-                              {' '}
-                              {c.name}
+                              <img alt="country_flag" src={c.flag} width="25px" /> {c.name}
                             </Option>
                           ))}
                         </Select>
@@ -309,12 +286,17 @@ class RegisterPerformer extends PureComponent<IProps> {
                       <Form.Item
                         name="gender"
                         validateTrigger={['onChange', 'onBlur']}
-                        rules={[{ required: true, message: 'Please select your gender' }]}
-                      >
+                        rules={[{ required: true, message: 'Please select your gender' }]}>
                         <Select>
-                          <Option value="male" key="male">Male</Option>
-                          <Option value="female" key="female">Female</Option>
-                          <Option value="transgender" key="trans">Trans</Option>
+                          <Option value="male" key="male">
+                            Male
+                          </Option>
+                          <Option value="female" key="female">
+                            Female
+                          </Option>
+                          <Option value="transgender" key="trans">
+                            Trans
+                          </Option>
                         </Select>
                       </Form.Item>
                     </Col>
@@ -325,11 +307,11 @@ class RegisterPerformer extends PureComponent<IProps> {
                         rules={[
                           {
                             pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
-                            message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                            message:
+                              'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
                           },
                           { required: true, message: 'Please input your password!' }
-                        ]}
-                      >
+                        ]}>
                         <Input.Password placeholder="Password" />
                       </Form.Item>
                     </Col>
@@ -351,28 +333,21 @@ class RegisterPerformer extends PureComponent<IProps> {
                               return Promise.reject('Passwords do not match together!');
                             }
                           })
-                        ]}
-                      >
+                        ]}>
                         <Input type="password" placeholder="Confirm password" />
                       </Form.Item>
                     </Col>
                   </Row>
                 </Col>
-                <Col
-                  xs={24}
-                  sm={24}
-                  md={10}
-                  lg={10}
-                >
+                <Col xs={24} sm={24} md={10} lg={10}>
                   <div className="register-form">
                     <Form.Item
                       labelCol={{ span: 24 }}
                       name="idVerificationId"
                       className="model-photo-verification"
-                      help="Your government issued ID card, National ID card, Passport or Driving license"
-                    >
+                      help="Your government issued ID card, National ID card, Passport or Driving license">
                       <div className="id-block">
-                        <ImageUploadModel onFileReaded={(f) => this.onFileReaded(f, 'idFile')} />
+                        <ImageUploadModel onFileReaded={f => this.onFileReaded(f, 'idFile')} />
                         <img alt="id-img" className="img-id" src="/static/front-id.png" />
                       </div>
                     </Form.Item>
@@ -380,10 +355,9 @@ class RegisterPerformer extends PureComponent<IProps> {
                       labelCol={{ span: 24 }}
                       name="documentVerificationId"
                       className="model-photo-verification"
-                      help="Your selfie with your ID and handwritten note"
-                    >
+                      help="Your selfie with your ID and handwritten note">
                       <div className="id-block">
-                        <ImageUploadModel onFileReaded={(f) => this.onFileReaded(f, 'documentFile')} />
+                        <ImageUploadModel onFileReaded={f => this.onFileReaded(f, 'documentFile')} />
                         <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpg" />
                       </div>
                     </Form.Item>
@@ -397,18 +371,18 @@ class RegisterPerformer extends PureComponent<IProps> {
                   disabled={registerPerformerData.requesting || isLoading}
                   loading={registerPerformerData.requesting || isLoading}
                   className="login-form-button"
-                  style={{ maxWidth: 300 }}
-                >
+                  style={{ maxWidth: 300 }}>
                   CREATE YOUR ACCOUNT
                 </Button>
                 <p>
-                  By signing up you agree to our
-                  {' '}
-                  <a href="/page/term-of-service" target="_blank">Terms of Service</a>
-                  {' '}
-                  and
-                  {' '}
-                  <a href="/page/privacy-policy" target="_blank">Privacy Policy</a>
+                  By signing up you agree to our{' '}
+                  <a href="/page/term-of-service" target="_blank">
+                    Terms of Service
+                  </a>{' '}
+                  and{' '}
+                  <a href="/page/privacy-policy" target="_blank">
+                    Privacy Policy
+                  </a>
                   , and confirm that you are at least 18 years old.
                 </p>
                 <p>

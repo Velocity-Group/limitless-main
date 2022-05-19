@@ -1,8 +1,5 @@
 /* eslint-disable prefer-promise-reject-errors */
-import {
-  Row, Col, Button, Layout, Form, Input, message,
-  Divider
-} from 'antd';
+import { Row, Col, Button, Layout, Form, Input, message, Divider } from 'antd';
 import { PureComponent } from 'react';
 import Link from 'next/link';
 import { registerFan, loginSocial } from '@redux/auth/actions';
@@ -12,8 +9,8 @@ import { ISettings, IUIConfig } from 'src/interfaces';
 // import { GoogleReCaptcha } from '@components/common';
 import { TwitterOutlined } from '@ant-design/icons';
 import { authService } from '@services/auth.service';
-import GoogleLogin from 'react-google-login';
 import './index.less';
+import GoogleLoginButton from '@components/auth/google-login-button';
 
 interface IProps {
   ui: IUIConfig;
@@ -32,7 +29,7 @@ class FanRegister extends PureComponent<IProps> {
 
   state = {
     isLoading: false
-  }
+  };
 
   handleRegister = (data: any) => {
     const { registerFan: handleRegister } = this.props;
@@ -52,11 +49,11 @@ class FanRegister extends PureComponent<IProps> {
   }
 
   async onGoogleLogin(resp: any) {
-    if (!resp?.tokenId) {
+    if (!resp?.credential) {
       return;
     }
     const { loginSocial: handleLogin } = this.props;
-    const payload = { tokenId: resp.tokenId, role: 'user' };
+    const payload = { tokenId: resp.credential, role: 'user' };
     try {
       await this.setState({ isLoading: true });
       const response = await (await authService.loginGoogle(payload)).data;
@@ -86,64 +83,56 @@ class FanRegister extends PureComponent<IProps> {
   }
 
   render() {
-    const {
-      ui, registerFanData, settings
-    } = this.props;
+    const { ui, registerFanData, settings } = this.props;
     const { requesting: submiting } = registerFanData;
     const { isLoading } = this.state;
     return (
       <Layout>
         <Head>
-          <title>
-            {ui && ui.siteName}
-            {' '}
-            | Sign up
-          </title>
+          <title>{ui && ui.siteName} | Sign up</title>
         </Head>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <div className="main-container">
           <div className="login-box">
             <p className="text-center">
               <small>
-                Do not create an account on this page if you are a model. Models must create an account on
-                {' '}
+                Do not create an account on this page if you are a model. Models must create an account on{' '}
                 <a href="/auth/model-register">this link</a>
               </small>
             </p>
             <Row>
-              <Col
-                xs={24}
-                sm={24}
-                md={6}
-                lg={12}
-              >
+              <Col xs={24} sm={24} md={6} lg={12}>
                 <div
                   className="login-content left"
                   style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
                 />
               </Col>
-              <Col
-                xs={24}
-                sm={24}
-                md={18}
-                lg={12}
-              >
+              <Col xs={24} sm={24} md={18} lg={12}>
                 <div className="login-content right">
                   <div className="title">Fan Sign Up</div>
-                  <p className="text-center"><small>Sign up to interact with your idols!</small></p>
+                  <p className="text-center">
+                    <small>Sign up to interact with your idols!</small>
+                  </p>
                   <div className="social-login">
-                    <button type="button" disabled={!settings.twitterClientId} onClick={() => this.loginTwitter()} className="twitter-button">
-                      <TwitterOutlined />
-                      {' '}
-                      SIGN UP WITH TWITTER
+                    <button
+                      type="button"
+                      disabled={!settings.twitterClientId}
+                      onClick={() => this.loginTwitter()}
+                      className="twitter-button">
+                      <TwitterOutlined /> SIGN UP WITH TWITTER
                     </button>
-                    <GoogleLogin
+                    <GoogleLoginButton
+                      clientId={settings.googleClientId}
+                      onGoogleLogin={this.onGoogleLogin.bind(this)}
+                    />
+                    {/* <GoogleLogin
                       className="google-button"
                       clientId={settings.googleClientId}
                       buttonText="SIGN UP WITH GOOGLE"
                       onSuccess={this.onGoogleLogin.bind(this)}
                       onFailure={this.onGoogleLogin.bind(this)}
                       cookiePolicy="single_host_origin"
-                    />
+                    /> */}
                   </div>
                   <Divider>Or</Divider>
                   <div className="login-form">
@@ -152,8 +141,7 @@ class FanRegister extends PureComponent<IProps> {
                       name="member_register"
                       initialValues={{ remember: true, gender: 'male' }}
                       onFinish={this.handleRegister.bind(this)}
-                      scrollToFirstError
-                    >
+                      scrollToFirstError>
                       <Form.Item
                         name="firstName"
                         validateTrigger={['onChange', 'onBlur']}
@@ -163,11 +151,9 @@ class FanRegister extends PureComponent<IProps> {
                             pattern: new RegExp(
                               /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                             ),
-                            message:
-                              'First name can not contain number and special character'
+                            message: 'First name can not contain number and special character'
                           }
-                        ]}
-                      >
+                        ]}>
                         <Input placeholder="First name" />
                       </Form.Item>
                       <Form.Item
@@ -179,11 +165,9 @@ class FanRegister extends PureComponent<IProps> {
                             pattern: new RegExp(
                               /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                             ),
-                            message:
-                              'Last name can not contain number and special character'
+                            message: 'Last name can not contain number and special character'
                           }
-                        ]}
-                      >
+                        ]}>
                         <Input placeholder="Last name" />
                       </Form.Item>
                       <Form.Item
@@ -198,8 +182,7 @@ class FanRegister extends PureComponent<IProps> {
                             required: true,
                             message: 'Please input your email address!'
                           }
-                        ]}
-                      >
+                        ]}>
                         <Input placeholder="Email address" />
                       </Form.Item>
                       <Form.Item
@@ -208,11 +191,11 @@ class FanRegister extends PureComponent<IProps> {
                         rules={[
                           {
                             pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
-                            message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                            message:
+                              'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
                           },
                           { required: true, message: 'Please enter your password!' }
-                        ]}
-                      >
+                        ]}>
                         <Input.Password placeholder="Password" />
                       </Form.Item>
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
@@ -222,18 +205,18 @@ class FanRegister extends PureComponent<IProps> {
                           htmlType="submit"
                           className="login-form-button"
                           disabled={submiting || isLoading}
-                          loading={submiting || isLoading}
-                        >
+                          loading={submiting || isLoading}>
                           SIGN UP
                         </Button>
                         <p>
-                          By signing up you agree to our
-                          {' '}
-                          <a href="/page/terms-of-service" target="_blank">Terms of Service</a>
-                          {' '}
-                          and
-                          {' '}
-                          <a href="/page/privacy-policy" target="_blank">Privacy Policy</a>
+                          By signing up you agree to our{' '}
+                          <a href="/page/terms-of-service" target="_blank">
+                            Terms of Service
+                          </a>{' '}
+                          and{' '}
+                          <a href="/page/privacy-policy" target="_blank">
+                            Privacy Policy
+                          </a>
                           , and confirm that you are at least 18 years old.
                         </p>
                         <p>
