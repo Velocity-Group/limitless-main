@@ -36,7 +36,8 @@ class SubscriptionPage extends PureComponent<IProps> {
     sortBy: 'updatedAt',
     filter: {},
     openSubscriptionModal: false,
-    selectedSubscription: null
+    selectedSubscription: null,
+    paymentUrl: ''
   };
 
   componentDidMount() {
@@ -101,7 +102,7 @@ class SubscriptionPage extends PureComponent<IProps> {
     this.setState({ openSubscriptionModal: true, selectedSubscription: subscription });
   }
 
-  async subscribe() {
+  async subscribe(paymentGateway = 'ccbill') {
     const { selectedSubscription } = this.state;
     const { performerInfo: performer, subscriptionType } = selectedSubscription;
     const { currentUser } = this.props;
@@ -110,20 +111,24 @@ class SubscriptionPage extends PureComponent<IProps> {
       Router.push('/auth/login');
       return;
     }
-    if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
+    if ((paymentGateway === 'stripe' && !currentUser?.stripeCardIds) || (paymentGateway === 'stripe' && !currentUser.stripeCardIds.length)) {
       message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
     }
     try {
       await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
-        paymentGateway: 'stripe',
-        stripeCardId: currentUser.stripeCardIds[0]
+        paymentGateway,
+        stripeCardId: currentUser.stripeCardIds && currentUser.stripeCardIds[0]
       });
-      this.setState({ openSubscriptionModal: false });
+      if (paymentGateway === 'ccbill') {
+        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -133,7 +138,7 @@ class SubscriptionPage extends PureComponent<IProps> {
 
   render() {
     const {
-      subscriptionList, pagination, loading, submiting, openSubscriptionModal, selectedSubscription
+      subscriptionList, pagination, loading, submiting, openSubscriptionModal, selectedSubscription, paymentUrl
     } = this.state;
     const { ui } = this.props;
     return (
@@ -163,20 +168,24 @@ class SubscriptionPage extends PureComponent<IProps> {
             />
           </div>
           <Modal
-            centered
             key="subscribe_performer"
+            className="subscription-modal"
+            width={!paymentUrl ? 500 : 1200}
+            centered
             title={null}
             visible={openSubscriptionModal}
-            confirmLoading={submiting}
             footer={null}
-            onCancel={() => this.setState({ openSubscriptionModal: false })}
+            onCancel={() => this.setState({ openSubscriptionModal: false, paymentUrl: '' })}
+            destroyOnClose
           >
-            <ConfirmSubscriptionPerformerForm
-              type={selectedSubscription?.subscriptionType || 'monthly'}
-              performer={selectedSubscription?.performerInfo}
-              submiting={submiting}
-              onFinish={this.subscribe.bind(this)}
-            />
+            {!paymentUrl ? (
+              <ConfirmSubscriptionPerformerForm
+                type={selectedSubscription.subscriptionType || 'monthly'}
+                performer={selectedSubscription?.performerInfo}
+                submiting={submiting}
+                onFinish={this.subscribe.bind(this)}
+              />
+            ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '88vh' }} src={paymentUrl} />}
           </Modal>
           {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
         </div>

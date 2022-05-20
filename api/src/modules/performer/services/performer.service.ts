@@ -382,7 +382,7 @@ export class PerformerService {
       // TODO - check for other storaged
       data.avatarPath = avatar.path;
     }
-    data.username = data.username.trim().toLowerCase();
+    data.username = data.username.trim().toLowerCase() || `model${StringHelper.randomString(8, '0123456789')}`;
     data.email = data.email.toLowerCase();
     if (!data.name) {
       data.name = data.firstName && data.lastName ? [data.firstName, data.lastName].join(' ') : 'No_display_name';
