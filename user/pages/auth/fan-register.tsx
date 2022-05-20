@@ -33,10 +33,6 @@ class FanRegister extends PureComponent<IProps> {
 
   handleRegister = (data: any) => {
     const { registerFan: handleRegister } = this.props;
-    // if (!this.recaptchaSuccess && ui.enableGoogleReCaptcha) {
-    //   message.error('Are you a robot?');
-    //   return;
-    // }
     handleRegister(data);
   };
 
@@ -91,7 +87,6 @@ class FanRegister extends PureComponent<IProps> {
         <Head>
           <title>{ui && ui.siteName} | Sign up</title>
         </Head>
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <div className="main-container">
           <div className="login-box">
             <p className="text-center">
@@ -123,7 +118,8 @@ class FanRegister extends PureComponent<IProps> {
                     </button>
                     <GoogleLoginButton
                       clientId={settings.googleClientId}
-                      onGoogleLogin={this.onGoogleLogin.bind(this)}
+                      onSuccess={this.onGoogleLogin.bind(this)}
+                      onFailure={this.onGoogleLogin.bind(this)}
                     />
                     {/* <GoogleLogin
                       className="google-button"
