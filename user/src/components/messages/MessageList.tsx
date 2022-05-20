@@ -35,13 +35,6 @@ class MessageList extends PureComponent<IProps> {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ offset: 0 });
     }
-    if ((prevProps.message.total === 0 && message.total !== 0) || (prevProps.message.total === message.total)) {
-      if (prevProps.sendMessage?.data?._id !== sendMessage?.data?._id) {
-        this.scrollToBottom(true);
-        return;
-      }
-      this.scrollToBottom(false);
-    }
   }
 
   async handleScroll(conversation, event) {
@@ -62,6 +55,7 @@ class MessageList extends PureComponent<IProps> {
 
  renderMessages = () => {
    const { message, currentUser, conversation } = this.props;
+   const { offset } = this.state;
    const recipientInfo = conversation && conversation.recipientInfo;
    const messages = message.items;
    let i = 0;
@@ -121,16 +115,16 @@ class MessageList extends PureComponent<IProps> {
      // Proceed to the next message.
      i += 1;
    }
+   !offset && this.scrollToBottom();
    return tempMessages;
  };
 
- scrollToBottom(toBot = true) {
+ scrollToBottom() {
    const { message: { fetching } } = this.props;
-   const { offset } = this.state;
    if (!fetching && this.messagesRef && this.messagesRef.current) {
      const ele = this.messagesRef.current;
      window.setTimeout(() => {
-       ele.scrollTop = toBot ? ele.scrollHeight : (ele.scrollHeight / (offset + 1) - 150);
+       ele.scrollTop = ele.scrollHeight;
      }, 300);
    }
  }
