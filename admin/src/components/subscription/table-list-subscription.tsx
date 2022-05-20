@@ -70,20 +70,20 @@ export const TableListSubscription = ({
       title: 'Expiry Date',
       dataIndex: 'expiredAt',
       sorter: true,
+      render(date: Date, record) {
+        return <span>{record.status !== 'active' && formatDate(date, 'LL')}</span>;
+      }
+    },
+    {
+      title: 'start Date”',
+      dataIndex: 'createdAt',
+      sorter: true,
       render(date: Date) {
         return <span>{formatDate(date, 'LL')}</span>;
       }
     },
     {
-      title: 'Subscription start Date”',
-      dataIndex: 'startRecurringDate',
-      sorter: true,
-      render(date: Date, record) {
-        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
-      }
-    },
-    {
-      title: 'Renews On',
+      title: 'Renewal Date',
       dataIndex: 'nextRecurringDate',
       sorter: true,
       render(date: Date, record) {
