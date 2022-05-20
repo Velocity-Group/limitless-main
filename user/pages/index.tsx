@@ -164,7 +164,6 @@ class Login extends PureComponent<IProps> {
           <meta name="twitter:image" content={ui && ui.logo} />
           <meta name="twitter:description" content={settings && settings.metaDescription} />
         </Head>
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <div className="main-container">
           <div className="login-box">
             <Row>
@@ -192,7 +191,8 @@ class Login extends PureComponent<IProps> {
                     </button>
                     <GoogleLoginButton
                       clientId={settings.googleClientId}
-                      onGoogleLogin={this.onGoogleLogin.bind(this)}
+                      onSuccess={this.onGoogleLogin.bind(this)}
+                      onFailure={this.onGoogleLogin.bind(this)}
                     />
                   </div>
                   <Divider>Or</Divider>

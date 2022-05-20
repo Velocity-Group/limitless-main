@@ -130,7 +130,6 @@ class RegisterPerformer extends PureComponent<IProps> {
         <Head>
           <title>{ui && ui.siteName} | Model Sign Up</title>
         </Head>
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <div className="main-container">
           <div className="login-box register-box">
             <div className="text-center">
@@ -147,15 +146,11 @@ class RegisterPerformer extends PureComponent<IProps> {
                 className="twitter-button">
                 <TwitterOutlined /> SIGN UP WITH TWITTER
               </button>
-              <GoogleLoginButton clientId={settings.googleClientId} onGoogleLogin={this.onGoogleLogin.bind(this)} />
-              {/* <GoogleLogin
-                className="google-button"
+              <GoogleLoginButton
                 clientId={settings.googleClientId}
-                buttonText="SIGN UP WITH GOOGLE"
                 onSuccess={this.onGoogleLogin.bind(this)}
                 onFailure={this.onGoogleLogin.bind(this)}
-                cookiePolicy="single_host_origin"
-              /> */}
+              />
             </div>
             <Divider>Or</Divider>
             <Form
