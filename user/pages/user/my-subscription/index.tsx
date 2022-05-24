@@ -180,7 +180,7 @@ class SubscriptionPage extends PureComponent<IProps> {
           >
             {!paymentUrl ? (
               <ConfirmSubscriptionPerformerForm
-                type={selectedSubscription.subscriptionType || 'monthly'}
+                type={selectedSubscription?.subscriptionType || 'monthly'}
                 performer={selectedSubscription?.performerInfo}
                 submiting={submiting}
                 onFinish={this.subscribe.bind(this)}

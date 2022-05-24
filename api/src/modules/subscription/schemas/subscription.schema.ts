@@ -25,7 +25,7 @@ const subscriptionSchema = new mongoose.Schema({
   },
   paymentGateway: {
     type: String,
-    default: 'stripe',
+    default: 'ccbill',
     index: true
   },
   status: {

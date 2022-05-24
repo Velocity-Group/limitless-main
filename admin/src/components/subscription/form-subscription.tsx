@@ -112,7 +112,7 @@ export class FormSubscription extends PureComponent<IProps> {
         <Form.Item
           name="expiredAt"
           label="Expried Date"
-          rules={[{ required: true, message: 'Please input select expried date of subscription!' }]}
+          rules={[{ required: true, message: 'Please input select expiry date!' }]}
         >
           <DatePicker format="YYYY-MM-DD" disabledDate={disabledDate} disabled={isDisabledExpired} />
         </Form.Item>

@@ -57,11 +57,11 @@ export const TableListSubscription = ({
       render(subscriptionType: string) {
         switch (subscriptionType) {
           case 'monthly':
-            return <Tag color="orange">Monthly Subscription</Tag>;
+            return <Tag color="orange">Monthly</Tag>;
           case 'yearly':
-            return <Tag color="purple">Yearly Subscription</Tag>;
+            return <Tag color="purple">Yearly</Tag>;
           case 'free':
-            return <Tag color="red">Free Subscription</Tag>;
+            return <Tag color="red">Free</Tag>;
           default: return <Tag color="orange">{subscriptionType}</Tag>;
         }
       }
