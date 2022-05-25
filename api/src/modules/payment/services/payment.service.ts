@@ -473,7 +473,59 @@ export class PaymentService {
       ]);
       return { success: true };
     }
-    return { success: false };
+    if (resp?.data && resp?.data.includes('"results"\n"0"\n')) {
+      throw new HttpException('The requested action failed.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-1"\n')) {
+      throw new HttpException('The arguments provided to authenticate the merchant were invalid or missing.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-2"\n')) {
+      throw new HttpException('The subscription id provided was invalid or the subscription type is not supported by the requested action.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-3"\n')) {
+      throw new HttpException('No record was found for the given subscription.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-4"\n')) {
+      throw new HttpException('The given subscription was not for the account the merchant was authenticated on.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-5"\n')) {
+      throw new HttpException('The arguments provided for the requested action were invalid or missing.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-6"\n')) {
+      throw new HttpException('The requested action was invalid', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-7"\n')) {
+      throw new HttpException('There was an internal error or a database error and the requested action could not complete.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-8"\n')) {
+      throw new HttpException('The IP Address the merchant was attempting to authenticate on was not in the valid range.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-9"\n')) {
+      throw new HttpException('The merchant’s account has been deactivated for use on the Datalink system or the merchant is not permitted to perform the requested action', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-10"\n')) {
+      throw new HttpException('The merchant has not been set up to use the Datalink system.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-11"\n')) {
+      throw new HttpException('Subscription is not eligible for a discount, recurring price less than $5.00.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-12"\n')) {
+      throw new HttpException('The merchant has unsuccessfully logged into the system 3 or more times in the last hour. The merchant should wait an hour before attempting to login again and is advised to review the login information.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-15"\n')) {
+      throw new HttpException('Merchant over refund threshold', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-16"\n')) {
+      throw new HttpException('Merchant over void threshold', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-23"\n')) {
+      throw new HttpException('Transaction limit reached', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-24"\n')) {
+      throw new HttpException('Purchase limit reached', 400);
+    }
+
+    throw new HttpException('Cancel subscription has been fail, please try again later', 400);
   }
 
   public async stripeSubscriptionWebhook(payload: Record<string, any>) {
