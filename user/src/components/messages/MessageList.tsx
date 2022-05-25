@@ -19,22 +19,29 @@ interface IProps {
 }
 
 class MessageList extends PureComponent<IProps> {
-  messagesRef: any;
+  private messagesRef = createRef<HTMLDivElement>();
+
+  private resizeObserver: any;
 
   state = {
     offset: 0
   }
 
-  async componentDidMount() {
-    if (!this.messagesRef) this.messagesRef = createRef();
+  componentDidMount() {
+    this.resizeObserver = new (window as any).ResizeObserver(this.scrollToBottom);
+    this.resizeObserver.observe(document.querySelector('.message-list-container'));
   }
 
-  async componentDidUpdate(prevProps) {
-    const { conversation, message, sendMessage } = this.props;
+  componentDidUpdate(prevProps) {
+    const { conversation } = this.props;
     if (prevProps.conversation && prevProps.conversation._id !== conversation._id) {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ offset: 0 });
     }
+  }
+
+  componentWillUnmount() {
+    this.resizeObserver && this.resizeObserver.disconnect();
   }
 
   async handleScroll(conversation, event) {
@@ -55,7 +62,6 @@ class MessageList extends PureComponent<IProps> {
 
  renderMessages = () => {
    const { message, currentUser, conversation } = this.props;
-   const { offset } = this.state;
    const recipientInfo = conversation && conversation.recipientInfo;
    const messages = message.items;
    let i = 0;
@@ -115,24 +121,27 @@ class MessageList extends PureComponent<IProps> {
      // Proceed to the next message.
      i += 1;
    }
-   !offset && this.scrollToBottom();
    return tempMessages;
  };
 
- scrollToBottom() {
+ scrollToBottom = () => {
    const { message: { fetching } } = this.props;
-   if (!fetching && this.messagesRef && this.messagesRef.current) {
-     const ele = this.messagesRef.current;
-     window.setTimeout(() => {
-       ele.scrollTop = ele.scrollHeight;
-     }, 300);
+   if (fetching) {
+     return;
+   }
+
+   if (this.messagesRef && this.messagesRef.current) {
+     const ele: HTMLDivElement = this.messagesRef.current;
+     ele.scroll({
+       top: ele.scrollHeight,
+       behavior: 'auto'
+     });
    }
  }
 
  render() {
    const { conversation, message } = this.props;
    const { fetching } = message;
-   if (!this.messagesRef) this.messagesRef = createRef();
    return (
      <div className="message-list" ref={this.messagesRef} onScroll={this.handleScroll.bind(this, conversation)}>
        {conversation && conversation._id
