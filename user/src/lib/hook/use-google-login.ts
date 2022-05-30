@@ -35,6 +35,19 @@ const useGoogleLogin = ({
     }
   }
 
+  function renderButtonSignIn(e = null) {
+    if (e) {
+      e.preventDefault();
+    }
+    if (loaded) {
+      const google = (window as any).google;
+      google.accounts.id.renderButton(
+        document.getElementById('btnLoginWithGoogle'), // Ensure the element exist and it is a div to display correcctly
+        { theme: 'outline', size: 'large' } // Customization attributes
+      );
+    }
+  }
+
   useEffect(() => {
     let unmounted = false;
     const onLoadFailure = onScriptLoadFailure || onFailure;
@@ -72,7 +85,7 @@ const useGoogleLogin = ({
     }
   }, [loaded]);
 
-  return { signIn, loaded };
+  return { signIn, loaded, renderButtonSignIn };
 };
 
 export default useGoogleLogin;
