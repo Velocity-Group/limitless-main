@@ -195,8 +195,8 @@
   }
 }
 .home-footer {
-  transform: translate(9999px);
-  transition: all 0.5s ease-in-out;
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
   .main-footer {
     ul li {
       font-size: 11px;
@@ -207,7 +207,7 @@
   }
 
   &.active {
-    transform: translate(0);
+    opacity: 1;
   }
 
   @media screen and (max-width: @mobile-screen) {
