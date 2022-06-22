@@ -96,13 +96,13 @@ const PayoutRequestForm = ({
       )}
       <Form.Item label="Select payout method" name="paymentAccountType">
         <Select>
-          {settings?.stripeEnable && (
+          {/* {settings?.stripeEnable && (
           <Select.Option value="stripe" key="stripe">
             <img src="/static/stripe-icon.jpeg" width="30px" alt="stripe" />
             {' '}
             Stripe
           </Select.Option>
-          )}
+          )} */}
           <Select.Option value="banking" key="banking">
             <img src="/static/banking-ico.png" width="30px" alt="banking" />
             {' '}
