@@ -15,6 +15,10 @@ interface IProps {
     key: string;
     text?: string;
   }[];
+  subscriptionTypes?: {
+    key: string;
+    text?: string;
+  }[];
   searchWithPerformer?: boolean;
   searchWithKeyword?: boolean;
   dateRange?: boolean;
@@ -30,7 +34,8 @@ export class SearchFilter extends PureComponent<IProps> {
       searchWithKeyword,
       dateRange,
       isFree,
-      onSubmit
+      onSubmit,
+      subscriptionTypes
     } = this.props;
     return (
       <Row className="search-filter">
@@ -68,6 +73,22 @@ export class SearchFilter extends PureComponent<IProps> {
               defaultValue=""
             >
               {type.map((s) => (
+                <Select.Option key={s.key} value={s.key}>
+                  {s.text || s.key}
+                </Select.Option>
+              ))}
+            </Select>
+          </Col>
+        ) : null}
+        {subscriptionTypes && subscriptionTypes.length ? (
+          <Col lg={8} md={8} xs={12}>
+            <Select
+              onChange={(val) => this.setState({ subscriptionType: val }, () => onSubmit(this.state))}
+              style={{ width: '100%' }}
+              placeholder="Select type"
+              defaultValue=""
+            >
+              {subscriptionTypes.map((s) => (
                 <Select.Option key={s.key} value={s.key}>
                   {s.text || s.key}
                 </Select.Option>
