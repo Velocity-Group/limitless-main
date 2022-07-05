@@ -4,9 +4,9 @@ import {
 } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
-import { orderProviders } from './providers';
-import { OrderService } from './services';
-import { OrderController } from './controllers';
+import { orderProviders, shippingAddressProviders } from './providers';
+import { OrderService, ShippingAddressService } from './services';
+import { OrderController, ShippingAddressController } from './controllers';
 import { OrderListener } from './listeners';
 import { UserModule } from '../user/user.module';
 import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
@@ -28,14 +28,18 @@ import { FileModule } from '../file/file.module';
   ],
   providers: [
     ...orderProviders,
+    ...shippingAddressProviders,
     OrderService,
-    OrderListener
+    OrderListener,
+    ShippingAddressService
   ],
-  controllers: [OrderController],
+  controllers: [
+    OrderController,
+    ShippingAddressController
+  ],
   exports: [
     ...orderProviders,
-    OrderService,
-    OrderListener
+    OrderService
   ]
 })
-export class OrderModule {}
+export class OrderModule { }
