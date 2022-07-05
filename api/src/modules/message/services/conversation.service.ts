@@ -219,8 +219,7 @@ export class ConversationService {
         subscriptions = await this.subscriptionService.findSubscriptionList({
           performerId: { $in: pIds },
           userId: sender.sourceId,
-          expiredAt: { $gt: new Date() },
-          status: SUBSCRIPTION_STATUS.ACTIVE
+          expiredAt: { $gt: new Date() }
         });
         blockCountries = await this.performerBlockService.findBlockCountriesByQuery({ sourceId: { $in: pIds } });
         blockedUsers = await this.performerBlockService.listByQuery({ sourceId: { $in: pIds }, targetId: sender.sourceId });

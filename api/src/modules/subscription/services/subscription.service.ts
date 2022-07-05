@@ -40,67 +40,8 @@ export class SubscriptionService {
     private readonly userService: UserService,
     @Inject(SUBSCRIPTION_MODEL_PROVIDER)
     private readonly subscriptionModel: Model<SubscriptionModel>
-    // private readonly agenda: AgendaService,
-    // private readonly mailerService: MailerService
   ) {
-    // this.defineJobs();
   }
-
-  // private async defineJobs() {
-  //   const collection = (this.agenda as any)._collection;
-  //   await collection.deleteMany({
-  //     name: {
-  //       $in: [
-  //         CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY
-  //       ]
-  //     }
-  //   });
-  //   this.agenda.define(CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY, { }, this.checkSubscriptionsAndNotify.bind(this));
-  //   this.agenda.every('24 hours', CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY, {});
-  // }
-
-  // private async checkSubscriptionsAndNotify(job: any, done: any): Promise<void> {
-  //   try {
-  //     const total = await this.subscriptionModel.countDocuments({
-  //       expiredAt: { $lt: new Date() },
-  //       status: SUBSCRIPTION_STATUS.ACTIVE
-  //     });
-  //     for (let i = 0; i <= total / 99; i += 1) {
-  //       const subscriptions = await this.subscriptionModel.find({
-  //         expiredAt: { $lt: new Date() },
-  //         status: SUBSCRIPTION_STATUS.ACTIVE
-  //       }).limit(99).skip(i * 99);
-  //       const userIds = subscriptions.map((f) => f.userId);
-  //       const users = await this.userService.find({ _id: { $in: uniq(userIds) } });
-  //       const performerIds = subscriptions.map((f) => f.performerId);
-  //       const performers = await this.performerService.find({ _id: { $in: uniq(performerIds) } });
-  //       await Promise.all(subscriptions.map((sub) => {
-  //         const user = users.find((p) => `${p._id}` === `${sub.userId}`);
-  //         const performer = performers.find((p) => `${p._id}` === `${sub.performerId}`);
-  //         if (user && user.email && performer && sub.subscriptionType === SUBSCRIPTION_TYPE.FREE) {
-  //           // mailer
-  //           this.mailerService.send({
-  //             subject: `Free trial subscription ${performer?.name || performer?.username} has been expired`,
-  //             to: user.email,
-  //             data: {
-  //               performerName: performer.name || performer.username,
-  //               userName: user.name || user.username
-  //             },
-  //             template: 'free-subscription-expired'
-  //           });
-  //         }
-  //         // eslint-disable-next-line no-param-reassign
-  //         sub.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-  //         return sub.save();
-  //       }));
-  //     }
-  //   } catch (e) {
-  //     // eslint-disable-next-line no-console
-  //     console.log('Check expired subscriptions & mailer', e);
-  //   } finally {
-  //     done();
-  //   }
-  // }
 
   public async updateSubscriptionId({ userId, performerId, transactionId }, subscriptionId: string) {
     let subscription = await this.subscriptionModel.findOne({ userId, performerId });
@@ -125,11 +66,6 @@ export class SubscriptionService {
 
   public async findSubscriptionList(query: any) {
     const data = await this.subscriptionModel.find(query);
-    return data;
-  }
-
-  public async countSubscriptions(query: any) {
-    const data = await this.subscriptionModel.countDocuments(query);
     return data;
   }
 
@@ -207,6 +143,12 @@ export class SubscriptionService {
       const Ids = usersSearch ? usersSearch.map((u) => u._id) : [];
       query.userId = { $in: Ids };
     }
+    if (req.fromDate && req.toDate) {
+      query.createdAt = {
+        $gt: new Date(req.fromDate),
+        $lte: new Date(req.toDate)
+      };
+    }
     let sort = {
       updatedAt: -1
     } as any;
@@ -269,6 +211,13 @@ export class SubscriptionService {
       query.subscriptionType = req.subscriptionType;
     }
 
+    if (req.fromDate && req.toDate) {
+      query.createdAt = {
+        $gt: new Date(req.fromDate),
+        $lte: new Date(req.toDate)
+      };
+    }
+
     let sort = {
       updatedAt: -1
     } as any;
@@ -325,6 +274,12 @@ export class SubscriptionService {
     if (req.subscriptionType) {
       query.subscriptionType = req.subscriptionType;
     }
+    if (req.fromDate && req.toDate) {
+      query.createdAt = {
+        $gt: new Date(req.fromDate),
+        $lte: new Date(req.toDate)
+      };
+    }
     let sort = {
       updatedAt: -1
     } as any;
@@ -377,8 +332,7 @@ export class SubscriptionService {
     return this.subscriptionModel.countDocuments({
       performerId,
       userId,
-      expiredAt: { $gt: new Date() },
-      status: SUBSCRIPTION_STATUS.ACTIVE
+      expiredAt: { $gt: new Date() }
     });
   }
 
@@ -389,11 +343,6 @@ export class SubscriptionService {
 
   public async performerTotalSubscriptions(performerId: string | ObjectId) {
     const data = await this.subscriptionModel.countDocuments({ performerId, expiredAt: { $gt: new Date() } });
-    return data;
-  }
-
-  public async findAllPerformerSubscriptions(performerId: string | ObjectId) {
-    const data = await this.subscriptionModel.find({ performerId });
     return data;
   }
 

@@ -156,8 +156,7 @@ export class FeedService {
       user && user._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
         performerId: { $in: performerIds },
-        expiredAt: { $gt: new Date() },
-        status: SUBSCRIPTION_STATUS.ACTIVE
+        expiredAt: { $gt: new Date() }
       }) : [],
       user && user._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,
@@ -403,8 +402,7 @@ export class FeedService {
     const [subscriptions] = await Promise.all([
       user ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
-        expiredAt: { $gt: new Date() },
-        status: SUBSCRIPTION_STATUS.ACTIVE
+        expiredAt: { $gt: new Date() }
       }) : []
     ]);
     const performerIds = subscriptions.map((s) => s.performerId);
