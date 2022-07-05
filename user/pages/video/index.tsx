@@ -425,7 +425,7 @@ class VideoViewPage extends PureComponent<IProps> {
             </div>
             )}
             {((!video.isSale && isSubscribed && !video.isSchedule) || (video.isSale && isBought && !video.isSchedule)) && (
-            <div className="vid-group">
+            <>
               {video.processing ? (
                 <div className="vid-processing">
                   <div className="text-center">
@@ -435,7 +435,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   </div>
                 </div>
               ) : <VideoPlayer {...videoJsOptions} />}
-            </div>
+            </>
             )}
           </div>
         </div>

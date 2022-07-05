@@ -103,7 +103,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
     try {
       await this.setState({ submiting: true });
       const body = {
-        // paymentAccountType: data.paymentAccountType,
+        paymentAccountType: data.paymentAccountType,
         requestTokens: data.requestTokens,
         requestNote: data.requestNote,
         source: 'performer'

@@ -278,9 +278,8 @@ class Header extends PureComponent<IProps> {
                         {' '}
                         {shortenLargeNumber(user?.stats?.subscribers || 0)}
                         {' '}
-                        Followers
+                        Subscribers
                       </a>
-
                     </Link>
                   ) : (
                     <Link href="/user/my-subscription">
