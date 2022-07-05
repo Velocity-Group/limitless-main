@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
@@ -401,12 +402,23 @@ export class FileService {
       let newAbsolutePath = respVideo.toPath;
       let newPath = respVideo.toPath.replace(publicDir, '');
 
-      const meta = await this.videoService.getMetaData(videoPath);
-      const { width, height } = meta.streams[0];
+      const vidmeta = await this.videoService.getMetaData(videoPath);
+      const meta1 = vidmeta.streams[0];
+      const meta2 = vidmeta.streams[1];
+      let {
+        width, height, duration
+      } = meta1;
+      if (!width && !height) {
+        width = meta2.width;
+        height = meta2.height;
+      }
+      if (!duration) {
+        duration = meta2.duration;
+      }
       const respThumb = await this.videoService.createThumbs(videoPath, {
         toFolder: videoDir,
-        size: options?.size || (width && height ? `${width}x${height}` : '640x360'),
-        count: options?.count || 3
+        size: options?.size || (width && height && `${width}x${height}`),
+        count: options?.count || 1
       });
       let thumbnails: any = [];
       // check s3 settings
@@ -463,7 +475,7 @@ export class FileService {
             absolutePath: newAbsolutePath,
             path: newPath,
             thumbnails,
-            duration: parseInt(meta.format.duration, 10),
+            duration: parseInt(duration, 10),
             metadata,
             server,
             width,
