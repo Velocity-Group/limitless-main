@@ -15,7 +15,6 @@ import { SubscriptionService } from 'src/modules/subscription/services/subscript
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION } from 'src/modules/reaction/constants';
 import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/token-transaction/constants';
-import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { TokenTransactionSearchService, TokenTransactionService } from 'src/modules/token-transaction/services';
 import { UserDto } from 'src/modules/user/dtos';
@@ -73,7 +72,7 @@ export class FeedService {
     });
     // schedule feed
     this.agenda.define(SCHEDULE_FEED_AGENDA, {}, this.scheduleFeed.bind(this));
-    this.agenda.schedule('1 hour from now', SCHEDULE_FEED_AGENDA, {});
+    this.agenda.schedule('10 seconds from now', SCHEDULE_FEED_AGENDA, {});
   }
 
   private async scheduleFeed(job: any, done: any) {
@@ -152,7 +151,7 @@ export class FeedService {
         pollIds = pollIds.concat(f.pollIds);
       }
     });
-    const [performers, files, actions, subscriptions, transactions, polls] = await Promise.all([
+    const [performers, files, actions, subscriptions, transactions, polls, follows] = await Promise.all([
       performerIds.length ? this.performerService.findByIds(performerIds) : [],
       fileIds.length ? this.fileService.findByIds(fileIds) : [],
       user && user._id ? this.reactionService.findByQuery({ objectId: { $in: feedIds }, createdBy: user._id }) : [],
@@ -167,7 +166,11 @@ export class FeedService {
         target: PURCHASE_ITEM_TARTGET_TYPE.FEED,
         status: PURCHASE_ITEM_STATUS.SUCCESS
       }) : [],
-      pollIds.length ? this.PollVoteModel.find({ _id: { $in: pollIds } }) : []
+      pollIds.length ? this.PollVoteModel.find({ _id: { $in: pollIds } }) : [],
+      user && user._id ? this.followService.find({
+        followerId: user._id,
+        followingId: { $in: performerIds }
+      }) : []
     ]);
 
     return feeds.map((f) => {
@@ -184,7 +187,8 @@ export class FeedService {
       feed.isSubscribed = !!subscribed;
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
       feed.isBought = !!bought;
-      if ((feed.isSale && !feed.price) || (feed.isSale && feed.price === 0)) {
+      const followed = follows.find((f) => `${f.followingId}` === `${f.fromSourceId}`);
+      if (feed.isSale && !feed.price && !!followed) {
         feed.isBought = true;
       }
       const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
@@ -539,7 +543,11 @@ export class FeedService {
       }
       return true;
     } if (feed.isSale) {
-      if (!feed.price || feed.price === 0) {
+      if (!feed.price) {
+        const followed = await this.followService.countOne({ followerId: user._id, followingId: feed.fromSourceId });
+        if (!followed) {
+          throw new ForbiddenException();
+        }
         return true;
       }
       // check bought

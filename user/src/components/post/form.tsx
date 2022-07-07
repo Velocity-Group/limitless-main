@@ -274,8 +274,8 @@ export default class FeedForm extends PureComponent<IProps> {
       message.error('Description is over 300 characters');
       return;
     }
-    if (formValues.price < 1) {
-      message.error('Amount of tokens must be greater than 1');
+    if (formValues.price < 0) {
+      message.error('Amount of tokens must be greater than 0');
       return;
     }
     formValues.teaserId = this.teaserId;
@@ -356,13 +356,13 @@ export default class FeedForm extends PureComponent<IProps> {
             </div>
           </Form.Item>
           {['video', 'photo'].includes(feed?.type || type) && (
-          <Form.Item>
+          <Form.Item extra="Set PPV & set amount of tokens to 0 to make it FREE for the followers">
             <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
           </Form.Item>
           )}
           {isSale && (
             <Form.Item label="Amount of Tokens" name="price" rules={[{ required: true, message: 'Please add amount of tokens' }]}>
-              <InputNumber min={1} />
+              <InputNumber min={0} />
             </Form.Item>
           )}
           {['video', 'photo'].includes(feed?.type || type) && (

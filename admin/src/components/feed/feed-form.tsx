@@ -270,8 +270,8 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!formValues.text || !formValues.text.trim()) {
       return message.error('Please add a description');
     }
-    if (formValues.price < 1) {
-      return message.error('Tokens must be greater than 1');
+    if (formValues.price < 0) {
+      return message.error('Amount of tokens must be greater than 0');
     }
     formValues.teaserId = this.teaserId;
     formValues.thumbnailId = this.thumbnailId;
@@ -356,13 +356,13 @@ export default class FormFeed extends PureComponent<IProps> {
             <TextArea className="feed-input" rows={3} placeholder="Add a description" allowClear />
           </Form.Item>
           {['photo', 'video'].includes(type) && (
-          <Form.Item>
+          <Form.Item extra="PPV & Set amount of tokens to 0 to make it FREE for the followers">
             <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
           </Form.Item>
           )}
           {isSale && (
             <Form.Item label="Amount of tokens" name="price" rules={[{ required: isSale, message: 'Please add amount of tokens' }]}>
-              <InputNumber min={1} />
+              <InputNumber min={0} />
             </Form.Item>
           )}
           {thumbnail && (
