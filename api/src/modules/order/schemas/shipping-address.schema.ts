@@ -17,8 +17,7 @@ export const ShippingAddressSchema = new Schema({
   streetNumber: String,
   streetAddress: String,
   zipCode: String,
-  phoneNumber: String,
-  note: String,
+  description: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -1,10 +1,9 @@
-import { Document } from 'mongoose';
-import { ObjectId } from 'mongodb';
+export interface IAddress {
+  _id: string;
 
-export class ShippingAddressModel extends Document {
   source: string;
 
-  sourceId: ObjectId;
+  sourceId: string;
 
   name: string;
 

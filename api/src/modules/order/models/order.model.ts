@@ -22,11 +22,11 @@ export class OrderModel extends Document {
 
   totalPrice: number;
 
+  deliveryAddressId: ObjectId;
+
   deliveryAddress: string;
 
   deliveryStatus: string;
-
-  postalCode: string;
 
   userNote: string;
 

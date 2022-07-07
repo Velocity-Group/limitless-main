@@ -38,10 +38,10 @@ export const OrderSchema = new Schema({
     type: Number,
     default: 1
   },
-  deliveryAddress: {
-    type: String
+  deliveryAddressId: {
+    type: Schema.Types.ObjectId
   },
-  postalCode: {
+  deliveryAddress: {
     type: String
   },
   deliveryStatus: {

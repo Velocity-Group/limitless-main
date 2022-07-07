@@ -2,7 +2,8 @@
 import {
   Injectable,
   Inject,
-  forwardRef
+  forwardRef,
+  ForbiddenException
 } from '@nestjs/common';
 import { PerformerService } from 'src/modules/performer/services';
 import {
@@ -20,8 +21,8 @@ import { uniq } from 'lodash';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { EVENT } from 'src/kernel/constants';
-import { ORDER_MODEL_PROVIDER } from '../providers';
-import { OrderModel } from '../models';
+import { ORDER_MODEL_PROVIDER, SHIPPING_ADDRESS_MODEL_PROVIDER } from '../providers';
+import { OrderModel, ShippingAddressModel } from '../models';
 import {
   OrderSearchPayload, OrderUpdatePayload
 } from '../payloads';
@@ -41,6 +42,8 @@ export class OrderService {
     private readonly productService: ProductService,
     @Inject(ORDER_MODEL_PROVIDER)
     private readonly orderModel: Model<OrderModel>,
+    @Inject(SHIPPING_ADDRESS_MODEL_PROVIDER)
+    private readonly addressModel: Model<ShippingAddressModel>,
     private readonly mailService: MailerService,
     private readonly queueEventService: QueueEventService
   ) { }
@@ -229,5 +232,20 @@ export class OrderService {
       data: orders,
       total
     };
+  }
+
+  public async updateDeliveryAddress(id: string, payload: any, user: UserDto) {
+    const order = await this.findById(id);
+    if (!order || !payload.deliveryAddressId) {
+      throw new EntityNotFoundException();
+    }
+    if (`${order.userId}` !== `${user._id}`) throw new ForbiddenException();
+    if (order.deliveryStatus !== ORDER_STATUS.PROCESSING) throw new ForbiddenException();
+    const address = await this.addressModel.findById(payload.deliveryAddressId);
+    const deliveryAddress = address ? `${address.name.toUpperCase()} - ${address.streetNumber} ${address.streetAddress}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}` : '';
+    order.deliveryAddressId = payload.deliveryAddressId;
+    order.deliveryAddress = deliveryAddress;
+    await order.save();
+    return new OrderDto(order);
   }
 }

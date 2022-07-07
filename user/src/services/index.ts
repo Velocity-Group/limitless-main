@@ -26,3 +26,4 @@ export * from './payout-request.service';
 export * from './block.service';
 export * from './report.service';
 export * from './cookies.service';
+export * from './shipping-address.service';

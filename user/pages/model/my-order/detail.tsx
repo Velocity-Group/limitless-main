@@ -121,6 +121,11 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 ? (
                   <>
                     <div style={{ marginBottom: '10px' }}>
+                      Phone Number:
+                      {' '}
+                      {order.phoneNumber || 'N/A'}
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
                       Delivery Address:
                       {' '}
                       {order.deliveryAddress || 'N/A'}

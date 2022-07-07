@@ -11,12 +11,14 @@ import { connect } from 'react-redux';
 import Head from 'next/head';
 import Link from 'next/link';
 import Error from 'next/error';
-import { productService, tokenTransctionService, reactionService } from '@services/index';
+import {
+  productService, tokenTransctionService, reactionService, utilsService
+} from '@services/index';
 import { PerformerListProduct } from '@components/product/performer-list-product';
 import { PurchaseProductForm } from '@components/product/confirm-purchase';
 import { updateBalance } from '@redux/user/actions';
 import {
-  IProduct, IUser, IUIConfig, IError
+  IProduct, IUser, IUIConfig, IError, ICountry
 } from 'src/interfaces';
 import Router from 'next/router';
 import './store.less';
@@ -27,6 +29,7 @@ interface IProps {
   error: IError;
   updateBalance: Function;
   product: IProduct;
+  countries: ICountry[];
 }
 
 interface IStates {
@@ -45,13 +48,15 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
     try {
-      const product = (await (
-        await productService.userView(query.id, {
+      const [product, countries] = await Promise.all([
+        productService.userView(query.id, {
           Authorization: ctx.token
-        })
-      ).data);
+        }),
+        utilsService.countriesList()
+      ]);
       return {
-        product
+        product: product.data,
+        countries: countries.data
       };
     } catch (e) {
       return { error: await e };
@@ -131,6 +136,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
 
   async purchaseProduct(payload: any) {
     const { user, updateBalance: handleUpdateBalance, product } = this.props;
+    if (user?.isPerformer) return;
     if (user.balance < product.price) {
       message.error('You have an insufficient token balance. Please top up.');
       return;
@@ -149,7 +155,9 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
   }
 
   render() {
-    const { ui, product, error } = this.props;
+    const {
+      ui, product, error, user, countries
+    } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Product was not found'} />;
     }
@@ -198,7 +206,6 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 <Image
                   alt="product-img"
                   src={product?.image || '/static/empty_product.svg'}
-                  placeholder
                 />
                 {product.stock && product.type === 'physical' ? (
                   <span className="prod-stock">
@@ -224,7 +231,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   <div>
                     <Button
                       className="primary"
-                      disabled={loading}
+                      disabled={loading || !user?._id || user?.isPerformer || (product?.type === 'physical' && !product?.stock)}
                       onClick={() => this.setState({ openPurchaseModal: true })}
                     >
                       <DollarOutlined />
@@ -292,9 +299,10 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           </div>
         </div>
         <Modal
-          key="tip_performer"
+          key="purchase-product"
+          width={660}
           title={null}
-          visible={openPurchaseModal}
+          visible
           onOk={() => this.setState({ openPurchaseModal: false })}
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}
@@ -302,6 +310,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           centered
         >
           <PurchaseProductForm
+            countries={countries}
             product={product}
             submiting={submiting}
             onFinish={this.purchaseProduct.bind(this)}

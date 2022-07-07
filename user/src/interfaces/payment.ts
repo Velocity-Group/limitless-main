@@ -80,4 +80,6 @@ export interface IOrder {
   updatedAt: Date;
 
   digitalPath: string;
+
+  deliveryAddressId: string;
 }

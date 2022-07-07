@@ -40,11 +40,6 @@ export class AddressBodyPayload extends SearchRequest {
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  phoneNumber: string;
-
-  @ApiProperty()
-  @IsString()
   @IsOptional()
   note: string;
 }

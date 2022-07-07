@@ -402,19 +402,11 @@ export class FileService {
       let newAbsolutePath = respVideo.toPath;
       let newPath = respVideo.toPath.replace(publicDir, '');
 
-      const vidmeta = await this.videoService.getMetaData(videoPath);
-      const meta1 = vidmeta.streams[0];
-      const meta2 = vidmeta.streams[1];
-      let {
-        width, height, duration
-      } = meta1;
-      if (!width && !height) {
-        width = meta2.width;
-        height = meta2.height;
-      }
-      if (!duration) {
-        duration = meta2.duration;
-      }
+      const meta = await this.videoService.getMetaData(videoPath);
+      const { width: w0, height: h0 } = meta.streams[0];
+      const { width: w1, height: h1 } = meta.streams[1];
+      const width = w0 || w1;
+      const height = h0 || h1;
       const respThumb = await this.videoService.createThumbs(videoPath, {
         toFolder: videoDir,
         size: options?.size || (width && height && `${width}x${height}`),
@@ -475,7 +467,7 @@ export class FileService {
             absolutePath: newAbsolutePath,
             path: newPath,
             thumbnails,
-            duration: parseInt(duration, 10),
+            duration: parseInt(meta.format.duration, 10),
             metadata,
             server,
             width,

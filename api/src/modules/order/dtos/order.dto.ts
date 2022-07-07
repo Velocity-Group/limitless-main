@@ -32,7 +32,7 @@ export class OrderDto {
 
   deliveryStatus: string;
 
-  postalCode?: string;
+  deliveryAddressId?: ObjectId;
 
   userNote?: string;
 
@@ -62,7 +62,7 @@ export class OrderDto {
           'totalPrice',
           'deliveryAddress',
           'deliveryStatus',
-          'postalCode',
+          'deliveryAddressId',
           'userNote',
           'phoneNumber',
           'createdAt',
