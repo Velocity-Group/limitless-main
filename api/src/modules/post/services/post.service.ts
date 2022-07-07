@@ -185,7 +185,7 @@ export class PostService {
   public async getPublic(id: string): Promise<PostDto> {
     const post = await this.findByIdOrSlug(id);
     // TODO - map details from meta data
-    if (!post) {
+    if (!post || post.status !== 'active') {
       throw new EntityNotFoundException();
     }
 

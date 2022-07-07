@@ -21,8 +21,8 @@ import {
 import Link from 'next/link';
 import Router from 'next/router';
 import { debounce } from 'lodash';
-import './index.less';
 import dynamic from 'next/dynamic';
+import './index.less';
 
 const StreamListItem = dynamic(() => import('@components/streaming/stream-list-item'), { ssr: false });
 
@@ -168,12 +168,16 @@ class HomePage extends PureComponent<IProps> {
 
   async getPerformers() {
     const { isFreeSubscription } = this.state;
+    const { user } = this.props;
     try {
       await this.setState({ loadingPerformer: true });
       const performers = await (
         await performerService.randomSearch({ isFreeSubscription })
       ).data.data;
-      this.setState({ randomPerformers: performers, loadingPerformer: false });
+      this.setState({
+        randomPerformers: performers.filter((p) => p._id !== user._id),
+        loadingPerformer: false
+      });
     } catch {
       this.setState({ loadingPerformer: false });
     }
