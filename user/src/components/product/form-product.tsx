@@ -66,11 +66,6 @@ export class FormProduct extends PureComponent<IProps> {
     const { beforeUpload } = this.props;
     const config = getGlobalConfig();
     if (field === 'image') {
-      const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
-      if (!isLt2M) {
-        message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
-        return false;
-      }
       const reader = new FileReader();
       reader.addEventListener('load', () => this.setState({ previewImageProduct: reader.result }));
       reader.readAsDataURL(file);
@@ -189,6 +184,7 @@ export class FormProduct extends PureComponent<IProps> {
                 showUploadList={false}
                 disabled={uploading}
                 beforeUpload={this.beforeUpload.bind(this, 'image')}
+                customRequest={() => false}
               >
                 {previewImageProduct && (
                   <img
@@ -211,6 +207,7 @@ export class FormProduct extends PureComponent<IProps> {
                 showUploadList
                 disabled={uploading}
                 beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
+                customRequest={() => false}
               >
                 <FileAddOutlined />
               </Upload>

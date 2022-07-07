@@ -173,6 +173,10 @@ const performerSchema = new mongoose.Schema({
       type: Number,
       default: 0
     },
+    followers: {
+      type: Number,
+      default: 0
+    },
     views: {
       type: Number,
       default: 0
@@ -194,14 +198,6 @@ const performerSchema = new mongoose.Schema({
       default: 0
     },
     totalFeeds: {
-      type: Number,
-      default: 0
-    },
-    totalBlogs: {
-      type: Number,
-      default: 0
-    },
-    totalStories: {
       type: Number,
       default: 0
     },

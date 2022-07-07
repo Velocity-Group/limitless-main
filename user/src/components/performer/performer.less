@@ -171,7 +171,7 @@
   justify-content: center;
   align-items: center;
 
-  button {
+  .ant-btn {
     color: @primary-color;
     font-weight: 500;
     background-color: transparent;
@@ -444,17 +444,6 @@
     text-transform: uppercase;
   }
 
-  .card-country {
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-
-    img {
-      height: 25px !important;
-      width: unset !important;
-    }
-  }
-
   .card-age {
     position: absolute;
     bottom: 5px;
@@ -464,18 +453,17 @@
     z-index: 9;
   }
 
-  .card-stat {
+  .card-free {
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 2px;
+    left: 2px;
     border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     color: @white;
-    font-size: 10px;
+    font-size: 8px;
     padding: 5px 10px;
-    font-weight: 600;
     background-image: linear-gradient(to bottom, #04040e00 0%, @gray 100%);
     line-height: normal;
 
@@ -513,6 +501,12 @@
       overflow: hidden;
       font-family: @primary-font-bold;
       line-height: normal;
+      text-transform: capitalize;
+    }
+
+    .model-country {
+      height: 20px !important;
+      margin-right: 5px;
     }
 
     .anticon {
@@ -526,24 +520,16 @@
       margin: 0;
     }
   }
-
-  .bookmark-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 4px 8px;
+  
+  .follow-btn {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
-    z-index: 100;
+    top: 5px;
+    right: 5px;
+    color: @white;
+    font-size: 20px;
 
-    &:hover {
-      .icon {
-        color: @theme-color;
-      }
-    }
-
-    .icon-active {
-      color: @theme-color;
+    &.active {
+      color: @primary-color;
     }
   }
 
@@ -601,19 +587,6 @@
     background-image: linear-gradient(to bottom, #9a9a9a00 0%, #292929 100%);
   }
 
-  .free-status {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    border-radius: 5px;
-    text-align: center;
-    color: @white;
-    font-size: 10px;
-    padding: 2px 10px;
-    font-weight: 600;
-    background-image: linear-gradient(to bottom, #04040e00 0%, @gray 100%);
-  }
-
   .online-status {
     position: absolute;
     left: 5px;
@@ -638,8 +611,8 @@
 
   .live-status {
     position: absolute;
-    top: 5px;
-    left: 5px;
+    top: 3px;
+    left: 3px;
     background: @secondary-color;
     color: @white;
     padding: 0 5px;
@@ -648,6 +621,22 @@
     font-size: 11px;
     line-height: 17px;
     text-transform: uppercase;
+  }
+
+  .follow-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: transparent;
+    border: none;
+    opacity: 0.8;
+    color: @white;
+    font-weight: 500;
+    font-size: 25px;
+
+    &.active {
+      color: @primary-color;
+    }
   }
 
   .model-name {
@@ -673,6 +662,11 @@
 
     .anticon {
       margin-left: 2px;
+    }
+
+    .model-country {
+      height: 20px;
+      margin-right: 5px;
     }
   }
 

@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
-import { IUserResponse } from 'src/modules/user/dtos';
 import { IRecipient } from '../models';
 
 export class ConversationDto {
@@ -24,7 +23,7 @@ export class ConversationDto {
 
   updatedAt: Date;
 
-  recipientInfo: IUserResponse;
+  recipientInfo: any;
 
   totalNotSeenMessages: number;
 

@@ -118,4 +118,9 @@ export class PerformerSearchPayload extends SearchRequest {
   @IsString()
   @IsOptional()
   streamingStatus: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  followed: string;
 }

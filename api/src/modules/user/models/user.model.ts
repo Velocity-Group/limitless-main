@@ -54,5 +54,6 @@ export class UserModel extends Document {
 
   stats: {
     totalSubscriptions: number;
+    following: number;
   }
 }

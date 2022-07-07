@@ -46,11 +46,8 @@ export interface IPerformerResponse {
     totalPhotos?: number;
     totalGalleries?: number;
     totalProducts?: number;
-    totalBlogs?: number;
-    totalStories?: number;
     totalStreamTime?: number;
-    totalRating?: number;
-    avgRating?: number;
+    followers?: number;
   };
   verifiedEmail?: boolean;
   verifiedAccount?: boolean;
@@ -83,6 +80,7 @@ export interface IPerformerResponse {
     linkedIn: String;
   };
   stripeAccount?: any;
+  isFollowed?: boolean;
 }
 
 export class PerformerDto {
@@ -189,11 +187,8 @@ export class PerformerDto {
     totalGalleries: number;
     totalProducts: number;
     totalFeeds: number;
-    totalBlogs: number;
-    totalStories: number;
+    followers: number;
     totalStreamTime: number;
-    totalRating: number;
-    avgRating: number;
   };
 
   score?: number;
@@ -251,6 +246,8 @@ export class PerformerDto {
     instagram: String;
     linkedIn: String;
   }
+
+  isFollowed?: boolean;
 
   constructor(data?: Partial<any>) {
     Object.assign(
@@ -327,7 +324,8 @@ export class PerformerDto {
         'dateOfBirth',
         'bodyType',
         'balance',
-        'socialsLink'
+        'socialsLink',
+        'isFollowed'
       ])
     );
   }
@@ -369,7 +367,8 @@ export class PerformerDto {
       eyes: this.eyes,
       bodyType: this.bodyType,
       sexualOrientation: this.sexualOrientation,
-      isPerformer: true
+      isPerformer: true,
+      isFollowed: this.isFollowed
     };
     const privateInfo = {
       firstName: this.firstName,
@@ -445,7 +444,8 @@ export class PerformerDto {
       lastStreamingTime: this.lastStreamingTime,
       live: this.live,
       streamingStatus: this.streamingStatus,
-      socialsLink: this.socialsLink
+      socialsLink: this.socialsLink,
+      isFollowed: this.isFollowed
     };
   }
 
@@ -500,7 +500,8 @@ export class PerformerDto {
       dateOfBirth: this.dateOfBirth,
       bodyType: this.bodyType,
       socialsLink: this.socialsLink,
-      isPerformer: true
+      isPerformer: true,
+      isFollowed: this.isFollowed
     };
   }
 }

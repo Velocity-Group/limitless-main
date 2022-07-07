@@ -20,7 +20,10 @@ export interface IUserResponse {
   twitterConnected?: boolean;
   googleConnected?: boolean;
   isOnline?: boolean;
-  stats?: any;
+  stats: {
+    totalSubscriptions: number;
+    following: number;
+  }
   isBlocked?: boolean;
   stripeCardIds?: string[];
   stripeCustomerId?: string;
@@ -45,6 +48,7 @@ export class UserDto {
 
   stats: {
     totalSubscriptions: number;
+    following: number;
   }
 
   avatarPath?: string;

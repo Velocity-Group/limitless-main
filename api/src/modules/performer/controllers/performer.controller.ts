@@ -79,9 +79,10 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async usearch(
-    @Query() query: PerformerSearchPayload
+    @Query() query: PerformerSearchPayload,
+    @CurrentUser() currentUser: UserDto
   ): Promise<DataResponse<PageableData<IPerformerResponse>>> {
-    const data = await this.performerSearchService.search(query);
+    const data = await this.performerSearchService.search(query, currentUser);
     return DataResponse.ok({
       total: data.total,
       data: data.data.map((p) => new PerformerDto(p).toPublicDetailsResponse())
@@ -93,9 +94,10 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async randomSearch(
-    @Query() req: PerformerSearchPayload
+    @Query() req: PerformerSearchPayload,
+    @CurrentUser() currentUser: UserDto
   ): Promise<DataResponse<any>> {
-    const data = await this.performerSearchService.randomSearch(req);
+    const data = await this.performerSearchService.randomSearch(req, currentUser);
     return DataResponse.ok(data);
   }
 

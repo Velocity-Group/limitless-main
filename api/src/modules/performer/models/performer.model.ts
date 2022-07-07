@@ -93,11 +93,8 @@ export class PerformerModel extends Document {
     totalGalleries: number;
     totalProducts: number;
     totalFeeds: number;
-    totalBlogs: number;
-    totalStories: number;
     totalStreamTime: number;
-    totalRating: number;
-    avgRating: number;
+    followers: number;
   };
 
   bankingInfomation: BankingModel;

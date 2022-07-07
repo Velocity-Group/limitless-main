@@ -9,11 +9,12 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, tokenTransctionService, feedService, reactionService, paymentService, utilsService
+  performerService, tokenTransctionService, feedService, reactionService, paymentService,
+  utilsService, followService
 } from 'src/services';
 import Head from 'next/head';
 import {
-  ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined,
+  ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined, HeartFilled,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined
 } from '@ant-design/icons';
 import {
@@ -41,7 +42,7 @@ import '@components/performer/performer.less';
 interface IProps {
   ui: IUIConfig;
   error: any;
-  currentUser: IUser;
+  user: IUser;
   performer: IPerformer;
   listProducts: Function;
   getVideos: Function;
@@ -87,7 +88,8 @@ class PerformerProfile extends PureComponent<IProps> {
     tab: 'post',
     filter: initialFilter,
     isGrid: false,
-    subscriptionType: 'monthly'
+    subscriptionType: 'monthly',
+    isFollowed: false
   };
 
   static async getInitialProps({ ctx }) {
@@ -114,7 +116,7 @@ class PerformerProfile extends PureComponent<IProps> {
     if (performer) {
       const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');
       const showWelcomVideo = !notShownWelcomeVideos || (notShownWelcomeVideos && !notShownWelcomeVideos.includes(performer._id));
-      this.setState({ isBookMarked: performer.isBookMarked, showWelcomVideo });
+      this.setState({ isBookMarked: performer.isBookMarked, showWelcomVideo, isFollowed: !!performer.isFollowed });
       this.loadItems();
     }
   }
@@ -132,8 +134,8 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async handleDeleteFeed(feed: IFeed) {
-    const { currentUser, removeFeedSuccess: handleRemoveFeed } = this.props;
-    if (currentUser._id !== feed.fromSourceId) {
+    const { user, removeFeedSuccess: handleRemoveFeed } = this.props;
+    if (user._id !== feed.fromSourceId) {
       message.error('Permission denied');
       return;
     }
@@ -149,10 +151,34 @@ class PerformerProfile extends PureComponent<IProps> {
     }
   }
 
+  handleFollow = async () => {
+    const { performer, user } = this.props;
+    const { isFollowed, requesting } = this.state;
+    if (!user._id) {
+      message.error('Please log in or register!');
+      return;
+    }
+    if (requesting || user.isPerformer) return;
+    try {
+      this.setState({ requesting: true });
+      if (!isFollowed) {
+        await followService.create(performer?._id);
+        this.setState({ isFollowed: true, requesting: false });
+      } else {
+        await followService.delete(performer?._id);
+        this.setState({ isFollowed: false, requesting: false });
+      }
+    } catch (e) {
+      const error = await e;
+      message.error(error.message || 'Error occured, please try again later');
+      this.setState({ requesting: false });
+    }
+  }
+
   async handleBookmark() {
-    const { performer, currentUser } = this.props;
+    const { performer, user } = this.props;
     const { isBookMarked, requesting } = this.state;
-    if (requesting || currentUser.isPerformer) return;
+    if (requesting || user.isPerformer) return;
     try {
       await this.setState({ requesting: true });
       if (!isBookMarked) {
@@ -184,12 +210,12 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   handleJoinStream = () => {
-    const { currentUser, performer } = this.props;
-    if (!currentUser._id) {
+    const { user, performer } = this.props;
+    if (!user._id) {
       message.error('Please log in or register!');
       return;
     }
-    if (currentUser.isPerformer) return;
+    if (user.isPerformer) return;
     if (!performer?.isSubscribed) {
       message.error('Please subscribe to this model!');
       return;
@@ -245,14 +271,14 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async subscribe() {
-    const { performer, currentUser } = this.props;
+    const { performer, user } = this.props;
     const { subscriptionType } = this.state;
-    if (!currentUser._id) {
+    if (!user._id) {
       message.error('Please log in!');
       Router.push('/');
       return;
     }
-    if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
+    if (!user.stripeCardIds || !user.stripeCardIds.length) {
       message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
@@ -263,7 +289,7 @@ class PerformerProfile extends PureComponent<IProps> {
         type: subscriptionType,
         performerId: performer._id,
         paymentGateway: 'stripe',
-        stripeCardId: currentUser.stripeCardIds[0] // TODO user can choose card
+        stripeCardId: user.stripeCardIds[0] // TODO user can choose card
       });
       this.setState({ openSubscriptionModal: false });
     } catch (e) {
@@ -274,8 +300,8 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async sendTip(price: number) {
-    const { performer, currentUser, updateBalance: handleUpdateBalance } = this.props;
-    if (currentUser.balance < price) {
+    const { performer, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user.balance < price) {
       message.error('You have an insufficient token balance. Please top up.');
       Router.push('/token-package');
       return;
@@ -353,7 +379,7 @@ class PerformerProfile extends PureComponent<IProps> {
       error,
       performer,
       ui,
-      currentUser,
+      user,
       feedState,
       videoState,
       productState,
@@ -375,7 +401,8 @@ class PerformerProfile extends PureComponent<IProps> {
       openSubscriptionModal,
       tab,
       isGrid,
-      subscriptionType
+      subscriptionType,
+      isFollowed
     } = this.state;
     return (
       <Layout>
@@ -471,7 +498,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 src={performer?.avatar || '/static/no-avatar.png'}
                 fallback="/static/no-avatar.png"
               />
-              {currentUser?._id !== performer?._id && <span className={performer?.isOnline > 0 ? 'online-status' : 'online-status off'} />}
+              {user?._id !== performer?._id && <span className={performer?.isOnline > 0 ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
                 <h4>
                   {performer?.name || 'N/A'}
@@ -480,8 +507,8 @@ class PerformerProfile extends PureComponent<IProps> {
                     <TickIcon />
                   )}
                   &nbsp;
-                  {performer?.live > 0 && currentUser?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
-                  {currentUser?._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
+                  {performer?.live > 0 && user?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
+                  {user?._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
                 </h4>
                 <h5 style={{ textTransform: 'none' }}>
                   @
@@ -491,10 +518,18 @@ class PerformerProfile extends PureComponent<IProps> {
             </div>
             <div className="btn-grp">
               <div style={{ marginBottom: '4px' }}>
+                <Tooltip title={isFollowed ? 'Following' : 'Follow'}>
+                  <Button
+                    disabled={!user._id || user.isPerformer}
+                    className={isBookMarked ? 'active' : ''}
+                    onClick={() => this.handleFollow()}
+                  >
+                    {isFollowed ? <HeartFilled /> : <HeartOutlined />}
+                  </Button>
+                </Tooltip>
                 <Tooltip title="Send Tip">
                   <Button
-                    disabled={!currentUser._id || currentUser.isPerformer}
-                    className="normal"
+                    disabled={!user._id || user.isPerformer}
                     onClick={() => this.setState({ openTipModal: true })}
                   >
                     <DollarOutlined />
@@ -502,8 +537,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </Tooltip>
                 <Tooltip title="Send Message">
                   <Button
-                    disabled={!currentUser._id || currentUser.isPerformer}
-                    className="normal"
+                    disabled={!user._id || user.isPerformer}
                     onClick={() => Router.push({
                       pathname: '/messages',
                       query: {
@@ -517,7 +551,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </Tooltip>
                 <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
                   <Button
-                    disabled={!currentUser._id || currentUser.isPerformer}
+                    disabled={!user._id || user.isPerformer}
                     className={isBookMarked ? 'active' : ''}
                     onClick={() => this.handleBookmark()}
                   >
@@ -531,7 +565,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </Popover>
               </div>
             </div>
-            <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
+            <div className={user.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={countries} performer={performer} />
             </div>
             {!performer?.isSubscribed && (
@@ -775,7 +809,7 @@ const mapStates = (state: any) => ({
   feedState: { ...state.feed.feeds },
   productState: { ...state.product.products },
   galleryState: { ...state.gallery.galleries },
-  currentUser: { ...state.user.current }
+  user: { ...state.user.current }
 });
 
 const mapDispatch = {

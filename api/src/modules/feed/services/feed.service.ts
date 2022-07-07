@@ -22,6 +22,7 @@ import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import * as moment from 'moment';
 import { Storage } from 'src/modules/storage/contants';
+import { FollowService } from 'src/modules/follow/services/follow.service';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
@@ -35,6 +36,8 @@ import { FEED_PROVIDER, POLL_PROVIDER, VOTE_PROVIDER } from '../providers';
 @Injectable()
 export class FeedService {
   constructor(
+    @Inject(forwardRef(() => FollowService))
+    private readonly followService: FollowService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => TokenTransactionSearchService))
@@ -181,6 +184,9 @@ export class FeedService {
       feed.isSubscribed = !!subscribed;
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
       feed.isBought = !!bought;
+      if ((feed.isSale && !feed.price) || (feed.isSale && feed.price === 0)) {
+        feed.isBought = true;
+      }
       const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
       const feedPollStringIds = (f.pollIds || []).map((pollId) => pollId.toString());
       feed.polls = polls.filter((p) => feedPollStringIds.includes(p._id.toString()));
@@ -399,15 +405,18 @@ export class FeedService {
       status: STATUS.ACTIVE
     } as any;
 
-    const [subscriptions] = await Promise.all([
+    const [subscriptions, follows] = await Promise.all([
       user ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
         expiredAt: { $gt: new Date() }
-      }) : []
+      }) : [],
+      user ? this.followService.find({ followerId: user._id }) : []
     ]);
-    const performerIds = subscriptions.map((s) => s.performerId);
+    const subPerIds = subscriptions.map((s) => s.performerId);
+    const folPerIds = follows.map((s) => s.followingId);
+    const performerIds = uniq(subPerIds.concat(folPerIds));
     query.fromSourceId = { $in: performerIds };
-    if (!user || !performerIds.length || (user && user.roles && user.roles.includes('admin')) || (user && user.isPerformer)) delete query.fromSourceId;
+    if ((user && user.isPerformer)) delete query.fromSourceId;
     if (req.q) {
       query.$or = [
         {
@@ -530,6 +539,9 @@ export class FeedService {
       }
       return true;
     } if (feed.isSale) {
+      if (!feed.price || feed.price === 0) {
+        return true;
+      }
       // check bought
       const bought = await this.paymentTokenService.checkBought(feed, PurchaseItemType.FEED, user);
       if (!bought) {

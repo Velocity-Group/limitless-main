@@ -31,6 +31,8 @@ import { PerformerBlockService } from 'src/modules/block/services';
 import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
 import { Storage } from 'src/modules/storage/contants';
 import { StripeService } from 'src/modules/payment/services';
+import { FollowService } from 'src/modules/follow/services/follow.service';
+import * as moment from 'moment';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
@@ -60,6 +62,8 @@ import {
 @Injectable()
 export class PerformerService {
   constructor(
+    @Inject(forwardRef(() => FollowService))
+    private readonly followService: FollowService,
     @Inject(forwardRef(() => PerformerBlockService))
     private readonly performerBlockService: PerformerBlockService,
     @Inject(forwardRef(() => ChangeTokenLogService))
@@ -139,20 +143,30 @@ export class PerformerService {
     let isBlockedByPerformer = false;
     let isBookMarked = null;
     let isSubscribed = null;
+    let isFollowed = null;
     if (currentUser) {
       isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
         model._id,
         currentUser._id
       );
       if (isBlockedByPerformer) throw new HttpException('You has been blocked by this model', 403);
-      isSubscribed = await this.subscriptionService.checkSubscribed(model._id, currentUser._id);
       isBookMarked = await this.reactionService.findOneQuery({
         objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: currentUser._id, action: REACTION.BOOK_MARK
       });
+      const [subscription, following] = await Promise.all([
+        this.subscriptionService.findOneSubscription({
+          performerId: model._id,
+          userId: currentUser._id
+        }),
+        this.followService.findOne({ followerId: currentUser._id, followingId: model._id })
+      ]);
+      isFollowed = following;
+      isSubscribed = (subscription && moment().isBefore(subscription.expiredAt)) || false;
     }
     const dto = new PerformerDto(model);
     dto.isSubscribed = !!isSubscribed;
     dto.isBookMarked = !!isBookMarked;
+    dto.isFollowed = !!isFollowed;
     if (model.avatarId) {
       const avatar = await this.fileService.findById(model.avatarId);
       dto.avatarPath = avatar ? avatar.path : null;
