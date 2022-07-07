@@ -187,7 +187,7 @@ export class FeedService {
       feed.isSubscribed = !!subscribed;
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
       feed.isBought = !!bought;
-      const followed = follows.find((f) => `${f.followingId}` === `${f.fromSourceId}`);
+      const followed = follows.find((fol) => `${fol.followingId}` === `${f.fromSourceId}`);
       if (feed.isSale && !feed.price && !!followed) {
         feed.isBought = true;
       }

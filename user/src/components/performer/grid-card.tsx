@@ -5,7 +5,7 @@ import { StarOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { dobToAge, shortenLargeNumber } from '@lib/index';
 import { connect } from 'react-redux';
-import { message, Button, Tooltip } from 'antd';
+import { message, Tooltip } from 'antd';
 import Router from 'next/router';
 import { followService } from 'src/services';
 import './performer.less';

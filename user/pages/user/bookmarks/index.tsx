@@ -4,11 +4,11 @@ import {
 import { PureComponent } from 'react';
 import PageHeading from '@components/common/page-heading';
 import {
-  IUIConfig, IFeed, IUser
+  IUIConfig, IFeed, IUser, ICountry
 } from 'src/interfaces';
 import { connect } from 'react-redux';
 import {
-  feedService, productService, galleryService, videoService, performerService
+  feedService, productService, galleryService, videoService, performerService, utilsService
 } from 'src/services';
 import Head from 'next/head';
 import ScrollListPerformers from '@components/performer/scroll-list';
@@ -25,6 +25,7 @@ import '../index.less';
 interface IProps {
   ui: IUIConfig;
   user: IUser;
+  countries: ICountry[];
 }
 interface IStates {
   loading: boolean;
@@ -74,6 +75,15 @@ const initialState = {
 
 class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   static authenticate = true;
+
+  static async getInitialProps() {
+    const [countries] = await Promise.all([
+      utilsService.countriesList()
+    ]);
+    return {
+      countries: countries?.data || []
+    };
+  }
 
   state = initialState;
 
@@ -255,7 +265,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
       totalProducts,
       tab
     } = this.state;
-    const { ui } = this.props;
+    const { ui, countries } = this.props;
     return (
       <Layout>
         <Head>
@@ -356,6 +366,7 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                     'performers'
                   )}
                   notFoundText="No bookmarked profiles found"
+                  countries={countries}
                 />
               </Tabs.TabPane>
             </Tabs>

@@ -1,5 +1,5 @@
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { IPerformer } from 'src/interfaces';
+import { ICountry, IPerformer } from 'src/interfaces';
 import PerformerCard from '@components/performer/grid-card';
 import {
   Row, Col, Alert, Spin
@@ -12,10 +12,11 @@ interface IProps {
   loading: boolean;
   // eslint-disable-next-line react/require-default-props
   notFoundText?: string;
+  countries: ICountry[]
 }
 
 const ScrollListPerformers = ({
-  loadMore, performers, total, loading, notFoundText
+  loadMore, performers, total, loading, notFoundText, countries
 }: IProps) => (
   <>
     <InfiniteScroll
@@ -30,7 +31,7 @@ const ScrollListPerformers = ({
         {performers.length > 0
           && performers.map((p: any) => (
             <Col xs={12} sm={12} md={6} lg={6} key={p._id}>
-              <PerformerCard performer={p} />
+              <PerformerCard performer={p} countries={countries} />
             </Col>
           ))}
       </Row>
