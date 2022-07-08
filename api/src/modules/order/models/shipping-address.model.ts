@@ -14,6 +14,10 @@ export class ShippingAddressModel extends Document {
 
   city: string;
 
+  district: string;
+
+  ward: string;
+
   streetNumber: string;
 
   streetAddress: string;

@@ -242,7 +242,7 @@ export class OrderService {
     if (`${order.userId}` !== `${user._id}`) throw new ForbiddenException();
     if (order.deliveryStatus !== ORDER_STATUS.PROCESSING) throw new ForbiddenException();
     const address = await this.addressModel.findById(payload.deliveryAddressId);
-    const deliveryAddress = address ? `${address.name.toUpperCase()} - ${address.streetNumber} ${address.streetAddress}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}` : '';
+    const deliveryAddress = address ? `${address.name.toUpperCase()} - ${address.streetNumber} ${address.streetAddress}, ${address.ward}, ${address.district}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}` : '';
     order.deliveryAddressId = payload.deliveryAddressId;
     order.deliveryAddress = deliveryAddress;
     await order.save();

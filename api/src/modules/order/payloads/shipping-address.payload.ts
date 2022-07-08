@@ -26,6 +26,16 @@ export class AddressBodyPayload extends SearchRequest {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
+  district: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  ward: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
   streetAddress: string;
 
   @ApiProperty()

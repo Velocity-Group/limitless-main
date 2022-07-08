@@ -58,7 +58,7 @@ export class OrderListener {
       totalPrice += parseFloat(p.price);
     });
     const address = shippingInfo.deliveryAddressId && await this.shippingAddressModel.findById(shippingInfo.deliveryAddressId);
-    const deliveryAddress = address ? `${address.name.toUpperCase()} - ${address.streetNumber} ${address.streetAddress}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}` : '';
+    const deliveryAddress = address ? `${address.name.toUpperCase()} - ${address.streetNumber} ${address.streetAddress}, ${address.ward}, ${address.district}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}` : '';
     await this.orderModel.create({
       transactionId: transaction._id,
       performerId: transaction.performerId,

@@ -11,7 +11,8 @@ import {
   Param,
   Put,
   Body,
-  Post
+  Post,
+  Delete
 } from '@nestjs/common';
 import { AuthGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData, SearchRequest } from 'src/kernel';
@@ -74,6 +75,18 @@ export class ShippingAddressController {
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<ShippingAddressModel>> {
     const data = await this.shippingAddressService.findOne(id, user);
+    return DataResponse.ok(data);
+  }
+
+  @Delete('/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async delete(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDto
+  ): Promise<DataResponse<boolean>> {
+    const data = await this.shippingAddressService.delete(id, user);
     return DataResponse.ok(data);
   }
 }

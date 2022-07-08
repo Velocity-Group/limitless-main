@@ -302,7 +302,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           key="purchase-product"
           width={660}
           title={null}
-          visible
+          visible={openPurchaseModal}
           onOk={() => this.setState({ openPurchaseModal: false })}
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}

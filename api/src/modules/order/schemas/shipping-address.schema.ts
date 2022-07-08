@@ -14,6 +14,8 @@ export const ShippingAddressSchema = new Schema({
   country: String,
   state: String,
   city: String,
+  district: String,
+  ward: String,
   streetNumber: String,
   streetAddress: String,
   zipCode: String,

@@ -64,9 +64,12 @@ export const PurchaseProductForm = ({
   const deleteAddress = async (id) => {
     try {
       setSubmiting(true);
-      const resp = await shippingAddressService.delete(id);
-      // addresses.unshift(resp.data);
+      await shippingAddressService.delete(id);
+      const index = addresses.findIndex((f) => f._id === id);
+      addresses.splice(index, 1);
+      setSubmiting(false);
     } catch (e) {
+      setSubmiting(false);
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later!');
     }
@@ -125,7 +128,7 @@ export const PurchaseProductForm = ({
                       {' '}
                       -
                       {' '}
-                      <small>{`${a.streetNumber} ${a.streetAddress}, ${a.city}, ${a.state}, ${a.country}`}</small>
+                      <small>{`${a.streetNumber} ${a.streetAddress}, ${a.ward}, ${a.district}, ${a.city}${a.state ? `, ${a.state}` : ''} ${a.zipCode}, ${a.country}`}</small>
                       <a aria-hidden className="delete-btn" onClick={() => deleteAddress(a._id)}><DeleteOutlined /></a>
                     </div>
                   </Select.Option>
@@ -138,12 +141,13 @@ export const PurchaseProductForm = ({
             name="phoneNumber"
             label="Phone number"
             rules={[
+              { required: true, message: 'Please enter your phone number!' },
               {
                 pattern: new RegExp(/^([+]\d{2,4})?\d{9,12}$/g), message: 'Please provide valid digit numbers'
               }
             ]}
           >
-            <Input placeholder="Enter valid phone number (+910123456789)" />
+            <Input placeholder="Phone number (+910123456789)" />
           </Form.Item>
           <Form.Item
             name="userNote"

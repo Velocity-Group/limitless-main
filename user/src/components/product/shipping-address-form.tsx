@@ -140,6 +140,32 @@ export const ShippingAddressForm = ({
         </Col>
         <Col md={12} xs={12}>
           <Form.Item
+            name="district"
+            label="District"
+            rules={[
+              {
+                required: true, message: 'Please enter your district!'
+              }
+            ]}
+          >
+            <Input placeholder="District" />
+          </Form.Item>
+        </Col>
+        <Col md={12} xs={12}>
+          <Form.Item
+            name="ward"
+            label="Ward"
+            rules={[
+              {
+                required: true, message: 'Please enter your ward!'
+              }
+            ]}
+          >
+            <Input placeholder="Ward" />
+          </Form.Item>
+        </Col>
+        <Col md={12} xs={12}>
+          <Form.Item
             name="streetAddress"
             label="Street Address"
             rules={[

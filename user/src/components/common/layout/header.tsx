@@ -13,7 +13,7 @@ import {
   LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined
 } from '@ant-design/icons';
 import {
-  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon
+  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon, TickIcon
 } from 'src/icons';
 import Router, { withRouter, Router as RouterEvent } from 'next/router';
 import {
@@ -258,7 +258,11 @@ class Header extends PureComponent<IProps> {
                 <div className="profile-user">
                   <img className="avatar" src={user?.avatar || '/static/no-avatar.png'} alt="avatar" />
                   <span className="profile-name">
-                    {user?.name || 'N/A'}
+                    <span>
+                      {user?.name || 'N/A'}
+                      {' '}
+                      <TickIcon />
+                    </span>
                     <span className="sub-name">
                       @
                       {user?.username || 'n/a'}
