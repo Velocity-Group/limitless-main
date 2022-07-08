@@ -26,11 +26,11 @@ export class TableListMenu extends PureComponent<IProps> {
         title: 'Path',
         dataIndex: 'path'
       },
-      {
-        title: 'Ordering',
-        dataIndex: 'ordering',
-        sorter: true
-      },
+      // {
+      //   title: 'Ordering',
+      //   dataIndex: 'ordering',
+      //   sorter: true
+      // },
       // {
       //   title: 'Public',
       //   dataIndex: 'public',

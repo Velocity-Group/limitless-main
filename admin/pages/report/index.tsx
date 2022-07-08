@@ -1,10 +1,10 @@
-import './index.less';
 import Page from '@components/common/layout/page';
 import ReportTableList from '@components/report/report-table-list';
 import { reportService } from '@services/report.service';
 import { message } from 'antd';
 import Head from 'next/head';
 import React, { PureComponent } from 'react';
+import './index.less';
 
 export default class index extends PureComponent {
   state = {

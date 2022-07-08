@@ -2,7 +2,9 @@ import { ObjectId } from 'mongodb';
 import { pick } from 'lodash';
 
 export class ReportDto {
-  _id?: ObjectId;
+  _id: ObjectId;
+
+  title: string;
 
   description: string;
 
@@ -31,6 +33,7 @@ export class ReportDto {
       this,
       pick(data, [
         '_id',
+        'title',
         'description',
         'source',
         'sourceId',

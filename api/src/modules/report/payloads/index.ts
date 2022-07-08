@@ -36,5 +36,9 @@ export class ReportCreatePayload {
 
   @IsString()
   @IsNotEmpty()
+  title: string;
+
+  @IsString()
+  @IsNotEmpty()
   description: string;
 }

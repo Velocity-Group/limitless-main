@@ -25,14 +25,14 @@ export class SearchFilter extends PureComponent<IProps> {
 
     return (
       <Row gutter={24}>
-        <Col lg={6} xs={24}>
+        <Col lg={6} xs={12}>
           <Input
             placeholder="Enter keyword"
             onChange={(evt) => this.setState({ q: evt.target.value })}
             onPressEnter={() => onSubmit(this.state, () => onSubmit(this.state))}
           />
         </Col>
-        <Col lg={6} xs={24}>
+        <Col lg={6} xs={12}>
           <Select
             defaultValue={status}
             style={{ width: '100%' }}
@@ -46,7 +46,7 @@ export class SearchFilter extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Col>
-        <Col lg={6} xs={24}>
+        <Col lg={6} xs={12}>
           <Select
             defaultValue=""
             style={{ width: '100%' }}
@@ -64,7 +64,7 @@ export class SearchFilter extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Col>
-        <Col lg={6} xs={24}>
+        <Col lg={6} xs={12}>
           <Select
             defaultValue={verifiedDocument}
             style={{ width: '100%' }}

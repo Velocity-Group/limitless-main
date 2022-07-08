@@ -71,12 +71,12 @@ export class FormMenu extends PureComponent<IProps> {
           name="internal"
           label={(
             <>
-              <Popover content={<p>Using website post as menu item or an external link</p>}>
+              <Popover content={<p>Create menu link to an internal page or to an external source.</p>}>
                 <a style={{ marginRight: '5px' }}>
                   <QuestionCircleOutlined />
                 </a>
               </Popover>
-              From sytem post?
+              Link to an internal page?
             </>
           )}
           valuePropName="checked"
@@ -92,11 +92,11 @@ export class FormMenu extends PureComponent<IProps> {
             }}
           />
         </Form.Item>
-        <Form.Item name="isNewTab" label="Is new tab?" valuePropName="checked">
+        <Form.Item name="isNewTab" label="Open in new tab?" valuePropName="checked">
           <Switch defaultChecked={false} />
         </Form.Item>
-        <Form.Item name="title" rules={[{ required: true, message: 'Please input title of menu!' }]} label="Title">
-          <Input placeholder="Enter menu title" />
+        <Form.Item name="title" rules={[{ required: true, message: 'Please input title of menu item!' }]} label="Title">
+          <Input placeholder="Enter menu item title" />
         </Form.Item>
         {isInternal ? (
           <Form.Item
@@ -134,7 +134,7 @@ export class FormMenu extends PureComponent<IProps> {
           <Form.Item
             name="path"
             rules={[
-              { required: true, message: 'Please input url of menu!' },
+              { required: true, message: 'Please input URL of menu item!' },
               {
                 validator: (rule, value) => {
                   if (!value) return Promise.resolve();
@@ -151,7 +151,7 @@ export class FormMenu extends PureComponent<IProps> {
             ]}
             label="Url"
           >
-            <Input placeholder="Enter menu url" />
+            <Input placeholder="Enter menu item URL" />
           </Form.Item>
         )}
         {/* <Form.Item name="help" label="Help">
@@ -180,9 +180,9 @@ export class FormMenu extends PureComponent<IProps> {
         <Form.Item name="public" label="Public" valuePropName="checked">
           <Switch />
         </Form.Item> */}
-        <Form.Item name="ordering" label="Ordering">
+        {/* <Form.Item name="ordering" label="Ordering">
           <InputNumber type="number" placeholder="Enter ordering of menu item" />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item wrapperCol={{ span: 20, offset: 4 }}>
           <Button type="primary" htmlType="submit" loading={submiting}>
             Submit
