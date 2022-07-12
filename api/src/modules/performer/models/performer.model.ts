@@ -148,15 +148,5 @@ export class PerformerModel extends Document {
 
   balance: number;
 
-  socialsLink: {
-    facebook: String;
-    twitter: String;
-    google: String;
-    instagram: String;
-    linkedIn: String;
-  };
-
-  invitationId: ObjectId;
-
-  referralId: ObjectId;
+  commissionPercentage: number;
 }

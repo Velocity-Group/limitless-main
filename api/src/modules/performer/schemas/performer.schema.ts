@@ -264,6 +264,10 @@ const performerSchema = new mongoose.Schema({
   balance: {
     type: Number,
     default: 0
+  },
+  commissionPercentage: {
+    type: Number,
+    default: 0.1
   }
 });
 

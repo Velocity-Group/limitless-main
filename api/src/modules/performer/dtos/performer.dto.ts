@@ -72,15 +72,9 @@ export interface IPerformerResponse {
   dateOfBirth?: Date;
   bodyType?: string;
   balance?: number;
-  socialsLink?: {
-    facebook: String;
-    twitter: String;
-    google: String;
-    instagram: String;
-    linkedIn: String;
-  };
   stripeAccount?: any;
   isFollowed?: boolean;
+  commissionPercentage?: number;
 }
 
 export class PerformerDto {
@@ -239,15 +233,9 @@ export class PerformerDto {
 
   balance: number;
 
-  socialsLink: {
-    facebook: String;
-    twitter: String;
-    google: String;
-    instagram: String;
-    linkedIn: String;
-  }
-
   isFollowed?: boolean;
+
+  commissionPercentage?: number;
 
   constructor(data?: Partial<any>) {
     Object.assign(
@@ -324,8 +312,8 @@ export class PerformerDto {
         'dateOfBirth',
         'bodyType',
         'balance',
-        'socialsLink',
-        'isFollowed'
+        'isFollowed',
+        'commissionPercentage'
       ])
     );
   }
@@ -406,7 +394,7 @@ export class PerformerDto {
         ...publicInfo,
         ...privateInfo,
         ccbillSetting: this.ccbillSetting,
-        commissionSetting: this.commissionSetting
+        commissionPercentage: this.commissionPercentage
       };
     }
 
@@ -444,7 +432,6 @@ export class PerformerDto {
       lastStreamingTime: this.lastStreamingTime,
       live: this.live,
       streamingStatus: this.streamingStatus,
-      socialsLink: this.socialsLink,
       isFollowed: this.isFollowed
     };
   }
@@ -499,7 +486,6 @@ export class PerformerDto {
       streamingStatus: this.streamingStatus,
       dateOfBirth: this.dateOfBirth,
       bodyType: this.bodyType,
-      socialsLink: this.socialsLink,
       isPerformer: true,
       isFollowed: this.isFollowed
     };
