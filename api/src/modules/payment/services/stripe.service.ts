@@ -166,18 +166,8 @@ export class StripeService {
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
-      const performerCommissions = await this.performerService.getCommissions(transaction.performerId);
-      const settingCommission = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION ? await this.settingService.getKeyValue(SETTING_KEYS.MONTHLY_SUBSCRIPTION_COMMISSION) : await this.settingService.getKeyValue(SETTING_KEYS.YEARLY_SUBSCRIPTION_COMMISSION);
-      let commission = 0.2;
-      switch (transaction.type) {
-        case PAYMENT_TYPE.MONTHLY_SUBSCRIPTION:
-          commission = performerCommissions?.monthlySubscriptionCommission || settingCommission;
-          break;
-        case PAYMENT_TYPE.YEARLY_SUBSCRIPTION:
-          commission = performerCommissions?.yearlySubscriptionCommission || settingCommission;
-          break;
-        default: commission = performerCommissions?.monthlySubscriptionCommission || settingCommission;
-      }
+      const settingCommission = await this.settingService.getKeyValue(SETTING_KEYS.PERFORMER_COMMISSION);
+      const commission = performer.commissionPercentage || settingCommission;
       const product = await this.getStripeProduct(performer, transaction.type);
       // monthly subscription will be used once free trial end
       const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;

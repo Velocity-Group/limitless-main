@@ -74,10 +74,6 @@ class PerformerUpdate extends PureComponent<IProps> {
     }
   }
 
-  onFormRefSubmit() {
-    this.formRef && this.formRef.formRefSubmit();
-  }
-
   onUploaded(field: string, resp: any) {
     if (field === 'avatarId') {
       this.setState({ avatarUrl: resp.response.data.url });
@@ -124,7 +120,7 @@ class PerformerUpdate extends PureComponent<IProps> {
     try {
       await this.setState({ settingUpdating: true });
       await performerService.updateCommissionSetting(id, { ...data, performerId: id });
-      message.success('Updated successfully!');
+      message.success('Updated commission setting successfully!');
     } catch (error) {
       message.error('An error occurred, please try again!');
     } finally {
@@ -236,7 +232,7 @@ class PerformerUpdate extends PureComponent<IProps> {
                 <CommissionSettingForm
                   submiting={settingUpdating}
                   onFinish={this.updateCommissionSetting.bind(this)}
-                  commissionSetting={performer.commissionSetting}
+                  performer={performer}
                 />
               </Tabs.TabPane>
               {/* <Tabs.TabPane tab={<span>CCbill</span>} key="ccbill">

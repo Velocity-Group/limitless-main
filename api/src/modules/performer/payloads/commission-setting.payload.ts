@@ -11,47 +11,5 @@ export class CommissionSettingPayload {
   @Min(0)
   @Max(0.99)
   @IsOptional()
-  monthlySubscriptionCommission: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(0.99)
-  @IsOptional()
-  yearlySubscriptionCommission: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(0.99)
-  @IsOptional()
-  videoSaleCommission: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(0.99)
-  @IsOptional()
-  gallerySaleCommission: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(0.99)
-  @IsOptional()
-  streamCommission: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(0.99)
-  @IsOptional()
-  productSaleCommission: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(0.99)
-  @IsOptional()
-  tipCommission: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(0.99)
-  @IsOptional()
-  feedSaleCommission: number;
+  commissionPercentage: number;
 }

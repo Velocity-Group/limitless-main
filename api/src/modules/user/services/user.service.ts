@@ -113,6 +113,8 @@ export class UserService {
     if (countUserUsername || countPerformerUsername) {
       throw new UsernameExistedException();
     }
+    // eslint-disable-next-line no-param-reassign
+    data.username = data.username ? data.username.trim().toLowerCase() : `model${StringHelper.randomString(8, '0123456789')}`;
     const user = { ...data } as any;
     user.email = data.email.toLowerCase();
     user.username = data.username && data.username.trim().toLowerCase();
@@ -131,6 +133,8 @@ export class UserService {
       // eslint-disable-next-line no-param-reassign
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
+    // eslint-disable-next-line no-param-reassign
+    data.username = data.username ? data.username.trim().toLowerCase() : `model${StringHelper.randomString(8, '0123456789')}`;
     return this.userModel.create(data);
   }
 

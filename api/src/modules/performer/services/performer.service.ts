@@ -28,7 +28,7 @@ import { UserService } from 'src/modules/user/services';
 import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
-import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
+import { isObjectId, toObjectId, randomString } from 'src/kernel/helpers/string.helper';
 import { Storage } from 'src/modules/storage/contants';
 import { StripeService } from 'src/modules/payment/services';
 import { FollowService } from 'src/modules/follow/services/follow.service';
@@ -40,7 +40,6 @@ import {
 import {
   PerformerModel,
   PaymentGatewaySettingModel,
-  CommissionSettingModel,
   BankingModel
 } from '../models';
 import {
@@ -54,7 +53,6 @@ import {
 } from '../payloads';
 import {
   PERFORMER_BANKING_SETTING_MODEL_PROVIDER,
-  PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER,
   PERFORMER_MODEL_PROVIDER,
   PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER
 } from '../providers';
@@ -89,9 +87,7 @@ export class PerformerService {
     @Inject(PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER)
     private readonly paymentGatewaySettingModel: Model<PaymentGatewaySettingModel>,
     @Inject(PERFORMER_BANKING_SETTING_MODEL_PROVIDER)
-    private readonly bankingSettingModel: Model<BankingModel>,
-    @Inject(PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER)
-    private readonly commissionSettingModel: Model<CommissionSettingModel>
+    private readonly bankingSettingModel: Model<BankingModel>
   ) {
   }
 
@@ -211,7 +207,7 @@ export class PerformerService {
     }
     const [
       avatar, documentVerification, idVerification, cover, welcomeVideo,
-      paypalSetting, commissionSetting, stripeAccount, blockCountries
+      paypalSetting, stripeAccount, blockCountries
     ] = await Promise.all([
       performer.avatarId && this.fileService.findById(performer.avatarId),
       performer.documentVerificationId && this.fileService.findById(performer.documentVerificationId),
@@ -219,7 +215,6 @@ export class PerformerService {
       performer.coverId && this.fileService.findById(performer.coverId),
       performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId),
       this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'paypal' }),
-      this.commissionSettingModel.findOne({ performerId: id }),
       this.stripeService.getConnectAccount(performer._id),
       this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id })
     ]);
@@ -253,7 +248,6 @@ export class PerformerService {
       };
     }
     dto.paypalSetting = paypalSetting;
-    dto.commissionSetting = commissionSetting;
     dto.stripeAccount = stripeAccount;
     dto.blockCountries = blockCountries;
     return dto;
@@ -319,7 +313,7 @@ export class PerformerService {
     if (user) {
       data.createdBy = user._id;
     }
-    data.username = data.username.trim().toLowerCase();
+    data.username = data.username ? data.username.trim().toLowerCase() : `model${randomString(8, '0123456789')}`;
     data.email = data.email.toLowerCase();
     if (data.dateOfBirth) {
       data.dateOfBirth = new Date(data.dateOfBirth);
@@ -383,7 +377,7 @@ export class PerformerService {
       // TODO - check for other storaged
       data.avatarPath = avatar.path;
     }
-    data.username = data.username.trim().toLowerCase();
+    data.username = data.username ? data.username.trim().toLowerCase() : `model${randomString(8, '0123456789')}`;
     data.email = data.email.toLowerCase();
     if (!data.name) {
       data.name = data.firstName && data.lastName ? [data.firstName, data.lastName].join(' ') : 'No_display_name';
@@ -422,7 +416,7 @@ export class PerformerService {
   }
 
   public async adminUpdate(
-    id: string | ObjectId,
+    id: string,
     payload: PerformerUpdatePayload
   ): Promise<any> {
     const performer = await this.performerModel.findById(id);
@@ -548,7 +542,7 @@ export class PerformerService {
   }
 
   public async selfUpdate(
-    id: string | ObjectId,
+    id: string,
     payload: SelfUpdatePayload
   ): Promise<boolean> {
     const performer = await this.performerModel.findById(id);
@@ -558,6 +552,7 @@ export class PerformerService {
     const data = { ...payload } as any;
     delete data.balance;
     delete data.welcomeVideoId;
+    delete data.commissionPercentage;
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
@@ -797,23 +792,7 @@ export class PerformerService {
     performerId: string,
     payload: CommissionSettingPayload
   ) {
-    let item = await this.commissionSettingModel.findOne({
-      performerId
-    });
-    if (!item) {
-      // eslint-disable-next-line new-cap
-      item = new this.commissionSettingModel();
-    }
-    item.performerId = performerId as any;
-    item.monthlySubscriptionCommission = payload.monthlySubscriptionCommission;
-    item.yearlySubscriptionCommission = payload.yearlySubscriptionCommission;
-    item.videoSaleCommission = payload.videoSaleCommission;
-    item.gallerySaleCommission = payload.gallerySaleCommission;
-    item.productSaleCommission = payload.productSaleCommission;
-    item.tipCommission = payload.tipCommission;
-    item.feedSaleCommission = payload.feedSaleCommission;
-    item.streamCommission = payload.streamCommission;
-    return item.save();
+    return this.performerModel.updateOne({ _id: performerId, commissionPercentage: payload.commissionPercentage });
   }
 
   public async updateBankingSetting(
@@ -857,10 +836,6 @@ export class PerformerService {
       },
       { status: STATUS.ACTIVE, verifiedEmail: true }
     );
-  }
-
-  public async getCommissions(performerId: string | ObjectId) {
-    return this.commissionSettingModel.findOne({ performerId });
   }
 
   public async updatePerformerBalance(performerId: string | ObjectId, tokens: number) {

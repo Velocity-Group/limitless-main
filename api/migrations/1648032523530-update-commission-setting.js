@@ -45,7 +45,7 @@ module.exports.up = async function up(next) {
   }
 
   // eslint-disable-next-line no-console
-  console.log('Migrate settings done');
+  console.log('Update commission settings');
   next();
 };
 
