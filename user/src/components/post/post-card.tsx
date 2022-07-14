@@ -159,16 +159,12 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  async handleReport(reason: string) {
+  async handleReport(payload: any) {
     const { feed } = this.props;
-    if (!reason || reason.length < 20) {
-      message.error('You report must be at least 20 characters');
-      return;
-    }
     try {
       await this.setState({ requesting: true });
       await reportService.create({
-        target: 'feed', targetId: feed._id, performerId: feed.fromSourceId, description: reason
+        ...payload, target: 'feed', targetId: feed._id, performerId: feed.fromSourceId
       });
       message.success('Your report has been sent');
     } catch (e) {
