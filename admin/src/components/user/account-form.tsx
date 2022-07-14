@@ -213,7 +213,7 @@ export class AccountForm extends PureComponent<IProps> {
                 </Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Turn on if email account verified" stat>
+            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Turn on if email account verified">
               <Switch />
             </Form.Item>
           </Col>
