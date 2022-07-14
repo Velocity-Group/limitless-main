@@ -128,7 +128,7 @@ export const PurchaseProductForm = ({
                       {' '}
                       -
                       {' '}
-                      <small>{`${a.streetNumber} ${a.streetAddress}, ${a.ward}, ${a.district}, ${a.city}${a.state ? `, ${a.state}` : ''} ${a.zipCode}, ${a.country}`}</small>
+                      <small>{`${a.streetNumber} ${a.streetAddress}, ${a.ward}, ${a.district}, ${a.city}, ${a.state} (${a.zipCode}), ${a.country}`}</small>
                       <a aria-hidden className="delete-btn" onClick={() => deleteAddress(a._id)}><DeleteOutlined /></a>
                     </div>
                   </Select.Option>

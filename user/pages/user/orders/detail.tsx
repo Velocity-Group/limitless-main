@@ -171,7 +171,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                               {' '}
                               -
                               {' '}
-                              <small>{`${a.streetNumber} ${a.streetAddress}, ${a.city}, ${a.state}, ${a.country}`}</small>
+                              <small>{`${a.streetNumber} ${a.streetAddress}, ${a.ward}, ${a.district}, ${a.city}, ${a.state} (${a.zipCode}), ${a.country}`}</small>
                             </div>
                           </Select.Option>
                         ))}
