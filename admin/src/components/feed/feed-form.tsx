@@ -2,7 +2,7 @@
 import { PureComponent, createRef } from 'react';
 import {
   Upload, message, Button, Tooltip, Select,
-  Input, Form, InputNumber, Switch, Progress
+  Input, Form, InputNumber, Radio, Progress
 } from 'antd';
 import {
   BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
@@ -51,11 +51,11 @@ export default class FormFeed extends PureComponent<IProps> {
     fileList: [],
     fileIds: [],
     pollList: [],
-    isSale: false,
     addPoll: false,
     openPollDuration: false,
     expirePollTime: 7,
-    expiredPollAt: moment().endOf('day').add(7, 'days')
+    expiredPollAt: moment().endOf('day').add(7, 'days'),
+    intendedFor: 'subscriber'
   };
 
   componentDidMount() {
@@ -66,7 +66,8 @@ export default class FormFeed extends PureComponent<IProps> {
         type: feed.type,
         fileList: feed.files ? feed.files : [],
         fileIds: feed.fileIds ? feed.fileIds : [],
-        isSale: feed.isSale,
+        // eslint-disable-next-line no-nested-ternary
+        intendedFor: !feed.isSale ? 'subscriber' : feed.isSale && feed.price ? 'sale' : 'follower',
         addPoll: !!feed.pollIds.length,
         pollList: feed.polls,
         thumbnail: feed.thumbnail,
@@ -264,7 +265,7 @@ export default class FormFeed extends PureComponent<IProps> {
   async submit(payload: any) {
     const { feed } = this.props;
     const {
-      pollList, addPoll, isSale, expiredPollAt, fileIds, type
+      pollList, addPoll, intendedFor, expiredPollAt, fileIds, type
     } = this.state;
     const formValues = payload;
     if (!formValues.text || !formValues.text.trim()) {
@@ -275,7 +276,7 @@ export default class FormFeed extends PureComponent<IProps> {
     }
     formValues.teaserId = this.teaserId;
     formValues.thumbnailId = this.thumbnailId;
-    formValues.isSale = isSale;
+    formValues.isSale = intendedFor !== 'subscriber';
     formValues.fileIds = fileIds;
     if (['video', 'photo'].includes(feed?.type || type) && !fileIds.length) {
       return message.error(`Please add ${feed?.type || type} file`);
@@ -314,7 +315,7 @@ export default class FormFeed extends PureComponent<IProps> {
     if (!this.formRef) this.formRef = createRef();
     const { feed, onDelete } = this.props;
     const {
-      uploading, fileList, isSale, pollList, type, teaser,
+      uploading, fileList, pollList, type, teaser, intendedFor,
       addPoll, openPollDuration, expirePollTime, thumbnail
     } = this.state;
     return (
@@ -329,8 +330,7 @@ export default class FormFeed extends PureComponent<IProps> {
           initialValues={feed || ({
             type: 'text',
             text: '',
-            price: 4.99,
-            isSale: false
+            price: 4.99
           } as IFeed)}
         >
           <Form.Item
@@ -355,14 +355,18 @@ export default class FormFeed extends PureComponent<IProps> {
           <Form.Item label="Add description" name="text" rules={[{ required: true, message: 'Please add a description' }]}>
             <TextArea className="feed-input" rows={3} placeholder="Add a description" allowClear />
           </Form.Item>
-          {['photo', 'video'].includes(type) && (
-          <Form.Item extra="PPV & Set amount of tokens to 0 to make it FREE for the followers">
-            <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
+          {['video', 'photo'].includes(type) && (
+          <Form.Item>
+            <Radio.Group value={intendedFor} onChange={(e) => this.setState({ intendedFor: e.target.value })}>
+              <Radio key="subscriber" value="subscriber">Only for Subscribers</Radio>
+              <Radio key="sale" value="sale">Pay per View</Radio>
+              <Radio key="follower" value="follower">Free for Subscribers & Followers</Radio>
+            </Radio.Group>
           </Form.Item>
           )}
-          {isSale && (
-            <Form.Item label="Amount of tokens" name="price" rules={[{ required: isSale, message: 'Please add amount of tokens' }]}>
-              <InputNumber min={0} />
+          {intendedFor === 'sale' && (
+            <Form.Item label="Amount of tokens" name="price" rules={[{ required: true, message: 'Please add amount of tokens' }]}>
+              <InputNumber min={1} />
             </Form.Item>
           )}
           {thumbnail && (
@@ -467,7 +471,7 @@ export default class FormFeed extends PureComponent<IProps> {
             />
           </Form.Item>
           )}
-          <div style={{ display: 'flex', margin: '15px 0' }}>
+          <div style={{ margin: '15px 0' }}>
             {['video', 'photo'].includes(feed?.type || type) && [
               <Upload
                 key="upload_thumb"
@@ -479,7 +483,7 @@ export default class FormFeed extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Button type="primary" style={{ marginLeft: 15 }}>
+                <Button type="primary">
                   <PictureOutlined />
                   {' '}
                   Add Thumbnail
@@ -536,7 +540,7 @@ export default class FormFeed extends PureComponent<IProps> {
               loading={uploading}
               disabled={uploading}
             >
-              Back
+              Discard
             </Button>
           </div>
         </Form>

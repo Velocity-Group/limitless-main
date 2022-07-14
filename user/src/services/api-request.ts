@@ -52,10 +52,6 @@ export abstract class APIRequest {
       throw new Error('Please login!');
     }
 
-    if (response.status === 403) {
-      throw new Error('Please login!');
-    }
-
     // const error = new Error(response.statusText) as any;
     // error.response = response;
     // throw error;

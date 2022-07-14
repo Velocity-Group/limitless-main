@@ -188,6 +188,7 @@ export class FeedService {
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
       feed.isBought = !!bought;
       const followed = follows.find((fol) => `${fol.followingId}` === `${f.fromSourceId}`);
+      feed.isFollowed = !!followed;
       if (feed.isSale && !feed.price && !!followed) {
         feed.isBought = true;
       }
@@ -532,23 +533,25 @@ export class FeedService {
     if (user._id.toString() === feed.fromSourceId.toString()) {
       return true;
     }
+    let isSubscribed = false;
     if (!feed.isSale) {
       // check subscription
       const subscribed = await this.subscriptionService.checkSubscribed(
         feed.fromSourceId,
         user._id
       );
-      if (!subscribed) {
+      isSubscribed = !!subscribed;
+      if (!isSubscribed) {
         throw new ForbiddenException();
       }
       return true;
     } if (feed.isSale) {
       if (!feed.price) {
         const followed = await this.followService.countOne({ followerId: user._id, followingId: feed.fromSourceId });
-        if (!followed) {
-          throw new ForbiddenException();
+        if (followed || isSubscribed) {
+          return true;
         }
-        return true;
+        throw new ForbiddenException();
       }
       // check bought
       const bought = await this.paymentTokenService.checkBought(feed, PurchaseItemType.FEED, user);

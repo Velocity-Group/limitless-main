@@ -141,6 +141,10 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       message.error('You have an insufficient token balance. Please top up.');
       return;
     }
+    if (!payload.deliveryAddressId) {
+      message.error('Please select or create new the delivery address!');
+      return;
+    }
     try {
       await this.setState({ submiting: true });
       await tokenTransctionService.purchaseProduct(product._id, payload);

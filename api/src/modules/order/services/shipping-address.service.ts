@@ -1,11 +1,9 @@
 import {
   Injectable,
   Inject,
-  forwardRef,
   ForbiddenException
 } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { EntityNotFoundException, SearchRequest, PageableData } from 'src/kernel';
 import { SHIPPING_ADDRESS_MODEL_PROVIDER } from '../providers';
@@ -13,23 +11,18 @@ import { ShippingAddressModel } from '../models';
 import {
   AddressBodyPayload
 } from '../payloads';
-import {
-
-} from '../constants';
 import { } from '../dtos';
 
 @Injectable()
 export class ShippingAddressService {
   constructor(
-    @Inject(forwardRef(() => UserService))
-    private readonly userService: UserService,
     @Inject(SHIPPING_ADDRESS_MODEL_PROVIDER)
     private readonly addressModel: Model<ShippingAddressModel>
   ) { }
 
   public async findOne(id: string, user: UserDto): Promise<ShippingAddressModel> {
     const data = await this.addressModel.findById(id);
-    if (data?.sourceId !== user?._id) throw new ForbiddenException();
+    if (`${data.sourceId}` !== `${user._id}`) throw new ForbiddenException();
     return data;
   }
 
@@ -57,7 +50,7 @@ export class ShippingAddressService {
     if (!address) {
       throw new EntityNotFoundException();
     }
-    if (address.sourceId !== user._id) throw new ForbiddenException();
+    if (`${address.sourceId}` !== `${user._id}`) throw new ForbiddenException();
     await this.addressModel.updateOne({ _id: id }, payload);
     return true;
   }
@@ -70,7 +63,7 @@ export class ShippingAddressService {
     if (!address) {
       throw new EntityNotFoundException();
     }
-    if (address.sourceId !== user._id) throw new ForbiddenException();
+    if (`${address.sourceId}` !== `${user._id}`) throw new ForbiddenException();
     await this.addressModel.deleteOne({ _id: id });
     return true;
   }

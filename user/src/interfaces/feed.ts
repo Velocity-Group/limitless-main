@@ -33,4 +33,5 @@ export interface IFeed {
   isPinned: boolean;
   pinnedAt: Date;
   pollDescription: string;
+  isFollowed: boolean;
 }

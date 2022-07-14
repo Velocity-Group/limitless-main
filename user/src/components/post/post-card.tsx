@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { Component, createRef, forwardRef } from 'react';
+import { Component, createRef } from 'react';
 import {
   Menu, Dropdown, Divider, message, Modal, Tooltip, Button
 } from 'antd';
@@ -29,13 +29,13 @@ import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
 import Loader from '@components/common/base/loader';
 import { IFeed, IUser } from 'src/interfaces';
-import dynamic from 'next/dynamic';
+// import dynamic from 'next/dynamic';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
 import './index.less';
 
-const Subscriber = dynamic(() => import('@components/streaming/agora/subscriber'), { ssr: false });
-const ForwardedSubscriber = forwardRef((props: any, ref) => <Subscriber {...props} forwardedRef={ref} />);
+// const Subscriber = dynamic(() => import('@components/streaming/agora/subscriber'), { ssr: false });
+// const ForwardedSubscriber = forwardRef((props: any, ref) => <Subscriber {...props} forwardedRef={ref} />);
 
 interface IProps {
   feed: IFeed;
@@ -342,7 +342,11 @@ class FeedCard extends Component<IProps> {
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
       openTeaser, openSubscriptionModal, openReportModal, requesting
     } = this.state;
-    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
+    const canView = (!feed.isSale && feed.isSubscribed)
+    || (feed.isSale && isBought)
+    || feed.type === 'text'
+    || (feed.isSale && !feed.price && feed.isFollowed)
+    || (feed.isSale && !feed.price && feed.isSubscribed);
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     const thumbUrl = (feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0])
@@ -377,18 +381,6 @@ class FeedCard extends Component<IProps> {
             Copy link to clipboard
           </a>
         </Menu.Item>
-        {/* {user._id === feed.fromSourceId && (
-        <Menu.Item key={`pin_profile_${feed._id}`}>
-          <a target="_blank" rel="noopener noreferrer" href="#">
-            Pin to profile page
-          </a>
-        </Menu.Item>
-        )} */}
-        {/* <Menu.Item key={`statistic_${feed._id}`}>
-          <a target="_blank" href="#">
-            Post statistics
-          </a>
-        </Menu.Item> */}
         {user._id === feed.fromSourceId && <Divider style={{ margin: '10px 0' }} />}
         {user._id === feed.fromSourceId && <Menu.Item key={`delete_post_${feed._id}`}><a aria-hidden onClick={handleDelete.bind(this, feed)}>Delete post</a></Menu.Item>}
       </Menu>
@@ -401,85 +393,85 @@ class FeedCard extends Component<IProps> {
       </Dropdown>
     );
 
-    if (feed.type === 'stream') {
-      return (
-        <div className="feed-card">
-          <div className="feed-top">
-            <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
-              <div className="feed-top-left">
-                <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
-                <div className="feed-name">
-                  <h4>
-                    {performer?.name || 'N/A'}
-                    {' '}
-                    {performer?.verifiedAccount && <TickIcon />}
-                  </h4>
-                  <h5>
-                    @
-                    {performer?.username || 'n/a'}
-                  </h5>
-                </div>
-                {!performer?.isOnline ? <span className="online-status" /> : <span className="online-status active" />}
-              </div>
-            </Link>
-            <div className="feed-top-right">
-              <span className="feed-time">{formatDate(feed.updatedAt, 'MMM DD')}</span>
-              {dropdown}
-            </div>
-          </div>
-          <div className="feed-container">
-            <div className="feed-text">
-              Live
-            </div>
-            {!feed.isSubscribed ? (
-              <div className="lock-content">
-                <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
-                <Button
-                  onMouseEnter={() => this.setState({ isHovered: true })}
-                  onMouseLeave={() => this.setState({ isHovered: false })}
-                  disabled={user.isPerformer}
-                  className="secondary"
-                  onClick={() => this.setState({ openSubscriptionModal: true })}
-                >
-                  Subscribe to unlock
-                </Button>
-              </div>
-            ) : (
-              <div className="feed-content">
-                {!feed.isSale ? (
-                  <>
-                    <ForwardedSubscriber
-                      ref={this.subscriberRef}
-                      {...{
-                        localUId: user._id,
-                        remoteUId: performer._id,
-                        conversationId: (feed as any).targetId
-                      }}
-                    />
-                    <Button block className="primary" onClick={() => this.subscriberRef.current.join()}>join</Button>
-                    <Button block className="secondary" onClick={() => this.subscriberRef.current.leave()}>Leave</Button>
-                  </>
-                ) : (
-                  <Button onClick={() => Router.push(
-                    {
-                      pathname: '/streaming/details',
-                      query: {
-                        username: performer?.username || performer?._id
-                      }
-                    },
-                    `/streaming/${performer?.username || performer?._id
-                    }`
-                  )}
-                  >
-                    View full content
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
+    // if (feed.type === 'stream') {
+    //   return (
+    //     <div className="feed-card">
+    //       <div className="feed-top">
+    //         <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
+    //           <div className="feed-top-left">
+    //             <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
+    //             <div className="feed-name">
+    //               <h4>
+    //                 {performer?.name || 'N/A'}
+    //                 {' '}
+    //                 {performer?.verifiedAccount && <TickIcon />}
+    //               </h4>
+    //               <h5>
+    //                 @
+    //                 {performer?.username || 'n/a'}
+    //               </h5>
+    //             </div>
+    //             {!performer?.isOnline ? <span className="online-status" /> : <span className="online-status active" />}
+    //           </div>
+    //         </Link>
+    //         <div className="feed-top-right">
+    //           <span className="feed-time">{formatDate(feed.updatedAt, 'MMM DD')}</span>
+    //           {dropdown}
+    //         </div>
+    //       </div>
+    //       <div className="feed-container">
+    //         <div className="feed-text">
+    //           Live
+    //         </div>
+    //         {!feed.isSubscribed ? (
+    //           <div className="lock-content">
+    //             <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
+    //             <Button
+    //               onMouseEnter={() => this.setState({ isHovered: true })}
+    //               onMouseLeave={() => this.setState({ isHovered: false })}
+    //               disabled={user.isPerformer}
+    //               className="secondary"
+    //               onClick={() => this.setState({ openSubscriptionModal: true })}
+    //             >
+    //               Subscribe to unlock
+    //             </Button>
+    //           </div>
+    //         ) : (
+    //           <div className="feed-content">
+    //             {!feed.isSale ? (
+    //               <>
+    //                 <ForwardedSubscriber
+    //                   ref={this.subscriberRef}
+    //                   {...{
+    //                     localUId: user._id,
+    //                     remoteUId: performer._id,
+    //                     conversationId: (feed as any).targetId
+    //                   }}
+    //                 />
+    //                 <Button block className="primary" onClick={() => this.subscriberRef.current.join()}>join</Button>
+    //                 <Button block className="secondary" onClick={() => this.subscriberRef.current.leave()}>Leave</Button>
+    //               </>
+    //             ) : (
+    //               <Button onClick={() => Router.push(
+    //                 {
+    //                   pathname: '/streaming/details',
+    //                   query: {
+    //                     username: performer?.username || performer?._id
+    //                   }
+    //                 },
+    //                 `/streaming/${performer?.username || performer?._id
+    //                 }`
+    //               )}
+    //               >
+    //                 View full content
+    //               </Button>
+    //             )}
+    //           </div>
+    //         )}
+    //       </div>
+    //     </div>
+    //   );
+    // }
 
     return (
       <div className="feed-card">
@@ -547,7 +539,7 @@ class FeedCard extends Component<IProps> {
               {/* eslint-disable-next-line no-nested-ternary */}
               <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
               <div className="lock-middle">
-                {(isHovered || canView) ? <UnlockOutlined /> : <LockOutlined />}
+                {(isHovered) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
                   <Button
                     onMouseEnter={() => this.setState({ isHovered: true })}
@@ -559,7 +551,7 @@ class FeedCard extends Component<IProps> {
                     Subscribe to unlock
                   </Button>
                 )}
-                {feed.isSale && !isBought && (
+                {feed.isSale && feed.price > 0 && !isBought && (
                   <Button
                     onMouseEnter={() => this.setState({ isHovered: true })}
                     onMouseLeave={() => this.setState({ isHovered: false })}
@@ -574,9 +566,19 @@ class FeedCard extends Component<IProps> {
                     to unlock
                   </Button>
                 )}
+                {((feed.isSale && !feed.price && !isBought) || (feed.isSale && !feed.price && !feed.isSubscribed)) && (
+                <Button
+                  onMouseEnter={() => this.setState({ isHovered: true })}
+                  onMouseLeave={() => this.setState({ isHovered: false })}
+                  disabled={user.isPerformer}
+                  className="secondary"
+                  onClick={() => Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`)}
+                >
+                  Follow for free
+                </Button>
+                )}
                 {feed.teaser && (
-                  <Button type="link" onClick={() => this.setState({ openTeaser: true })}>
-                    <EyeOutlined />
+                  <Button className="teaser-btn" type="link" onClick={() => this.setState({ openTeaser: true })}>
                     View teaser
                   </Button>
                 )}

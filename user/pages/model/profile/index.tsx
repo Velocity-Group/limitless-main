@@ -153,7 +153,7 @@ class PerformerProfile extends PureComponent<IProps> {
 
   handleFollow = async () => {
     const { performer, user } = this.props;
-    const { isFollowed, requesting } = this.state;
+    const { isFollowed, requesting, tab } = this.state;
     if (!user._id) {
       message.error('Please log in or register!');
       return;
@@ -167,6 +167,9 @@ class PerformerProfile extends PureComponent<IProps> {
       } else {
         await followService.delete(performer?._id);
         this.setState({ isFollowed: false, requesting: false });
+      }
+      if (tab === 'post') {
+        this.loadItems();
       }
     } catch (e) {
       const error = await e;

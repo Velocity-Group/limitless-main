@@ -73,6 +73,8 @@ export class FeedDto {
 
   targetId: ObjectId;
 
+  isFollowed: boolean;
+
   constructor(data: Partial<FeedDto>) {
     Object.assign(
       this,
@@ -113,7 +115,8 @@ export class FeedDto {
         'status',
         'isSchedule',
         'scheduleAt',
-        'targetId'
+        'targetId',
+        'isFollowed'
       ])
     );
   }

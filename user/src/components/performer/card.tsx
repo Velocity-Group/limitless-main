@@ -14,6 +14,7 @@ interface IProps {
   performer: IPerformer;
   countries: ICountry[];
   user: IUser;
+  onFollow?: Function;
 }
 
 class PerformerCard extends PureComponent<IProps> {
@@ -49,13 +50,13 @@ class PerformerCard extends PureComponent<IProps> {
   }
 
   handleFollow = async () => {
-    const { performer, user } = this.props;
+    const { performer, user, onFollow } = this.props;
     const { isFollowed, requesting } = this.state;
+    if (requesting || user.isPerformer) return;
     if (!user._id) {
       message.error('Please log in or register!');
       return;
     }
-    if (requesting || user.isPerformer) return;
     try {
       this.setState({ requesting: true });
       if (!isFollowed) {
@@ -65,6 +66,7 @@ class PerformerCard extends PureComponent<IProps> {
         await followService.delete(performer?._id);
         this.setState({ isFollowed: false, requesting: false });
       }
+      onFollow && onFollow();
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
@@ -74,7 +76,7 @@ class PerformerCard extends PureComponent<IProps> {
 
   render() {
     const { performer, countries, user } = this.props;
-    const { isFollowed, requesting } = this.state;
+    const { isFollowed } = this.state;
     const country = countries && countries.length && countries.find((c) => c.code === performer.country);
 
     return (
