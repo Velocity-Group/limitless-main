@@ -13,6 +13,7 @@ import Router from 'next/router';
 const WYSIWYG = dynamic(() => import('@components/wysiwyg'), {
   ssr: false
 });
+
 class PostCreate extends PureComponent<any> {
   private _content: string = '';
 
@@ -53,8 +54,8 @@ class PostCreate extends PureComponent<any> {
     }
   }
 
-  contentChange(content: { [html: string]: string }) {
-    this._content = content.html;
+  contentChange(content: string) {
+    this._content = content;
   }
 
   render() {

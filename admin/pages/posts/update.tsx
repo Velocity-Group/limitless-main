@@ -4,7 +4,7 @@ import Page from '@components/common/layout/page';
 
 import dynamic from 'next/dynamic';
 import {
-  Form, Input, Select, Button, Breadcrumb, message, InputNumber
+  Form, Input, Select, Button, Breadcrumb, message
 } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
 import { postService } from '@services/post.service';
@@ -13,6 +13,7 @@ import Loader from '@components/common/base/loader';
 const WYSIWYG = dynamic(() => import('@components/wysiwyg'), {
   ssr: false
 });
+
 class PostUpdate extends PureComponent<any> {
   private _content: string = '';
 
@@ -59,8 +60,8 @@ class PostUpdate extends PureComponent<any> {
     }
   }
 
-  contentChange(content: { [html: string]: string }) {
-    this._content = content.html;
+  contentChange(content: string) {
+    this._content = content;
   }
 
   render() {
@@ -90,19 +91,19 @@ class PostUpdate extends PureComponent<any> {
             <Form
               onFinish={this.submit.bind(this)}
               initialValues={post}
-              labelCol={{ span: 4 }}
-              wrapperCol={{ span: 20 }}
+              labelCol={{ span: 24 }}
+              wrapperCol={{ span: 24 }}
             >
               <Form.Item name="title" rules={[{ required: true, message: 'Please input title!' }]} label="Title">
                 <Input placeholder="Enter your title" />
               </Form.Item>
 
-              <Form.Item name="slug" label="Slug">
+              {/* <Form.Item name="slug" label="Slug">
                 <Input placeholder="Custom friendly slug" />
               </Form.Item>
               <Form.Item name="ordering" label="Ordering">
                 <InputNumber />
-              </Form.Item>
+              </Form.Item> */}
               <Form.Item name="shortDescription" label="Short description">
                 <Input.TextArea rows={3} />
               </Form.Item>
@@ -117,7 +118,7 @@ class PostUpdate extends PureComponent<any> {
               </Form.Item>
 
               <Form.Item wrapperCol={{ offset: 4 }}>
-                <Button type="primary" htmlType="submit" style={{ float: 'right' }} loading={submiting}>
+                <Button type="primary" htmlType="submit" loading={submiting}>
                   Submit
                 </Button>
               </Form.Item>

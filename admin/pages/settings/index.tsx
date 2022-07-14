@@ -46,10 +46,10 @@ class Settings extends PureComponent {
     this.loadSettings();
   }
 
-  async handleTextEditerContentChange(key: string, content: { [html: string]: string}) {
-    this[key] = content.html;
-    this.setVal(key, content.html);
-    this.dataChange[key] = content.html;
+  async handleTextEditerContentChange(key: string, content: string) {
+    this[key] = content;
+    this.setVal(key, content);
+    this.dataChange[key] = content;
   }
 
   async onMenuChange(menu) {
