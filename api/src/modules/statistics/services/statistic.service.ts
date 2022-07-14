@@ -21,6 +21,7 @@ import { EARNING_MODEL_PROVIDER } from 'src/modules/earning/providers/earning.pr
 import { EarningModel } from 'src/modules/earning/models/earning.model';
 import { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING_EMAIL_CONFIRMATION } from 'src/modules/user/constants';
 import { ORDER_STATUS } from 'src/modules/order/constants';
+import { animationFrameScheduler } from 'rxjs';
 
 @Injectable()
 export class StatisticService {
@@ -50,7 +51,7 @@ export class StatisticService {
   public async stats(): Promise<any> {
     const totalActiveUsers = await this.userModel.countDocuments({ status: STATUS_ACTIVE });
     const totalInactiveUsers = await this.userModel.countDocuments({ status: STATUS_INACTIVE });
-    const totalPendingUsers = await this.userModel.countDocuments({ status: STATUS_PENDING_EMAIL_CONFIRMATION });
+    const totalPendingUsers = await this.userModel.countDocuments({ verifiedEmail: animationFrameScheduler });
     const totalActivePerformers = await this.performerModel.countDocuments({ status: STATUS_ACTIVE });
     const totalInactivePerformers = await this.performerModel.countDocuments({ status: STATUS_INACTIVE });
     const totalPendingPerformers = await this.performerModel.countDocuments({ verifiedDocument: false });
@@ -139,8 +140,6 @@ export class StatisticService {
       totalVideos,
       totalProducts,
       totalSubscribers,
-      // totalActiveSubscribers,
-      // totalInactiveSubscribers: totalSubscribers - totalActiveSubscribers,
       totalDeliveredOrders,
       totalShippingdOrders,
       totalRefundedOrders,

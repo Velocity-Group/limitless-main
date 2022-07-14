@@ -24,16 +24,19 @@ export class ReportForm extends PureComponent<IProps> {
           />
         </div>
         <div className="info-body">
-          <div style={{ marginBottom: '15px', width: '100%', textAlign: 'center' }}>
-
+          <div style={{ marginBottom: '15px', width: '100%' }}>
             <p>Report post</p>
             <Form
-              name="galleryForm"
+              name="report-form"
               onFinish={onFinish.bind(this)}
               labelCol={{ span: 24 }}
               wrapperCol={{ span: 24 }}
               className="account-form"
               scrollToFirstError
+              initialValues={{
+                title: 'Violent or repulsive content',
+                description: ''
+              }}
             >
               <Form.Item
                 label="Title"

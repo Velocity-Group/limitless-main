@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import {
   IsString, IsOptional, IsNotEmpty, IsIn
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { REPORT_TARGET } from '../constants';
 
 export class ReportSearchRequestPayload extends SearchRequest {
@@ -18,6 +19,7 @@ export class ReportSearchRequestPayload extends SearchRequest {
 }
 
 export class ReportCreatePayload {
+  @ApiProperty()
   @IsString()
   @IsOptional()
   @IsIn([
@@ -30,15 +32,18 @@ export class ReportCreatePayload {
   ])
   target = REPORT_TARGET.FEED;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   targetId: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   title: string;
 
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   description: string;
 }

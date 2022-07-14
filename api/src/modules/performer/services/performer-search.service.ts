@@ -49,6 +49,12 @@ export class PerformerSearchService {
     if (req.verifiedDocument) {
       query.verifiedDocument = req.verifiedDocument === 'true';
     }
+    if (req.verifiedEmail) {
+      query.verifiedEmail = req.verifiedEmail === 'true';
+    }
+    if (req.verifiedAccount) {
+      query.verifiedAccount = req.verifiedAccount === 'true';
+    }
     if (req.fromAge && req.toAge) {
       query.dateOfBirth = {
         $gte: new Date(req.fromAge),

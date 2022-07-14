@@ -490,9 +490,6 @@ export class AccountForm extends PureComponent<IProps> {
                 <Select.Option key="inactive" value="inactive">
                   Inactive
                 </Select.Option>
-                <Select.Option key="pending-email-confirmation" value="pending-email-confirmation" disabled>
-                  Not verified email
-                </Select.Option>
               </Select>
             </Form.Item>
           </Col>

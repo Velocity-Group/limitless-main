@@ -211,12 +211,9 @@ export class AccountForm extends PureComponent<IProps> {
                 <Select.Option key="inactive" value="inactive">
                   Inactive
                 </Select.Option>
-                <Select.Option key="pending-email-confirmation" value="pending-email-confirmation">
-                  Pending email confirmation
-                </Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Tracking reality email-adress">
+            <Form.Item name="verifiedEmail" label="Verified Email" valuePropName="checked" help="Turn on if email account verified" stat>
               <Switch />
             </Form.Item>
           </Col>

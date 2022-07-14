@@ -86,7 +86,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href={{ pathname: '/users', query: { status: 'pending-email-confirmation' } }}>
+            <Link href={{ pathname: '/users', query: { verifiedEmail: false } }}>
               <a>
                 <Card>
                   <Statistic
@@ -133,7 +133,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="NOT VERIFIED IDS MODELS"
+                    title="NOT VERIFIED ID MODELS"
                     value={stats.totalPendingPerformers}
                     valueStyle={{ color: '#009688' }}
                     prefix={<BarChartOutlined />}

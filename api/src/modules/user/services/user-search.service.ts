@@ -39,6 +39,9 @@ export class UserSearchService {
         }
       ];
     }
+    if (req.verifiedEmail) {
+      query.verifiedEmail = req.verifiedEmail === 'true';
+    }
     if (req.role) {
       query.roles = { $in: [req.role] };
     }
