@@ -229,10 +229,6 @@ export default class Performers extends PureComponent<IProps> {
       {
         key: 'inactive',
         text: 'Inactive'
-      },
-      {
-        key: 'pending-email-confirmation',
-        text: 'Not verified email'
       }
     ];
 

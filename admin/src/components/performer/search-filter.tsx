@@ -41,9 +41,6 @@ export class SearchFilter extends PureComponent<IProps> {
             <Select.Option value="">All Statuses</Select.Option>
             <Select.Option value="active">Active</Select.Option>
             <Select.Option value="inactive">Inactive</Select.Option>
-            <Select.Option value="pending-email-confirmation">
-              Not verified email
-            </Select.Option>
           </Select>
         </Col>
         <Col lg={6} xs={12}>
