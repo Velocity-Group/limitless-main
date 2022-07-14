@@ -6,11 +6,12 @@ import {
 interface IProps {
   onSubmit: Function;
   defaultStatus: string;
+  defaultEmailStatus: string;
 }
 
 export class SearchFilter extends PureComponent<IProps> {
   render() {
-    const { onSubmit, defaultStatus } = this.props;
+    const { onSubmit, defaultStatus, defaultEmailStatus } = this.props;
     return (
       <Row gutter={24}>
         <Col md={5} xs={12}>
@@ -44,7 +45,7 @@ export class SearchFilter extends PureComponent<IProps> {
         </Col>
         <Col md={5} xs={12}>
           <Select
-            defaultValue=""
+            defaultValue={defaultEmailStatus}
             style={{ width: '100%' }}
             onChange={(val) => this.setState({ verifiedEmail: val })}
           >
