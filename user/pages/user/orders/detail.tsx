@@ -1,22 +1,26 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Button, Descriptions, Tag, Spin, Divider, Select
+  Layout, message, Button, Descriptions, Tag, Spin, Divider, Select, Modal
 } from 'antd';
 import {
-  ShoppingCartOutlined, EditOutlined
+  ShoppingCartOutlined, EditOutlined, PlusOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
-import { IOrder, IUIConfig, IAddress } from 'src/interfaces';
-import { orderService, shippingAddressService } from 'src/services';
+import {
+  IOrder, IUIConfig, IAddress, ICountry
+} from 'src/interfaces';
+import { orderService, shippingAddressService, utilsService } from 'src/services';
 import { connect } from 'react-redux';
 import Router from 'next/router';
+import { ShippingAddressForm } from '@components/product/shipping-address-form';
 
 const { Item } = Descriptions;
 
 interface IProps {
   id: string;
   ui: IUIConfig;
+  countries: ICountry[];
 }
 
 interface IStates {
@@ -24,13 +28,26 @@ interface IStates {
   loading: boolean;
   addresses: IAddress[];
   onEditAddress: boolean;
+  submiting: boolean;
+  openAddAddressModal: boolean;
 }
 
 class OrderDetailPage extends PureComponent<IProps, IStates> {
   static authenticate = true;
 
   static async getInitialProps({ ctx }) {
-    return ctx.query;
+    const { query } = ctx;
+    try {
+      const [countries] = await Promise.all([
+        utilsService.countriesList()
+      ]);
+      return {
+        id: query.id,
+        countries: countries.data
+      };
+    } catch (e) {
+      return { error: await e };
+    }
   }
 
   constructor(props: IProps) {
@@ -39,7 +56,9 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
       loading: false,
       order: null,
       addresses: [],
-      onEditAddress: false
+      onEditAddress: false,
+      submiting: false,
+      openAddAddressModal: false
     };
   }
 
@@ -98,10 +117,48 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
     }
   }
 
+  addNewAddress = async (payload: any) => {
+    const { countries } = this.props;
+    const { addresses } = this.state;
+    try {
+      this.setState({ submiting: true });
+      const country = countries.find((c) => c.code === payload.country);
+      const data = { ...payload, country: country.name };
+      const resp = await shippingAddressService.create(data);
+      this.setState({
+        submiting: false,
+        openAddAddressModal: false,
+        addresses: [...[resp.data], ...addresses]
+      });
+    } catch (e) {
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later!');
+      this.setState({ submiting: false, openAddAddressModal: false });
+    }
+  };
+
+  deleteAddress = async (id) => {
+    const { addresses } = this.state;
+    try {
+      this.setState({ submiting: true });
+      await shippingAddressService.delete(id);
+      const index = addresses.findIndex((f) => f._id === id);
+      addresses.splice(index, 1);
+      this.setState({
+        submiting: false,
+        addresses: addresses.filter((a) => a._id !== id)
+      });
+    } catch (e) {
+      this.setState({ submiting: false });
+      const err = await e;
+      message.error(err?.message || 'Error occured, please try again later!');
+    }
+  };
+
   render() {
-    const { ui } = this.props;
+    const { ui, countries } = this.props;
     const {
-      order, loading, addresses, onEditAddress
+      order, loading, addresses, onEditAddress, submiting, openAddAddressModal
     } = this.state;
     return (
       <Layout>
@@ -160,30 +217,45 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                     {' '}
                     {!onEditAddress ? order?.deliveryAddress : (
                       <Select
-                        style={{ minWidth: 200 }}
+                        style={{ minWidth: 250 }}
                         defaultValue={order?.deliveryAddressId}
                         onChange={(id) => this.onUpdateDeliveryAddress(id)}
                       >
                         {addresses.map((a: IAddress) => (
                           <Select.Option value={a._id} key={a._id}>
-                            <div className="address-option">
+                            <div style={{ position: 'relative', paddingRight: 30 }}>
                               {a.name}
                               {' '}
                               -
                               {' '}
                               <small>{`${a.streetNumber} ${a.streetAddress}, ${a.ward}, ${a.district}, ${a.city}, ${a.state} (${a.zipCode}), ${a.country}`}</small>
+                              {/* <a style={{ position: 'absolute', right: 0 }} aria-hidden onClick={() => this.deleteAddress(a._id)}><DeleteOutlined /></a> */}
                             </div>
                           </Select.Option>
                         ))}
                       </Select>
                     )}
-                    {!onEditAddress && (
-                      <a aria-hidden onClick={() => this.setState({ onEditAddress: true })}>
-                        &nbsp;&nbsp;
-                        <EditOutlined />
-                        {' '}
-                        Change address
-                      </a>
+                     &nbsp;&nbsp;
+                    {order?.deliveryStatus === 'processing' && (
+                    <>
+                      {!onEditAddress ? (
+                        <a aria-hidden onClick={() => this.setState({ onEditAddress: true })}>
+                          <EditOutlined />
+                          {' '}
+                          Change
+                        </a>
+                      ) : (
+                        <>
+                          {addresses.length < 10 && (
+                          <a aria-hidden onClick={() => this.setState({ openAddAddressModal: true })}>
+                            <PlusOutlined />
+                            {' '}
+                            Add New Address
+                          </a>
+                          )}
+                        </>
+                      )}
+                    </>
                     )}
                   </div>
                   <div style={{ marginBottom: '10px' }}>
@@ -212,6 +284,24 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
           )}
           {loading && <div className="text-center" style={{ margin: 30 }}><Spin /></div>}
         </div>
+        <Modal
+          key="add-new-address"
+          width={660}
+          title={null}
+          visible={openAddAddressModal}
+          onOk={() => this.setState({ openAddAddressModal: false })}
+          footer={null}
+          onCancel={() => this.setState({ openAddAddressModal: false })}
+          destroyOnClose
+          centered
+        >
+          <ShippingAddressForm
+            onCancel={() => this.setState({ openAddAddressModal: false })}
+            submiting={submiting}
+            onFinish={this.addNewAddress}
+            countries={countries}
+          />
+        </Modal>
       </Layout>
     );
   }

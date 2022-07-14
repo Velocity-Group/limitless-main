@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Button, Form, Input, message, InputNumber, Select
 } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { ICountry, IProduct, IAddress } from '@interfaces/index';
 import { shippingAddressService } from 'src/services';
 import { ShippingAddressForm } from './shipping-address-form';
@@ -68,6 +68,7 @@ export const PurchaseProductForm = ({
       const index = addresses.findIndex((f) => f._id === id);
       addresses.splice(index, 1);
       setSubmiting(false);
+      formRef.current.resetFields(['deliveryAddressId']);
     } catch (e) {
       setSubmiting(false);
       const err = await e;
@@ -119,7 +120,7 @@ export const PurchaseProductForm = ({
             rules={[{ required: true, message: 'Please select delivery address!' }]}
             label="Delivery address"
           >
-            <Button.Group style={{ width: '100%' }}>
+            <Button.Group style={{ width: '100%', overflow: 'auto' }}>
               <Select defaultActiveFirstOption onChange={(val: string) => formRef.current.setFieldsValue({ deliveryAddressId: val })}>
                 {addresses.map((a: IAddress) => (
                   <Select.Option value={a._id} key={a._id}>
@@ -132,9 +133,9 @@ export const PurchaseProductForm = ({
                       <a aria-hidden className="delete-btn" onClick={() => deleteAddress(a._id)}><DeleteOutlined /></a>
                     </div>
                   </Select.Option>
-                )) }
+                ))}
               </Select>
-              {addresses.length < 10 && <Button onClick={() => setNewAddress(true)} className="primary">Add New</Button>}
+              {addresses.length < 10 && <Button onClick={() => setNewAddress(true)} className="primary"><PlusOutlined /></Button>}
             </Button.Group>
           </Form.Item>
           <Form.Item
