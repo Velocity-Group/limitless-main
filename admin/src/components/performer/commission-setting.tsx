@@ -30,10 +30,10 @@ export class CommissionSettingForm extends PureComponent<IProps> {
         onFinishFailed={() => message.error('Please complete the required fields.')}
         validateMessages={validateMessages}
         initialValues={{
-          commissionPercentage: performer.commissionPercentage
+          commissionPercentage: performer?.commissionPercentage || 0
         }}
       >
-        <Form.Item name="commissionPercentage" label="Commission Percentage" help="Value is from 0 to 0.99 (0% - 99%)">
+        <Form.Item name="commissionPercentage" label="Commission Percentage" help="Value is from 0.01 to 0.99 (1% - 99%)">
           <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item wrapperCol={{ ...layout.wrapperCol }}>

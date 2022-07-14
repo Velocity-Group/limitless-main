@@ -792,7 +792,9 @@ export class PerformerService {
     performerId: string,
     payload: CommissionSettingPayload
   ) {
-    return this.performerModel.updateOne({ _id: performerId, commissionPercentage: payload.commissionPercentage });
+    return this.performerModel.updateOne({ _id: performerId }, {
+      commissionPercentage: payload.commissionPercentage
+    });
   }
 
   public async updateBankingSetting(

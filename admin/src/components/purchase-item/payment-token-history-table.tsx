@@ -3,7 +3,6 @@ import {
   Table, Tag, Avatar, Tooltip
 } from 'antd';
 import { IPaymentTokenHistory } from 'src/interfaces';
-import { getGlobalConfig } from '@services/index';
 import { formatDate } from '@lib/date';
 
 interface IProps {

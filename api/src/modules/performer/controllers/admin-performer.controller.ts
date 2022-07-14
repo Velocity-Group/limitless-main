@@ -243,9 +243,9 @@ export class AdminPerformerController {
   }
 
   @Put('/:id/commission-settings')
-  @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
+  @HttpCode(HttpStatus.OK)
   async updateCommissionSetting(
     @Param('id') performerId: string,
     @Body() payload: CommissionSettingPayload

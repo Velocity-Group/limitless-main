@@ -1,5 +1,5 @@
 import {
-  IsString, IsNotEmpty, IsOptional, IsNumber, Min, Max
+  IsString, IsNotEmpty, IsNumber, Min, Max
 } from 'class-validator';
 
 export class CommissionSettingPayload {
@@ -8,8 +8,8 @@ export class CommissionSettingPayload {
   performerId: string;
 
   @IsNumber()
-  @Min(0)
+  @Min(0.01)
   @Max(0.99)
-  @IsOptional()
+  @IsNotEmpty()
   commissionPercentage: number;
 }
