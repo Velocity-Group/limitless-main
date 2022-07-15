@@ -379,7 +379,9 @@ export class FileService {
     // get thumb of the file, then convert to mp4
     const publicDir = this.config.get('file.publicDir');
     const videoDir = this.config.get('file.videoDir');
-    let videoPath: string;
+    let videoPath = '';
+    let newAbsolutePath = '';
+    let newPath = '';
     let { metadata = {}, server } = fileData;
     if (existsSync(fileData.absolutePath)) {
       videoPath = fileData.absolutePath;
@@ -398,18 +400,17 @@ export class FileService {
       );
 
       const respVideo = await this.videoService.convert2Mp4(videoPath);
-      // delete old video and replace with new one
-      let newAbsolutePath = respVideo.toPath;
-      let newPath = respVideo.toPath.replace(publicDir, '');
-
+      newAbsolutePath = respVideo.toPath;
+      newPath = respVideo.toPath.replace(publicDir, '');
       const meta = await this.videoService.getMetaData(videoPath);
-      const { width: w0, height: h0 } = meta.streams[0];
-      const { width: w1, height: h1 } = meta.streams[1];
-      const width = w0 || w1;
-      const height = h0 || h1;
+      const stream1 = meta.streams && meta.streams[0];
+      const stream2 = meta.streams && meta.streams[1];
+      const width = stream1?.width || stream2?.width || '500';
+      const height = stream1?.height || stream2?.height || '500';
+      const rotate = stream1?.rotation || stream2?.rotation;
       const respThumb = await this.videoService.createThumbs(videoPath, {
         toFolder: videoDir,
-        size: options?.size || (width && height && `${width}x${height}`),
+        size: options?.size || (rotate === '-90' ? `${height}x${width}` : `${width}x${height}`),
         count: options?.count || 1
       });
       let thumbnails: any = [];
@@ -451,6 +452,8 @@ export class FileService {
             }
           }
         }
+        // remove converted file once uploaded s3 done
+        existsSync(respVideo.toPath) && unlinkSync(respVideo.toPath);
       } else {
         server = Storage.DiskStorage;
         thumbnails = respThumb.map((name) => ({
@@ -458,6 +461,7 @@ export class FileService {
           path: join(videoDir, name).replace(publicDir, '')
         }));
       }
+      // remove old file
       existsSync(videoPath) && unlinkSync(videoPath);
       await this.fileModel.updateOne(
         { _id: fileData._id },
@@ -476,6 +480,8 @@ export class FileService {
         }
       );
     } catch (e) {
+      existsSync(videoPath) && unlinkSync(videoPath);
+      existsSync(newAbsolutePath) && unlinkSync(newAbsolutePath);
       await this.fileModel.updateOne(
         { _id: fileData._id },
         {
@@ -539,7 +545,9 @@ export class FileService {
     const fileData = event.data.file as FileDto;
     const options = event.data.options || {};
     const publicDir = this.config.get('file.publicDir');
-    let audioPath: string;
+    let audioPath = '';
+    let newAbsolutePath = '';
+    let newPath = '';
     let { metadata = {}, server } = fileData;
     if (existsSync(fileData.absolutePath)) {
       audioPath = fileData.absolutePath;
@@ -557,9 +565,8 @@ export class FileService {
       );
 
       const respAudio = await this.audioFileService.convert2Mp3(audioPath);
-      // delete old audio and replace with new one
-      let newAbsolutePath = respAudio.toPath;
-      let newPath = respAudio.toPath.replace(publicDir, '');
+      newAbsolutePath = respAudio.toPath;
+      newPath = respAudio.toPath.replace(publicDir, '');
       // check s3 settings
       const checkS3Settings = await this.s3StorageService.checkSetting();
       if (fileData.server === Storage.S3 && checkS3Settings) {
@@ -578,6 +585,7 @@ export class FileService {
           bucket: result.Bucket,
           endpoint: S3Service.getEndpoint(result)
         };
+        existsSync(respAudio.toPath) && unlinkSync(respAudio.toPath);
       } else {
         server = Storage.DiskStorage;
       }
@@ -600,6 +608,8 @@ export class FileService {
         }
       );
     } catch (e) {
+      existsSync(audioPath) && unlinkSync(audioPath);
+      existsSync(newAbsolutePath) && unlinkSync(newAbsolutePath);
       await this.fileModel.updateOne(
         { _id: fileData._id },
         {
@@ -668,6 +678,19 @@ export class FileService {
     const fileData = event.data.file as FileDto;
     let { metadata = {}, server } = fileData;
     const options = event.data.options || {};
+    const publicDir = this.config.get('file.publicDir');
+    const photoDir = this.config.get('file.photoDir');
+    let photoPath = '';
+    let thumbnailAbsolutePath = '';
+    let thumbnailPath = '';
+    let absolutePath = '';
+
+    if (existsSync(fileData.absolutePath)) {
+      photoPath = fileData.absolutePath;
+    } else if (existsSync(join(publicDir, fileData.path))) {
+      photoPath = join(publicDir, fileData.path);
+    }
+
     try {
       await this.fileModel.updateOne(
         { _id: fileData._id },
@@ -677,25 +700,12 @@ export class FileService {
           }
         }
       );
-
-      const publicDir = this.config.get('file.publicDir');
-      const photoDir = this.config.get('file.photoDir');
-      let photoPath: any;
-      let thumbnailAbsolutePath: string;
-      let thumbnailPath: string;
-      let { absolutePath } = fileData;
-
-      if (existsSync(fileData.absolutePath)) {
-        photoPath = fileData.absolutePath;
-      } else if (existsSync(join(publicDir, fileData.path))) {
-        photoPath = join(publicDir, fileData.path);
-      }
       const meta = await this.imageService.getMetaData(photoPath);
       const thumbBuffer = await this.imageService.createThumbnail(
         photoPath,
         options.thumbnailSize || {
-          width: 500,
-          height: 500
+          width: 250,
+          height: 250
         }
       ) as Buffer;
 
@@ -720,9 +730,9 @@ export class FileService {
         thumbnailAbsolutePath = join(photoDir, thumbName);
         writeFileSync(join(photoDir, thumbName), thumbBuffer);
       }
+      const buffer = await this.imageService.replaceWithoutExif(photoPath);
       // upload file to s3
       if (fileData.server === Storage.S3 && checkS3Settings) {
-        const buffer = await this.imageService.replaceWithoutExif(photoPath);
         const upload = await this.s3StorageService.upload(
           fileData.name,
           fileData.acl,
@@ -739,9 +749,8 @@ export class FileService {
           endpoint: S3Service.getEndpoint(upload)
         };
         // remove old file once upload s3 done
-        existsSync(photoPath) && unlinkSync(photoPath);
+        existsSync(fileData.absolutePath) && unlinkSync(fileData.absolutePath);
       } else {
-        const buffer = await this.imageService.replaceWithoutExif(photoPath);
         writeFileSync(photoPath, buffer);
         photoPath = photoPath.replace(publicDir, '');
         server = Storage.DiskStorage;
@@ -767,6 +776,7 @@ export class FileService {
         }
       );
     } catch (e) {
+      existsSync(fileData.absolutePath) && unlinkSync(fileData.absolutePath);
       await this.fileModel.updateOne(
         { _id: fileData._id },
         {
