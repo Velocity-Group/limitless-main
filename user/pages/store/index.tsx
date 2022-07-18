@@ -141,7 +141,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       message.error('You have an insufficient token balance. Please top up.');
       return;
     }
-    if (!payload.deliveryAddressId) {
+    if (product.type === 'physical' && !payload.deliveryAddressId) {
       message.error('Please select or create new the delivery address!');
       return;
     }
@@ -150,7 +150,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       await tokenTransctionService.purchaseProduct(product._id, payload);
       message.success('Payment success');
       handleUpdateBalance({ token: -product.price });
-      Router.replace('/user/token-transaction');
+      Router.push('/user/orders');
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');

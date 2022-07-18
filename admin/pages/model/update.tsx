@@ -122,7 +122,8 @@ class PerformerUpdate extends PureComponent<IProps> {
       await performerService.updateCommissionSetting(id, { ...data, performerId: id });
       message.success('Updated commission setting successfully!');
     } catch (error) {
-      message.error('An error occurred, please try again!');
+      const err = await error;
+      message.error(err?.message || 'An error occurred, please try again!');
     } finally {
       this.setState({ settingUpdating: false });
     }
