@@ -339,8 +339,7 @@ class FeedCard extends Component<IProps> {
     const canView = (!feed.isSale && feed.isSubscribed)
     || (feed.isSale && isBought)
     || feed.type === 'text'
-    || (feed.isSale && !feed.price && feed.isFollowed)
-    || (feed.isSale && !feed.price && feed.isSubscribed);
+    || (feed.isSale && !feed.price && user._id);
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     const thumbUrl = (feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0])
@@ -479,7 +478,7 @@ class FeedCard extends Component<IProps> {
                     to unlock
                   </Button>
                 )}
-                {((feed.isSale && !feed.price && !isBought) || (feed.isSale && !feed.price && !feed.isSubscribed)) && (
+                {(feed.isSale && !feed.price && !user._id) && (
                 <Button
                   onMouseEnter={() => this.setState({ isHovered: true })}
                   onMouseLeave={() => this.setState({ isHovered: false })}

@@ -361,7 +361,7 @@ export default class FeedForm extends PureComponent<IProps> {
             <Radio.Group value={intendedFor} onChange={(e) => this.setState({ intendedFor: e.target.value })}>
               <Radio key="subscriber" value="subscriber">Only for Subscribers</Radio>
               <Radio key="sale" value="sale">Pay per View</Radio>
-              <Radio key="follower" value="follower">Free for Subscribers & Followers</Radio>
+              <Radio key="follower" value="follower">Free for Everyone</Radio>
             </Radio.Group>
           </Form.Item>
           )}

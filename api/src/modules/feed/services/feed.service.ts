@@ -184,18 +184,20 @@ export class FeedService {
       feed.isBought = !!bought;
       const followed = follows.find((fol) => `${fol.followingId}` === `${f.fromSourceId}`);
       feed.isFollowed = !!followed;
-      if (feed.isSale && !feed.price && !!followed) {
+      if (feed.isSale && !feed.price) {
         feed.isBought = true;
       }
       const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
       const feedPollStringIds = (f.pollIds || []).map((pollId) => pollId.toString());
       feed.polls = polls.filter((p) => feedPollStringIds.includes(p._id.toString()));
       const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
-      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'));
-      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))) {
+      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`)
+        || (user && user.roles && user.roles.includes('admin'))) {
         feed.isSubscribed = true;
         feed.isBought = true;
       }
+      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (feed.isSale && !feed.price);
+
       if (feedFiles.length) {
         feed.files = feedFiles.map((file) => {
           // track server s3 or local, assign jwtoken if local
@@ -549,11 +551,7 @@ export class FeedService {
       return true;
     } if (feed.isSale) {
       if (!feed.price) {
-        const followed = await this.followService.countOne({ followerId: user._id, followingId: feed.fromSourceId });
-        if (followed || isSubscribed) {
-          return true;
-        }
-        throw new ForbiddenException();
+        return true;
       }
       // check bought
       const bought = await this.paymentTokenService.checkBought(feed, PurchaseItemType.FEED, user);
