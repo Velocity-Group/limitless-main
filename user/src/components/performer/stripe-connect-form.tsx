@@ -17,6 +17,7 @@ export class StripeConnectForm extends PureComponent<IProps> {
     } = this.props;
     return (
       <div className="account-form">
+        <h4 className="text-center">The Stripe connect account will be used to automatically payouts. You can also save your Banking or PayPal account to request manual payouts</h4>
         {stripeAccount && stripeAccount.payoutsEnabled && stripeAccount.detailsSubmitted && (
           <div className="text-center">
             <p>You are connected with Stripe!</p>

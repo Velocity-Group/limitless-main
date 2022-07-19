@@ -89,7 +89,6 @@ export class PerformerBankingForm extends PureComponent<IProps> {
         className="account-form"
         ref={(ref) => { this.formRef = ref; }}
       >
-        <h4 className="text-center">The banking account saved here will be used when requesting manual payouts. You can also save your PayPal account under the PayPal tab</h4>
         <Row>
           <Col xl={12} md={12} xs={12}>
             <Form.Item

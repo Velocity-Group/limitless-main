@@ -260,11 +260,7 @@ export class PaymentService {
     paymentTransaction.targetId = products[0].productId;
     paymentTransaction.performerId = null;
     paymentTransaction.type = PAYMENT_TYPE.TOKEN_PACKAGE;
-<<<<<<< HEAD
-    paymentTransaction.totalPrice = couponInfo ? Number((totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2))).toFixed(2)) : totalPrice;
-=======
     paymentTransaction.totalPrice = couponInfo ? totalPrice - (totalPrice * couponInfo.value) : totalPrice;
->>>>>>> payment-gateways/ccbill
     paymentTransaction.products = products;
     paymentTransaction.paymentResponseInfo = null;
     paymentTransaction.status = PAYMENT_STATUS.CREATED;
@@ -273,11 +269,7 @@ export class PaymentService {
     return paymentTransaction;
   }
 
-<<<<<<< HEAD
   public async buyTokens(payload: PurchaseTokenPayload, user: UserDto) {
-=======
-  public async buyTokens(tokenId: string, payload: PurchaseTokenPayload, user: UserDto) {
->>>>>>> payment-gateways/ccbill
     const {
       paymentGateway, couponCode, currency, amount
     } = payload;
@@ -286,7 +278,7 @@ export class PaymentService {
       price: totalPrice,
       quantity: 1,
       name: 'Wallet',
-      description: `Top up $${amount}`,
+      description: `Top up Wallet $${amount}`,
       productId: null,
       productType: PAYMENT_TARGET_TYPE.TOKEN_PACKAGE,
       performerId: null,

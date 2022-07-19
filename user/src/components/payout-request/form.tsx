@@ -75,23 +75,23 @@ const PayoutRequestForm = ({
         <Input.TextArea disabled={payout && payout.status === 'done'} placeholder="Text something to admin here" rows={3} />
       </Form.Item>
       {payout?.adminNote && (
-      <Form.Item label="Admin noted">
-        <Alert type="info" message={payout?.adminNote} />
-      </Form.Item>
+        <Form.Item label="Admin noted">
+          <Alert type="info" message={payout?.adminNote} />
+        </Form.Item>
       )}
       {payout._id && (
-      <Form.Item label="Status">
-        <Tag color="orange" style={{ textTransform: 'capitalize' }}>{status}</Tag>
-      </Form.Item>
+        <Form.Item label="Status">
+          <Tag color="orange" style={{ textTransform: 'capitalize' }}>{status}</Tag>
+        </Form.Item>
       )}
       <Form.Item label="Select payout method" name="paymentAccountType">
         <Select>
           {settings?.paymentGateway === 'stripe' && (
-          <Select.Option value="stripe" key="stripe">
-            <img src="/static/stripe-icon.jpeg" width="30px" alt="stripe" />
-            {' '}
-            Stripe
-          </Select.Option>
+            <Select.Option value="stripe" key="stripe">
+              <img src="/static/stripe-icon.jpeg" width="30px" alt="stripe" />
+              {' '}
+              Stripe
+            </Select.Option>
           )}
           <Select.Option value="banking" key="banking">
             <img src="/static/banking-ico.png" width="30px" alt="banking" />
@@ -130,6 +130,6 @@ const PayoutRequestForm = ({
   );
 };
 
-PayoutRequestForm.defaultProps = { };
+PayoutRequestForm.defaultProps = {};
 
 export default PayoutRequestForm;

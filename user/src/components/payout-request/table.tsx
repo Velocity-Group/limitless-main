@@ -48,7 +48,7 @@ const PayoutRequestList = ({
       render: (requestTokens: number) => (
         <span>
           $
-          {requestTokens.toFixed(2)}
+          {(requestTokens || 0).toFixed(2)}
         </span>
       )
     },

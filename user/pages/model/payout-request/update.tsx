@@ -110,11 +110,10 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
       };
       await payoutRequestService.update(payout._id, body);
       message.success('Changes saved!');
-      Router.back();
+      Router.push('/model/payout-request');
     } catch (e) {
       const error = await Promise.resolve(e);
       message.error(error?.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ submiting: false });
     }
   }
