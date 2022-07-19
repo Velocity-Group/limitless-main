@@ -21,15 +21,8 @@ interface IProps {
 class MessageList extends PureComponent<IProps> {
   private messagesRef = createRef<HTMLDivElement>();
 
-  private resizeObserver: any;
-
   state = {
     offset: 0
-  }
-
-  componentDidMount() {
-    this.resizeObserver = new (window as any).ResizeObserver(this.scrollToBottom);
-    this.resizeObserver.observe(document.querySelector('.message-list-container'));
   }
 
   componentDidUpdate(prevProps) {
@@ -38,10 +31,6 @@ class MessageList extends PureComponent<IProps> {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ offset: 0 });
     }
-  }
-
-  componentWillUnmount() {
-    this.resizeObserver && this.resizeObserver.disconnect();
   }
 
   async handleScroll(conversation, event) {
@@ -121,6 +110,7 @@ class MessageList extends PureComponent<IProps> {
      // Proceed to the next message.
      i += 1;
    }
+   this.scrollToBottom();
    return tempMessages;
  };
 
@@ -132,10 +122,9 @@ class MessageList extends PureComponent<IProps> {
 
    if (this.messagesRef && this.messagesRef.current) {
      const ele: HTMLDivElement = this.messagesRef.current;
-     ele.scroll({
-       top: ele.scrollHeight,
-       behavior: 'auto'
-     });
+     setTimeout(() => {
+       ele.scrollTop = ele.scrollHeight;
+     }, 300);
    }
  }
 
@@ -157,7 +146,7 @@ class MessageList extends PureComponent<IProps> {
                </div>
                {fetching && <div className="text-center"><Spin /></div>}
                {this.renderMessages()}
-               {!fetching && !message.items.length && <p className="text-center">Let&apos;s talking</p>}
+               {!fetching && !message.items.length && <p className="text-center">Let&apos;s connect</p>}
                {!conversation.isSubscribed && (
                <Link href={{ pathname: '/model/profile', query: { username: conversation?.recipientInfo?.username || conversation?.recipientInfo?._id } }} as={`/${conversation?.recipientInfo?.username || conversation?.recipientInfo?._id}`}>
                  <div className="sub-text">Please subscribe to this model to start the conversation!</div>
