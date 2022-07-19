@@ -45,23 +45,23 @@ export const TableListSubscription = ({
     },
     {
       title: 'Start Date',
-      dataIndex: 'startRecurringDate',
-      render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
+      dataIndex: 'createdAt',
+      render(date: Date) {
+        return <span>{formatDate(date, 'll')}</span>;
       }
     },
     {
       title: 'Expiry Date',
       dataIndex: 'expiredAt',
       render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
+        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && formatDate(date, 'll')}</span>;
       }
     },
     {
       title: 'Renewal Date',
       dataIndex: 'nextRecurringDate',
       render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && nowIsBefore(record.expiredAt) ? formatDate(date, 'll') : 'N/A'}</span>;
+        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && formatDate(date, 'll')}</span>;
       }
     },
     {

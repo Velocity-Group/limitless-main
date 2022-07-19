@@ -671,6 +671,7 @@ class FeedCard extends Component<IProps> {
                 </div>
               ) : (
                 <ConfirmSubscriptionPerformerForm
+                  width={!paymentUrl ? 600 : 990}
                   type={subscriptionType}
                   performer={performer}
                   submiting={submiting}

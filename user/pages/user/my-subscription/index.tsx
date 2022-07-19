@@ -172,7 +172,7 @@ class SubscriptionPage extends PureComponent<IProps> {
           <Modal
             key="subscribe_performer"
             className="subscription-modal"
-            width={!paymentUrl ? 500 : 1200}
+            width={!paymentUrl ? 600 : 1200}
             centered
             title={null}
             visible={openSubscriptionModal}

@@ -656,7 +656,7 @@ class VideoViewPage extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={!paymentUrl ? 500 : 990}
+          width={!paymentUrl ? 600 : 990}
           centered
           title={null}
           visible={openSubscriptionModal}
