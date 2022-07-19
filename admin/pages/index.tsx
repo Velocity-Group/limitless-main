@@ -256,7 +256,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="GROSS PROFIT $"
+                    title="TOTAL EARNINGS"
                     value={`${stats?.totalGrossPrice.toFixed(2)}`}
                     valueStyle={{ color: '#fb2b2b' }}
                     prefix="$"
@@ -270,7 +270,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="NET PROFIT $"
+                    title="PLATFORM EARNINGS"
                     value={`${stats?.totalPriceCommission.toFixed(2)}`}
                     valueStyle={{ color: '#fb2b2b' }}
                     prefix="$"
@@ -284,7 +284,7 @@ export default class Dashboard extends PureComponent<any> {
               <a>
                 <Card>
                   <Statistic
-                    title="MODELS COMMISSION $"
+                    title="MODEL'S EARNINGS"
                     value={`${stats?.totalNetPrice.toFixed(2)}`}
                     valueStyle={{ color: '#fb2b2b' }}
                     prefix="$"

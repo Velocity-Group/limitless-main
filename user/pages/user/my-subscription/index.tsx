@@ -87,7 +87,7 @@ class SubscriptionPage extends PureComponent<IProps> {
   }
 
   async cancelSubscription(subscription: ISubscription) {
-    if (!window.confirm('Confirm to cancel this subscription!')) return;
+    if (!window.confirm('Are you sure you want to cancel this subscription!')) return;
     try {
       await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
       message.success('Subscription cancelled successfully');

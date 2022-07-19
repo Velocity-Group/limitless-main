@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 import { PureComponent, createRef } from 'react';
 import {
-  Upload, message, Button, Tooltip, Select,
-  Input, Form, InputNumber, Radio, Progress
+  Upload, message, Button, Tooltip, Select, Image,
+  Input, Form, InputNumber, Radio, Progress, Modal
 } from 'antd';
 import {
   BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
@@ -17,6 +17,7 @@ import moment from 'moment';
 import { formatDate } from '@lib/date';
 import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
 import { FormInstance } from 'antd/lib/form';
+import { VideoPlayer } from '@components/common';
 import AddPollDurationForm from './add-poll-duration';
 import './index.less';
 
@@ -55,7 +56,8 @@ export default class FormFeed extends PureComponent<IProps> {
     openPollDuration: false,
     expirePollTime: 7,
     expiredPollAt: moment().endOf('day').add(7, 'days'),
-    intendedFor: 'subscriber'
+    intendedFor: 'subscriber',
+    isShowPreviewTeaser: false
   };
 
   componentDidMount() {
@@ -316,7 +318,7 @@ export default class FormFeed extends PureComponent<IProps> {
     const { feed, onDelete } = this.props;
     const {
       uploading, fileList, pollList, type, teaser, intendedFor,
-      addPoll, openPollDuration, expirePollTime, thumbnail
+      addPoll, openPollDuration, expirePollTime, thumbnail, isShowPreviewTeaser
     } = this.state;
     return (
       <div className="feed-form">
@@ -373,7 +375,7 @@ export default class FormFeed extends PureComponent<IProps> {
           <Form.Item label="Thumbnail">
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, right: 2 }}><DeleteOutlined /></Button>
-              <img alt="thumbnail" src={(thumbnail?.thumbnails && thumbnail?.thumbnails[0]) || thumbnail?.url || thumbnail} width="200px" />
+              <Image alt="thumbnail" src={thumbnail?.url} width="200px" />
             </div>
           </Form.Item>
           )}
@@ -381,7 +383,11 @@ export default class FormFeed extends PureComponent<IProps> {
             <Form.Item label="Teaser">
               <div className="f-upload-list">
                 <div className="f-upload-item">
-                  <div className="f-upload-thumb">
+                  <div
+                    aria-hidden
+                    className="f-upload-thumb"
+                    onClick={() => this.setState({ isShowPreviewTeaser: !!teaser })}
+                  >
                     <a href={teaser?.url} target="_blank" rel="noreferrer">
                       <span className="f-thumb-vid">
                         <PlayCircleOutlined />
@@ -544,6 +550,30 @@ export default class FormFeed extends PureComponent<IProps> {
             </Button>
           </div>
         </Form>
+
+        <Modal
+          width={767}
+          footer={null}
+          onOk={() => this.setState({ isShowPreviewTeaser: false })}
+          onCancel={() => this.setState({ isShowPreviewTeaser: false })}
+          visible={isShowPreviewTeaser}
+          destroyOnClose
+        >
+          <VideoPlayer
+            {...{
+              autoplay: true,
+              controls: true,
+              playsinline: true,
+              fluid: true,
+              sources: [
+                {
+                  src: teaser?.url,
+                  type: 'video/mp4'
+                }
+              ]
+            }}
+          />
+        </Modal>
       </div>
     );
   }

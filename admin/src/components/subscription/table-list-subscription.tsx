@@ -70,16 +70,16 @@ export const TableListSubscription = ({
       title: 'Start Date',
       dataIndex: 'createdAt',
       sorter: true,
-      render(date: Date, record:ISubscription) {
-        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+      render(date: Date) {
+        return <span>{formatDate(date, 'LL')}</span>;
       }
     },
     {
       title: 'Expiry Date',
       dataIndex: 'expiredAt',
       sorter: true,
-      render(date: Date) {
-        return <span>{formatDate(date, 'LL')}</span>;
+      render(date: Date, record: ISubscription) {
+        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
       }
     },
     {
