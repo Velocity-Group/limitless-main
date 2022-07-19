@@ -612,7 +612,7 @@ class FeedCard extends Component<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={!paymentUrl ? 500 : 990}
+          width={!paymentUrl ? 600 : 990}
           centered
           title={null}
           visible={openSubscriptionModal}
@@ -671,7 +671,6 @@ class FeedCard extends Component<IProps> {
                 </div>
               ) : (
                 <ConfirmSubscriptionPerformerForm
-                  width={!paymentUrl ? 600 : 990}
                   type={subscriptionType}
                   performer={performer}
                   submiting={submiting}
