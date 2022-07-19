@@ -122,7 +122,7 @@ export class PerformerService {
   public async findByUsername(
     username: string,
     countryCode?: string,
-    currentUser?: UserDto
+    user?: UserDto
   ): Promise<PerformerDto> {
     const query = !isObjectId(username) ? {
       username: username.trim()
@@ -130,39 +130,48 @@ export class PerformerService {
     const model = await this.performerModel.findOne(query).lean();
     if (!model) throw new EntityNotFoundException();
     let isBlocked = false;
-    if (countryCode && `${currentUser?._id}` !== `${model._id}`) {
+    if (countryCode && `${user?._id}` !== `${model._id}`) {
       isBlocked = await this.performerBlockService.checkBlockedCountryByIp(model._id, countryCode);
       if (isBlocked) {
         throw new HttpException('Your country has been blocked by this model', 403);
       }
     }
+    const dto = new PerformerDto(model);
     let isBlockedByPerformer = false;
     let isBookMarked = null;
     let isSubscribed = null;
     let isFollowed = null;
-    if (currentUser) {
-      isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
+    if (user) {
+      isBlockedByPerformer = `${user?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
         model._id,
-        currentUser._id
+        user._id
       );
       if (isBlockedByPerformer) throw new HttpException('You has been blocked by this model', 403);
       isBookMarked = await this.reactionService.findOneQuery({
-        objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: currentUser._id, action: REACTION.BOOK_MARK
+        objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: user._id, action: REACTION.BOOK_MARK
       });
       const [subscription, following] = await Promise.all([
         this.subscriptionService.findOneSubscription({
           performerId: model._id,
-          userId: currentUser._id
+          userId: user._id
         }),
-        this.followService.findOne({ followerId: currentUser._id, followingId: model._id })
+        this.followService.findOne({ followerId: user._id, followingId: model._id })
       ]);
+      if (subscription) {
+        isSubscribed = moment().isBefore(subscription.expiredAt);
+        if (subscription.usedFreeSubscription) {
+          dto.isFreeSubscription = false;
+        }
+      }
       isFollowed = following;
       isSubscribed = (subscription && moment().isBefore(subscription.expiredAt)) || false;
     }
-    const dto = new PerformerDto(model);
     dto.isSubscribed = !!isSubscribed;
     dto.isBookMarked = !!isBookMarked;
     dto.isFollowed = !!isFollowed;
+    if (user && user.roles && user.roles.includes('admin')) {
+      dto.isSubscribed = true;
+    }
     if (model.avatarId) {
       const avatar = await this.fileService.findById(model.avatarId);
       dto.avatarPath = avatar ? avatar.path : null;
@@ -206,23 +215,24 @@ export class PerformerService {
       throw new EntityNotFoundException();
     }
     const [
-      avatar, documentVerification, idVerification, cover, welcomeVideo,
-      paypalSetting, stripeAccount, blockCountries
+      documentVerification, idVerification, welcomeVideo
     ] = await Promise.all([
-      performer.avatarId && this.fileService.findById(performer.avatarId),
       performer.documentVerificationId && this.fileService.findById(performer.documentVerificationId),
       performer.idVerificationId && this.fileService.findById(performer.idVerificationId),
-      performer.coverId && this.fileService.findById(performer.coverId),
-      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId),
+      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId)
+    ]);
+    const [paypalSetting, stripeAccount, blockCountries, bankingInformation, ccbillSetting] = await Promise.all([
       this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'paypal' }),
       this.stripeService.getConnectAccount(performer._id),
-      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id })
+      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id }),
+      this.getBankInfo(performer._id),
+      this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'ccbill' })
     ]);
 
     // TODO - update kernel for file dto
     const dto = new PerformerDto(performer);
-    dto.avatar = avatar ? FileDto.getPublicUrl(avatar.path) : null; // TODO - get default avatar
-    dto.cover = cover ? FileDto.getPublicUrl(cover.path) : null;
+    dto.avatar = dto.avatarPath ? FileDto.getPublicUrl(dto.avatarPath) : null; // TODO - get default avatar
+    dto.cover = dto.coverPath ? FileDto.getPublicUrl(dto.coverPath) : null;
     dto.welcomeVideoName = welcomeVideo ? welcomeVideo.name : null;
     dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : null;
     if (idVerification) {
@@ -250,6 +260,8 @@ export class PerformerService {
     dto.paypalSetting = paypalSetting;
     dto.stripeAccount = stripeAccount;
     dto.blockCountries = blockCountries;
+    dto.bankingInformation = bankingInformation;
+    dto.ccbillSetting = ccbillSetting;
     return dto;
   }
 
@@ -800,11 +812,11 @@ export class PerformerService {
   public async updateBankingSetting(
     performerId: string,
     payload: BankingSettingPayload,
-    currentUser: UserDto
+    user: UserDto
   ) {
     const performer = await this.performerModel.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
-    if (!currentUser?.roles.includes('admin') && `${currentUser._id}` !== `${performerId}`) {
+    if (user?.roles && !user?.roles.includes('admin') && `${user._id}` !== `${performerId}`) {
       throw new HttpException('Permission denied', 403);
     }
     let item = await this.bankingSettingModel.findOne({

@@ -75,7 +75,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Renews On',
+      title: 'Renewal Date',
       dataIndex: 'nextRecurringDate',
       sorter: true,
       render(date: Date, record: ISubscription) {

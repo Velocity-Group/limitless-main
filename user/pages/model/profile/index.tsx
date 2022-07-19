@@ -90,7 +90,8 @@ class PerformerProfile extends PureComponent<IProps> {
     filter: initialFilter,
     isGrid: false,
     subscriptionType: 'monthly',
-    isFollowed: false
+    isFollowed: false,
+    paymentUrl: ''
   };
 
   static async getInitialProps({ ctx }) {
@@ -289,12 +290,16 @@ class PerformerProfile extends PureComponent<IProps> {
     }
     try {
       this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
         paymentGateway: settings.paymentGateway
       });
-      this.setState({ openSubscriptionModal: false });
+      if (settings.paymentGateway === 'ccbill') {
+        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -387,7 +392,8 @@ class PerformerProfile extends PureComponent<IProps> {
       videoState,
       productState,
       galleryState,
-      countries
+      countries,
+      settings
     } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
@@ -405,7 +411,8 @@ class PerformerProfile extends PureComponent<IProps> {
       tab,
       isGrid,
       subscriptionType,
-      isFollowed
+      isFollowed,
+      paymentUrl
     } = this.state;
     return (
       <Layout>
@@ -623,11 +630,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   {performer?.durationFreeSubscriptionDays || 1}
                   {' '}
                   {performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
-                  {' '}
-                  THEN $
-                  {performer?.monthlyPrice.toFixed(2)}
-                  {' '}
-                  PER MONTH
+                  {settings.paymentGateway === 'stripe' && ` THEN ${performer?.monthlyPrice.toFixed(2)} PER MONTH`}
                 </button>
               </div>
             )}
@@ -718,8 +721,7 @@ class PerformerProfile extends PureComponent<IProps> {
             </Tabs>
           </div>
         </div>
-        {
-          performer
+        {performer
           && performer?.welcomeVideoPath
           && performer?.activateWelcomeVideo
           && (
@@ -764,8 +766,7 @@ class PerformerProfile extends PureComponent<IProps> {
               }}
               />
             </Modal>
-          )
-        }
+          )}
         <Modal
           key="tip_performer"
           className="subscription-modal"
@@ -786,19 +787,22 @@ class PerformerProfile extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={500}
+          width={!paymentUrl ? 500 : 990}
           centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
-          onCancel={() => this.setState({ openSubscriptionModal: false })}
+          onCancel={() => this.setState({ openSubscriptionModal: false, paymentUrl: '' })}
+          destroyOnClose
         >
-          <ConfirmSubscriptionPerformerForm
-            type={subscriptionType}
-            performer={performer}
-            submiting={submiting}
-            onFinish={this.subscribe.bind(this)}
-          />
+          {!paymentUrl ? (
+            <ConfirmSubscriptionPerformerForm
+              type={subscriptionType || 'monthly'}
+              performer={performer}
+              submiting={submiting}
+              onFinish={this.subscribe.bind(this)}
+            />
+          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
         </Modal>
         {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>

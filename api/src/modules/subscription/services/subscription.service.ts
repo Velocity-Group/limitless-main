@@ -84,16 +84,14 @@ export class SubscriptionService {
       existSubscription.updatedAt = new Date();
       existSubscription.subscriptionType = payload.subscriptionType;
       existSubscription.status = SUBSCRIPTION_STATUS.ACTIVE;
+      existSubscription.paymentGateway = 'system';
       await existSubscription.save();
-      await Promise.all([
-        this.performerService.updateSubscriptionStat(existSubscription.performerId, 1),
-        this.userService.updateStats(existSubscription.userId, { 'stats.totalSubscriptions': 1 })
-      ]);
       return new SubscriptionDto(existSubscription);
     }
     payload.createdAt = new Date();
     payload.updatedAt = new Date();
     payload.status = SUBSCRIPTION_STATUS.ACTIVE;
+    payload.paymentGateway = 'system';
     const newSubscription = await this.subscriptionModel.create(payload);
     await Promise.all([
       this.performerService.updateSubscriptionStat(newSubscription.performerId, 1),
@@ -116,11 +114,6 @@ export class SubscriptionService {
     subscription.updatedAt = new Date();
     subscription.subscriptionType = payload.subscriptionType;
     subscription.status = payload.status;
-    await Promise.all([
-      // todo - should check admin renew or cancel subscription
-      this.performerService.updateSubscriptionStat(subscription.performerId, 1),
-      this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': 1 })
-    ]);
     await subscription.save();
     return new SubscriptionDto(subscription);
   }

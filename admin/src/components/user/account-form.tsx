@@ -139,7 +139,7 @@ export class AccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
-            <Form.Item name="balance" label="Token Balance">
+            <Form.Item name="balance" label="Wallet Balance">
               <InputNumber style={{ width: '100%' }} />
             </Form.Item>
           </Col>

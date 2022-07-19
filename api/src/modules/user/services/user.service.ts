@@ -113,11 +113,9 @@ export class UserService {
     if (countUserUsername || countPerformerUsername) {
       throw new UsernameExistedException();
     }
-    // eslint-disable-next-line no-param-reassign
-    data.username = data.username ? data.username.trim().toLowerCase() : `model${StringHelper.randomString(8, '0123456789')}`;
     const user = { ...data } as any;
     user.email = data.email.toLowerCase();
-    user.username = data.username && data.username.trim().toLowerCase();
+    user.username = data.username ? data.username.trim().toLowerCase() : `user${StringHelper.randomString(8, '0123456789')}`;
     user.createdAt = new Date();
     user.updatedAt = new Date();
     user.roles = options.roles || ['user'];

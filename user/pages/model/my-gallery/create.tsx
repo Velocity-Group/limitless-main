@@ -4,7 +4,7 @@ import { PictureOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import FormGallery from '@components/gallery/form-gallery';
 import PageHeading from '@components/common/page-heading';
-import { IPerformer, IUIConfig } from 'src/interfaces';
+import { IPerformer, ISettings, IUIConfig } from 'src/interfaces';
 import { galleryService } from 'src/services';
 import { getResponseError } from '@lib/utils';
 import Router from 'next/router';
@@ -13,6 +13,7 @@ import { connect } from 'react-redux';
 interface IProps {
   ui: IUIConfig;
   user: IPerformer;
+  settings: ISettings;
 }
 
 interface IStates {
@@ -29,12 +30,12 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
   };
 
   componentDidMount() {
-    const { user } = this.props;
+    const { user, settings } = this.props;
     if (!user.verifiedDocument) {
       message.warning('Your ID documents are not verified yet! You could not post any content right now.');
       Router.back();
     }
-    if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
+    if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
       message.warning('You have not connected with stripe. So you cannot post any content right now!');
       Router.push('/model/banking');
     }
@@ -81,6 +82,7 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
 
 const mapStates = (state: any) => ({
   ui: { ...state.ui },
-  user: { ...state.user.current }
+  user: { ...state.user.current },
+  settings: { ...state.settings }
 });
 export default connect(mapStates)(GalleryCreatePage);

@@ -58,7 +58,7 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Renews On',
+      title: 'Renewal Date',
       dataIndex: 'nextRecurringDate',
       render(date: Date, record: ISubscription) {
         return <span>{record.status === 'active' && nowIsBefore(record.expiredAt) ? formatDate(date, 'll') : 'N/A'}</span>;
@@ -71,8 +71,6 @@ export const TableListSubscription = ({
         switch (paymentGateway) {
           case 'stripe':
             return <Tag color="blue">Stripe</Tag>;
-          case 'bitpay':
-            return <Tag color="pink">Bitpay</Tag>;
           case 'paypal':
             return <Tag color="violet">Paypal</Tag>;
           case 'ccbill':

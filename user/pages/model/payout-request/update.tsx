@@ -134,7 +134,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
             payout={payout}
             submit={this.submit.bind(this)}
             submiting={submiting}
-            tokenConversionRate={settings?.tokenConversionRate}
+            settings={settings}
           />
         </div>
       </>

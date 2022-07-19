@@ -132,6 +132,12 @@ export class PayoutRequestService {
         throw new HttpException('You have not provided your Paypal account yet, please try again later', 422);
       }
     }
+    if (payload.paymentAccountType === 'banking') {
+      const paymentAccountInfo = await this.performerService.getBankInfo(user._id);
+      if (!paymentAccountInfo || !paymentAccountInfo.firstName || !paymentAccountInfo.lastName || !paymentAccountInfo.bankAccount) {
+        throw new HttpException('Missing banking information', 404);
+      }
+    }
     const data = {
       ...payload,
       source: SOURCE_TYPE.PERFORMER,
@@ -244,6 +250,12 @@ export class PayoutRequestService {
         throw new HttpException('You have not provided your Paypal account yet, please try again later', 422);
       }
     }
+    if (payload.paymentAccountType === 'banking') {
+      const paymentAccountInfo = await this.performerService.getBankInfo(performer._id);
+      if (!paymentAccountInfo || !paymentAccountInfo.firstName || !paymentAccountInfo.lastName || !paymentAccountInfo.bankAccount) {
+        throw new HttpException('Missing banking information', 404);
+      }
+    }
     if (performer.balance < payout.requestTokens) {
       throw new InvalidRequestTokenException();
     }
@@ -291,6 +303,9 @@ export class PayoutRequestService {
         data.sourceInfo = new PerformerDto(sourceInfo).toResponse();
         if (paymentAccountType === 'paypal') {
           data.paymentAccountInfo = await this.performerService.getPaymentSetting(sourceInfo._id, 'paypal');
+        }
+        if (paymentAccountType === 'banking') {
+          data.paymentAccountInfo = await this.performerService.getBankInfo(sourceInfo._id);
         }
       }
     }

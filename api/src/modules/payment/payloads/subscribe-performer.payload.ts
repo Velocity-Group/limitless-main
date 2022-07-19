@@ -5,13 +5,12 @@ import {
   IsOptional
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ObjectId } from 'mongodb';
 
 export class SubscribePerformerPayload {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  performerId: string | ObjectId;
+  performerId: string;
 
   @ApiProperty()
   @IsNotEmpty()

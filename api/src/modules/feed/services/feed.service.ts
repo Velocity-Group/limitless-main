@@ -157,8 +157,7 @@ export class FeedService {
       user && user._id ? this.reactionService.findByQuery({ objectId: { $in: feedIds }, createdBy: user._id }) : [],
       user && user._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
-        performerId: { $in: performerIds },
-        expiredAt: { $gt: new Date() }
+        performerId: { $in: performerIds }
       }) : [],
       user && user._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,
@@ -175,16 +174,12 @@ export class FeedService {
 
     return feeds.map((f) => {
       const feed = new FeedDto(f);
-      const performer = performers.find((p) => p._id.toString() === f.fromSourceId.toString());
-      if (performer) {
-        feed.performer = performer.toPublicDetailsResponse();
-      }
       const like = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.LIKE);
       feed.isLiked = !!like;
       const bookmarked = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.BOOK_MARK);
       feed.isBookMarked = !!bookmarked;
-      const subscribed = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
-      feed.isSubscribed = !!subscribed;
+      const subscription = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
+      feed.isSubscribed = subscription && moment().isBefore(subscription.expiredAt);
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
       feed.isBought = !!bought;
       const followed = follows.find((fol) => `${fol.followingId}` === `${f.fromSourceId}`);
@@ -230,6 +225,13 @@ export class FeedService {
           thumbnails: teaser.getThumbnails(),
           url: teaser.getUrl()
         };
+      }
+      const performer = performers.find((p) => p._id.toString() === f.fromSourceId.toString());
+      if (performer) {
+        feed.performer = performer.toPublicDetailsResponse();
+        if (subscription && subscription.usedFreeSubscription) {
+          feed.performer.isFreeSubscription = false;
+        }
       }
       return feed;
     });

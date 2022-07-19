@@ -133,9 +133,9 @@ class Earning extends PureComponent<IProps> {
     return (
       <>
         <Head>
-          <title>Cash Earnings Report</title>
+          <title>Earnings Report</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Cash Earnings Report' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Earnings Report' }]} />
         <Page>
           <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={8}>

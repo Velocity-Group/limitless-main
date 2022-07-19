@@ -312,7 +312,7 @@ export class AccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col md={12} xs={12}>
-            <Form.Item label="Token balance" name="balance">
+            <Form.Item label="Wallet Balance" name="balance">
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
           </Col>

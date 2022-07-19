@@ -10,7 +10,7 @@ interface IProps {
   onConnectAccount: Function;
 }
 
-export class PerformerBankingForm extends PureComponent<IProps> {
+export class StripeConnectForm extends PureComponent<IProps> {
   render() {
     const {
       loading, stripeAccount, loginUrl, onConnectAccount

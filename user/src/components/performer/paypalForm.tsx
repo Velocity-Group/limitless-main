@@ -48,6 +48,11 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
             >
               <Input />
             </Form.Item>
+            <Form.Item className="text-center">
+              <Button className="secondary" htmlType="submit" disabled={updating} loading={updating}>
+                Submit
+              </Button>
+            </Form.Item>
           </Col>
           {/* <Col lg={12} xs={24}>
             <Form.Item
@@ -64,11 +69,6 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
             </Form.Item>
           </Col> */}
         </Row>
-        <Form.Item>
-          <Button className="secondary" htmlType="submit" disabled={updating} loading={updating}>
-            Submit
-          </Button>
-        </Form.Item>
       </Form>
     );
   }

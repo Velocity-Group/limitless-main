@@ -4,7 +4,9 @@ import {
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { IUser, IUIConfig, StreamSettings } from 'src/interfaces';
+import {
+  IUser, StreamSettings, IUIConfig, ISettings
+} from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
@@ -24,8 +26,8 @@ import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/action
 import { updateUIValue } from 'src/redux/ui/actions';
 import { updateBalance } from '@redux/user/actions';
 import { shortenLargeNumber } from '@lib/number';
-import './header.less';
 import { SubscribePerformerModal } from 'src/components/subscription/subscribe-performer-modal';
+import './header.less';
 
 interface IProps {
   updateBalance: Function;
@@ -38,6 +40,7 @@ interface IProps {
   addPrivateRequest: Function;
   accessPrivateRequest: Function;
   settings: StreamSettings;
+  config: ISettings;
 }
 
 class Header extends PureComponent<IProps> {
@@ -47,13 +50,12 @@ class Header extends PureComponent<IProps> {
     openStripeAlert: false
   };
 
-  async componentDidMount() {
+  componentDidMount() {
     RouterEvent.events.on('routeChangeStart', this.handleChangeRoute);
-    const { user, router } = this.props;
+    const { user, router, config } = this.props;
     if (user._id) {
       this.handleCountNotificationMessage();
-      if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
-        || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
+      if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
         // eslint-disable-next-line react/no-did-update-set-state
         this.setState({ openStripeAlert: true });
       }
@@ -61,12 +63,11 @@ class Header extends PureComponent<IProps> {
   }
 
   async componentDidUpdate(prevProps: any) {
-    const { user, router } = this.props;
+    const { user, router, config } = this.props;
     const { openStripeAlert } = this.state;
     if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
-      if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
-        || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
+      if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
         // eslint-disable-next-line react/no-did-update-set-state
         this.setState({ openStripeAlert: true });
       }
@@ -154,7 +155,7 @@ class Header extends PureComponent<IProps> {
 
   render() {
     const {
-      user, router, ui, settings
+      user, router, ui, settings, config
     } = this.props;
     const {
       totalNotReadMessage, openProfile, openStripeAlert
@@ -166,10 +167,6 @@ class Header extends PureComponent<IProps> {
           event="nofify_read_messages_in_conversation"
           handler={this.handleMessage.bind(this)}
         />
-        {/* <Event
-          event="private-chat-request"
-          handler={this.handlePrivateChat.bind(this)}
-        /> */}
         <Event
           event="update_balance"
           handler={this.handleUpdateBalance.bind(this)}
@@ -421,6 +418,7 @@ class Header extends PureComponent<IProps> {
                     Edit Profile
                   </div>
                 </Link>
+                {config.paymentGateway === 'stripe' && (
                 <Link href="/user/cards" as="/user/cards">
                   <div className={router.pathname === '/user/cards' ? 'menu-item active' : 'menu-item'}>
                     <CreditCardOutlined />
@@ -428,6 +426,7 @@ class Header extends PureComponent<IProps> {
                     Add Card
                   </div>
                 </Link>
+                )}
                 <Link href="/user/bookmarks" as="/user/bookmarks">
                   <div className={router.pathname === '/user/bookmarks' ? 'menu-item active' : 'menu-item'}>
                     <BookOutlined />
@@ -521,8 +520,9 @@ class Header extends PureComponent<IProps> {
 Header.contextType = SocketContext;
 
 const mapState = (state: any) => ({
-  user: state.user.current,
-  ui: state.ui,
+  user: { ...state.user.current },
+  ui: { ...state.ui },
+  config: { ...state.settings },
   ...state.streaming
 });
 const mapDispatch = {

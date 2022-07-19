@@ -26,6 +26,7 @@ import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { REACTION, REACTION_TYPE } from 'src/modules/reaction/constants';
 import { Storage } from 'src/modules/storage/contants';
+import * as moment from 'moment';
 import { VideoUpdatePayload } from '../payloads';
 import { VideoDto, IVideoResponse } from '../dtos';
 import { DELETED_ASSETS_CHANNEL, VIDEO_STATUS } from '../constants';
@@ -348,8 +349,14 @@ export class VideoService {
     dto.isBookmarked = !!reactions.filter((r) => r.action === REACTION.BOOK_MARK).length;
     // TODO check video for sale or subscriber
     if (!dto.isSale) {
-      const subscribed = currentUser && await this.subscriptionService.checkSubscribed(dto.performerId, currentUser._id);
-      dto.isSubscribed = !!subscribed;
+      const subscription = currentUser && await this.subscriptionService.findOneSubscription({
+        performerId: dto.performerId,
+        userId: currentUser._id
+      });
+      dto.isSubscribed = (subscription && moment().isBefore(subscription.expiredAt)) || false;
+      if (subscription && subscription.usedFreeSubscription) {
+        dto.performer.isFreeSubscription = false;
+      }
     }
     if (dto.isSale) {
       const bought = currentUser && await this.tokenTransactionService.checkBought(dto, PurchaseItemType.VIDEO, currentUser);

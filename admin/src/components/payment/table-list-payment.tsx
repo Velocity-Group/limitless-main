@@ -109,6 +109,19 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Gateway',
+        dataIndex: 'paymentGateway',
+        render(paymentGateway: string) {
+          switch (paymentGateway) {
+            case 'stripe':
+              return <Tag color="blue">Stripe</Tag>;
+            case 'ccbill':
+              return <Tag color="orange">CCbill</Tag>;
+            default: return <Tag color="red">{paymentGateway}</Tag>;
+          }
+        }
+      },
+      {
         title: 'Updated On',
         dataIndex: 'updatedAt',
         sorter: true,

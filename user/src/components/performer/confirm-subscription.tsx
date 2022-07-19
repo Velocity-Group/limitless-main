@@ -63,7 +63,13 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
             </li>
           </ul>
         </div>
-        <Button className="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()} style={{ textTransform: 'uppercase', whiteSpace: 'pre-wrap', height: 'auto' }}>
+        <Button
+          className="primary"
+          disabled={submiting}
+          loading={submiting}
+          onClick={() => onFinish()}
+          style={{ textTransform: 'uppercase', whiteSpace: 'pre-wrap', height: 'auto' }}
+        >
           Confirm
           {' '}
           {type}
@@ -72,7 +78,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
           {' '}
           for
           {' '}
-          {type === 'monthly' ? `$${(performer?.monthlyPrice || 0).toFixed(2)}` : type === 'yearly' ? `$${(performer?.yearlyPrice || 0).toFixed(2)}` : `${performer?.durationFreeSubscriptionDays} day${performer?.durationFreeSubscriptionDays > 1 ? 's' : ''}, then $${(performer?.monthlyPrice || 0).toFixed(2)} per month`}
+          {type === 'monthly' ? `$${(performer?.monthlyPrice || 0).toFixed(2)}` : type === 'yearly' ? `$${(performer?.yearlyPrice || 0).toFixed(2)}` : `${performer?.durationFreeSubscriptionDays} day${performer?.durationFreeSubscriptionDays > 1 ? 's' : ''}`}
         </Button>
       </div>
     );

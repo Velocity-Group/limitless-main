@@ -52,23 +52,14 @@ const PayoutRequestList = ({
         </span>
       )
     },
-    // {
-    //   title: 'Conversion Rate',
-    //   dataIndex: 'tokenConversionRate',
-    //   key: 'tokenConversionRate',
-    //   render: (tokenConversionRate: number, record) => (
-    //     <span>
-    //       $
-    //       {((tokenConversionRate || 1) * record.requestTokens).toFixed(2)}
-    //     </span>
-    //   )
-    // },
     {
       title: 'Payout Gateway',
       dataIndex: 'paymentAccountType',
       key: 'paymentAccountType',
       render: (paymentAccountType: string) => {
         switch (paymentAccountType) {
+          case 'banking':
+            return <Tag color="gold">Banking</Tag>;
           case 'stripe':
             return <Tag color="#656fde">Stripe</Tag>;
           case 'paypal':
@@ -76,7 +67,7 @@ const PayoutRequestList = ({
           default:
             break;
         }
-        return <Tag color="default">{paymentAccountType}</Tag>;
+        return <Tag color="gold">{paymentAccountType}</Tag>;
       }
     },
     {
@@ -97,14 +88,14 @@ const PayoutRequestList = ({
       }
     },
     {
-      title: 'Created On',
+      title: 'Requested On',
       key: 'createdAt',
       dataIndex: 'createdAt',
       render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>,
       sorter: true
     },
     {
-      title: 'Last updated On',
+      title: 'Updated On',
       key: 'updatedAt',
       dataIndex: 'updatedAt',
       render: (updatedAt: Date) => <span>{formatDate(updatedAt)}</span>,

@@ -5,14 +5,18 @@ import {
   LanguageService,
   PhoneCodeService,
   RecaptchaService,
-  UserAdditionalInfoService
+  UserAdditionalInfoService,
+  StateService,
+  CityService
 } from './services';
 import {
   CountryController,
   LanguageController,
   PhoneCodeController,
   UserAdditionalInfoController,
-  RecaptchaController
+  RecaptchaController,
+  StateController,
+  CityController
 } from './controllers';
 import { AuthModule } from '../auth/auth.module';
 
@@ -30,11 +34,14 @@ import { AuthModule } from '../auth/auth.module';
     LanguageController,
     PhoneCodeController,
     UserAdditionalInfoController,
-    RecaptchaController
+    RecaptchaController,
+    StateController,
+    CityController
   ],
   providers: [
     CountryService, LanguageService, PhoneCodeService,
-    UserAdditionalInfoService, RecaptchaService
+    UserAdditionalInfoService, RecaptchaService,
+    StateService, CityService
   ],
   exports: [CountryService, LanguageService, PhoneCodeService]
 })
