@@ -235,8 +235,22 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   <div>
                     <Button
                       className="primary"
-                      disabled={loading || !user?._id || user?.isPerformer || (product?.type === 'physical' && !product?.stock)}
-                      onClick={() => this.setState({ openPurchaseModal: true })}
+                      disabled={loading}
+                      onClick={() => {
+                        if (!user?._id) {
+                          message.error('Please log in or register!');
+                          return;
+                        }
+                        if (user?.isPerformer) {
+                          message.error('Models cannot purchase theirs own products!');
+                          return;
+                        }
+                        if (product?.type === 'physical' && !product?.stock) {
+                          message.error('Out of stock, please comeback later!');
+                          return;
+                        }
+                        this.setState({ openPurchaseModal: true });
+                      }}
                     >
                       <DollarOutlined />
                       Get it now!
