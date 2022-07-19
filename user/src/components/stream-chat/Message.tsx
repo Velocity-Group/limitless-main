@@ -71,8 +71,6 @@ export default function Message(props: IProps) {
       <div className="tip-box">
         <span>
           {data.text}
-          {' '}
-          <img src="/static/coin-ico.png" width="20px" alt="" />
         </span>
       </div>
       )}

@@ -5,6 +5,7 @@ import { HeartOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import { TableListSubscription } from '@components/subscription/table-list-subscription';
 import {
+  ISettings,
   ISubscription, IUIConfig, IUser
 } from 'src/interfaces';
 import { paymentService, subscriptionService } from '@services/index';
@@ -18,6 +19,7 @@ import Router from 'next/router';
 interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
+  settings: ISettings;
 }
 
 class SubscriptionPage extends PureComponent<IProps> {
@@ -105,13 +107,13 @@ class SubscriptionPage extends PureComponent<IProps> {
   async subscribe() {
     const { selectedSubscription } = this.state;
     const { performerInfo: performer, subscriptionType } = selectedSubscription;
-    const { currentUser } = this.props;
+    const { currentUser, settings } = this.props;
     if (!currentUser._id) {
       message.error('Please log in!');
       Router.push('/');
       return;
     }
-    if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
+    if (settings.paymentGateway === 'stripe' && !currentUser.stripeCardIds.length) {
       message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
@@ -121,8 +123,7 @@ class SubscriptionPage extends PureComponent<IProps> {
       await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
-        paymentGateway: 'stripe',
-        stripeCardId: currentUser.stripeCardIds[0]
+        paymentGateway: settings.paymentGateway
       });
       this.setState({ openSubscriptionModal: false });
     } catch (e) {
@@ -188,7 +189,8 @@ class SubscriptionPage extends PureComponent<IProps> {
 
 const mapState = (state: any) => ({
   ui: { ...state.ui },
-  currentUser: { ...state.user.current }
+  currentUser: { ...state.user.current },
+  settings: { ...state.settings }
 });
 const mapDispatch = { };
 export default connect(mapState, mapDispatch)(SubscriptionPage);

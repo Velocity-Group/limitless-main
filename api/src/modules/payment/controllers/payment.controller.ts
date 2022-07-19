@@ -35,17 +35,16 @@ export class PaymentController {
     return DataResponse.ok(info);
   }
 
-  @Post('/purchase-tokens/:tokenId')
+  @Post('/wallet/top-up')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
   @Roles('user')
   @UsePipes(new ValidationPipe({ transform: true }))
   async purchaseTokens(
     @CurrentUser() user: UserDto,
-    @Param('tokenId') tokenId: string,
     @Body() payload: PurchaseTokenPayload
   ): Promise<DataResponse<any>> {
-    const info = await this.paymentService.buyTokens(tokenId, payload, user);
+    const info = await this.paymentService.buyTokens(payload, user);
     return DataResponse.ok(info);
   }
 }

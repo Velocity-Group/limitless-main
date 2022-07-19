@@ -2,7 +2,7 @@
 import Head from 'next/head';
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Menu, message, Button, Input,
+  Form, Menu, message, Button, Input, Select,
   InputNumber, Switch, Checkbox, Radio
 } from 'antd';
 import Page from '@components/common/layout/page';
@@ -175,11 +175,22 @@ class Settings extends PureComponent {
 
   renderFormItem(setting: ISetting) {
     const { updating } = this.state;
-    let { type } = setting;
+    // eslint-disable-next-line prefer-const
+    let { type, key } = setting;
     if (setting.meta && setting.meta.textarea) {
       type = 'textarea';
     }
     const ref = createRef() as any;
+    if (key === 'paymentGateway') {
+      return (
+        <Form.Item label={setting.name} key={setting._id} help={setting.description} extra={setting.extra}>
+          <Select onChange={(val) => this.setVal(setting.key, val.target.value)} defaultValue={setting.value}>
+            <Select.Option value="Stripe" key="stripe">Stripe</Select.Option>
+            <Select.Option value="ccbill" key="ccbill">CCbill</Select.Option>
+          </Select>
+        </Form.Item>
+      );
+    }
     switch (type) {
       case 'textarea':
         return (
@@ -322,11 +333,9 @@ class Settings extends PureComponent {
               <Menu.Item key="commission">Commission</Menu.Item>
               {/* <Menu.Item key="s3">S3</Menu.Item> */}
               <Menu.Item key="agora">Agora Live</Menu.Item>
-              <Menu.Item key="stripe">Stripe</Menu.Item>
+              <Menu.Item key="paymentGateways">Payment Gateways</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>
-              {/* <Menu.Item key="recaptcha">Re-Captcha</Menu.Item> */}
-              {/* <Menu.Item key="ant">Ant Media</Menu.Item> */}
             </Menu>
           </div>
 

@@ -53,7 +53,7 @@ class PayoutRequestCreatePage extends React.PureComponent<Props, States> {
   async submit(data) {
     const { user } = this.props;
     if (data.requestTokens > user.balance) {
-      message.error('Requested tokens must be less than or equal your balance');
+      message.error('Requested amount must be less than or equal your wallet balance');
       return;
     }
     try {

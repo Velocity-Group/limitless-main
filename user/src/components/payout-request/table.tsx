@@ -42,27 +42,27 @@ const PayoutRequestList = ({
       )
     },
     {
-      title: 'Amount in Tokens',
+      title: 'Amount',
       dataIndex: 'requestTokens',
       key: 'requestTokens',
       render: (requestTokens: number) => (
         <span>
-          <img alt="token" src="/static/coin-ico.png" width="20px" />
+          $
           {requestTokens.toFixed(2)}
         </span>
       )
     },
-    {
-      title: 'Conversion Rate',
-      dataIndex: 'tokenConversionRate',
-      key: 'tokenConversionRate',
-      render: (tokenConversionRate: number, record) => (
-        <span>
-          $
-          {((tokenConversionRate || 1) * record.requestTokens).toFixed(2)}
-        </span>
-      )
-    },
+    // {
+    //   title: 'Conversion Rate',
+    //   dataIndex: 'tokenConversionRate',
+    //   key: 'tokenConversionRate',
+    //   render: (tokenConversionRate: number, record) => (
+    //     <span>
+    //       $
+    //       {((tokenConversionRate || 1) * record.requestTokens).toFixed(2)}
+    //     </span>
+    //   )
+    // },
     {
       title: 'Payout Gateway',
       dataIndex: 'paymentAccountType',

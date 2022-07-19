@@ -35,7 +35,7 @@ export class VideoCard extends PureComponent<IProps> {
           {video.isSale && video.price > 0 && (
           <span className="vid-price">
             <div className="label-price">
-              <img alt="coin" src="/static/coin-ico.png" width="15px" />
+              $
               {(video.price || 0).toFixed(2)}
             </div>
           </span>

@@ -73,7 +73,7 @@ class VideoUpdate extends PureComponent<IProps> {
     const { video } = this.state;
     const submitData = { ...data };
     if ((data.isSale && !data.price) || (data.isSale && data.price < 1)) {
-      message.error('Invalid amount of tokens');
+      message.error('Invalid price');
       return;
     }
     if ((data.isSchedule && !data.scheduledAt) || (data.isSchedule && moment(data.scheduledAt).isBefore(moment()))) {

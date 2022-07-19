@@ -70,8 +70,8 @@ const FormGallery = ({
       {isSale && (
         <Form.Item
           name="price"
-          rules={[{ required: true, message: 'Please input amount of tokens' }]}
-          label="Amount of Tokens"
+          rules={[{ required: true, message: 'Please input the price' }]}
+          label="Price"
         >
           <InputNumber min={1} />
         </Form.Item>

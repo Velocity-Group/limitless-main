@@ -13,7 +13,7 @@ import {
   LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined
 } from '@ant-design/icons';
 import {
-  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon, TickIcon
+  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon, TickIcon, WalletSvg
 } from 'src/icons';
 import Router, { withRouter, Router as RouterEvent } from 'next/router';
 import {
@@ -270,8 +270,10 @@ class Header extends PureComponent<IProps> {
                   </span>
                 </div>
                 <div className="sub-info">
-                  <a aria-hidden className="user-balance" onClick={() => !user?.isPerformer && Router.push('/token-package')}>
-                    <img src="/static/coin-ico.png" alt="gem" />
+                  <a aria-hidden className="user-balance" onClick={() => !user?.isPerformer && Router.push('/wallet')}>
+                    <WalletSvg />
+                    {' '}
+                    $
                     {(user?.balance || 0).toFixed(2)}
                     {!user?.isPerformer && <PlusCircleOutlined />}
                   </a>
@@ -279,20 +281,18 @@ class Header extends PureComponent<IProps> {
                     <Link href="/model/my-subscriber">
                       <a>
                         <StarOutlined />
+                        Subscribers
                         {' '}
                         {shortenLargeNumber(user?.stats?.subscribers || 0)}
-                        {' '}
-                        Subscribers
                       </a>
                     </Link>
                   ) : (
                     <Link href="/user/my-subscription">
                       <a>
                         <HeartOutlined />
+                        Subscription
                         {' '}
                         {shortenLargeNumber(user?.stats?.totalSubscriptions || 0)}
-                        {' '}
-                        Following
                       </a>
                     </Link>
                   )}
@@ -457,11 +457,11 @@ class Header extends PureComponent<IProps> {
                     Payment History
                   </div>
                 </Link>
-                <Link href="/user/token-transaction" as="/user/token-transaction">
-                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/user/wallet-transaction" as="/user/wallet-transaction">
+                  <div className={router.pathname === '/user/wallet-transaction' ? 'menu-item active' : 'menu-item'}>
                     <DollarOutlined />
                     {' '}
-                    Token Transactions
+                    Wallet Transactions
                   </div>
                 </Link>
                 <Divider />

@@ -14,7 +14,7 @@ import {
 import { getRelatedGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  IGallery, IUser, IUIConfig
+  IGallery, IUser, IUIConfig, ISettings
 } from 'src/interfaces';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { PurchaseGalleryForm } from '@components/gallery/confirm-purchase';
@@ -36,6 +36,7 @@ interface IProps {
   getRelatedGalleries: Function;
   updateBalance: Function;
   relatedGalleries: any;
+  settings: ISettings;
 }
 
 class GalleryViewPage extends PureComponent<IProps> {
@@ -158,7 +159,7 @@ class GalleryViewPage extends PureComponent<IProps> {
     const { gallery, user, updateBalance: handleUpdateBalance } = this.props;
     if (user?.balance < gallery.price) {
       message.error('You have an insufficient token balance. Please top up.');
-      Router.push('/token-package');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -176,13 +177,13 @@ class GalleryViewPage extends PureComponent<IProps> {
 
   async subscribe() {
     try {
-      const { gallery, user } = this.props;
+      const { gallery, user, settings } = this.props;
       if (!user._id) {
         message.error('Please log in!');
         Router.push('/');
         return;
       }
-      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
         message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
@@ -191,8 +192,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: gallery.performerId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway: settings.paymentGateway
       });
       this.setState({ openSubscriptionModal: false });
     } catch (e) {
@@ -277,8 +277,7 @@ class GalleryViewPage extends PureComponent<IProps> {
               {gallery?.isSale && !isBought && (
               <Button disabled={!user || !user._id || requesting} className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
                 PAY&nbsp;
-                <img alt="coin" src="/static/coin-ico.png" width="20px" />
-                {' '}
+                $
                 {(gallery?.price || 0).toFixed(2)}
                 {' '}
                 TO UNLOCK
@@ -440,7 +439,8 @@ class GalleryViewPage extends PureComponent<IProps> {
 const mapStates = (state: any) => ({
   user: { ...state.user.current },
   ui: { ...state.ui },
-  relatedGalleries: { ...state.gallery.relatedGalleries }
+  relatedGalleries: { ...state.gallery.relatedGalleries },
+  settings: { ...state.settings }
 });
 
 const mapDispatch = {

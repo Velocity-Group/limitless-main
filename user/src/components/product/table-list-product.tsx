@@ -60,13 +60,12 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Tokens',
+        title: 'Price',
         dataIndex: 'price',
         render(price: number) {
           return (
             <span style={{ whiteSpace: 'nowrap' }}>
-              <img alt="token" src="/static/coin-ico.png" height="20px" />
-              {' '}
+              $
               {(price && price.toFixed(2)) || 0}
             </span>
           );

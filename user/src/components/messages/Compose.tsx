@@ -85,8 +85,8 @@ class Compose extends PureComponent<IProps> {
   async sendTip(price) {
     const { currentUser, conversation, updateBalance: handleUpdateBalance } = this.props;
     if (currentUser.balance < price) {
-      message.error('Your token balance is not enough');
-      Router.push('/token-package');
+      message.error('Your wallet balance is not enough');
+      Router.push('/wallet');
       return;
     }
     try {

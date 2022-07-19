@@ -4,7 +4,6 @@ import {
 } from '@nestjs/common';
 import { CouponModule } from 'src/modules/coupon/coupon.module';
 import { RequestLoggerMiddleware } from 'src/kernel/logger/request-log.middleware';
-import { TokenPackageModule } from 'src/modules/token-package/token-package.module';
 import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
 import { paymentProviders } from './providers';
@@ -34,7 +33,6 @@ import { SocketModule } from '../socket/socket.module';
     forwardRef(() => SettingModule),
     forwardRef(() => CouponModule),
     forwardRef(() => MailerModule),
-    forwardRef(() => TokenPackageModule),
     forwardRef(() => SubscriptionModule)
   ],
   providers: [

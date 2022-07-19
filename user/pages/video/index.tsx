@@ -26,7 +26,7 @@ import { ListComments, CommentForm } from '@components/comment';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
 import {
-  IVideo, IUser, IUIConfig, IPerformer
+  IVideo, IUser, IUIConfig, IPerformer, ISettings
 } from 'src/interfaces';
 import Link from 'next/link';
 import Router from 'next/router';
@@ -50,6 +50,7 @@ interface IProps {
   video: IVideo;
   deleteComment: Function;
   updateBalance: Function;
+  settings: ISettings;
 }
 
 class VideoViewPage extends PureComponent<IProps> {
@@ -229,8 +230,12 @@ class VideoViewPage extends PureComponent<IProps> {
 
   async purchaseVideo() {
     const { video, user, updateBalance: handleUpdateBalance } = this.props;
-    if (!user._id || user.isPerformer) {
-      message.error('Forbiden');
+    if (!user._id) {
+      message.error('Please log in!');
+      Router.push('/');
+      return;
+    }
+    if (user.isPerformer) {
       return;
     }
     try {
@@ -248,13 +253,16 @@ class VideoViewPage extends PureComponent<IProps> {
 
   async subscribe() {
     try {
-      const { video, user } = this.props;
+      const { video, user, settings } = this.props;
       if (!user._id) {
         message.error('Please log in!');
         Router.push('/');
         return;
       }
-      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      if (user.isPerformer) {
+        return;
+      }
+      if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
         message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
@@ -264,8 +272,7 @@ class VideoViewPage extends PureComponent<IProps> {
       await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: video.performerId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway: settings.paymentGateway
       });
     } catch (e) {
       const err = await e;
@@ -396,10 +403,7 @@ class VideoViewPage extends PureComponent<IProps> {
                 <div className="text-center">
                   {video.isSale && !isBought && (
                   <Button type="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
-                    PAY
-                    &nbsp;
-                    <img alt="token" src="/static/coin-ico.png" height="20px" />
-                    {' '}
+                    PAY $
                     {video.price.toFixed(2)}
                     {' '}
                     TO UNLOCK
@@ -614,7 +618,8 @@ const mapStates = (state: any) => {
     commentMapping,
     comment,
     user: { ...state.user.current },
-    ui: { ...state.ui }
+    ui: { ...state.ui },
+    settings: { ...state.settings }
   };
 };
 

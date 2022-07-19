@@ -68,14 +68,14 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             )}
             <Form.Item
               name="monthlyPrice"
-              label="Monthly Subscription Price ($)"
+              label="Monthly Subscription Price"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
             </Form.Item>
             <Form.Item
               name="yearlyPrice"
-              label="Yearly Subscription Price ($)"
+              label="Yearly Subscription Price"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
@@ -83,7 +83,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             <Form.Item
               key="publicChatPrice"
               name="publicChatPrice"
-              label="Default Streaming Price (token)"
+              label="Default Streaming Price"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />

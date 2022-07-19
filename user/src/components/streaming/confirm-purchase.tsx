@@ -42,10 +42,8 @@ export class PurchaseStreamForm extends PureComponent<IProps> {
         >
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Button className="primary" htmlType="submit" loading={submiting} disabled={submiting} block>
-              Confirm to join this session for
-              &nbsp;
-              <img src="/static/coin-ico.png" alt="gem" width="20px" />
-              {activeStream.price.toFixed(2)}
+              Confirm to join this session for $
+              {(activeStream.price || 0).toFixed(2)}
             </Button>
           </div>
         </Form>

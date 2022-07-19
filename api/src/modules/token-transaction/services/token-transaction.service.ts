@@ -351,7 +351,7 @@ export class TokenTransactionService {
     paymentTransaction.products = [
       {
         name: `Tip to ${performer.name || performer.username || performer._id}`,
-        description: `Tip ${price} tokens to ${performer.name
+        description: `Tip $${price} to ${performer.name
           || performer.username
           || performer._id}`,
         price,
@@ -376,7 +376,7 @@ export class TokenTransactionService {
         conversationId,
         {
           type: MESSAGE_TYPE.TIP,
-          text: `${user?.name || user?.username} tipped ${price.toFixed(2)}`
+          text: `${user?.name || user?.username} tipped $${price.toFixed(2)}`
         },
         {
           source: paymentTransaction.source,

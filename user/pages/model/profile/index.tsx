@@ -31,7 +31,7 @@ import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
 import { VideoPlayer } from '@components/common';
 import {
-  IPerformer, IUser, IUIConfig, IFeed, ICountry
+  IPerformer, IUser, IUIConfig, IFeed, ICountry, ISettings
 } from 'src/interfaces';
 import { shortenLargeNumber } from '@lib/index';
 import Link from 'next/link';
@@ -59,6 +59,7 @@ interface IProps {
   removeFeedSuccess: Function;
   updateBalance: Function;
   countries: ICountry[];
+  settings: ISettings;
 }
 
 const { TabPane } = Tabs;
@@ -274,14 +275,14 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async subscribe() {
-    const { performer, user } = this.props;
+    const { performer, user, settings } = this.props;
     const { subscriptionType } = this.state;
     if (!user._id) {
       message.error('Please log in!');
       Router.push('/');
       return;
     }
-    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+    if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
       message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
@@ -291,8 +292,7 @@ class PerformerProfile extends PureComponent<IProps> {
       await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0] // TODO user can choose card
+        paymentGateway: settings.paymentGateway
       });
       this.setState({ openSubscriptionModal: false });
     } catch (e) {
@@ -305,8 +305,8 @@ class PerformerProfile extends PureComponent<IProps> {
   async sendTip(price: number) {
     const { performer, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < price) {
-      message.error('You have an insufficient token balance. Please top up.');
-      Router.push('/token-package');
+      message.error('You have an insufficient wallet balance. Please top up.');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -812,7 +812,8 @@ const mapStates = (state: any) => ({
   feedState: { ...state.feed.feeds },
   productState: { ...state.product.products },
   galleryState: { ...state.gallery.galleries },
-  user: { ...state.user.current }
+  user: { ...state.user.current },
+  settings: { ...state.settings }
 });
 
 const mapDispatch = {

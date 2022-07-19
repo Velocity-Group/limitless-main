@@ -36,8 +36,8 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
         {gallery?.isSale && gallery?.price > 0 && (
           <span className="gallery-price">
             <div className="label-price">
-              <img alt="coin" src="/static/coin-ico.png" width="15px" />
-              {gallery?.price.toFixed(2)}
+              $
+              {(gallery?.price || 0).toFixed(2)}
             </div>
           </span>
         )}

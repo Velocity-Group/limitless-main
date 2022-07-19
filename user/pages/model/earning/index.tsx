@@ -12,6 +12,7 @@ import { earningService } from 'src/services';
 import { getResponseError } from '@lib/utils';
 import { TableListEarning } from '@components/performer/table-earning';
 import { SearchFilter } from 'src/components/common/search-filter';
+import PageHeading from '@components/common/page-heading';
 import './index.less';
 
 interface IProps {
@@ -120,9 +121,8 @@ class EarningPage extends PureComponent<IProps, IStates> {
   }
 
   async getPerformerStats() {
-    const { dateRange, type, isToken } = this.state;
+    const { dateRange, type } = this.state;
     const resp = await earningService.performerStarts({
-      isToken,
       type,
       ...dateRange
     });
@@ -131,39 +131,20 @@ class EarningPage extends PureComponent<IProps, IStates> {
 
   render() {
     const {
-      loading, earning, pagination, stats, isToken
+      loading, earning, pagination, stats
     } = this.state;
     const { ui } = this.props;
     return (
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${isToken ? 'Token Earnings Report' : 'USD Earnings Report'}`}
+            {`${ui?.siteName} | Earnings`}
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading">
-            <Switch
-              checked={isToken}
-              unCheckedChildren={(
-                <>
-                  <DollarOutlined style={{ fontSize: 14 }} />
-                  {' '}
-                  USD EARNING REPORT
-                </>
-                )}
-              checkedChildren={(
-                <>
-                  <img src="/static/coin-ico.png" width="20px" alt="coin" />
-                  {' '}
-                  TOKEN EARNING REPORT
-                </>
-                )}
-              onChange={this.handleSwitch.bind(this)}
-            />
-          </div>
+          <PageHeading icon={<DollarOutlined />} title="Earnings" />
           <SearchFilter
-            type={isToken ? [
+            type={[
               { key: '', text: 'All types' },
               // { key: 'private_chat', text: 'Private Chat' },
               // { key: 'group_chat', text: 'Group Chat' },
@@ -174,11 +155,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
               { key: 'video', text: 'Video' },
               { key: 'tip', text: 'Tip' },
               { key: 'stream_tip', text: 'Streaming tip' },
-              { key: 'public_chat', text: 'Paid steaming' }
-              // { key: 'gift', text: 'Gift' },
-              // { key: 'message', text: 'Message' }
-            ] : [
-              { key: '', text: 'All types' },
+              { key: 'public_chat', text: 'Paid steaming' },
               { key: 'monthly_subscription', text: 'Monthly Subscription' },
               { key: 'yearly_subscription', text: 'Yearly Subscription' }
             ]}
@@ -188,19 +165,19 @@ class EarningPage extends PureComponent<IProps, IStates> {
           <div className="stats-earning">
             <Statistic
               title="Total"
-              prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+              prefix="$"
               value={stats?.totalGrossPrice || 0}
               precision={2}
             />
             <Statistic
               title="Platform commission"
-              prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+              prefix="$"
               value={stats?.totalSiteCommission || 0}
               precision={2}
             />
             <Statistic
               title="Your Earnings"
-              prefix={isToken ? <img alt="coin" src="/static/coin-ico.png" width="20px" /> : '$'}
+              prefix="$"
               value={stats?.totalNetPrice || 0}
               precision={2}
             />
@@ -211,7 +188,6 @@ class EarningPage extends PureComponent<IProps, IStates> {
               rowKey="_id"
               pagination={pagination}
               loading={loading}
-              isToken={isToken}
               onChange={this.handleTabsChange.bind(this)}
             />
           </div>

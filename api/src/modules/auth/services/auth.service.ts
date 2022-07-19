@@ -47,7 +47,16 @@ export class AuthService {
     private readonly mailService: MailerService,
     private readonly config: ConfigService,
     private readonly queueEventService: QueueEventService
-  ) { }
+  ) {
+    this.mailService.send({
+      subject: 'Recover password',
+      to: 'hunghoai@mailinator.com',
+      data: {
+
+      },
+      template: 'forgot'
+    });
+  }
 
   /**
    * generate password salt

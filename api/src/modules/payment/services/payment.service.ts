@@ -14,7 +14,6 @@ import { ObjectId } from 'mongodb';
 import { CouponService } from 'src/modules/coupon/services';
 import { SettingService } from 'src/modules/settings';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
-import { TokenPackageService } from 'src/modules/token-package/services';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { PerformerService } from 'src/modules/performer/services';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
@@ -56,8 +55,6 @@ export class PaymentService {
     private readonly userService: UserService,
     @Inject(forwardRef(() => CouponService))
     private readonly couponService: CouponService,
-    @Inject(forwardRef(() => TokenPackageService))
-    private readonly tokenPackageService: TokenPackageService,
     @Inject(PAYMENT_TRANSACTION_MODEL_PROVIDER)
     private readonly TransactionModel: Model<PaymentTransactionModel>,
     private readonly ccbillService: CCBillService,
@@ -179,7 +176,7 @@ export class PaymentService {
 
   public async subscribePerformer(payload: SubscribePerformerPayload, user: UserDto) {
     const {
-      type, performerId, paymentGateway, stripeCardId
+      type, performerId, paymentGateway
     } = payload;
     const performer = await this.performerService.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
@@ -198,7 +195,7 @@ export class PaymentService {
       });
     }
     if (paymentGateway === 'stripe') {
-      if (!user.stripeCustomerId || !stripeCardId) {
+      if (!user.stripeCustomerId || !user.stripeCardIds.length) {
         throw new HttpException('Please add a payment card', 422);
       }
       const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
@@ -257,25 +254,20 @@ export class PaymentService {
     return paymentTransaction;
   }
 
-  public async buyTokens(tokenId: string | ObjectId, payload: PurchaseTokenPayload, user: UserDto) {
+  public async buyTokens(payload: PurchaseTokenPayload, user: UserDto) {
     const {
-      paymentGateway, couponCode, currency, stripeCardId
+      paymentGateway, couponCode, currency, amount
     } = payload;
-    let totalPrice = 0;
-    const tokenPackage = await this.tokenPackageService.findById(tokenId);
-    if (!tokenPackage) {
-      throw new EntityNotFoundException('Token package not found');
-    }
-    totalPrice = parseFloat(tokenPackage.price.toFixed(2)) || 0;
+    const totalPrice = amount;
     const products = [{
       price: totalPrice,
       quantity: 1,
-      name: tokenPackage.name,
-      description: `purchase token package ${tokenPackage.name || tokenPackage.description}`,
-      productId: tokenPackage._id,
+      name: 'Wallet',
+      description: `Top up $${amount}`,
+      productId: null,
       productType: PAYMENT_TARGET_TYPE.TOKEN_PACKAGE,
       performerId: null,
-      tokens: tokenPackage.tokens
+      tokens: amount
     }];
 
     let coupon = null;
@@ -321,16 +313,16 @@ export class PaymentService {
       return { paymentUrl: `${process.env.USER_URL}/payment/cancel` };
     }
     if (paymentGateway === 'stripe') {
-      if (!user.stripeCustomerId || !stripeCardId) {
+      if (!user.stripeCustomerId || !user.stripeCardIds.length) {
         throw new HttpException('Please add a payment card', 422);
       }
       const data = await this.stripeService.createSingleCharge({
         transaction,
         item: {
-          name: tokenPackage.name
+          name: `Wallet - Top up $${amount}`
         },
         user,
-        stripeCardId
+        stripeCardId: user.stripeCardIds[0]
       });
       if (data) {
         transaction.stripeInvoiceId = data.id || (data.invoice && data.invoice.toString());

@@ -146,13 +146,13 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Tokens',
+      title: 'Price',
       dataIndex: 'totalPrice',
       key: 'tokens',
       render(totalPrice) {
         return (
           <span style={{ whiteSpace: 'nowrap' }}>
-            <img alt="token-img" src="/static/coin-ico.png" height="15px" />
+            $
             {(totalPrice || 0).toFixed(2)}
           </span>
         );

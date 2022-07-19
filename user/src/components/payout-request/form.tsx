@@ -52,29 +52,29 @@ const PayoutRequestForm = ({
       <div>
         <Space size="large">
           <Statistic
-            title="Total tokens"
+            title="Total Earned"
             value={statsPayout?.totalEarnedTokens || 0}
             precision={2}
-            prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}
+            prefix="$"
           />
           <Statistic
-            title="Paid out tokens"
+            title="Withdrew"
             value={statsPayout?.previousPaidOutTokens || 0}
             precision={2}
-            prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}
+            prefix="$"
           />
           <Statistic
-            title="Balance"
+            title="Wallet Balance"
             value={statsPayout?.remainingUnpaidTokens || 0}
             precision={2}
-            prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}
+            prefix="$"
           />
         </Space>
       </div>
-      <Form.Item label="Requested amount of tokens" name="requestTokens">
+      <Form.Item label="Requested amount" name="requestTokens">
         <InputNumber style={{ width: '100%' }} disabled={payout && payout.status === 'done'} min={1} onChange={(val) => setToken(val)} max={statsPayout?.remainingUnpaidTokens} />
       </Form.Item>
-      <p className="error-color">{`Conversion rate of tokens to dollars: $${(tokenConversionRate * tokens).toFixed(2)}`}</p>
+      {/* <p className="error-color">{`Conversion rate of tokens to dollars: $${(tokenConversionRate * tokens).toFixed(2)}`}</p> */}
       <Form.Item label="Note to Admin" name="requestNote">
         <Input.TextArea disabled={payout && payout.status === 'done'} placeholder="Text something to admin here" rows={3} />
       </Form.Item>

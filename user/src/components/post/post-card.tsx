@@ -4,7 +4,7 @@ import {
   Menu, Dropdown, Divider, message, Modal, Tooltip, Button
 } from 'antd';
 import {
-  HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined, EyeOutlined,
+  HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined,
   MoreOutlined, DollarOutlined, LockOutlined, FlagOutlined,
   FileImageOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
@@ -28,14 +28,10 @@ import { ReportForm } from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
 import Loader from '@components/common/base/loader';
-import { IFeed, IUser } from 'src/interfaces';
-// import dynamic from 'next/dynamic';
+import { IFeed, ISettings, IUser } from 'src/interfaces';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
 import './index.less';
-
-// const Subscriber = dynamic(() => import('@components/streaming/agora/subscriber'), { ssr: false });
-// const ForwardedSubscriber = forwardRef((props: any, ref) => <Subscriber {...props} forwardedRef={ref} />);
 
 interface IProps {
   feed: IFeed;
@@ -49,6 +45,7 @@ interface IProps {
   commentMapping: any;
   comment: any;
   siteName: string;
+  settings: ISettings;
 }
 
 class FeedCard extends Component<IProps> {
@@ -226,14 +223,14 @@ class FeedCard extends Component<IProps> {
   }
 
   async subscribe() {
-    const { feed, user } = this.props;
+    const { feed, user, settings } = this.props;
     if (!user._id) {
       message.error('Please log in!');
       Router.push('/');
       return;
     }
     if (user.isPerformer) return;
-    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+    if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
       message.error('Please add payment card');
       Router.push('/user/cards');
       return;
@@ -243,8 +240,7 @@ class FeedCard extends Component<IProps> {
       await paymentService.subscribePerformer({
         type: this.subscriptionType,
         performerId: feed.fromSourceId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway: settings.paymentGateway
       });
       this.setState({ openSubscriptionModal: false });
     } catch (e) {
@@ -261,8 +257,8 @@ class FeedCard extends Component<IProps> {
       return;
     }
     if (user.balance < price) {
-      message.error('Your token balance is not enough');
-      Router.push('/token-package');
+      message.error('Your wallet balance is not enough');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -281,8 +277,8 @@ class FeedCard extends Component<IProps> {
   async purchaseFeed() {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < feed.price) {
-      message.error('Your token balance is not enough');
-      Router.push('/token-package');
+      message.error('Your wallet balance is not enough');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -389,86 +385,6 @@ class FeedCard extends Component<IProps> {
       </Dropdown>
     );
 
-    // if (feed.type === 'stream') {
-    //   return (
-    //     <div className="feed-card">
-    //       <div className="feed-top">
-    //         <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
-    //           <div className="feed-top-left">
-    //             <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
-    //             <div className="feed-name">
-    //               <h4>
-    //                 {performer?.name || 'N/A'}
-    //                 {' '}
-    //                 {performer?.verifiedAccount && <TickIcon />}
-    //               </h4>
-    //               <h5>
-    //                 @
-    //                 {performer?.username || 'n/a'}
-    //               </h5>
-    //             </div>
-    //             {!performer?.isOnline ? <span className="online-status" /> : <span className="online-status active" />}
-    //           </div>
-    //         </Link>
-    //         <div className="feed-top-right">
-    //           <span className="feed-time">{formatDate(feed.updatedAt, 'MMM DD')}</span>
-    //           {dropdown}
-    //         </div>
-    //       </div>
-    //       <div className="feed-container">
-    //         <div className="feed-text">
-    //           Live
-    //         </div>
-    //         {!feed.isSubscribed ? (
-    //           <div className="lock-content">
-    //             <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
-    //             <Button
-    //               onMouseEnter={() => this.setState({ isHovered: true })}
-    //               onMouseLeave={() => this.setState({ isHovered: false })}
-    //               disabled={user.isPerformer}
-    //               className="secondary"
-    //               onClick={() => this.setState({ openSubscriptionModal: true })}
-    //             >
-    //               Subscribe to unlock
-    //             </Button>
-    //           </div>
-    //         ) : (
-    //           <div className="feed-content">
-    //             {!feed.isSale ? (
-    //               <>
-    //                 <ForwardedSubscriber
-    //                   ref={this.subscriberRef}
-    //                   {...{
-    //                     localUId: user._id,
-    //                     remoteUId: performer._id,
-    //                     conversationId: (feed as any).targetId
-    //                   }}
-    //                 />
-    //                 <Button block className="primary" onClick={() => this.subscriberRef.current.join()}>join</Button>
-    //                 <Button block className="secondary" onClick={() => this.subscriberRef.current.leave()}>Leave</Button>
-    //               </>
-    //             ) : (
-    //               <Button onClick={() => Router.push(
-    //                 {
-    //                   pathname: '/streaming/details',
-    //                   query: {
-    //                     username: performer?.username || performer?._id
-    //                   }
-    //                 },
-    //                 `/streaming/${performer?.username || performer?._id
-    //                 }`
-    //               )}
-    //               >
-    //                 View full content
-    //               </Button>
-    //             )}
-    //           </div>
-    //         )}
-    //       </div>
-    //     </div>
-    //   );
-    // }
-
     return (
       <div className="feed-card">
         <div className="feed-top">
@@ -555,9 +471,8 @@ class FeedCard extends Component<IProps> {
                     className="secondary"
                     onClick={() => this.setState({ openPurchaseModal: true })}
                   >
-                    Pay&nbsp;
-                    <img alt="coin" src="/static/coin-ico.png" width="15px" />
-                    {feed.price.toFixed(2)}
+                    Pay $
+                    {(feed.price || 0).toFixed(2)}
                     {' '}
                     to unlock
                   </Button>
@@ -748,7 +663,8 @@ const mapStates = (state: any) => {
     siteName: state.ui.siteName,
     user: state.user.current,
     commentMapping,
-    comment
+    comment,
+    settings: state.settings
   };
 };
 

@@ -23,9 +23,6 @@ export default class Dashboard extends PureComponent<any> {
       totalGrossPrice: 0,
       totalNetPrice: 0,
       totalPriceCommission: 0,
-      totalGrossToken: 0,
-      totalNetToken: 0,
-      totalTokenCommission: 0,
       totalOrders: 0,
       totalPosts: 0,
       totalPhotoPosts: 0,
@@ -255,7 +252,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col> */}
           <Col md={8} xs={12}>
-            <Link href="/earnings/cash">
+            <Link href="/earnings">
               <a>
                 <Card>
                   <Statistic
@@ -269,7 +266,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earnings/cash">
+            <Link href="/earnings">
               <a>
                 <Card>
                   <Statistic
@@ -283,7 +280,7 @@ export default class Dashboard extends PureComponent<any> {
             </Link>
           </Col>
           <Col md={8} xs={12}>
-            <Link href="/earnings/cash">
+            <Link href="/earnings">
               <a>
                 <Card>
                   <Statistic
@@ -291,48 +288,6 @@ export default class Dashboard extends PureComponent<any> {
                     value={`${stats?.totalNetPrice.toFixed(2)}`}
                     valueStyle={{ color: '#fb2b2b' }}
                     prefix="$"
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/earnings/token">
-              <a>
-                <Card>
-                  <Statistic
-                    title="GROSS PROFIT TOKEN"
-                    value={`${stats?.totalGrossToken.toFixed(2)}`}
-                    valueStyle={{ color: '#fb2b2b' }}
-                    prefix={<img alt="coin" src="/coin-ico.png" width="20px" />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/earnings/token">
-              <a>
-                <Card>
-                  <Statistic
-                    title="NET PROFIT TOKEN"
-                    value={`${stats?.totalTokenCommission.toFixed(2)}`}
-                    valueStyle={{ color: '#fb2b2b' }}
-                    prefix={<img alt="coin" src="/coin-ico.png" width="20px" />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/earnings/token">
-              <a>
-                <Card>
-                  <Statistic
-                    title="MODELS COMMISSION TOKEN"
-                    value={`${stats?.totalNetToken.toFixed(2)}`}
-                    valueStyle={{ color: '#fb2b2b' }}
-                    prefix={<img alt="coin" src="/coin-ico.png" width="20px" />}
                   />
                 </Card>
               </a>

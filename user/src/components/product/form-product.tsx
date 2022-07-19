@@ -152,8 +152,8 @@ export class FormProduct extends PureComponent<IProps> {
           <Col md={12} xs={12}>
             <Form.Item
               name="price"
-              label="Amount of tokens"
-              rules={[{ required: true, message: 'Amount of tokens is required!' }]}
+              label="Price"
+              rules={[{ required: true, message: 'Price is required!' }]}
             >
               <InputNumber style={{ width: '100%' }} min={1} />
             </Form.Item>

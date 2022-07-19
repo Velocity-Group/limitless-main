@@ -276,7 +276,7 @@ export default class FeedForm extends PureComponent<IProps> {
       return;
     }
     if (formValues.price < 0) {
-      message.error('Amount of tokens must be greater than 0');
+      message.error('Price must be greater than 0');
       return;
     }
     formValues.teaserId = this.teaserId;
@@ -366,7 +366,7 @@ export default class FeedForm extends PureComponent<IProps> {
           </Form.Item>
           )}
           {intendedFor === 'sale' && (
-            <Form.Item label="Amount of Tokens" name="price" rules={[{ required: true, message: 'Please add amount of tokens' }]}>
+            <Form.Item label="Price" name="price" rules={[{ required: true, message: 'Please add the price' }]}>
               <InputNumber min={1} />
             </Form.Item>
           )}

@@ -313,23 +313,23 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
           }
         ]
       },
-      {
-        id: 'token-package',
-        name: 'Token Packages',
-        icon: <LinkOutlined />,
-        children: [
-          {
-            id: 'token-package',
-            name: 'All token packages',
-            route: '/token-package'
-          },
-          {
-            id: 'new-token-package',
-            name: 'Create new',
-            route: '/token-package/create'
-          }
-        ]
-      },
+      // {
+      //   id: 'token-package',
+      //   name: 'Token Packages',
+      //   icon: <LinkOutlined />,
+      //   children: [
+      //     {
+      //       id: 'token-package',
+      //       name: 'All token packages',
+      //       route: '/token-package'
+      //     },
+      //     {
+      //       id: 'new-token-package',
+      //       name: 'Create new',
+      //       route: '/token-package/create'
+      //     }
+      //   ]
+      // },
       {
         id: 'order',
         name: 'Order History',
@@ -348,14 +348,9 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         icon: <DollarOutlined />,
         children: [
           {
-            id: 'earning-token',
-            name: 'Token earnings',
-            route: '/earnings/token'
-          },
-          {
             id: 'earning-money',
-            name: 'Cash earnings',
-            route: '/earnings/cash'
+            name: 'Earnings',
+            route: '/earnings'
           }
         ]
       },
@@ -390,7 +385,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
       },
       {
         id: 'transactions',
-        name: 'Token Transactions',
+        name: 'Wallet Transactions',
         icon: <DollarOutlined />,
         children: [
           {

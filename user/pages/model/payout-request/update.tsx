@@ -97,7 +97,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
       return;
     }
     if (data.requestTokens > user.balance) {
-      message.error('Requested tokens must be less than or equal your balance');
+      message.error('Requested amount must be less than or equal your wallet balance');
       return;
     }
     try {

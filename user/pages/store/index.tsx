@@ -229,7 +229,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 <p className="prod-desc">{product?.description || 'No description yet'}</p>
                 <div className="add-cart">
                   <p className="prod-price">
-                    <img alt="coin" src="/static/coin-ico.png" width="25px" />
+                    $
                     {product.price.toFixed(2)}
                   </p>
                   <div>
