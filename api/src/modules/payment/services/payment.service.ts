@@ -520,6 +520,21 @@ export class PaymentService {
     throw new HttpException('Cancel subscription has been fail, please try again later', 400);
   }
 
+  public async ccbillUserReactivation(payload: any) {
+    const { subscriptionId } = payload;
+    const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
+    if (!subscription) {
+      throw new EntityNotFoundException();
+    }
+    subscription.status = SUBSCRIPTION_STATUS.ACTIVE;
+    subscription.updatedAt = new Date();
+    await subscription.save();
+    await Promise.all([
+      this.performerService.updateSubscriptionStat(subscription.performerId, 1),
+      this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': 1 })
+    ]);
+  }
+
   public async stripeSubscriptionWebhook(payload: Record<string, any>) {
     const { data } = payload;
     const subscriptionId = data?.object?.id;
