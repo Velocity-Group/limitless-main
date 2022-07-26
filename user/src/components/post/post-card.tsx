@@ -1,7 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import { Component } from 'react';
 import {
-  Menu, Dropdown, Divider, message, Modal, Tooltip, Button
+  Menu, Dropdown, Divider, message, Modal, Tooltip, Button, Avatar
 } from 'antd';
 import {
   HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined,
@@ -391,7 +391,7 @@ class FeedCard extends Component<IProps> {
         <div className="feed-top">
           <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
             <div className="feed-top-left">
-              <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
+              <Avatar alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} size={40} />
               <div className="feed-name">
                 <h4>
                   {performer?.name || 'N/A'}
