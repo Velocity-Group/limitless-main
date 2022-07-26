@@ -14,6 +14,7 @@ import { authService } from '@services/auth.service';
 import { FormInstance } from 'antd/lib/form';
 import { getResponseError } from '@lib/utils';
 import dynamic from 'next/dynamic';
+import { PaymentSettingsForm } from '@components/setting/payment-settings';
 
 const WYSIWYG = dynamic(() => import('@components/wysiwyg'), {
   ssr: false
@@ -176,21 +177,11 @@ class Settings extends PureComponent {
   renderFormItem(setting: ISetting) {
     const { updating } = this.state;
     // eslint-disable-next-line prefer-const
-    let { type, key } = setting;
+    let { type } = setting;
     if (setting.meta && setting.meta.textarea) {
       type = 'textarea';
     }
     const ref = createRef() as any;
-    if (key === 'paymentGateway') {
-      return (
-        <Form.Item label={setting.name} key={setting._id} help={setting.description} extra={setting.extra}>
-          <Select onChange={(val) => this.setVal(setting.key, val.target.value)} defaultValue={setting.value}>
-            <Select.Option value="Stripe" key="stripe">Stripe</Select.Option>
-            <Select.Option value="ccbill" key="ccbill">CCbill</Select.Option>
-          </Select>
-        </Form.Item>
-      );
-    }
     switch (type) {
       case 'textarea':
         return (
@@ -342,21 +333,25 @@ class Settings extends PureComponent {
           {loading ? (
             <Loader />
           ) : (
-            <Form
-              {...layout}
-              layout="horizontal"
-              name="setting-frm"
-              onFinish={this.submit.bind(this)}
-              initialValues={initialValues}
-              ref={this.formRef}
-            >
-              {list.map((setting) => this.renderFormItem(setting))}
-              <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-                <Button type="primary" htmlType="submit" disabled={updating} loading={updating}>
-                  Submit
-                </Button>
-              </Form.Item>
-            </Form>
+            <>
+              {selectedTab === 'paymentGateways' ? <PaymentSettingsForm settings={list} /> : (
+                <Form
+                  {...layout}
+                  layout="horizontal"
+                  name="setting-frm"
+                  onFinish={this.submit.bind(this)}
+                  initialValues={initialValues}
+                  ref={this.formRef}
+                >
+                  {list.map((setting) => this.renderFormItem(setting))}
+                  <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+                    <Button type="primary" htmlType="submit" disabled={updating} loading={updating}>
+                      Submit
+                    </Button>
+                  </Form.Item>
+                </Form>
+              )}
+            </>
           )}
         </Page>
       </>
