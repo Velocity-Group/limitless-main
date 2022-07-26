@@ -114,9 +114,12 @@ export class TransactionEarningListener {
     newEarning.set('createdAt', transaction.createdAt);
     newEarning.set('updatedAt', transaction.updatedAt);
     newEarning.set('paymentGateway', transaction.paymentGateway);
-    newEarning.set('isPaid', transaction.paymentGateway === 'stripe');
+    newEarning.set('isPaid', false);
     newEarning.set('isToken', false);
     await newEarning.save();
+    // update balance
+    await this.updateBalance(newEarning.grossPrice, netPrice, newEarning);
+    await this.notifyPerformerBalance(newEarning, netPrice);
   }
 
   private async updateBalance(userTokens, performerTokens, earning) {
