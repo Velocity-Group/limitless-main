@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { MongoDBModule, AgendaModule } from 'src/kernel';
+import { MongoDBModule } from 'src/kernel';
 import { AuthModule } from '../auth/auth.module';
 import { fileProviders } from './providers';
 import { FileController } from './controllers/file.controller';
@@ -10,7 +10,6 @@ import {
 @Module({
   imports: [
     MongoDBModule,
-    AgendaModule.register(),
     forwardRef(() => AuthModule)
   ],
   providers: [

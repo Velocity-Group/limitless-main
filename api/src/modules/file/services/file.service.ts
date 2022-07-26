@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { ConfigService } from 'nestjs-config';
 import {
-  StringHelper, QueueEventService, QueueEvent, getConfig, EntityNotFoundException, AgendaService
+  StringHelper, QueueEventService, QueueEvent, getConfig, EntityNotFoundException
 } from 'src/kernel';
 import {
   writeFileSync, unlinkSync, existsSync, createReadStream, readFileSync
@@ -26,7 +26,6 @@ import { AudioFileService } from './audio.service';
 const VIDEO_QUEUE_CHANNEL = 'VIDEO_PROCESS';
 const AUDIO_QUEUE_CHANNEL = 'AUDIO_PROCESS';
 const PHOTO_QUEUE_CHANNEL = 'PHOTO_PROCESS';
-const REMOVE_FILES_NOT_HAVE_REF = 'REMOVE_FILES_NOT_HAVE_REF';
 
 export const FILE_EVENT = {
   VIDEO_PROCESSED: 'VIDEO_PROCESSED',
@@ -45,8 +44,7 @@ export class FileService {
     private readonly videoService: VideoFileService,
     private readonly audioFileService: AudioFileService,
     private readonly queueEventService: QueueEventService,
-    private readonly config: ConfigService,
-    private readonly agenda: AgendaService
+    private readonly config: ConfigService
   ) {
     this.queueEventService.subscribe(
       VIDEO_QUEUE_CHANNEL,
@@ -65,62 +63,6 @@ export class FileService {
       'PROCESS_PHOTO',
       this._processPhoto.bind(this)
     );
-    this.defineJobs();
-  }
-
-  private async defineJobs() {
-    const collection = (this.agenda as any)._collection;
-    await collection.deleteMany({
-      name: {
-        $in: [
-          REMOVE_FILES_NOT_HAVE_REF
-        ]
-      }
-    });
-    // schedule feed
-    this.agenda.define(REMOVE_FILES_NOT_HAVE_REF, {}, this.jobRemoveNoRefFiles.bind(this));
-    this.agenda.schedule('10 seconds from now', REMOVE_FILES_NOT_HAVE_REF, {});
-  }
-
-  private async jobRemoveNoRefFiles(job: any, done: any) {
-    try {
-      const files = await this.fileModel.find({
-        $or: [{
-          refItems: { $exists: false }
-        }, {
-          refItems: { $exists: true, $size: 0 }
-        }]
-      }).lean();
-      const publicDir = this.config.get('file.publicDir');
-      // eslint-disable-next-line no-restricted-syntax
-      for (const file of files) {
-        // eslint-disable-next-line no-await-in-loop
-        await this.fileModel.deleteOne({ _id: file._id });
-        const filePaths = [
-          {
-            absolutePath: file.absolutePath,
-            path: file.path
-          }
-        ].concat(file.thumbnails || []);
-
-        // eslint-disable-next-line no-loop-func
-        filePaths.forEach((fp) => {
-          if (existsSync(fp.absolutePath)) {
-            unlinkSync(fp.absolutePath);
-          } else {
-            const filePublic = join(publicDir, fp.path);
-            existsSync(filePublic) && unlinkSync(filePublic);
-          }
-        });
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('Remove files no ref error', e);
-    } finally {
-      job.remove();
-      this.agenda.schedule('8 hours from now', REMOVE_FILES_NOT_HAVE_REF, {});
-      typeof done === 'function' && done();
-    }
   }
 
   public async findById(id: string | ObjectId): Promise<FileDto> {
