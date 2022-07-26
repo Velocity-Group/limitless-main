@@ -120,6 +120,13 @@ class Earning extends PureComponent<IProps> {
         key: '',
         text: 'All Types'
       },
+      { key: 'tip', text: 'Tip' },
+      { key: 'feed', text: 'Post' },
+      { key: 'video', text: 'Video' },
+      { key: 'gallery', text: 'Gallery' },
+      { key: 'product', text: 'Product' },
+      { key: 'stream_tip', text: 'Streaming tip' },
+      { key: 'public_chat', text: 'Paid steaming' },
       {
         key: 'monthly_subscription',
         text: 'Monthly Subscription'
