@@ -191,7 +191,7 @@ export class AccountForm extends PureComponent<IProps> {
               <div className="avatar-upload">
                 <AvatarUpload
                   headers={uploadHeaders}
-                  uploadUrl={performerService.getAvatarUploadUrl()}
+                  uploadUrl={performerService.getAvatarUploadUrl(performer._id)}
                   onUploaded={onUploaded.bind(this, 'avatarId')}
                   image={avatarUrl}
                 />
@@ -201,7 +201,7 @@ export class AccountForm extends PureComponent<IProps> {
                   options={{ fieldName: 'cover' }}
                   image={performer && performer.cover ? performer.cover : ''}
                   headers={uploadHeaders}
-                  uploadUrl={performerService.getCoverUploadUrl()}
+                  uploadUrl={performerService.getCoverUploadUrl(performer._id)}
                   onUploaded={onUploaded.bind(this, 'coverId')}
                 />
               </div>

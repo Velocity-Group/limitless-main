@@ -35,10 +35,10 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
       message.warning('Your ID documents are not verified yet! You could not post any content right now.');
       Router.back();
     }
-    if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
-      message.warning('You have not connected with stripe. So you cannot post any content right now!');
-      Router.push('/model/banking');
-    }
+    // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
+    //   message.warning('You have not connected with stripe. So you cannot post any content right now!');
+    //   Router.push('/model/banking');
+    // }
   }
 
   async onFinish(data) {

@@ -67,13 +67,13 @@ export class TransactionEarningListener {
     newEarning.set('grossPrice', transaction.totalPrice);
     newEarning.set('netPrice', netPrice);
     newEarning.set('performerId', transaction.performerId);
-    newEarning.set('userId', transaction?.sourceId || null);
-    newEarning.set('transactionId', transaction?._id || null);
+    newEarning.set('userId', transaction.sourceId);
+    newEarning.set('transactionId', transaction._id);
     newEarning.set('sourceType', transaction.target);
     newEarning.set('type', transaction.type);
     newEarning.set('createdAt', transaction.createdAt);
     newEarning.set('isPaid', false);
-    newEarning.set('transactionStatus', transaction.status);
+    newEarning.set('paymentGateway', 'system');
     newEarning.set('isToken', true);
     await newEarning.save();
     // update balance
@@ -84,44 +84,39 @@ export class TransactionEarningListener {
   public async handleListenEarningMoney(
     event: QueueEvent
   ): Promise<EarningDto> {
-    try {
-      if (event.eventName !== EVENT.CREATED) {
-        return;
-      }
-      const transaction = event.data as PaymentDto;
-      if (!transaction || transaction.status !== PURCHASE_ITEM_STATUS.SUCCESS || !transaction.totalPrice) {
-        return;
-      }
-      if (![PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
-        return;
-      }
-      const [
-        settingCommission, performer
-      ] = await Promise.all([
-        SettingService.getValueByKey(SETTING_KEYS.PERFORMER_COMMISSION),
-        this.performerService.findById(transaction.performerId)
-      ]);
-      const commission = performer.commissionPercentage || settingCommission;
-      const netPrice = transaction.totalPrice - transaction.totalPrice * commission;
-      const newEarning = new this.PerformerEarningModel();
-      newEarning.set('siteCommission', commission);
-      newEarning.set('grossPrice', transaction.totalPrice);
-      newEarning.set('netPrice', netPrice);
-      newEarning.set('performerId', transaction.performerId);
-      newEarning.set('userId', transaction?.sourceId || null);
-      newEarning.set('transactionId', transaction?._id || null);
-      newEarning.set('sourceType', transaction.target);
-      newEarning.set('type', transaction.type);
-      newEarning.set('createdAt', transaction.createdAt);
-      newEarning.set('updatedAt', transaction.updatedAt);
-      newEarning.set('transactionStatus', transaction.status);
-      newEarning.set('isPaid', true);
-      newEarning.set('isToken', false);
-      await newEarning.save();
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
+    if (event.eventName !== EVENT.CREATED) {
+      return;
     }
+    const transaction = event.data as PaymentDto;
+    if (!transaction || transaction.status !== PURCHASE_ITEM_STATUS.SUCCESS || !transaction.totalPrice) {
+      return;
+    }
+    if (![PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
+      return;
+    }
+    const [
+      settingCommission, performer
+    ] = await Promise.all([
+      SettingService.getValueByKey(SETTING_KEYS.PERFORMER_COMMISSION),
+      this.performerService.findById(transaction.performerId)
+    ]);
+    const commission = performer.commissionPercentage || settingCommission;
+    const netPrice = transaction.totalPrice - transaction.totalPrice * commission;
+    const newEarning = new this.PerformerEarningModel();
+    newEarning.set('siteCommission', commission);
+    newEarning.set('grossPrice', transaction.totalPrice);
+    newEarning.set('netPrice', netPrice);
+    newEarning.set('performerId', transaction.performerId);
+    newEarning.set('userId', transaction.sourceId);
+    newEarning.set('transactionId', transaction._id);
+    newEarning.set('sourceType', transaction.target);
+    newEarning.set('type', transaction.type);
+    newEarning.set('createdAt', transaction.createdAt);
+    newEarning.set('updatedAt', transaction.updatedAt);
+    newEarning.set('paymentGateway', transaction.paymentGateway);
+    newEarning.set('isPaid', transaction.paymentGateway === 'stripe');
+    newEarning.set('isToken', false);
+    await newEarning.save();
   }
 
   private async updateBalance(userTokens, performerTokens, earning) {

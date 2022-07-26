@@ -1,5 +1,5 @@
 import {
-  Layout, message, Statistic, Switch
+  Layout, message, Statistic
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
@@ -32,12 +32,10 @@ interface IStates {
   sort: string;
   type: string;
   dateRange: any;
-  isToken: boolean;
 }
 
 const initialState = {
   loading: true,
-  isToken: false,
   earning: [],
   pagination: { total: 0, current: 1, pageSize: 10 },
   stats: {
@@ -88,15 +86,9 @@ class EarningPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
-  async handleSwitch(val) {
-    await this.setState({ ...initialState, isToken: val });
-    this.getData();
-    this.getPerformerStats();
-  }
-
   async getData() {
     const {
-      pagination, sort, sortBy, type, dateRange, isToken
+      pagination, sort, sortBy, type, dateRange
     } = this.state;
     try {
       const { current, pageSize } = pagination;
@@ -106,7 +98,6 @@ class EarningPage extends PureComponent<IProps, IStates> {
         sort,
         sortBy,
         type,
-        isToken,
         ...dateRange
       });
       this.setState({
@@ -146,9 +137,6 @@ class EarningPage extends PureComponent<IProps, IStates> {
           <SearchFilter
             type={[
               { key: '', text: 'All types' },
-              // { key: 'private_chat', text: 'Private Chat' },
-              // { key: 'group_chat', text: 'Group Chat' },
-              // { key: 'public_chat', text: 'Public Chat' },
               { key: 'product', text: 'Product' },
               { key: 'gallery', text: 'Gallery' },
               { key: 'feed', text: 'Post' },

@@ -9,7 +9,7 @@ import {
   EntityNotFoundException, ForbiddenException, QueueEventService, QueueEvent, StringHelper
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
-import { FileService } from 'src/modules/file/services';
+import { FileService, FILE_EVENT } from 'src/modules/file/services';
 import { SettingService } from 'src/modules/settings';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
@@ -33,6 +33,7 @@ import { Storage } from 'src/modules/storage/contants';
 import { StripeService } from 'src/modules/payment/services';
 import { FollowService } from 'src/modules/follow/services/follow.service';
 import * as moment from 'moment';
+import { omit } from 'lodash';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
@@ -89,6 +90,31 @@ export class PerformerService {
     @Inject(PERFORMER_BANKING_SETTING_MODEL_PROVIDER)
     private readonly bankingSettingModel: Model<BankingModel>
   ) {
+    this.queueEventService.subscribe(
+      'CONVERT_WELCOME_VIDEO_CHANNEL',
+      'FILE_PROCESSED_TOPIC',
+      this.handleWelcomeVideoFile.bind(this)
+    );
+  }
+
+  public async handleWelcomeVideoFile(event: QueueEvent) {
+    const { eventName } = event;
+    if (eventName !== FILE_EVENT.VIDEO_PROCESSED) {
+      return;
+    }
+    const { performerId } = event.data.meta;
+    const [performer, file] = await Promise.all([
+      this.performerModel.findById(performerId),
+      this.fileService.findById(event.data.fileId)
+    ]);
+    if (!performer) {
+      // TODO - delete file?
+      await this.fileService.remove(event.data.fileId);
+      return;
+    }
+
+    performer.welcomeVideoPath = file.getUrl();
+    await performer.save();
   }
 
   public async checkExistedEmailorUsername(payload) {
@@ -172,15 +198,12 @@ export class PerformerService {
     if (user && user.roles && user.roles.includes('admin')) {
       dto.isSubscribed = true;
     }
-    if (model.avatarId) {
-      const avatar = await this.fileService.findById(model.avatarId);
-      dto.avatarPath = avatar ? avatar.path : null;
-    }
     if (model.welcomeVideoId) {
       const welcomeVideo = await this.fileService.findById(
         model.welcomeVideoId
       );
-      dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : null;
+      dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : '';
+      dto.welcomeVideoPath && await this.performerModel.updateOne({ _id: model._id }, { welcomeVideoPath: dto.welcomeVideoPath });
     }
     await this.increaseViewStats(dto._id);
     return dto;
@@ -436,7 +459,7 @@ export class PerformerService {
       throw new EntityNotFoundException();
     }
 
-    const data = { ...payload } as any;
+    const data = omit(payload, ['welcomeVideoId', 'welcomeVideoPath', 'avatarId', 'coverId', 'avatarPath', 'coverPath']) as any;
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
@@ -561,10 +584,8 @@ export class PerformerService {
     if (!performer) {
       throw new EntityNotFoundException();
     }
-    const data = { ...payload } as any;
-    delete data.balance;
-    delete data.welcomeVideoId;
-    delete data.commissionPercentage;
+
+    const data = omit(payload, ['welcomeVideoId', 'welcomeVideoPath', 'avatarId', 'coverId', 'avatarPath', 'coverPath', 'balance', 'commissionPercentage']) as any;
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
@@ -630,61 +651,48 @@ export class PerformerService {
     return this.performerModel.create(data);
   }
 
-  public async updateAvatar(user: UserDto, file: FileDto) {
+  public async updateAvatar(performerId: string | ObjectId, file: FileDto) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
     await this.performerModel.updateOne(
-      { _id: user._id },
+      { _id: performerId },
       {
         avatarId: file._id,
         avatarPath: file.path
       }
     );
     await this.fileService.addRef(file._id, {
-      itemId: user._id,
+      itemId: toObjectId(performerId),
       itemType: REF_TYPE.PERFORMER
     });
 
-    // resend user info?
-    // TODO - check others config for other storage
+    if (performer.avatarId && `${performer.avatarId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.avatarId);
+    }
     return file;
   }
 
-  public async updateCover(user: UserDto, file: FileDto) {
+  public async updateCover(performerId: string | ObjectId, file: FileDto) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
     await this.performerModel.updateOne(
-      { _id: user._id },
+      { _id: performerId },
       {
         coverId: file._id,
         coverPath: file.path
       }
     );
     await this.fileService.addRef(file._id, {
-      itemId: user._id,
+      itemId: toObjectId(performerId),
       itemType: REF_TYPE.PERFORMER
     });
-
-    return file;
-  }
-
-  public async updateWelcomeVideo(user: PerformerDto, file: FileDto) {
-    await this.performerModel.updateOne(
-      { _id: user._id },
-      {
-        welcomeVideoId: file._id,
-        welcomeVideoPath: file.path
-      }
-    );
-
-    await this.fileService.addRef(file._id, {
-      itemId: user._id,
-      itemType: REF_TYPE.PERFORMER
-    });
-    if (user.welcomeVideoId && `${user.welcomeVideoId}` !== `${file._id}`) {
-      await this.fileService.remove(user.welcomeVideoId);
+    if (performer.coverId && `${performer.coverId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.coverId);
     }
-    await this.fileService.queueProcessVideo(file._id);
     return file;
   }
 
-  public async adminUpdateWelcomeVideo(performerId: string, file: FileDto) {
+  public async updateWelcomeVideo(performerId: string | ObjectId, file: FileDto) {
     const performer = await this.performerModel.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
     await this.performerModel.updateOne(
@@ -703,7 +711,12 @@ export class PerformerService {
     if (performer.welcomeVideoId && `${performer.welcomeVideoId}` !== `${file._id}`) {
       await this.fileService.remove(performer.welcomeVideoId);
     }
-    await this.fileService.queueProcessVideo(file._id);
+    await this.fileService.queueProcessVideo(file._id, {
+      publishChannel: 'CONVERT_WELCOME_VIDEO_CHANNEL',
+      meta: {
+        performerId
+      }
+    });
     return file;
   }
 

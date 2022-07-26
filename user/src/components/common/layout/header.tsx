@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Layout, Badge, Drawer, Divider, Avatar, Modal, Button
+  Layout, Badge, Drawer, Divider, Avatar
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
@@ -55,25 +55,25 @@ class Header extends PureComponent<IProps> {
     const { user, router, config } = this.props;
     if (user._id) {
       this.handleCountNotificationMessage();
-      if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
-        // eslint-disable-next-line react/no-did-update-set-state
-        this.setState({ openStripeAlert: true });
-      }
+      // if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
+      //   // eslint-disable-next-line react/no-did-update-set-state
+      //   this.setState({ openStripeAlert: true });
+      // }
     }
   }
 
-  async componentDidUpdate(prevProps: any) {
+  componentDidUpdate(prevProps: any) {
     const { user, router, config } = this.props;
     const { openStripeAlert } = this.state;
     if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
-      if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
-        // eslint-disable-next-line react/no-did-update-set-state
-        this.setState({ openStripeAlert: true });
-      }
+      // if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
+      //   // eslint-disable-next-line react/no-did-update-set-state
+      //   this.setState({ openStripeAlert: true });
+      // }
     }
     // eslint-disable-next-line react/no-did-update-set-state
-    if (openStripeAlert && router.pathname === '/model/banking') this.setState({ openStripeAlert: false });
+    // if (openStripeAlert && router.pathname === '/model/banking') this.setState({ openStripeAlert: false });
   }
 
   componentWillUnmount() {
@@ -137,11 +137,6 @@ class Header extends PureComponent<IProps> {
       window.location.href = redirectUrl;
     }
   }
-
-  // onThemeChange = (theme: string) => {
-  //   const { updateUIValue: handleUpdateUI } = this.props;
-  //   handleUpdateUI({ theme });
-  // };
 
   async beforeLogout() {
     const { logout: handleLogout } = this.props;
@@ -484,7 +479,7 @@ class Header extends PureComponent<IProps> {
               />
             </div> */}
           </Drawer>
-          <Modal
+          {/* <Modal
             title={null}
             footer={null}
             width={500}
@@ -509,7 +504,7 @@ class Header extends PureComponent<IProps> {
                 <Button className="secondary" onClick={() => this.setState({ openStripeAlert: false })}>No, i will connect later</Button>
               </div>
             </div>
-          </Modal>
+          </Modal> */}
           <SubscribePerformerModal onSubscribed={this.handleSubscribe} />
         </div>
       </div>

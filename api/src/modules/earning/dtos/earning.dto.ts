@@ -34,7 +34,7 @@ export class EarningDto {
 
   paidAt: Date;
 
-  transactionStatus?: string;
+  paymentGateway?: string;
 
   isToken?: boolean;
 
@@ -58,7 +58,7 @@ export class EarningDto {
         'createdAt',
         'updatedAt',
         'paidAt',
-        'transactionStatus',
+        'paymentGateway',
         'isToken'
       ])
     );

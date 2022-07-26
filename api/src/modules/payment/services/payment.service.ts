@@ -133,7 +133,7 @@ export class PaymentService {
           price: totalPrice,
           quantity: 1,
           name: `${subscriptionType} ${performer?.name || performer?.username}`,
-          description: `${subscriptionType} ${performer?.name || performer?.username} ${subscriptionType === PAYMENT_TYPE.FREE_SUBSCRIPTION ? `in ${performer?.durationFreeSubscriptionDays} days` : null}`,
+          description: `${subscriptionType} ${performer?.name || performer?.username} ${subscriptionType === PAYMENT_TYPE.FREE_SUBSCRIPTION ? `in ${performer?.durationFreeSubscriptionDays} days` : ''}`,
           productId: performer._id,
           productType: PAYMENT_TARGET_TYPE.PERFORMER,
           performerId: performer._id
@@ -260,7 +260,7 @@ export class PaymentService {
     paymentTransaction.targetId = products[0].productId;
     paymentTransaction.performerId = null;
     paymentTransaction.type = PAYMENT_TYPE.TOKEN_PACKAGE;
-    paymentTransaction.totalPrice = couponInfo ? totalPrice - (totalPrice * couponInfo.value) : totalPrice;
+    paymentTransaction.totalPrice = couponInfo ? totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2)) : totalPrice;
     paymentTransaction.products = products;
     paymentTransaction.paymentResponseInfo = null;
     paymentTransaction.status = PAYMENT_STATUS.CREATED;
