@@ -15,6 +15,8 @@ const SETTING_KEYS = {
 
   CCBILL_CLIENT_ACCOUNT_NUMBER: 'ccbillClientAccountNumber',
   CCBILL_SUB_ACCOUNT_NUMBER: 'ccbillSubAccountNumber',
+  CCBILL_SINGLE_SUB_ACCOUNT_NUMBER: 'ccbillSingleSubAccountNumber',
+  CCBILL_RECURRING_SUB_ACCOUNT_NUMBER: 'ccbillRecurringSubAccountNumber',
   CCBILL_FLEXFORM_ID: 'ccbillFlexformId',
   CCBILL_SALT: 'ccbillSalt',
   CCBILL_DATALINK_USERNAME: 'ccbillDatalinkUsername',
@@ -30,6 +32,26 @@ const settings = [{
   name: 'Payment Gateway',
   description: 'Platform payment gateway',
   public: true,
+  group: 'paymentGateways',
+  editable: true,
+  type: 'string'
+},
+{
+  key: SETTING_KEYS.CCBILL_SINGLE_SUB_ACCOUNT_NUMBER,
+  value: '',
+  name: 'Single Purchase Sub Account Number',
+  description: 'ex: 0000',
+  public: false,
+  group: 'paymentGateways',
+  editable: true,
+  type: 'string'
+},
+{
+  key: SETTING_KEYS.CCBILL_SUBSCRIPTION_SUB_ACCOUNT_NUMBER,
+  value: '',
+  name: 'Reccurring Purchase Sub Account Number',
+  description: 'ex: 0001',
+  public: false,
   group: 'paymentGateways',
   editable: true,
   type: 'string'
@@ -57,6 +79,13 @@ module.exports.up = async function up(next) {
   }, {
     $set: {
       group: 'paymentGateways'
+    }
+  });
+  await DB.collection(COLLECTION.SETTING).deleteMany({
+    key: {
+      $in: [
+        'ccbillSubAccountNumber'
+      ]
     }
   });
   // eslint-disable-next-line no-restricted-syntax

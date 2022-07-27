@@ -241,6 +241,7 @@ class HomePage extends PureComponent<IProps> {
               <div className="home-container">
                 <div className="left-container">
                   {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
+                  {streams?.length > 0 && (
                   <div className="visit-history">
                     <div className="top-story">
                       <a>Live Videos</a>
@@ -250,9 +251,10 @@ class HomePage extends PureComponent<IProps> {
                       {streams.length > 0 && streams.map((s) => (
                         <StreamListItem stream={s} user={user} key={s._id} />
                       ))}
-                      {!streams?.length && <p className="text-center" style={{ margin: '30px 0' }}>No live for now</p>}
+                      {/* {!streams?.length && <p className="text-center" style={{ margin: '30px 0' }}>No live for now</p>} */}
                     </div>
                   </div>
+                  )}
                   {!loadingFeed && !totalFeeds && (
                     <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
                       <Alert

@@ -230,13 +230,13 @@ class PerformerUpdate extends PureComponent<IProps> {
                   performer={performer}
                 />
               </Tabs.TabPane>
-              <Tabs.TabPane tab={<span>CCbill</span>} key="ccbill">
+              {/* <Tabs.TabPane tab={<span>CCbill</span>} key="ccbill">
                 <CCbillSettingForm
                   submiting={settingUpdating}
                   onFinish={this.updatePaymentGatewaySetting.bind(this, 'ccbill')}
                   ccbillSetting={performer.ccbillSetting}
                 />
-              </Tabs.TabPane>
+              </Tabs.TabPane> */}
               <Tabs.TabPane tab={<span>Banking</span>} key="banking">
                 <BankingForm
                   submiting={settingUpdating}

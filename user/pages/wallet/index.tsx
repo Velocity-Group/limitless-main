@@ -118,7 +118,7 @@ class TokenPackages extends PureComponent<IProps> {
                 label="Enter Amount"
                 rules={[{ required: true, message: 'Amount is required!' }]}
               >
-                <InputNumber style={{ width: '100%' }} max={499} min={1} />
+                <InputNumber style={{ width: '100%' }} min={1} />
               </Form.Item>
               <Form.Item help={coupon && (
               <small style={{ color: 'red' }}>

@@ -58,7 +58,9 @@ export const SETTING_KEYS = {
   AWS_S3_ENABLE: 's3Enabled',
   AGORA_APPID: 'agoraAppId',
   AGORA_CERTIFICATE: 'agoraCertificate',
-  AGORA_ENABLE: 'agoraEnable'
+  AGORA_ENABLE: 'agoraEnable',
+  CCBILL_SINGLE_SUB_ACCOUNT_NUMBER: 'ccbillSingleSubAccountNumber',
+  CCBILL_RECURRING_SUB_ACCOUNT_NUMBER: 'ccbillRecurringSubAccountNumber'
 };
 
 export const MENU_SECTION = {

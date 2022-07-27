@@ -61,7 +61,8 @@ export class PaymentSettingsForm extends PureComponent<IProps> {
     } = this.props;
     const { gateway, submiting } = this.state;
     const ccbillClientAccountNumber = settings.find((s) => s.key === 'ccbillClientAccountNumber');
-    const ccbillSubAccountNumber = settings.find((s) => s.key === 'ccbillSubAccountNumber');
+    const ccbillSingleSubAccountNumber = settings.find((s) => s.key === 'ccbillSingleSubAccountNumber');
+    const ccbillRecurringSubAccountNumber = settings.find((s) => s.key === 'ccbillRecurringSubAccountNumber');
     const ccbillFlexformId = settings.find((s) => s.key === 'ccbillFlexformId');
     const ccbillSalt = settings.find((s) => s.key === 'ccbillSalt');
     const ccbillDatalinkUsername = settings.find((s) => s.key === 'ccbillDatalinkUsername');
@@ -82,7 +83,8 @@ export class PaymentSettingsForm extends PureComponent<IProps> {
           stripePublishableKey: stripePublishableKey?.value,
           stripeSecretKey: stripeSecretKey?.value,
           ccbillClientAccountNumber: ccbillClientAccountNumber?.value,
-          ccbillSubAccountNumber: ccbillSubAccountNumber?.value,
+          ccbillSingleSubAccountNumber: ccbillSingleSubAccountNumber?.value,
+          ccbillRecurringSubAccountNumber: ccbillRecurringSubAccountNumber?.value,
           ccbillFlexformId: ccbillFlexformId?.value,
           ccbillSalt: ccbillSalt?.value,
           ccbillDatalinkUsername: ccbillDatalinkUsername?.value,
@@ -125,7 +127,7 @@ export class PaymentSettingsForm extends PureComponent<IProps> {
         {gateway === 'ccbill' && (
           <>
             <Form.Item
-              label="CCbill - Client account number"
+              label="Client account number"
               name="ccbillClientAccountNumber"
               rules={[{ required: true }]}
               extra="CCbill merchant account number (eg: 987654)"
@@ -133,10 +135,18 @@ export class PaymentSettingsForm extends PureComponent<IProps> {
               <Input />
             </Form.Item>
             <Form.Item
-              label="CCbill - Sub account number"
-              name="ccbillSubAccountNumber"
+              label="Single Purchase Sub account number"
+              name="ccbillSingleSubAccountNumber"
               rules={[{ required: true }]}
-              extra="eg: 0001, 0002,..."
+              extra="eg: 0001"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Recurring Purchase Sub account number"
+              name="ccbillRecurringSubAccountNumber"
+              rules={[{ required: true }]}
+              extra="eg: 0002"
             >
               <Input />
             </Form.Item>

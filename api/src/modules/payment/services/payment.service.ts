@@ -73,22 +73,27 @@ export class PaymentService {
 
   private async getPerformerSubscriptionPaymentGateway(performerId: ObjectId, paymentGateway = 'ccbill') {
     // get performer information and do transaction
-    const performerPaymentSetting = await this.performerService.getPaymentSetting(
-      performerId,
-      paymentGateway
-    );
-    if (!performerPaymentSetting) {
-      throw new MissingConfigPaymentException();
-    }
-    const flexformId = performerPaymentSetting?.value?.flexformId || await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_FLEXFORM_ID);
-    const subAccountNumber = performerPaymentSetting?.value?.subscriptionSubAccountNumber;
-    const salt = performerPaymentSetting?.value?.salt || await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SALT);
-    if (!flexformId || !subAccountNumber || !salt) {
+    // const performerPaymentSetting = await this.performerService.getPaymentSetting(
+    //   performerId,
+    //   paymentGateway
+    // );
+    // if (!performerPaymentSetting) {
+    //   throw new MissingConfigPaymentException();
+    // }
+    // const flexformId = performerPaymentSetting?.value?.flexformId || await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_FLEXFORM_ID);
+    // const subAccountNumber = performerPaymentSetting?.value?.subscriptionSubAccountNumber;
+    // const salt = performerPaymentSetting?.value?.salt || await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SALT);
+    const flexformId = SettingService.getValueByKey(SETTING_KEYS.CCBILL_FLEXFORM_ID);
+    const singleSubAccountNumber = SettingService.getValueByKey(SETTING_KEYS.CCBILL_SINGLE_SUB_ACCOUNT_NUMBER);
+    const recurringSubAccountNumber = SettingService.getValueByKey(SETTING_KEYS.CCBILL_RECURRING_SUB_ACCOUNT_NUMBER);
+    const salt = SettingService.getValueByKey(SETTING_KEYS.CCBILL_SALT);
+    if (!flexformId || !singleSubAccountNumber || !recurringSubAccountNumber || !salt) {
       throw new MissingConfigPaymentException();
     }
     return {
       flexformId,
-      subAccountNumber,
+      singleSubAccountNumber,
+      recurringSubAccountNumber,
       salt
     };
   }
@@ -199,13 +204,13 @@ export class PaymentService {
         );
         return transaction;
       }
-      const { flexformId, subAccountNumber, salt } = await this.getPerformerSubscriptionPaymentGateway(performer._id);
+      const { flexformId, recurringSubAccountNumber, salt } = await this.getPerformerSubscriptionPaymentGateway(performer._id);
       return this.ccbillService.subscription({
         transactionId: transaction._id,
         price: transaction.totalPrice,
         flexformId,
         salt,
-        subAccountNumber,
+        recurringSubAccountNumber,
         subscriptionType
       });
     }
