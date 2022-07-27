@@ -39,7 +39,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
         </div>
         <div className="right-col">
           <h2>
-            Follow
+            Subscribe
             {' '}
             <span className="username">{`@${performer?.username}` || 'the model'}</span>
           </h2>

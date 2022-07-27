@@ -774,7 +774,7 @@ class PerformerProfile extends PureComponent<IProps> {
           centered
           onOk={() => this.setState({ openTipModal: false })}
           footer={null}
-          width={350}
+          width={600}
           title={null}
           onCancel={() => this.setState({ openTipModal: false })}
         >

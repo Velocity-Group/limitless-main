@@ -160,7 +160,7 @@ class Compose extends PureComponent<IProps> {
           key="tip_performer"
           className="subscription-modal"
           title={null}
-          width={350}
+          width={600}
           visible={openTipModal}
           onOk={() => this.setState({ openTipModal: false })}
           footer={null}

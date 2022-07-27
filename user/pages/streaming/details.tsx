@@ -459,6 +459,7 @@ class LivePage extends PureComponent<IProps> {
               onOk={() => this.setState({ openTipModal: false })}
               footer={null}
               onCancel={() => this.setState({ openTipModal: false })}
+              width={600}
             >
               <TipPerformerForm
                 performer={performer}
