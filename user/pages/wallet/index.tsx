@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import {
-  Layout, message, InputNumber, Form, Input, Button
+  Layout, message, InputNumber, Form, Input, Button, Modal
 } from 'antd';
 import {
   ArrowLeftOutlined
@@ -33,10 +33,12 @@ class TokenPackages extends PureComponent<IProps> {
   state = {
     submiting: false,
     couponCode: '',
-    coupon: null
+    coupon: null,
+    amount: 10,
+    paymentUrl: ''
   };
 
-  purchaseTokenPackage = async ({ amount }) => {
+  addFund = async ({ amount }) => {
     const { user, settings } = this.props;
     const {
       couponCode, coupon
@@ -48,11 +50,14 @@ class TokenPackages extends PureComponent<IProps> {
     }
     try {
       this.setState({ submiting: true });
-      await paymentService.addFunds({
+      const resp = await paymentService.addFunds({
         paymentGateway: settings.paymentGateway,
         amount,
         couponCode: coupon ? couponCode : ''
       });
+      if (settings.paymentGateway === 'ccbill') {
+        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+      }
     } catch (e) {
       const error = await e;
       message.error(error.message || 'Error occured, please try again later');
@@ -76,7 +81,7 @@ class TokenPackages extends PureComponent<IProps> {
   render() {
     const { ui, user } = this.props;
     const {
-      submiting, couponCode, coupon
+      submiting, couponCode, coupon, amount, paymentUrl
     } = this.state;
     return (
       <Layout>
@@ -98,18 +103,21 @@ class TokenPackages extends PureComponent<IProps> {
           <div className="purchase-form">
             <div className="current-balance">
               <WalletSvg />
-              {' '}
-              $
-              {(user.balance || 0).toFixed(2)}
+              <div className="balance">
+                <b>Current Balance</b>
+                <span className="amount">
+                  $
+                  {(user.balance || 0).toFixed(2)}
+                </span>
+              </div>
             </div>
             <Form
-              onFinish={this.purchaseTokenPackage}
+              onFinish={this.addFund}
               onFinishFailed={() => message.error('Please complete the required fields')}
               name="form-upload"
               scrollToFirstError
               initialValues={{
-                amount: 10,
-                paymentGateway: 'stripe'
+                amount: 10
               }}
               {...layout}
             >
@@ -118,7 +126,7 @@ class TokenPackages extends PureComponent<IProps> {
                 label="Enter Amount"
                 rules={[{ required: true, message: 'Amount is required!' }]}
               >
-                <InputNumber style={{ width: '100%' }} min={1} />
+                <InputNumber onChange={(val) => this.setState({ amount: val })} style={{ width: '100%' }} min={1} />
               </Form.Item>
               <Form.Item help={coupon && (
               <small style={{ color: 'red' }}>
@@ -132,9 +140,16 @@ class TokenPackages extends PureComponent<IProps> {
                 <Button.Group className="coupon-dc">
                   <Input disabled={!!coupon} placeholder="Enter coupon code here" onChange={(e) => this.setState({ couponCode: e.target.value })} />
                   {!coupon ? <Button disabled={!couponCode} onClick={this.applyCoupon.bind(this)}>Apply!</Button>
-                    : <Button onClick={() => this.setState({ couponCode: '', coupon: null })}>Use Later!</Button>}
+                    : <Button type="primary" onClick={() => this.setState({ couponCode: '', coupon: null })}>Use Later!</Button>}
 
                 </Button.Group>
+              </Form.Item>
+              <Form.Item className="total-price">
+                Total:
+                <span className="amount">
+                  $
+                  {(amount - (amount * (coupon?.value || 0))).toFixed(2)}
+                </span>
               </Form.Item>
               <Form.Item className="text-center">
                 <Button htmlType="submit" className="primary" disabled={submiting} loading={submiting}>
@@ -143,6 +158,23 @@ class TokenPackages extends PureComponent<IProps> {
               </Form.Item>
             </Form>
           </div>
+          <Modal
+            key="subscribe_performer"
+            className="subscription-modal"
+            width={990}
+            centered
+            title={null}
+            visible={!!paymentUrl}
+            footer={null}
+            onCancel={() => {
+              if (!window.confirm('Confirm to discard this payment!')) return;
+              this.setState({ paymentUrl: '' });
+            }}
+            destroyOnClose
+            maskClosable={false}
+          >
+            <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />
+          </Modal>
           {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
         </div>
       </Layout>
