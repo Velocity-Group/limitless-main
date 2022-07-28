@@ -47,7 +47,7 @@ const settings = [{
   type: 'string'
 },
 {
-  key: SETTING_KEYS.CCBILL_SUBSCRIPTION_SUB_ACCOUNT_NUMBER,
+  key: SETTING_KEYS.CCBILL_RECURRING_SUB_ACCOUNT_NUMBER,
   value: '',
   name: 'Reccurring Purchase Sub Account Number',
   description: 'ex: 0001',
