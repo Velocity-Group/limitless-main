@@ -84,7 +84,7 @@ export class PerformerBankingForm extends PureComponent<IProps> {
         name="nest-messages"
         onFinish={onFinish.bind(this)}
         validateMessages={validateMessages}
-        initialValues={user.bankingInformation}
+        initialValues={user?.bankingInformation}
         labelAlign="left"
         className="account-form"
         ref={(ref) => { this.formRef = ref; }}

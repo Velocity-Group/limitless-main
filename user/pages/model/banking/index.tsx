@@ -7,7 +7,7 @@ import {
   IPerformer, IUIConfig, ISettings, ICountry
 } from 'src/interfaces';
 import {
-  updatePerformer
+  updatePerformer, updateUserSuccess
 } from 'src/redux/user/actions';
 import { StripeConnectForm, PerformerPaypalForm, PerformerBankingForm } from '@components/performer';
 import { paymentService, performerService, utilsService } from '@services/index';
@@ -20,6 +20,7 @@ interface IProps {
   updatePerformer: Function;
   settings: ISettings;
   countries: ICountry[];
+  updateUserSuccess: Function;
 }
 class BankingSettings extends PureComponent<IProps> {
   static authenticate = true;
@@ -48,13 +49,14 @@ class BankingSettings extends PureComponent<IProps> {
   }
 
   async handleUpdatePaypal(data) {
-    const { user } = this.props;
+    const { user, updateUserSuccess: onUpdateSuccess } = this.props;
     try {
-      await this.setState({ submiting: true });
+      this.setState({ submiting: true });
       const payload = { key: 'paypal', value: data, performerId: user._id };
-      await performerService.updatePaymentGateway(user._id, payload);
+      const resp = await performerService.updatePaymentGateway(user._id, payload);
+      onUpdateSuccess({ ...user, paypalSetting: resp.data });
       this.setState({ submiting: false });
-      message.success('Changes saved');
+      message.success('Paypal account was updated successfully!');
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try againl later');
@@ -65,9 +67,10 @@ class BankingSettings extends PureComponent<IProps> {
   async handleUpdateBanking(data) {
     try {
       this.setState({ submiting: true });
-      const { user } = this.props;
+      const { user, updateUserSuccess: onUpdateSuccess } = this.props;
       const info = { ...data, performerId: user._id };
-      await performerService.updateBanking(user._id, info);
+      const resp = await performerService.updateBanking(user._id, info);
+      onUpdateSuccess({ ...user, bankingInformation: resp.data });
       this.setState({ submiting: false });
       message.success('Banking account was updated successfully!');
     } catch (error) {
@@ -188,5 +191,5 @@ const mapStates = (state: any) => ({
   user: state.user.current,
   settings: state.settings
 });
-const mapDispatch = { updatePerformer };
+const mapDispatch = { updatePerformer, updateUserSuccess };
 export default connect(mapStates, mapDispatch)(BankingSettings);

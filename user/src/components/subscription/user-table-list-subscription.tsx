@@ -1,4 +1,4 @@
-import { Table, Tag } from 'antd';
+import { Table, Tag, Avatar } from 'antd';
 import { ISubscription } from 'src/interfaces';
 import { formatDate, nowIsBefore } from '@lib/date';
 
@@ -22,7 +22,13 @@ export const TableListSubscription = ({
       title: 'User',
       dataIndex: 'userInfo',
       render(data, records) {
-        return <span>{records?.userInfo?.name || records?.userInfo?.username || 'N/A'}</span>;
+        return (
+          <span>
+            <Avatar src={records?.userInfo?.avatar || '/static/no-avatar.png'} />
+            {' '}
+            {records?.userInfo?.name || records?.userInfo?.username || 'N/A'}
+          </span>
+        );
       }
     },
     {
@@ -53,8 +59,8 @@ export const TableListSubscription = ({
     {
       title: 'Expiry Date',
       dataIndex: 'expiredAt',
-      render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && formatDate(date, 'll')}</span>;
+      render(date: Date) {
+        return <span>{formatDate(date, 'll')}</span>;
       }
     },
     {

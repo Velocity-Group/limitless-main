@@ -2,7 +2,7 @@ import { flatten } from 'lodash';
 import { put } from 'redux-saga/effects';
 import { createSagas } from '@lib/redux';
 import { userService, authService, performerService } from '@services/index';
-import { IReduxAction, IBanking } from 'src/interfaces';
+import { IReduxAction } from 'src/interfaces';
 import { message } from 'antd';
 import {
   updateUser,
@@ -12,11 +12,7 @@ import {
   updatePassword,
   updatePasswordSuccess,
   updatePasswordFail,
-  updatePerformer,
-  updateBanking,
-  updateBankingSuccess,
-  updateBankingFail,
-  setUpdatingBanking
+  updatePerformer
 } from './actions';
 
 const userSagas = [
@@ -72,23 +68,6 @@ const userSagas = [
         yield put(updatePasswordFail(error));
       } finally {
         yield put(setUpdating(false));
-      }
-    }
-  },
-  {
-    on: updateBanking,
-    * worker(data: IReduxAction<IBanking>) {
-      try {
-        yield put(setUpdatingBanking(true));
-        const updated = yield performerService.updateBanking(data.payload.performerId, data.payload);
-        message.success('Changes saved');
-        yield put(updateBankingSuccess(updated.data));
-      } catch (e) {
-        const error = yield Promise.resolve(e);
-        message.error(error?.message || 'Error occured, please try again later');
-        yield put(updateBankingFail(error));
-      } finally {
-        yield put(setUpdatingBanking(false));
       }
     }
   }

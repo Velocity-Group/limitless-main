@@ -10,10 +10,6 @@ import {
   updateUserFail,
   updatePasswordSuccess,
   updatePasswordFail,
-  setUpdatingBanking,
-  updateBanking,
-  updateBankingSuccess,
-  updateBankingFail,
   updateCurrentUserCover,
   updateBlockCountries,
   updateBalance
@@ -116,53 +112,6 @@ const userReducers = [
         updateSuccess: false,
         updatedPassword: null,
         error: data.payload
-      };
-    }
-  },
-  // Update banking
-  // TODO add interface
-  {
-    on: setUpdatingBanking,
-    reducer(state: any, data: IReduxAction<boolean>) {
-      return {
-        ...state,
-        updating: data.payload,
-        updateSuccess: false
-      };
-    }
-  },
-  {
-    on: updateBanking,
-    reducer(state: any, data: IReduxAction<any>) {
-      return {
-        ...state,
-        updateSuccess: false,
-        updatedPassword: null,
-        error: data.payload
-      };
-    }
-  },
-  {
-    on: updateBankingSuccess,
-    reducer(state: any, data: IReduxAction<any>) {
-      return {
-        ...state,
-        updateSuccess: true,
-        updatedBanking: data.payload,
-        current: { ...state.current, ...{ bankingInformation: data.payload } },
-        error: null,
-        updating: false
-      };
-    }
-  },
-  {
-    on: updateBankingFail,
-    reducer(state: any, data: IReduxAction<any>) {
-      return {
-        ...state,
-        updateSuccess: false,
-        error: data.payload,
-        updating: false
       };
     }
   },

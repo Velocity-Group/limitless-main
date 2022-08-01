@@ -1,4 +1,6 @@
-import { Table, Tag, Button } from 'antd';
+import {
+  Table, Tag, Button, Avatar
+} from 'antd';
 import { ISubscription } from 'src/interfaces';
 import { formatDate, nowIsBefore } from '@lib/date';
 import Link from 'next/link';
@@ -36,6 +38,8 @@ export const TableListSubscription = ({
             as={`/${records?.performerInfo?.username || records?.performerInfo?._id}`}
           >
             <a>
+              <Avatar src={records?.performerInfo?.avatar || '/static/no-avatar.png'} />
+              {' '}
               {records?.performerInfo?.name || records?.performerInfo?.username || 'N/A'}
             </a>
           </Link>
@@ -70,8 +74,8 @@ export const TableListSubscription = ({
       title: 'Expiry Date',
       dataIndex: 'expiredAt',
       sorter: true,
-      render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && formatDate(date, 'll')}</span>;
+      render(date: Date) {
+        return <span>{formatDate(date, 'll')}</span>;
       }
     },
     {
@@ -133,11 +137,11 @@ export const TableListSubscription = ({
           <>
             {record.status === 'active' && nowIsBefore(record.expiredAt) ? (
               <Button danger onClick={() => cancelSubscription(record)}>
-                Cancel subscription
+                Cancel
               </Button>
             ) : (
               <Button type="primary" onClick={() => activeSubscription(record)}>
-                Activate subscription
+                Activate
               </Button>
             )}
           </>

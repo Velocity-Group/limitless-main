@@ -12,13 +12,15 @@ import {
 import {
   PerformerBlockCountriesForm
 } from '@components/performer';
-import '../../user/index.less';
+import { updateUserSuccess } from '@redux/user/actions';
 import PageHeading from '@components/common/page-heading';
+import '../../user/index.less';
 
 interface IProps {
   performer: IPerformer;
   ui: IUIConfig;
   countries: ICountry[];
+  updateUserSuccess: Function;
 }
 
 class BlockCountries extends PureComponent<IProps> {
@@ -40,9 +42,11 @@ class BlockCountries extends PureComponent<IProps> {
   }
 
   async handleUpdateBlockCountries(data: IBlockCountries) {
+    const { performer, updateUserSuccess: onUpdateSuccess } = this.props;
     try {
-      await this.setState({ submiting: true });
-      await blockService.blockCountries(data);
+      this.setState({ submiting: true });
+      const resp = await blockService.blockCountries(data);
+      onUpdateSuccess({ ...performer, blockCountries: resp.data });
       this.setState({ submiting: false });
       message.success('Changes saved');
     } catch (e) {
@@ -85,5 +89,6 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui }
 });
 const mapDispatch = {
+  updateUserSuccess
 };
 export default connect(mapStates, mapDispatch)(BlockCountries);
