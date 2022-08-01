@@ -578,7 +578,7 @@ class PerformerProfile extends PureComponent<IProps> {
             <div className={user.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={countries} performer={performer} />
             </div>
-            {!performer?.isSubscribed && (
+            {!performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Monthly Subscription</h5>
                 <button
@@ -596,7 +596,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {!performer?.isSubscribed && (
+            {!performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Yearly Subscription</h5>
                 <button
@@ -614,7 +614,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {performer?.isFreeSubscription && !performer?.isSubscribed && (
+            {performer?.isFreeSubscription && !performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Free Subscription</h5>
                 <button

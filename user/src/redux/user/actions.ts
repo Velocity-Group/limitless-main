@@ -23,6 +23,4 @@ export const {
   updatePasswordFail
 } = createAsyncAction('updatePassword', 'UPDATE_PASSWORD');
 
-export const updateBlockCountries = createAction('updateBlockCountries');
-
 export const updateBalance = createAction('updateBalance');

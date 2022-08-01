@@ -11,7 +11,6 @@ import {
   updatePasswordSuccess,
   updatePasswordFail,
   updateCurrentUserCover,
-  updateBlockCountries,
   updateBalance
 } from './actions';
 
@@ -112,15 +111,6 @@ const userReducers = [
         updateSuccess: false,
         updatedPassword: null,
         error: data.payload
-      };
-    }
-  },
-  {
-    on: updateBlockCountries,
-    reducer(state: any, data: IReduxAction<any>) {
-      return {
-        ...state,
-        current: { ...state.current, ...{ blockCountries: data.payload } }
       };
     }
   },
