@@ -133,7 +133,7 @@ class BankingSettings extends PureComponent<IProps> {
         <div className="main-container">
           <PageHeading icon={<BankOutlined />} title="Banking (to earn)" />
           <Tabs>
-            {settings.paymentGateway === 'stripe' && (
+            {/* {settings.paymentGateway === 'stripe' && (
             <Tabs.TabPane
               tab={(
                 <span>
@@ -149,7 +149,7 @@ class BankingSettings extends PureComponent<IProps> {
                 onConnectAccount={this.connectAccount.bind(this)}
               />
             </Tabs.TabPane>
-            )}
+            )} */}
             <Tabs.TabPane
               tab={(
                 <span>
