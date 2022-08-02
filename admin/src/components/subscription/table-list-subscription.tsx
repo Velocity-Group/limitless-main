@@ -26,6 +26,10 @@ export const TableListSubscription = ({
 }: IProps) => {
   const columns = [
     {
+      title: 'ID',
+      dataIndex: 'subscriptionId'
+    },
+    {
       title: 'User',
       dataIndex: 'userInfo',
       render(data, records) {
@@ -87,7 +91,7 @@ export const TableListSubscription = ({
       dataIndex: 'nextRecurringDate',
       sorter: true,
       render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && nowIsBefore(record.expiredAt) && formatDate(date, 'LL')}</span>;
+        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && record.subscriptionId && formatDate(date, 'LL')}</span>;
       }
     },
     {

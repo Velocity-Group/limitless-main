@@ -52,11 +52,11 @@ export const TableListSubscription = ({
       render(subscriptionType: string) {
         switch (subscriptionType) {
           case 'monthly':
-            return <Tag color="blue">Monthly Subscription</Tag>;
+            return <Tag color="blue">Monthly</Tag>;
           case 'yearly':
-            return <Tag color="red">Yearly Subscription</Tag>;
+            return <Tag color="red">Yearly</Tag>;
           case 'free':
-            return <Tag color="orange">Free Subscription</Tag>;
+            return <Tag color="orange">Free</Tag>;
           default:
             return <Tag color="orange">{subscriptionType}</Tag>;
         }
@@ -83,7 +83,7 @@ export const TableListSubscription = ({
       dataIndex: 'nextRecurringDate',
       sorter: true,
       render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && nowIsBefore(record.expiredAt) && formatDate(date, 'll')}</span>;
+        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && formatDate(date, 'll')}</span>;
       }
     },
     {
