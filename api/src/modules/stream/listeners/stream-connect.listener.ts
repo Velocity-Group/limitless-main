@@ -81,30 +81,15 @@ export class StreamConnectListener {
     if (event.eventName !== LIVE_STREAM_EVENT_NAME.DISCONNECTED) {
       return;
     }
-
     const sourceId = event.data;
     const model = await this.performerService.findById(sourceId);
     if (!model) {
       return;
     }
-
-    const connectedRedisRooms = await this.socketUserService.userGetAllConnectedRooms(
-      sourceId
-    );
-
-    if (!connectedRedisRooms.length) {
-      return;
-    }
-
-    await Promise.all(
-      connectedRedisRooms.map((r) => this.socketUserService.removeConnectionFromRoom(r, sourceId))
-    );
-    /**
-     * To do
-     * Update status
-     */
+    const connectedRedisRooms = await this.socketUserService.userGetAllConnectedRooms(sourceId);
+    connectedRedisRooms.length > 0 && await connectedRedisRooms.map((r) => this.socketUserService.removeConnectionFromRoom(r, sourceId));
     await this.streamModel.updateMany(
-      { isStreaming: 1 },
+      { performerId: model._id },
       { $set: { isStreaming: 0, lastStreamingTime: new Date() } }
     );
   }
