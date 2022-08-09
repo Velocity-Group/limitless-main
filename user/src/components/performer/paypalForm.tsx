@@ -43,8 +43,8 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
           <Col lg={12} xs={24}>
             <Form.Item
               name="email"
-              label="Paypal business account email"
-              help="You must upgrade to Business account to receive the payout from Admin"
+              label="Paypal account email"
+              // help="You must upgrade to Business account to receive the payout from Admin"
             >
               <Input />
             </Form.Item>
