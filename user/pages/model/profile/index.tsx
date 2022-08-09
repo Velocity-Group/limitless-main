@@ -527,53 +527,51 @@ class PerformerProfile extends PureComponent<IProps> {
               </div>
             </div>
             <div className="btn-grp">
-              <div style={{ marginBottom: '4px' }}>
-                <Tooltip title={isFollowed ? 'Following' : 'Follow'}>
-                  <Button
-                    disabled={!user._id || user.isPerformer}
-                    className={isBookMarked ? 'active' : ''}
-                    onClick={() => this.handleFollow()}
-                  >
-                    {isFollowed ? <HeartFilled /> : <HeartOutlined />}
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Send Tip">
-                  <Button
-                    disabled={!user._id || user.isPerformer}
-                    onClick={() => this.setState({ openTipModal: true })}
-                  >
-                    <DollarOutlined />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Send Message">
-                  <Button
-                    disabled={!user._id || user.isPerformer}
-                    onClick={() => Router.push({
-                      pathname: '/messages',
-                      query: {
-                        toSource: 'performer',
-                        toId: (performer?._id) || ''
-                      }
-                    })}
-                  >
-                    <MessageIcon />
-                  </Button>
-                </Tooltip>
-                <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
-                  <Button
-                    disabled={!user._id || user.isPerformer}
-                    className={isBookMarked ? 'active' : ''}
-                    onClick={() => this.handleBookmark()}
-                  >
-                    <BookOutlined />
-                  </Button>
-                </Tooltip>
-                <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
-                  <Button className="normal">
-                    <ShareIcon />
-                  </Button>
-                </Popover>
-              </div>
+              <Tooltip title={isFollowed ? 'Following' : 'Follow'}>
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  className={isBookMarked ? 'active' : ''}
+                  onClick={() => this.handleFollow()}
+                >
+                  {isFollowed ? <HeartFilled /> : <HeartOutlined />}
+                </Button>
+              </Tooltip>
+              <Tooltip title="Send Tip">
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  onClick={() => this.setState({ openTipModal: true })}
+                >
+                  <DollarOutlined />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Send Message">
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  onClick={() => Router.push({
+                    pathname: '/messages',
+                    query: {
+                      toSource: 'performer',
+                      toId: (performer?._id) || ''
+                    }
+                  })}
+                >
+                  <MessageIcon />
+                </Button>
+              </Tooltip>
+              <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  className={isBookMarked ? 'active' : ''}
+                  onClick={() => this.handleBookmark()}
+                >
+                  <BookOutlined />
+                </Button>
+              </Tooltip>
+              <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
+                <Button className="normal">
+                  <ShareIcon />
+                </Button>
+              </Popover>
             </div>
             <div className={user.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={countries} performer={performer} />
