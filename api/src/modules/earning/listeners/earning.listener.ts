@@ -125,7 +125,7 @@ export class TransactionEarningListener {
   private async updateBalance(userTokens, performerTokens, earning) {
     await Promise.all([
       this.performerService.updatePerformerBalance(earning.performerId, performerTokens),
-      this.userService.updateBalance(
+      earning.isToken && this.userService.updateBalance(
         earning.userId,
         -userTokens
       )

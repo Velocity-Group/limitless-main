@@ -514,6 +514,27 @@ export class PaymentService {
     ]);
   }
 
+  private async stripeCreateRenewalSubscription(transaction: PaymentTransactionModel, totalPrice: number, paymentResponseInfo: any) {
+    const {
+      paymentGateway, sourceId, targetId, target, type, originalPrice, products, couponInfo
+    } = transaction;
+    return this.TransactionModel.create({
+      paymentGateway,
+      source: 'user',
+      sourceId,
+      target,
+      targetId,
+      performerId: targetId,
+      type: type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_TYPE.MONTHLY_SUBSCRIPTION : type,
+      originalPrice,
+      totalPrice,
+      products,
+      couponInfo,
+      status: PAYMENT_STATUS.SUCCESS,
+      paymentResponseInfo
+    });
+  }
+
   public async stripeSubscriptionWebhook(payload: Record<string, any>) {
     const { data } = payload;
     const subscriptionId = data?.object?.id;
@@ -549,9 +570,7 @@ export class PaymentService {
       transaction = stripeInvoiceId && await this.TransactionModel.findOne({ stripeInvoiceId });
     }
     if (!transaction) throw new HttpException('Transaction was not found', 404);
-    transaction.paymentResponseInfo = payload;
-    transaction.updatedAt = new Date();
-    transaction.liveMode = livemode;
+
     let redirectUrl = '';
     switch (type) {
       case 'payment_intent.processing':
@@ -571,14 +590,20 @@ export class PaymentService {
         transaction.stripeConfirmUrl = redirectUrl;
         break;
       case 'payment_intent.succeeded':
-        transaction.status = PAYMENT_STATUS.SUCCESS;
-        if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
-          transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
-          // save total price for free subscription, renew to month subscription
-          // convert from cent to usd
-          transaction.totalPrice = data?.object?.amount / 100 || data?.object?.amount_received / 100 || 0;
-          transaction.originalPrice = data?.object?.amount / 100 || data?.object?.amount_received / 100 || 0;
+        // create new record for renewal
+        if ([PAYMENT_TYPE.FREE_SUBSCRIPTION, PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type) && transaction.status === PAYMENT_STATUS.SUCCESS) {
+          const totalP = data?.object?.amount / 100 || data?.object?.amount_received / 100 || 0;
+          const renewalTransaction = await this.stripeCreateRenewalSubscription(transaction, totalP, payload);
+          await this.queueEventService.publish(
+            new QueueEvent({
+              channel: TRANSACTION_SUCCESS_CHANNEL,
+              eventName: EVENT.CREATED,
+              data: new PaymentDto(renewalTransaction)
+            })
+          );
+          return { success: true };
         }
+        transaction.status = PAYMENT_STATUS.SUCCESS;
         await this.queueEventService.publish(
           new QueueEvent({
             channel: TRANSACTION_SUCCESS_CHANNEL,
@@ -590,6 +615,9 @@ export class PaymentService {
         break;
       default: break;
     }
+    transaction.paymentResponseInfo = payload;
+    transaction.updatedAt = new Date();
+    transaction.liveMode = livemode;
     await transaction.save();
     redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { success: true };
