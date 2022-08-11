@@ -40,9 +40,8 @@ export const EarningSchema = new mongoose.Schema({
     default: false,
     index: true
   },
-  transactionStatus: {
-    type: String,
-    index: true
+  paymentGateway: {
+    type: String
   },
   createdAt: {
     type: Date,

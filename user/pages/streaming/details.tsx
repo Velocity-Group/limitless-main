@@ -181,10 +181,10 @@ class LivePage extends PureComponent<IProps> {
     if (activeStream.isFree || !activeStream.sessionId) return;
     if (user.balance < activeStream.price) {
       message.error(
-        'You have an insufficient token balance. Please top up.',
-        15
+        'You have an insufficient wallet balance. Please top up.',
+        10
       );
-      Router.push('/token-package');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -319,8 +319,8 @@ class LivePage extends PureComponent<IProps> {
     } = this.props;
     const { stream: activeStream } = this.props;
     if (user.balance < token) {
-      message.error('You have an insufficient token balance. Please top up.');
-      Router.push('/token-package');
+      message.error('You have an insufficient wallet balance. Please top up.');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -395,8 +395,7 @@ class LivePage extends PureComponent<IProps> {
                     {videoDuration(sessionDuration)}
                   </span>
                   <span>
-                    <img src="/static/coin-ico.png" alt="gem" width="20px" />
-                    {' '}
+                    $
                     {(user?.balance || 0).toFixed(2)}
                   </span>
                   <span>
@@ -460,6 +459,7 @@ class LivePage extends PureComponent<IProps> {
               onOk={() => this.setState({ openTipModal: false })}
               footer={null}
               onCancel={() => this.setState({ openTipModal: false })}
+              width={600}
             >
               <TipPerformerForm
                 performer={performer}

@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Form, Button, Row, Col, Image
+  Form, Button, Row, Col, Image, Switch
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import { performerService, authService } from '@services/index';
@@ -79,6 +79,16 @@ export class PerformerDocument extends PureComponent<IProps> {
               {documentVerificationUrl ? (
                 <Image alt="id-img" src={documentVerificationUrl} style={{ margin: 5, height: '150px' }} />
               ) : <img src="/holding-id.jpg" height="150px" alt="holding-id" />}
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              name="verifiedDocument"
+              label="Verified ID Documents?"
+              valuePropName="checked"
+              help="Allow model to start posting contents"
+            >
+              <Switch />
             </Form.Item>
           </Col>
         </Row>

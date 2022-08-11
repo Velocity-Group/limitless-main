@@ -31,8 +31,8 @@ export class PurchaseFeedForm extends PureComponent<IProps> {
         </div>
         <Button type="primary" loading={submiting} onClick={() => onFinish()}>
           UNLOCK THIS POST FOR &nbsp;
-          <img src="/static/coin-ico.png" width="20px" alt="coin" />
-          {feed.price.toFixed(2)}
+          $
+          {(feed.price || 0).toFixed(2)}
         </Button>
       </div>
     );

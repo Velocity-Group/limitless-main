@@ -26,8 +26,7 @@ export class ProductCard extends PureComponent<IProps, IStates> {
             <div className="label-wrapper">
               {product.price > 0 && (
               <span className="label-wrapper-price">
-                <img alt="token" src="/static/coin-ico.png" width="15px" />
-                &nbsp;
+                $
                 {product.price.toFixed(2)}
               </span>
               )}

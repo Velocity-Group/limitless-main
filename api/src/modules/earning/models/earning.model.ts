@@ -24,7 +24,7 @@ export class EarningModel extends Document {
 
   paidAt: Date;
 
-  transactionStatus: string;
+  paymentGateway: string;
 
   isToken: boolean;
 }

@@ -85,7 +85,7 @@ export interface IPerformer {
     twitter: string;
     linkedIn: string;
   }
-  commissionSetting: any;
+  commissionPercentage: boolean;
   ccbillSetting: any;
   paypalSetting: any;
 }

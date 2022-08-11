@@ -185,7 +185,7 @@ export class PostService {
   public async getPublic(id: string): Promise<PostDto> {
     const post = await this.findByIdOrSlug(id);
     // TODO - map details from meta data
-    if (!post) {
+    if (!post || post.status !== 'published') {
       throw new EntityNotFoundException();
     }
 
@@ -205,26 +205,22 @@ export class PostService {
   }
 
   private async categoryChangeUpdater(event: QueueEvent) {
-    try {
-      if (event.eventName !== CATEGORY_EVENTS.DELETED) {
-        return;
-      }
-
-      // TODO - check if need to convert string to ObjectId
-      const categoryId = event.data._id;
-      await this.postModel.updateMany(
-        {
-          categoryIds: categoryId
-        },
-        {
-          $pull: {
-            categoryIds: categoryId,
-            categorySearchIds: categoryId
-          }
-        }
-      );
-    } catch (e) {
-      // TODO - log me
+    if (event.eventName !== CATEGORY_EVENTS.DELETED) {
+      return;
     }
+
+    // TODO - check if need to convert string to ObjectId
+    const categoryId = event.data._id;
+    await this.postModel.updateMany(
+      {
+        categoryIds: categoryId
+      },
+      {
+        $pull: {
+          categoryIds: categoryId,
+          categorySearchIds: categoryId
+        }
+      }
+    );
   }
 }

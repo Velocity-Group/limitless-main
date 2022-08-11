@@ -168,7 +168,7 @@ export class AdminPerformerController {
     });
   }
 
-  @Post('/avatar/upload')
+  @Post('/:id/avatar/upload')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
@@ -180,8 +180,11 @@ export class AdminPerformerController {
       server: Storage.S3
     })
   )
-  async uploadPerformerAvatar(@FileUploaded() file: FileDto): Promise<any> {
-    // TODO - define url for perfomer id if have?
+  async uploadPerformerAvatar(
+    @FileUploaded() file: FileDto,
+    @Param('performerId') performerId: string
+  ): Promise<any> {
+    await this.performerService.updateAvatar(performerId, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl()
@@ -200,8 +203,11 @@ export class AdminPerformerController {
       server: Storage.S3
     })
   )
-  async uploadPerformerCover(@FileUploaded() file: FileDto): Promise<any> {
-    // TODO - define url for perfomer id if have?
+  async uploadPerformerCover(
+    @FileUploaded() file: FileDto,
+    @Param('performerId') performerId: string
+  ): Promise<any> {
+    await this.performerService.updateCover(performerId, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl()
@@ -224,7 +230,7 @@ export class AdminPerformerController {
     @Param('id') performerId: string
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
-    await this.performerService.adminUpdateWelcomeVideo(performerId, file);
+    await this.performerService.updateWelcomeVideo(performerId, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl(true)
@@ -243,9 +249,9 @@ export class AdminPerformerController {
   }
 
   @Put('/:id/commission-settings')
-  @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
+  @HttpCode(HttpStatus.OK)
   async updateCommissionSetting(
     @Param('id') performerId: string,
     @Body() payload: CommissionSettingPayload

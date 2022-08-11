@@ -9,11 +9,12 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, tokenTransctionService, feedService, reactionService, paymentService, utilsService
+  performerService, tokenTransctionService, feedService, reactionService, paymentService,
+  utilsService, followService
 } from 'src/services';
 import Head from 'next/head';
 import {
-  ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined,
+  ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined, HeartFilled,
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined
 } from '@ant-design/icons';
 import {
@@ -30,7 +31,7 @@ import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
 import { VideoPlayer } from '@components/common';
 import {
-  IPerformer, IUser, IUIConfig, IFeed, ICountry
+  IPerformer, IUser, IUIConfig, IFeed, ICountry, ISettings
 } from 'src/interfaces';
 import { shortenLargeNumber } from '@lib/index';
 import Link from 'next/link';
@@ -41,7 +42,7 @@ import '@components/performer/performer.less';
 interface IProps {
   ui: IUIConfig;
   error: any;
-  currentUser: IUser;
+  user: IUser;
   performer: IPerformer;
   listProducts: Function;
   getVideos: Function;
@@ -58,6 +59,7 @@ interface IProps {
   removeFeedSuccess: Function;
   updateBalance: Function;
   countries: ICountry[];
+  settings: ISettings;
 }
 
 const { TabPane } = Tabs;
@@ -87,7 +89,9 @@ class PerformerProfile extends PureComponent<IProps> {
     tab: 'post',
     filter: initialFilter,
     isGrid: false,
-    subscriptionType: 'monthly'
+    subscriptionType: 'monthly',
+    isFollowed: false,
+    paymentUrl: ''
   };
 
   static async getInitialProps({ ctx }) {
@@ -114,7 +118,7 @@ class PerformerProfile extends PureComponent<IProps> {
     if (performer) {
       const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');
       const showWelcomVideo = !notShownWelcomeVideos || (notShownWelcomeVideos && !notShownWelcomeVideos.includes(performer._id));
-      this.setState({ isBookMarked: performer.isBookMarked, showWelcomVideo });
+      this.setState({ isBookMarked: performer.isBookMarked, showWelcomVideo, isFollowed: !!performer.isFollowed });
       this.loadItems();
     }
   }
@@ -132,8 +136,8 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async handleDeleteFeed(feed: IFeed) {
-    const { currentUser, removeFeedSuccess: handleRemoveFeed } = this.props;
-    if (currentUser._id !== feed.fromSourceId) {
+    const { user, removeFeedSuccess: handleRemoveFeed } = this.props;
+    if (user._id !== feed.fromSourceId) {
       message.error('Permission denied');
       return;
     }
@@ -149,10 +153,37 @@ class PerformerProfile extends PureComponent<IProps> {
     }
   }
 
+  handleFollow = async () => {
+    const { performer, user } = this.props;
+    const { isFollowed, requesting, tab } = this.state;
+    if (!user._id) {
+      message.error('Please log in or register!');
+      return;
+    }
+    if (requesting || user.isPerformer) return;
+    try {
+      this.setState({ requesting: true });
+      if (!isFollowed) {
+        await followService.create(performer?._id);
+        this.setState({ isFollowed: true, requesting: false });
+      } else {
+        await followService.delete(performer?._id);
+        this.setState({ isFollowed: false, requesting: false });
+      }
+      if (tab === 'post') {
+        this.loadItems();
+      }
+    } catch (e) {
+      const error = await e;
+      message.error(error.message || 'Error occured, please try again later');
+      this.setState({ requesting: false });
+    }
+  }
+
   async handleBookmark() {
-    const { performer, currentUser } = this.props;
+    const { performer, user } = this.props;
     const { isBookMarked, requesting } = this.state;
-    if (requesting || currentUser.isPerformer) return;
+    if (requesting || user.isPerformer) return;
     try {
       await this.setState({ requesting: true });
       if (!isBookMarked) {
@@ -184,12 +215,12 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   handleJoinStream = () => {
-    const { currentUser, performer } = this.props;
-    if (!currentUser._id) {
+    const { user, performer } = this.props;
+    if (!user._id) {
       message.error('Please log in or register!');
       return;
     }
-    if (currentUser.isPerformer) return;
+    if (user.isPerformer) return;
     if (!performer?.isSubscribed) {
       message.error('Please subscribe to this model!');
       return;
@@ -245,27 +276,30 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async subscribe() {
-    const { performer, currentUser } = this.props;
+    const { performer, user, settings } = this.props;
     const { subscriptionType } = this.state;
-    if (!currentUser._id) {
+    if (!user._id) {
       message.error('Please log in!');
       Router.push('/');
       return;
     }
-    if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
+    if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
       message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
     }
     try {
       this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
-        paymentGateway: 'stripe',
-        stripeCardId: currentUser.stripeCardIds[0] // TODO user can choose card
+        paymentGateway: settings.paymentGateway
       });
-      this.setState({ openSubscriptionModal: false });
+      if (settings.paymentGateway === 'ccbill') {
+        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -274,10 +308,10 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async sendTip(price: number) {
-    const { performer, currentUser, updateBalance: handleUpdateBalance } = this.props;
-    if (currentUser.balance < price) {
-      message.error('You have an insufficient token balance. Please top up.');
-      Router.push('/token-package');
+    const { performer, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user.balance < price) {
+      message.error('You have an insufficient wallet balance. Please top up.');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -353,12 +387,13 @@ class PerformerProfile extends PureComponent<IProps> {
       error,
       performer,
       ui,
-      currentUser,
+      user,
       feedState,
       videoState,
       productState,
       galleryState,
-      countries
+      countries,
+      settings
     } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
@@ -375,7 +410,9 @@ class PerformerProfile extends PureComponent<IProps> {
       openSubscriptionModal,
       tab,
       isGrid,
-      subscriptionType
+      subscriptionType,
+      isFollowed,
+      paymentUrl
     } = this.state;
     return (
       <Layout>
@@ -471,7 +508,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 src={performer?.avatar || '/static/no-avatar.png'}
                 fallback="/static/no-avatar.png"
               />
-              {currentUser?._id !== performer?._id && <span className={performer?.isOnline > 0 ? 'online-status' : 'online-status off'} />}
+              {user?._id !== performer?._id && <span className={performer?.isOnline > 0 ? 'online-status' : 'online-status off'} />}
               <div className="m-user-name">
                 <h4>
                   {performer?.name || 'N/A'}
@@ -480,8 +517,8 @@ class PerformerProfile extends PureComponent<IProps> {
                     <TickIcon />
                   )}
                   &nbsp;
-                  {performer?.live > 0 && currentUser?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
-                  {currentUser?._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
+                  {performer?.live > 0 && user?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
+                  {user?._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
                 </h4>
                 <h5 style={{ textTransform: 'none' }}>
                   @
@@ -490,51 +527,56 @@ class PerformerProfile extends PureComponent<IProps> {
               </div>
             </div>
             <div className="btn-grp">
-              <div style={{ marginBottom: '4px' }}>
-                <Tooltip title="Send Tip">
-                  <Button
-                    disabled={!currentUser._id || currentUser.isPerformer}
-                    className="normal"
-                    onClick={() => this.setState({ openTipModal: true })}
-                  >
-                    <DollarOutlined />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Send Message">
-                  <Button
-                    disabled={!currentUser._id || currentUser.isPerformer}
-                    className="normal"
-                    onClick={() => Router.push({
-                      pathname: '/messages',
-                      query: {
-                        toSource: 'performer',
-                        toId: (performer?._id) || ''
-                      }
-                    })}
-                  >
-                    <MessageIcon />
-                  </Button>
-                </Tooltip>
-                <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
-                  <Button
-                    disabled={!currentUser._id || currentUser.isPerformer}
-                    className={isBookMarked ? 'active' : ''}
-                    onClick={() => this.handleBookmark()}
-                  >
-                    <BookOutlined />
-                  </Button>
-                </Tooltip>
-                <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
-                  <Button className="normal">
-                    <ShareIcon />
-                  </Button>
-                </Popover>
-              </div>
+              <Tooltip title={isFollowed ? 'Following' : 'Follow'}>
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  className={isBookMarked ? 'active' : ''}
+                  onClick={() => this.handleFollow()}
+                >
+                  {isFollowed ? <HeartFilled /> : <HeartOutlined />}
+                </Button>
+              </Tooltip>
+              <Tooltip title="Send Tip">
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  onClick={() => this.setState({ openTipModal: true })}
+                >
+                  <DollarOutlined />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Send Message">
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  onClick={() => Router.push({
+                    pathname: '/messages',
+                    query: {
+                      toSource: 'performer',
+                      toId: (performer?._id) || ''
+                    }
+                  })}
+                >
+                  <MessageIcon />
+                </Button>
+              </Tooltip>
+              <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  className={isBookMarked ? 'active' : ''}
+                  onClick={() => this.handleBookmark()}
+                >
+                  <BookOutlined />
+                </Button>
+              </Tooltip>
+              <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
+                <Button className="normal">
+                  <ShareIcon />
+                </Button>
+              </Popover>
             </div>
-            <div className={currentUser.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
+            <div className={user.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={countries} performer={performer} />
             </div>
-            {!performer?.isSubscribed && (
+            {!performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Monthly Subscription</h5>
                 <button
@@ -552,7 +594,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {!performer?.isSubscribed && (
+            {!performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Yearly Subscription</h5>
                 <button
@@ -570,7 +612,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {performer?.isFreeSubscription && !performer?.isSubscribed && (
+            {performer?.isFreeSubscription && !performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Free Subscription</h5>
                 <button
@@ -586,11 +628,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   {performer?.durationFreeSubscriptionDays || 1}
                   {' '}
                   {performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
-                  {' '}
-                  THEN $
-                  {performer?.monthlyPrice.toFixed(2)}
-                  {' '}
-                  PER MONTH
+                  {settings.paymentGateway === 'stripe' && ` THEN ${performer?.monthlyPrice.toFixed(2)} PER MONTH`}
                 </button>
               </div>
             )}
@@ -681,8 +719,7 @@ class PerformerProfile extends PureComponent<IProps> {
             </Tabs>
           </div>
         </div>
-        {
-          performer
+        {performer
           && performer?.welcomeVideoPath
           && performer?.activateWelcomeVideo
           && (
@@ -727,8 +764,7 @@ class PerformerProfile extends PureComponent<IProps> {
               }}
               />
             </Modal>
-          )
-        }
+          )}
         <Modal
           key="tip_performer"
           className="subscription-modal"
@@ -736,7 +772,7 @@ class PerformerProfile extends PureComponent<IProps> {
           centered
           onOk={() => this.setState({ openTipModal: false })}
           footer={null}
-          width={350}
+          width={600}
           title={null}
           onCancel={() => this.setState({ openTipModal: false })}
         >
@@ -749,19 +785,22 @@ class PerformerProfile extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={500}
+          width={!paymentUrl ? 600 : 990}
           centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
-          onCancel={() => this.setState({ openSubscriptionModal: false })}
+          onCancel={() => this.setState({ openSubscriptionModal: false, paymentUrl: '' })}
+          destroyOnClose
         >
-          <ConfirmSubscriptionPerformerForm
-            type={subscriptionType}
-            performer={performer}
-            submiting={submiting}
-            onFinish={this.subscribe.bind(this)}
-          />
+          {!paymentUrl ? (
+            <ConfirmSubscriptionPerformerForm
+              type={subscriptionType || 'monthly'}
+              performer={performer}
+              submiting={submiting}
+              onFinish={this.subscribe.bind(this)}
+            />
+          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
         </Modal>
         {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
@@ -775,7 +814,8 @@ const mapStates = (state: any) => ({
   feedState: { ...state.feed.feeds },
   productState: { ...state.product.products },
   galleryState: { ...state.gallery.galleries },
-  currentUser: { ...state.user.current }
+  user: { ...state.user.current },
+  settings: { ...state.settings }
 });
 
 const mapDispatch = {

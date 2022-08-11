@@ -58,7 +58,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
   }
 
   async onCancelSubscription(subscription: ISubscription) {
-    if (!window.confirm('Are you sure to cancel the subscription?')) {
+    if (!window.confirm('Are you sure you want to cancel the subscription?')) {
       return;
     }
     try {
@@ -72,7 +72,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
   }
 
   async onRenewSubscription(subscription: ISubscription) {
-    if (!window.confirm('Are you sure you want to re-activate this subscription?')) {
+    if (!window.confirm('Are you sure you want to reactivate this subscription?')) {
       return;
     }
     try {
@@ -94,7 +94,7 @@ class SubscriptionPage extends PureComponent<IProps, IStates> {
       }
 
       this.getData();
-      message.success('This subscription have been reactivate');
+      message.success('This subscription have been reactivated');
     } catch (error) {
       const err = await Promise.resolve(error);
       message.error(getResponseError(err));

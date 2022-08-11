@@ -19,28 +19,17 @@ interface IProps {
 }
 
 class MessageList extends PureComponent<IProps> {
-  messagesRef: any;
+  private messagesRef = createRef<HTMLDivElement>();
 
   state = {
     offset: 0
   }
 
-  async componentDidMount() {
-    if (!this.messagesRef) this.messagesRef = createRef();
-  }
-
-  async componentDidUpdate(prevProps) {
-    const { conversation, message, sendMessage } = this.props;
+  componentDidUpdate(prevProps) {
+    const { conversation } = this.props;
     if (prevProps.conversation && prevProps.conversation._id !== conversation._id) {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ offset: 0 });
-    }
-    if ((prevProps.message.total === 0 && message.total !== 0) || (prevProps.message.total === message.total)) {
-      if (prevProps.sendMessage?.data?._id !== sendMessage?.data?._id) {
-        this.scrollToBottom(true);
-        return;
-      }
-      this.scrollToBottom(false);
     }
   }
 
@@ -121,16 +110,20 @@ class MessageList extends PureComponent<IProps> {
      // Proceed to the next message.
      i += 1;
    }
+   this.scrollToBottom();
    return tempMessages;
  };
 
- scrollToBottom(toBot = true) {
+ scrollToBottom = () => {
    const { message: { fetching } } = this.props;
-   const { offset } = this.state;
-   if (!fetching && this.messagesRef && this.messagesRef.current) {
-     const ele = this.messagesRef.current;
-     window.setTimeout(() => {
-       ele.scrollTop = toBot ? ele.scrollHeight : (ele.scrollHeight / (offset + 1) - 150);
+   if (fetching) {
+     return;
+   }
+
+   if (this.messagesRef && this.messagesRef.current) {
+     const ele: HTMLDivElement = this.messagesRef.current;
+     setTimeout(() => {
+       ele.scrollTop = ele.scrollHeight;
      }, 300);
    }
  }
@@ -138,7 +131,6 @@ class MessageList extends PureComponent<IProps> {
  render() {
    const { conversation, message } = this.props;
    const { fetching } = message;
-   if (!this.messagesRef) this.messagesRef = createRef();
    return (
      <div className="message-list" ref={this.messagesRef} onScroll={this.handleScroll.bind(this, conversation)}>
        {conversation && conversation._id
@@ -154,7 +146,7 @@ class MessageList extends PureComponent<IProps> {
                </div>
                {fetching && <div className="text-center"><Spin /></div>}
                {this.renderMessages()}
-               {!fetching && !message.items.length && <p className="text-center">Let&apos;s talking</p>}
+               {!fetching && !message.items.length && <p className="text-center">Let&apos;s connect</p>}
                {!conversation.isSubscribed && (
                <Link href={{ pathname: '/model/profile', query: { username: conversation?.recipientInfo?.username || conversation?.recipientInfo?._id } }} as={`/${conversation?.recipientInfo?.username || conversation?.recipientInfo?._id}`}>
                  <div className="sub-text">Please subscribe to this model to start the conversation!</div>

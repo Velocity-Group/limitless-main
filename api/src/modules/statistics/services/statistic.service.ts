@@ -19,7 +19,7 @@ import { ORDER_MODEL_PROVIDER } from 'src/modules/order/providers';
 import { OrderModel } from 'src/modules/order/models';
 import { EARNING_MODEL_PROVIDER } from 'src/modules/earning/providers/earning.provider';
 import { EarningModel } from 'src/modules/earning/models/earning.model';
-import { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING_EMAIL_CONFIRMATION } from 'src/modules/user/constants';
+import { STATUS_ACTIVE, STATUS_INACTIVE } from 'src/modules/user/constants';
 import { ORDER_STATUS } from 'src/modules/order/constants';
 
 @Injectable()
@@ -50,7 +50,7 @@ export class StatisticService {
   public async stats(): Promise<any> {
     const totalActiveUsers = await this.userModel.countDocuments({ status: STATUS_ACTIVE });
     const totalInactiveUsers = await this.userModel.countDocuments({ status: STATUS_INACTIVE });
-    const totalPendingUsers = await this.userModel.countDocuments({ status: STATUS_PENDING_EMAIL_CONFIRMATION });
+    const totalPendingUsers = await this.userModel.countDocuments({ verifiedEmail: false });
     const totalActivePerformers = await this.performerModel.countDocuments({ status: STATUS_ACTIVE });
     const totalInactivePerformers = await this.performerModel.countDocuments({ status: STATUS_INACTIVE });
     const totalPendingPerformers = await this.performerModel.countDocuments({ verifiedDocument: false });
@@ -64,12 +64,10 @@ export class StatisticService {
     const totalShippingdOrders = await this.orderModel.countDocuments({ deliveryStatus: ORDER_STATUS.SHIPPING });
     const totalRefundedOrders = await this.orderModel.countDocuments({ deliveryStatus: ORDER_STATUS.REFUNDED });
     const totalProducts = await this.productModel.countDocuments({});
-    const [totalGrossPrice, totalNetPrice, totalGrossToken, totalNetToken] = await Promise.all([
+    const [totalGrossPrice, totalNetPrice] = await Promise.all([
       this.earningModel.aggregate([
         {
-          $match: {
-            isToken: false
-          }
+          $match: { }
         },
         {
           $group: {
@@ -82,39 +80,7 @@ export class StatisticService {
       ]),
       this.earningModel.aggregate([
         {
-          $match: {
-            isToken: false
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            total: {
-              $sum: '$netPrice'
-            }
-          }
-        }
-      ]),
-      this.earningModel.aggregate([
-        {
-          $match: {
-            isToken: true
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            total: {
-              $sum: '$grossPrice'
-            }
-          }
-        }
-      ]),
-      this.earningModel.aggregate([
-        {
-          $match: {
-            isToken: true
-          }
+          $match: { }
         },
         {
           $group: {
@@ -139,17 +105,12 @@ export class StatisticService {
       totalVideos,
       totalProducts,
       totalSubscribers,
-      // totalActiveSubscribers,
-      // totalInactiveSubscribers: totalSubscribers - totalActiveSubscribers,
       totalDeliveredOrders,
       totalShippingdOrders,
       totalRefundedOrders,
       totalGrossPrice: totalGrossPrice[0]?.total || 0,
       totalNetPrice: totalNetPrice[0]?.total || 0,
-      totalPriceCommission: (totalGrossPrice[0]?.total - totalNetPrice[0]?.total) || 0,
-      totalGrossToken: totalGrossToken[0]?.total || 0,
-      totalNetToken: totalNetToken[0]?.total || 0,
-      totalTokenCommission: (totalGrossToken[0]?.total - totalNetToken[0]?.total) || 0
+      totalPriceCommission: (totalGrossPrice[0]?.total - totalNetPrice[0]?.total) || 0
     };
   }
 }

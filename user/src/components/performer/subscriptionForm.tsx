@@ -30,7 +30,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
 
   componentDidMount() {
     const { user } = this.props;
-    this.setState({ isFreeSubscription: user.isFreeSubscription });
+    this.setState({ isFreeSubscription: !!user?.isFreeSubscription });
   }
 
   render() {
@@ -41,8 +41,6 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
         {...layout}
         name="nest-messages"
         onFinish={(values) => {
-          // eslint-disable-next-line no-param-reassign
-          values.isFreeSubscription = isFreeSubscription;
           onFinish(values);
         }}
         validateMessages={validateMessages}
@@ -53,14 +51,14 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
       >
         <Row>
           <Col xl={12} md={12} xs={24}>
-            <Form.Item>
-              <Switch unCheckedChildren="Unpaid Subscription" checkedChildren="Paid Subcription" checked={isFreeSubscription} onChange={() => this.setState({ isFreeSubscription: !isFreeSubscription })} />
+            <Form.Item name="isFreeSubscription" valuePropName="checked">
+              <Switch unCheckedChildren="Paid Subscription" checkedChildren="Unpaid Subcription" onChange={(val) => this.setState({ isFreeSubscription: val })} />
             </Form.Item>
             {isFreeSubscription && (
             <Form.Item
               name="durationFreeSubscriptionDays"
               label="Duration (days)"
-              help="Try free subscription for xx days, then $xx per month"
+              help="Try free subscription for xx days"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
@@ -68,14 +66,14 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             )}
             <Form.Item
               name="monthlyPrice"
-              label="Monthly Subscription Price ($)"
+              label="Monthly Subscription Price"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
             </Form.Item>
             <Form.Item
               name="yearlyPrice"
-              label="Yearly Subscription Price ($)"
+              label="Yearly Subscription Price"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />
@@ -83,7 +81,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             <Form.Item
               key="publicChatPrice"
               name="publicChatPrice"
-              label="Default Streaming Price (token)"
+              label="Default Streaming Price"
               rules={[{ required: true }]}
             >
               <InputNumber min={1} />

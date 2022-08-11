@@ -36,7 +36,8 @@ const validateMessages = {
 export class FormProduct extends PureComponent<IProps> {
   state = {
     previewImageProduct: null,
-    isDigitalProduct: false
+    isDigitalProduct: false,
+    digitalFileAdded: false
   };
 
   formRef: any;
@@ -47,7 +48,8 @@ export class FormProduct extends PureComponent<IProps> {
     if (product) {
       this.setState({
         isDigitalProduct: product.type === 'digital',
-        previewImageProduct: product?.image || '/static/no-image.jpg'
+        previewImageProduct: product?.image || '/static/no-image.jpg',
+        digitalFileAdded: !!product.digitalFileUrl
       });
     }
   }
@@ -62,25 +64,31 @@ export class FormProduct extends PureComponent<IProps> {
     }
   }
 
-  beforeUpload(field, file) {
+  beforeUploadThumb(file) {
     const { beforeUpload } = this.props;
     const config = getGlobalConfig();
-    if (field === 'image') {
-      const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
-      if (!isLt2M) {
-        message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
-        return false;
-      }
-      const reader = new FileReader();
-      reader.addEventListener('load', () => this.setState({ previewImageProduct: reader.result }));
-      reader.readAsDataURL(file);
-    }
+    const reader = new FileReader();
+    reader.addEventListener('load', () => this.setState({ previewImageProduct: reader.result }));
+    reader.readAsDataURL(file);
     const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
     if (!isValid) {
       message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
       return false;
     }
-    beforeUpload && beforeUpload(file, field);
+    beforeUpload && beforeUpload(file, 'image');
+    return isValid;
+  }
+
+  beforeUploadDigitalFile(file) {
+    const { beforeUpload } = this.props;
+    const config = getGlobalConfig();
+    const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
+    if (!isValid) {
+      message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
+      return false;
+    }
+    this.setState({ digitalFileAdded: true });
+    beforeUpload && beforeUpload(file, 'digitalFile');
     return isValid;
   }
 
@@ -90,8 +98,7 @@ export class FormProduct extends PureComponent<IProps> {
       product, submit, uploading, uploadPercentage
     } = this.props;
     const {
-      previewImageProduct,
-      isDigitalProduct
+      previewImageProduct, isDigitalProduct, digitalFileAdded
     } = this.state;
     const haveProduct = !!product;
     return (
@@ -145,8 +152,8 @@ export class FormProduct extends PureComponent<IProps> {
           <Col md={12} xs={12}>
             <Form.Item
               name="price"
-              label="Amount of tokens"
-              rules={[{ required: true, message: 'Amount of tokens is required!' }]}
+              label="Price"
+              rules={[{ required: true, message: 'Price is required!' }]}
             >
               <InputNumber style={{ width: '100%' }} min={1} />
             </Form.Item>
@@ -188,7 +195,8 @@ export class FormProduct extends PureComponent<IProps> {
                 multiple={false}
                 showUploadList={false}
                 disabled={uploading}
-                beforeUpload={this.beforeUpload.bind(this, 'image')}
+                beforeUpload={this.beforeUploadThumb.bind(this)}
+                customRequest={() => false}
               >
                 {previewImageProduct && (
                   <img
@@ -208,20 +216,22 @@ export class FormProduct extends PureComponent<IProps> {
                 listType="picture-card"
                 className="avatar-uploader"
                 multiple={false}
-                showUploadList
+                showUploadList={false}
                 disabled={uploading}
-                beforeUpload={this.beforeUpload.bind(this, 'digitalFile')}
+                beforeUpload={this.beforeUploadDigitalFile.bind(this)}
+                customRequest={() => false}
               >
+                {digitalFileAdded && <img src="/static/file-checked.jpg" alt="check" />}
                 <FileAddOutlined />
               </Upload>
-              {product?.digitalFileId && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a download target="_blank" href={product?.digitalFileUrl} rel="noreferrer">Click to download</a></div>}
-              {uploadPercentage ? (
-                <Progress percent={Math.round(uploadPercentage)} />
-              ) : null}
+              {product?.digitalFileUrl && <div className="ant-form-item-explain" style={{ textAlign: 'left' }}><a download target="_blank" href={product?.digitalFileUrl} rel="noreferrer">Click to download</a></div>}
             </Form.Item>
           </Col>
           )}
         </Row>
+        {uploadPercentage > 0 ? (
+          <Progress percent={Math.round(uploadPercentage)} />
+        ) : null}
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button
             className="primary"

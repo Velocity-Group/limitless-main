@@ -9,8 +9,8 @@ import { EVENT } from 'src/kernel/constants';
 import { ProductService } from 'src/modules/performer-assets/services';
 import { PRODUCT_TYPE } from 'src/modules/performer-assets/constants';
 import { OrderDto } from '../dtos';
-import { ORDER_MODEL_PROVIDER } from '../providers';
-import { OrderModel } from '../models';
+import { ORDER_MODEL_PROVIDER, SHIPPING_ADDRESS_MODEL_PROVIDER } from '../providers';
+import { OrderModel, ShippingAddressModel } from '../models';
 import { ORDER_STATUS } from '../constants';
 
 const ORDER_TOPIC = 'ORDER_TOPIC';
@@ -22,6 +22,8 @@ export class OrderListener {
     private readonly productService: ProductService,
     @Inject(ORDER_MODEL_PROVIDER)
     private readonly orderModel: Model<OrderModel>,
+    @Inject(SHIPPING_ADDRESS_MODEL_PROVIDER)
+    private readonly shippingAddressModel: Model<ShippingAddressModel>,
     private readonly queueEventService: QueueEventService
   ) {
     this.queueEventService.subscribe(
@@ -55,18 +57,20 @@ export class OrderListener {
       quantity += p.quantity;
       totalPrice += parseFloat(p.price);
     });
+    const address = shippingInfo.deliveryAddressId && await this.shippingAddressModel.findById(shippingInfo.deliveryAddressId);
+    const deliveryAddress = address ? `${address.name.toUpperCase()} - ${address.streetNumber} ${address.streetAddress}, ${address.ward}, ${address.district}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}` : '';
     await this.orderModel.create({
       transactionId: transaction._id,
       performerId: transaction.performerId,
       userId: transaction.sourceId,
       orderNumber: transaction._id.toString().slice(16, 24).toUpperCase(),
       shippingCode: '',
-      postalCode: shippingInfo?.postalCode || transaction?.paymentResponseInfo?.postalCode || '',
       productId: newProds[0].productId,
       unitPrice: products[0].price,
       quantity,
       totalPrice,
-      deliveryAddress: shippingInfo.deliveryAddress || '',
+      deliveryAddressId: shippingInfo?.deliveryAddressId || '',
+      deliveryAddress,
       deliveryStatus: newProds[0].productType === PRODUCT_TYPE.DIGITAL ? ORDER_STATUS.DELIVERED : ORDER_STATUS.PROCESSING,
       phoneNumber: shippingInfo?.phoneNumber,
       userNote: shippingInfo?.userNote,

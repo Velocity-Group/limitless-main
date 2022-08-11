@@ -2,7 +2,7 @@
 import { PureComponent } from 'react';
 import {
   Form, Input, Button, Row, Col, Select, DatePicker,
-  Upload, Progress, message, Checkbox, Popover
+  Upload, Progress, message, Checkbox, Popover, Modal
 } from 'antd';
 import {
   IPerformer, ICountry, IBody
@@ -13,6 +13,7 @@ import {
   UploadOutlined, TwitterOutlined, GoogleOutlined
 } from '@ant-design/icons';
 import { getGlobalConfig } from '@services/config';
+import { VideoPlayer } from '@components/common';
 import moment from 'moment';
 
 const { Option } = Select;
@@ -61,7 +62,8 @@ export class PerformerAccountForm extends PureComponent<IProps> {
     isUploadingVideo: false,
     uploadVideoPercentage: 0,
     previewVideoUrl: null,
-    previewVideoName: null
+    previewVideoName: null,
+    isShowPreview: false
   }
 
   componentDidMount() {
@@ -115,7 +117,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
       videoUploadUrl
     } = options;
     const {
-      isUploadingVideo, uploadVideoPercentage, previewVideoUrl, previewVideoName
+      isUploadingVideo, uploadVideoPercentage, previewVideoUrl, previewVideoName, isShowPreview
     } = this.state;
     return (
       <Form
@@ -516,7 +518,7 @@ export class PerformerAccountForm extends PureComponent<IProps> {
                 <UploadOutlined />
               </Upload>
               <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
-                {((previewVideoUrl || previewVideoName) && <a rel="noreferrer" href={previewVideoUrl} target="_blank">{previewVideoName || 'Click here to preview'}</a>)
+                {((previewVideoUrl || previewVideoName) && <a aria-hidden onClick={() => this.setState({ isShowPreview: true })}>{previewVideoName || previewVideoUrl || 'Click here to preview'}</a>)
                   || (
                     <a>
                       Intro video is
@@ -560,6 +562,30 @@ export class PerformerAccountForm extends PureComponent<IProps> {
             Save Changes
           </Button>
         </Form.Item>
+        <Modal
+          width={767}
+          footer={null}
+          onOk={() => this.setState({ isShowPreview: false })}
+          onCancel={() => this.setState({ isShowPreview: false })}
+          visible={isShowPreview}
+          destroyOnClose
+          centered
+        >
+          <VideoPlayer
+            {...{
+              autoplay: true,
+              controls: true,
+              playsinline: true,
+              fluid: true,
+              sources: [
+                {
+                  src: previewVideoUrl,
+                  type: 'video/mp4'
+                }
+              ]
+            }}
+          />
+        </Modal>
       </Form>
     );
   }

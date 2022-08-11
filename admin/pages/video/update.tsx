@@ -66,7 +66,10 @@ class VideoUpdate extends PureComponent<IProps> {
       message.error('Invalid amount of tokens');
       return;
     }
-    if ((data.isSchedule && !data.scheduledAt) || (data.isSchedule && moment(data.scheduledAt).isBefore(moment()))) {
+    if (
+      (data.isSchedule && !data.scheduledAt)
+      || (data.isSchedule && moment(data.scheduledAt).isBefore(moment()))
+    ) {
       message.error('Invalid schedule date');
       return;
     }
@@ -87,7 +90,12 @@ class VideoUpdate extends PureComponent<IProps> {
     });
     const { video } = this.state;
     try {
-      await videoService.update(video._id, files, data, this.onUploading.bind(this));
+      await videoService.update(
+        video._id,
+        files,
+        data,
+        this.onUploading.bind(this)
+      );
       message.success('Video has been uploaded');
       // TODO - process for response data?
       Router.push('/video');
@@ -107,13 +115,22 @@ class VideoUpdate extends PureComponent<IProps> {
           <title>Edit Video</title>
         </Head>
         <BreadcrumbComponent
-          breadcrumbs={[{ title: 'Video', href: '/video' }, { title: video.title ? video.title : 'Edit video' }]}
+          breadcrumbs={[
+            { title: 'Video', href: '/video' },
+            { title: video.title ? video.title : 'Edit video' }
+          ]}
         />
         <Page>
           {fetching ? (
             <Loader />
           ) : (
-            <FormUploadVideo video={video} submit={this.submit.bind(this)} uploading={uploading} beforeUpload={this.beforeUpload.bind(this)} uploadPercentage={uploadPercentage} />
+            <FormUploadVideo
+              video={video}
+              submit={this.submit.bind(this)}
+              uploading={uploading}
+              beforeUpload={this.beforeUpload.bind(this)}
+              uploadPercentage={uploadPercentage}
+            />
           )}
         </Page>
       </>

@@ -1,4 +1,4 @@
-import { Table, Tag } from 'antd';
+import { Table, Tag, Avatar } from 'antd';
 import { ISubscription } from 'src/interfaces';
 import { formatDate, nowIsBefore } from '@lib/date';
 
@@ -22,7 +22,13 @@ export const TableListSubscription = ({
       title: 'User',
       dataIndex: 'userInfo',
       render(data, records) {
-        return <span>{records?.userInfo?.name || records?.userInfo?.username || 'N/A'}</span>;
+        return (
+          <span>
+            <Avatar src={records?.userInfo?.avatar || '/static/no-avatar.png'} />
+            {' '}
+            {records?.userInfo?.name || records?.userInfo?.username || 'N/A'}
+          </span>
+        );
       }
     },
     {
@@ -31,11 +37,11 @@ export const TableListSubscription = ({
       render(subscriptionType: string) {
         switch (subscriptionType) {
           case 'monthly':
-            return <Tag color="blue">Monthly Subscription</Tag>;
+            return <Tag color="blue">Monthly</Tag>;
           case 'yearly':
-            return <Tag color="red">Yearly Subscription</Tag>;
+            return <Tag color="red">Yearly</Tag>;
           case 'free':
-            return <Tag color="orange">Free Subscription</Tag>;
+            return <Tag color="orange">Free</Tag>;
           case 'system':
             return <Tag color="green">System</Tag>;
           default:
@@ -45,23 +51,23 @@ export const TableListSubscription = ({
     },
     {
       title: 'Start Date',
-      dataIndex: 'startRecurringDate',
-      render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
+      dataIndex: 'createdAt',
+      render(date: Date) {
+        return <span>{formatDate(date, 'll')}</span>;
       }
     },
     {
       title: 'Expiry Date',
       dataIndex: 'expiredAt',
-      render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
+      render(date: Date) {
+        return <span>{formatDate(date, 'll')}</span>;
       }
     },
     {
-      title: 'Renews On',
+      title: 'Renewal Date',
       dataIndex: 'nextRecurringDate',
       render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && nowIsBefore(record.expiredAt) ? formatDate(date, 'll') : 'N/A'}</span>;
+        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && formatDate(date, 'll')}</span>;
       }
     },
     {
@@ -71,8 +77,6 @@ export const TableListSubscription = ({
         switch (paymentGateway) {
           case 'stripe':
             return <Tag color="blue">Stripe</Tag>;
-          case 'bitpay':
-            return <Tag color="pink">Bitpay</Tag>;
           case 'paypal':
             return <Tag color="violet">Paypal</Tag>;
           case 'ccbill':

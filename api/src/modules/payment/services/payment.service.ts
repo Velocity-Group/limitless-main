@@ -14,7 +14,6 @@ import { ObjectId } from 'mongodb';
 import { CouponService } from 'src/modules/coupon/services';
 import { SettingService } from 'src/modules/settings';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
-import { TokenPackageService } from 'src/modules/token-package/services';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { PerformerService } from 'src/modules/performer/services';
 import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
@@ -24,6 +23,7 @@ import axios from 'axios';
 import { UserDto } from 'src/modules/user/dtos';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { UserService } from 'src/modules/user/services';
+import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { PAYMENT_TRANSACTION_MODEL_PROVIDER } from '../providers';
 import { PaymentTransactionModel } from '../models';
 import {
@@ -56,8 +56,6 @@ export class PaymentService {
     private readonly userService: UserService,
     @Inject(forwardRef(() => CouponService))
     private readonly couponService: CouponService,
-    @Inject(forwardRef(() => TokenPackageService))
-    private readonly tokenPackageService: TokenPackageService,
     @Inject(PAYMENT_TRANSACTION_MODEL_PROVIDER)
     private readonly TransactionModel: Model<PaymentTransactionModel>,
     private readonly ccbillService: CCBillService,
@@ -73,44 +71,23 @@ export class PaymentService {
     return data;
   }
 
-  private async getPerformerSubscriptionPaymentGateway(performerId, paymentGateway = 'stripe') {
-    // get performer information and do transaction
-    const performerPaymentSetting = await this.performerService.getPaymentSetting(
-      performerId,
-      paymentGateway
-    );
-    if (!performerPaymentSetting) {
-      throw new MissingConfigPaymentException();
-    }
-    const flexformId = performerPaymentSetting?.value?.flexformId || await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_FLEXFORM_ID);
-    const subAccountNumber = performerPaymentSetting?.value?.subscriptionSubAccountNumber;
-    const salt = performerPaymentSetting?.value?.salt;
-    if (!flexformId || !subAccountNumber || !salt) {
-      throw new MissingConfigPaymentException();
-    }
-    return {
-      flexformId,
-      subAccountNumber,
-      salt
-    };
-  }
-
   private async getCCbillPaymentGatewaySettings() {
-    const flexformId = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_FLEXFORM_ID);
-    const subAccountNumber = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SUB_ACCOUNT_NUMBER);
-    const salt = await this.settingService.getKeyValue(SETTING_KEYS.CCBILL_SALT);
-    if (!flexformId || !subAccountNumber || !salt) {
+    const flexformId = SettingService.getValueByKey(SETTING_KEYS.CCBILL_FLEXFORM_ID);
+    const singleSubAccountNumber = SettingService.getValueByKey(SETTING_KEYS.CCBILL_SINGLE_SUB_ACCOUNT_NUMBER);
+    const recurringSubAccountNumber = SettingService.getValueByKey(SETTING_KEYS.CCBILL_RECURRING_SUB_ACCOUNT_NUMBER);
+    const salt = SettingService.getValueByKey(SETTING_KEYS.CCBILL_SALT);
+    if (!flexformId || !singleSubAccountNumber || !recurringSubAccountNumber || !salt) {
       throw new MissingConfigPaymentException();
     }
-
     return {
       flexformId,
-      subAccountNumber,
+      singleSubAccountNumber,
+      recurringSubAccountNumber,
       salt
     };
   }
 
-  public async createSubscriptionPaymentTransaction(performer: PerformerDto, subscriptionType: string, user: UserDto, couponInfo?: CouponDto, paymentGateway = 'stripe') {
+  public async createSubscriptionPaymentTransaction(performer: PerformerDto, subscriptionType: string, user: UserDto, paymentGateway = 'stripe', couponInfo?: CouponDto) {
     const price = () => {
       switch (subscriptionType) {
         case PAYMENT_TYPE.FREE_SUBSCRIPTION: return 0;
@@ -135,7 +112,7 @@ export class PaymentService {
           price: totalPrice,
           quantity: 1,
           name: `${subscriptionType} ${performer?.name || performer?.username}`,
-          description: `${subscriptionType} ${performer?.name || performer?.username} ${subscriptionType === PAYMENT_TYPE.FREE_SUBSCRIPTION ? `in ${performer?.durationFreeSubscriptionDays} days` : null}`,
+          description: `${subscriptionType} ${performer?.name || performer?.username} ${subscriptionType === PAYMENT_TYPE.FREE_SUBSCRIPTION ? `in ${performer?.durationFreeSubscriptionDays} days` : ''}`,
           productId: performer._id,
           productType: PAYMENT_TARGET_TYPE.PERFORMER,
           performerId: performer._id
@@ -151,7 +128,6 @@ export class PaymentService {
     const price = payload.billedAmount || payload.accountingAmount;
     const { userId, performerId, subscriptionType } = subscription;
     const performer = await this.performerService.findById(performerId);
-    if (!performer) return null;
     return this.TransactionModel.create({
       paymentGateway: 'ccbill',
       source: 'user',
@@ -167,9 +143,9 @@ export class PaymentService {
         quantity: 1,
         name: `${subscriptionType} subscription ${performer?.name || performer?.username}`,
         description: `recurring ${subscriptionType} subscription ${performer?.name || performer?.username}`,
-        productId: performer._id,
+        productId: performerId,
         productType: PAYMENT_TARGET_TYPE.PERFORMER,
-        performerId: performer._id
+        performerId
       }],
       couponInfo: null,
       status: PAYMENT_STATUS.SUCCESS,
@@ -179,26 +155,41 @@ export class PaymentService {
 
   public async subscribePerformer(payload: SubscribePerformerPayload, user: UserDto) {
     const {
-      type, performerId, paymentGateway, stripeCardId
+      type, performerId, paymentGateway
     } = payload;
     const performer = await this.performerService.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
     // eslint-disable-next-line no-nested-ternary
     const subscriptionType = type === SUBSCRIPTION_TYPE.FREE ? PAYMENT_TYPE.FREE_SUBSCRIPTION : type === SUBSCRIPTION_TYPE.MONTHLY ? PAYMENT_TYPE.MONTHLY_SUBSCRIPTION : PAYMENT_TYPE.YEARLY_SUBSCRIPTION;
-    const transaction = await this.createSubscriptionPaymentTransaction(performer, subscriptionType, user);
+    const transaction = await this.createSubscriptionPaymentTransaction(performer, subscriptionType, user, paymentGateway);
     if (paymentGateway === 'ccbill') {
-      const { flexformId, subAccountNumber, salt } = await this.getPerformerSubscriptionPaymentGateway(performer._id);
+      if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: TRANSACTION_SUCCESS_CHANNEL,
+            eventName: EVENT.CREATED,
+            data: new PaymentDto(transaction)
+          })
+        );
+        await this.socketUserService.emitToUsers(
+          transaction.sourceId,
+          'payment_status_callback',
+          { redirectUrl: `/payment/success?transactionId=${transaction._id.toString().slice(16, 24)}` }
+        );
+        return transaction;
+      }
+      const { flexformId, recurringSubAccountNumber, salt } = await this.getCCbillPaymentGatewaySettings();
       return this.ccbillService.subscription({
         transactionId: transaction._id,
         price: transaction.totalPrice,
         flexformId,
         salt,
-        subAccountNumber,
+        recurringSubAccountNumber,
         subscriptionType
       });
     }
     if (paymentGateway === 'stripe') {
-      if (!user.stripeCustomerId || !stripeCardId) {
+      if (!user.stripeCustomerId || !user.stripeCardIds.length) {
         throw new HttpException('Please add a payment card', 422);
       }
       const plan = await this.stripeService.createSubscriptionPlan(transaction, performer, user);
@@ -248,34 +239,29 @@ export class PaymentService {
     paymentTransaction.targetId = products[0].productId;
     paymentTransaction.performerId = null;
     paymentTransaction.type = PAYMENT_TYPE.TOKEN_PACKAGE;
-    paymentTransaction.totalPrice = couponInfo ? Number((totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2))).toFixed(2)) : totalPrice;
+    paymentTransaction.totalPrice = couponInfo ? totalPrice - parseFloat((totalPrice * couponInfo.value).toFixed(2)) : totalPrice;
     paymentTransaction.products = products;
-    paymentTransaction.paymentResponseInfo = {};
+    paymentTransaction.paymentResponseInfo = null;
     paymentTransaction.status = PAYMENT_STATUS.CREATED;
     paymentTransaction.couponInfo = couponInfo;
     await paymentTransaction.save();
     return paymentTransaction;
   }
 
-  public async buyTokens(tokenId: string | ObjectId, payload: PurchaseTokenPayload, user: UserDto) {
+  public async buyTokens(payload: PurchaseTokenPayload, user: UserDto) {
     const {
-      paymentGateway, couponCode, currency, stripeCardId
+      paymentGateway, couponCode, currency, amount
     } = payload;
-    let totalPrice = 0;
-    const tokenPackage = await this.tokenPackageService.findById(tokenId);
-    if (!tokenPackage) {
-      throw new EntityNotFoundException('Token package not found');
-    }
-    totalPrice = parseFloat(tokenPackage.price.toFixed(2)) || 0;
+    const totalPrice = amount;
     const products = [{
       price: totalPrice,
       quantity: 1,
-      name: tokenPackage.name,
-      description: `purchase token package ${tokenPackage.name || tokenPackage.description}`,
-      productId: tokenPackage._id,
+      name: 'Wallet',
+      description: `Top up Wallet $${amount}`,
+      productId: null,
       productType: PAYMENT_TARGET_TYPE.TOKEN_PACKAGE,
       performerId: null,
-      tokens: tokenPackage.tokens
+      tokens: amount
     }];
 
     let coupon = null;
@@ -292,12 +278,12 @@ export class PaymentService {
     );
 
     if (paymentGateway === 'ccbill') {
-      const { flexformId, subAccountNumber, salt } = await this.getCCbillPaymentGatewaySettings();
+      const { flexformId, singleSubAccountNumber, salt } = await this.getCCbillPaymentGatewaySettings();
       return this.ccbillService.singlePurchase({
         salt,
         flexformId,
-        subAccountNumber,
-        price: coupon ? totalPrice - parseFloat((totalPrice * coupon.value).toFixed(2)) : totalPrice,
+        singleSubAccountNumber,
+        price: coupon ? totalPrice - (totalPrice * coupon.value) : totalPrice,
         transactionId: transaction._id
       });
     }
@@ -321,16 +307,16 @@ export class PaymentService {
       return { paymentUrl: `${process.env.USER_URL}/payment/cancel` };
     }
     if (paymentGateway === 'stripe') {
-      if (!user.stripeCustomerId || !stripeCardId) {
+      if (!user.stripeCustomerId || !user.stripeCardIds.length) {
         throw new HttpException('Please add a payment card', 422);
       }
       const data = await this.stripeService.createSingleCharge({
         transaction,
         item: {
-          name: tokenPackage.name
+          name: `Wallet - Top up $${amount}`
         },
         user,
-        stripeCardId
+        stripeCardId: user.stripeCardIds[0]
       });
       if (data) {
         transaction.stripeInvoiceId = data.id || (data.invoice && data.invoice.toString());
@@ -346,16 +332,18 @@ export class PaymentService {
     if (!transactionId) {
       throw new BadRequestException();
     }
-    const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
-    if (!checkForHexRegExp.test(transactionId)) {
+    if (!isObjectId(transactionId)) {
       return { ok: false };
     }
-    const transaction = await this.TransactionModel.findById(transactionId);
+    const transaction = await this.TransactionModel.findById(
+      transactionId
+    );
     if (!transaction) {
       return { ok: false };
     }
     transaction.status = PAYMENT_STATUS.SUCCESS;
     transaction.paymentResponseInfo = payload;
+    transaction.updatedAt = new Date();
     await transaction.save();
     await this.queueEventService.publish(
       new QueueEvent({
@@ -364,6 +352,8 @@ export class PaymentService {
         data: new PaymentDto(transaction)
       })
     );
+    const redirectUrl = `/payment/success?transactionId=${transaction._id.toString().slice(16, 24)}`;
+    redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { ok: true };
   }
 
@@ -373,7 +363,7 @@ export class PaymentService {
       throw new BadRequestException();
     }
     const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
-    if (!subscription || subscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) {
+    if (!subscription) {
       return { ok: false };
     }
     const transaction = await this.createCCbillRenewalSubscriptionPaymentTransaction(subscription, payload);
@@ -424,7 +414,7 @@ export class PaymentService {
     if (!user.roles.includes('admin') && `${subscription.userId}` !== `${user._id}`) {
       throw new ForbiddenException();
     }
-    if (subscription.subscriptionType === SUBSCRIPTION_TYPE.FREE || !subscription.subscriptionId) {
+    if (!subscription.subscriptionId) {
       subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
       await subscription.save();
       await Promise.all([
@@ -442,23 +432,107 @@ export class PaymentService {
     if (!ccbillClientAccNo || !ccbillDatalinkUsername || !ccbillDatalinkPassword) {
       throw new MissingConfigPaymentException();
     }
-    try {
-      const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&username=${ccbillDatalinkUsername}&password=${ccbillDatalinkPassword}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
-      // TODO tracking data response
-      if (resp.data && resp.data.includes('"results"\n"1"\n')) {
-        subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
-        subscription.updatedAt = new Date();
-        await subscription.save();
-        await Promise.all([
-          this.performerService.updateSubscriptionStat(subscription.performerId, -1),
-          this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
-        ]);
-        return { success: true };
-      }
-      return { success: false };
-    } catch (e) {
-      throw new HttpException(e, 500);
+    const resp = await axios.get(`${ccbillCancelUrl}?subscriptionId=${subscriptionId}&username=${ccbillDatalinkUsername}&password=${ccbillDatalinkPassword}&action=cancelSubscription&clientAccnum=${ccbillClientAccNo}`);
+    // TODO tracking data response
+    if (resp?.data && resp?.data.includes('"results"\n"1"\n')) {
+      subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+      subscription.updatedAt = new Date();
+      await subscription.save();
+      await Promise.all([
+        this.performerService.updateSubscriptionStat(subscription.performerId, -1),
+        this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
+      ]);
+      return { success: true };
     }
+    if (resp?.data && resp?.data.includes('"results"\n"0"\n')) {
+      throw new HttpException('The requested action failed.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-1"\n')) {
+      throw new HttpException('The arguments provided to authenticate the merchant were invalid or missing.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-2"\n')) {
+      throw new HttpException('The subscription id provided was invalid or the subscription type is not supported by the requested action.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-3"\n')) {
+      throw new HttpException('No record was found for the given subscription.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-4"\n')) {
+      throw new HttpException('The given subscription was not for the account the merchant was authenticated on.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-5"\n')) {
+      throw new HttpException('The arguments provided for the requested action were invalid or missing.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-6"\n')) {
+      throw new HttpException('The requested action was invalid', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-7"\n')) {
+      throw new HttpException('There was an internal error or a database error and the requested action could not complete.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-8"\n')) {
+      throw new HttpException('The IP Address the merchant was attempting to authenticate on was not in the valid range.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-9"\n')) {
+      throw new HttpException('The merchant’s account has been deactivated for use on the Datalink system or the merchant is not permitted to perform the requested action', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-10"\n')) {
+      throw new HttpException('The merchant has not been set up to use the Datalink system.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-11"\n')) {
+      throw new HttpException('Subscription is not eligible for a discount, recurring price less than $5.00.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-12"\n')) {
+      throw new HttpException('The merchant has unsuccessfully logged into the system 3 or more times in the last hour. The merchant should wait an hour before attempting to login again and is advised to review the login information.', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-15"\n')) {
+      throw new HttpException('Merchant over refund threshold', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-16"\n')) {
+      throw new HttpException('Merchant over void threshold', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-23"\n')) {
+      throw new HttpException('Transaction limit reached', 400);
+    }
+    if (resp?.data && resp?.data.includes('"results"\n"-24"\n')) {
+      throw new HttpException('Purchase limit reached', 400);
+    }
+
+    throw new HttpException('Cancel subscription has been fail, please try again later', 400);
+  }
+
+  public async ccbillUserReactivation(payload: any) {
+    const { subscriptionId } = payload;
+    const subscription = await this.subscriptionService.findBySubscriptionId(subscriptionId);
+    if (!subscription) {
+      throw new EntityNotFoundException();
+    }
+    subscription.status = SUBSCRIPTION_STATUS.ACTIVE;
+    subscription.updatedAt = new Date();
+    await subscription.save();
+    await Promise.all([
+      this.performerService.updateSubscriptionStat(subscription.performerId, 1),
+      this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': 1 })
+    ]);
+  }
+
+  private async stripeCreateRenewalSubscription(transaction: PaymentTransactionModel, totalPrice: number, paymentResponseInfo: any) {
+    const {
+      paymentGateway, sourceId, targetId, target, type, originalPrice, products, couponInfo
+    } = transaction;
+    return this.TransactionModel.create({
+      paymentGateway,
+      source: 'user',
+      sourceId,
+      target,
+      targetId,
+      performerId: targetId,
+      type: type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_TYPE.MONTHLY_SUBSCRIPTION : type,
+      originalPrice,
+      totalPrice,
+      products,
+      couponInfo,
+      status: PAYMENT_STATUS.SUCCESS,
+      paymentResponseInfo
+    });
   }
 
   public async stripeSubscriptionWebhook(payload: Record<string, any>) {
@@ -496,9 +570,7 @@ export class PaymentService {
       transaction = stripeInvoiceId && await this.TransactionModel.findOne({ stripeInvoiceId });
     }
     if (!transaction) throw new HttpException('Transaction was not found', 404);
-    transaction.paymentResponseInfo = payload;
-    transaction.updatedAt = new Date();
-    transaction.liveMode = livemode;
+
     let redirectUrl = '';
     switch (type) {
       case 'payment_intent.processing':
@@ -518,14 +590,20 @@ export class PaymentService {
         transaction.stripeConfirmUrl = redirectUrl;
         break;
       case 'payment_intent.succeeded':
-        transaction.status = PAYMENT_STATUS.SUCCESS;
-        if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
-          transaction.type = PAYMENT_TYPE.MONTHLY_SUBSCRIPTION;
-          // save total price for free subscription, renew to month subscription
-          // convert from cent to usd
-          transaction.totalPrice = data?.object?.amount / 100 || data?.object?.amount_received / 100 || 0;
-          transaction.originalPrice = data?.object?.amount / 100 || data?.object?.amount_received / 100 || 0;
+        // create new record for renewal
+        if ([PAYMENT_TYPE.FREE_SUBSCRIPTION, PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type) && transaction.status === PAYMENT_STATUS.SUCCESS) {
+          const totalP = data?.object?.amount / 100 || data?.object?.amount_received / 100 || 0;
+          const renewalTransaction = await this.stripeCreateRenewalSubscription(transaction, totalP, payload);
+          await this.queueEventService.publish(
+            new QueueEvent({
+              channel: TRANSACTION_SUCCESS_CHANNEL,
+              eventName: EVENT.CREATED,
+              data: new PaymentDto(renewalTransaction)
+            })
+          );
+          return { success: true };
         }
+        transaction.status = PAYMENT_STATUS.SUCCESS;
         await this.queueEventService.publish(
           new QueueEvent({
             channel: TRANSACTION_SUCCESS_CHANNEL,
@@ -537,6 +615,9 @@ export class PaymentService {
         break;
       default: break;
     }
+    transaction.paymentResponseInfo = payload;
+    transaction.updatedAt = new Date();
+    transaction.liveMode = livemode;
     await transaction.save();
     redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { success: true };

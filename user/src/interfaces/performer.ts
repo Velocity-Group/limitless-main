@@ -41,10 +41,7 @@ export interface IPerformer {
     totalGalleries: number;
     totalProducts: number;
     totalFeeds: number;
-    totalStories: number;
-    totalBlogs: number;
-    totalRating: number;
-    avgRating: number;
+    followers: number;
   };
   score: number;
   bankingInformation: IBanking;
@@ -88,6 +85,7 @@ export interface IPerformer {
     linkedIn: string;
   };
   isPerformer: boolean;
+  isFollowed: boolean;
 }
 
 export interface IBanking {

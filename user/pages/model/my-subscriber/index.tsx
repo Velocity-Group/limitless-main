@@ -8,6 +8,7 @@ import { ISubscription, IUIConfig } from 'src/interfaces';
 import { subscriptionService } from '@services/subscription.service';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
+import { SearchFilter } from '@components/common/search-filter';
 
 interface IProps {
   ui: IUIConfig;
@@ -50,6 +51,12 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
     this.getData();
   }
 
+  async handleFilter(values) {
+    const { filter } = this.state;
+    await this.setState({ filter: { ...filter, ...values } });
+    this.getData();
+  }
+
   async handleTabChange(data) {
     const { pagination } = this.state;
     await this.setState({
@@ -87,6 +94,38 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
   render() {
     const { subscriptionList, pagination, loading } = this.state;
     const { ui } = this.props;
+    const statuses = [
+      {
+        key: '',
+        text: 'All Statuses'
+      },
+      {
+        key: 'active',
+        text: 'Active'
+      },
+      {
+        key: 'deactivated',
+        text: 'Inactive'
+      }
+    ];
+    const types = [
+      {
+        key: '',
+        text: 'All Types'
+      },
+      {
+        key: 'free',
+        text: 'Free Subscription'
+      },
+      {
+        key: 'monthly',
+        text: 'Monthly Subscription'
+      },
+      {
+        key: 'yearly',
+        text: 'Yearly Subscription'
+      }
+    ];
     return (
       <Layout>
         <Head>
@@ -98,6 +137,12 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
         </Head>
         <div className="main-container">
           <PageHeading title="My Subscribers" icon={<UserAddOutlined />} />
+          <SearchFilter
+            subscriptionTypes={types}
+            statuses={statuses}
+            dateRange
+            onSubmit={this.handleFilter.bind(this)}
+          />
           <div className="table-responsive">
             <TableListSubscription
               dataSource={subscriptionList}

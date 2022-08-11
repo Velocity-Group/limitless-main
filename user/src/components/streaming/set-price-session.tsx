@@ -51,12 +51,12 @@ const StreamPriceForm = ({
         label="Select an option"
         valuePropName="checked"
       >
-        <Switch unCheckedChildren="Pay Per Live for Subscribers" checkedChildren=" Free for Subscribers" checked={isFree} onChange={(val) => setFree(val)} />
+        <Switch unCheckedChildren="Pay Per Live for Subscribers" checkedChildren="Free for Subscribers" checked={isFree} onChange={(val) => setFree(val)} />
       </Form.Item>
       {!isFree && (
       <Form.Item
         name="price"
-        label="Amount of Tokens"
+        label="Price"
       >
         <InputNumber min={1} />
       </Form.Item>

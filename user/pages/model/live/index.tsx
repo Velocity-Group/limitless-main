@@ -223,8 +223,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
                     {videoDuration(callTime)}
                   </span>
                   <span>
-                    <img src="/static/coin-ico.png" alt="gem" width="20px" />
-                    {' '}
+                    $
                     {(user?.balance).toFixed(2)}
                   </span>
                   <span>

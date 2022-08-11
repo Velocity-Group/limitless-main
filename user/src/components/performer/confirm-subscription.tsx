@@ -24,32 +24,56 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
     } = this.props;
     return (
       <div className="confirm-subscription-form">
-        <div className="text-center">
-          <h3 className="secondary-color">
-            Confirm
-            {' '}
-            {type}
-            {' '}
-            subscription with
-            {' '}
-            {performer?.name || performer?.username || 'the model'}
-          </h3>
+        <div className="left-col">
           <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
-          <p className="p-name">
-            {performer?.name || performer?.username || 'N/A'}
+          <div className="p-name">
+            {performer?.name || 'N/A'}
             {' '}
             {performer?.verifiedAccount && <TickIcon className="primary-color" />}
-          </p>
+          </div>
+          <div className="p-username">
+            @
+            {performer?.username || 'n/a'}
+          </div>
+          <img className="lock-icon" src="/static/lock-icon.png" alt="lock" />
         </div>
-        <div className="info-body">
-          <p>
-            SUBSCRIBE TO GET THESE BENEFITS
-          </p>
-          <ul>
+        <div className="right-col">
+          <h2>
+            Subscribe
+            {' '}
+            <span className="username">{`@${performer?.username}` || 'the model'}</span>
+          </h2>
+          {type === 'monthly' && (
+          <h3>
+            <span className="price">{(performer?.monthlyPrice || 0).toFixed(2)}</span>
+            {' '}
+            USD/month
+          </h3>
+          )}
+          {type === 'yearly' && (
+          <h3>
+            <span className="price">{(performer?.yearlyPrice || 0).toFixed(2)}</span>
+            {' '}
+            USD/year
+          </h3>
+          )}
+          {type === 'free' && (
+          <h3>
+            <span className="price">FREE</span>
+            {' '}
+            for
+            {' '}
+            {performer?.durationFreeSubscriptionDays}
+            {' '}
+            day
+            {performer?.durationFreeSubscriptionDays > 1 ? 's' : ''}
+          </h3>
+          )}
+          <ul className="check-list">
             <li>
               <CheckSquareOutlined />
               {' '}
-              Full access to this model&apos;s content
+              Full access to this model&apos;s exclusive content
             </li>
             <li>
               <CheckSquareOutlined />
@@ -59,21 +83,25 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
             <li>
               <CheckSquareOutlined />
               {' '}
+              Requested personalised Pay Per View content
+            </li>
+            <li>
+              <CheckSquareOutlined />
+              {' '}
               Cancel your subscription at any time
             </li>
           </ul>
+          <Button
+            className="primary"
+            disabled={submiting}
+            loading={submiting}
+            onClick={() => onFinish()}
+          >
+            SUBSCRIBE
+          </Button>
+          <p className="sub-text">Clicking &quot;Subscribe&quot; will take you to the payment screen to finalize you subscription</p>
         </div>
-        <Button className="primary" disabled={submiting} loading={submiting} onClick={() => onFinish()} style={{ textTransform: 'uppercase', whiteSpace: 'pre-wrap', height: 'auto' }}>
-          Confirm
-          {' '}
-          {type}
-          {' '}
-          subscription
-          {' '}
-          for
-          {' '}
-          {type === 'monthly' ? `$${(performer?.monthlyPrice || 0).toFixed(2)}` : type === 'yearly' ? `$${(performer?.yearlyPrice || 0).toFixed(2)}` : `${performer?.durationFreeSubscriptionDays} day${performer?.durationFreeSubscriptionDays > 1 ? 's' : ''}, then $${(performer?.monthlyPrice || 0).toFixed(2)} per month`}
-        </Button>
+
       </div>
     );
   }

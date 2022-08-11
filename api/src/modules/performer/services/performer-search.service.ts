@@ -1,7 +1,9 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { PageableData } from 'src/kernel/common';
 import * as moment from 'moment';
+import { FollowService } from 'src/modules/follow/services/follow.service';
+import { UserDto } from 'src/modules/user/dtos';
 import { PerformerModel } from '../models';
 import { PERFORMER_MODEL_PROVIDER } from '../providers';
 import { PerformerDto, IPerformerResponse } from '../dtos';
@@ -11,6 +13,8 @@ import { PERFORMER_STATUSES } from '../constants';
 @Injectable()
 export class PerformerSearchService {
   constructor(
+    @Inject(forwardRef(() => FollowService))
+    private readonly followService: FollowService,
     @Inject(PERFORMER_MODEL_PROVIDER)
     private readonly performerModel: Model<PerformerModel>
   ) { }
@@ -34,7 +38,7 @@ export class PerformerSearchService {
       ];
     }
     if (req.performerIds) {
-      query._id = { $in: req.performerIds.split(',') };
+      query._id = { $in: req.performerIds };
     }
     ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender', 'status',
       'height', 'weight', 'eyes', 'butt', 'sexualOrientation'].forEach((f) => {
@@ -44,6 +48,12 @@ export class PerformerSearchService {
     });
     if (req.verifiedDocument) {
       query.verifiedDocument = req.verifiedDocument === 'true';
+    }
+    if (req.verifiedEmail) {
+      query.verifiedEmail = req.verifiedEmail === 'true';
+    }
+    if (req.verifiedAccount) {
+      query.verifiedAccount = req.verifiedAccount === 'true';
     }
     if (req.fromAge && req.toAge) {
       query.dateOfBirth = {
@@ -62,7 +72,7 @@ export class PerformerSearchService {
       };
     }
     let sort = {
-      updatedAt: -1
+      isOnline: -1
     } as any;
     if (req.sort && req.sortBy) {
       sort = {
@@ -87,7 +97,8 @@ export class PerformerSearchService {
 
   // TODO - should create new search service?
   public async search(
-    req: PerformerSearchPayload
+    req: PerformerSearchPayload,
+    user: UserDto
   ): Promise<PageableData<any>> {
     const query = {
       status: PERFORMER_STATUSES.ACTIVE,
@@ -105,10 +116,10 @@ export class PerformerSearchService {
       ];
     }
     if (req.performerIds) {
-      query._id = { $in: req.performerIds.split(',') };
+      query._id = { $in: req.performerIds };
     }
     ['hair', 'pubicHair', 'ethnicity', 'country', 'bodyType', 'gender',
-      'height', 'weight', 'eyes', 'butt', 'sexualOrientation', 'streamingStatus'].forEach((f) => {
+      'height', 'weight', 'eyes', 'butt', 'sexualOrientation'].forEach((f) => {
       if (req[f]) {
         query[f] = req[f];
       }
@@ -132,8 +143,23 @@ export class PerformerSearchService {
     if (req.isFreeSubscription) {
       query.isFreeSubscription = req.isFreeSubscription === 'true';
     }
+    if (user?._id && req.followed === 'true') {
+      const follows = await this.followService.find({
+        followerId: user._id
+      });
+      const perIds = follows.map((f) => f.followingId);
+      query._id = { $in: perIds };
+    }
+    if (user?._id && req.followed === 'false') {
+      const follows = await this.followService.find({
+        followerId: user._id
+      });
+      const perIds = follows.map((f) => f.followingId);
+      query._id = { $nin: perIds };
+    }
     let sort = {
-      updatedAt: -1
+      isOnline: -1,
+      createdAt: -1
     } as any;
     if (req.sort && req.sortBy) {
       sort = {
@@ -164,8 +190,22 @@ export class PerformerSearchService {
         .skip(parseInt(req.offset as string, 10)),
       this.performerModel.countDocuments(query)
     ]);
+    const items = data.map((item) => new PerformerDto(item).toSearchResponse());
+    let follows = [];
+    if (user) {
+      const performerIds = data.map((d) => d._id);
+      follows = await this.followService.find({
+        followerId: user._id,
+        followingId: { $in: performerIds }
+      });
+    }
+    items.forEach((performer) => {
+      const followed = follows.find((f) => `${f.followingId}` === `${performer._id}`);
+      // eslint-disable-next-line no-param-reassign
+      performer.isFollowed = !!followed;
+    });
     return {
-      data,
+      data: items,
       total
     };
   }
@@ -243,7 +283,7 @@ export class PerformerSearchService {
     };
   }
 
-  public async randomSearch(req: PerformerSearchPayload): Promise<any> {
+  public async randomSearch(req: PerformerSearchPayload, user: UserDto): Promise<any> {
     const query = {
       status: PERFORMER_STATUSES.ACTIVE,
       verifiedDocument: true
@@ -265,8 +305,23 @@ export class PerformerSearchService {
       { $match: query },
       { $sample: { size: 50 } }
     ]);
+    const items = data.map((item) => new PerformerDto(item).toSearchResponse());
+    let follows = [];
+    if (user) {
+      const performerIds = data.map((d) => d._id);
+      follows = await this.followService.find({
+        followerId: user._id,
+        followingId: { $in: performerIds }
+      });
+    }
+    items.forEach((performer) => {
+      const followed = follows.find((f) => `${f.followingId}` === `${performer._id}`);
+      // eslint-disable-next-line no-param-reassign
+      performer.isFollowed = !!followed;
+    });
+
     return {
-      data: data.map((item) => new PerformerDto(item).toSearchResponse())
+      data: items
     };
   }
 }

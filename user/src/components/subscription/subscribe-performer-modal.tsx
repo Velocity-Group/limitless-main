@@ -19,6 +19,7 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
   const [loading, setLoading] = useState(false);
   const [submiting, setSubmiting] = useState<string>();
   const currentUser = useSelector((state: any) => state.user.current);
+  const settings = useSelector((state: any) => state.settings);
   const subscription = useSelector((state: any) => state.subscription);
   const dispatch = useDispatch();
 
@@ -47,7 +48,7 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
       Router.push('/');
       return;
     }
-    if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
+    if (settings.paymentGateway === 'stripe' && !currentUser.stripeCardIds.length) {
       message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
@@ -57,8 +58,7 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
       await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
-        paymentGateway: 'stripe',
-        stripeCardId: currentUser.stripeCardIds[0] // TODO user can choose card
+        paymentGateway: settings.paymentGateway === 'stripe'
       });
       onSubscribed && onSubscribed(performer.username);
     } catch (e) {

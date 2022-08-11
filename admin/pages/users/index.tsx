@@ -1,19 +1,21 @@
 import { PureComponent } from 'react';
 import {
-  Table, message, Tag, Modal, Avatar
+  Table, message, Tag, Avatar
 } from 'antd';
 import Page from '@components/common/layout/page';
 import {
   EditOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
-import { BreadcrumbComponent, DropdownAction, SearchFilter } from '@components/common';
-import { TableTokenChangeLogs } from '@components/user/change-token-change-log';
-import { userService } from '@services/user.service'; import Head from 'next/head';
+import { BreadcrumbComponent, DropdownAction } from '@components/common';
+import { userService } from '@services/user.service';
+import { SearchFilter } from '@components/user/search-filter';
+import Head from 'next/head';
 import Link from 'next/link';
 
 interface IProps {
   status: string
+  verifiedEmail: string;
 }
 
 export default class Performers extends PureComponent<IProps> {
@@ -26,7 +28,6 @@ export default class Performers extends PureComponent<IProps> {
   state = {
     pagination: {} as any,
     searching: false,
-    openChangeTokenLogModal: false,
     list: [],
     limit: 10,
     filter: {} as any,
@@ -35,8 +36,8 @@ export default class Performers extends PureComponent<IProps> {
   };
 
   componentDidMount() {
-    const { status } = this.props;
-    this.setState({ filter: { status: status || '' } }, () => this.search());
+    const { status, verifiedEmail } = this.props;
+    this.setState({ filter: { status: status || '', verifiedEmail: verifiedEmail || '' } }, () => this.search());
   }
 
   async handleTableChange(pagination, filters, sorter) {
@@ -69,11 +70,6 @@ export default class Performers extends PureComponent<IProps> {
     }
   }
 
-  async handleOpenChangeTokenLog(user) {
-    this._selectedUser = user;
-    this.setState({ openChangeTokenLogModal: true });
-  }
-
   async search(page = 1) {
     const {
       limit, sort, filter, sortBy, pagination
@@ -102,12 +98,11 @@ export default class Performers extends PureComponent<IProps> {
   }
 
   render() {
-    const { status: defaultStatus } = this.props;
+    const { status: defaultStatus, verifiedEmail } = this.props;
     const {
-      list, searching, pagination, openChangeTokenLogModal
+      list, searching, pagination
     } = this.state;
     const onDelete = this.handleDelete.bind(this);
-    // const openChangeTokenLog = this.handleOpenChangeTokenLog.bind(this);
     const columns = [
       {
         title: 'Avatar',
@@ -144,13 +139,13 @@ export default class Performers extends PureComponent<IProps> {
       {
         title: 'Verified Email?',
         dataIndex: 'verifiedEmail',
-        render(verifiedEmail) {
-          switch (verifiedEmail) {
+        render(val) {
+          switch (val) {
             case true:
               return <Tag color="green">Y</Tag>;
             case false:
               return <Tag color="red">N</Tag>;
-            default: return <Tag color="default">{verifiedEmail}</Tag>;
+            default: return <Tag color="default">{val}</Tag>;
           }
         }
       },
@@ -199,40 +194,10 @@ export default class Performers extends PureComponent<IProps> {
                     </a>
                   )
                 }
-                // {
-                //   key: 'change-token-logs',
-                //   name: 'Token balance change logs',
-                //   children: (
-                //     <a aria-hidden onClick={() => openChangeTokenLog(record)}>
-                //       <HistoryOutlined />
-                //       {' '}
-                //       Token Change Logs
-                //     </a>
-                //   )
-                // }
               ]}
             />
           );
         }
-      }
-    ];
-
-    const statuses = [
-      {
-        key: '',
-        text: 'All statuses'
-      },
-      {
-        key: 'active',
-        text: 'Active'
-      },
-      {
-        key: 'inactive',
-        text: 'Inactive'
-      },
-      {
-        key: 'pending-email-confirmation',
-        text: 'Not verified email'
       }
     ];
 
@@ -243,7 +208,11 @@ export default class Performers extends PureComponent<IProps> {
         </Head>
         <BreadcrumbComponent breadcrumbs={[{ title: 'Users' }]} />
         <Page>
-          <SearchFilter keyword onSubmit={this.handleFilter.bind(this)} statuses={statuses} defaultStatus={defaultStatus || ''} />
+          <SearchFilter
+            onSubmit={this.handleFilter.bind(this)}
+            defaultStatus={defaultStatus}
+            defaultEmailStatus={verifiedEmail}
+          />
           <div style={{ marginBottom: '20px' }} />
           <div className="table-responsive">
             <Table
@@ -255,15 +224,6 @@ export default class Performers extends PureComponent<IProps> {
               onChange={this.handleTableChange.bind(this)}
             />
           </div>
-          <Modal
-            title={`Token balance change logs of ${this._selectedUser?.name || this._selectedUser?.username || 'N/A'}`}
-            destroyOnClose
-            onCancel={() => this.setState({ openChangeTokenLogModal: false })}
-            visible={openChangeTokenLogModal}
-            footer={null}
-          >
-            <TableTokenChangeLogs sourceId={this._selectedUser?._id} source="user" />
-          </Modal>
         </Page>
       </>
     );

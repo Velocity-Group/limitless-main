@@ -37,7 +37,7 @@ export class ReportService {
     if (existReport) {
       existReport.description = payload.description;
       await existReport.save();
-      return existReport;
+      return new ReportDto(existReport);
     }
     const data = { ...payload } as any;
     data.sourceId = user._id;
@@ -45,7 +45,7 @@ export class ReportService {
     data.createdAt = new Date();
     data.updatedAt = new Date();
     const newreport = await this.reportModel.create(data);
-    return newreport;
+    return new ReportDto(newreport);
   }
 
   public async remove(id) {

@@ -79,13 +79,11 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async usearch(
-    @Query() query: PerformerSearchPayload
+    @Query() query: PerformerSearchPayload,
+    @CurrentUser() currentUser: UserDto
   ): Promise<DataResponse<PageableData<IPerformerResponse>>> {
-    const data = await this.performerSearchService.search(query);
-    return DataResponse.ok({
-      total: data.total,
-      data: data.data.map((p) => new PerformerDto(p).toPublicDetailsResponse())
-    });
+    const data = await this.performerSearchService.search(query, currentUser);
+    return DataResponse.ok(data);
   }
 
   @Get('/search/random')
@@ -93,9 +91,10 @@ export class PerformerController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async randomSearch(
-    @Query() req: PerformerSearchPayload
+    @Query() req: PerformerSearchPayload,
+    @CurrentUser() currentUser: UserDto
   ): Promise<DataResponse<any>> {
-    const data = await this.performerSearchService.randomSearch(req);
+    const data = await this.performerSearchService.randomSearch(req, currentUser);
     return DataResponse.ok(data);
   }
 
@@ -211,7 +210,7 @@ export class PerformerController {
     @CurrentUser() performer: UserDto
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
-    await this.performerService.updateAvatar(performer, file);
+    await this.performerService.updateAvatar(performer._id, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl()
@@ -235,7 +234,7 @@ export class PerformerController {
     @CurrentUser() performer: UserDto
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
-    await this.performerService.updateCover(performer, file);
+    await this.performerService.updateCover(performer._id, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl()
@@ -258,7 +257,7 @@ export class PerformerController {
     @CurrentUser() performer: PerformerDto
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
-    await this.performerService.updateWelcomeVideo(performer, file);
+    await this.performerService.updateWelcomeVideo(performer._id, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl(true)

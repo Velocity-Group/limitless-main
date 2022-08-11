@@ -16,6 +16,7 @@ import { FileModule } from '../file/file.module';
 import { PerformerModule } from '../performer/performer.module';
 import { ReactionModule } from '../reaction/reaction.module';
 import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
+import { FollowModule } from '../follow/follow.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { TokenTransactionModule } from '../token-transaction/token-transaction.m
     forwardRef(() => PerformerModule),
     forwardRef(() => ReactionModule),
     forwardRef(() => SubscriptionModule),
-    forwardRef(() => TokenTransactionModule)
+    forwardRef(() => TokenTransactionModule),
+    forwardRef(() => FollowModule)
   ],
   providers: [...feedProviders, ...pollProviders, ...voteProviders,
     FeedService, FeedFileService,

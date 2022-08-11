@@ -26,6 +26,10 @@ export const TableListSubscription = ({
 }: IProps) => {
   const columns = [
     {
+      title: 'ID',
+      dataIndex: 'subscriptionId'
+    },
+    {
       title: 'User',
       dataIndex: 'userInfo',
       render(data, records) {
@@ -57,21 +61,21 @@ export const TableListSubscription = ({
       render(subscriptionType: string) {
         switch (subscriptionType) {
           case 'monthly':
-            return <Tag color="orange">Monthly Subscription</Tag>;
+            return <Tag color="orange">Monthly</Tag>;
           case 'yearly':
-            return <Tag color="purple">Yearly Subscription</Tag>;
+            return <Tag color="purple">Yearly</Tag>;
           case 'free':
-            return <Tag color="red">Free Subscription</Tag>;
+            return <Tag color="red">Free</Tag>;
           default: return <Tag color="orange">{subscriptionType}</Tag>;
         }
       }
     },
     {
       title: 'Start Date',
-      dataIndex: 'startRecurringDate',
+      dataIndex: 'createdAt',
       sorter: true,
-      render(date: Date, record:ISubscription) {
-        return <span>{record.status === 'active' && formatDate(date, 'LL')}</span>;
+      render(date: Date) {
+        return <span>{formatDate(date, 'LL')}</span>;
       }
     },
     {
@@ -83,11 +87,11 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Renews On',
+      title: 'Renewal Date',
       dataIndex: 'nextRecurringDate',
       sorter: true,
       render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && nowIsBefore(record.expiredAt) && formatDate(date, 'LL')}</span>;
+        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && record.subscriptionId && formatDate(date, 'LL')}</span>;
       }
     },
     {
@@ -97,10 +101,6 @@ export const TableListSubscription = ({
         switch (paymentGateway) {
           case 'stripe':
             return <Tag color="blue">Stripe</Tag>;
-          case 'bitpay':
-            return <Tag color="pink">Bitpay</Tag>;
-          case 'paypal':
-            return <Tag color="violet">Paypal</Tag>;
           case 'ccbill':
             return <Tag color="orange">CCbill</Tag>;
           default:
@@ -142,13 +142,13 @@ export const TableListSubscription = ({
               <Button type="primary" onClick={() => onCancelSubscription(records)}>
                 <StopOutlined />
                 {' '}
-                Cancel subscription
+                Cancel
               </Button>
             ) : (
               <Button type="primary" onClick={() => onRenewSubscription(records)}>
                 <RightCircleOutlined />
                 {' '}
-                Reactivate subscription
+                Activate
               </Button>
             )}
           </span>

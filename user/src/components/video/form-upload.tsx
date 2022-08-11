@@ -306,7 +306,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
               />
             </Form.Item>
             {isSale && (
-            <Form.Item name="price" label="Amount of Tokens">
+            <Form.Item name="price" label="Price">
               <InputNumber style={{ width: '100%' }} min={1} />
             </Form.Item>
             )}

@@ -108,8 +108,22 @@ export class TableListEarning extends PureComponent<IProps> {
         dataIndex: 'type',
         render(type: string) {
           switch (type) {
+            case 'product':
+              return <Tag color="#FFCF00">Product</Tag>;
+            case 'gallery':
+              return <Tag color="#FFCF00">Gallery</Tag>;
+            case 'feed':
+              return <Tag color="green">Post</Tag>;
+            case 'tip':
+              return <Tag color="#00dcff">Tip</Tag>;
+            case 'video':
+              return <Tag color="blue">Video</Tag>;
+            case 'stream_tip':
+              return <Tag color="violet">Streaming Tip</Tag>;
+            case 'public_chat':
+              return <Tag color="pink">Paid Streaming</Tag>;
             case 'monthly_subscription':
-              return <Tag color="blue">Monthly Sub</Tag>;
+              return <Tag color="red">Monthly Sub</Tag>;
             case 'yearly_subscription':
               return <Tag color="red">Yearly Sub</Tag>;
             default: return <Tag color="#00dcff">{type}</Tag>;

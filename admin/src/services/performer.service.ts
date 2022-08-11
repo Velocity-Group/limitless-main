@@ -27,14 +27,14 @@ export class PerformerService extends APIRequest {
     return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/documents/upload`;
   }
 
-  getAvatarUploadUrl() {
+  getAvatarUploadUrl(performerId: string) {
     const config = getGlobalConfig();
-    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/avatar/upload`;
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/${performerId}/avatar/upload`;
   }
 
-  getCoverUploadUrl() {
+  getCoverUploadUrl(performerId: string) {
     const config = getGlobalConfig();
-    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/cover/upload`;
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/${performerId}/cover/upload`;
   }
 
   getWelcomeVideoUploadUrl(performerId: string) {

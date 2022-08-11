@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Form,
   Button,
@@ -10,7 +9,7 @@ import {
   Alert,
   Select
 } from 'antd';
-import { PayoutRequestInterface } from 'src/interfaces';
+import { PayoutRequestInterface, ISettings } from 'src/interfaces';
 import Router from 'next/router';
 
 interface Props {
@@ -22,18 +21,16 @@ interface Props {
     previousPaidOutTokens: number;
     remainingUnpaidTokens: number;
   };
-  tokenConversionRate: number;
+  settings: ISettings;
 }
 
 const PayoutRequestForm = ({
-  payout, submit, submiting, statsPayout, tokenConversionRate
+  payout, submit, submiting, statsPayout, settings
 }: Props) => {
   const [form] = Form.useForm();
   const {
     requestNote, requestTokens, status, paymentAccountType
   } = payout;
-
-  const [tokens, setToken] = useState(payout?.requestTokens || 0);
 
   return (
     <Form
@@ -45,55 +42,61 @@ const PayoutRequestForm = ({
       initialValues={{
         requestNote: requestNote || '',
         requestTokens: requestTokens || statsPayout?.remainingUnpaidTokens || 0,
-        paymentAccountType: paymentAccountType || 'stripe'
+        paymentAccountType: paymentAccountType || 'banking'
       }}
       scrollToFirstError
     >
       <div>
         <Space size="large">
           <Statistic
-            title="Total tokens"
+            title="Total Earned"
             value={statsPayout?.totalEarnedTokens || 0}
             precision={2}
-            prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}
+            prefix="$"
           />
           <Statistic
-            title="Paid out tokens"
+            title="Withdrew"
             value={statsPayout?.previousPaidOutTokens || 0}
             precision={2}
-            prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}
+            prefix="$"
           />
           <Statistic
-            title="Balance"
+            title="Wallet Balance"
             value={statsPayout?.remainingUnpaidTokens || 0}
             precision={2}
-            prefix={<img src="/static/coin-ico.png" width="20px" alt="coinn" />}
+            prefix="$"
           />
         </Space>
       </div>
-      <Form.Item label="Requested amount of tokens" name="requestTokens">
-        <InputNumber style={{ width: '100%' }} disabled={payout && payout.status === 'done'} min={1} onChange={(val) => setToken(val)} max={statsPayout?.remainingUnpaidTokens} />
+      <Form.Item label="Requested amount" name="requestTokens">
+        <InputNumber style={{ width: '100%' }} disabled={payout && payout.status === 'done'} min={1} max={statsPayout?.remainingUnpaidTokens} />
       </Form.Item>
-      <p className="error-color">{`Conversion rate of tokens to dollars: $${(tokenConversionRate * tokens).toFixed(2)}`}</p>
       <Form.Item label="Note to Admin" name="requestNote">
         <Input.TextArea disabled={payout && payout.status === 'done'} placeholder="Text something to admin here" rows={3} />
       </Form.Item>
       {payout?.adminNote && (
-      <Form.Item label="Admin noted">
-        <Alert type="info" message={payout?.adminNote} />
-      </Form.Item>
+        <Form.Item label="Admin noted">
+          <Alert type="info" message={payout?.adminNote} />
+        </Form.Item>
       )}
       {payout._id && (
-      <Form.Item label="Status">
-        <Tag color="orange" style={{ textTransform: 'capitalize' }}>{status}</Tag>
-      </Form.Item>
+        <Form.Item label="Status">
+          <Tag color="orange" style={{ textTransform: 'capitalize' }}>{status}</Tag>
+        </Form.Item>
       )}
       <Form.Item label="Select payout method" name="paymentAccountType">
         <Select>
-          <Select.Option value="stripe" key="stripe">
-            <img src="/static/stripe-icon.jpeg" width="30px" alt="stripe" />
+          {/* {settings?.paymentGateway === 'stripe' && (
+            <Select.Option value="stripe" key="stripe">
+              <img src="/static/stripe-icon.jpeg" width="30px" alt="stripe" />
+              {' '}
+              Stripe
+            </Select.Option>
+          )} */}
+          <Select.Option value="banking" key="banking">
+            <img src="/static/banking-ico.png" width="30px" alt="banking" />
             {' '}
-            Stripe
+            Banking
           </Select.Option>
           <Select.Option value="paypal" key="paypal">
             <img src="/static/paypal-ico.png" width="30px" alt="paypal" />
@@ -127,6 +130,6 @@ const PayoutRequestForm = ({
   );
 };
 
-PayoutRequestForm.defaultProps = { };
+PayoutRequestForm.defaultProps = {};
 
 export default PayoutRequestForm;

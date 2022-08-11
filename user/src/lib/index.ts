@@ -6,3 +6,4 @@ export * from './message';
 export * from './duration';
 export * from './utils';
 export * from './number';
+export * from './array';

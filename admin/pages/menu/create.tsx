@@ -49,9 +49,9 @@ class MenuCreate extends PureComponent {
     return (
       <>
         <Head>
-          <title>Create new menu</title>
+          <title>Create New</title>
         </Head>
-        <BreadcrumbComponent breadcrumbs={[{ title: 'Menus', href: '/menu' }, { title: 'Create new menu' }]} />
+        <BreadcrumbComponent breadcrumbs={[{ title: 'Menus', href: '/menu' }, { title: 'Create New' }]} />
         <Page>
           <FormMenu onFinish={this.submit.bind(this)} submiting={submiting} />
         </Page>

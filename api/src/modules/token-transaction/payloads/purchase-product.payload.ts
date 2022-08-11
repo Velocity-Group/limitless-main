@@ -1,13 +1,15 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
+import {
+  IsOptional, IsString, IsNumber
+} from 'class-validator';
 
 export class PurchaseProductsPayload {
   @IsString()
   @IsOptional()
-  deliveryAddress: string;
+  deliveryAddressId: string;
 
   @IsString()
   @IsOptional()
-  postalCode: string;
+  phoneNumber: string;
 
   @IsString()
   @IsOptional()

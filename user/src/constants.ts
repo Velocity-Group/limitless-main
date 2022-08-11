@@ -28,7 +28,6 @@ export const SETTING_KEYS = {
   CCBILL_FLEXFORM_ID: 'ccbillFlexformId',
   CCBILL_SALT: 'ccbillSalt',
   CCBILL_CURRENCY_CODE: 'ccbilCurrencyCode',
-  CCBILL_ENABLE: 'ccbillEnable',
   USE_SENDGRID_TRANSPORTER: 'useSengridTransporter',
   SMTP_TRANSPORTER: 'smtpTransporter',
   GOOGLE_ANALYTICS_CODE: 'gaCode',
@@ -59,9 +58,9 @@ export const SETTING_KEYS = {
   TOKEN_CONVERSION_RATE: 'tokenConversionRate',
   STRIPE_PUBLISHABLE_KEY: 'stripePublishableKey',
   STRIPE_SECRET_KEY: 'stripeSecretKey',
-  STRIPE_ENABLE: 'stripeEnable',
   AGORA_APPID: 'agoraAppId',
-  AGORA_ENABLE: 'agoraEnable'
+  AGORA_ENABLE: 'agoraEnable',
+  PAYMENT_GATEWAY: 'paymentGateway'
 };
 
 export const MENU_SECTION = {

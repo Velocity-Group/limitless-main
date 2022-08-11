@@ -32,4 +32,9 @@ export class UserSearchRequestPayload extends SearchRequest {
   @IsString()
   @IsOptional()
   country: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  verifiedEmail: string;
 }

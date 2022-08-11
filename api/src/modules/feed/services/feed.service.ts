@@ -15,13 +15,13 @@ import { SubscriptionService } from 'src/modules/subscription/services/subscript
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION } from 'src/modules/reaction/constants';
 import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/token-transaction/constants';
-import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { TokenTransactionSearchService, TokenTransactionService } from 'src/modules/token-transaction/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import * as moment from 'moment';
 import { Storage } from 'src/modules/storage/contants';
+import { FollowService } from 'src/modules/follow/services/follow.service';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
@@ -35,6 +35,8 @@ import { FEED_PROVIDER, POLL_PROVIDER, VOTE_PROVIDER } from '../providers';
 @Injectable()
 export class FeedService {
   constructor(
+    @Inject(forwardRef(() => FollowService))
+    private readonly followService: FollowService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => TokenTransactionSearchService))
@@ -70,7 +72,7 @@ export class FeedService {
     });
     // schedule feed
     this.agenda.define(SCHEDULE_FEED_AGENDA, {}, this.scheduleFeed.bind(this));
-    this.agenda.schedule('1 hour from now', SCHEDULE_FEED_AGENDA, {});
+    this.agenda.schedule('10 seconds from now', SCHEDULE_FEED_AGENDA, {});
   }
 
   private async scheduleFeed(job: any, done: any) {
@@ -149,15 +151,13 @@ export class FeedService {
         pollIds = pollIds.concat(f.pollIds);
       }
     });
-    const [performers, files, actions, subscriptions, transactions, polls] = await Promise.all([
+    const [performers, files, actions, subscriptions, transactions, polls, follows] = await Promise.all([
       performerIds.length ? this.performerService.findByIds(performerIds) : [],
       fileIds.length ? this.fileService.findByIds(fileIds) : [],
       user && user._id ? this.reactionService.findByQuery({ objectId: { $in: feedIds }, createdBy: user._id }) : [],
       user && user._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
-        performerId: { $in: performerIds },
-        expiredAt: { $gt: new Date() },
-        status: SUBSCRIPTION_STATUS.ACTIVE
+        performerId: { $in: performerIds }
       }) : [],
       user && user._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,
@@ -165,32 +165,39 @@ export class FeedService {
         target: PURCHASE_ITEM_TARTGET_TYPE.FEED,
         status: PURCHASE_ITEM_STATUS.SUCCESS
       }) : [],
-      pollIds.length ? this.PollVoteModel.find({ _id: { $in: pollIds } }) : []
+      pollIds.length ? this.PollVoteModel.find({ _id: { $in: pollIds } }) : [],
+      user && user._id ? this.followService.find({
+        followerId: user._id,
+        followingId: { $in: performerIds }
+      }) : []
     ]);
 
     return feeds.map((f) => {
       const feed = new FeedDto(f);
-      const performer = performers.find((p) => p._id.toString() === f.fromSourceId.toString());
-      if (performer) {
-        feed.performer = performer.toPublicDetailsResponse();
-      }
       const like = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.LIKE);
       feed.isLiked = !!like;
       const bookmarked = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.BOOK_MARK);
       feed.isBookMarked = !!bookmarked;
-      const subscribed = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
-      feed.isSubscribed = !!subscribed;
+      const subscription = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
+      feed.isSubscribed = subscription && moment().isBefore(subscription.expiredAt);
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
       feed.isBought = !!bought;
+      const followed = follows.find((fol) => `${fol.followingId}` === `${f.fromSourceId}`);
+      feed.isFollowed = !!followed;
+      if (feed.isSale && !feed.price) {
+        feed.isBought = true;
+      }
       const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
       const feedPollStringIds = (f.pollIds || []).map((pollId) => pollId.toString());
       feed.polls = polls.filter((p) => feedPollStringIds.includes(p._id.toString()));
       const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
-      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'));
-      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))) {
+      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`)
+        || (user && user.roles && user.roles.includes('admin'))) {
         feed.isSubscribed = true;
         feed.isBought = true;
       }
+      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (feed.isSale && !feed.price);
+
       if (feedFiles.length) {
         feed.files = feedFiles.map((file) => {
           // track server s3 or local, assign jwtoken if local
@@ -220,6 +227,13 @@ export class FeedService {
           thumbnails: teaser.getThumbnails(),
           url: teaser.getUrl()
         };
+      }
+      const performer = performers.find((p) => p._id.toString() === f.fromSourceId.toString());
+      if (performer) {
+        feed.performer = performer.toPublicDetailsResponse();
+        if (subscription && subscription.usedFreeSubscription) {
+          feed.performer.isFreeSubscription = false;
+        }
       }
       return feed;
     });
@@ -400,16 +414,18 @@ export class FeedService {
       status: STATUS.ACTIVE
     } as any;
 
-    const [subscriptions] = await Promise.all([
+    const [subscriptions, follows] = await Promise.all([
       user ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
-        expiredAt: { $gt: new Date() },
-        status: SUBSCRIPTION_STATUS.ACTIVE
-      }) : []
+        expiredAt: { $gt: new Date() }
+      }) : [],
+      user ? this.followService.find({ followerId: user._id }) : []
     ]);
-    const performerIds = subscriptions.map((s) => s.performerId);
+    const subPerIds = subscriptions.map((s) => s.performerId);
+    const folPerIds = follows.map((s) => s.followingId);
+    const performerIds = uniq(subPerIds.concat(folPerIds));
     query.fromSourceId = { $in: performerIds };
-    if (!user || !performerIds.length || (user && user.roles && user.roles.includes('admin')) || (user && user.isPerformer)) delete query.fromSourceId;
+    if ((user && user.isPerformer)) delete query.fromSourceId;
     if (req.q) {
       query.$or = [
         {
@@ -521,17 +537,22 @@ export class FeedService {
     if (user._id.toString() === feed.fromSourceId.toString()) {
       return true;
     }
+    let isSubscribed = false;
     if (!feed.isSale) {
       // check subscription
       const subscribed = await this.subscriptionService.checkSubscribed(
         feed.fromSourceId,
         user._id
       );
-      if (!subscribed) {
+      isSubscribed = !!subscribed;
+      if (!isSubscribed) {
         throw new ForbiddenException();
       }
       return true;
     } if (feed.isSale) {
+      if (!feed.price) {
+        return true;
+      }
       // check bought
       const bought = await this.paymentTokenService.checkBought(feed, PurchaseItemType.FEED, user);
       if (!bought) {

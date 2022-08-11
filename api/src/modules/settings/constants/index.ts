@@ -12,15 +12,7 @@ export const SETTING_KEYS = {
   META_DESCRIPTION: 'metaDescription',
   HEADER_SCRIPT: 'headerScript',
   AFTER_BODY_SCRIPT: 'afterBodyScript',
-  MONTHLY_SUBSCRIPTION_COMMISSION: 'monthlySubscriptionCommission',
-  YEARLY_SUBSCRIPTION_COMMISSION: 'yearlySubscriptionCommission',
-  VIDEO_SALE_COMMISSION: 'videoSaleCommission',
-  GALLERY_SALE_COMMISSION: 'gallerySaleCommission',
-  PRODUCT_SALE_COMMISSION: 'productSaleCommission',
-  FEED_SALE_COMMISSION: 'feedSaleCommission',
-  TIP_COMMISSION: 'tipCommission',
-  STREAM_COMMISSION: 'streamCommission',
-  MESSAGE_COMMISSION: 'messageCommission',
+  PERFORMER_COMMISSION: 'performerCommission',
   CCBILL_CLIENT_ACCOUNT_NUMBER: 'ccbillClientAccountNumber',
   CCBILL_DATALINK_USERNAME: 'ccbillDatalinkUsername',
   CCBILL_DATALINK_PASSWORD: 'ccbillDatalinkPassword',
@@ -66,7 +58,9 @@ export const SETTING_KEYS = {
   AWS_S3_ENABLE: 's3Enabled',
   AGORA_APPID: 'agoraAppId',
   AGORA_CERTIFICATE: 'agoraCertificate',
-  AGORA_ENABLE: 'agoraEnable'
+  AGORA_ENABLE: 'agoraEnable',
+  CCBILL_SINGLE_SUB_ACCOUNT_NUMBER: 'ccbillSingleSubAccountNumber',
+  CCBILL_RECURRING_SUB_ACCOUNT_NUMBER: 'ccbillRecurringSubAccountNumber'
 };
 
 export const MENU_SECTION = {

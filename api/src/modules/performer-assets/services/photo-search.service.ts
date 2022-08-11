@@ -184,8 +184,7 @@ export class PhotoSearchService {
       user?._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
         performerId: { $in: performerIds },
-        expiredAt: { $gt: new Date() },
-        status: SUBSCRIPTION_STATUS.ACTIVE
+        expiredAt: { $gt: new Date() }
       }) : [],
       user?._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,

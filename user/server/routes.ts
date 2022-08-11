@@ -19,7 +19,7 @@ export default routes()
   .add('error', '/error', '/error')
   .add('home', '/home', '/home')
   .add('search', '/search', '/search')
-  .add('token-package', '/token-package', '/token-package')
+  .add('wallet', '/wallet', '/wallet')
   .add('payment-success', '/payment/success', '/payment/success')
   .add('payment-cancel', '/payment/cancel', '/payment/cancel')
   // performer

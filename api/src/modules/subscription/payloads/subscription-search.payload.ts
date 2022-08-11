@@ -18,6 +18,10 @@ export class SubscriptionSearchRequestPayload extends SearchRequest {
 
   status?: string;
 
+  fromDate?: string;
+
+  toDate?: string;
+
   createdAt?: Date;
 
   expiredAt?: Date;

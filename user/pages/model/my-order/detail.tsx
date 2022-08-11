@@ -106,20 +106,25 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   <Tag color="orange" style={{ textTransform: 'capitalize' }}>{order?.productInfo?.type || 'N/A'}</Tag>
                 </Item>
                 <Item key="unitPrice" label="Unit price">
-                  <img src="/static/coin-ico.png" width="20px" alt="coin" />
+                  $
                   {order?.unitPrice}
                 </Item>
                 <Item key="quantiy" label="Quantity">
                   {order?.quantity || '0'}
                 </Item>
                 <Item key="originalPrice" label="Total Price">
-                  <img src="/static/coin-ico.png" width="20px" alt="coin" />
+                  $
                   {order?.totalPrice}
                 </Item>
               </Descriptions>
               {order?.productInfo?.type === 'physical'
                 ? (
                   <>
+                    <div style={{ marginBottom: '10px' }}>
+                      Phone Number:
+                      {' '}
+                      {order.phoneNumber || 'N/A'}
+                    </div>
                     <div style={{ marginBottom: '10px' }}>
                       Delivery Address:
                       {' '}

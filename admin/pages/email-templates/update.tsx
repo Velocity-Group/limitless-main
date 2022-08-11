@@ -13,6 +13,7 @@ import { emailTemplateService } from '@services/email-template.service';
 const WYSIWYG = dynamic(() => import('@components/wysiwyg'), {
   ssr: false
 });
+
 class EmailTemplateUpdate extends PureComponent<any, any> {
   private _content: string = '';
 
@@ -59,8 +60,8 @@ class EmailTemplateUpdate extends PureComponent<any, any> {
     }
   }
 
-  contentChange(content: { [html: string]: string }) {
-    this._content = content.html;
+  contentChange(content: string) {
+    this._content = content;
   }
 
   render() {

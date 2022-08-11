@@ -11,12 +11,14 @@ import { connect } from 'react-redux';
 import Head from 'next/head';
 import Link from 'next/link';
 import Error from 'next/error';
-import { productService, tokenTransctionService, reactionService } from '@services/index';
+import {
+  productService, tokenTransctionService, reactionService, utilsService
+} from '@services/index';
 import { PerformerListProduct } from '@components/product/performer-list-product';
 import { PurchaseProductForm } from '@components/product/confirm-purchase';
 import { updateBalance } from '@redux/user/actions';
 import {
-  IProduct, IUser, IUIConfig, IError
+  IProduct, IUser, IUIConfig, IError, ICountry
 } from 'src/interfaces';
 import Router from 'next/router';
 import './store.less';
@@ -27,6 +29,7 @@ interface IProps {
   error: IError;
   updateBalance: Function;
   product: IProduct;
+  countries: ICountry[];
 }
 
 interface IStates {
@@ -45,13 +48,15 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
     try {
-      const product = (await (
-        await productService.userView(query.id, {
+      const [product, countries] = await Promise.all([
+        productService.userView(query.id, {
           Authorization: ctx.token
-        })
-      ).data);
+        }),
+        utilsService.countriesList()
+      ]);
       return {
-        product
+        product: product.data,
+        countries: countries.data
       };
     } catch (e) {
       return { error: await e };
@@ -131,8 +136,13 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
 
   async purchaseProduct(payload: any) {
     const { user, updateBalance: handleUpdateBalance, product } = this.props;
+    if (user?.isPerformer) return;
     if (user.balance < product.price) {
       message.error('You have an insufficient token balance. Please top up.');
+      return;
+    }
+    if (product.type === 'physical' && !payload.deliveryAddressId) {
+      message.error('Please select or create new the delivery address!');
       return;
     }
     try {
@@ -140,7 +150,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       await tokenTransctionService.purchaseProduct(product._id, payload);
       message.success('Payment success');
       handleUpdateBalance({ token: -product.price });
-      Router.replace('/user/token-transaction');
+      Router.push('/user/orders');
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
@@ -149,7 +159,9 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
   }
 
   render() {
-    const { ui, product, error } = this.props;
+    const {
+      ui, product, error, user, countries
+    } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Product was not found'} />;
     }
@@ -198,7 +210,6 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 <Image
                   alt="product-img"
                   src={product?.image || '/static/empty_product.svg'}
-                  placeholder
                 />
                 {product.stock && product.type === 'physical' ? (
                   <span className="prod-stock">
@@ -218,14 +229,28 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 <p className="prod-desc">{product?.description || 'No description yet'}</p>
                 <div className="add-cart">
                   <p className="prod-price">
-                    <img alt="coin" src="/static/coin-ico.png" width="25px" />
+                    $
                     {product.price.toFixed(2)}
                   </p>
                   <div>
                     <Button
                       className="primary"
                       disabled={loading}
-                      onClick={() => this.setState({ openPurchaseModal: true })}
+                      onClick={() => {
+                        if (!user?._id) {
+                          message.error('Please log in or register!');
+                          return;
+                        }
+                        if (user?.isPerformer) {
+                          message.error('Models cannot purchase theirs own products!');
+                          return;
+                        }
+                        if (product?.type === 'physical' && !product?.stock) {
+                          message.error('Out of stock, please comeback later!');
+                          return;
+                        }
+                        this.setState({ openPurchaseModal: true });
+                      }}
                     >
                       <DollarOutlined />
                       Get it now!
@@ -292,7 +317,8 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           </div>
         </div>
         <Modal
-          key="tip_performer"
+          key="purchase-product"
+          width={660}
           title={null}
           visible={openPurchaseModal}
           onOk={() => this.setState({ openPurchaseModal: false })}
@@ -302,6 +328,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
           centered
         >
           <PurchaseProductForm
+            countries={countries}
             product={product}
             submiting={submiting}
             onFinish={this.purchaseProduct.bind(this)}

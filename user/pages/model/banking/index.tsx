@@ -4,13 +4,13 @@ import { connect } from 'react-redux';
 import { Layout, message, Tabs } from 'antd';
 import { BankOutlined } from '@ant-design/icons';
 import {
-  IPerformer, IUIConfig
+  IPerformer, IUIConfig, ISettings, ICountry
 } from 'src/interfaces';
 import {
-  updatePerformer
+  updatePerformer, updateUserSuccess
 } from 'src/redux/user/actions';
-import { PerformerBankingForm, PerformerPaypalForm } from '@components/performer';
-import { paymentService, performerService } from '@services/index';
+import { StripeConnectForm, PerformerPaypalForm, PerformerBankingForm } from '@components/performer';
+import { paymentService, performerService, utilsService } from '@services/index';
 import PageHeading from '@components/common/page-heading';
 import '../../user/index.less';
 
@@ -18,11 +18,23 @@ interface IProps {
   user: IPerformer;
   ui: IUIConfig;
   updatePerformer: Function;
+  settings: ISettings;
+  countries: ICountry[];
+  updateUserSuccess: Function;
 }
 class BankingSettings extends PureComponent<IProps> {
   static authenticate = true;
 
   static onlyPerformer = true;
+
+  static async getInitialProps() {
+    const [countries] = await Promise.all([
+      utilsService.countriesList()
+    ]);
+    return {
+      countries: countries?.data || []
+    };
+  }
 
   state = {
     loading: false,
@@ -32,21 +44,39 @@ class BankingSettings extends PureComponent<IProps> {
   }
 
   componentDidMount() {
-    this.getAccount();
+    const { settings } = this.props;
+    settings.paymentGateway === 'stripe' && this.getAccount();
   }
 
   async handleUpdatePaypal(data) {
-    const { user } = this.props;
+    const { user, updateUserSuccess: onUpdateSuccess } = this.props;
     try {
-      await this.setState({ submiting: true });
+      this.setState({ submiting: true });
       const payload = { key: 'paypal', value: data, performerId: user._id };
-      await performerService.updatePaymentGateway(user._id, payload);
+      const resp = await performerService.updatePaymentGateway(user._id, payload);
+      onUpdateSuccess({ ...user, paypalSetting: resp.data });
       this.setState({ submiting: false });
-      message.success('Changes saved');
+      message.success('Paypal account was updated successfully!');
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try againl later');
       this.setState({ submiting: false });
+    }
+  }
+
+  async handleUpdateBanking(data) {
+    try {
+      this.setState({ submiting: true });
+      const { user, updateUserSuccess: onUpdateSuccess } = this.props;
+      const info = { ...data, performerId: user._id };
+      const resp = await performerService.updateBanking(user._id, info);
+      onUpdateSuccess({ ...user, bankingInformation: resp.data });
+      this.setState({ submiting: false });
+      message.success('Banking account was updated successfully!');
+    } catch (error) {
+      this.setState({ submiting: false });
+      const err = await error;
+      message.error(err?.message || 'An error orccurred, please try again.');
     }
   }
 
@@ -86,7 +116,7 @@ class BankingSettings extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, user
+      ui, user, settings, countries
     } = this.props;
     const {
       loading, submiting, loginUrl, stripeAccount
@@ -103,6 +133,7 @@ class BankingSettings extends PureComponent<IProps> {
         <div className="main-container">
           <PageHeading icon={<BankOutlined />} title="Banking (to earn)" />
           <Tabs>
+            {/* {settings.paymentGateway === 'stripe' && (
             <Tabs.TabPane
               tab={(
                 <span>
@@ -111,7 +142,28 @@ class BankingSettings extends PureComponent<IProps> {
               )}
               key="stripe"
             >
-              <PerformerBankingForm stripeAccount={stripeAccount} loading={loading || submiting} loginUrl={loginUrl} onConnectAccount={this.connectAccount.bind(this)} />
+              <StripeConnectForm
+                stripeAccount={stripeAccount}
+                loading={loading || submiting}
+                loginUrl={loginUrl}
+                onConnectAccount={this.connectAccount.bind(this)}
+              />
+            </Tabs.TabPane>
+            )} */}
+            <Tabs.TabPane
+              tab={(
+                <span>
+                  <img src="/static/banking-ico.png" alt="banking-icon" height="30px" />
+                </span>
+              )}
+              key="banking"
+            >
+              <PerformerBankingForm
+                onFinish={this.handleUpdateBanking.bind(this)}
+                updating={submiting}
+                user={user}
+                countries={countries}
+              />
             </Tabs.TabPane>
             <Tabs.TabPane
               tab={(
@@ -135,8 +187,9 @@ class BankingSettings extends PureComponent<IProps> {
 }
 
 const mapStates = (state: any) => ({
-  ui: { ...state.ui },
-  user: { ...state.user.current }
+  ui: state.ui,
+  user: state.user.current,
+  settings: state.settings
 });
-const mapDispatch = { updatePerformer };
+const mapDispatch = { updatePerformer, updateUserSuccess };
 export default connect(mapStates, mapDispatch)(BankingSettings);

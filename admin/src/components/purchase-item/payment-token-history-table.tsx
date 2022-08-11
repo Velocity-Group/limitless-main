@@ -1,7 +1,8 @@
 /* eslint-disable react/destructuring-assignment */
-import { Table, Tag, Avatar } from 'antd';
+import {
+  Table, Tag, Avatar, Tooltip
+} from 'antd';
 import { IPaymentTokenHistory } from 'src/interfaces';
-import { getGlobalConfig } from '@services/index';
 import { formatDate } from '@lib/date';
 
 interface IProps {
@@ -25,34 +26,31 @@ const PaymentTableList = ({
       dataIndex: '_id',
       key: 'id',
       render(data, record) {
-        let path = '';
-        switch (record.target) {
-          case 'feed':
-            path = `/post/${record?.targetId}`;
-            break;
-          case 'product':
-            path = `/store/${record?.targetId}`;
-            break;
-          case 'video':
-            path = `/video/${record?.targetId}`;
-            break;
-          case 'gallery':
-            path = `/gallery/${record?.targetId}`;
-            break;
-          case 'performer':
-            path = `/${record?.targetId}`;
-            break;
-          case 'stream':
-            path = `/${record?.performerId}`;
-            break;
-          default: path = '/home';
-        }
+        // let path = '';
+        // switch (record.target) {
+        //   case 'feed':
+        //     path = `/post/${record?.targetId}`;
+        //     break;
+        //   case 'product':
+        //     path = `/store/${record?.targetId}`;
+        //     break;
+        //   case 'video':
+        //     path = `/video/${record?.targetId}`;
+        //     break;
+        //   case 'gallery':
+        //     path = `/gallery/${record?.targetId}`;
+        //     break;
+        //   case 'performer':
+        //     path = `/${record?.targetId}`;
+        //     break;
+        //   case 'stream':
+        //     path = `/${record?.performerId}`;
+        //     break;
+        //   default: path = '/home';
+        // }
         return (
           <a
             style={{ textTransform: 'uppercase', fontWeight: 600 }}
-            target="_blank"
-            href={`${getGlobalConfig().NEXT_PUBLIC_SITE_URL}${path}`}
-            rel="noreferrer"
           >
             {record._id.slice(16, 24)}
           </a>
@@ -91,12 +89,11 @@ const PaymentTableList = ({
       title: 'Description',
       render(data, record) {
         return record.products.map((re) => (
-          <>
-            <span key={record._id}>
+          <Tooltip key={record._id} title={re.description}>
+            <span key={record._id} style={{ maxWidth: 150, whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
               {re.description}
             </span>
-            <br />
-          </>
+          </Tooltip>
         ));
       }
     },

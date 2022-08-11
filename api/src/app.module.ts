@@ -33,6 +33,7 @@ import { ChangeTokenLogModule } from './modules/change-token-logs/change-token-l
 import { BlockModule } from './modules/block/block.module';
 import { ReportModule } from './modules/report/report.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { FollowModule } from './modules/follow/follow.module';
 
 @Module({
   imports: [
@@ -68,7 +69,8 @@ import { StorageModule } from './modules/storage/storage.module';
     OrderModule,
     ChangeTokenLogModule,
     BlockModule,
-    ReportModule
+    ReportModule,
+    FollowModule
   ],
   controllers: [AppController],
   providers: [AppService]

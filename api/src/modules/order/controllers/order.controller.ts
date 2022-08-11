@@ -75,4 +75,17 @@ export class OrderController {
     const data = await this.orderService.findOne(id);
     return DataResponse.ok(data);
   }
+
+  @Put('/:id/update/delivery-address')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateShippingAddress(
+    @Param('id') id: string,
+    @Body() payload: any,
+    @CurrentUser() user: any
+  ): Promise<DataResponse<any>> {
+    const data = await this.orderService.updateDeliveryAddress(id, payload, user);
+    return DataResponse.ok(data);
+  }
 }

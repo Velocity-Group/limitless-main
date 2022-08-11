@@ -2,7 +2,7 @@
 import { PureComponent, createRef } from 'react';
 import {
   Form, Input, Select, Upload, Button, message, Progress, Switch, DatePicker,
-  Col, Row, InputNumber, Avatar
+  Col, Row, InputNumber, Avatar, Modal
 } from 'antd';
 import { IVideo } from 'src/interfaces';
 import { CameraOutlined, VideoCameraAddOutlined, FileAddOutlined } from '@ant-design/icons';
@@ -11,6 +11,7 @@ import { performerService, getGlobalConfig, videoService } from '@services/index
 import { FormInstance } from 'antd/lib/form';
 import moment from 'moment';
 import { debounce } from 'lodash';
+import { VideoPlayer } from '@components/common';
 
 interface IProps {
   video?: IVideo;
@@ -39,7 +40,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
     firstLoadPerformer: false,
     performers: [],
     removedTeaser: false,
-    removedThumbnail: false
+    removedThumbnail: false,
+    isShowPreview: false,
+    previewUrl: '',
+    previewType: ''
   };
 
   formRef: any;
@@ -93,6 +97,47 @@ export class FormUploadVideo extends PureComponent<IProps> {
       [field]: val
     });
   }
+
+  previewModal = () => {
+    const {
+      isShowPreview, previewUrl, previewType
+    } = this.state;
+    return (
+      <Modal
+        width={767}
+        footer={null}
+        onOk={() => this.setState({ isShowPreview: false })}
+        onCancel={() => this.setState({ isShowPreview: false })}
+        visible={isShowPreview}
+        destroyOnClose
+      >
+        {['teaser', 'video'].includes(previewType) && (
+          <VideoPlayer
+            {...{
+              autoplay: true,
+              controls: true,
+              playsinline: true,
+              fluid: true,
+              sources: [
+                {
+                  src: previewUrl,
+                  type: 'video/mp4'
+                }
+              ]
+            }}
+          />
+        )}
+        {previewType === 'thumbnail' && (
+          <img
+            src={previewUrl}
+            alt="thumbnail"
+            width="100%"
+            style={{ borderRadius: 5 }}
+          />
+        )}
+      </Modal>
+    );
+  };
 
   beforeUpload(file: File, field: string) {
     const { beforeUpload: beforeUploadHandler } = this.props;
@@ -247,9 +292,20 @@ export class FormUploadVideo extends PureComponent<IProps> {
           <Col lg={8} xs={24}>
             <Form.Item
               label="Video"
-              help={(selectedVideo && <a>{selectedVideo.name}</a>)
-                || (previewVideo && <a href={previewVideo?.url} target="_blank" rel="noreferrer">{previewVideo?.name || 'Click here to preview'}</a>)
-                || `Video file is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`}
+              help={
+                (previewVideo && (
+                <a
+                  aria-hidden
+                  onClick={() => this.setState({
+                    isShowPreview: true, previewUrl: previewVideo?.url, previewType: 'video'
+                  })}
+                >
+                  {previewVideo?.name || 'Click here to preview'}
+                </a>
+                ))
+                || (selectedVideo && <a>{selectedVideo.name}</a>)
+                || `Video file is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`
+              }
             >
               <Upload
                 customRequest={() => false}
@@ -269,10 +325,19 @@ export class FormUploadVideo extends PureComponent<IProps> {
             <Form.Item
               label="Teaser"
               help={
-                (selectedTeaser && <a>{selectedTeaser.name}</a>)
-                || (previewTeaserVideo && !removedTeaser && <a href={previewTeaserVideo?.url} target="_blank" rel="noreferrer">{previewTeaserVideo?.name || 'Click here to preview'}</a>)
-                || `Teaser is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`
-              }
+                (previewTeaserVideo && !removedTeaser && (
+                  <a
+                    aria-hidden
+                    onClick={() => this.setState({
+                      isShowPreview: true, previewUrl: previewTeaserVideo?.url, previewType: 'teaser'
+                    })}
+                  >
+                    {previewTeaserVideo?.name || 'Click here to preview'}
+                  </a>
+                ))
+                  || (selectedTeaser && <a>{selectedTeaser.name}</a>)
+                  || `Teaser is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`
+                }
             >
               <Upload
                 customRequest={() => false}
@@ -292,9 +357,20 @@ export class FormUploadVideo extends PureComponent<IProps> {
           <Col lg={8} xs={24}>
             <Form.Item
               label="Thumbnail"
-              help={(selectedThumbnail && <a>{selectedThumbnail.name}</a>)
-                || (previewThumbnail && !removedThumbnail && <a href={previewThumbnail?.url} target="_blank" rel="noreferrer">{previewThumbnail?.name || 'Click here to preview'}</a>)
-                || `Thumbnail is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`}
+              help={
+                (previewThumbnail && !removedThumbnail && (
+                  <a
+                    aria-hidden
+                    onClick={() => this.setState({
+                      isShowPreview: true, previewUrl: previewThumbnail?.url, previewType: 'thumbnail'
+                    })}
+                  >
+                    {previewThumbnail?.name || 'Click here to preview'}
+                  </a>
+                ))
+                  || (selectedThumbnail && <a>{selectedThumbnail.name}</a>)
+                  || `Thumbnail is ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`
+                }
             >
               <Upload
                 customRequest={() => false}
@@ -330,6 +406,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
             {video ? 'Update' : 'Upload'}
           </Button>
         </Form.Item>
+        {this.previewModal()}
       </Form>
     );
   }

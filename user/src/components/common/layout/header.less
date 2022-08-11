@@ -7,6 +7,7 @@
   top: 0;
   left: 0;
   width: 100%;
+  max-width: 100vw;
   z-index: 999;
 }
 
@@ -270,11 +271,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 5px;
+    margin: 10px 0;
     font-size: 10px;
   }
 
   a {
+    display: inline-flex;
     color: @dark-grey;
 
     &.user-balance {
@@ -282,15 +284,22 @@
       align-items: center;
       font-size: 12px;
 
-      img {
-        height: 18px;
+      svg {
+        height: 25px;
+        width: auto;
       }
 
-      .anticon {
-        color: @theme-color;
-        font-size: 18px;
-        margin-left: 10px;
+      .anticon.anticon-plus-circle {
+        color: @primary-color;
+        svg {
+          height: unset
+        }
       }
+    }
+
+    .anticon {
+      font-size: 18px;
+      margin: 0 5px;
     }
   }
 

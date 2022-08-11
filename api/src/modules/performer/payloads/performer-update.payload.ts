@@ -144,9 +144,9 @@ export class PerformerUpdatePayload {
   studioId: string;
 
   @ApiProperty()
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsOptional()
   categoryIds: string[];
 
   @ApiProperty()
@@ -230,13 +230,13 @@ export class PerformerUpdatePayload {
   privateChatPrice: number;
 
   @ApiProperty()
+  @IsDateString()
   @IsOptional()
-  bankingInfomation?: any;
+  dateOfBirth: string;
 
   @ApiProperty()
   @IsOptional()
-  @IsDateString()
-  dateOfBirth: string
+  commissionPercentage: number;
 }
 
 export class SelfUpdatePayload {
@@ -418,7 +418,7 @@ export class SelfUpdatePayload {
   documentVerificationId: string;
 
   @ApiProperty()
-  @IsOptional()
   @IsDateString()
+  @IsOptional()
   dateOfBirth: string
 }

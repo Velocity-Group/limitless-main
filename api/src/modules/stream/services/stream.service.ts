@@ -154,7 +154,6 @@ export class StreamService {
         ? this.subscriptionService.findSubscriptionList({
           performerId: { $in: performerIds },
           userId: user._id,
-          status: SUBSCRIPTION_STATUS.ACTIVE,
           expiredAt: { $gt: new Date() }
         })
         : [],

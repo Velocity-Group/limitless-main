@@ -8,7 +8,6 @@ import { render } from 'mustache';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { Model } from 'mongoose';
 import { IMail } from '../interfaces';
-import { EmailVerificationFailureException } from '../exceptions';
 import { EmailTemplateUpdatePayload } from '../payloads/email-template-update.payload';
 import { EmailTemplateModel } from '../models/email-template.model';
 import { EMAIL_TEMPLATE_PROVIDER } from '../providers';

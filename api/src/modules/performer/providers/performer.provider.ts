@@ -3,7 +3,6 @@ import { MONGO_DB_PROVIDER } from 'src/kernel';
 import {
   CategorySchema,
   PerformerSchema,
-  CommissionSettingSchema,
   BankingSettingSchema
 } from '../schemas';
 import { PaymentGatewaySettingSchema } from '../schemas/payment-gateway-setting.schema';
@@ -11,7 +10,6 @@ import { PaymentGatewaySettingSchema } from '../schemas/payment-gateway-setting.
 export const PERFORMER_MODEL_PROVIDER = 'PERFORMER_MODEL';
 export const PERFORMER_CATEGORY_MODEL_PROVIDER = 'PERFORMER_CATEGORY_MODEL';
 export const PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER = 'PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER';
-export const PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER = 'PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER';
 export const PERFORMER_BANKING_SETTING_MODEL_PROVIDER = 'PERFORMER_BANKING_SETTING_MODEL_PROVIDER';
 
 export const performerProviders = [
@@ -31,11 +29,6 @@ export const performerProviders = [
       'PerformerPaymentGatewaySetting',
       PaymentGatewaySettingSchema
     ),
-    inject: [MONGO_DB_PROVIDER]
-  },
-  {
-    provide: PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER,
-    useFactory: (connection: Connection) => connection.model('PerformerCommissionSetting', CommissionSettingSchema),
     inject: [MONGO_DB_PROVIDER]
   },
   {

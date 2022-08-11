@@ -7,6 +7,8 @@ import { PerformerDocument } from '@components/performer/Document';
 import { SubscriptionForm } from '@components/performer/Subcription';
 import { PerformerPaypalForm } from '@components/performer/paypalForm';
 import { CommissionSettingForm } from '@components/performer/commission-setting';
+import { CCbillSettingForm } from '@components/performer/ccbill-setting';
+import { BankingForm } from '@components/performer/BankingForm';
 import {
   ICountry,
   ILangguges,
@@ -74,10 +76,6 @@ class PerformerUpdate extends PureComponent<IProps> {
     }
   }
 
-  onFormRefSubmit() {
-    this.formRef && this.formRef.formRefSubmit();
-  }
-
   onUploaded(field: string, resp: any) {
     if (field === 'avatarId') {
       this.setState({ avatarUrl: resp.response.data.url });
@@ -124,9 +122,10 @@ class PerformerUpdate extends PureComponent<IProps> {
     try {
       await this.setState({ settingUpdating: true });
       await performerService.updateCommissionSetting(id, { ...data, performerId: id });
-      message.success('Updated successfully!');
+      message.success('Updated commission setting successfully!');
     } catch (error) {
-      message.error('An error occurred, please try again!');
+      const err = await error;
+      message.error(err?.message || 'An error occurred, please try again!');
     } finally {
       this.setState({ settingUpdating: false });
     }
@@ -224,19 +223,11 @@ class PerformerUpdate extends PureComponent<IProps> {
                   performer={performer}
                 />
               </Tabs.TabPane>
-              {/* <Tabs.TabPane tab={<span>Banking</span>} key="banking">
-                <BankingForm
-                  submiting={settingUpdating}
-                  onFinish={this.updateBankingSetting.bind(this)}
-                  bankingInformation={performer.bankingInformation || null}
-                  countries={countries}
-                />
-              </Tabs.TabPane> */}
               <Tabs.TabPane tab={<span>Commission</span>} key="commission">
                 <CommissionSettingForm
                   submiting={settingUpdating}
                   onFinish={this.updateCommissionSetting.bind(this)}
-                  commissionSetting={performer.commissionSetting}
+                  performer={performer}
                 />
               </Tabs.TabPane>
               {/* <Tabs.TabPane tab={<span>CCbill</span>} key="ccbill">
@@ -246,6 +237,14 @@ class PerformerUpdate extends PureComponent<IProps> {
                   ccbillSetting={performer.ccbillSetting}
                 />
               </Tabs.TabPane> */}
+              <Tabs.TabPane tab={<span>Banking</span>} key="banking">
+                <BankingForm
+                  submiting={settingUpdating}
+                  onFinish={this.updateBankingSetting.bind(this)}
+                  bankingInformation={performer.bankingInformation || null}
+                  countries={countries}
+                />
+              </Tabs.TabPane>
               <Tabs.TabPane tab={<span>Paypal</span>} key="paypal">
                 <PerformerPaypalForm
                   updating={settingUpdating}

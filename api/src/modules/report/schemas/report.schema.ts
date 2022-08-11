@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose';
 import { REPORT_TARGET } from '../constants';
 
 export const ReportSchema = new mongoose.Schema({
+  title: String,
   description: String,
   source: {
     type: String,

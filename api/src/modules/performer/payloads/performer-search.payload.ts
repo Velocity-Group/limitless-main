@@ -40,12 +40,19 @@ export class PerformerSearchPayload extends SearchRequest {
   status: string;
 
   @ApiProperty()
+  @IsString()
   @IsOptional()
   verifiedEmail: string;
 
   @ApiProperty()
+  @IsString()
   @IsOptional()
   verifiedDocument: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  verifiedAccount: string;
 
   @ApiProperty()
   @IsString()
@@ -118,4 +125,9 @@ export class PerformerSearchPayload extends SearchRequest {
   @IsString()
   @IsOptional()
   streamingStatus: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  followed: string;
 }

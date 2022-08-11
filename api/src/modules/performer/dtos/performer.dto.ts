@@ -46,11 +46,8 @@ export interface IPerformerResponse {
     totalPhotos?: number;
     totalGalleries?: number;
     totalProducts?: number;
-    totalBlogs?: number;
-    totalStories?: number;
     totalStreamTime?: number;
-    totalRating?: number;
-    avgRating?: number;
+    followers?: number;
   };
   verifiedEmail?: boolean;
   verifiedAccount?: boolean;
@@ -75,14 +72,9 @@ export interface IPerformerResponse {
   dateOfBirth?: Date;
   bodyType?: string;
   balance?: number;
-  socialsLink?: {
-    facebook: String;
-    twitter: String;
-    google: String;
-    instagram: String;
-    linkedIn: String;
-  };
   stripeAccount?: any;
+  isFollowed?: boolean;
+  commissionPercentage?: number;
 }
 
 export class PerformerDto {
@@ -189,11 +181,8 @@ export class PerformerDto {
     totalGalleries: number;
     totalProducts: number;
     totalFeeds: number;
-    totalBlogs: number;
-    totalStories: number;
+    followers: number;
     totalStreamTime: number;
-    totalRating: number;
-    avgRating: number;
   };
 
   score?: number;
@@ -244,13 +233,9 @@ export class PerformerDto {
 
   balance: number;
 
-  socialsLink: {
-    facebook: String;
-    twitter: String;
-    google: String;
-    instagram: String;
-    linkedIn: String;
-  }
+  isFollowed?: boolean;
+
+  commissionPercentage?: number;
 
   constructor(data?: Partial<any>) {
     Object.assign(
@@ -327,7 +312,8 @@ export class PerformerDto {
         'dateOfBirth',
         'bodyType',
         'balance',
-        'socialsLink'
+        'isFollowed',
+        'commissionPercentage'
       ])
     );
   }
@@ -369,7 +355,8 @@ export class PerformerDto {
       eyes: this.eyes,
       bodyType: this.bodyType,
       sexualOrientation: this.sexualOrientation,
-      isPerformer: true
+      isPerformer: true,
+      isFollowed: this.isFollowed
     };
     const privateInfo = {
       firstName: this.firstName,
@@ -407,7 +394,7 @@ export class PerformerDto {
         ...publicInfo,
         ...privateInfo,
         ccbillSetting: this.ccbillSetting,
-        commissionSetting: this.commissionSetting
+        commissionPercentage: this.commissionPercentage
       };
     }
 
@@ -445,7 +432,7 @@ export class PerformerDto {
       lastStreamingTime: this.lastStreamingTime,
       live: this.live,
       streamingStatus: this.streamingStatus,
-      socialsLink: this.socialsLink
+      isFollowed: this.isFollowed
     };
   }
 
@@ -499,8 +486,8 @@ export class PerformerDto {
       streamingStatus: this.streamingStatus,
       dateOfBirth: this.dateOfBirth,
       bodyType: this.bodyType,
-      socialsLink: this.socialsLink,
-      isPerformer: true
+      isPerformer: true,
+      isFollowed: this.isFollowed
     };
   }
 }

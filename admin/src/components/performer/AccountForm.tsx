@@ -1,19 +1,39 @@
 import { PureComponent } from 'react';
 import {
-  Form, Input, Button, Select, message, Switch, Row, Col, DatePicker, InputNumber, Upload, Checkbox, Progress
+  Form,
+  Input,
+  Button,
+  Select,
+  message,
+  Switch,
+  Row,
+  Col,
+  DatePicker,
+  InputNumber,
+  Upload,
+  Checkbox,
+  Progress,
+  Modal
 } from 'antd';
 import {
-  IPerformer, ICountry, ILangguges, IPhoneCodes, IBody
+  IPerformer,
+  ICountry,
+  ILangguges,
+  IPhoneCodes,
+  IBody
 } from 'src/interfaces';
-import {
-  UploadOutlined
-} from '@ant-design/icons';
+import { UploadOutlined } from '@ant-design/icons';
 import { AvatarUpload } from '@components/user/avatar-upload';
 import { CoverUpload } from '@components/user/cover-upload';
-import { authService, performerService, getGlobalConfig } from '@services/index';
+import {
+  authService,
+  performerService,
+  getGlobalConfig
+} from '@services/index';
 import Router from 'next/router';
 import moment from 'moment';
 import './index.less';
+import { VideoPlayer } from '@components/common';
 
 const layout = {
   labelCol: { span: 24 },
@@ -52,8 +72,9 @@ export class AccountForm extends PureComponent<IProps> {
     isUploadingVideo: false,
     uploadVideoPercentage: 0,
     previewVideoUrl: '',
-    previewVideoName: ''
-  }
+    previewVideoName: '',
+    isShowPreview: false
+  };
 
   componentDidMount() {
     const { performer } = this.props;
@@ -64,7 +85,9 @@ export class AccountForm extends PureComponent<IProps> {
   }
 
   handleVideoChange = (info: any) => {
-    info.file && info.file.percent && this.setState({ uploadVideoPercentage: info.file.percent });
+    info.file
+      && info.file.percent
+      && this.setState({ uploadVideoPercentage: info.file.percent });
     if (info.file.status === 'uploading') {
       this.setState({ isUploadingVideo: true });
       return;
@@ -80,25 +103,48 @@ export class AccountForm extends PureComponent<IProps> {
   };
 
   beforeUploadVideo = (file) => {
-    const isValid = file.size / 1024 / 1024 < (getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
+    const isValid = file.size / 1024 / 1024
+      < (getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!isValid) {
-      message.error(`File is too large please provide an file ${getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
+      message.error(
+        `File is too large please provide an file ${
+          getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200
+        }MB or below`
+      );
       return false;
     }
     this.setState({ previewVideoName: file.name });
     return true;
-  }
+  };
 
   render() {
     const {
-      performer, onFinish, submiting, countries, onUploaded, bodyInfo, avatarUrl, coverUrl
+      performer,
+      onFinish,
+      submiting,
+      countries,
+      onUploaded,
+      bodyInfo,
+      avatarUrl,
+      coverUrl
     } = this.props;
     const {
-      heights = [], weights = [], bodyTypes = [], genders = [], sexualOrientations = [], ethnicities = [],
-      hairs = [], eyes = [], butts = []
+      heights = [],
+      weights = [],
+      bodyTypes = [],
+      genders = [],
+      sexualOrientations = [],
+      ethnicities = [],
+      hairs = [],
+      eyes = [],
+      butts = []
     } = bodyInfo;
     const {
-      uploadVideoPercentage, isUploadingVideo, previewVideoName, previewVideoUrl
+      uploadVideoPercentage,
+      isUploadingVideo,
+      previewVideoName,
+      previewVideoUrl,
+      isShowPreview
     } = this.state;
     const uploadHeaders = {
       authorization: authService.getToken()
@@ -111,18 +157,23 @@ export class AccountForm extends PureComponent<IProps> {
         onFinishFailed={() => message.error('Please complete the required fields')}
         validateMessages={validateMessages}
         initialValues={
-          performer ? { ...performer, dateOfBirth: moment(performer?.dateOfBirth) || '' } : {
-            country: 'US',
-            status: 'active',
-            gender: 'male',
-            sexualOrientation: 'female',
-            languages: ['en'],
-            dateOfBirth: '',
-            verifiedEmail: false,
-            verifiedAccount: false,
-            verifiedDocument: false,
-            balance: 0
-          }
+          performer
+            ? {
+              ...performer,
+              dateOfBirth: moment(performer?.dateOfBirth) || ''
+            }
+            : {
+              country: 'US',
+              status: 'active',
+              gender: 'male',
+              sexualOrientation: 'female',
+              languages: ['en'],
+              dateOfBirth: '',
+              verifiedEmail: false,
+              verifiedAccount: false,
+              verifiedDocument: false,
+              balance: 0
+            }
         }
       >
         <Row>
@@ -132,16 +183,15 @@ export class AccountForm extends PureComponent<IProps> {
               style={{
                 position: 'relative',
                 marginBottom: 25,
-                backgroundImage:
-                  coverUrl
-                    ? `url('${coverUrl}')`
-                    : "url('/banner-image.jpg')"
+                backgroundImage: coverUrl
+                  ? `url('${coverUrl}')`
+                  : "url('/banner-image.jpg')"
               }}
             >
               <div className="avatar-upload">
                 <AvatarUpload
                   headers={uploadHeaders}
-                  uploadUrl={performerService.getAvatarUploadUrl()}
+                  uploadUrl={performerService.getAvatarUploadUrl(performer._id)}
                   onUploaded={onUploaded.bind(this, 'avatarId')}
                   image={avatarUrl}
                 />
@@ -151,7 +201,7 @@ export class AccountForm extends PureComponent<IProps> {
                   options={{ fieldName: 'cover' }}
                   image={performer && performer.cover ? performer.cover : ''}
                   headers={uploadHeaders}
-                  uploadUrl={performerService.getCoverUploadUrl()}
+                  uploadUrl={performerService.getCoverUploadUrl(performer._id)}
                   onUploaded={onUploaded.bind(this, 'coverId')}
                 />
               </div>
@@ -204,8 +254,7 @@ export class AccountForm extends PureComponent<IProps> {
                 { required: true, message: 'Please input your display name!' },
                 {
                   pattern: new RegExp(/^(?=.*\S).+$/g),
-                  message:
-                    'Display name can not contain only whitespace'
+                  message: 'Display name can not contain only whitespace'
                 },
                 {
                   min: 3,
@@ -226,13 +275,19 @@ export class AccountForm extends PureComponent<IProps> {
                 {
                   pattern: new RegExp(/^[a-z0-9]+$/g),
                   message: 'Username must contain lowercase alphanumerics only'
-                }, { min: 3 }]}
+                },
+                { min: 3 }
+              ]}
             >
               <Input placeholder="Unique, lowercase alphanumerics only" />
             </Form.Item>
           </Col>
           <Col xs={12} md={12}>
-            <Form.Item name="email" label="Email" rules={[{ type: 'email', required: true }]}>
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[{ type: 'email', required: true }]}
+            >
               <Input placeholder="Email address" />
             </Form.Item>
           </Col>
@@ -251,15 +306,13 @@ export class AccountForm extends PureComponent<IProps> {
                 style={{ width: '100%' }}
                 placeholder="DD/MM/YYYY"
                 format="DD/MM/YYYY"
-                disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(18, 'year').endOf('day')}
+                disabledDate={(currentDate) => currentDate
+                  && currentDate > moment().subtract(18, 'year').endOf('day')}
               />
             </Form.Item>
           </Col>
           <Col md={12} xs={12}>
-            <Form.Item
-              label="Token balance"
-              name="balance"
-            >
+            <Form.Item label="Wallet Balance" name="balance">
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
           </Col>
@@ -309,8 +362,11 @@ export class AccountForm extends PureComponent<IProps> {
                 label="Password"
                 rules={[
                   {
-                    pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
-                    message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                    pattern: new RegExp(
+                      /^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g
+                    ),
+                    message:
+                      'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
                   },
                   { required: true, message: 'Please enter your password!' }
                 ]}
@@ -325,8 +381,11 @@ export class AccountForm extends PureComponent<IProps> {
                 label="Confirm password"
                 rules={[
                   {
-                    pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
-                    message: 'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                    pattern: new RegExp(
+                      /^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g
+                    ),
+                    message:
+                      'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
                   },
                   { required: true, message: 'Please confirm your password!' }
                 ]}
@@ -467,31 +526,47 @@ export class AccountForm extends PureComponent<IProps> {
           </Select>
         </Form.Item> */}
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedEmail" label="Verified Email?" valuePropName="checked" help="Turn on if email account verified">
+            <Form.Item
+              name="verifiedEmail"
+              label="Verified Email?"
+              valuePropName="checked"
+              help="Turn on if email account verified"
+            >
               <Switch />
             </Form.Item>
           </Col>
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedDocument" label="Verified ID Documents?" valuePropName="checked" help="Allow model to start posting contents">
+            <Form.Item
+              name="verifiedDocument"
+              label="Verified ID Documents?"
+              valuePropName="checked"
+              help="Allow model to start posting contents"
+            >
               <Switch />
             </Form.Item>
           </Col>
           <Col xs={8} md={8}>
-            <Form.Item name="verifiedAccount" label="Verified Account?" valuePropName="checked" help="Display verification tick beside model name">
+            <Form.Item
+              name="verifiedAccount"
+              label="Verified Account?"
+              valuePropName="checked"
+              help="Display verification tick beside model name"
+            >
               <Switch />
             </Form.Item>
           </Col>
           <Col xs={24} md={24}>
-            <Form.Item name="status" label="Status" rules={[{ required: true }]}>
+            <Form.Item
+              name="status"
+              label="Status"
+              rules={[{ required: true }]}
+            >
               <Select>
                 <Select.Option key="active" value="active">
                   Active
                 </Select.Option>
                 <Select.Option key="inactive" value="inactive">
                   Inactive
-                </Select.Option>
-                <Select.Option key="pending-email-confirmation" value="pending-email-confirmation" disabled>
-                  Not verified email
                 </Select.Option>
               </Select>
             </Form.Item>
@@ -505,22 +580,35 @@ export class AccountForm extends PureComponent<IProps> {
                   listType="picture-card"
                   className="avatar-uploader"
                   showUploadList={false}
-                  action={performerService.getWelcomeVideoUploadUrl(performer._id)}
+                  action={performerService.getWelcomeVideoUploadUrl(
+                    performer._id
+                  )}
                   headers={uploadHeaders}
                   beforeUpload={(file) => this.beforeUploadVideo(file)}
                   onChange={this.handleVideoChange.bind(this)}
                 >
                   <UploadOutlined />
                 </Upload>
-                <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
-                  {((previewVideoUrl || previewVideoName) && <a rel="noreferrer" href={previewVideoUrl} target="_blank">{previewVideoName || 'Click here to preview'}</a>)
-                 || (
-                 <a>
-                   Intro video is $
-                   {getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}
-                   MB or below
-                 </a>
-                 )}
+                <div
+                  className="ant-form-item-explain"
+                  style={{ textAlign: 'left' }}
+                >
+                  {((previewVideoUrl || previewVideoName) && (
+                    <a
+                      aria-hidden
+                      onClick={() => this.setState({ isShowPreview: true })}
+                    >
+                      {previewVideoName
+                        || previewVideoUrl
+                        || 'Click here to preview'}
+                    </a>
+                  )) || (
+                    <a>
+                      Intro video is $
+                      {getGlobalConfig().NEXT_PUBLIC_MAX_SIZE_TEASER || 200}
+                      MB or below
+                    </a>
+                  )}
                 </div>
                 {uploadVideoPercentage ? (
                   <Progress percent={Math.round(uploadVideoPercentage)} />
@@ -533,7 +621,12 @@ export class AccountForm extends PureComponent<IProps> {
           )}
           <Col xs={24} md={24}>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-              <Button type="primary" htmlType="submit" disabled={submiting || isUploadingVideo} loading={submiting || isUploadingVideo}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={submiting || isUploadingVideo}
+                loading={submiting || isUploadingVideo}
+              >
                 Submit
               </Button>
               &nbsp;
@@ -543,6 +636,30 @@ export class AccountForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
         </Row>
+        <Modal
+          width={767}
+          footer={null}
+          onOk={() => this.setState({ isShowPreview: false })}
+          onCancel={() => this.setState({ isShowPreview: false })}
+          visible={isShowPreview}
+          destroyOnClose
+          centered
+        >
+          <VideoPlayer
+            {...{
+              autoplay: true,
+              controls: true,
+              playsinline: true,
+              fluid: true,
+              sources: [
+                {
+                  src: previewVideoUrl,
+                  type: 'video/mp4'
+                }
+              ]
+            }}
+          />
+        </Modal>
       </Form>
     );
   }

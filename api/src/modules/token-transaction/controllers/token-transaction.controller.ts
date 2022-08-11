@@ -19,7 +19,7 @@ import { PurchaseProductsPayload, SendTipsPayload } from '../payloads';
 import { TokenTransactionService } from '../services';
 
 @Injectable()
-@Controller('token-transactions')
+@Controller('wallet/charges')
 export class PaymentTokenController {
   constructor(private readonly tokenTransactionService: TokenTransactionService) {}
 

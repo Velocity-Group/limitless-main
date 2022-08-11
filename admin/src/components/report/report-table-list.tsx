@@ -1,8 +1,10 @@
 /* eslint-disable react/destructuring-assignment */
 import { formatDate } from '@lib/date';
 import {
-  Button, Table, Tag, Tooltip
+  Button, Collapse, Table, Tag
 } from 'antd';
+import { CaretDownOutlined } from '@ant-design/icons';
+import { getGlobalConfig } from '@services/config';
 
 interface IProps {
   items: any[];
@@ -52,17 +54,16 @@ const reportTableList = ({
     },
     {
       title: 'Reason',
-      dataIndex: 'description',
       key: 'description',
-      render: (description) => (
-        <Tooltip title={description}>
-          <div style={{
-            width: 150, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden'
-          }}
+      render: (record) => (
+        <Collapse ghost accordion expandIconPosition="right">
+          <Collapse.Panel
+            header={record?.title || record?.description}
+            key="1"
           >
-            {description || 'N/A'}
-          </div>
-        </Tooltip>
+            {record?.description}
+          </Collapse.Panel>
+        </Collapse>
       )
     },
     {

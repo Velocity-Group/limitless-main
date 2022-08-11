@@ -9,7 +9,7 @@ import {
   EntityNotFoundException, ForbiddenException, QueueEventService, QueueEvent, StringHelper
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
-import { FileService } from 'src/modules/file/services';
+import { FileService, FILE_EVENT } from 'src/modules/file/services';
 import { SettingService } from 'src/modules/settings';
 import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
@@ -28,9 +28,12 @@ import { UserService } from 'src/modules/user/services';
 import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
-import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
+import { isObjectId, toObjectId, randomString } from 'src/kernel/helpers/string.helper';
 import { Storage } from 'src/modules/storage/contants';
 import { StripeService } from 'src/modules/payment/services';
+import { FollowService } from 'src/modules/follow/services/follow.service';
+import * as moment from 'moment';
+import { omit } from 'lodash';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
@@ -38,7 +41,6 @@ import {
 import {
   PerformerModel,
   PaymentGatewaySettingModel,
-  CommissionSettingModel,
   BankingModel
 } from '../models';
 import {
@@ -52,7 +54,6 @@ import {
 } from '../payloads';
 import {
   PERFORMER_BANKING_SETTING_MODEL_PROVIDER,
-  PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER,
   PERFORMER_MODEL_PROVIDER,
   PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER
 } from '../providers';
@@ -60,6 +61,8 @@ import {
 @Injectable()
 export class PerformerService {
   constructor(
+    @Inject(forwardRef(() => FollowService))
+    private readonly followService: FollowService,
     @Inject(forwardRef(() => PerformerBlockService))
     private readonly performerBlockService: PerformerBlockService,
     @Inject(forwardRef(() => ChangeTokenLogService))
@@ -85,10 +88,33 @@ export class PerformerService {
     @Inject(PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER)
     private readonly paymentGatewaySettingModel: Model<PaymentGatewaySettingModel>,
     @Inject(PERFORMER_BANKING_SETTING_MODEL_PROVIDER)
-    private readonly bankingSettingModel: Model<BankingModel>,
-    @Inject(PERFORMER_COMMISSION_SETTING_MODEL_PROVIDER)
-    private readonly commissionSettingModel: Model<CommissionSettingModel>
+    private readonly bankingSettingModel: Model<BankingModel>
   ) {
+    this.queueEventService.subscribe(
+      'CONVERT_WELCOME_VIDEO_CHANNEL',
+      'FILE_PROCESSED_TOPIC',
+      this.handleWelcomeVideoFile.bind(this)
+    );
+  }
+
+  public async handleWelcomeVideoFile(event: QueueEvent) {
+    const { eventName } = event;
+    if (eventName !== FILE_EVENT.VIDEO_PROCESSED) {
+      return;
+    }
+    const { performerId } = event.data.meta;
+    const [performer, file] = await Promise.all([
+      this.performerModel.findById(performerId),
+      this.fileService.findById(event.data.fileId)
+    ]);
+    if (!performer) {
+      // TODO - delete file?
+      await this.fileService.remove(event.data.fileId);
+      return;
+    }
+
+    performer.welcomeVideoPath = file.getUrl();
+    await performer.save();
   }
 
   public async checkExistedEmailorUsername(payload) {
@@ -122,7 +148,7 @@ export class PerformerService {
   public async findByUsername(
     username: string,
     countryCode?: string,
-    currentUser?: UserDto
+    user?: UserDto
   ): Promise<PerformerDto> {
     const query = !isObjectId(username) ? {
       username: username.trim()
@@ -130,38 +156,54 @@ export class PerformerService {
     const model = await this.performerModel.findOne(query).lean();
     if (!model) throw new EntityNotFoundException();
     let isBlocked = false;
-    if (countryCode && `${currentUser?._id}` !== `${model._id}`) {
+    if (countryCode && `${user?._id}` !== `${model._id}`) {
       isBlocked = await this.performerBlockService.checkBlockedCountryByIp(model._id, countryCode);
       if (isBlocked) {
         throw new HttpException('Your country has been blocked by this model', 403);
       }
     }
+    const dto = new PerformerDto(model);
     let isBlockedByPerformer = false;
     let isBookMarked = null;
     let isSubscribed = null;
-    if (currentUser) {
-      isBlockedByPerformer = `${currentUser?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
+    let isFollowed = null;
+    if (user) {
+      isBlockedByPerformer = `${user?._id}` !== `${model._id}` && await this.performerBlockService.checkBlockedByPerformer(
         model._id,
-        currentUser._id
+        user._id
       );
       if (isBlockedByPerformer) throw new HttpException('You has been blocked by this model', 403);
-      isSubscribed = await this.subscriptionService.checkSubscribed(model._id, currentUser._id);
       isBookMarked = await this.reactionService.findOneQuery({
-        objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: currentUser._id, action: REACTION.BOOK_MARK
+        objectType: REACTION_TYPE.PERFORMER, objectId: model._id, createdBy: user._id, action: REACTION.BOOK_MARK
       });
+      const [subscription, following] = await Promise.all([
+        this.subscriptionService.findOneSubscription({
+          performerId: model._id,
+          userId: user._id
+        }),
+        this.followService.findOne({ followerId: user._id, followingId: model._id })
+      ]);
+      if (subscription) {
+        isSubscribed = moment().isBefore(subscription.expiredAt);
+        if (subscription.usedFreeSubscription) {
+          dto.isFreeSubscription = false;
+        }
+      }
+      isFollowed = following;
+      isSubscribed = (subscription && moment().isBefore(subscription.expiredAt)) || false;
     }
-    const dto = new PerformerDto(model);
     dto.isSubscribed = !!isSubscribed;
     dto.isBookMarked = !!isBookMarked;
-    if (model.avatarId) {
-      const avatar = await this.fileService.findById(model.avatarId);
-      dto.avatarPath = avatar ? avatar.path : null;
+    dto.isFollowed = !!isFollowed;
+    if (user && user.roles && user.roles.includes('admin')) {
+      dto.isSubscribed = true;
     }
     if (model.welcomeVideoId) {
       const welcomeVideo = await this.fileService.findById(
         model.welcomeVideoId
       );
-      dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : null;
+      dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : '';
+      dto.welcomeVideoPath && await this.performerModel.updateOne({ _id: model._id }, { welcomeVideoPath: dto.welcomeVideoPath });
     }
     await this.increaseViewStats(dto._id);
     return dto;
@@ -196,24 +238,24 @@ export class PerformerService {
       throw new EntityNotFoundException();
     }
     const [
-      avatar, documentVerification, idVerification, cover, welcomeVideo,
-      paypalSetting, commissionSetting, stripeAccount, blockCountries
+      documentVerification, idVerification, welcomeVideo
     ] = await Promise.all([
-      performer.avatarId && this.fileService.findById(performer.avatarId),
       performer.documentVerificationId && this.fileService.findById(performer.documentVerificationId),
       performer.idVerificationId && this.fileService.findById(performer.idVerificationId),
-      performer.coverId && this.fileService.findById(performer.coverId),
-      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId),
+      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId)
+    ]);
+    const [paypalSetting, stripeAccount, blockCountries, bankingInformation, ccbillSetting] = await Promise.all([
       this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'paypal' }),
-      this.commissionSettingModel.findOne({ performerId: id }),
       this.stripeService.getConnectAccount(performer._id),
-      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id })
+      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id }),
+      this.getBankInfo(performer._id),
+      this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'ccbill' })
     ]);
 
     // TODO - update kernel for file dto
     const dto = new PerformerDto(performer);
-    dto.avatar = avatar ? FileDto.getPublicUrl(avatar.path) : null; // TODO - get default avatar
-    dto.cover = cover ? FileDto.getPublicUrl(cover.path) : null;
+    dto.avatar = dto.avatarPath ? FileDto.getPublicUrl(dto.avatarPath) : null; // TODO - get default avatar
+    dto.cover = dto.coverPath ? FileDto.getPublicUrl(dto.coverPath) : null;
     dto.welcomeVideoName = welcomeVideo ? welcomeVideo.name : null;
     dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : null;
     if (idVerification) {
@@ -239,9 +281,10 @@ export class PerformerService {
       };
     }
     dto.paypalSetting = paypalSetting;
-    dto.commissionSetting = commissionSetting;
     dto.stripeAccount = stripeAccount;
     dto.blockCountries = blockCountries;
+    dto.bankingInformation = bankingInformation;
+    dto.ccbillSetting = ccbillSetting;
     return dto;
   }
 
@@ -262,11 +305,19 @@ export class PerformerService {
     payload: PerformerCreatePayload,
     user?: UserDto
   ): Promise<PerformerDto> {
-    const data = {
+    const data = omit({
       ...payload,
       updatedAt: new Date(),
       createdAt: new Date()
-    } as any;
+    }, ['balance', 'commissionPercentage']) as any;
+    if (!data.name) {
+      // eslint-disable-next-line no-param-reassign
+      data.name = [data.firstName || '', data.lastName || ''].join(' ');
+    }
+    if (!data.username) {
+      // eslint-disable-next-line no-param-reassign
+      data.username = `user${randomString(8, '0123456789')}`;
+    }
     const countPerformerUsername = await this.performerModel.countDocuments({
       username: payload.username.trim().toLowerCase()
     });
@@ -305,7 +356,7 @@ export class PerformerService {
     if (user) {
       data.createdBy = user._id;
     }
-    data.username = data.username.trim().toLowerCase();
+    data.username = data.username ? data.username.trim().toLowerCase() : `model${randomString(8, '0123456789')}`;
     data.email = data.email.toLowerCase();
     if (data.dateOfBirth) {
       data.dateOfBirth = new Date(data.dateOfBirth);
@@ -340,11 +391,11 @@ export class PerformerService {
   public async register(
     payload: PerformerRegisterPayload
   ): Promise<PerformerDto> {
-    const data = {
+    const data = omit({
       ...payload,
       updatedAt: new Date(),
       createdAt: new Date()
-    } as any;
+    }, ['balance', 'commissionPercentage']) as any;
     const countPerformerUsername = await this.performerModel.countDocuments({
       username: payload.username.trim().toLowerCase()
     });
@@ -369,7 +420,7 @@ export class PerformerService {
       // TODO - check for other storaged
       data.avatarPath = avatar.path;
     }
-    data.username = data.username.trim().toLowerCase();
+    data.username = data.username ? data.username.trim().toLowerCase() : `model${randomString(8, '0123456789')}`;
     data.email = data.email.toLowerCase();
     if (!data.name) {
       data.name = data.firstName && data.lastName ? [data.firstName, data.lastName].join(' ') : 'No_display_name';
@@ -408,7 +459,7 @@ export class PerformerService {
   }
 
   public async adminUpdate(
-    id: string | ObjectId,
+    id: string,
     payload: PerformerUpdatePayload
   ): Promise<any> {
     const performer = await this.performerModel.findById(id);
@@ -416,7 +467,7 @@ export class PerformerService {
       throw new EntityNotFoundException();
     }
 
-    const data = { ...payload } as any;
+    const data = omit(payload, ['welcomeVideoId', 'welcomeVideoPath', 'avatarId', 'coverId', 'avatarPath', 'coverPath']) as any;
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
@@ -534,16 +585,15 @@ export class PerformerService {
   }
 
   public async selfUpdate(
-    id: string | ObjectId,
+    id: string,
     payload: SelfUpdatePayload
   ): Promise<boolean> {
     const performer = await this.performerModel.findById(id);
     if (!performer) {
       throw new EntityNotFoundException();
     }
-    const data = { ...payload } as any;
-    delete data.balance;
-    delete data.welcomeVideoId;
+
+    const data = omit(payload, ['welcomeVideoId', 'welcomeVideoPath', 'avatarId', 'coverId', 'avatarPath', 'coverPath', 'balance', 'commissionPercentage']) as any;
     if (!data.name) {
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
@@ -605,65 +655,65 @@ export class PerformerService {
     return true;
   }
 
-  public async modelCreate(data): Promise<PerformerModel> {
+  public async modelCreate(payload): Promise<PerformerModel> {
+    const data = omit({
+      ...payload,
+      updatedAt: new Date(),
+      createdAt: new Date()
+    }, ['balance', 'commissionPercentage']) as any;
+    if (!data.name) {
+      // eslint-disable-next-line no-param-reassign
+      data.name = [data.firstName || '', data.lastName || ''].join(' ');
+    }
+    if (!data.username) {
+      // eslint-disable-next-line no-param-reassign
+      data.username = `model${StringHelper.randomString(8, '0123456789')}`;
+    }
     return this.performerModel.create(data);
   }
 
-  public async updateAvatar(user: UserDto, file: FileDto) {
+  public async updateAvatar(performerId: string | ObjectId, file: FileDto) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
     await this.performerModel.updateOne(
-      { _id: user._id },
+      { _id: performerId },
       {
         avatarId: file._id,
         avatarPath: file.path
       }
     );
     await this.fileService.addRef(file._id, {
-      itemId: user._id,
+      itemId: toObjectId(performerId),
       itemType: REF_TYPE.PERFORMER
     });
 
-    // resend user info?
-    // TODO - check others config for other storage
+    if (performer.avatarId && `${performer.avatarId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.avatarId);
+    }
     return file;
   }
 
-  public async updateCover(user: UserDto, file: FileDto) {
+  public async updateCover(performerId: string | ObjectId, file: FileDto) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
     await this.performerModel.updateOne(
-      { _id: user._id },
+      { _id: performerId },
       {
         coverId: file._id,
         coverPath: file.path
       }
     );
     await this.fileService.addRef(file._id, {
-      itemId: user._id,
+      itemId: toObjectId(performerId),
       itemType: REF_TYPE.PERFORMER
     });
-
-    return file;
-  }
-
-  public async updateWelcomeVideo(user: PerformerDto, file: FileDto) {
-    await this.performerModel.updateOne(
-      { _id: user._id },
-      {
-        welcomeVideoId: file._id,
-        welcomeVideoPath: file.path
-      }
-    );
-
-    await this.fileService.addRef(file._id, {
-      itemId: user._id,
-      itemType: REF_TYPE.PERFORMER
-    });
-    if (user.welcomeVideoId && `${user.welcomeVideoId}` !== `${file._id}`) {
-      await this.fileService.remove(user.welcomeVideoId);
+    if (performer.coverId && `${performer.coverId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.coverId);
     }
-    await this.fileService.queueProcessVideo(file._id);
     return file;
   }
 
-  public async adminUpdateWelcomeVideo(performerId: string, file: FileDto) {
+  public async updateWelcomeVideo(performerId: string | ObjectId, file: FileDto) {
     const performer = await this.performerModel.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
     await this.performerModel.updateOne(
@@ -682,7 +732,12 @@ export class PerformerService {
     if (performer.welcomeVideoId && `${performer.welcomeVideoId}` !== `${file._id}`) {
       await this.fileService.remove(performer.welcomeVideoId);
     }
-    await this.fileService.queueProcessVideo(file._id);
+    await this.fileService.queueProcessVideo(file._id, {
+      publishChannel: 'CONVERT_WELCOME_VIDEO_CHANNEL',
+      meta: {
+        performerId
+      }
+    });
     return file;
   }
 
@@ -783,33 +838,19 @@ export class PerformerService {
     performerId: string,
     payload: CommissionSettingPayload
   ) {
-    let item = await this.commissionSettingModel.findOne({
-      performerId
+    return this.performerModel.updateOne({ _id: performerId }, {
+      commissionPercentage: payload.commissionPercentage
     });
-    if (!item) {
-      // eslint-disable-next-line new-cap
-      item = new this.commissionSettingModel();
-    }
-    item.performerId = performerId as any;
-    item.monthlySubscriptionCommission = payload.monthlySubscriptionCommission;
-    item.yearlySubscriptionCommission = payload.yearlySubscriptionCommission;
-    item.videoSaleCommission = payload.videoSaleCommission;
-    item.gallerySaleCommission = payload.gallerySaleCommission;
-    item.productSaleCommission = payload.productSaleCommission;
-    item.tipCommission = payload.tipCommission;
-    item.feedSaleCommission = payload.feedSaleCommission;
-    item.streamCommission = payload.streamCommission;
-    return item.save();
   }
 
   public async updateBankingSetting(
     performerId: string,
     payload: BankingSettingPayload,
-    currentUser: UserDto
+    user: UserDto
   ) {
     const performer = await this.performerModel.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
-    if (!currentUser?.roles.includes('admin') && `${currentUser._id}` !== `${performerId}`) {
+    if (user?.roles && !user?.roles.includes('admin') && `${user._id}` !== `${performerId}`) {
       throw new HttpException('Permission denied', 403);
     }
     let item = await this.bankingSettingModel.findOne({
@@ -843,10 +884,6 @@ export class PerformerService {
       },
       { status: STATUS.ACTIVE, verifiedEmail: true }
     );
-  }
-
-  public async getCommissions(performerId: string | ObjectId) {
-    return this.commissionSettingModel.findOne({ performerId });
   }
 
   public async updatePerformerBalance(performerId: string | ObjectId, tokens: number) {

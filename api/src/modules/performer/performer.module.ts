@@ -22,6 +22,7 @@ import {
   PerformerAssetsListener, PerformerConnectedListener, UpdatePerformerStatusListener
 } from './listeners';
 import { PaymentModule } from '../payment/payment.module';
+import { FollowModule } from '../follow/follow.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { PaymentModule } from '../payment/payment.module';
     forwardRef(() => ReactionModule),
     forwardRef(() => ChangeTokenLogModule),
     forwardRef(() => BlockModule),
-    forwardRef(() => PaymentModule)
+    forwardRef(() => PaymentModule),
+    forwardRef(() => FollowModule)
   ],
   providers: [
     ...performerProviders,

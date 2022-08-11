@@ -1,10 +1,10 @@
 /* eslint-disable no-prototype-builtins */
-import { Component, createRef, forwardRef } from 'react';
+import { Component } from 'react';
 import {
-  Menu, Dropdown, Divider, message, Modal, Tooltip, Button
+  Menu, Dropdown, Divider, message, Modal, Tooltip, Button, Avatar
 } from 'antd';
 import {
-  HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined, EyeOutlined,
+  HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined,
   MoreOutlined, DollarOutlined, LockOutlined, FlagOutlined,
   FileImageOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
@@ -28,14 +28,10 @@ import { ReportForm } from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
 import Loader from '@components/common/base/loader';
-import { IFeed, IUser } from 'src/interfaces';
-import dynamic from 'next/dynamic';
+import { IFeed, ISettings, IUser } from 'src/interfaces';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
 import './index.less';
-
-const Subscriber = dynamic(() => import('@components/streaming/agora/subscriber'), { ssr: false });
-const ForwardedSubscriber = forwardRef((props: any, ref) => <Subscriber {...props} forwardedRef={ref} />);
 
 interface IProps {
   feed: IFeed;
@@ -49,13 +45,10 @@ interface IProps {
   commentMapping: any;
   comment: any;
   siteName: string;
+  settings: ISettings;
 }
 
 class FeedCard extends Component<IProps> {
-  private subscriberRef = createRef<{ join: any, leave: any }>();
-
-  subscriptionType = 'monthly';
-
   state = {
     isOpenComment: false,
     isLiked: false,
@@ -74,7 +67,9 @@ class FeedCard extends Component<IProps> {
     polls: [],
     requesting: false,
     openSubscriptionModal: false,
-    openReportModal: false
+    openReportModal: false,
+    subscriptionType: '',
+    paymentUrl: ''
   }
 
   componentDidMount() {
@@ -88,7 +83,6 @@ class FeedCard extends Component<IProps> {
         totalComment: feed.totalComment,
         polls: feed.polls ? feed.polls : []
       });
-      this.subscriptionType = feed?.performer?.isFreeSubscription ? 'free' : 'monthly';
     }
   }
 
@@ -159,16 +153,12 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  async handleReport(reason: string) {
+  async handleReport(payload: any) {
     const { feed } = this.props;
-    if (!reason || reason.length < 20) {
-      message.error('You report must be at least 20 characters');
-      return;
-    }
     try {
       await this.setState({ requesting: true });
       await reportService.create({
-        target: 'feed', targetId: feed._id, performerId: feed.fromSourceId, description: reason
+        ...payload, target: 'feed', targetId: feed._id, performerId: feed.fromSourceId
       });
       message.success('Your report has been sent');
     } catch (e) {
@@ -230,27 +220,31 @@ class FeedCard extends Component<IProps> {
   }
 
   async subscribe() {
-    const { feed, user } = this.props;
+    const { feed, user, settings } = this.props;
+    const { subscriptionType } = this.state;
     if (!user._id) {
       message.error('Please log in!');
       Router.push('/');
       return;
     }
     if (user.isPerformer) return;
-    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+    if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
       message.error('Please add payment card');
       Router.push('/user/cards');
       return;
     }
     try {
-      await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
-        type: this.subscriptionType,
+      this.setState({ submiting: true });
+      const resp = await paymentService.subscribePerformer({
+        type: subscriptionType || 'monthly',
         performerId: feed.fromSourceId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway: settings.paymentGateway
       });
-      this.setState({ openSubscriptionModal: false });
+      if (settings.paymentGateway === 'ccbill') {
+        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -265,8 +259,8 @@ class FeedCard extends Component<IProps> {
       return;
     }
     if (user.balance < price) {
-      message.error('Your token balance is not enough');
-      Router.push('/token-package');
+      message.error('Your wallet balance is not enough');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -285,8 +279,8 @@ class FeedCard extends Component<IProps> {
   async purchaseFeed() {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < feed.price) {
-      message.error('Your token balance is not enough');
-      Router.push('/token-package');
+      message.error('Your wallet balance is not enough');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -340,9 +334,12 @@ class FeedCard extends Component<IProps> {
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
-      openTeaser, openSubscriptionModal, openReportModal, requesting
+      openTeaser, openSubscriptionModal, openReportModal, requesting, subscriptionType, paymentUrl
     } = this.state;
-    const canView = (!feed.isSale && feed.isSubscribed) || (feed.isSale && isBought) || feed.type === 'text';
+    const canView = (!feed.isSale && feed.isSubscribed)
+    || (feed.isSale && isBought)
+    || feed.type === 'text'
+    || (feed.isSale && !feed.price && user._id);
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     const thumbUrl = (feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0])
@@ -377,18 +374,6 @@ class FeedCard extends Component<IProps> {
             Copy link to clipboard
           </a>
         </Menu.Item>
-        {/* {user._id === feed.fromSourceId && (
-        <Menu.Item key={`pin_profile_${feed._id}`}>
-          <a target="_blank" rel="noopener noreferrer" href="#">
-            Pin to profile page
-          </a>
-        </Menu.Item>
-        )} */}
-        {/* <Menu.Item key={`statistic_${feed._id}`}>
-          <a target="_blank" href="#">
-            Post statistics
-          </a>
-        </Menu.Item> */}
         {user._id === feed.fromSourceId && <Divider style={{ margin: '10px 0' }} />}
         {user._id === feed.fromSourceId && <Menu.Item key={`delete_post_${feed._id}`}><a aria-hidden onClick={handleDelete.bind(this, feed)}>Delete post</a></Menu.Item>}
       </Menu>
@@ -401,92 +386,12 @@ class FeedCard extends Component<IProps> {
       </Dropdown>
     );
 
-    if (feed.type === 'stream') {
-      return (
-        <div className="feed-card">
-          <div className="feed-top">
-            <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
-              <div className="feed-top-left">
-                <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
-                <div className="feed-name">
-                  <h4>
-                    {performer?.name || 'N/A'}
-                    {' '}
-                    {performer?.verifiedAccount && <TickIcon />}
-                  </h4>
-                  <h5>
-                    @
-                    {performer?.username || 'n/a'}
-                  </h5>
-                </div>
-                {!performer?.isOnline ? <span className="online-status" /> : <span className="online-status active" />}
-              </div>
-            </Link>
-            <div className="feed-top-right">
-              <span className="feed-time">{formatDate(feed.updatedAt, 'MMM DD')}</span>
-              {dropdown}
-            </div>
-          </div>
-          <div className="feed-container">
-            <div className="feed-text">
-              Live
-            </div>
-            {!feed.isSubscribed ? (
-              <div className="lock-content">
-                <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
-                <Button
-                  onMouseEnter={() => this.setState({ isHovered: true })}
-                  onMouseLeave={() => this.setState({ isHovered: false })}
-                  disabled={user.isPerformer}
-                  className="secondary"
-                  onClick={() => this.setState({ openSubscriptionModal: true })}
-                >
-                  Subscribe to unlock
-                </Button>
-              </div>
-            ) : (
-              <div className="feed-content">
-                {!feed.isSale ? (
-                  <>
-                    <ForwardedSubscriber
-                      ref={this.subscriberRef}
-                      {...{
-                        localUId: user._id,
-                        remoteUId: performer._id,
-                        conversationId: (feed as any).targetId
-                      }}
-                    />
-                    <Button block className="primary" onClick={() => this.subscriberRef.current.join()}>join</Button>
-                    <Button block className="secondary" onClick={() => this.subscriberRef.current.leave()}>Leave</Button>
-                  </>
-                ) : (
-                  <Button onClick={() => Router.push(
-                    {
-                      pathname: '/streaming/details',
-                      query: {
-                        username: performer?.username || performer?._id
-                      }
-                    },
-                    `/streaming/${performer?.username || performer?._id
-                    }`
-                  )}
-                  >
-                    View full content
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
     return (
       <div className="feed-card">
         <div className="feed-top">
           <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
             <div className="feed-top-left">
-              <img alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} width="50px" />
+              <Avatar alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} size={40} />
               <div className="feed-name">
                 <h4>
                   {performer?.name || 'N/A'}
@@ -547,7 +452,7 @@ class FeedCard extends Component<IProps> {
               {/* eslint-disable-next-line no-nested-ternary */}
               <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
               <div className="lock-middle">
-                {(isHovered || canView) ? <UnlockOutlined /> : <LockOutlined />}
+                {(isHovered) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
                   <Button
                     onMouseEnter={() => this.setState({ isHovered: true })}
@@ -559,7 +464,7 @@ class FeedCard extends Component<IProps> {
                     Subscribe to unlock
                   </Button>
                 )}
-                {feed.isSale && !isBought && (
+                {feed.isSale && feed.price > 0 && !isBought && (
                   <Button
                     onMouseEnter={() => this.setState({ isHovered: true })}
                     onMouseLeave={() => this.setState({ isHovered: false })}
@@ -567,16 +472,25 @@ class FeedCard extends Component<IProps> {
                     className="secondary"
                     onClick={() => this.setState({ openPurchaseModal: true })}
                   >
-                    Pay&nbsp;
-                    <img alt="coin" src="/static/coin-ico.png" width="15px" />
-                    {feed.price.toFixed(2)}
+                    Pay $
+                    {(feed.price || 0).toFixed(2)}
                     {' '}
                     to unlock
                   </Button>
                 )}
+                {(feed.isSale && !feed.price && !user._id) && (
+                <Button
+                  onMouseEnter={() => this.setState({ isHovered: true })}
+                  onMouseLeave={() => this.setState({ isHovered: false })}
+                  disabled={user.isPerformer}
+                  className="secondary"
+                  onClick={() => Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`)}
+                >
+                  Follow for free
+                </Button>
+                )}
                 {feed.teaser && (
-                  <Button type="link" onClick={() => this.setState({ openTeaser: true })}>
-                    <EyeOutlined />
+                  <Button className="teaser-btn" type="link" onClick={() => this.setState({ openTeaser: true })}>
                     View teaser
                   </Button>
                 )}
@@ -665,7 +579,7 @@ class FeedCard extends Component<IProps> {
           key="tip_performer"
           className="subscription-modal"
           title={null}
-          width={350}
+          width={600}
           visible={openTipModal}
           onOk={() => this.setState({ openTipModal: false })}
           footer={null}
@@ -698,19 +612,73 @@ class FeedCard extends Component<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={500}
+          width={!paymentUrl ? 600 : 990}
+          centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
           destroyOnClose
-          onCancel={() => this.setState({ openSubscriptionModal: false })}
+          onCancel={() => this.setState({ openSubscriptionModal: false, subscriptionType: '', paymentUrl: '' })}
         >
-          <ConfirmSubscriptionPerformerForm
-            type={this.subscriptionType || 'monthly'}
-            performer={performer}
-            submiting={submiting}
-            onFinish={this.subscribe.bind(this)}
-          />
+          {!paymentUrl ? (
+            <>
+              {!subscriptionType ? (
+                <div
+                  className="subscription-btn-grp"
+                >
+                  <h2 style={{ paddingTop: 25 }}>SUBSCRIBE TO UNLOCK</h2>
+                  {feed?.performer?.isFreeSubscription && (
+                    <Button
+                      className="primary"
+                      style={{ marginRight: '15px' }}
+                      disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
+                      onClick={() => {
+                        this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
+                      }}
+                    >
+                      SUBSCRIBE FOR FREE FOR
+                      {' '}
+                      {feed?.performer?.durationFreeSubscriptionDays || 1}
+                      {' '}
+                      {feed?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
+                    </Button>
+                  )}
+                  {feed?.performer?.monthlyPrice && (
+                    <Button
+                      className="primary"
+                      style={{ marginRight: '15px' }}
+                      disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
+                      onClick={() => {
+                        this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
+                      }}
+                    >
+                      MONTHLY SUBSCRIPTION FOR $
+                      {(feed?.performer?.monthlyPrice || 0).toFixed(2)}
+                    </Button>
+                  )}
+                  {feed?.performer.yearlyPrice && (
+                    <Button
+                      className="secondary"
+                      disabled={!user || !user._id || (submiting && subscriptionType === 'yearly')}
+                      onClick={() => {
+                        this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
+                      }}
+                    >
+                      YEARLY SUBSCRIPTON FOR $
+                      {(feed?.performer?.yearlyPrice || 0).toFixed(2)}
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <ConfirmSubscriptionPerformerForm
+                  type={subscriptionType}
+                  performer={performer}
+                  submiting={submiting}
+                  onFinish={this.subscribe.bind(this)}
+                />
+              )}
+            </>
+          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
         </Modal>
         <Modal
           key="teaser_video"
@@ -750,7 +718,8 @@ const mapStates = (state: any) => {
     siteName: state.ui.siteName,
     user: state.user.current,
     commentMapping,
-    comment
+    comment,
+    settings: state.settings
   };
 };
 

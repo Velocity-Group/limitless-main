@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 import { PureComponent } from 'react';
 import {
-  Upload, message, Button, Tooltip, Select, Modal, Image,
-  Input, Form, InputNumber, Switch, Progress, Popover, Row, Col
+  Upload, message, Button, Tooltip, Select, Modal, Image, Radio,
+  Input, Form, InputNumber, Progress, Popover, Row, Col
 } from 'antd';
 import {
   BarChartOutlined, PictureOutlined, VideoCameraAddOutlined,
@@ -51,13 +51,13 @@ export default class FeedForm extends PureComponent<IProps> {
     fileList: [],
     fileIds: [],
     pollList: [],
-    isSale: false,
     addPoll: false,
     openPollDuration: false,
     expirePollTime: 7,
     expiredPollAt: moment().endOf('day').add(7, 'days'),
     text: '',
-    isShowPreviewTeaser: false
+    isShowPreviewTeaser: false,
+    intendedFor: 'subscriber'
   };
 
   componentDidMount() {
@@ -66,7 +66,8 @@ export default class FeedForm extends PureComponent<IProps> {
       this.setState({
         fileList: feed.files ? feed.files : [],
         fileIds: feed.fileIds ? feed.fileIds : [],
-        isSale: feed.isSale,
+        // eslint-disable-next-line no-nested-ternary
+        intendedFor: !feed.isSale ? 'subscriber' : feed.isSale && feed.price ? 'sale' : 'follower',
         addPoll: !!feed.pollIds.length,
         pollList: feed.polls,
         thumbnail: feed.thumbnail,
@@ -78,7 +79,7 @@ export default class FeedForm extends PureComponent<IProps> {
     }
   }
 
-  handleDeleteFile(field: string) {
+  handleDeleteFile = (field: string) => {
     if (field === 'thumbnail') {
       this.setState({ thumbnail: null });
       this.thumbnailId = null;
@@ -89,7 +90,7 @@ export default class FeedForm extends PureComponent<IProps> {
     }
   }
 
-  onUploading(file, resp: any) {
+  onUploading = (file, resp: any) => {
     // eslint-disable-next-line no-param-reassign
     file.percent = resp.percentage;
     // eslint-disable-next-line no-param-reassign
@@ -97,7 +98,7 @@ export default class FeedForm extends PureComponent<IProps> {
     this.forceUpdate();
   }
 
-  async onAddPoll() {
+  onAddPoll = () => {
     const { addPoll } = this.state;
     this.setState({ addPoll: !addPoll });
     if (!addPoll) {
@@ -106,7 +107,7 @@ export default class FeedForm extends PureComponent<IProps> {
     }
   }
 
-  async onChangePoll(index, e) {
+  onChangePoll = async (index, e) => {
     const { value } = e.target;
     this.setState((prevState: any) => {
       const newItems = [...prevState.pollList];
@@ -115,7 +116,7 @@ export default class FeedForm extends PureComponent<IProps> {
     });
   }
 
-  async onsubmit(feed, values) {
+  onsubmit = async (feed, values) => {
     const { type } = this.props;
     try {
       await this.setState({ uploading: true });
@@ -128,12 +129,12 @@ export default class FeedForm extends PureComponent<IProps> {
     }
   }
 
-  async onChangePollDuration(numberDays) {
+  onChangePollDuration = (numberDays) => {
     const date = !numberDays ? moment().endOf('day').add(99, 'years') : moment().endOf('day').add(numberDays, 'days');
     this.setState({ openPollDuration: false, expiredPollAt: date, expirePollTime: numberDays });
   }
 
-  async onClearPolls() {
+  onClearPolls = () => {
     this.setState({ pollList: [] });
     this.pollIds = [];
   }
@@ -143,7 +144,7 @@ export default class FeedForm extends PureComponent<IProps> {
     this.setState({ text: `${text} ${emoji} ` });
   }
 
-  async remove(file) {
+  remove = async (file) => {
     const { fileList, fileIds } = this.state;
     this.setState({
       fileList: fileList.filter((f) => f?._id !== file?._id || f?.uid !== file?.uid),
@@ -151,7 +152,7 @@ export default class FeedForm extends PureComponent<IProps> {
     });
   }
 
-  async beforeUpload(file, listFile) {
+  beforeUpload = async (file, listFile) => {
     const config = getGlobalConfig();
     const { fileList, fileIds } = this.state;
     if (file.type.includes('image')) {
@@ -208,7 +209,7 @@ export default class FeedForm extends PureComponent<IProps> {
     return true;
   }
 
-  async beforeUploadThumbnail(file) {
+  beforeUploadThumbnail = async (file) => {
     if (!file) {
       return;
     }
@@ -235,7 +236,7 @@ export default class FeedForm extends PureComponent<IProps> {
     }
   }
 
-  async beforeUploadteaser(file) {
+  beforeUploadteaser = async (file) => {
     if (!file) {
       return;
     }
@@ -260,10 +261,10 @@ export default class FeedForm extends PureComponent<IProps> {
     }
   }
 
-  async submit(payload: any) {
+  submit = async (payload: any) => {
     const { feed, type } = this.props;
     const {
-      pollList, addPoll, isSale, expiredPollAt, fileIds, text
+      pollList, addPoll, intendedFor, expiredPollAt, fileIds, text
     } = this.state;
     const formValues = { ...payload };
     if (!text) {
@@ -274,13 +275,13 @@ export default class FeedForm extends PureComponent<IProps> {
       message.error('Description is over 300 characters');
       return;
     }
-    if (formValues.price < 1) {
-      message.error('Amount of tokens must be greater than 1');
+    if (formValues.price < 0) {
+      message.error('Price must be greater than 0');
       return;
     }
     formValues.teaserId = this.teaserId;
     formValues.thumbnailId = this.thumbnailId;
-    formValues.isSale = isSale;
+    formValues.isSale = intendedFor !== 'subscriber';
     formValues.text = text;
     formValues.fileIds = fileIds;
     if (['video', 'photo'].includes(feed?.type || type) && !fileIds.length) {
@@ -322,7 +323,7 @@ export default class FeedForm extends PureComponent<IProps> {
   render() {
     const { feed, type, discard } = this.props;
     const {
-      uploading, fileList, fileIds, isSale, pollList, text, isShowPreviewTeaser,
+      uploading, fileList, fileIds, intendedFor, pollList, text, isShowPreviewTeaser,
       addPoll, openPollDuration, expirePollTime, thumbnail, teaser
     } = this.state;
     return (
@@ -357,16 +358,20 @@ export default class FeedForm extends PureComponent<IProps> {
           </Form.Item>
           {['video', 'photo'].includes(feed?.type || type) && (
           <Form.Item>
-            <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={() => this.setState({ isSale: !isSale })} />
+            <Radio.Group value={intendedFor} onChange={(e) => this.setState({ intendedFor: e.target.value })}>
+              <Radio key="subscriber" value="subscriber">Only for Subscribers</Radio>
+              <Radio key="sale" value="sale">Pay per View</Radio>
+              <Radio key="follower" value="follower">Free for Everyone</Radio>
+            </Radio.Group>
           </Form.Item>
           )}
-          {isSale && (
-            <Form.Item label="Amount of Tokens" name="price" rules={[{ required: true, message: 'Please add amount of tokens' }]}>
+          {intendedFor === 'sale' && (
+            <Form.Item label="Price" name="price" rules={[{ required: true, message: 'Please add the price' }]}>
               <InputNumber min={1} />
             </Form.Item>
           )}
           {['video', 'photo'].includes(feed?.type || type) && (
-          <Form.Item label="Files">
+          <Form.Item>
             <UploadList
               type={feed?.type || type}
               files={fileList}
@@ -485,7 +490,7 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Button type="primary">
+                <Button type="primary" style={{ marginRight: 10 }}>
                   <PictureOutlined />
                   {' '}
                   Add thumbnail
@@ -503,7 +508,7 @@ export default class FeedForm extends PureComponent<IProps> {
                 disabled={uploading}
                 listType="picture"
               >
-                <Button type="primary">
+                <Button type="primary" style={{ marginRight: 10 }}>
                   <VideoCameraAddOutlined />
                   {' '}
                   Add teaser
@@ -517,6 +522,7 @@ export default class FeedForm extends PureComponent<IProps> {
             </Button>
           </div>
           <AddPollDurationForm onAddPollDuration={this.onChangePollDuration.bind(this)} openDurationPollModal={openPollDuration} />
+          {feed && (
           <Form.Item
             name="status"
             label="Status"
@@ -530,12 +536,14 @@ export default class FeedForm extends PureComponent<IProps> {
               </Select.Option>
             </Select>
           </Form.Item>
-          <div className="submit-btns custom">
+          )}
+          <div className="submit-btns">
             <Button
               className="primary"
               htmlType="submit"
               loading={uploading}
               disabled={uploading}
+              style={{ marginRight: 10 }}
             >
               SUBMIT
             </Button>

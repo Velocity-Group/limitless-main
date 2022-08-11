@@ -18,7 +18,7 @@ import { PaymentTokenSearchPayload } from '../payloads/purchase-item.search.payl
 import { IPaymentTokenResponse } from '../dtos';
 
 @Injectable()
-@Controller('token-transactions')
+@Controller('wallet/charges')
 export class PaymentTokenSearchController {
   constructor(
     private readonly tokenTransactionSearchService: TokenTransactionSearchService

@@ -1,10 +1,12 @@
 import { PureComponent } from 'react';
 import {
-  Layout, Badge, Drawer, Divider, Avatar, Modal, Button
+  Layout, Badge, Drawer, Divider, Avatar
 } from 'antd';
 import { connect } from 'react-redux';
 import Link from 'next/link';
-import { IUser, IUIConfig, StreamSettings } from 'src/interfaces';
+import {
+  IUser, StreamSettings, IUIConfig, ISettings
+} from 'src/interfaces';
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
@@ -13,7 +15,7 @@ import {
   LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined
 } from '@ant-design/icons';
 import {
-  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon
+  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon, TickIcon, WalletSvg
 } from 'src/icons';
 import Router, { withRouter, Router as RouterEvent } from 'next/router';
 import {
@@ -24,8 +26,8 @@ import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/action
 import { updateUIValue } from 'src/redux/ui/actions';
 import { updateBalance } from '@redux/user/actions';
 import { shortenLargeNumber } from '@lib/number';
-import './header.less';
 import { SubscribePerformerModal } from 'src/components/subscription/subscribe-performer-modal';
+import './header.less';
 
 interface IProps {
   updateBalance: Function;
@@ -38,6 +40,7 @@ interface IProps {
   addPrivateRequest: Function;
   accessPrivateRequest: Function;
   settings: StreamSettings;
+  config: ISettings;
 }
 
 class Header extends PureComponent<IProps> {
@@ -47,32 +50,30 @@ class Header extends PureComponent<IProps> {
     openStripeAlert: false
   };
 
-  async componentDidMount() {
+  componentDidMount() {
     RouterEvent.events.on('routeChangeStart', this.handleChangeRoute);
-    const { user, router } = this.props;
+    const { user, router, config } = this.props;
     if (user._id) {
       this.handleCountNotificationMessage();
-      if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
-        || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
-        // eslint-disable-next-line react/no-did-update-set-state
-        this.setState({ openStripeAlert: true });
-      }
+      // if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
+      //   // eslint-disable-next-line react/no-did-update-set-state
+      //   this.setState({ openStripeAlert: true });
+      // }
     }
   }
 
-  async componentDidUpdate(prevProps: any) {
-    const { user, router } = this.props;
+  componentDidUpdate(prevProps: any) {
+    const { user, router, config } = this.props;
     const { openStripeAlert } = this.state;
     if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
-      if ((router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled)
-        || (router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.detailsSubmitted)) {
-        // eslint-disable-next-line react/no-did-update-set-state
-        this.setState({ openStripeAlert: true });
-      }
+      // if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
+      //   // eslint-disable-next-line react/no-did-update-set-state
+      //   this.setState({ openStripeAlert: true });
+      // }
     }
     // eslint-disable-next-line react/no-did-update-set-state
-    if (openStripeAlert && router.pathname === '/model/banking') this.setState({ openStripeAlert: false });
+    // if (openStripeAlert && router.pathname === '/model/banking') this.setState({ openStripeAlert: false });
   }
 
   componentWillUnmount() {
@@ -137,11 +138,6 @@ class Header extends PureComponent<IProps> {
     }
   }
 
-  // onThemeChange = (theme: string) => {
-  //   const { updateUIValue: handleUpdateUI } = this.props;
-  //   handleUpdateUI({ theme });
-  // };
-
   async beforeLogout() {
     const { logout: handleLogout } = this.props;
     const token = authService.getToken();
@@ -154,7 +150,7 @@ class Header extends PureComponent<IProps> {
 
   render() {
     const {
-      user, router, ui, settings
+      user, router, ui, settings, config
     } = this.props;
     const {
       totalNotReadMessage, openProfile, openStripeAlert
@@ -166,10 +162,6 @@ class Header extends PureComponent<IProps> {
           event="nofify_read_messages_in_conversation"
           handler={this.handleMessage.bind(this)}
         />
-        {/* <Event
-          event="private-chat-request"
-          handler={this.handlePrivateChat.bind(this)}
-        /> */}
         <Event
           event="update_balance"
           handler={this.handleUpdateBalance.bind(this)}
@@ -258,7 +250,11 @@ class Header extends PureComponent<IProps> {
                 <div className="profile-user">
                   <img className="avatar" src={user?.avatar || '/static/no-avatar.png'} alt="avatar" />
                   <span className="profile-name">
-                    {user?.name || 'N/A'}
+                    <span>
+                      {user?.name || 'N/A'}
+                      {' '}
+                      <TickIcon />
+                    </span>
                     <span className="sub-name">
                       @
                       {user?.username || 'n/a'}
@@ -266,8 +262,10 @@ class Header extends PureComponent<IProps> {
                   </span>
                 </div>
                 <div className="sub-info">
-                  <a aria-hidden className="user-balance" onClick={() => !user?.isPerformer && Router.push('/token-package')}>
-                    <img src="/static/coin-ico.png" alt="gem" />
+                  <a aria-hidden className="user-balance" onClick={() => !user?.isPerformer && Router.push('/wallet')}>
+                    <WalletSvg />
+                    {' '}
+                    $
                     {(user?.balance || 0).toFixed(2)}
                     {!user?.isPerformer && <PlusCircleOutlined />}
                   </a>
@@ -275,21 +273,18 @@ class Header extends PureComponent<IProps> {
                     <Link href="/model/my-subscriber">
                       <a>
                         <StarOutlined />
+                        Subscribers
                         {' '}
                         {shortenLargeNumber(user?.stats?.subscribers || 0)}
-                        {' '}
-                        Followers
                       </a>
-
                     </Link>
                   ) : (
                     <Link href="/user/my-subscription">
                       <a>
                         <HeartOutlined />
+                        Subscription
                         {' '}
                         {shortenLargeNumber(user?.stats?.totalSubscriptions || 0)}
-                        {' '}
-                        Following
                       </a>
                     </Link>
                   )}
@@ -418,6 +413,7 @@ class Header extends PureComponent<IProps> {
                     Edit Profile
                   </div>
                 </Link>
+                {config.paymentGateway === 'stripe' && (
                 <Link href="/user/cards" as="/user/cards">
                   <div className={router.pathname === '/user/cards' ? 'menu-item active' : 'menu-item'}>
                     <CreditCardOutlined />
@@ -425,6 +421,7 @@ class Header extends PureComponent<IProps> {
                     Add Card
                   </div>
                 </Link>
+                )}
                 <Link href="/user/bookmarks" as="/user/bookmarks">
                   <div className={router.pathname === '/user/bookmarks' ? 'menu-item active' : 'menu-item'}>
                     <BookOutlined />
@@ -454,11 +451,11 @@ class Header extends PureComponent<IProps> {
                     Payment History
                   </div>
                 </Link>
-                <Link href="/user/token-transaction" as="/user/token-transaction">
-                  <div className={router.pathname === '/user/token-transaction' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/user/wallet-transaction" as="/user/wallet-transaction">
+                  <div className={router.pathname === '/user/wallet-transaction' ? 'menu-item active' : 'menu-item'}>
                     <DollarOutlined />
                     {' '}
-                    Token Transactions
+                    Wallet Transactions
                   </div>
                 </Link>
                 <Divider />
@@ -482,7 +479,7 @@ class Header extends PureComponent<IProps> {
               />
             </div> */}
           </Drawer>
-          <Modal
+          {/* <Modal
             title={null}
             footer={null}
             width={500}
@@ -507,7 +504,7 @@ class Header extends PureComponent<IProps> {
                 <Button className="secondary" onClick={() => this.setState({ openStripeAlert: false })}>No, i will connect later</Button>
               </div>
             </div>
-          </Modal>
+          </Modal> */}
           <SubscribePerformerModal onSubscribed={this.handleSubscribe} />
         </div>
       </div>
@@ -518,8 +515,9 @@ class Header extends PureComponent<IProps> {
 Header.contextType = SocketContext;
 
 const mapState = (state: any) => ({
-  user: state.user.current,
-  ui: state.ui,
+  user: { ...state.user.current },
+  ui: { ...state.ui },
+  config: { ...state.settings },
   ...state.streaming
 });
 const mapDispatch = {

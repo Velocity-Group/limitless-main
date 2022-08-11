@@ -39,7 +39,13 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
         dataIndex: 'type',
         key: 'type',
         render(type: string) {
-          return <Tag color="orange">{type}</Tag>;
+          switch (type) {
+            case 'token_package': return <Tag color="blue">Wallet Purchase</Tag>;
+            case 'monthly_subscription': return <Tag color="orange">Monthly Subscription</Tag>;
+            case 'yearly_subscription': return <Tag color="red">Yearly Subscription</Tag>;
+            case 'free_subscription': return <Tag color="green">Free Subscription</Tag>;
+            default: return <Tag>{type}</Tag>;
+          }
         }
       },
       // {
@@ -105,6 +111,19 @@ export class TableListPaymentTransaction extends PureComponent<IProps> {
             case 'require_authentication':
               return <Tag color="default">Require Authentication</Tag>;
             default: return <Tag color="red">{status}</Tag>;
+          }
+        }
+      },
+      {
+        title: 'Gateway',
+        dataIndex: 'paymentGateway',
+        render(paymentGateway: string) {
+          switch (paymentGateway) {
+            case 'stripe':
+              return <Tag color="blue">Stripe</Tag>;
+            case 'ccbill':
+              return <Tag color="orange">CCbill</Tag>;
+            default: return <Tag color="red">{paymentGateway}</Tag>;
           }
         }
       },

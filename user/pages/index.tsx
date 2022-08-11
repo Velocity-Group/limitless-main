@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
-import { Form, Input, Button, Row, Col, Divider, Layout, message } from 'antd';
+import {
+  Form, Input, Button, Row, Col, Divider, Layout, message
+} from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
@@ -98,9 +100,9 @@ class Login extends PureComponent<IProps> {
       handleUpdateUser(user.data);
       user.data.isPerformer
         ? Router.push(
-            { pathname: '/model/profile', query: { username: user.data.username || user.data._id } },
-            `/${user.data.username || user.data._id}`
-          )
+          { pathname: '/model/profile', query: { username: user.data.username || user.data._id } },
+          `/${user.data.username || user.data._id}`
+        )
         : Router.push('/home');
     } catch {
       this.setState({ isLoading: false });
@@ -186,8 +188,11 @@ class Login extends PureComponent<IProps> {
                       type="button"
                       disabled={!settings.twitterClientId}
                       onClick={() => this.loginTwitter()}
-                      className="twitter-button">
-                      <TwitterOutlined /> LOG IN / SIGN UP WITH TWITTER
+                      className="twitter-button"
+                    >
+                      <TwitterOutlined />
+                      {' '}
+                      LOG IN / SIGN UP WITH TWITTER
                     </button>
                     <GoogleLoginButton
                       clientId={settings.googleClientId}
@@ -201,24 +206,28 @@ class Login extends PureComponent<IProps> {
                       name="normal_login"
                       className="login-form"
                       initialValues={{ remember: true }}
-                      onFinish={this.handleLogin.bind(this)}>
+                      onFinish={this.handleLogin.bind(this)}
+                    >
                       <Form.Item
                         name="username"
                         validateTrigger={['onChange', 'onBlur']}
-                        rules={[{ required: true, message: 'Email or Username is missing' }]}>
+                        rules={[{ required: true, message: 'Email or Username is missing' }]}
+                      >
                         <Input disabled={loginAuth.requesting || isLoading} placeholder="Email or Username" />
                       </Form.Item>
                       <Form.Item
                         name="password"
                         validateTrigger={['onChange', 'onBlur']}
-                        rules={[{ required: true, message: 'Please enter your password!' }]}>
+                        rules={[{ required: true, message: 'Please enter your password!' }]}
+                      >
                         <Input.Password disabled={loginAuth.requesting || isLoading} placeholder="Password" />
                       </Form.Item>
                       <p style={{ padding: '0 20px' }}>
                         <Link
                           href={{
                             pathname: '/auth/forgot-password'
-                          }}>
+                          }}
+                        >
                           <a className="sub-text">Forgot password?</a>
                         </Link>
                       </p>
@@ -229,18 +238,31 @@ class Login extends PureComponent<IProps> {
                           loading={loginAuth.requesting || isLoading}
                           type="primary"
                           htmlType="submit"
-                          className="login-form-button">
+                          className="login-form-button"
+                        >
                           LOG IN
                         </Button>
                         <p style={{ fontSize: 11 }}>
-                          Visit <a href="/page/help">Help Center</a> for any help if you are not able to login with your
-                          existing {ui?.siteName || 'Fanso'} account
+                          Visit
+                          {' '}
+                          <a href="/page/help">Help Center</a>
+                          {' '}
+                          for any help if you are not able to login with your
+                          existing
+                          {' '}
+                          {ui?.siteName || 'Fanso'}
+                          {' '}
+                          account
                         </p>
                         <Divider style={{ margin: '15px 0' }} />
                         <p style={{ marginBottom: 5 }}>Don&apos;t have an account yet?</p>
                         <p>
                           <Link href="/auth/register">
-                            <a>Sign up for {ui?.siteName}</a>
+                            <a>
+                              Sign up for
+                              {' '}
+                              {ui?.siteName}
+                            </a>
                           </Link>
                         </p>
                       </Form.Item>
