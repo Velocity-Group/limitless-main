@@ -52,7 +52,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
         <Row>
           <Col xl={12} md={12} xs={24}>
             <Form.Item name="isFreeSubscription" valuePropName="checked">
-              <Switch unCheckedChildren="Unpaid Subscription" checkedChildren="Paid Subcription" onChange={(val) => this.setState({ isFreeSubscription: val })} />
+              <Switch unCheckedChildren="Paid Subscription" checkedChildren="Unpaid Subcription" onChange={(val) => this.setState({ isFreeSubscription: val })} />
             </Form.Item>
             {isFreeSubscription && (
             <Form.Item
