@@ -30,7 +30,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
 
   componentDidMount() {
     const { user } = this.props;
-    this.setState({ isFreeSubscription: user.isFreeSubscription });
+    this.setState({ isFreeSubscription: !!user?.isFreeSubscription });
   }
 
   render() {
@@ -41,8 +41,6 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
         {...layout}
         name="nest-messages"
         onFinish={(values) => {
-          // eslint-disable-next-line no-param-reassign
-          values.isFreeSubscription = isFreeSubscription;
           onFinish(values);
         }}
         validateMessages={validateMessages}
@@ -53,8 +51,8 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
       >
         <Row>
           <Col xl={12} md={12} xs={24}>
-            <Form.Item>
-              <Switch unCheckedChildren="Unpaid Subscription" checkedChildren="Paid Subcription" checked={isFreeSubscription} onChange={() => this.setState({ isFreeSubscription: !isFreeSubscription })} />
+            <Form.Item name="isFreeSubscription" valuePropName="checked">
+              <Switch unCheckedChildren="Unpaid Subscription" checkedChildren="Paid Subcription" onChange={(val) => this.setState({ isFreeSubscription: val })} />
             </Form.Item>
             {isFreeSubscription && (
             <Form.Item

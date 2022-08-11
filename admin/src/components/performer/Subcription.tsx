@@ -26,7 +26,7 @@ export class SubscriptionForm extends PureComponent<IProps> {
 
   componentDidMount() {
     const { performer } = this.props;
-    this.setState({ isFreeSubscription: performer.isFreeSubscription });
+    this.setState({ isFreeSubscription: !!performer?.isFreeSubscription });
   }
 
   render() {
@@ -53,8 +53,8 @@ export class SubscriptionForm extends PureComponent<IProps> {
       >
         <Row>
           <Col xs={24} md={12}>
-            <Form.Item>
-              <Switch unCheckedChildren="Unpaid Subscription" checkedChildren="Paid Subscription" checked={isFreeSubscription} onChange={() => this.setState({ isFreeSubscription: !isFreeSubscription })} />
+            <Form.Item name="isFreeSubscription" valuePropName="checked">
+              <Switch unCheckedChildren="Unpaid Subscription" checkedChildren="Paid Subscription" onChange={(val) => this.setState({ isFreeSubscription: val })} />
             </Form.Item>
             {isFreeSubscription && (
             <Form.Item
