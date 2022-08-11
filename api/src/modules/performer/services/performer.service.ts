@@ -305,11 +305,19 @@ export class PerformerService {
     payload: PerformerCreatePayload,
     user?: UserDto
   ): Promise<PerformerDto> {
-    const data = {
+    const data = omit({
       ...payload,
       updatedAt: new Date(),
       createdAt: new Date()
-    } as any;
+    }, ['balance', 'commissionPercentage']) as any;
+    if (!data.name) {
+      // eslint-disable-next-line no-param-reassign
+      data.name = [data.firstName || '', data.lastName || ''].join(' ');
+    }
+    if (!data.username) {
+      // eslint-disable-next-line no-param-reassign
+      data.username = `user${randomString(8, '0123456789')}`;
+    }
     const countPerformerUsername = await this.performerModel.countDocuments({
       username: payload.username.trim().toLowerCase()
     });
@@ -383,11 +391,11 @@ export class PerformerService {
   public async register(
     payload: PerformerRegisterPayload
   ): Promise<PerformerDto> {
-    const data = {
+    const data = omit({
       ...payload,
       updatedAt: new Date(),
       createdAt: new Date()
-    } as any;
+    }, ['balance', 'commissionPercentage']) as any;
     const countPerformerUsername = await this.performerModel.countDocuments({
       username: payload.username.trim().toLowerCase()
     });
@@ -647,7 +655,20 @@ export class PerformerService {
     return true;
   }
 
-  public async modelCreate(data): Promise<PerformerModel> {
+  public async modelCreate(payload): Promise<PerformerModel> {
+    const data = omit({
+      ...payload,
+      updatedAt: new Date(),
+      createdAt: new Date()
+    }, ['balance', 'commissionPercentage']) as any;
+    if (!data.name) {
+      // eslint-disable-next-line no-param-reassign
+      data.name = [data.firstName || '', data.lastName || ''].join(' ');
+    }
+    if (!data.username) {
+      // eslint-disable-next-line no-param-reassign
+      data.username = `model${StringHelper.randomString(8, '0123456789')}`;
+    }
     return this.performerModel.create(data);
   }
 

@@ -217,7 +217,7 @@ export class AuthService {
     }
     if (decodded.source === 'performer') {
       const user = await this.performerService.findById(decodded.sourceId);
-      return new PerformerDto(user).toPublicDetailsResponse();
+      return new PerformerDto(user).toResponse(true);
     }
 
     return null;
