@@ -422,17 +422,16 @@ export class PerformerDto {
       country: this.country,
       username: this.username,
       gender: this.gender,
-      languages: this.languages,
       stats: this.stats,
       score: this.score,
       isOnline: this.isOnline,
       isFreeSubscription: this.isFreeSubscription,
       durationFreeSubscriptionDays: this.durationFreeSubscriptionDays,
       verifiedAccount: this.verifiedAccount,
-      lastStreamingTime: this.lastStreamingTime,
       live: this.live,
       streamingStatus: this.streamingStatus,
-      isFollowed: this.isFollowed
+      isFollowed: this.isFollowed,
+      dateOfBirth: this.dateOfBirth
     };
   }
 

@@ -20,23 +20,17 @@ export class UpdateCouponUsesListener {
   }
 
   public async handleUpdateCoupon(event: QueueEvent) {
-    try {
-      if (![EVENT.CREATED].includes(event.eventName)) {
-        return false;
-      }
-      const { transaction } = event.data;
-      // TOTO handle more event transaction
-      if (transaction.status !== PAYMENT_STATUS.SUCCESS) {
-        return false;
-      }
-      if (!transaction.couponInfo || !transaction.couponInfo._id) {
-        return false;
-      }
-      await this.couponService.updateNumberOfUses(transaction.couponInfo._id);
-      return true;
-    } catch (e) {
-      // TODO - log me
-      return false;
+    if (![EVENT.CREATED].includes(event.eventName)) {
+      return;
     }
+    const transaction = event.data;
+    // TOTO handle more event transaction
+    if (transaction.status !== PAYMENT_STATUS.SUCCESS) {
+      return;
+    }
+    if (!transaction.couponInfo || !transaction.couponInfo._id) {
+      return;
+    }
+    await this.couponService.updateNumberOfUses(transaction.couponInfo._id);
   }
 }
