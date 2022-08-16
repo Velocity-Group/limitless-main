@@ -10,14 +10,13 @@ import { paymentProviders } from './providers';
 import { SettingModule } from '../settings/setting.module';
 import { MailerModule } from '../mailer/mailer.module';
 import {
-  CCBillService, PaymentService, PaymentSearchService,
-  BitpayService, StripeService
+  CCBillService, PaymentService, PaymentSearchService, BitpayService, StripeService
 } from './services';
 import {
   PaymentController, PaymentSearchController, CancelSubscriptionController, PaymentWebhookController,
   StripeController
 } from './controllers';
-import { TransactionMailerListener, UpdateUserBalanceListener } from './listeners';
+import { TransactionMailerListener, UpdateUserBalanceListener, StripeSettingsUpdatedListener } from './listeners';
 import { UserModule } from '../user/user.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { SocketModule } from '../socket/socket.module';
@@ -43,7 +42,8 @@ import { SocketModule } from '../socket/socket.module';
     StripeService,
     PaymentSearchService,
     TransactionMailerListener,
-    UpdateUserBalanceListener
+    UpdateUserBalanceListener,
+    StripeSettingsUpdatedListener
   ],
   controllers: [
     PaymentController, PaymentSearchController, StripeController,
@@ -60,12 +60,6 @@ export class PaymentModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(RequestLoggerMiddleware)
-      .forRoutes('/payment/ccbill/callhook');
-    consumer
-      .apply(RequestLoggerMiddleware)
-      .forRoutes('/payment/bitpay/callhook');
-    consumer
-      .apply(RequestLoggerMiddleware)
-      .forRoutes('/payment/stripe/callhook');
+      .forRoutes('/payment/*/callhook');
   }
 }
