@@ -1,5 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
-import { Table, Tag } from 'antd';
+import {
+  Table, Tag, Avatar, Tooltip
+} from 'antd';
 import { ITransaction } from 'src/interfaces';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
@@ -103,6 +105,8 @@ const PaymentTableList = ({
       render(data) {
         return (
           <span style={{ whiteSpace: 'nowrap' }}>
+            <Avatar src={data?.avatar || '/static/no-avatar.png'} />
+            {' '}
             {data?.name || data?.username || 'N/A'}
           </span>
         );
@@ -113,9 +117,11 @@ const PaymentTableList = ({
       key: 'description',
       render(data, record) {
         return record?.products.map((re) => (
-          <span key={record._id}>
-            {re.description}
-          </span>
+          <Tooltip key={record._id} title={re.description}>
+            <span style={{ whiteSpace: 'nowrap', maxWidth: 150, textOverflow: 'ellipsis' }}>
+              {re.description}
+            </span>
+          </Tooltip>
         ));
       }
     },
