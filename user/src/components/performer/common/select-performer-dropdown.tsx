@@ -1,5 +1,5 @@
 import { PureComponent } from 'react';
-import { Select, message } from 'antd';
+import { Select, message, Avatar } from 'antd';
 import { debounce } from 'lodash';
 import { performerService } from '@services/performer.service';
 
@@ -54,10 +54,12 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
         disabled={disabled}
       >
         <Select.Option value="" key="default">
-          All
+          All Model
         </Select.Option>
         {data && data.length > 0 && data.map((u) => (
           <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>
+            <Avatar size={30} src={u?.avatar || '/static/no-avatar.png'} />
+            {' '}
             {`${u?.name || u?.username}`}
           </Select.Option>
         ))}
