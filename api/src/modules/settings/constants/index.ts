@@ -60,7 +60,8 @@ export const SETTING_KEYS = {
   AGORA_CERTIFICATE: 'agoraCertificate',
   AGORA_ENABLE: 'agoraEnable',
   CCBILL_SINGLE_SUB_ACCOUNT_NUMBER: 'ccbillSingleSubAccountNumber',
-  CCBILL_RECURRING_SUB_ACCOUNT_NUMBER: 'ccbillRecurringSubAccountNumber'
+  CCBILL_RECURRING_SUB_ACCOUNT_NUMBER: 'ccbillRecurringSubAccountNumber',
+  PAYMENT_GATEWAY: 'paymentGateway'
 };
 
 export const MENU_SECTION = {
