@@ -403,11 +403,8 @@ export class FileService {
       newAbsolutePath = respVideo.toPath;
       newPath = respVideo.toPath.replace(publicDir, '');
       const meta = await this.videoService.getMetaData(videoPath);
-      const stream1 = meta.streams && meta.streams[0];
-      const stream2 = meta.streams && meta.streams[1];
-      const width = stream1?.width || stream2?.width || '500';
-      const height = stream1?.height || stream2?.height || '500';
-      const rotate = stream1?.rotation || stream2?.rotation;
+      const videoMeta = meta.streams.find((s) => s.codec_type === 'video');
+      const { width = 500, height = 500, rotate } = videoMeta || {};
       const respThumb = await this.videoService.createThumbs(videoPath, {
         toFolder: videoDir,
         size: options?.size || (rotate === '-90' ? `${height}x${width}` : `${width}x${height}`),
