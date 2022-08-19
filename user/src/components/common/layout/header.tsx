@@ -262,7 +262,7 @@ class Header extends PureComponent<IProps> {
                   </span>
                 </div>
                 <div className="sub-info">
-                  <a aria-hidden className="user-balance" onClick={() => !user?.isPerformer && Router.push('/wallet')}>
+                  <a aria-hidden className="user-balance" onClick={() => (!user?.isPerformer ? Router.push('/wallet') : Router.push('/model/earning'))}>
                     <WalletSvg />
                     {' '}
                     $
