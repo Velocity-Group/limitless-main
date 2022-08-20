@@ -336,10 +336,14 @@ class FeedCard extends Component<IProps> {
       openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
       openTeaser, openSubscriptionModal, openReportModal, requesting, subscriptionType, paymentUrl
     } = this.state;
-    const canView = (!feed.isSale && feed.isSubscribed)
+    let canView = (!feed.isSale && feed.isSubscribed)
     || (feed.isSale && isBought)
     || feed.type === 'text'
-    || (feed.isSale && !feed.price && user._id);
+    || (feed.isSale && !feed.price);
+
+    if (!user?._id || (`${user?._id}` !== `${feed?.fromSourceId}` && user?.isPerformer)) {
+      canView = false;
+    }
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     const thumbUrl = (feed?.thumbnail?.thumbnails && feed?.thumbnail?.thumbnails[0])
