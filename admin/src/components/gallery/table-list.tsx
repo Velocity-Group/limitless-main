@@ -39,12 +39,12 @@ export class TableListGallery extends PureComponent<IProps> {
         dataIndex: 'title'
       },
       {
-        title: 'Tokens',
+        title: 'Price',
         dataIndex: 'price',
         render(token: number) {
           return (
             <span>
-              <img src="/coin-ico.png" width="15px" alt="coin" />
+              $
               {token.toFixed(2)}
             </span>
           );

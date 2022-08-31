@@ -271,7 +271,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
           <Switch unCheckedChildren="Subscribe to view" checkedChildren="Pay per view" onChange={(val) => this.setState({ isSaleVideo: val })} />
         </Form.Item>
         {isSaleVideo && (
-          <Form.Item name="price" label="Amount of tokens">
+          <Form.Item name="price" label="Price">
             <InputNumber min={1} />
           </Form.Item>
         )}

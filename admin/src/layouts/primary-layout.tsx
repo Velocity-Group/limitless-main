@@ -390,8 +390,8 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         children: [
           {
             id: 'transactions',
-            name: 'All token transactions',
-            route: '/token-transactions'
+            name: 'All wallet transactions',
+            route: '/wallet-transactions'
           }
         ]
       },

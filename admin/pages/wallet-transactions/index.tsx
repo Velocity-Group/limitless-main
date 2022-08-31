@@ -148,10 +148,10 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
     return (
       <Layout>
         <Head>
-          <title>Token Transactions</title>
+          <title>Wallet Transactions</title>
         </Head>
         <Page>
-          <BreadcrumbComponent breadcrumbs={[{ title: 'Token Transactions' }]} />
+          <BreadcrumbComponent breadcrumbs={[{ title: 'Wallet Transactions' }]} />
           <SearchFilter
             type={type}
             onSubmit={this.handleFilter.bind(this)}

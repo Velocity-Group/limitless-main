@@ -119,7 +119,7 @@ export class FormProduct extends PureComponent<IProps> {
             </Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item name="price" label="Amount of Tokens">
+        <Form.Item name="price" label="Price">
           <InputNumber min={1} />
         </Form.Item>
         {!isDigitalProduct && (
