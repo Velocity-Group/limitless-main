@@ -72,12 +72,12 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Tokens',
+      title: 'Price',
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
           <span>
-            <img src="/coin-ico.png" width="15px" alt="coin" />
+            $
             {(totalPrice || 0).toFixed(2)}
           </span>
         );

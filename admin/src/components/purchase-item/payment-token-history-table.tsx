@@ -98,12 +98,12 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Tokens',
+      title: 'Price',
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
           <span>
-            <img alt="gem" src="/coin-ico.png" width="15px" />
+            $
             {(totalPrice || 0).toFixed(2)}
           </span>
         );

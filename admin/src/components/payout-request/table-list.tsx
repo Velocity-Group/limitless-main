@@ -39,31 +39,31 @@ export class RequestPayoutTable extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Requested Tokens',
+        title: 'Requested Price',
         dataIndex: 'requestTokens',
         key: 'requestTokens',
         render(requestTokens: number) {
           return (
             <span>
-              <img src="/coin-ico.png" width="15px" alt="coin" />
-              {requestTokens.toFixed(2)}
-            </span>
-          );
-        }
-      },
-      {
-        title: 'Conversion Rate',
-        dataIndex: 'tokenConversionRate',
-        key: 'tokenConversionRate',
-        render(tokenConversionRate: number, record) {
-          return (
-            <span>
               $
-              {((tokenConversionRate || 1) * record.requestTokens).toFixed(2)}
+              {(requestTokens || 0).toFixed(2)}
             </span>
           );
         }
       },
+      // {
+      //   title: 'Conversion Rate',
+      //   dataIndex: 'tokenConversionRate',
+      //   key: 'tokenConversionRate',
+      //   render(tokenConversionRate: number, record) {
+      //     return (
+      //       <span>
+      //         $
+      //         {((tokenConversionRate || 1) * record.requestTokens).toFixed(2)}
+      //       </span>
+      //     );
+      //   }
+      // },
       {
         title: 'Gateway',
         dataIndex: 'paymentAccountType',

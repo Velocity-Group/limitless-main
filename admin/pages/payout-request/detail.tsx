@@ -160,20 +160,20 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
                   <Space size="large">
                     <Statistic
-                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Total Tokens"
+                      prefix="$"
+                      title="Total Price"
                       value={statsPayout?.totalEarnedTokens || 0}
                       precision={2}
                     />
                     <Statistic
-                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Paid Out Tokens"
+                      prefix="$"
+                      title="Paid Out Price"
                       value={statsPayout?.previousPaidOutTokens || 0}
                       precision={2}
                     />
                     <Statistic
-                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Remaining Tokens"
+                      prefix="$"
+                      title="Remaining Price"
                       value={statsPayout?.remainingUnpaidTokens || 0}
                       precision={2}
                     />
