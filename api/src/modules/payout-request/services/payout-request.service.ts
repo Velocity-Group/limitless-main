@@ -150,9 +150,7 @@ export class PayoutRequestService {
     const query = {
       sourceId: user._id,
       source: SOURCE_TYPE.PERFORMER,
-      requestTokens: data.requestTokens,
-      status: STATUSES.PENDING,
-      createdAt: { $gte: moment().subtract(1, 'day').toDate() }
+      status: STATUSES.PENDING
     };
     const request = await this.payoutRequestModel.findOne(query);
     if (request) {
@@ -235,6 +233,9 @@ export class PayoutRequestService {
     if (!payout) {
       throw new EntityNotFoundException();
     }
+    if (payout.status !== 'processing') {
+      throw new ForbiddenException();
+    }
     if (performer._id.toString() !== payout.sourceId.toString()) {
       throw new ForbiddenException();
     }
@@ -260,6 +261,7 @@ export class PayoutRequestService {
       throw new InvalidRequestTokenException();
     }
     merge(payout, payload);
+    payout.updatedAt = new Date();
     payout.tokenConversionRate = await this.settingService.getKeyValue(SETTING_KEYS.TOKEN_CONVERSION_RATE) || 1;
     await payout.save();
     // const adminEmail = (await this.settingService.getKeyValue(SETTING_KEYS.ADMIN_EMAIL)) || process.env.ADMIN_EMAIL;
