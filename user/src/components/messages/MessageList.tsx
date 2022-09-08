@@ -22,14 +22,19 @@ class MessageList extends PureComponent<IProps> {
   private messagesRef = createRef<HTMLDivElement>();
 
   state = {
-    offset: 0
+    offset: 0,
+    onLoadMore: false
   }
 
   componentDidUpdate(prevProps) {
-    const { conversation } = this.props;
+    const { conversation, sendMessage } = this.props;
     if (prevProps.conversation && prevProps.conversation._id !== conversation._id) {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ offset: 0 });
+    }
+    if (prevProps?.sendMessage?.data?._id !== sendMessage?.data?._id) {
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({ onLoadMore: false });
     }
   }
 
@@ -41,11 +46,12 @@ class MessageList extends PureComponent<IProps> {
     const ele = event.target;
     if (!canloadmore) return;
     if (ele.scrollTop === 0 && conversation._id && !fetching && canloadmore) {
-      this.setState({ offset: offset + 1 },
-        () => {
-          const { offset: newOffset } = this.state;
-          handleLoadMore({ conversationId: conversation._id, limit: 25, offset: newOffset * 25 });
-        });
+      this.setState({ offset: offset + 1, onLoadMore: true });
+      handleLoadMore({
+        conversationId: conversation._id,
+        limit: 25,
+        offset: (offset + 1) * 25
+      });
     }
   }
 
@@ -115,16 +121,17 @@ class MessageList extends PureComponent<IProps> {
  };
 
  scrollToBottom = () => {
-   const { message: { fetching } } = this.props;
-   if (fetching) {
-     return;
-   }
-
-   if (this.messagesRef && this.messagesRef.current) {
-     const ele: HTMLDivElement = this.messagesRef.current;
-     setTimeout(() => {
-       ele.scrollTop = ele.scrollHeight;
-     }, 300);
+   const {
+     message: { fetching }
+   } = this.props;
+   const { onLoadMore } = this.state;
+   if (onLoadMore) return;
+   const ele = this.messagesRef.current as HTMLDivElement;
+   if (!fetching && ele) {
+     if (ele.scrollTop === ele.scrollHeight) return;
+     window.setTimeout(() => {
+       ele.scrollTo({ top: ele.scrollHeight, behavior: 'smooth' });
+     }, 100);
    }
  }
 
@@ -132,11 +139,11 @@ class MessageList extends PureComponent<IProps> {
    const { conversation, message } = this.props;
    const { fetching } = message;
    return (
-     <div className="message-list" ref={this.messagesRef} onScroll={this.handleScroll.bind(this, conversation)}>
+     <div className="message-list" onScroll={this.handleScroll.bind(this, conversation)}>
        {conversation && conversation._id
          ? (
            <>
-             <div className="message-list-container">
+             <div className="message-list-container" ref={this.messagesRef as any}>
                <div aria-hidden className="mess-recipient" onClick={() => conversation?.recipientInfo?.isPerformer && Router.push({ pathname: '/model/profile', query: { username: conversation?.recipientInfo?.username || conversation?.recipientInfo?._id } }, `/${conversation?.recipientInfo?.username || conversation?.recipientInfo?._id}`)}>
                  <Avatar alt="avatar" src={conversation?.recipientInfo?.avatar || '/static/no-avatar.png'} />
                  {' '}
