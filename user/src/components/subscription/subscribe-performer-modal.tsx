@@ -1,7 +1,9 @@
 import { IPerformer } from '@interfaces/performer';
 import { getResponseError } from '@lib/utils';
 import { performerService } from '@services/performer.service';
-import { Avatar, message, Modal } from 'antd';
+import {
+  Avatar, message, Modal, Spin, Button
+} from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Router from 'next/router';
@@ -17,10 +19,11 @@ type Props = {
 export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props) => {
   const [performer, setPerformer] = useState<IPerformer>();
   const [loading, setLoading] = useState(false);
-  const [submiting, setSubmiting] = useState<string>();
+  const [submiting, setSubmiting] = useState<boolean>();
   const currentUser = useSelector((state: any) => state.user.current);
   const settings = useSelector((state: any) => state.settings);
   const subscription = useSelector((state: any) => state.subscription);
+  const [paymentUrl, setPaymentUrl] = useState<string>('');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -54,19 +57,22 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
       return;
     }
     try {
-      setSubmiting(subscriptionType);
-      await paymentService.subscribePerformer({
+      setSubmiting(true);
+      const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
-        paymentGateway: settings.paymentGateway === 'stripe'
+        paymentGateway: settings.paymentGateway
       });
-      onSubscribed && onSubscribed(performer.username);
+      if (settings.paymentGateway === 'ccbill') {
+        setPaymentUrl(resp?.data?.paymentUrl);
+      } else {
+        setSubmiting(false);
+        dispatch(hideSubscribePerformerModal());
+        onSubscribed && onSubscribed(performer?.username || performer?._id);
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
-    } finally {
-      setSubmiting(null);
-      dispatch(hideSubscribePerformerModal());
     }
   };
 
@@ -77,107 +83,73 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
   return (
     <Modal
       visible={subscription.showModal}
+      destroyOnClose
+      centered
       width={770}
       footer={null}
       onCancel={onCancel}
     >
-      {loading && <p>Loading...</p>}
-      <div className="confirm-subscription-form">
-        <div className="text-center">
-          <h3 className="secondary-color">
-            Confirm subscription with
-            {' '}
-            {performer?.name || performer?.username || 'the model'}
-          </h3>
-          <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
-          <p className="p-name">
-            {performer?.name || performer?.username || 'N/A'}
-            {' '}
-            {performer?.verifiedAccount && (
-              <TickIcon className="primary-color" />
-            )}
-          </p>
-        </div>
-        <div className="info-body">
-          <p>SUBSCRIBE TO GET THESE BENEFITS</p>
-          <ul>
-            <li>
-              <CheckSquareOutlined />
+      {loading && <div style={{ margin: 30, textAlign: 'center' }}><Spin /></div>}
+      {!paymentUrl ? (
+        <div className="confirm-subscription-form">
+          <div className="left-col">
+            <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
+            <div className="p-name">
+              {performer?.name || 'N/A'}
               {' '}
-              Full access to this model&apos;s content
-            </li>
-            <li>
-              <CheckSquareOutlined />
-              {' '}
-              Direct message with this model
-            </li>
-            <li>
-              <CheckSquareOutlined />
-              {' '}
-              Cancel your subscription at any time
-            </li>
-          </ul>
-        </div>
-      </div>
-      {!loading && performer && !performer?.isSubscribed && (
-        <div className="subscription-bl">
-          <h5>Monthly Subscription</h5>
-          <button
-            type="button"
-            className="sub-btn"
-            disabled={submiting && submiting === 'monthly'}
-            onClick={() => {
-              subscribe('monthly');
-            }}
-          >
-            SUBSCRIBE FOR $
-            {performer && performer?.monthlyPrice.toFixed(2)}
-          </button>
-        </div>
-      )}
-      {!loading && performer && !performer?.isSubscribed && (
-        <div className="subscription-bl">
-          <h5>Yearly Subscription</h5>
-          <button
-            type="button"
-            className="sub-btn"
-            disabled={submiting === 'yearly'}
-            onClick={() => {
-              subscribe('yearly');
-            }}
-          >
-            SUBSCRIBE FOR $
-            {performer?.yearlyPrice.toFixed(2)}
-          </button>
-        </div>
-      )}
-      {!loading
-        && performer
-        && performer?.isFreeSubscription
-        && !performer?.isSubscribed && (
-          <div className="subscription-bl">
-            <h5>Free Subscription</h5>
-            <button
-              type="button"
-              className="sub-btn"
-              disabled={submiting === 'free'}
-              onClick={() => {
-                subscribe('free');
-              }}
-            >
-              SUBSCRIBE FOR FREE FOR
-              {' '}
-              {performer?.durationFreeSubscriptionDays || 1}
-              {' '}
-              {performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
-              {' '}
-              THEN $
-              {performer?.monthlyPrice.toFixed(2)}
-              {' '}
-              PER MONTH
-            </button>
+              {performer?.verifiedAccount && <TickIcon className="primary-color" />}
+            </div>
+            <div className="p-username">
+              @
+              {performer?.username || 'n/a'}
+            </div>
+            <img className="lock-icon" src="/static/lock-icon.png" alt="lock" />
           </div>
-      )}
+          <div className="right-col">
+            <h2>
+              Subscribe
+              {' '}
+              <span className="username">{`@${performer?.username}` || 'the model'}</span>
+            </h2>
+            <h3>
+              <span className="price">{(performer?.monthlyPrice || 0).toFixed(2)}</span>
+              {' '}
+              USD/month
+            </h3>
+            <ul className="check-list">
+              <li>
+                <CheckSquareOutlined />
+                {' '}
+                Full access to this model&apos;s exclusive content
+              </li>
+              <li>
+                <CheckSquareOutlined />
+                {' '}
+                Direct message with this model
+              </li>
+              <li>
+                <CheckSquareOutlined />
+                {' '}
+                Requested personalised Pay Per View content
+              </li>
+              <li>
+                <CheckSquareOutlined />
+                {' '}
+                Cancel your subscription at any time
+              </li>
+            </ul>
+            <Button
+              className="primary"
+              disabled={submiting}
+              loading={submiting}
+              onClick={() => subscribe('monthly')}
+            >
+              SUBSCRIBE
+            </Button>
+            <p className="sub-text">Clicking &quot;Subscribe&quot; will take you to the payment screen to finalize you subscription</p>
+          </div>
+        </div>
+      ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
     </Modal>
   );
 };
