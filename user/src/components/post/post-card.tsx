@@ -96,8 +96,27 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  // eslint-disable-next-line react/sort-comp
-  async handleLike() {
+  handleJoinStream = () => {
+    const { user, feed } = this.props;
+    if (!user._id) {
+      message.error('Please log in or register!');
+      return;
+    }
+    if (user.isPerformer) return;
+    if (!feed?.isSubscribed) {
+      message.error('Please subscribe to this model!');
+      return;
+    }
+    Router.push({
+      pathname: '/streaming/details',
+      query: {
+        performer: JSON.stringify(feed?.performer),
+        username: feed?.performer?.username || feed?.performer?._id
+      }
+    }, `/streaming/${feed?.performer?.username || feed?.performer?._id}`);
+  }
+
+  handleLike = async () => {
     const { feed } = this.props;
     const { isLiked, totalLike, requesting } = this.state;
     if (requesting) return;
@@ -125,7 +144,7 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  async handleBookmark() {
+  handleBookmark = async () => {
     const { feed, user } = this.props;
     const { isBookMarked, requesting } = this.state;
     if (requesting || !user._id || user.isPerformer) return;
@@ -153,7 +172,7 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  async handleReport(payload: any) {
+  handleReport = async (payload: any) => {
     const { feed } = this.props;
     try {
       await this.setState({ requesting: true });
@@ -169,14 +188,14 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  async onOpenComment() {
+  onOpenComment = () => {
     const { feed, getComments: handleGetComment } = this.props;
     const {
       isOpenComment, isFirstLoadComment, itemPerPage, commentPage
     } = this.state;
     this.setState({ isOpenComment: !isOpenComment });
     if (isFirstLoadComment) {
-      await this.setState({ isFirstLoadComment: false });
+      this.setState({ isFirstLoadComment: false });
       handleGetComment({
         objectId: feed._id,
         limit: itemPerPage,
@@ -185,7 +204,7 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  copyLink() {
+  copyLink = () => {
     const { feed } = this.props;
     const str = `${window.location.origin}/post/${feed?.slug || feed?._id}`;
     const el = document.createElement('textarea');
@@ -200,7 +219,7 @@ class FeedCard extends Component<IProps> {
     message.success('Copied to clipboard');
   }
 
-  async moreComment() {
+  moreComment = async () => {
     const { feed, moreComment: handleLoadMore } = this.props;
     const { commentPage, itemPerPage } = this.state;
     this.setState({
@@ -213,13 +232,13 @@ class FeedCard extends Component<IProps> {
     });
   }
 
-  async deleteComment(item) {
+  deleteComment = (item) => {
     const { deleteComment: handleDelete } = this.props;
     if (!window.confirm('Are you sure to remove this comment?')) return;
     handleDelete(item._id);
   }
 
-  async subscribe() {
+  subscribe = async () => {
     const { feed, user, settings } = this.props;
     const { subscriptionType } = this.state;
     if (!user._id) {
@@ -252,7 +271,7 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  async sendTip(price) {
+  sendTip = async (price) => {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
     if (user._id === feed?.performer?._id) {
       message.error('Models cannot tip for themselves');
@@ -276,7 +295,7 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  async purchaseFeed() {
+  purchaseFeed = async () => {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < feed.price) {
       message.error('Your wallet balance is not enough');
@@ -297,7 +316,7 @@ class FeedCard extends Component<IProps> {
     }
   }
 
-  async votePoll(poll: any) {
+  votePoll = async (poll: any) => {
     const { feed } = this.props;
     const { polls } = this.state;
     const isExpired = new Date(feed.pollExpiredAt) < new Date();
@@ -401,6 +420,8 @@ class FeedCard extends Component<IProps> {
                   {performer?.name || 'N/A'}
                   {' '}
                   {performer?.verifiedAccount && <TickIcon />}
+                  &nbsp;&nbsp;
+                  {performer?.live > 0 && user?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
                 </h4>
                 <h5>
                   @
