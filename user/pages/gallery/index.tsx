@@ -166,7 +166,7 @@ class GalleryViewPage extends PureComponent<IProps> {
       await this.setState({ requesting: true });
       await (await tokenTransctionService.purchaseGallery(gallery._id, { })).data;
       message.success('Gallery is unlocked!');
-      handleUpdateBalance({ token: gallery.price });
+      handleUpdateBalance({ token: -gallery.price });
       this.setState({ isBought: true, openPurchaseModal: false, requesting: false });
     } catch (e) {
       const error = await e;
