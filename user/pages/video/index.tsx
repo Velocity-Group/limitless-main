@@ -244,7 +244,7 @@ class VideoViewPage extends PureComponent<IProps> {
       await this.setState({ requesting: true });
       await (await tokenTransctionService.purchaseVideo(video._id, {})).data;
       message.success('Video is unlocked!');
-      handleUpdateBalance({ token: video.price });
+      handleUpdateBalance({ token: -video.price });
       this.setState({ isBought: true, requesting: false });
     } catch (e) {
       const error = await e;
