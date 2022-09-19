@@ -52,6 +52,10 @@ class MessageList extends PureComponent<IProps> {
         limit: 25,
         offset: (offset + 1) * 25
       });
+      setTimeout(() => {
+        const getMeTo = document.getElementById(items[0]._id);
+        getMeTo && getMeTo.scrollIntoView({ behavior: 'auto', block: 'center' });
+      }, 1000);
     }
   }
 
