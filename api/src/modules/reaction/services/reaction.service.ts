@@ -230,7 +230,7 @@ export class ReactionService {
     };
   }
 
-  public async getListGallery(req: ReactionSearchRequestPayload, user: UserDto) {
+  public async getListGallery(req: ReactionSearchRequestPayload, user: UserDto, jwToken: string) {
     const query = {
       objectType: REACTION_TYPE.GALLERY,
       action: REACTION.BOOK_MARK,
@@ -254,7 +254,7 @@ export class ReactionService {
 
     const galleryIds = uniq(items.map((i) => i.objectId));
     const galleries = galleryIds.length > 0 ? await this.galleryService.findByIds(galleryIds) : [];
-    const mapGalleries = await this.galleryService.mapArrayInfo(galleries, user);
+    const mapGalleries = await this.galleryService.mapArrayInfo(galleries, user, jwToken);
     const reactions = items.map((v) => new ReactionDto(v));
     reactions.forEach((r) => {
       const item = r;

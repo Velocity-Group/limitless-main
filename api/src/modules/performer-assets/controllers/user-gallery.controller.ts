@@ -10,7 +10,8 @@ import {
   Query,
   UseGuards,
   Res,
-  Post
+  Post,
+  Request
 } from '@nestjs/common';
 import { DataResponse } from 'src/kernel';
 import { AuthGuard, LoadUser } from 'src/modules/auth/guards';
@@ -28,10 +29,11 @@ export class UserGalleryController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
   async searchGallery(
-    @Query() req: GallerySearchRequest,
-    @CurrentUser() user: any
+    @Query() query: GallerySearchRequest,
+    @CurrentUser() user: any,
+    @Request() req: any
   ): Promise<any> {
-    const resp = await this.galleryService.userSearch(req, user);
+    const resp = await this.galleryService.userSearch(query, user, req.jwToken);
     return DataResponse.ok(resp);
   }
 
