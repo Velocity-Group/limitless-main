@@ -37,6 +37,7 @@ export default function Message(props: IProps) {
 
   return (
     <div
+      id={data._id}
       className={[
         'message',
         `${startsSequence ? 'start' : ''}`,
