@@ -15,8 +15,7 @@ interface GalleryCardIProps {
 
 const GalleryCard = ({ gallery }: GalleryCardIProps) => {
   const [isHovered, setHover] = useState(false);
-  const canView = (!gallery.isSale && gallery.isSubscribed)
-    || (gallery.isSale && gallery.isBought);
+  const canView = (!gallery.isSale && gallery.isSubscribed) || (gallery.isSale && gallery.isBought);
   const thumbUrl = (!canView
     ? gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]
     : gallery?.coverPhoto?.url) || '/static/no-image.jpg';

@@ -103,9 +103,12 @@ export class ReactionController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async bookmarkGalleries(
     @Query() query: ReactionSearchRequestPayload,
-    @CurrentUser() user: UserDto
+    @CurrentUser() user: UserDto,
+    @Request() req: any
   ): Promise<DataResponse<PageableData<ReactionDto>>> {
-    const data = await this.reactionService.getListGallery(query, user);
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const data = await this.reactionService.getListGallery(query, user, jwToken);
     return DataResponse.ok(data);
   }
 
