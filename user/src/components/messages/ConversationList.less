@@ -4,10 +4,14 @@
 .conversation-list {
   height: 100%;
   width: 100%;
-  overflow: auto;
   padding: 0 0 20px;
 
+  .c-list-container {
+    overflow: auto;
+    max-height: calc(100% - 100px);
+  }
 }
+
 .user-bl {
   display: flex;
   align-items: center;
@@ -15,6 +19,7 @@
   color: @primary-color;
   font-size: 15px;
   padding: 5px 25px;
+  height: 43px;
   margin-bottom: 10px;
   font-weight: 600;
   font-family: @primary-font-bold;

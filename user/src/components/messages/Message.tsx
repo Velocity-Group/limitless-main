@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { Image } from 'antd';
+import { Image, Avatar } from 'antd';
 import { IUser } from '@interfaces/index';
 import './Message.less';
 
@@ -22,6 +22,7 @@ export default function Message(props: IProps) {
   const friendlyTimestamp = moment(data.createdAt).format('LLLL');
   return (
     <div
+      id={data._id}
       className={[
         'message',
         `${isMine ? 'mine' : ''}`,
@@ -32,13 +33,13 @@ export default function Message(props: IProps) {
 
       {data.text && (
         <div className="bubble-container">
-          {!isMine && <img alt="" className="avatar" src={recipient?.avatar || '/static/no-avatar.png'} />}
+          {!isMine && <Avatar alt="" className="avatar" src={recipient?.avatar || '/static/no-avatar.png'} />}
           <div className="bubble" title={friendlyTimestamp}>
             {!data.imageUrl && data.text}
             {' '}
             {data.imageUrl && <Image alt="" src={data.imageUrl} preview />}
           </div>
-          {isMine && <img alt="" src={currentUser?.avatar || '/static/no-avatar.png'} className="avatar" />}
+          {isMine && <Avatar alt="" src={currentUser?.avatar || '/static/no-avatar.png'} className="avatar" />}
         </div>
       )}
       {showTimestamp && <div className="timestamp">{friendlyTimestamp}</div>}
