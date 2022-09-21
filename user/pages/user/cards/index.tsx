@@ -34,7 +34,7 @@ class CardsPage extends PureComponent<IProps> {
   async handleRemoveCard(cardId: string) {
     if (!window.confirm('Are you sure to remove this payment card?')) return;
     try {
-      await this.setState({ submiting: true });
+      this.setState({ submiting: true });
       await paymentService.removeStripeCard(cardId);
       this.getData();
     } catch (e) {
@@ -47,7 +47,7 @@ class CardsPage extends PureComponent<IProps> {
 
   async getData() {
     try {
-      await this.setState({ loading: true });
+      this.setState({ loading: true });
       const resp = await paymentService.getStripeCards();
       this.setState({
         cards: resp.data.data.map((d) => {
@@ -57,7 +57,7 @@ class CardsPage extends PureComponent<IProps> {
         })
       });
     } catch (error) {
-      message.error(getResponseError(error) || 'An error occured. Please try again.');
+      message.error(getResponseError(await error) || 'An error occured. Please try again.');
     } finally {
       this.setState({ loading: false });
     }

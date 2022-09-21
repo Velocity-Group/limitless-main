@@ -23,7 +23,7 @@ import {
   UserUpdatePayload, UserAuthUpdatePayload, UserAuthCreatePayload, UserCreatePayload
 } from '../payloads';
 import { UserDto } from '../dtos';
-import { DELETE_USER_CHANNEL, STATUS_ACTIVE } from '../constants';
+import { DELETE_USER_CHANNEL, ROLE_USER, STATUS_ACTIVE } from '../constants';
 import { EmailHasBeenTakenException } from '../exceptions';
 import { UsernameExistedException } from '../exceptions/username-existed.exception';
 
@@ -142,6 +142,7 @@ export class UserService {
     }
     // eslint-disable-next-line no-param-reassign
     data.username = data.username ? data.username.trim().toLowerCase() : `user${StringHelper.randomString(8, '0123456789')}`;
+    data.roles = [ROLE_USER];
     return this.userModel.create(data);
   }
 
