@@ -344,6 +344,23 @@ const messageReducer = [
         }
       };
     }
+  },
+  {
+    on: deactiveConversation,
+    reducer(state: any, data: IReduxAction<any>) {
+      const nextState = { ...state };
+      const conversationId = data.payload;
+      if (conversationId && nextState.conversationMap[conversationId]) {
+        nextState.conversationMap[conversationId] = {
+          items: [],
+          total: 0,
+          requesting: false
+        };
+      }
+      return {
+        ...nextState
+      };
+    }
   }
 ];
 
