@@ -130,7 +130,7 @@ export class SettingService {
     if (group) {
       query.group = group;
     }
-    const settings = await this.settingModel.find(query);
+    const settings = await this.settingModel.find(query).sort('createdAt').lean();
     return settings.map((s) => new SettingDto(s));
   }
 
