@@ -404,10 +404,10 @@ export class FileService {
       newPath = respVideo.toPath.replace(publicDir, '');
       const meta = await this.videoService.getMetaData(videoPath);
       const videoMeta = meta.streams.find((s) => s.codec_type === 'video');
-      const { width = 500, height = 500, rotate } = videoMeta || {};
+      const { width = 500, height = 500, rotation = '0' } = videoMeta || {};
       const respThumb = await this.videoService.createThumbs(videoPath, {
         toFolder: videoDir,
-        size: options?.size || (rotate === '-90' ? `${height}x${width}` : `${width}x${height}`),
+        size: options?.size || (['90', '-90', '270', '-270'].includes(rotation) ? `${height}x${width}` : `${width}x${height}`),
         count: options?.count || 1
       });
       let thumbnails: any = [];
