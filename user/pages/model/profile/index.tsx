@@ -90,8 +90,7 @@ class PerformerProfile extends PureComponent<IProps> {
     filter: initialFilter,
     isGrid: false,
     subscriptionType: 'monthly',
-    isFollowed: false,
-    paymentUrl: ''
+    isFollowed: false
   };
 
   static async getInitialProps({ ctx }) {
@@ -296,7 +295,7 @@ class PerformerProfile extends PureComponent<IProps> {
         paymentGateway: settings.paymentGateway
       });
       if (settings.paymentGateway === 'ccbill') {
-        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+        window.location.href = resp?.data?.paymentUrl;
       } else {
         this.setState({ openSubscriptionModal: false });
       }
@@ -411,8 +410,7 @@ class PerformerProfile extends PureComponent<IProps> {
       tab,
       isGrid,
       subscriptionType,
-      isFollowed,
-      paymentUrl
+      isFollowed
     } = this.state;
     return (
       <Layout>
@@ -785,22 +783,20 @@ class PerformerProfile extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={!paymentUrl ? 600 : 990}
+          width={600}
           centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
-          onCancel={() => this.setState({ openSubscriptionModal: false, paymentUrl: '' })}
+          onCancel={() => this.setState({ openSubscriptionModal: false })}
           destroyOnClose
         >
-          {!paymentUrl ? (
-            <ConfirmSubscriptionPerformerForm
-              type={subscriptionType || 'monthly'}
-              performer={performer}
-              submiting={submiting}
-              onFinish={this.subscribe.bind(this)}
-            />
-          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
+          <ConfirmSubscriptionPerformerForm
+            type={subscriptionType || 'monthly'}
+            performer={performer}
+            submiting={submiting}
+            onFinish={this.subscribe.bind(this)}
+          />
         </Modal>
         {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>

@@ -38,8 +38,7 @@ class SubscriptionPage extends PureComponent<IProps> {
     sortBy: 'updatedAt',
     filter: {},
     openSubscriptionModal: false,
-    selectedSubscription: null,
-    paymentUrl: ''
+    selectedSubscription: null
   };
 
   componentDidMount() {
@@ -127,7 +126,7 @@ class SubscriptionPage extends PureComponent<IProps> {
         paymentGateway: settings.paymentGateway
       });
       if (settings.paymentGateway === 'ccbill') {
-        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+        window.location.href = resp?.data?.paymentUrl;
       } else {
         this.setState({ openSubscriptionModal: false });
       }
@@ -140,7 +139,7 @@ class SubscriptionPage extends PureComponent<IProps> {
 
   render() {
     const {
-      subscriptionList, pagination, loading, submiting, openSubscriptionModal, selectedSubscription, paymentUrl
+      subscriptionList, pagination, loading, submiting, openSubscriptionModal, selectedSubscription
     } = this.state;
     const { ui } = this.props;
     return (
@@ -172,22 +171,20 @@ class SubscriptionPage extends PureComponent<IProps> {
           <Modal
             key="subscribe_performer"
             className="subscription-modal"
-            width={!paymentUrl ? 600 : 1200}
+            width={600}
             centered
             title={null}
             visible={openSubscriptionModal}
             footer={null}
-            onCancel={() => this.setState({ openSubscriptionModal: false, paymentUrl: '' })}
+            onCancel={() => this.setState({ openSubscriptionModal: false })}
             destroyOnClose
           >
-            {!paymentUrl ? (
-              <ConfirmSubscriptionPerformerForm
-                type={selectedSubscription?.subscriptionType || 'monthly'}
-                performer={selectedSubscription?.performerInfo}
-                submiting={submiting}
-                onFinish={this.subscribe.bind(this)}
-              />
-            ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '88vh' }} src={paymentUrl} />}
+            <ConfirmSubscriptionPerformerForm
+              type={selectedSubscription?.subscriptionType || 'monthly'}
+              performer={selectedSubscription?.performerInfo}
+              submiting={submiting}
+              onFinish={this.subscribe.bind(this)}
+            />
           </Modal>
           {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
         </div>

@@ -88,8 +88,7 @@ class VideoViewPage extends PureComponent<IProps> {
     requesting: false,
     activeTab: 'description',
     openSubscriptionModal: false,
-    subscriptionType: 'monthly',
-    paymentUrl: ''
+    subscriptionType: 'monthly'
   };
 
   componentDidMount() {
@@ -277,7 +276,7 @@ class VideoViewPage extends PureComponent<IProps> {
         paymentGateway: settings.paymentGateway
       });
       if (settings.paymentGateway === 'ccbill') {
-        this.setState({ paymentUrl: resp?.data?.paymentUrl, submiting: false });
+        window.location.href = resp?.data?.paymentUrl;
       }
     } catch (e) {
       const err = await e;
@@ -310,7 +309,7 @@ class VideoViewPage extends PureComponent<IProps> {
     const totalComments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].total : 0;
     const {
       videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment,
-      openSubscriptionModal, paymentUrl, subscriptionType
+      openSubscriptionModal, subscriptionType
     } = this.state;
     const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const videoJsOptions = {
@@ -657,21 +656,19 @@ class VideoViewPage extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={!paymentUrl ? 600 : 990}
+          width={600}
           centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
-          {!paymentUrl ? (
-            <ConfirmSubscriptionPerformerForm
-              type={subscriptionType || 'monthly'}
-              performer={video?.performer}
-              submiting={submiting}
-              onFinish={this.subscribe.bind(this)}
-            />
-          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
+          <ConfirmSubscriptionPerformerForm
+            type={subscriptionType || 'monthly'}
+            performer={video?.performer}
+            submiting={submiting}
+            onFinish={this.subscribe.bind(this)}
+          />
         </Modal>
         {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
