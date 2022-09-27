@@ -71,8 +71,7 @@ class GalleryViewPage extends PureComponent<IProps> {
     requesting: false,
     openPurchaseModal: false,
     openSubscriptionModal: false,
-    subscriptionType: 'monthly',
-    paymentUrl: ''
+    subscriptionType: 'monthly'
   };
 
   componentDidMount() {
@@ -196,7 +195,7 @@ class GalleryViewPage extends PureComponent<IProps> {
         paymentGateway: settings.paymentGateway
       });
       if (paymentGateway === 'ccbill') {
-        this.setState({ paymentUrl: resp?.data?.paymentUrl, submiting: false });
+        window.location.href = resp?.data?.paymentUrl;
       } else {
         this.setState({ openSubscriptionModal: false });
       }
@@ -225,7 +224,7 @@ class GalleryViewPage extends PureComponent<IProps> {
     }
     const {
       fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal,
-      isBookmarked, paymentUrl, subscriptionType
+      isBookmarked, subscriptionType
     } = this.state;
     const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && gallery?.isSubscribed);
     const thumbUrl = gallery?.coverPhoto?.url || ui?.logo;
@@ -411,21 +410,19 @@ class GalleryViewPage extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={!paymentUrl ? 600 : 990}
+          width={600}
           centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
-          {!paymentUrl ? (
-            <ConfirmSubscriptionPerformerForm
-              type={subscriptionType || 'monthly'}
-              performer={gallery?.performer}
-              submiting={submiting}
-              onFinish={this.subscribe.bind(this)}
-            />
-          ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
+          <ConfirmSubscriptionPerformerForm
+            type={subscriptionType || 'monthly'}
+            performer={gallery?.performer}
+            submiting={submiting}
+            onFinish={this.subscribe.bind(this)}
+          />
         </Modal>
         <Modal
           centered

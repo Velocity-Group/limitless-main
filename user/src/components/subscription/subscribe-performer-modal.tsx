@@ -23,7 +23,6 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
   const currentUser = useSelector((state: any) => state.user.current);
   const settings = useSelector((state: any) => state.settings);
   const subscription = useSelector((state: any) => state.subscription);
-  const [paymentUrl, setPaymentUrl] = useState<string>('');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -64,7 +63,7 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
         paymentGateway: settings.paymentGateway
       });
       if (settings.paymentGateway === 'ccbill') {
-        setPaymentUrl(resp?.data?.paymentUrl);
+        window.location.href = resp?.data?.paymentUrl;
       } else {
         setSubmiting(false);
         dispatch(hideSubscribePerformerModal());
@@ -90,66 +89,64 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
       onCancel={onCancel}
     >
       {loading && <div style={{ margin: 30, textAlign: 'center' }}><Spin /></div>}
-      {!paymentUrl ? (
-        <div className="confirm-subscription-form">
-          <div className="left-col">
-            <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
-            <div className="p-name">
-              {performer?.name || 'N/A'}
-              {' '}
-              {performer?.verifiedAccount && <TickIcon className="primary-color" />}
-            </div>
-            <div className="p-username">
-              @
-              {performer?.username || 'n/a'}
-            </div>
-            <img className="lock-icon" src="/static/lock-icon.png" alt="lock" />
+      <div className="confirm-subscription-form">
+        <div className="left-col">
+          <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
+          <div className="p-name">
+            {performer?.name || 'N/A'}
+            {' '}
+            {performer?.verifiedAccount && <TickIcon className="primary-color" />}
           </div>
-          <div className="right-col">
-            <h2>
-              Subscribe
-              {' '}
-              <span className="username">{`@${performer?.username}` || 'the model'}</span>
-            </h2>
-            <h3>
-              <span className="price">{(performer?.monthlyPrice || 0).toFixed(2)}</span>
-              {' '}
-              USD/month
-            </h3>
-            <ul className="check-list">
-              <li>
-                <CheckSquareOutlined />
-                {' '}
-                Full access to this model&apos;s exclusive content
-              </li>
-              <li>
-                <CheckSquareOutlined />
-                {' '}
-                Direct message with this model
-              </li>
-              <li>
-                <CheckSquareOutlined />
-                {' '}
-                Requested personalised Pay Per View content
-              </li>
-              <li>
-                <CheckSquareOutlined />
-                {' '}
-                Cancel your subscription at any time
-              </li>
-            </ul>
-            <Button
-              className="primary"
-              disabled={submiting}
-              loading={submiting}
-              onClick={() => subscribe('monthly')}
-            >
-              SUBSCRIBE
-            </Button>
-            <p className="sub-text">Clicking &quot;Subscribe&quot; will take you to the payment screen to finalize you subscription</p>
+          <div className="p-username">
+            @
+            {performer?.username || 'n/a'}
           </div>
+          <img className="lock-icon" src="/static/lock-icon.png" alt="lock" />
         </div>
-      ) : <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />}
+        <div className="right-col">
+          <h2>
+            Subscribe
+            {' '}
+            <span className="username">{`@${performer?.username}` || 'the model'}</span>
+          </h2>
+          <h3>
+            <span className="price">{(performer?.monthlyPrice || 0).toFixed(2)}</span>
+            {' '}
+            USD/month
+          </h3>
+          <ul className="check-list">
+            <li>
+              <CheckSquareOutlined />
+              {' '}
+              Full access to this model&apos;s exclusive content
+            </li>
+            <li>
+              <CheckSquareOutlined />
+              {' '}
+              Direct message with this model
+            </li>
+            <li>
+              <CheckSquareOutlined />
+              {' '}
+              Requested personalised Pay Per View content
+            </li>
+            <li>
+              <CheckSquareOutlined />
+              {' '}
+              Cancel your subscription at any time
+            </li>
+          </ul>
+          <Button
+            className="primary"
+            disabled={submiting}
+            loading={submiting}
+            onClick={() => subscribe('monthly')}
+          >
+            SUBSCRIBE
+          </Button>
+          <p className="sub-text">Clicking &quot;Subscribe&quot; will take you to the payment screen to finalize you subscription</p>
+        </div>
+      </div>
     </Modal>
   );
 };
