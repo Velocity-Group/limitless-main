@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import {
-  Layout, message, InputNumber, Form, Input, Button, Modal
+  Layout, message, InputNumber, Form, Input, Button
 } from 'antd';
 import {
   ArrowLeftOutlined
@@ -34,8 +34,7 @@ class TokenPackages extends PureComponent<IProps> {
     submiting: false,
     couponCode: '',
     coupon: null,
-    amount: 10,
-    paymentUrl: ''
+    amount: 10
   };
 
   addFund = async ({ amount }) => {
@@ -56,7 +55,7 @@ class TokenPackages extends PureComponent<IProps> {
         couponCode: coupon ? couponCode : ''
       });
       if (settings.paymentGateway === 'ccbill') {
-        this.setState({ submiting: false, paymentUrl: resp?.data?.paymentUrl });
+        window.location.href = resp?.data?.paymentUrl;
       }
     } catch (e) {
       const error = await e;
@@ -81,7 +80,7 @@ class TokenPackages extends PureComponent<IProps> {
   render() {
     const { ui, user } = this.props;
     const {
-      submiting, couponCode, coupon, amount, paymentUrl
+      submiting, couponCode, coupon, amount
     } = this.state;
     return (
       <Layout>
@@ -158,23 +157,6 @@ class TokenPackages extends PureComponent<IProps> {
               </Form.Item>
             </Form>
           </div>
-          <Modal
-            key="subscribe_performer"
-            className="subscription-modal"
-            width={990}
-            centered
-            title={null}
-            visible={!!paymentUrl}
-            footer={null}
-            onCancel={() => {
-              if (!window.confirm('Confirm to discard this payment!')) return;
-              this.setState({ paymentUrl: '' });
-            }}
-            destroyOnClose
-            maskClosable={false}
-          >
-            <iframe title="ccbill-paymennt-form" style={{ width: '100%', minHeight: '90vh' }} src={paymentUrl} />
-          </Modal>
           {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
         </div>
       </Layout>
