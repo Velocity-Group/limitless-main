@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  EyeOutlined, LikeOutlined, HourglassOutlined, LockOutlined, UnlockOutlined
+  EyeOutlined, LikeOutlined, HourglassOutlined, LockOutlined, UnlockOutlined, CalendarOutlined
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import Link from 'next/link';
@@ -38,6 +38,11 @@ export class VideoCard extends PureComponent<IProps> {
               $
               {(video.price || 0).toFixed(2)}
             </div>
+          </span>
+          )}
+          {video.isSchedule && (
+          <span className="vid-calendar">
+            <CalendarOutlined />
           </span>
           )}
           <div className="vid-thumb">
