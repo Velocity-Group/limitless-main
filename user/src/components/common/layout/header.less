@@ -133,6 +133,12 @@
       line-height: 20px;
       min-width: 20px;
       height: 20px;
+
+      @media (max-width: @mobile-screen) {
+        span {
+          font-size: 11px;
+        }
+      }
     }
 
     &:hover {
@@ -291,6 +297,7 @@
 
       .anticon.anticon-plus-circle {
         color: @primary-color;
+
         svg {
           height: unset
         }

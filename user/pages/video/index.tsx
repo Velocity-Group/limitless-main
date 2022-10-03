@@ -416,7 +416,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   )}
                   {!video.isSale && !isSubscribed && (
                   <div
-                    style={{ padding: '25px 5px' }}
+                    style={{ padding: '0 10px' }}
                     className="subscription-btn-grp"
                   >
                       {video?.performer?.isFreeSubscription && (
