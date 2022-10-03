@@ -653,7 +653,6 @@ class FeedCard extends Component<IProps> {
               {feed?.performer?.isFreeSubscription && (
               <Button
                 className="primary"
-                style={{ marginRight: '15px' }}
                 disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
                 onClick={() => {
                   this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
@@ -669,7 +668,6 @@ class FeedCard extends Component<IProps> {
               {feed?.performer?.monthlyPrice && (
               <Button
                 className="primary"
-                style={{ marginRight: '15px' }}
                 disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
                 onClick={() => {
                   this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });

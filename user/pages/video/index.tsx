@@ -407,7 +407,7 @@ class VideoViewPage extends PureComponent<IProps> {
                 <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
                 <div className="text-center">
                   {video.isSale && !isBought && (
-                  <Button type="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
+                  <Button block className="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
                     PAY $
                     {video.price.toFixed(2)}
                     {' '}
@@ -416,13 +416,12 @@ class VideoViewPage extends PureComponent<IProps> {
                   )}
                   {!video.isSale && !isSubscribed && (
                   <div
-                    style={{ padding: '25px 5px' }}
+                    style={{ padding: '0 10px' }}
                     className="subscription-btn-grp"
                   >
                       {video?.performer?.isFreeSubscription && (
                       <Button
                         className="primary"
-                        style={{ marginRight: '15px' }}
                         disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
                         onClick={() => {
                           this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
@@ -438,7 +437,6 @@ class VideoViewPage extends PureComponent<IProps> {
                       {video?.performer?.monthlyPrice && (
                       <Button
                         className="primary"
-                        style={{ marginRight: '15px' }}
                         disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
                         onClick={() => {
                           this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
@@ -465,7 +463,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   )}
                 </div>
                 {video.isSchedule && (
-                <h4>
+                <h4 style={{ marginTop: 15 }}>
                   Main video will be premiered on
                   {' '}
                   {formatDate(video.scheduledAt, 'll')}
