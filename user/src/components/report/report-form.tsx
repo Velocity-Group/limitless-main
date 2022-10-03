@@ -16,7 +16,7 @@ export class ReportForm extends PureComponent<IProps> {
       onFinish, submiting = false, performer
     } = this.props;
     return (
-      <div className="confirm-subscription-form">
+      <div className="confirm-purchase-form">
         <div className="text-center">
           <Avatar
             alt="main-avt"

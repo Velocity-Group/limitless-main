@@ -23,7 +23,7 @@ export class ConfirmSubscriptionPerformerForm extends PureComponent<IProps> {
       onFinish, submiting = false, performer, type
     } = this.props;
     return (
-      <div className="confirm-subscription-form">
+      <div className="confirm-purchase-form">
         <div className="left-col">
           <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
           <div className="p-name">

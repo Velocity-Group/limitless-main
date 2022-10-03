@@ -27,7 +27,7 @@ export class TipPerformerForm extends PureComponent<IProps> {
     } = this.props;
     const { price } = this.state;
     return (
-      <div className="confirm-subscription-form">
+      <div className="confirm-purchase-form">
         <div className="left-col">
           <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
           <div className="p-name">

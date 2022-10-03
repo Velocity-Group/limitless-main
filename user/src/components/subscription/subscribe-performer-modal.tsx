@@ -89,7 +89,7 @@ export const SubscribePerformerModal: React.FC<Props> = ({ onSubscribed }: Props
       onCancel={onCancel}
     >
       {loading && <div style={{ margin: 30, textAlign: 'center' }}><Spin /></div>}
-      <div className="confirm-subscription-form">
+      <div className="confirm-purchase-form">
         <div className="left-col">
           <Avatar src={performer?.avatar || '/static/no-avatar.png'} />
           <div className="p-name">
