@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Tooltip } from 'antd';
 import {
-  PictureOutlined,
-  LockOutlined,
-  UnlockOutlined
+  PictureOutlined, LockOutlined, UnlockOutlined, EyeOutlined
 } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Link from 'next/link';
@@ -53,6 +51,11 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
               <PictureOutlined />
               {' '}
               {gallery?.numOfItems || 0}
+            </a>
+            <a>
+              <EyeOutlined />
+              {' '}
+              {gallery?.stats?.views || 0}
             </a>
           </div>
           <div className="lock-middle">

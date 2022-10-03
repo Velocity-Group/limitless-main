@@ -601,7 +601,7 @@ class FeedCard extends Component<IProps> {
         </div>
         <Modal
           key="tip_performer"
-          className="subscription-modal"
+          className="tip-modal"
           title={null}
           width={600}
           visible={openTipModal}
@@ -613,10 +613,11 @@ class FeedCard extends Component<IProps> {
         </Modal>
         <Modal
           key="purchase_post"
-          className="subscription-modal"
+          className="purchase-modal"
           title={null}
           visible={openPurchaseModal}
           footer={null}
+          width={600}
           destroyOnClose
           onCancel={() => this.setState({ openPurchaseModal: false })}
         >
