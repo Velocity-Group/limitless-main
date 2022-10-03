@@ -46,34 +46,22 @@ interface IProps {
 class Header extends PureComponent<IProps> {
   state = {
     totalNotReadMessage: 0,
-    openProfile: false,
-    openStripeAlert: false
+    openProfile: false
   };
 
   componentDidMount() {
     RouterEvent.events.on('routeChangeStart', this.handleChangeRoute);
-    const { user, router, config } = this.props;
+    const { user } = this.props;
     if (user._id) {
       this.handleCountNotificationMessage();
-      // if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
-      //   // eslint-disable-next-line react/no-did-update-set-state
-      //   this.setState({ openStripeAlert: true });
-      // }
     }
   }
 
   componentDidUpdate(prevProps: any) {
-    const { user, router, config } = this.props;
-    const { openStripeAlert } = this.state;
+    const { user } = this.props;
     if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
-      // if (config.paymentGateway === 'stripe' && router.pathname !== '/model/banking' && user.isPerformer && !user?.stripeAccount?.payoutsEnabled) {
-      //   // eslint-disable-next-line react/no-did-update-set-state
-      //   this.setState({ openStripeAlert: true });
-      // }
     }
-    // eslint-disable-next-line react/no-did-update-set-state
-    // if (openStripeAlert && router.pathname === '/model/banking') this.setState({ openStripeAlert: false });
   }
 
   componentWillUnmount() {
@@ -107,24 +95,6 @@ class Header extends PureComponent<IProps> {
     }
   }
 
-  // handlePrivateChat(data: { conversationId: string; user: IUser }) {
-  //   const { addPrivateRequest: _addPrivateRequest } = this.props;
-  //   message.success(`${data?.user?.name || data?.user?.username}'ve sent you a private call request`, 10);
-  //   _addPrivateRequest({ ...data });
-  //   this.setState({ openCallRequest: true });
-  // }
-
-  // async handleDeclineCall(conversationId: string) {
-  //   const { accessPrivateRequest: handleRemoveRequest } = this.props;
-  //   try {
-  //     await streamService.declinePrivateChat(conversationId);
-  //     handleRemoveRequest(conversationId);
-  //   } catch (e) {
-  //     const err = await e;
-  //     message.error(err?.message || 'Error occured, please try again later');
-  //   }
-  // }
-
   async handleUpdateBalance(event) {
     const { user, updateBalance: handleUpdateBalance } = this.props;
     if (user.isPerformer) {
@@ -153,7 +123,7 @@ class Header extends PureComponent<IProps> {
       user, router, ui, settings, config
     } = this.props;
     const {
-      totalNotReadMessage, openProfile, openStripeAlert
+      totalNotReadMessage, openProfile
     } = this.state;
 
     return (
@@ -479,32 +449,6 @@ class Header extends PureComponent<IProps> {
               />
             </div> */}
           </Drawer>
-          {/* <Modal
-            title={null}
-            footer={null}
-            width={500}
-            maskClosable={false}
-            visible={openStripeAlert}
-          >
-            <div className="confirm-subscription-form">
-              <div className="text-center">
-                <h2 className="secondary-color">
-                  Hi
-                  {' '}
-                  {user?.name || user?.username || 'there'}
-                </h2>
-                <h3 className="secondary-color">
-                  You have not connected with stripe. You cannot post any content until it&apos;s configured. Please complete
-                  the onboarding process & start earning money!
-                </h3>
-              </div>
-              <div>
-                <Button className="primary" onClick={() => Router.push('/model/banking')}>Okay, take me there</Button>
-                &nbsp;
-                <Button className="secondary" onClick={() => this.setState({ openStripeAlert: false })}>No, i will connect later</Button>
-              </div>
-            </div>
-          </Modal> */}
           <SubscribePerformerModal onSubscribed={this.handleSubscribe} />
         </div>
       </div>

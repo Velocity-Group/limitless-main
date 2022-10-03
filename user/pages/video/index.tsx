@@ -403,7 +403,6 @@ class VideoViewPage extends PureComponent<IProps> {
               </div>
               )}
               <div className="vid-exl-group">
-                {video.teaser && !video.teaserProcessing && <p className="primary-color">You&apos;re watching the teaser!</p>}
                 {/* eslint-disable-next-line no-nested-ternary */}
                 <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
                 <div className="text-center">
