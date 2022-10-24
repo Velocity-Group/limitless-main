@@ -135,12 +135,12 @@ class MessageList extends PureComponent<IProps> {
     const { onLoadMore } = this.state;
     if (onLoadMore || this.onScrolling || fetching) return;
     const ele = this.messagesRef.current as HTMLDivElement;
-    if (ele.scrollTop === ele.scrollHeight) return;
+    if (ele && ele.scrollTop === ele.scrollHeight) return;
     this.onScrolling = true;
     window.setTimeout(() => {
       this.onScrolling = false;
-      ele.scrollTo({ top: ele.scrollHeight, behavior: 'smooth' });
-    }, 300);
+      ele && ele.scrollTo({ top: ele.scrollHeight, behavior: 'smooth' });
+    }, 400);
   };
 
   onClose = () => {
