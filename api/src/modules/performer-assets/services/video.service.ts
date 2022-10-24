@@ -347,6 +347,7 @@ export class VideoService {
     const videoFile = files.find((f) => `${f._id}` === `${dto.fileId}`);
     dto.isLiked = !!reactions.filter((r) => r.action === REACTION.LIKE).length;
     dto.isBookmarked = !!reactions.filter((r) => r.action === REACTION.BOOK_MARK).length;
+    dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     // TODO check video for sale or subscriber
     if (!dto.isSale) {
       const subscription = currentUser && await this.subscriptionService.findOneSubscription({
@@ -373,7 +374,6 @@ export class VideoService {
     };
     dto.teaser = teaserFile && this.getVideoForView(teaserFile, dto, true, jwToken);
     dto.video = this.getVideoForView(videoFile, dto, canView, jwToken);
-    dto.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
     dto.participants = participants.map((p) => p.toPublicDetailsResponse());
     await this.increaseView(dto._id);
     return dto;
