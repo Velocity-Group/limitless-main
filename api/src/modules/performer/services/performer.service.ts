@@ -378,10 +378,10 @@ export class PerformerService {
         itemType: REF_TYPE.PERFORMER
       }),
       payload.avatarId
-        && this.fileService.addRef(payload.avatarId, {
-          itemId: performer._id as any,
-          itemType: REF_TYPE.PERFORMER
-        })
+      && this.fileService.addRef(payload.avatarId, {
+        itemId: performer._id as any,
+        itemType: REF_TYPE.PERFORMER
+      })
     ]);
 
     // TODO - fire event?
@@ -670,6 +670,31 @@ export class PerformerService {
       data.username = `model${StringHelper.randomString(8, '0123456789')}`;
     }
     return this.performerModel.create(data);
+  }
+
+  public async updateDocument(performerId: string | ObjectId, file: FileDto, type: string) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
+    const data = type === 'idVerificationId' ? {
+      idVerificationId: file._id
+    } : {
+      documentVerificationId: file._id
+    };
+    await this.performerModel.updateOne(
+      { _id: performerId },
+      data
+    );
+    await this.fileService.addRef(file._id, {
+      itemId: toObjectId(performerId),
+      itemType: REF_TYPE.PERFORMER
+    });
+    if (type === 'idVerificationId' && performer.idVerificationId && `${performer.idVerificationId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.idVerificationId);
+    }
+    if (type === 'documentVerificationId' && performer.documentVerificationId && `${performer.documentVerificationId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.documentVerificationId);
+    }
+    return file;
   }
 
   public async updateAvatar(performerId: string | ObjectId, file: FileDto) {

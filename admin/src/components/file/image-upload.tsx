@@ -22,8 +22,9 @@ function beforeUpload(file) {
   const isMaxSize = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
   if (!isMaxSize) {
     message.error(`Image must smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+    return false;
   }
-  return isMaxSize;
+  return true;
 }
 
 interface IState {

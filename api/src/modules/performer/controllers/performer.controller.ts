@@ -167,7 +167,7 @@ export class PerformerController {
     return DataResponse.ok(performer.toPublicDetailsResponse());
   }
 
-  @Post('/documents/upload')
+  @Post('/documents/upload/:type')
   @UseGuards(RoleGuard)
   @Roles('performer')
   @HttpCode(HttpStatus.OK)
@@ -181,12 +181,10 @@ export class PerformerController {
   )
   async uploadPerformerDocument(
     @CurrentUser() currentUser: PerformerDto,
-    @FileUploaded() file: FileDto
+    @FileUploaded() file: FileDto,
+    @Param('type') type: any
   ): Promise<any> {
-    await this.fileService.addRef(file._id, {
-      itemId: currentUser._id,
-      itemType: REF_TYPE.PERFORMER
-    });
+    await this.performerService.updateDocument(currentUser._id, file, type);
     return DataResponse.ok({
       ...file,
       url: `${file.getUrl(true)}`
