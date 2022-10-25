@@ -56,15 +56,14 @@ const { TextArea } = Input;
 
 interface IProps {
   onFinish: Function;
-  onUploaded: Function;
+  onUploaded?: Function;
+  onBeforeUpload?: Function;
   performer?: IPerformer;
   submiting: boolean;
   countries: ICountry[];
   languages: ILangguges[];
   phoneCodes: IPhoneCodes[];
-  bodyInfo: IBody;
-  avatarUrl: string;
-  coverUrl: string;
+  bodyInfo: IBody
 }
 
 export class AccountForm extends PureComponent<IProps> {
@@ -73,14 +72,16 @@ export class AccountForm extends PureComponent<IProps> {
     uploadVideoPercentage: 0,
     previewVideoUrl: '',
     previewVideoName: '',
-    isShowPreview: false
+    isShowPreview: false,
+    coverUrl: ''
   };
 
   componentDidMount() {
     const { performer } = this.props;
     this.setState({
       previewVideoUrl: performer?.welcomeVideoPath,
-      previewVideoName: performer?.welcomeVideoName
+      previewVideoName: performer?.welcomeVideoName,
+      coverUrl: performer?.cover || ''
     });
   }
 
@@ -125,8 +126,7 @@ export class AccountForm extends PureComponent<IProps> {
       countries,
       onUploaded,
       bodyInfo,
-      avatarUrl,
-      coverUrl
+      onBeforeUpload
     } = this.props;
     const {
       heights = [],
@@ -144,7 +144,8 @@ export class AccountForm extends PureComponent<IProps> {
       isUploadingVideo,
       previewVideoName,
       previewVideoUrl,
-      isShowPreview
+      isShowPreview,
+      coverUrl
     } = this.state;
     const uploadHeaders = {
       authorization: authService.getToken()
@@ -191,9 +192,10 @@ export class AccountForm extends PureComponent<IProps> {
               <div className="avatar-upload">
                 <AvatarUpload
                   headers={uploadHeaders}
-                  uploadUrl={performerService.getAvatarUploadUrl(performer?._id)}
-                  onUploaded={onUploaded.bind(this, 'avatarId')}
-                  image={avatarUrl}
+                  uploadUrl={performer ? performerService.getAvatarUploadUrl(performer?._id) : ''}
+                  onUploaded={() => onUploaded && onUploaded('avatar')}
+                  onBeforeUpload={(f) => onBeforeUpload && onBeforeUpload(f, 'avatar')}
+                  image={performer?.avatar || ''}
                 />
               </div>
               <div className="cover-upload">
@@ -201,8 +203,12 @@ export class AccountForm extends PureComponent<IProps> {
                   options={{ fieldName: 'cover' }}
                   image={performer?.cover || ''}
                   headers={uploadHeaders}
-                  uploadUrl={performerService.getCoverUploadUrl(performer?._id)}
-                  onUploaded={onUploaded.bind(this, 'coverId')}
+                  uploadUrl={performer ? performerService.getCoverUploadUrl(performer?._id) : ''}
+                  onBeforeUpload={(f) => onBeforeUpload && onBeforeUpload(f, 'cover')}
+                  onUploaded={({ base64 }) => {
+                    this.setState({ coverUrl: base64 });
+                    onUploaded && onUploaded('cover');
+                  }}
                 />
               </div>
             </div>

@@ -37,6 +37,18 @@ export class PerformerService extends APIRequest {
     return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/${performerId}/cover/upload`;
   }
 
+  uploadAvatar(file: File, performerId: string) {
+    return this.upload(`/admin/performers/${performerId}/avatar/upload`, [
+      { file, fieldname: 'avatar' }
+    ]);
+  }
+
+  uploadCover(file: File, performerId: string) {
+    return this.upload(`/admin/performers/${performerId}/cover/upload`, [
+      { file, fieldname: 'cover' }
+    ]);
+  }
+
   getWelcomeVideoUploadUrl(performerId: string) {
     const config = getGlobalConfig();
     return `${config.NEXT_PUBLIC_API_ENDPOINT}/admin/performers/${performerId}/welcome-video/upload`;

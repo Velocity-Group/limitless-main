@@ -11,15 +11,6 @@ function getBase64(img, callback) {
   reader.readAsDataURL(img);
 }
 
-function beforeUpload(file) {
-  const config = getGlobalConfig();
-  const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
-  if (!isLt2M) {
-    message.error(`Cover must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
-  }
-  return isLt2M;
-}
-
 interface IState {
   loading: boolean;
 }
@@ -29,6 +20,7 @@ interface IProps {
   uploadUrl?: string;
   headers?: any;
   onUploaded?: Function;
+  onBeforeUpload?: Function;
   options?: any;
 }
 
@@ -73,6 +65,18 @@ export class CoverUpload extends PureComponent<IProps, IState> {
     imgWindow.document.write(image.outerHTML);
   };
 
+  beforeUpload = (file) => {
+    const { onBeforeUpload } = this.props;
+    const config = getGlobalConfig();
+    const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
+    if (!isLt2M) {
+      message.error(`Cover must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+      return false;
+    }
+    onBeforeUpload && onBeforeUpload(file);
+    return true;
+  }
+
   render() {
     const { loading } = this.state;
     const { headers, uploadUrl, options } = this.props;
@@ -84,7 +88,7 @@ export class CoverUpload extends PureComponent<IProps, IState> {
           listType="picture-card"
           showUploadList={false}
           action={uploadUrl}
-          beforeUpload={beforeUpload}
+          beforeUpload={this.beforeUpload}
           onChange={this.handleChange}
           onPreview={this.onPreview}
           headers={headers}

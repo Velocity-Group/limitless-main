@@ -28,6 +28,8 @@ interface IProps {
 class MessageList extends PureComponent<IProps> {
   private messagesRef = createRef<HTMLDivElement>();
 
+  onScrolling = false;
+
   state = {
     offset: 0,
     onLoadMore: false
@@ -150,15 +152,15 @@ class MessageList extends PureComponent<IProps> {
       message: { fetching }
     } = this.props;
     const { onLoadMore } = this.state;
-    if (onLoadMore) return;
+    if (onLoadMore || this.onScrolling || fetching) return;
     const ele = this.messagesRef.current as HTMLDivElement;
-    if (!fetching && ele) {
-      if (ele.scrollTop === ele.scrollHeight) return;
-      window.setTimeout(() => {
-        ele.scrollTo({ top: ele.scrollHeight, behavior: 'smooth' });
-      }, 100);
-    }
-  }
+    if (ele && ele.scrollTop === ele.scrollHeight) return;
+    this.onScrolling = true;
+    window.setTimeout(() => {
+      this.onScrolling = false;
+      ele && ele.scrollTo({ top: ele.scrollHeight, behavior: 'smooth' });
+    }, 400);
+  };
 
   render() {
     const { conversation } = this.props;

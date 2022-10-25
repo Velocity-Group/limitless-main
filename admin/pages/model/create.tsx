@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { PureComponent, createRef } from 'react';
+import { PureComponent } from 'react';
 import { message, Layout } from 'antd';
 import Page from '@components/common/layout/page';
 import {
@@ -36,23 +36,23 @@ class PerformerCreate extends PureComponent<IProps> {
   }
 
   state = {
-    creating: false,
-    avatarUrl: '',
-    coverUrl: ''
+    creating: false
   };
 
   customFields = {};
 
-  formRef = createRef() as any;
+  _avatar: File;
 
-  onUploaded(field: string, resp: any) {
-    if (field === 'avatarId') {
-      this.setState({ avatarUrl: resp.response.data.url });
+  _cover: File;
+
+  onBeforeUpload = async (file, field = 'avatar') => {
+    console.log(file, field);
+    if (field === 'avatar') {
+      this._avatar = file;
     }
-    if (field === 'coverId') {
-      this.setState({ coverUrl: resp.response.data.url });
+    if (field === 'cover') {
+      this._cover = file;
     }
-    this.customFields[field] = resp.response.data._id;
   }
 
   async submit(data: any) {
@@ -62,11 +62,17 @@ class PerformerCreate extends PureComponent<IProps> {
         return;
       }
 
-      await this.setState({ creating: true });
+      this.setState({ creating: true });
       const resp = await performerService.create({
         ...data,
         ...this.customFields
       });
+      if (this._avatar) {
+        await performerService.uploadAvatar(this._avatar, resp.data._id);
+      }
+      if (this._cover) {
+        await performerService.uploadCover(this._cover, resp.data._id);
+      }
       message.success('Created successfully');
       Router.push(
         {
@@ -82,7 +88,7 @@ class PerformerCreate extends PureComponent<IProps> {
   }
 
   render() {
-    const { creating, avatarUrl, coverUrl } = this.state;
+    const { creating } = this.state;
     const {
       countries, languages, bodyInfo, phoneCodes
     } = this.props;
@@ -96,16 +102,13 @@ class PerformerCreate extends PureComponent<IProps> {
         />
         <Page>
           <AccountForm
-            ref={this.formRef}
-            onUploaded={this.onUploaded.bind(this)}
             onFinish={this.submit.bind(this)}
             submiting={creating}
             countries={countries}
             languages={languages}
             phoneCodes={phoneCodes}
             bodyInfo={bodyInfo}
-            avatarUrl={avatarUrl}
-            coverUrl={coverUrl}
+            onBeforeUpload={this.onBeforeUpload}
           />
         </Page>
       </Layout>
