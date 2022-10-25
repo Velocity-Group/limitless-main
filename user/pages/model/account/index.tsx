@@ -156,8 +156,6 @@ class AccountSettings extends PureComponent<IProps> {
             </Tabs.TabPane>
             <Tabs.TabPane tab={<span>ID Documents</span>} key="verification">
               <PerformerVerificationForm
-                onFinish={this.submit.bind(this)}
-                updating={updating}
                 user={currentUser}
               />
             </Tabs.TabPane>

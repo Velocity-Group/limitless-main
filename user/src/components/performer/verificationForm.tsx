@@ -13,9 +13,7 @@ const layout = {
 };
 
 interface IProps {
-  onFinish: Function;
   user: IPerformer;
-  updating: boolean;
 }
 
 export class PerformerVerificationForm extends PureComponent<IProps> {
@@ -49,12 +47,10 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
       this.documentVerificationFileId = file?.response?.data?._id;
       this.setState({ documentImage: file?.response?.data.url });
     }
+    message.success('Photo has been uploaded!');
   }
 
   render() {
-    const {
-      onFinish, updating
-    } = this.props;
     const {
       idImage, documentImage
     } = this.state;
@@ -66,15 +62,6 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
       <Form
         {...layout}
         name="nest-messages"
-        onFinish={(values) => {
-          if (!this.idVerificationFileId || !this.documentVerificationFileId) {
-            return message.error('ID documents are required', 5);
-          }
-          const data = { ...values };
-          data.idVerificationId = this.idVerificationFileId;
-          data.documentVerificationId = this.documentVerificationFileId;
-          return onFinish(data);
-        }}
         labelAlign="left"
         className="account-form"
       >
@@ -86,9 +73,9 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               className="model-photo-verification"
             >
               <div className="document-upload">
-                <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'idFile')} />
+                <ImageUpload accept="image/*" headers={headers} uploadUrl={`${documentUploadUrl}/idVerificationId`} onUploaded={this.onFileUploaded.bind(this, 'idFile')} />
                 {idImage ? (
-                  <Image alt="id-img" src={idImage} style={{ margin: 5, height: '150px' }} />
+                  <Image alt="id-img" src={idImage} style={{ height: '150px' }} />
                 ) : <img src="/static/front-id.png" height="150px" alt="id-img" />}
               </div>
               <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
@@ -108,9 +95,9 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               className="model-photo-verification"
             >
               <div className="document-upload">
-                <ImageUpload accept="image/*" headers={headers} uploadUrl={documentUploadUrl} onUploaded={this.onFileUploaded.bind(this, 'documentFile')} />
+                <ImageUpload accept="image/*" headers={headers} uploadUrl={`${documentUploadUrl}/documentVerificationId`} onUploaded={this.onFileUploaded.bind(this, 'documentFile')} />
                 {documentImage ? (
-                  <Image alt="id-img" src={documentImage} style={{ margin: 5, height: '150px' }} />
+                  <Image alt="id-img" src={documentImage} style={{ height: '150px' }} />
                 ) : <img src="/static/holding-id.jpg" height="150px" alt="holding-id" />}
               </div>
               <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
@@ -127,11 +114,6 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item className="text-center">
-          <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>
-            Submit
-          </Button>
-        </Form.Item>
       </Form>
     );
   }

@@ -27,7 +27,6 @@ import { AuthService } from 'src/modules/auth/services';
 import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { FileUploadInterceptor, FileUploaded, FileDto } from 'src/modules/file';
 import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
-import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
 import {
@@ -142,7 +141,7 @@ export class AdminPerformerController {
     return DataResponse.ok(data);
   }
 
-  @Post('/documents/upload/:performerId')
+  @Post('/documents/upload/:performerId/:type')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
@@ -156,19 +155,17 @@ export class AdminPerformerController {
   )
   async uploadPerformerDocument(
     @FileUploaded() file: FileDto,
-    @Param('performerId') id: any
+    @Param('performerId') id: string,
+    @Param('type') type: string
   ): Promise<any> {
-    await this.fileService.addRef(file._id, {
-      itemId: id,
-      itemType: REF_TYPE.PERFORMER
-    });
+    await this.performerService.updateDocument(id, file, type);
     return DataResponse.ok({
       ...file,
       url: `${file.getUrl(true)}`
     });
   }
 
-  @Post('/:id/avatar/upload')
+  @Post('/:performerId/avatar/upload')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
@@ -191,7 +188,7 @@ export class AdminPerformerController {
     });
   }
 
-  @Post('/cover/upload')
+  @Post('/:performerId/cover/upload')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
