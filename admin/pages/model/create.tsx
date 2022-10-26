@@ -39,14 +39,11 @@ class PerformerCreate extends PureComponent<IProps> {
     creating: false
   };
 
-  customFields = {};
-
   _avatar: File;
 
   _cover: File;
 
   onBeforeUpload = async (file, field = 'avatar') => {
-    console.log(file, field);
     if (field === 'avatar') {
       this._avatar = file;
     }
@@ -64,8 +61,7 @@ class PerformerCreate extends PureComponent<IProps> {
 
       this.setState({ creating: true });
       const resp = await performerService.create({
-        ...data,
-        ...this.customFields
+        ...data
       });
       if (this._avatar) {
         await performerService.uploadAvatar(this._avatar, resp.data._id);
