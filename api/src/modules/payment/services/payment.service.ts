@@ -202,7 +202,8 @@ export class PaymentService {
         await this.subscriptionService.updateSubscriptionId({
           userId: transaction.sourceId,
           performerId: transaction.performerId,
-          transactionId: transaction._id
+          transactionId: transaction._id,
+          paymentGateway: 'stripe'
         }, plan.id);
       }
       if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
