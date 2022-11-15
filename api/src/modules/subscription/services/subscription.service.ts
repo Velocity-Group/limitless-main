@@ -43,7 +43,9 @@ export class SubscriptionService {
   ) {
   }
 
-  public async updateSubscriptionId({ userId, performerId, transactionId }, subscriptionId: string) {
+  public async updateSubscriptionId({
+    userId, performerId, transactionId, paymentGateway = 'stripe'
+  }, subscriptionId: string) {
     let subscription = await this.subscriptionModel.findOne({ userId, performerId });
     if (!subscription) {
       subscription = await this.subscriptionModel.create({
@@ -56,6 +58,7 @@ export class SubscriptionService {
         transactionId
       });
     }
+    subscription.paymentGateway = paymentGateway;
     subscription.subscriptionId = subscriptionId;
     await subscription.save();
   }
