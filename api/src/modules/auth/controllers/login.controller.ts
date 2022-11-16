@@ -76,7 +76,10 @@ export class LoginController {
     const requireEmailVerification = SettingService.getValueByKey(
       SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION
     );
-    if ((requireEmailVerification && user && !user.verifiedEmail) || (requireEmailVerification && performer && !performer.verifiedEmail)) {
+    if (
+      (requireEmailVerification && user && !user.verifiedEmail && !user?.roles?.includes('admin'))
+      || (requireEmailVerification && performer && !performer.verifiedEmail)
+    ) {
       throw new EmailNotVerifiedException();
     }
     let token = null;
