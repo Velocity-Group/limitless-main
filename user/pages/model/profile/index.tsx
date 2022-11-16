@@ -31,7 +31,7 @@ import SearchPostBar from '@components/post/search-bar';
 import Loader from '@components/common/base/loader';
 import { VideoPlayer } from '@components/common';
 import {
-  IPerformer, IUser, IUIConfig, IFeed, ICountry
+  IPerformer, IUser, IUIConfig, IFeed, ICountry, ISettings
 } from 'src/interfaces';
 import { shortenLargeNumber } from '@lib/index';
 import Link from 'next/link';
@@ -59,6 +59,7 @@ interface IProps {
   removeFeedSuccess: Function;
   updateBalance: Function;
   countries: ICountry[];
+  settings: ISettings;
 }
 
 const { TabPane } = Tabs;
@@ -274,27 +275,30 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async subscribe() {
-    const { performer, user } = this.props;
+    const { performer, user, settings } = this.props;
     const { subscriptionType } = this.state;
     if (!user._id) {
       message.error('Please log in!');
       Router.push('/');
       return;
     }
-    if (!user.stripeCardIds || !user.stripeCardIds.length) {
+    if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
       message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
     }
     try {
       this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0] // TODO user can choose card
+        paymentGateway: settings.paymentGateway
       });
-      this.setState({ openSubscriptionModal: false });
+      if (settings.paymentGateway === 'ccbill') {
+        window.location.href = resp?.data?.paymentUrl;
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -305,8 +309,8 @@ class PerformerProfile extends PureComponent<IProps> {
   async sendTip(price: number) {
     const { performer, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < price) {
-      message.error('You have an insufficient token balance. Please top up.');
-      Router.push('/token-package');
+      message.error('You have an insufficient wallet balance. Please top up.');
+      Router.push('/wallet');
       return;
     }
     try {
@@ -387,7 +391,8 @@ class PerformerProfile extends PureComponent<IProps> {
       videoState,
       productState,
       galleryState,
-      countries
+      countries,
+      settings
     } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
@@ -520,58 +525,56 @@ class PerformerProfile extends PureComponent<IProps> {
               </div>
             </div>
             <div className="btn-grp">
-              <div style={{ marginBottom: '4px' }}>
-                <Tooltip title={isFollowed ? 'Following' : 'Follow'}>
-                  <Button
-                    disabled={!user._id || user.isPerformer}
-                    className={isBookMarked ? 'active' : ''}
-                    onClick={() => this.handleFollow()}
-                  >
-                    {isFollowed ? <HeartFilled /> : <HeartOutlined />}
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Send Tip">
-                  <Button
-                    disabled={!user._id || user.isPerformer}
-                    onClick={() => this.setState({ openTipModal: true })}
-                  >
-                    <DollarOutlined />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Send Message">
-                  <Button
-                    disabled={!user._id || user.isPerformer}
-                    onClick={() => Router.push({
-                      pathname: '/messages',
-                      query: {
-                        toSource: 'performer',
-                        toId: (performer?._id) || ''
-                      }
-                    })}
-                  >
-                    <MessageIcon />
-                  </Button>
-                </Tooltip>
-                <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
-                  <Button
-                    disabled={!user._id || user.isPerformer}
-                    className={isBookMarked ? 'active' : ''}
-                    onClick={() => this.handleBookmark()}
-                  >
-                    <BookOutlined />
-                  </Button>
-                </Tooltip>
-                <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
-                  <Button className="normal">
-                    <ShareIcon />
-                  </Button>
-                </Popover>
-              </div>
+              <Tooltip title={isFollowed ? 'Following' : 'Follow'}>
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  className={isBookMarked ? 'active' : ''}
+                  onClick={() => this.handleFollow()}
+                >
+                  {isFollowed ? <HeartFilled /> : <HeartOutlined />}
+                </Button>
+              </Tooltip>
+              <Tooltip title="Send Tip">
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  onClick={() => this.setState({ openTipModal: true })}
+                >
+                  <DollarOutlined />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Send Message">
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  onClick={() => Router.push({
+                    pathname: '/messages',
+                    query: {
+                      toSource: 'performer',
+                      toId: (performer?._id) || ''
+                    }
+                  })}
+                >
+                  <MessageIcon />
+                </Button>
+              </Tooltip>
+              <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  className={isBookMarked ? 'active' : ''}
+                  onClick={() => this.handleBookmark()}
+                >
+                  <BookOutlined />
+                </Button>
+              </Tooltip>
+              <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
+                <Button className="normal">
+                  <ShareIcon />
+                </Button>
+              </Popover>
             </div>
             <div className={user.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={countries} performer={performer} />
             </div>
-            {!performer?.isSubscribed && (
+            {!performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Monthly Subscription</h5>
                 <button
@@ -589,7 +592,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {!performer?.isSubscribed && (
+            {!performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Yearly Subscription</h5>
                 <button
@@ -607,7 +610,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {performer?.isFreeSubscription && !performer?.isSubscribed && (
+            {performer?.isFreeSubscription && !performer?.isSubscribed && !user.isPerformer && (
               <div className="subscription-bl">
                 <h5>Free Subscription</h5>
                 <button
@@ -623,11 +626,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   {performer?.durationFreeSubscriptionDays || 1}
                   {' '}
                   {performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
-                  {' '}
-                  THEN $
-                  {performer?.monthlyPrice.toFixed(2)}
-                  {' '}
-                  PER MONTH
+                  {settings.paymentGateway === 'stripe' && ` THEN ${performer?.monthlyPrice.toFixed(2)} PER MONTH`}
                 </button>
               </div>
             )}
@@ -718,8 +717,7 @@ class PerformerProfile extends PureComponent<IProps> {
             </Tabs>
           </div>
         </div>
-        {
-          performer
+        {performer
           && performer?.welcomeVideoPath
           && performer?.activateWelcomeVideo
           && (
@@ -764,8 +762,7 @@ class PerformerProfile extends PureComponent<IProps> {
               }}
               />
             </Modal>
-          )
-        }
+          )}
         <Modal
           key="tip_performer"
           className="subscription-modal"
@@ -773,7 +770,7 @@ class PerformerProfile extends PureComponent<IProps> {
           centered
           onOk={() => this.setState({ openTipModal: false })}
           footer={null}
-          width={350}
+          width={600}
           title={null}
           onCancel={() => this.setState({ openTipModal: false })}
         >
@@ -786,15 +783,16 @@ class PerformerProfile extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={500}
+          width={600}
           centered
           title={null}
           visible={openSubscriptionModal}
           footer={null}
           onCancel={() => this.setState({ openSubscriptionModal: false })}
+          destroyOnClose
         >
           <ConfirmSubscriptionPerformerForm
-            type={subscriptionType}
+            type={subscriptionType || 'monthly'}
             performer={performer}
             submiting={submiting}
             onFinish={this.subscribe.bind(this)}
@@ -812,7 +810,8 @@ const mapStates = (state: any) => ({
   feedState: { ...state.feed.feeds },
   productState: { ...state.product.products },
   galleryState: { ...state.gallery.galleries },
-  user: { ...state.user.current }
+  user: { ...state.user.current },
+  settings: { ...state.settings }
 });
 
 const mapDispatch = {

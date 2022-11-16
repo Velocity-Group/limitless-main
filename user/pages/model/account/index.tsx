@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { Tabs, message, Layout } from 'antd';
 import {
   IPerformer,
-  IBanking,
   IUIConfig,
   ICountry,
   IBody
@@ -12,7 +11,6 @@ import {
 import {
   updatePerformer,
   updateCurrentUserAvatar,
-  updateBanking,
   updateCurrentUserCover
 } from 'src/redux/user/actions';
 import {
@@ -28,7 +26,6 @@ interface IProps {
   updatePerformer: Function;
   updating: boolean;
   updateCurrentUserAvatar: Function;
-  updateBanking: Function;
   ui: IUIConfig;
   updateCurrentUserCover: Function;
   countries: ICountry[];
@@ -66,11 +63,6 @@ class AccountSettings extends PureComponent<IProps> {
     }
     this.setState({ countTime: countTime - 1 });
     this._intervalCountdown = setInterval(this.coundown.bind(this), 1000);
-  }
-
-  async handleUpdateBanking(data: IBanking) {
-    const { currentUser, updateBanking: handleUpdateBanking } = this.props;
-    await handleUpdateBanking({ ...data, performerId: currentUser._id });
   }
 
   onAvatarUploaded(data: any) {
@@ -164,8 +156,6 @@ class AccountSettings extends PureComponent<IProps> {
             </Tabs.TabPane>
             <Tabs.TabPane tab={<span>ID Documents</span>} key="verification">
               <PerformerVerificationForm
-                onFinish={this.submit.bind(this)}
-                updating={updating}
                 user={currentUser}
               />
             </Tabs.TabPane>
@@ -200,7 +190,6 @@ const mapStates = (state: any) => ({
 const mapDispatch = {
   updatePerformer,
   updateCurrentUserAvatar,
-  updateBanking,
   updateCurrentUserCover
 };
 export default connect(mapStates, mapDispatch)(AccountSettings);

@@ -27,6 +27,8 @@ export interface IUserResponse {
   isBlocked?: boolean;
   stripeCardIds?: string[];
   stripeCustomerId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export class UserDto {
@@ -81,6 +83,10 @@ export class UserDto {
 
   verifiedAccount?: boolean;
 
+  createdAt?: Date;
+
+  updatedAt?: Date;
+
   constructor(data?: Partial<UserDto>) {
     data
       && Object.assign(
@@ -109,7 +115,9 @@ export class UserDto {
           'isPerformer',
           'isBlocked',
           'stripeCardIds',
-          'stripeCustomerId'
+          'stripeCustomerId',
+          'createdAt',
+          'updatedAt'
         ])
       );
   }
@@ -132,7 +140,9 @@ export class UserDto {
       isBlocked: this.isBlocked,
       verifiedAccount: this.verifiedAccount,
       twitterConnected: this.twitterConnected,
-      googleConnected: this.googleConnected
+      googleConnected: this.googleConnected,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
     };
 
     const privateInfo = {

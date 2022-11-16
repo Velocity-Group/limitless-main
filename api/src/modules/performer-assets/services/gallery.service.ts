@@ -23,6 +23,8 @@ import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
+import * as moment from 'moment';
+import { Storage } from 'src/modules/storage/contants';
 import { GalleryUpdatePayload } from '../payloads/gallery-update.payload';
 import { GalleryDto } from '../dtos';
 import { GalleryCreatePayload, GallerySearchRequest } from '../payloads';
@@ -141,7 +143,7 @@ export class GalleryService {
     return new GalleryDto(gallery);
   }
 
-  public async mapArrayInfo(data, user: UserDto) {
+  public async mapArrayInfo(data, user: UserDto, jwToken: string) {
     const performerIds = data.map((d) => d.performerId);
     const galleries = data.map((g) => new GalleryDto(g));
     const coverPhotoIds = data.map((d) => d.coverPhotoId);
@@ -184,9 +186,13 @@ export class GalleryService {
             (f) => f._id.toString() === coverPhoto.fileId.toString()
           );
           if (file) {
+            let fileUrl = file.getUrl(true);
+            if (file.server !== Storage.S3) {
+              fileUrl = `${fileUrl}?photoId=${g.coverPhotoId._id}&token=${jwToken}`;
+            }
             // eslint-disable-next-line no-param-reassign
             g.coverPhoto = {
-              url: file.getUrl(true),
+              url: fileUrl,
               thumbnails: file.getThumbnails()
             };
           }
@@ -227,13 +233,19 @@ export class GalleryService {
     }
     const bookmark = user && await this.reactionService.checkExisting(dto._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.GALLERY);
     dto.isBookMarked = !!bookmark;
-    const subscribed = user && await this.subscriptionService.checkSubscribed(dto.performerId, user._id);
-    dto.isSubscribed = !!subscribed;
+    const subscription = user && await this.subscriptionService.findOneSubscription({
+      performerId: dto.performerId,
+      userId: user._id
+    });
+    dto.isSubscribed = !!(subscription && moment().isBefore(subscription.expiredAt));
     const isBought = user && await this.tokenTransactionService.checkBought(gallery, PurchaseItemType.GALLERY, user);
     dto.isBought = !!isBought;
     if (user && user.roles && user.roles.includes('admin')) {
       dto.isBought = true;
       dto.isSubscribed = true;
+    }
+    if (subscription && subscription.usedFreeSubscription) {
+      dto.performer.isFreeSubscription = false;
     }
     await this.galleryModel.updateOne({ _id: gallery._id }, { $inc: { 'stats.views': 1 } });
     return dto;
@@ -432,7 +444,8 @@ export class GalleryService {
 
   public async userSearch(
     req: GallerySearchRequest,
-    user: UserDto
+    user: UserDto,
+    jwToken: string
   ): Promise<PageableData<GalleryDto>> {
     const query = {
       status: STATUS.ACTIVE,
@@ -471,7 +484,7 @@ export class GalleryService {
         .skip(parseInt(req.offset as string, 10)),
       this.galleryModel.countDocuments(query)
     ]);
-    const galleries = await this.mapArrayInfo(data, user);
+    const galleries = await this.mapArrayInfo(data, user, jwToken);
     return {
       data: galleries,
       total

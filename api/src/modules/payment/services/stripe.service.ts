@@ -160,20 +160,19 @@ export class StripeService {
 
   public async createSubscriptionPlan(transaction: PaymentTransactionModel, performer: PerformerDto, user: UserDto) {
     try {
-      const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
-      if (!connectAccount) throw new HttpException('This model hasn\'t connected with Stripe', 404);
+      // const connectAccount = await this.ConnectAccountModel.findOne({ sourceId: transaction.performerId });
+      // if (!connectAccount) throw new HttpException('This model hasn\'t connected with Stripe', 404);
       const secretKey = await this.settingService.getKeyValue(SETTING_KEYS.STRIPE_SECRET_KEY) || process.env.STRIPE_SECRET_KEY;
       const stripe = new Stripe(secretKey, {
         apiVersion: '2020-08-27'
       });
-      const settingCommission = await this.settingService.getKeyValue(SETTING_KEYS.PERFORMER_COMMISSION);
-      const commission = performer.commissionPercentage || settingCommission;
+      // const settingCommission = await this.settingService.getKeyValue(SETTING_KEYS.PERFORMER_COMMISSION);
+      // const commission = performer.commissionPercentage || settingCommission;
       const product = await this.getStripeProduct(performer, transaction.type);
       // monthly subscription will be used once free trial end
       const price = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.monthlyPrice : transaction.totalPrice;
       const plan = await stripe.subscriptions.create({
         customer: user.stripeCustomerId,
-        // product detail
         items: [
           {
             price_data: {
@@ -190,11 +189,10 @@ export class StripeService {
         metadata: {
           transactionId: transaction._id.toString()
         },
-        // transfer money for model
-        transfer_data: {
-          destination: connectAccount.accountId,
-          amount_percent: 100 - commission * 100 // % percentage
-        },
+        // transfer_data: {
+        //   destination: connectAccount.accountId,
+        //   amount_percent: 100 - commission * 100 // % percentage
+        // },
         trial_period_days: transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? performer.durationFreeSubscriptionDays : 0
       });
       return plan;

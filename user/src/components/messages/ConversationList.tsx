@@ -1,10 +1,10 @@
-import { PureComponent, createRef } from 'react';
+import { PureComponent } from 'react';
 import { Spin } from 'antd';
 import { connect } from 'react-redux';
 import { MessageIcon } from 'src/icons';
 import {
   searchConversations, getConversations, setActiveConversation,
-  getConversationDetail, receiveMessageSuccess
+  getConversationDetail, receiveMessageSuccess, deactiveConversation
 } from '@redux/message/actions';
 import { Event } from 'src/socket';
 import { debounce } from 'lodash';
@@ -17,6 +17,7 @@ interface IProps {
   searchConversations: Function;
   getConversations: Function;
   setActiveConversation: Function;
+  deactiveConversation: Function;
   getConversationDetail: Function;
   receiveMessageSuccess: Function;
   conversation: {
@@ -39,15 +40,12 @@ interface IProps {
   user: IUser;
 }
 class ConversationList extends PureComponent<IProps> {
-  conversationsRef: any;
-
   state = {
     conversationPage: 0,
     keyword: ''
   }
 
-  async componentDidMount() {
-    if (!this.conversationsRef) this.conversationsRef = createRef();
+  componentDidMount() {
     const {
       getConversations: getConversationsHandler,
       setActiveConversation: setActiveConversationHandler,
@@ -91,7 +89,7 @@ class ConversationList extends PureComponent<IProps> {
   onSearchConversation = debounce(async (e) => {
     const { value } = e.target;
     const { searchConversations: getConversationsHandler } = this.props;
-    await this.setState({ keyword: value, conversationPage: 0 });
+    this.setState({ keyword: value, conversationPage: 0 });
     if (value) {
       return getConversationsHandler({
         keyword: value, limit: 25, offset: 0, type: 'private'
@@ -107,31 +105,28 @@ class ConversationList extends PureComponent<IProps> {
     const canloadmore = total > data.length;
     const ele = event.target;
     if (!canloadmore) return;
-    if (ele.scrollHeight - ele.scrollTop === ele.clientHeight && !requesting && canloadmore) {
-      this.setState({ conversationPage: conversationPage + 1 }, () => {
-        const { conversationPage: newPage } = this.state;
-        getConversationsHandler({
-          keyword, limit: 25, offset: newPage * 25, type: 'private'
-        });
+    if ((ele.offsetHeight + ele.scrollTop >= ele.scrollHeight - 10) && !requesting && canloadmore) {
+      this.setState({ conversationPage: conversationPage + 1 });
+      getConversationsHandler({
+        keyword, limit: 25, offset: conversationPage + 1, type: 'private'
       });
     }
   }
 
   setActive = (conversationId: any) => {
     const {
-      setActiveConversation: setActiveConversationHandler,
-      user
+      setActiveConversation: setActive, deactiveConversation: setDeactive, conversation
     } = this.props;
-    setActiveConversationHandler({ conversationId, recipientId: user._id });
+    setActive({ conversationId });
+    conversation?.activeConversation?._id && setDeactive(conversation?.activeConversation?._id);
   };
 
   render() {
     const { conversation } = this.props;
     const { data: conversations, requesting } = conversation.list;
     const { mapping, activeConversation = {} } = conversation;
-    if (!this.conversationsRef) this.conversationsRef = createRef();
     return (
-      <div className="conversation-list" ref={this.conversationsRef} onScroll={this.handleScroll.bind(this)}>
+      <div className="conversation-list">
         <Event event="message_created" handler={this.onMessage} />
         <div className="user-bl">
           <MessageIcon />
@@ -144,7 +139,8 @@ class ConversationList extends PureComponent<IProps> {
             this.onSearchConversation(e);
           }}
         />
-        {conversations.length > 0
+        <div className="c-list-container" onScroll={this.handleScroll.bind(this)}>
+          {conversations.length > 0
           && conversations.map((conversationId) => (
             <ConversationListItem
               key={conversationId}
@@ -153,12 +149,13 @@ class ConversationList extends PureComponent<IProps> {
               selected={activeConversation._id === conversationId}
             />
           ))}
-        {requesting && (
-        <div className="text-center"><Spin /></div>
-        )}
-        {!requesting && !conversations.length && (
+          {requesting && (
+          <div className="text-center" style={{ margin: 30 }}><Spin /></div>
+          )}
+          {!requesting && !conversations.length && (
           <p className="text-center">No conversation found.</p>
-        )}
+          )}
+        </div>
       </div>
     );
   }
@@ -174,6 +171,7 @@ const mapDispatch = {
   searchConversations,
   getConversations,
   setActiveConversation,
+  deactiveConversation,
   getConversationDetail,
   receiveMessageSuccess
 };

@@ -40,12 +40,12 @@ export class TableListProduct extends PureComponent<IProps> {
         dataIndex: 'name'
       },
       {
-        title: 'Tokens',
+        title: 'Price',
         dataIndex: 'price',
         render(price: number) {
           return (
             <span>
-              <img alt="coin" src="/coin-ico.png" width="15px" />
+              $
               {(price || 0).toFixed(2)}
             </span>
           );

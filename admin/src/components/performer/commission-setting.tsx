@@ -34,7 +34,7 @@ export class CommissionSettingForm extends PureComponent<IProps> {
         }}
       >
         <Form.Item name="commissionPercentage" label="Commission Percentage" help="Value is from 0.01 to 0.99 (1% - 99%)">
-          <InputNumber min={0} max={0.99} style={{ width: '100%' }} step={0.01} />
+          <InputNumber min={0.01} max={0.99} style={{ width: '100%' }} step={0.01} />
         </Form.Item>
         <Form.Item wrapperCol={{ ...layout.wrapperCol }}>
           <Button type="primary" htmlType="submit" disabled={submiting} loading={submiting}>

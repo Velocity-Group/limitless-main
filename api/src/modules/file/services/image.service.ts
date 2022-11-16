@@ -14,12 +14,12 @@ export class ImageService {
 
     if (options.toPath) {
       return sharp(filePath)
-        .resize(options.width, options.height)
+        .resize(options.width, options.height, { fit: 'inside' })
         .toFile(options.toPath);
     }
 
     return sharp(filePath)
-      .resize(options.width, options.height)
+      .resize(options.width, options.height, { fit: 'inside' })
       .toBuffer();
   }
 

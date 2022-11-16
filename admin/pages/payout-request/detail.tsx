@@ -5,20 +5,20 @@ import {
 } from 'antd';
 import Head from 'next/head';
 import { PureComponent } from 'react';
-import { IPayoutRequest } from 'src/interfaces';
+import { ICountry, IPayoutRequest } from 'src/interfaces';
 import { BreadcrumbComponent } from '@components/common/breadcrumb';
 import Page from '@components/common/layout/page';
-import { payoutRequestService } from 'src/services';
+import { payoutRequestService, getGlobalConfig, utilsService } from 'src/services';
 import Router from 'next/router';
 import { getResponseError } from '@lib/utils';
 import { formatDate } from 'src/lib/date';
 import './index.less';
-import { getGlobalConfig } from '@services/config';
 
 const { Content } = Layout;
 
 interface IProps {
   id: string;
+  countries: ICountry[]
 }
 
 interface IStates {
@@ -35,7 +35,10 @@ interface IStates {
 
 class PayoutDetailPage extends PureComponent<IProps, IStates> {
   static async getInitialProps({ ctx }) {
-    return ctx.query;
+    const [countries] = await Promise.all([
+      utilsService.countriesList()
+    ]);
+    return { ...ctx.query, countries: countries?.data || [] };
   }
 
   constructor(props: IProps) {
@@ -129,10 +132,12 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
   }
 
   render() {
+    const { countries = [] } = this.props;
     const {
       request, adminNote, loading, statsPayout, status
     } = this.state;
     const paymentAccountInfo = request?.paymentAccountInfo;
+    const country = countries && countries.find((c) => c.code === paymentAccountInfo?.country);
     const config = getGlobalConfig();
     return (
       <Layout>
@@ -155,20 +160,20 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                 <div style={{ margin: '20px 0', textAlign: 'center', width: '100%' }}>
                   <Space size="large">
                     <Statistic
-                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Total Tokens"
+                      prefix="$"
+                      title="Total Price"
                       value={statsPayout?.totalEarnedTokens || 0}
                       precision={2}
                     />
                     <Statistic
-                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Paid Out Tokens"
+                      prefix="$"
+                      title="Paid Out Price"
                       value={statsPayout?.previousPaidOutTokens || 0}
                       precision={2}
                     />
                     <Statistic
-                      prefix={<img src="/coin-ico.png" alt="coin" width="20px" />}
-                      title="Remaining Tokens"
+                      prefix="$"
+                      title="Remaining Price"
                       value={statsPayout?.remainingUnpaidTokens || 0}
                       precision={2}
                     />
@@ -228,9 +233,6 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                       <input type="hidden" name="amount" value={(request.requestTokens || 0) * (request.tokenConversionRate || 1)} />
                       <input disabled={loading || request?.status !== 'pending'} type="image" src="/paypal-pay-btn.png" name="submit" alt="PayPal" style={{ width: 180 }} />
                     </form>
-                    <p style={{ color: 'red' }}>
-                      <small>Please update status manually after transaction success!</small>
-                    </p>
                   </div>
                 )}
                 {request.paymentAccountType === 'stripe' && (
@@ -250,9 +252,52 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     </div>
                   </div>
                 )}
+                {request.paymentAccountType === 'banking' && (
+                <div>
+                  <h2>
+                    Confirm transfer via Banking
+                  </h2>
+                  <p>
+                    Bank name:
+                    {' '}
+                    {paymentAccountInfo?.bankName || 'N/A'}
+                  </p>
+                  <p>
+                    Bank account number:
+                    {' '}
+                    {paymentAccountInfo?.bankAccount || 'N/A'}
+                  </p>
+                  <p>
+                    Bank account:
+                    {' '}
+                    {`${paymentAccountInfo?.firstName} ${paymentAccountInfo?.lastName}`}
+                  </p>
+                  <p>
+                    Bank routing:
+                    {' '}
+                    {paymentAccountInfo?.bankRouting || 'N/A'}
+                  </p>
+                  <p>
+                    Bank swift code:
+                    {' '}
+                    {paymentAccountInfo?.bankSwiftCode || 'N/A'}
+                  </p>
+                  <p>
+                    Country:
+                    {' '}
+                    {paymentAccountInfo?.country ? (
+                      <span>
+                        <img src={country?.flag} alt="flag" width="20px" />
+                        {' '}
+                        {country?.name}
+                      </span>
+                    ) : 'N/A' }
+                  </p>
+                </div>
+                )}
                 <Divider />
                 <div style={{ marginBottom: '10px' }}>
-                  <p>
+                  <p style={{ color: 'red' }}>
                     Please update the below status manually after the transaction is processed
                   </p>
                   <Select

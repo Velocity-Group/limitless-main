@@ -27,7 +27,6 @@ import { AuthService } from 'src/modules/auth/services';
 import { AuthCreateDto } from 'src/modules/auth/dtos';
 import { FileUploadInterceptor, FileUploaded, FileDto } from 'src/modules/file';
 import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
-import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
 import {
@@ -142,7 +141,7 @@ export class AdminPerformerController {
     return DataResponse.ok(data);
   }
 
-  @Post('/documents/upload/:performerId')
+  @Post('/documents/upload/:performerId/:type')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
@@ -156,19 +155,17 @@ export class AdminPerformerController {
   )
   async uploadPerformerDocument(
     @FileUploaded() file: FileDto,
-    @Param('performerId') id: any
+    @Param('performerId') id: string,
+    @Param('type') type: string
   ): Promise<any> {
-    await this.fileService.addRef(file._id, {
-      itemId: id,
-      itemType: REF_TYPE.PERFORMER
-    });
+    await this.performerService.updateDocument(id, file, type);
     return DataResponse.ok({
       ...file,
       url: `${file.getUrl(true)}`
     });
   }
 
-  @Post('/avatar/upload')
+  @Post('/:performerId/avatar/upload')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
@@ -180,15 +177,18 @@ export class AdminPerformerController {
       server: Storage.S3
     })
   )
-  async uploadPerformerAvatar(@FileUploaded() file: FileDto): Promise<any> {
-    // TODO - define url for perfomer id if have?
+  async uploadPerformerAvatar(
+    @FileUploaded() file: FileDto,
+    @Param('performerId') performerId: string
+  ): Promise<any> {
+    await this.performerService.updateAvatar(performerId, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl()
     });
   }
 
-  @Post('/cover/upload')
+  @Post('/:performerId/cover/upload')
   @HttpCode(HttpStatus.OK)
   @Roles('admin')
   @UseGuards(RoleGuard)
@@ -200,8 +200,11 @@ export class AdminPerformerController {
       server: Storage.S3
     })
   )
-  async uploadPerformerCover(@FileUploaded() file: FileDto): Promise<any> {
-    // TODO - define url for perfomer id if have?
+  async uploadPerformerCover(
+    @FileUploaded() file: FileDto,
+    @Param('performerId') performerId: string
+  ): Promise<any> {
+    await this.performerService.updateCover(performerId, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl()
@@ -224,7 +227,7 @@ export class AdminPerformerController {
     @Param('id') performerId: string
   ): Promise<any> {
     // TODO - define url for perfomer id if have?
-    await this.performerService.adminUpdateWelcomeVideo(performerId, file);
+    await this.performerService.updateWelcomeVideo(performerId, file);
     return DataResponse.ok({
       ...file,
       url: file.getUrl(true)

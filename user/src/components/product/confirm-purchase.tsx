@@ -167,7 +167,7 @@ export const PurchaseProductForm = ({
             disabled={submiting || (product.type === 'physical' && product.stock < quantity)}
           >
             CONFIRM PURCHASE FOR&nbsp;
-            <img alt="token" src="/static/coin-ico.png" height="15px" style={{ margin: '0 2px' }} />
+            $
             {(quantity * product.price).toFixed(2)}
           </Button>
         </div>

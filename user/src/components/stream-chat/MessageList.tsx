@@ -10,9 +10,9 @@ import {
 } from '@redux/stream-chat/actions';
 import { Event } from 'src/socket';
 import { IUser } from 'src/interfaces';
-import '@components/messages/MessageList.less';
 import StreamChatCompose from './Compose';
 import Message from './Message';
+import '@components/messages/MessageList.less';
 
 interface IProps {
   sendMessage: any;
@@ -28,23 +28,18 @@ interface IProps {
 class MessageList extends PureComponent<IProps> {
   private messagesRef = createRef<HTMLDivElement>();
 
-  private resizeObserver: any;
+  onScrolling = false;
 
   state = {
     offset: 0,
-    onloadmore: false
+    onLoadMore: false
   };
 
-  async componentDidMount() {
-    if (!this.messagesRef) this.messagesRef = createRef();
-
-    this.resizeObserver = new (window as any).ResizeObserver(this.onResize);
-    this.resizeObserver.observe(document.querySelector('.message-list-container'));
-  }
-
-  componentWillUnmount() {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
+  componentDidUpdate(prevProps) {
+    const { sendMessage } = this.props;
+    if (prevProps?.sendMessage?.data?._id !== sendMessage?.data?._id) {
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({ onLoadMore: false });
     }
   }
 
@@ -59,13 +54,17 @@ class MessageList extends PureComponent<IProps> {
     const ele = event.target;
     if (!canloadmore) return;
     if (ele.scrollTop === 0 && conversation._id && !fetching && canloadmore) {
-      await this.setState({ offset: offset + 1, onloadmore: true });
+      this.setState({ offset: offset + 1, onLoadMore: true });
       loadMore({
         conversationId: conversation._id,
         limit: 25,
         offset: (offset + 1) * 25,
         type: conversation.type
       });
+      setTimeout(() => {
+        const getMeTo = document.getElementById(items[0]._id);
+        getMeTo && getMeTo.scrollIntoView({ behavior: 'auto', block: 'center' });
+      }, 1000);
     }
   }
 
@@ -135,6 +134,7 @@ class MessageList extends PureComponent<IProps> {
       // Proceed to the next message.
       i += 1;
     }
+    this.scrollToBottom();
     return tempMessages;
   };
 
@@ -147,42 +147,29 @@ class MessageList extends PureComponent<IProps> {
     type === 'deleted' && remove(message);
   };
 
-  onResize = () => {
-    const { onloadmore } = this.state;
-    if (onloadmore) {
-      this.setState({ onloadmore: false });
-    } else {
-      this.scrollToBottom();
-    }
-  }
-
   scrollToBottom = () => {
-    const { message: { fetching } } = this.props;
-    const { onloadmore } = this.state;
-
-    if (fetching || onloadmore) {
-      return;
-    }
-
-    if (this.messagesRef && this.messagesRef.current) {
-      const ele: HTMLDivElement = this.messagesRef.current;
-      ele.scroll({
-        top: ele.scrollHeight,
-        behavior: 'auto'
-      });
-    }
-  }
+    const {
+      message: { fetching }
+    } = this.props;
+    const { onLoadMore } = this.state;
+    if (onLoadMore || this.onScrolling || fetching) return;
+    const ele = this.messagesRef.current as HTMLDivElement;
+    if (ele && ele.scrollTop === ele.scrollHeight) return;
+    this.onScrolling = true;
+    window.setTimeout(() => {
+      this.onScrolling = false;
+      ele && ele.scrollTo({ top: ele.scrollHeight, behavior: 'smooth' });
+    }, 400);
+  };
 
   render() {
     const { conversation } = this.props;
     const {
       message: { fetching = false, items = [] }
     } = this.props;
-    if (!this.messagesRef) this.messagesRef = createRef();
     return (
       <div
         className="message-list"
-        ref={this.messagesRef}
         onScroll={this.handleScroll.bind(this, conversation)}
       >
         <Event event={`message_created_conversation_${conversation._id}`} handler={this.onMessage.bind(this, 'created')} />
@@ -190,7 +177,7 @@ class MessageList extends PureComponent<IProps> {
         {/* <Event event={`user_joined_${conversation._id}`} handler={this.onUserJoined.bind(this)} /> */}
         {conversation && conversation._id && (
           <>
-            <div className="message-list-container">
+            <div className="message-list-container" ref={this.messagesRef as any}>
               {fetching && <div className="text-center" style={{ marginTop: '50px' }}><Spin /></div>}
               {this.renderMessages()}
               {!fetching && !items.length && <p className="text-center">Let&apos;s start talking something</p>}

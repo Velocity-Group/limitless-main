@@ -163,12 +163,9 @@
 
 .btn-grp {
   display: flex;
-  flex-direction: column;
   margin-top: -55px;
   padding: 0 5px;
-  position: relative;
-  float: right;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
 
   .ant-btn {
@@ -193,7 +190,7 @@
       font-size: 20px;
 
       &.anticon-custom {
-        font-size: 25px;
+        font-size: 22px;
       }
     }
 
@@ -210,7 +207,7 @@
   @media screen and (max-width: @mobile-screen) {
     margin-top: -90px;
 
-    button {
+    .ant-btn {
       width: 30px;
       height: 30px;
       flex: 0 0 30px;
@@ -220,7 +217,7 @@
         font-size: 14px;
 
         &.anticon-custom {
-          font-size: 16px;
+          font-size: 15px;
         }
       }
     }
@@ -273,7 +270,7 @@
   }
 
   @media screen and (max-width: @mobile-screen) {
-    margin-top: 5px;
+    margin-top: 60px;
   }
 }
 
@@ -505,8 +502,9 @@
     }
 
     .model-country {
+      width: auto;
       height: 20px !important;
-      margin-right: 5px;
+      margin: 0 5px;
     }
 
     .anticon {
@@ -520,7 +518,7 @@
       margin: 0;
     }
   }
-  
+
   .follow-btn {
     position: absolute;
     top: 5px;
@@ -665,8 +663,9 @@
     }
 
     .model-country {
+      width: auto;
       height: 20px;
-      margin-right: 5px;
+      margin: 0 5px;
     }
   }
 
@@ -911,52 +910,6 @@
 
   .ant-modal-body {
     padding: 0 0 15px;
-  }
-}
-
-.confirm-subscription-form {
-  text-align: center;
-  padding: 15px;
-
-  .info-body {
-    text-align: left;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    padding: 5px 0;
-
-    p {
-      font-size: 16px;
-      font-family: @primary-font-bold;
-      color: @secondary-color;
-      margin-bottom: 5px;
-    }
-
-    ul {
-      padding: 0;
-
-      li {
-        font-size: 14px;
-        margin: 0 5px;
-        color: @secondary-color;
-      }
-    }
-  }
-
-  .tip-grps {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-
-    .ant-btn {
-      margin-bottom: 5px;
-    }
-  }
-
-  .ant-avatar {
-    width: 100px;
-    height: 100px;
   }
 }
 

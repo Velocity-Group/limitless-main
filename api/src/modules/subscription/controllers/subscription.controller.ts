@@ -23,8 +23,7 @@ import {
   SubscriptionUpdatePayload
 } from '../payloads';
 import {
-  SubscriptionDto,
-  ISubscriptionResponse
+  SubscriptionDto
 } from '../dtos/subscription.dto';
 import { SubscriptionService } from '../services/subscription.service';
 
@@ -99,11 +98,8 @@ export class SubscriptionController {
   async userSearch(
     @Query() req: SubscriptionSearchRequestPayload,
     @CurrentUser() user: UserDto
-  ): Promise<DataResponse<PageableData<ISubscriptionResponse>>> {
+  ): Promise<DataResponse<PageableData<SubscriptionDto>>> {
     const data = await this.subscriptionService.userSearch(req, user);
-    return DataResponse.ok({
-      total: data.total,
-      data: data.data.map((s) => s.toResponse(false))
-    });
+    return DataResponse.ok(data);
   }
 }

@@ -5,6 +5,7 @@ import { HeartOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import { TableListSubscription } from '@components/subscription/table-list-subscription';
 import {
+  ISettings,
   ISubscription, IUIConfig, IUser
 } from 'src/interfaces';
 import { paymentService, subscriptionService } from '@services/index';
@@ -18,6 +19,7 @@ import Router from 'next/router';
 interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
+  settings: ISettings;
 }
 
 class SubscriptionPage extends PureComponent<IProps> {
@@ -84,7 +86,7 @@ class SubscriptionPage extends PureComponent<IProps> {
   }
 
   async cancelSubscription(subscription: ISubscription) {
-    if (!window.confirm('Confirm to cancel this subscription!')) return;
+    if (!window.confirm('Are you sure you want to cancel this subscription!')) return;
     try {
       await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
       message.success('Subscription cancelled successfully');
@@ -105,26 +107,29 @@ class SubscriptionPage extends PureComponent<IProps> {
   async subscribe() {
     const { selectedSubscription } = this.state;
     const { performerInfo: performer, subscriptionType } = selectedSubscription;
-    const { currentUser } = this.props;
+    const { currentUser, settings } = this.props;
     if (!currentUser._id) {
       message.error('Please log in!');
       Router.push('/');
       return;
     }
-    if (!currentUser.stripeCardIds || !currentUser.stripeCardIds.length) {
+    if (settings.paymentGateway === 'stripe' && !currentUser.stripeCardIds.length) {
       message.error('Please add a payment card');
       Router.push('/user/cards');
       return;
     }
     try {
       await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: performer._id,
-        paymentGateway: 'stripe',
-        stripeCardId: currentUser.stripeCardIds[0]
+        paymentGateway: settings.paymentGateway
       });
-      this.setState({ openSubscriptionModal: false });
+      if (settings.paymentGateway === 'ccbill') {
+        window.location.href = resp?.data?.paymentUrl;
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'error occured, please try again later');
@@ -164,13 +169,15 @@ class SubscriptionPage extends PureComponent<IProps> {
             />
           </div>
           <Modal
-            centered
             key="subscribe_performer"
+            className="subscription-modal"
+            width={600}
+            centered
             title={null}
             visible={openSubscriptionModal}
-            confirmLoading={submiting}
             footer={null}
             onCancel={() => this.setState({ openSubscriptionModal: false })}
+            destroyOnClose
           >
             <ConfirmSubscriptionPerformerForm
               type={selectedSubscription?.subscriptionType || 'monthly'}
@@ -188,7 +195,8 @@ class SubscriptionPage extends PureComponent<IProps> {
 
 const mapState = (state: any) => ({
   ui: { ...state.ui },
-  currentUser: { ...state.user.current }
+  currentUser: { ...state.user.current },
+  settings: { ...state.settings }
 });
 const mapDispatch = { };
 export default connect(mapState, mapDispatch)(SubscriptionPage);

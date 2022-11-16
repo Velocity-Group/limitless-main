@@ -46,7 +46,7 @@ const PaymentTableList = ({
       key: 'type',
       render(type: string) {
         switch (type) {
-          case 'token_package': return <Tag color="blue">Token Package</Tag>;
+          case 'token_package': return <Tag color="blue">Wallet Purchase</Tag>;
           case 'monthly_subscription': return <Tag color="orange">Monthly Subscription</Tag>;
           case 'yearly_subscription': return <Tag color="red">Yearly Subscription</Tag>;
           case 'free_subscription': return <Tag color="green">Free Subscription</Tag>;
@@ -120,6 +120,19 @@ const PaymentTableList = ({
       }
     },
     {
+      title: 'Gateway',
+      dataIndex: 'paymentGateway',
+      render(paymentGateway: string) {
+        switch (paymentGateway) {
+          case 'stripe':
+            return <Tag color="blue">Stripe</Tag>;
+          case 'ccbill':
+            return <Tag color="orange">CCbill</Tag>;
+          default: return <Tag color="red">{paymentGateway}</Tag>;
+        }
+      }
+    },
+    {
       title: 'Update on',
       dataIndex: 'updatedAt',
       sorter: true,
@@ -127,15 +140,6 @@ const PaymentTableList = ({
         return <span>{formatDate(date)}</span>;
       }
     }
-    // {
-    //   title: 'Action',
-    //   render(record) {
-    //     if (record.status === 'require_authentication' && record.stripeConfirmUrl) {
-    //       return <Link href={record.stripeConfirmUrl}><a>Confirm payment</a></Link>;
-    //     }
-    //     return null;
-    //   }
-    // }
   ];
   return (
     <div className="table-responsive">

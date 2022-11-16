@@ -9,8 +9,8 @@ export class PaymentService extends APIRequest {
     return this.get(this.buildUrl('/transactions/user/search', payload));
   }
 
-  purchaseTokenPackage(id: string, payload: any) {
-    return this.post(`/payment/purchase-tokens/${id}`, payload);
+  addFunds(payload: any) {
+    return this.post('/payment/wallet/top-up', payload);
   }
 
   applyCoupon(code: any) {

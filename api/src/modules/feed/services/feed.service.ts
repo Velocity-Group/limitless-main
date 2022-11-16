@@ -157,8 +157,7 @@ export class FeedService {
       user && user._id ? this.reactionService.findByQuery({ objectId: { $in: feedIds }, createdBy: user._id }) : [],
       user && user._id ? this.subscriptionService.findSubscriptionList({
         userId: user._id,
-        performerId: { $in: performerIds },
-        expiredAt: { $gt: new Date() }
+        performerId: { $in: performerIds }
       }) : [],
       user && user._id ? this.tokenTransactionSearchService.findByQuery({
         sourceId: user._id,
@@ -175,32 +174,30 @@ export class FeedService {
 
     return feeds.map((f) => {
       const feed = new FeedDto(f);
-      const performer = performers.find((p) => p._id.toString() === f.fromSourceId.toString());
-      if (performer) {
-        feed.performer = performer.toPublicDetailsResponse();
-      }
       const like = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.LIKE);
       feed.isLiked = !!like;
       const bookmarked = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.BOOK_MARK);
       feed.isBookMarked = !!bookmarked;
-      const subscribed = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
-      feed.isSubscribed = !!subscribed;
+      const subscription = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
+      feed.isSubscribed = subscription && moment().isBefore(subscription.expiredAt);
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
       feed.isBought = !!bought;
       const followed = follows.find((fol) => `${fol.followingId}` === `${f.fromSourceId}`);
       feed.isFollowed = !!followed;
-      if (feed.isSale && !feed.price && !!followed) {
+      if (feed.isSale && !feed.price) {
         feed.isBought = true;
       }
       const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
       const feedPollStringIds = (f.pollIds || []).map((pollId) => pollId.toString());
       feed.polls = polls.filter((p) => feedPollStringIds.includes(p._id.toString()));
       const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
-      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'));
-      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`) || (user && user.roles && user.roles.includes('admin'))) {
+      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`)
+        || (user && user.roles && user.roles.includes('admin'))) {
         feed.isSubscribed = true;
         feed.isBought = true;
       }
+      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (feed.isSale && !feed.price);
+
       if (feedFiles.length) {
         feed.files = feedFiles.map((file) => {
           // track server s3 or local, assign jwtoken if local
@@ -230,6 +227,13 @@ export class FeedService {
           thumbnails: teaser.getThumbnails(),
           url: teaser.getUrl()
         };
+      }
+      const performer = performers.find((p) => p._id.toString() === f.fromSourceId.toString());
+      if (performer) {
+        feed.performer = performer.toPublicDetailsResponse();
+        if (subscription && subscription.usedFreeSubscription) {
+          feed.performer.isFreeSubscription = false;
+        }
       }
       return feed;
     });
@@ -547,11 +551,7 @@ export class FeedService {
       return true;
     } if (feed.isSale) {
       if (!feed.price) {
-        const followed = await this.followService.countOne({ followerId: user._id, followingId: feed.fromSourceId });
-        if (followed || isSubscribed) {
-          return true;
-        }
-        throw new ForbiddenException();
+        return true;
       }
       // check bought
       const bought = await this.paymentTokenService.checkBought(feed, PurchaseItemType.FEED, user);

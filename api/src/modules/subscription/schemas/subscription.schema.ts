@@ -25,7 +25,7 @@ const subscriptionSchema = new mongoose.Schema({
   },
   paymentGateway: {
     type: String,
-    default: 'stripe',
+    default: 'ccbill',
     index: true
   },
   status: {
@@ -54,6 +54,10 @@ const subscriptionSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  usedFreeSubscription: {
+    type: Boolean,
+    default: false
   }
 });
 

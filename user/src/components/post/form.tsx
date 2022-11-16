@@ -276,7 +276,7 @@ export default class FeedForm extends PureComponent<IProps> {
       return;
     }
     if (formValues.price < 0) {
-      message.error('Amount of tokens must be greater than 0');
+      message.error('Price must be greater than 0');
       return;
     }
     formValues.teaserId = this.teaserId;
@@ -361,12 +361,12 @@ export default class FeedForm extends PureComponent<IProps> {
             <Radio.Group value={intendedFor} onChange={(e) => this.setState({ intendedFor: e.target.value })}>
               <Radio key="subscriber" value="subscriber">Only for Subscribers</Radio>
               <Radio key="sale" value="sale">Pay per View</Radio>
-              <Radio key="follower" value="follower">Free for Subscribers & Followers</Radio>
+              <Radio key="follower" value="follower">Free for Everyone</Radio>
             </Radio.Group>
           </Form.Item>
           )}
           {intendedFor === 'sale' && (
-            <Form.Item label="Amount of Tokens" name="price" rules={[{ required: true, message: 'Please add amount of tokens' }]}>
+            <Form.Item label="Price" name="price" rules={[{ required: true, message: 'Please add the price' }]}>
               <InputNumber min={1} />
             </Form.Item>
           )}

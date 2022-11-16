@@ -129,10 +129,10 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   {`${order.performerInfo?.name || 'N/A'}  - @${order.performerInfo?.username || 'n/a'}`}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
-                  <strong>Unit tokens</strong>
+                  <strong>Unit price</strong>
                   :
                   {' '}
-                  <img src="/coin-ico.png" width="15px" alt="coin" />
+                  $
                   {(order.unitPrice || 0).toFixed(2)}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
@@ -142,10 +142,10 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   {order.quantity}
                 </div>
                 <div style={{ marginBottom: '10px' }}>
-                  <strong>Total tokens</strong>
+                  <strong>Total price</strong>
                   :
                   {' '}
-                  <img src="/coin-ico.png" width="15px" alt="coin" />
+                  $
                   {(order.totalPrice || 0).toFixed(2)}
                 </div>
                 <div style={{ marginBottom: '10px' }}>

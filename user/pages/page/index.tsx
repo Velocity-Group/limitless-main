@@ -33,6 +33,23 @@ class PostDetail extends PureComponent<IProps> {
     }
   }
 
+  componentDidMount(): void {
+    if (window.iframely) {
+      document.querySelectorAll('oembed[url]').forEach((element: any) => {
+        window.iframely.load(element, element.attributes.url.value);
+      });
+      document.querySelectorAll('div[data-oembed-url]').forEach((element: any) => {
+        // Discard the static media preview from the database (empty the <div data-oembed-url="...">).
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+
+        // Generate the media preview using Iframely.
+        window.iframely.load(element, element.dataset.oembedUrl);
+      });
+    }
+  }
+
   render() {
     const { ui, post } = this.props;
     return (
@@ -41,6 +58,7 @@ class PostDetail extends PureComponent<IProps> {
           <title>
             {`${ui?.siteName} | ${post?.title || ''}`}
           </title>
+          <script charSet="utf-8" src="//cdn.iframe.ly/embed.js?api_key=7c5c0f5ad6ebf92379ec3e" />
         </Head>
         <div className="main-container">
           <div className="page-container">
@@ -50,12 +68,14 @@ class PostDetail extends PureComponent<IProps> {
               // eslint-disable-next-line react/no-danger
               dangerouslySetInnerHTML={{ __html: post?.content }}
             />
+
           </div>
         </div>
       </Layout>
     );
   }
 }
+
 const mapProps = (state: any) => ({
   ui: state.ui
 });

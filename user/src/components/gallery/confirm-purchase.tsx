@@ -42,13 +42,8 @@ export class PurchaseGalleryForm extends PureComponent<IProps> {
             disabled={submiting}
           >
             Unlock for &nbsp;
-            <img
-              alt="token"
-              src="/static/coin-ico.png"
-              height="15px"
-              style={{ margin: '0 3px' }}
-            />
-            {(gallery?.price).toFixed(2)}
+            $
+            {(gallery?.price || 0).toFixed(2)}
           </Button>
         </div>
       </div>

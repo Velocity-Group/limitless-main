@@ -1,3 +1,5 @@
+import { IPerformer } from './performer';
+
 export interface IGallery {
   _id: string;
   title: string;
@@ -7,7 +9,7 @@ export interface IGallery {
   status: string;
   price: number;
   performerId: string;
-  performer?: any;
+  performer: IPerformer;
   coverPhoto: { thumbnails: string[]; url: string };
   isBookMarked: boolean;
   isSubscribed: boolean;

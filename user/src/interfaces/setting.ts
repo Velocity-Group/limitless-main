@@ -17,10 +17,8 @@ export interface ISettings {
   twitterClientId: string;
   tokenConversionRate: number;
   stripePublishableKey: string;
-  stripeEnable: boolean;
-  ccbillEnable: boolean;
-  bitpayEnable: boolean;
   metaKeywords: string;
   metaDescription: string;
   agoraEnable: boolean;
+  paymentGateway: string;
 }

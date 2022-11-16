@@ -14,13 +14,16 @@ import { PerformerService } from 'src/modules/performer/services';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
+import { omit } from 'lodash';
+import { REF_TYPE } from 'src/modules/file/constants';
+import { FileService } from 'src/modules/file/services';
 import { UserModel } from '../models';
 import { USER_MODEL_PROVIDER } from '../providers';
 import {
   UserUpdatePayload, UserAuthUpdatePayload, UserAuthCreatePayload, UserCreatePayload
 } from '../payloads';
 import { UserDto } from '../dtos';
-import { DELETE_USER_CHANNEL, STATUS_ACTIVE } from '../constants';
+import { DELETE_USER_CHANNEL, ROLE_USER, STATUS_ACTIVE } from '../constants';
 import { EmailHasBeenTakenException } from '../exceptions';
 import { UsernameExistedException } from '../exceptions/username-existed.exception';
 
@@ -35,7 +38,8 @@ export class UserService {
     private readonly performerService: PerformerService,
     @Inject(USER_MODEL_PROVIDER)
     private readonly userModel: Model<UserModel>,
-    private readonly queueEventService: QueueEventService
+    private readonly queueEventService: QueueEventService,
+    private readonly fileService: FileService
   ) {}
 
   public async find(params: any): Promise<UserModel[]> {
@@ -113,11 +117,9 @@ export class UserService {
     if (countUserUsername || countPerformerUsername) {
       throw new UsernameExistedException();
     }
-    // eslint-disable-next-line no-param-reassign
-    data.username = data.username ? data.username.trim().toLowerCase() : `model${StringHelper.randomString(8, '0123456789')}`;
     const user = { ...data } as any;
     user.email = data.email.toLowerCase();
-    user.username = data.username && data.username.trim().toLowerCase();
+    user.username = data.username ? data.username.trim().toLowerCase() : `user${StringHelper.randomString(8, '0123456789')}`;
     user.createdAt = new Date();
     user.updatedAt = new Date();
     user.roles = options.roles || ['user'];
@@ -128,19 +130,27 @@ export class UserService {
     return this.userModel.create(user);
   }
 
-  public async socialCreate(data): Promise<UserModel> {
+  public async socialCreate(payload): Promise<UserModel> {
+    const data = omit({
+      ...payload,
+      updatedAt: new Date(),
+      createdAt: new Date()
+    }, ['balance', 'roles']) as any;
     if (!data.name) {
       // eslint-disable-next-line no-param-reassign
       data.name = [data.firstName || '', data.lastName || ''].join(' ');
     }
     // eslint-disable-next-line no-param-reassign
-    data.username = data.username ? data.username.trim().toLowerCase() : `model${StringHelper.randomString(8, '0123456789')}`;
+    data.username = data.username ? data.username.trim().toLowerCase() : `user${StringHelper.randomString(8, '0123456789')}`;
+    data.roles = [ROLE_USER];
     return this.userModel.create(data);
   }
 
   public async update(id: string | ObjectId, payload: UserUpdatePayload, user?: UserDto): Promise<any> {
-    const data = { ...payload } as any;
-    delete data.balance;
+    const data = omit({
+      ...payload,
+      updatedAt: new Date()
+    }, ['balance', 'roles']) as any;
     const eUser = await this.userModel.findById(id);
     if (!eUser) {
       throw new EntityNotFoundException();
@@ -202,8 +212,13 @@ export class UserService {
         avatarPath: file.path
       }
     );
-    // resend user info?
-    // TODO - check others config for other storage
+    await this.fileService.addRef(file._id, {
+      itemId: user._id,
+      itemType: REF_TYPE.USER
+    });
+    if (user.avatarId && `${user.avatarId}` !== `${file._id}`) {
+      await this.fileService.remove(user.avatarId);
+    }
     return file;
   }
 

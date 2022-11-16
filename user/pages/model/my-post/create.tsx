@@ -5,7 +5,7 @@ import {
 } from 'antd';
 import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
-import { IPerformer, IUIConfig } from '@interfaces/index';
+import { IPerformer, ISettings, IUIConfig } from '@interfaces/index';
 import FeedForm from '@components/post/form';
 import {
   PictureOutlined, VideoCameraOutlined, FireOutlined
@@ -15,6 +15,7 @@ import Router from 'next/router';
 interface IProps {
   ui: IUIConfig;
   user: IPerformer;
+  settings: ISettings;
 }
 
 class CreatePost extends PureComponent<IProps> {
@@ -28,15 +29,15 @@ class CreatePost extends PureComponent<IProps> {
   }
 
   componentDidMount() {
-    const { user } = this.props;
+    const { user, settings } = this.props;
     if (!user || !user.verifiedDocument) {
       message.warning('Your ID documents are not verified yet! You could not post any content right now.');
       Router.back();
     }
-    if (!user?.stripeAccount?.payoutsEnabled || !user?.stripeAccount?.detailsSubmitted) {
-      message.warning('You have not connected with stripe. So you cannot post any content right now!');
-      Router.push('/model/banking');
-    }
+    // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
+    //   message.warning('You have not connected with stripe. So you cannot post any content right now!');
+    //   Router.push('/model/banking');
+    // }
   }
 
   render() {
@@ -78,6 +79,7 @@ class CreatePost extends PureComponent<IProps> {
 }
 const mapStates = (state) => ({
   ui: { ...state.ui },
-  user: { ...state.user.current }
+  user: { ...state.user.current },
+  settings: { ...state.settings }
 });
 export default connect(mapStates)(CreatePost);

@@ -67,12 +67,12 @@ export class TableListFeed extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Tokens',
+        title: 'Price',
         dataIndex: 'price',
         render(price: number) {
           return (
             <span>
-              <img src="/coin-ico.png" alt="coin" width="15px" />
+              $
               {price.toFixed(2)}
             </span>
           );

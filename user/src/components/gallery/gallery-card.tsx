@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Tooltip } from 'antd';
 import {
-  PictureOutlined,
-  LockOutlined,
-  UnlockOutlined
+  PictureOutlined, LockOutlined, UnlockOutlined, EyeOutlined
 } from '@ant-design/icons';
 import { IGallery } from 'src/interfaces';
 import Link from 'next/link';
@@ -15,8 +13,7 @@ interface GalleryCardIProps {
 
 const GalleryCard = ({ gallery }: GalleryCardIProps) => {
   const [isHovered, setHover] = useState(false);
-  const canView = (!gallery.isSale && gallery.isSubscribed)
-    || (gallery.isSale && gallery.isBought);
+  const canView = (!gallery.isSale && gallery.isSubscribed) || (gallery.isSale && gallery.isBought);
   const thumbUrl = (!canView
     ? gallery?.coverPhoto?.thumbnails && gallery?.coverPhoto?.thumbnails[0]
     : gallery?.coverPhoto?.url) || '/static/no-image.jpg';
@@ -36,8 +33,8 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
         {gallery?.isSale && gallery?.price > 0 && (
           <span className="gallery-price">
             <div className="label-price">
-              <img alt="coin" src="/static/coin-ico.png" width="15px" />
-              {gallery?.price.toFixed(2)}
+              $
+              {(gallery?.price || 0).toFixed(2)}
             </div>
           </span>
         )}
@@ -54,6 +51,11 @@ const GalleryCard = ({ gallery }: GalleryCardIProps) => {
               <PictureOutlined />
               {' '}
               {gallery?.numOfItems || 0}
+            </a>
+            <a>
+              <EyeOutlined />
+              {' '}
+              {gallery?.stats?.views || 0}
             </a>
           </div>
           <div className="lock-middle">

@@ -10,9 +10,7 @@ const initialState = {
   googleClientId: '',
   tokenConversionRate: 1,
   stripePublishableKey: '',
-  stripeEnable: false,
-  ccbillEnable: false,
-  bitpayEnable: false
+  paymentGateway: 'stripe'
 };
 
 const settingReducers = [

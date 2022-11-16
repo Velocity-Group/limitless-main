@@ -2,57 +2,61 @@
 
 .message-list {
   height: 100%;
-  overflow: auto;
   width: 100%;
-}
-
-.message-list-container {
-  padding: 10px;
   position: relative;
 
-  .sub-text {
-    text-align: center;
-    color: @highlight-color;
-    padding: 10px;
-    font-size: 16px;
-    cursor: pointer;
+  .mess-recipient {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid @light-card;
+    padding: 5px;
 
-    @media all and (max-width: @mobile-screen) {
-      font-size: 14px;
+    .recipient {
+      text-transform: capitalize;
+      color: @grey-color;
+      cursor: pointer;
+
+      .ant-avatar {
+        width: 30px;
+        height: 30px;
+        margin-right: 5px;
+      }
+
+      .anticon {
+        color: @primary-color;
+        font-size: 14px;
+        margin-left: 2px;
+      }
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    .close-btn {
+      border: none;
     }
   }
-}
 
-.mess-recipient {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  position: absolute;
-  top: 0;
-  left: 0;
-  text-transform: capitalize;
-  border-bottom: 1px solid @light-card;
-  padding: 2px 5px;
-  color: @grey-color;
-  cursor: pointer;
+  .message-list-container {
+    padding: 0 10px;
+    padding-bottom: 50px;
+    overflow-y: auto;
+    max-height: calc(100% - 50px);
 
-  &:hover {
-    opacity: 0.9;
+    .sub-text {
+      text-align: center;
+      color: @highlight-color;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+
+      @media all and (max-width: @mobile-screen) {
+        font-size: 14px;
+      }
+    }
   }
 
-  .ant-avatar {
-    width: 31px;
-    height: 31px;
-    margin-right: 5px;
-  }
-
-  .anticon {
-    color: @primary-color;
-    font-size: 14px;
-    margin-left: 2px;
-  }
-}
-
-.mess-recipient + .message {
-  padding-top: 50px;
 }

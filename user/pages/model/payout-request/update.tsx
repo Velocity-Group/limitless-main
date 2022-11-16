@@ -97,7 +97,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
       return;
     }
     if (data.requestTokens > user.balance) {
-      message.error('Requested tokens must be less than or equal your balance');
+      message.error('Requested amount must be less than or equal your wallet balance');
       return;
     }
     try {
@@ -110,11 +110,10 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
       };
       await payoutRequestService.update(payout._id, body);
       message.success('Changes saved!');
-      Router.back();
+      Router.push('/model/payout-request');
     } catch (e) {
       const error = await Promise.resolve(e);
       message.error(error?.message || 'Error occured, please try again later');
-    } finally {
       this.setState({ submiting: false });
     }
   }
@@ -134,7 +133,7 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
             payout={payout}
             submit={this.submit.bind(this)}
             submiting={submiting}
-            tokenConversionRate={settings?.tokenConversionRate}
+            settings={settings}
           />
         </div>
       </>

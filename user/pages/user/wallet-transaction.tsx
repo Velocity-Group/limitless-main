@@ -136,14 +136,13 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {' '}
             {ui && ui.siteName}
             {' '}
-            | Token Transactions
+            | Wallet Transactions
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Token Transactions" icon={<HistoryOutlined />} />
+          <PageHeading title="Wallet Transactions" icon={<HistoryOutlined />} />
           <SearchFilter
             type={type}
             searchWithPerformer

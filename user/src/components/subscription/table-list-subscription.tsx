@@ -1,4 +1,6 @@
-import { Table, Tag, Button } from 'antd';
+import {
+  Table, Tag, Button, Avatar
+} from 'antd';
 import { ISubscription } from 'src/interfaces';
 import { formatDate, nowIsBefore } from '@lib/date';
 import Link from 'next/link';
@@ -36,6 +38,8 @@ export const TableListSubscription = ({
             as={`/${records?.performerInfo?.username || records?.performerInfo?._id}`}
           >
             <a>
+              <Avatar src={records?.performerInfo?.avatar || '/static/no-avatar.png'} />
+              {' '}
               {records?.performerInfo?.name || records?.performerInfo?.username || 'N/A'}
             </a>
           </Link>
@@ -48,11 +52,11 @@ export const TableListSubscription = ({
       render(subscriptionType: string) {
         switch (subscriptionType) {
           case 'monthly':
-            return <Tag color="blue">Monthly Subscription</Tag>;
+            return <Tag color="blue">Monthly</Tag>;
           case 'yearly':
-            return <Tag color="red">Yearly Subscription</Tag>;
+            return <Tag color="red">Yearly</Tag>;
           case 'free':
-            return <Tag color="orange">Free Subscription</Tag>;
+            return <Tag color="orange">Free</Tag>;
           default:
             return <Tag color="orange">{subscriptionType}</Tag>;
         }
@@ -60,10 +64,10 @@ export const TableListSubscription = ({
     },
     {
       title: 'Start Date',
-      dataIndex: 'startRecurringDate',
+      dataIndex: 'createdAt',
       sorter: true,
-      render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && formatDate(date, 'll')}</span>;
+      render(date: Date) {
+        return <span>{formatDate(date, 'll')}</span>;
       }
     },
     {
@@ -75,11 +79,11 @@ export const TableListSubscription = ({
       }
     },
     {
-      title: 'Renews On',
+      title: 'Renewal Date',
       dataIndex: 'nextRecurringDate',
       sorter: true,
       render(date: Date, record: ISubscription) {
-        return <span>{record.status === 'active' && nowIsBefore(record.expiredAt) && formatDate(date, 'll')}</span>;
+        return <span>{record.status === 'active' && record.subscriptionType !== 'free' && formatDate(date, 'll')}</span>;
       }
     },
     {
@@ -133,11 +137,11 @@ export const TableListSubscription = ({
           <>
             {record.status === 'active' && nowIsBefore(record.expiredAt) ? (
               <Button danger onClick={() => cancelSubscription(record)}>
-                Cancel subscription
+                Cancel
               </Button>
             ) : (
               <Button type="primary" onClick={() => activeSubscription(record)}>
-                Activate subscription
+                Activate
               </Button>
             )}
           </>

@@ -43,10 +43,15 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
           <Col lg={12} xs={24}>
             <Form.Item
               name="email"
-              label="Paypal business account email"
-              help="You must upgrade to Business account to receive the payout from Admin"
+              label="Paypal account email"
+              // help="You must upgrade to Business account to receive the payout from Admin"
             >
               <Input />
+            </Form.Item>
+            <Form.Item className="text-center">
+              <Button className="secondary" htmlType="submit" disabled={updating} loading={updating}>
+                Submit
+              </Button>
             </Form.Item>
           </Col>
           {/* <Col lg={12} xs={24}>
@@ -64,11 +69,6 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
             </Form.Item>
           </Col> */}
         </Row>
-        <Form.Item>
-          <Button className="secondary" htmlType="submit" disabled={updating} loading={updating}>
-            Submit
-          </Button>
-        </Form.Item>
       </Form>
     );
   }

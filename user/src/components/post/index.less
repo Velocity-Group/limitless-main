@@ -13,12 +13,6 @@
       display: flex;
       position: relative;
 
-      img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-      }
-
       .feed-name {
         padding: 0 10px;
 
@@ -33,6 +27,18 @@
             margin-left: 2px;
             font-size: 16px;
             color: @primary-color;
+          }
+
+          .live-status {
+            color: @secondary-color;
+            animation-name: scaling;
+            animation-duration: 2s;
+            animation-timing-function: ease-out;
+            animation-delay: 0s;
+            animation-direction: alternate;
+            animation-iteration-count: infinite;
+            animation-fill-mode: none;
+            animation-play-state: running;
           }
         }
 

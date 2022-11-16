@@ -23,6 +23,7 @@ export class LoadUser implements CanActivate {
     if (!request.user) request.user = user;
     const decodded = await this.authService.verifyJWT(token);
     request.authUser = request.authUser || decodded;
+    if (!request.jwToken) request.jwToken = token;
     return true;
   }
 }

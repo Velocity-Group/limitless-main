@@ -2,7 +2,7 @@
 import Head from 'next/head';
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Menu, message, Button, Input,
+  Form, Menu, message, Button, Input, Select,
   InputNumber, Switch, Checkbox, Radio
 } from 'antd';
 import Page from '@components/common/layout/page';
@@ -14,6 +14,7 @@ import { authService } from '@services/auth.service';
 import { FormInstance } from 'antd/lib/form';
 import { getResponseError } from '@lib/utils';
 import dynamic from 'next/dynamic';
+import { PaymentSettingsForm } from '@components/setting/payment-settings';
 
 const WYSIWYG = dynamic(() => import('@components/wysiwyg'), {
   ssr: false
@@ -175,6 +176,7 @@ class Settings extends PureComponent {
 
   renderFormItem(setting: ISetting) {
     const { updating } = this.state;
+    // eslint-disable-next-line prefer-const
     let { type } = setting;
     if (setting.meta && setting.meta.textarea) {
       type = 'textarea';
@@ -322,32 +324,34 @@ class Settings extends PureComponent {
               <Menu.Item key="commission">Commission</Menu.Item>
               {/* <Menu.Item key="s3">S3</Menu.Item> */}
               <Menu.Item key="agora">Agora Live</Menu.Item>
-              <Menu.Item key="stripe">Stripe</Menu.Item>
+              <Menu.Item key="paymentGateways">Payment Gateways</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>
-              {/* <Menu.Item key="recaptcha">Re-Captcha</Menu.Item> */}
-              {/* <Menu.Item key="ant">Ant Media</Menu.Item> */}
             </Menu>
           </div>
 
           {loading ? (
             <Loader />
           ) : (
-            <Form
-              {...layout}
-              layout="horizontal"
-              name="setting-frm"
-              onFinish={this.submit.bind(this)}
-              initialValues={initialValues}
-              ref={this.formRef}
-            >
-              {list.map((setting) => this.renderFormItem(setting))}
-              <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
-                <Button type="primary" htmlType="submit" disabled={updating} loading={updating}>
-                  Submit
-                </Button>
-              </Form.Item>
-            </Form>
+            <>
+              {selectedTab === 'paymentGateways' ? <PaymentSettingsForm settings={list} /> : (
+                <Form
+                  {...layout}
+                  layout="horizontal"
+                  name="setting-frm"
+                  onFinish={this.submit.bind(this)}
+                  initialValues={initialValues}
+                  ref={this.formRef}
+                >
+                  {list.map((setting) => this.renderFormItem(setting))}
+                  <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
+                    <Button type="primary" htmlType="submit" disabled={updating} loading={updating}>
+                      Submit
+                    </Button>
+                  </Form.Item>
+                </Form>
+              )}
+            </>
           )}
         </Page>
       </>

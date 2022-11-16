@@ -182,14 +182,14 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                   {order?.productInfo?.description || 'N/A'}
                 </Item>
                 <Item key="unitPrice" label="Unit price">
-                  <img alt="coin" src="/static/coin-ico.png" width="20px" />
+                  $
                   {(order?.unitPrice || 0).toFixed(2)}
                 </Item>
                 <Item key="quantiy" label="Quantity">
                   {order?.quantity || '0'}
                 </Item>
                 <Item key="totalPrice" label="Total Price">
-                  <img alt="coin" src="/static/coin-ico.png" width="20px" />
+                  $
                   {(order?.totalPrice || 0).toFixed(2)}
                 </Item>
               </Descriptions>

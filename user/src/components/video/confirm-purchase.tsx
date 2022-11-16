@@ -26,11 +26,10 @@ export class PurchaseVideoForm extends PureComponent<IProps> {
         </div>
         <div style={{ margin: '20px 0' }} />
         <Button type="primary" loading={submiting} disabled={submiting} onClick={onFinish.bind(this)}>
-          Unlock video by
+          Unlock video for
           {' '}
+          $
           {video.price.toFixed(2)}
-          {' '}
-          <img alt="token" src="/static/coin-ico.png" height="25px" />
         </Button>
       </div>
     );

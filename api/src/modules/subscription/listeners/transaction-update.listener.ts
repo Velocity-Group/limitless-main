@@ -53,6 +53,7 @@ export class TransactionSubscriptionListener {
     });
     const performer = await this.performerService.findById(transaction.performerId);
     if (!performer) return;
+    // do not pass subscriptionId to existed subscription because Stripe already have subscriptionId
     const subscriptionId = transaction?.paymentResponseInfo?.subscriptionId || transaction?.paymentResponseInfo?.subscription_id;
     // eslint-disable-next-line no-nested-ternary
     const expiredAt = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION
@@ -83,6 +84,7 @@ export class TransactionSubscriptionListener {
         ? new Date(nextRecurringDate)
         : new Date(expiredAt);
       existSubscription.status = SUBSCRIPTION_STATUS.ACTIVE;
+      existSubscription.usedFreeSubscription = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION;
       await existSubscription.save();
       return;
     }
@@ -103,7 +105,8 @@ export class TransactionSubscriptionListener {
         ? new Date(nextRecurringDate)
         : new Date(expiredAt),
       transactionId: transaction._id,
-      status: SUBSCRIPTION_STATUS.ACTIVE
+      status: SUBSCRIPTION_STATUS.ACTIVE,
+      usedFreeSubscription: transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION
     });
     await Promise.all([
       this.performerService.updateSubscriptionStat(newSubscription.performerId, 1),

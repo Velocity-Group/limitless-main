@@ -14,7 +14,7 @@ import {
 import { getRelatedGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  IGallery, IUser, IUIConfig
+  IGallery, IUser, IUIConfig, ISettings
 } from 'src/interfaces';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { PurchaseGalleryForm } from '@components/gallery/confirm-purchase';
@@ -36,14 +36,13 @@ interface IProps {
   getRelatedGalleries: Function;
   updateBalance: Function;
   relatedGalleries: any;
+  settings: ISettings;
 }
 
 class GalleryViewPage extends PureComponent<IProps> {
   static authenticate = true;
 
   static noredirect = true;
-
-  subscriptionType = 'monthly';
 
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
@@ -71,10 +70,11 @@ class GalleryViewPage extends PureComponent<IProps> {
     submiting: false,
     requesting: false,
     openPurchaseModal: false,
-    openSubscriptionModal: false
+    openSubscriptionModal: false,
+    subscriptionType: 'monthly'
   };
 
-  async componentDidMount() {
+  componentDidMount() {
     this.handleUpdateState();
   }
 
@@ -158,14 +158,14 @@ class GalleryViewPage extends PureComponent<IProps> {
     const { gallery, user, updateBalance: handleUpdateBalance } = this.props;
     if (user?.balance < gallery.price) {
       message.error('You have an insufficient token balance. Please top up.');
-      Router.push('/token-package');
+      Router.push('/wallet');
       return;
     }
     try {
       await this.setState({ requesting: true });
       await (await tokenTransctionService.purchaseGallery(gallery._id, { })).data;
       message.success('Gallery is unlocked!');
-      handleUpdateBalance({ token: gallery.price });
+      handleUpdateBalance({ token: -gallery.price });
       this.setState({ isBought: true, openPurchaseModal: false, requesting: false });
     } catch (e) {
       const error = await e;
@@ -174,27 +174,31 @@ class GalleryViewPage extends PureComponent<IProps> {
     }
   }
 
-  async subscribe() {
+  async subscribe(paymentGateway: string) {
     try {
-      const { gallery, user } = this.props;
+      const { gallery, user, settings } = this.props;
+      const { subscriptionType } = this.state;
       if (!user._id) {
         message.error('Please log in!');
         Router.push('/');
         return;
       }
-      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
         message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
       }
-      await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
-        type: this.subscriptionType,
+      this.setState({ submiting: true });
+      const resp = await paymentService.subscribePerformer({
+        type: subscriptionType,
         performerId: gallery.performerId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway: settings.paymentGateway
       });
-      this.setState({ openSubscriptionModal: false });
+      if (paymentGateway === 'ccbill') {
+        window.location.href = resp?.data?.paymentUrl;
+      } else {
+        this.setState({ openSubscriptionModal: false });
+      }
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
@@ -219,7 +223,8 @@ class GalleryViewPage extends PureComponent<IProps> {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Galley was not found'} />;
     }
     const {
-      fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal, isBookmarked
+      fetching, photos, total, isBought, submiting, requesting, openPurchaseModal, openSubscriptionModal,
+      isBookmarked, subscriptionType
     } = this.state;
     const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && gallery?.isSubscribed);
     const thumbUrl = gallery?.coverPhoto?.url || ui?.logo;
@@ -277,8 +282,7 @@ class GalleryViewPage extends PureComponent<IProps> {
               {gallery?.isSale && !isBought && (
               <Button disabled={!user || !user._id || requesting} className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
                 PAY&nbsp;
-                <img alt="coin" src="/static/coin-ico.png" width="20px" />
-                {' '}
+                $
                 {(gallery?.price || 0).toFixed(2)}
                 {' '}
                 TO UNLOCK
@@ -290,48 +294,47 @@ class GalleryViewPage extends PureComponent<IProps> {
                 className="subscription"
               >
                 <h3>Subscribe to view full content</h3>
-                <div style={{ marginBottom: '25px' }}>
                   {gallery?.performer?.isFreeSubscription && (
                   <Button
                     className="primary"
                     style={{ marginRight: '15px' }}
-                    disabled={!user || !user._id || (submiting && this.subscriptionType === 'free')}
+                    disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
                     onClick={() => {
-                      this.subscriptionType = 'free';
-                      this.setState({ openSubscriptionModal: true });
+                      this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
                     }}
                   >
                     SUBSCRIBE FOR FREE
+                    {' '}
+                    {gallery?.performer?.durationFreeSubscriptionDays || 1}
+                    {' '}
+                    {gallery?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
                   </Button>
                   )}
-                  {!gallery?.performer?.isFreeSubscription && gallery?.performer?.monthlyPrice && (
+                  {gallery?.performer?.monthlyPrice && (
                   <Button
                     className="primary"
                     style={{ marginRight: '15px' }}
-                    disabled={!user || !user._id || (submiting && this.subscriptionType === 'monthly')}
+                    disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
                     onClick={() => {
-                      this.subscriptionType = 'monthly';
-                      this.setState({ openSubscriptionModal: true });
+                      this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
                     }}
                   >
                     MONTHLY SUBSCRIPTION FOR $
                     {(gallery?.performer?.monthlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
-                  {!gallery?.performer?.isFreeSubscription && gallery?.performer.yearlyPrice && (
+                  {gallery?.performer.yearlyPrice && (
                   <Button
                     className="secondary"
-                    disabled={!user || !user._id || (submiting && this.subscriptionType === 'yearly')}
+                    disabled={!user || !user._id || (submiting && subscriptionType === 'yearly')}
                     onClick={() => {
-                      this.subscriptionType = 'yearly';
-                      this.setState({ openSubscriptionModal: true });
+                      this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
                     }}
                   >
                     YEARLY SUBSCRIPTON FOR $
                     {(gallery?.performer?.yearlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
-                </div>
               </div>
               )}
             </div>
@@ -407,15 +410,15 @@ class GalleryViewPage extends PureComponent<IProps> {
         <Modal
           key="subscribe_performer"
           className="subscription-modal"
-          width={500}
-          title={null}
+          width={600}
           centered
+          title={null}
           visible={openSubscriptionModal}
           footer={null}
           onCancel={() => this.setState({ openSubscriptionModal: false })}
         >
           <ConfirmSubscriptionPerformerForm
-            type={this.subscriptionType || 'monthly'}
+            type={subscriptionType || 'monthly'}
             performer={gallery?.performer}
             submiting={submiting}
             onFinish={this.subscribe.bind(this)}
@@ -440,7 +443,8 @@ class GalleryViewPage extends PureComponent<IProps> {
 const mapStates = (state: any) => ({
   user: { ...state.user.current },
   ui: { ...state.ui },
-  relatedGalleries: { ...state.gallery.relatedGalleries }
+  relatedGalleries: { ...state.gallery.relatedGalleries },
+  settings: { ...state.settings }
 });
 
 const mapDispatch = {

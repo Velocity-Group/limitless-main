@@ -9,7 +9,6 @@ import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { STATUS } from 'src/kernel/constants';
 import { uniq } from 'lodash';
-import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/token-transaction/constants';
 import { VideoDto } from '../dtos';
 import { VideoSearchRequest } from '../payloads';

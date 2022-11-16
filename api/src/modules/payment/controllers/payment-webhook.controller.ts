@@ -26,7 +26,7 @@ export class PaymentWebhookController {
     @Query() req: Record<string, string>
   ): Promise<DataResponse<any>> {
     // TODO - update for ccbill whitelist here
-    if (!['NewSaleSuccess', 'RenewalSuccess'].includes(req.eventType)) {
+    if (!['NewSaleSuccess', 'RenewalSuccess', 'UserReactivation'].includes(req.eventType)) {
       return DataResponse.ok(false);
     }
 
@@ -36,6 +36,9 @@ export class PaymentWebhookController {
       ...req
     };
     switch (req.eventType) {
+      case 'UserReactivation':
+        info = await this.paymentService.ccbillUserReactivation(data);
+        break;
       case 'RenewalSuccess':
         info = await this.paymentService.ccbillRenewalSuccessWebhook(data);
         break;

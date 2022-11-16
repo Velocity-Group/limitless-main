@@ -10,15 +10,14 @@ interface IProps {
   pagination: {};
   onChange: Function;
   loading: boolean;
-  isToken: boolean;
 }
 
 export class TableListEarning extends PureComponent<IProps> {
   render() {
     const {
-      dataSource, rowKey, pagination, onChange, loading, isToken
+      dataSource, rowKey, pagination, onChange, loading
     } = this.props;
-    const columns = isToken ? [
+    const columns = [
       {
         title: 'User',
         dataIndex: 'userInfo',
@@ -35,10 +34,10 @@ export class TableListEarning extends PureComponent<IProps> {
         dataIndex: 'type',
         render(type: string) {
           switch (type) {
-            // case 'private_chat':
-            //   return <Tag color="violet">Private Chat</Tag>;
-            // case 'group_chat':
-            //   return <Tag color="violet">Group Chat</Tag>;
+            case 'monthly_subscription':
+              return <Tag color="red">Monthly</Tag>;
+            case 'yearly_subscription':
+              return <Tag color="red">Yearly</Tag>;
             case 'public_chat':
               return <Tag color="violet">Paid Streaming</Tag>;
             case 'feed':
@@ -62,10 +61,10 @@ export class TableListEarning extends PureComponent<IProps> {
       {
         title: 'GROSS',
         dataIndex: 'grossPrice',
-        render(grossPrice: number, record: any) {
+        render(grossPrice: number) {
           return (
             <span style={{ whiteSpace: 'nowrap' }}>
-              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
+              $
               {grossPrice.toFixed(2)}
             </span>
           );
@@ -86,10 +85,10 @@ export class TableListEarning extends PureComponent<IProps> {
       {
         title: 'NET',
         dataIndex: 'netPrice',
-        render(netPrice: number, record: any) {
+        render(netPrice: number) {
           return (
             <span style={{ whiteSpace: 'nowrap' }}>
-              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
+              $
               {(netPrice || 0).toFixed(2)}
             </span>
           );
@@ -101,75 +100,6 @@ export class TableListEarning extends PureComponent<IProps> {
         sorter: true,
         render(date: Date) {
           return <span style={{ whiteSpace: 'nowrap' }}>{formatDate(date)}</span>;
-        }
-      }
-    ] : [
-      {
-        title: 'User',
-        dataIndex: 'userInfo',
-        render(userInfo) {
-          return (
-            <span>
-              {userInfo?.name || userInfo?.username || 'N/A'}
-            </span>
-          );
-        }
-      },
-      {
-        title: 'Type',
-        dataIndex: 'type',
-        render(type: string) {
-          switch (type) {
-            case 'monthly_subscription':
-              return <Tag color="blue">Monthly</Tag>;
-            case 'yearly_subscription':
-              return <Tag color="red">Yearly</Tag>;
-          }
-          return <Tag color="#936dc9">{type}</Tag>;
-        }
-      },
-      {
-        title: 'GROSS',
-        dataIndex: 'grossPrice',
-        render(grossPrice: number, record: any) {
-          return (
-            <span style={{ whiteSpace: 'nowrap' }}>
-              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
-              {grossPrice.toFixed(2)}
-            </span>
-          );
-        }
-      },
-      {
-        title: 'Commission',
-        dataIndex: 'siteCommission',
-        render(commission: number) {
-          return (
-            <span style={{ whiteSpace: 'nowrap' }}>
-              {commission * 100}
-              %
-            </span>
-          );
-        }
-      },
-      {
-        title: 'NET',
-        dataIndex: 'netPrice',
-        render(netPrice: number, record: any) {
-          return (
-            <span style={{ whiteSpace: 'nowrap' }}>
-              {record.isToken ? <img alt="coin" src="/static/coin-ico.png" width="15px" /> : '$'}
-              {(netPrice || 0).toFixed(2)}
-            </span>
-          );
-        }
-      },
-      {
-        title: 'Date',
-        dataIndex: 'createdAt',
-        sorter: true,
-        render(date: Date) {
-          return <span>{formatDate(date)}</span>;
         }
       }
     ];

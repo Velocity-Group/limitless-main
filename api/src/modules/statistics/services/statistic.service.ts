@@ -64,12 +64,10 @@ export class StatisticService {
     const totalShippingdOrders = await this.orderModel.countDocuments({ deliveryStatus: ORDER_STATUS.SHIPPING });
     const totalRefundedOrders = await this.orderModel.countDocuments({ deliveryStatus: ORDER_STATUS.REFUNDED });
     const totalProducts = await this.productModel.countDocuments({});
-    const [totalGrossPrice, totalNetPrice, totalGrossToken, totalNetToken] = await Promise.all([
+    const [totalGrossPrice, totalNetPrice] = await Promise.all([
       this.earningModel.aggregate([
         {
-          $match: {
-            isToken: false
-          }
+          $match: { }
         },
         {
           $group: {
@@ -82,39 +80,7 @@ export class StatisticService {
       ]),
       this.earningModel.aggregate([
         {
-          $match: {
-            isToken: false
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            total: {
-              $sum: '$netPrice'
-            }
-          }
-        }
-      ]),
-      this.earningModel.aggregate([
-        {
-          $match: {
-            isToken: true
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            total: {
-              $sum: '$grossPrice'
-            }
-          }
-        }
-      ]),
-      this.earningModel.aggregate([
-        {
-          $match: {
-            isToken: true
-          }
+          $match: { }
         },
         {
           $group: {
@@ -144,10 +110,7 @@ export class StatisticService {
       totalRefundedOrders,
       totalGrossPrice: totalGrossPrice[0]?.total || 0,
       totalNetPrice: totalNetPrice[0]?.total || 0,
-      totalPriceCommission: (totalGrossPrice[0]?.total - totalNetPrice[0]?.total) || 0,
-      totalGrossToken: totalGrossToken[0]?.total || 0,
-      totalNetToken: totalNetToken[0]?.total || 0,
-      totalTokenCommission: (totalGrossToken[0]?.total - totalNetToken[0]?.total) || 0
+      totalPriceCommission: (totalGrossPrice[0]?.total - totalNetPrice[0]?.total) || 0
     };
   }
 }

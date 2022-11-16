@@ -109,10 +109,11 @@ class PerformerCard extends PureComponent<IProps> {
             <a>
               <div className="model-name">
                 <div className="name">
+                  {performer?.name || 'N/A'}
+                  {' '}
                   {country && (
                   <img alt="performer-country" className="model-country" src={country?.flag} />
                   )}
-                  {performer?.name || 'N/A'}
                   {' '}
                   {performer?.verifiedAccount && <TickIcon />}
                 </div>

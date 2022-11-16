@@ -47,7 +47,8 @@ export class AuthService {
     private readonly mailService: MailerService,
     private readonly config: ConfigService,
     private readonly queueEventService: QueueEventService
-  ) { }
+  ) {
+  }
 
   /**
    * generate password salt
@@ -208,7 +209,7 @@ export class AuthService {
     }
     if (decodded.source === 'performer') {
       const user = await this.performerService.findById(decodded.sourceId);
-      return new PerformerDto(user).toPublicDetailsResponse();
+      return new PerformerDto(user).toResponse(true);
     }
 
     return null;

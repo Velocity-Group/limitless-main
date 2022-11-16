@@ -65,7 +65,7 @@ export class FormGallery extends PureComponent<IProps> {
           <Switch unCheckedChildren="Subscribe to view" checkedChildren="Pay per view" checked={isSale} onChange={(val) => this.setState({ isSale: val })} />
         </Form.Item>
         {isSale && (
-        <Form.Item name="price" label="Amount of Tokens">
+        <Form.Item name="price" label="Price">
           <InputNumber min={1} />
         </Form.Item>
         )}

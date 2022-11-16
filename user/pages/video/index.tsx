@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import {
-  Layout, Tabs, message, Button, Spin, Tooltip, Avatar
+  Layout, Tabs, message, Button, Spin, Tooltip, Avatar, Modal
 } from 'antd';
 import {
   BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined,
@@ -26,7 +26,7 @@ import { ListComments, CommentForm } from '@components/comment';
 import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
 import {
-  IVideo, IUser, IUIConfig, IPerformer
+  IVideo, IUser, IUIConfig, IPerformer, ISettings
 } from 'src/interfaces';
 import Link from 'next/link';
 import Router from 'next/router';
@@ -50,14 +50,13 @@ interface IProps {
   video: IVideo;
   deleteComment: Function;
   updateBalance: Function;
+  settings: ISettings;
 }
 
 class VideoViewPage extends PureComponent<IProps> {
   static authenticate = true;
 
   static noredirect = true;
-
-  subscriptionType = 'monthly';
 
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
@@ -87,7 +86,9 @@ class VideoViewPage extends PureComponent<IProps> {
     totalComment: 0,
     submiting: false,
     requesting: false,
-    activeTab: 'description'
+    activeTab: 'description',
+    openSubscriptionModal: false,
+    subscriptionType: 'monthly'
   };
 
   componentDidMount() {
@@ -123,7 +124,8 @@ class VideoViewPage extends PureComponent<IProps> {
       isLiked: video.isLiked,
       isBookmarked: video.isBookmarked,
       isBought: video.isBought,
-      isSubscribed: video.isSubscribed
+      isSubscribed: video.isSubscribed,
+      subscriptionType: video?.performer?.isFreeSubscription ? 'free' : 'monthly'
     });
     handleGetRelated({
       performerId: video.performerId,
@@ -229,15 +231,19 @@ class VideoViewPage extends PureComponent<IProps> {
 
   async purchaseVideo() {
     const { video, user, updateBalance: handleUpdateBalance } = this.props;
-    if (!user._id || user.isPerformer) {
-      message.error('Forbiden');
+    if (!user._id) {
+      message.error('Please log in!');
+      Router.push('/');
+      return;
+    }
+    if (user.isPerformer) {
       return;
     }
     try {
       await this.setState({ requesting: true });
       await (await tokenTransctionService.purchaseVideo(video._id, {})).data;
       message.success('Video is unlocked!');
-      handleUpdateBalance({ token: video.price });
+      handleUpdateBalance({ token: -video.price });
       this.setState({ isBought: true, requesting: false });
     } catch (e) {
       const error = await e;
@@ -248,25 +254,30 @@ class VideoViewPage extends PureComponent<IProps> {
 
   async subscribe() {
     try {
-      const { video, user } = this.props;
+      const { video, user, settings } = this.props;
       if (!user._id) {
         message.error('Please log in!');
         Router.push('/');
         return;
       }
-      if (!user.stripeCardIds || !user.stripeCardIds.length) {
+      if (user.isPerformer) {
+        return;
+      }
+      if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
         message.error('Please add a payment card');
         Router.push('/user/cards');
         return;
       }
       const subscriptionType = video.performer.isFreeSubscription ? 'free' : 'monthly';
-      await this.setState({ submiting: true });
-      await paymentService.subscribePerformer({
+      this.setState({ submiting: true });
+      const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: video.performerId,
-        paymentGateway: 'stripe',
-        stripeCardId: user.stripeCardIds[0]
+        paymentGateway: settings.paymentGateway
       });
+      if (settings.paymentGateway === 'ccbill') {
+        window.location.href = resp?.data?.paymentUrl;
+      }
     } catch (e) {
       const err = await e;
       message.error(err.message || 'Error occured, please try again later');
@@ -297,7 +308,8 @@ class VideoViewPage extends PureComponent<IProps> {
     const comments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].items : [];
     const totalComments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].total : 0;
     const {
-      videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment
+      videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment,
+      openSubscriptionModal, subscriptionType
     } = this.state;
     const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const videoJsOptions = {
@@ -395,28 +407,64 @@ class VideoViewPage extends PureComponent<IProps> {
                 <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
                 <div className="text-center">
                   {video.isSale && !isBought && (
-                  <Button type="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
-                    PAY
-                    &nbsp;
-                    <img alt="token" src="/static/coin-ico.png" height="20px" />
-                    {' '}
+                  <Button block className="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
+                    PAY $
                     {video.price.toFixed(2)}
                     {' '}
                     TO UNLOCK
                   </Button>
                   )}
                   {!video.isSale && !isSubscribed && (
-                  <ConfirmSubscriptionPerformerForm
-                    type={video?.performer?.isFreeSubscription ? 'free' : 'monthly'}
-                    performer={video.performer}
-                    submiting={submiting}
-                    onFinish={this.subscribe.bind(this)}
-                  />
+                  <div
+                    style={{ padding: '0 10px' }}
+                    className="subscription-btn-grp"
+                  >
+                      {video?.performer?.isFreeSubscription && (
+                      <Button
+                        className="primary"
+                        disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
+                        onClick={() => {
+                          this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
+                        }}
+                      >
+                        SUBSCRIBE FOR FREE FOR
+                        {' '}
+                        {video?.performer?.durationFreeSubscriptionDays || 1}
+                        {' '}
+                        {video?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
+                      </Button>
+                      )}
+                      {video?.performer?.monthlyPrice && (
+                      <Button
+                        className="primary"
+                        disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
+                        onClick={() => {
+                          this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
+                        }}
+                      >
+                        MONTHLY SUBSCRIPTION FOR $
+                        {(video?.performer?.monthlyPrice || 0).toFixed(2)}
+                      </Button>
+                      )}
+                      {video?.performer.yearlyPrice && (
+                      <Button
+                        className="secondary"
+                        disabled={!user || !user._id || (submiting && subscriptionType === 'yearly')}
+                        onClick={() => {
+                          this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
+                        }}
+                      >
+                        YEARLY SUBSCRIPTON FOR $
+                        {(video?.performer?.yearlyPrice || 0).toFixed(2)}
+                      </Button>
+                      )}
+
+                  </div>
                   )}
                 </div>
                 {video.isSchedule && (
-                <h4>
-                  Main video will be premiered at
+                <h4 style={{ marginTop: 15 }}>
+                  Main video will be premiered on
                   {' '}
                   {formatDate(video.scheduledAt, 'll')}
                 </h4>
@@ -602,6 +650,23 @@ class VideoViewPage extends PureComponent<IProps> {
             )}
           </div>
         </div>
+        <Modal
+          key="subscribe_performer"
+          className="subscription-modal"
+          width={600}
+          centered
+          title={null}
+          visible={openSubscriptionModal}
+          footer={null}
+          onCancel={() => this.setState({ openSubscriptionModal: false })}
+        >
+          <ConfirmSubscriptionPerformerForm
+            type={subscriptionType || 'monthly'}
+            performer={video?.performer}
+            submiting={submiting}
+            onFinish={this.subscribe.bind(this)}
+          />
+        </Modal>
         {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );
@@ -614,7 +679,8 @@ const mapStates = (state: any) => {
     commentMapping,
     comment,
     user: { ...state.user.current },
-    ui: { ...state.ui }
+    ui: { ...state.ui },
+    settings: { ...state.settings }
   };
 };
 

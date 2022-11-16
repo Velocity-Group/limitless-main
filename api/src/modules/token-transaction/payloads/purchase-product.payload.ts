@@ -1,14 +1,14 @@
 import {
-  IsNotEmpty, IsOptional, IsString, IsNumber
+  IsOptional, IsString, IsNumber
 } from 'class-validator';
 
 export class PurchaseProductsPayload {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   deliveryAddressId: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   phoneNumber: string;
 
   @IsString()

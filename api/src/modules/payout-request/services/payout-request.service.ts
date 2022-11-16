@@ -132,6 +132,12 @@ export class PayoutRequestService {
         throw new HttpException('You have not provided your Paypal account yet, please try again later', 422);
       }
     }
+    if (payload.paymentAccountType === 'banking') {
+      const paymentAccountInfo = await this.performerService.getBankInfo(user._id);
+      if (!paymentAccountInfo || !paymentAccountInfo.firstName || !paymentAccountInfo.lastName || !paymentAccountInfo.bankAccount) {
+        throw new HttpException('Missing banking information', 404);
+      }
+    }
     const data = {
       ...payload,
       source: SOURCE_TYPE.PERFORMER,
@@ -144,9 +150,7 @@ export class PayoutRequestService {
     const query = {
       sourceId: user._id,
       source: SOURCE_TYPE.PERFORMER,
-      requestTokens: data.requestTokens,
-      status: STATUSES.PENDING,
-      createdAt: { $gte: moment().subtract(1, 'day').toDate() }
+      status: STATUSES.PENDING
     };
     const request = await this.payoutRequestModel.findOne(query);
     if (request) {
@@ -229,6 +233,9 @@ export class PayoutRequestService {
     if (!payout) {
       throw new EntityNotFoundException();
     }
+    if (payout.status !== 'processing') {
+      throw new ForbiddenException();
+    }
     if (performer._id.toString() !== payout.sourceId.toString()) {
       throw new ForbiddenException();
     }
@@ -244,10 +251,17 @@ export class PayoutRequestService {
         throw new HttpException('You have not provided your Paypal account yet, please try again later', 422);
       }
     }
+    if (payload.paymentAccountType === 'banking') {
+      const paymentAccountInfo = await this.performerService.getBankInfo(performer._id);
+      if (!paymentAccountInfo || !paymentAccountInfo.firstName || !paymentAccountInfo.lastName || !paymentAccountInfo.bankAccount) {
+        throw new HttpException('Missing banking information', 404);
+      }
+    }
     if (performer.balance < payout.requestTokens) {
       throw new InvalidRequestTokenException();
     }
     merge(payout, payload);
+    payout.updatedAt = new Date();
     payout.tokenConversionRate = await this.settingService.getKeyValue(SETTING_KEYS.TOKEN_CONVERSION_RATE) || 1;
     await payout.save();
     // const adminEmail = (await this.settingService.getKeyValue(SETTING_KEYS.ADMIN_EMAIL)) || process.env.ADMIN_EMAIL;
@@ -291,6 +305,9 @@ export class PayoutRequestService {
         data.sourceInfo = new PerformerDto(sourceInfo).toResponse();
         if (paymentAccountType === 'paypal') {
           data.paymentAccountInfo = await this.performerService.getPaymentSetting(sourceInfo._id, 'paypal');
+        }
+        if (paymentAccountType === 'banking') {
+          data.paymentAccountInfo = await this.performerService.getBankInfo(sourceInfo._id);
         }
       }
     }
