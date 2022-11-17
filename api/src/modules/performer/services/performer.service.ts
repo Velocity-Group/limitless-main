@@ -364,6 +364,8 @@ export class PerformerService {
     if (!data.name) {
       data.name = data.firstName && data.lastName ? [data.firstName, data.lastName].join(' ') : 'No_display_name';
     }
+
+    data.commissionPercentage = SettingService.getValueByKey(SETTING_KEYS.PERFORMER_COMMISSION);
     const performer = await this.performerModel.create(data);
 
     await Promise.all([
@@ -428,6 +430,7 @@ export class PerformerService {
     if (data.dateOfBirth) {
       data.dateOfBirth = new Date(data.dateOfBirth);
     }
+    data.commissionPercentage = SettingService.getValueByKey(SETTING_KEYS.PERFORMER_COMMISSION);
     const performer = await this.performerModel.create(data);
 
     await Promise.all([
