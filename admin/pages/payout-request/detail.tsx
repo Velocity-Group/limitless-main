@@ -189,15 +189,10 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                   </strong>
                 </p>
                 <p>
-                  Requested amount of tokens:
-                  {' '}
-                  {request.requestTokens.toFixed(2) || 0}
-                </p>
-                <p>
-                  Conversion rate:
+                  Requested amount:
                   {' '}
                   $
-                  {((request.requestTokens || 0) * (request.tokenConversionRate || 1)).toFixed(2)}
+                  {(request.requestTokens || 0).toFixed(2)}
                 </p>
                 <p>
                   Requested on:
@@ -220,7 +215,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     </p>
                     <p>
                       Amount: $
-                      {((request.requestTokens || 0) * (request.tokenConversionRate || 1)).toFixed(2)}
+                      {(request.requestTokens || 0).toFixed(2)}
                     </p>
                     <form action={config.NEXT_PUBLIC_PAYPAY_PAYOUT_URL || 'https://www.paypal.com/cgi-bin/webscr'} method="post" className="paypal-payout">
                       <input type="hidden" name="cmd" value="_xclick" />
@@ -243,7 +238,7 @@ class PayoutDetailPage extends PureComponent<IProps, IStates> {
                     <div>
                       <Button type="primary" disabled={loading || ['done', 'rejected'].includes(request?.status)} onClick={this.handleStripePayout.bind(this)}>
                         Click here to transfer $
-                        {((request.requestTokens || 0) * (request.tokenConversionRate || 1) || 0).toFixed(2)}
+                        {(request.requestTokens || 0).toFixed(2)}
                         {' '}
                         to
                         {' '}
