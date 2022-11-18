@@ -56,18 +56,13 @@ export class TransactionSubscriptionListener {
     // do not pass subscriptionId to existed subscription because Stripe already have subscriptionId
     const subscriptionId = transaction?.paymentResponseInfo?.subscriptionId || transaction?.paymentResponseInfo?.subscription_id;
     // eslint-disable-next-line no-nested-ternary
-    const expiredAt = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION
-      ? moment().add(30, 'days').toDate()
-      : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION
-        ? moment().add(365, 'days').toDate() : moment().add(performer.durationFreeSubscriptionDays, 'days').toDate();
-      // eslint-disable-next-line no-nested-ternary
+    let expiredAt = moment().toDate();
+    // eslint-disable-next-line no-nested-ternary
     const subscriptionType = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION
       ? SUBSCRIPTION_TYPE.MONTHLY
       : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION
         ? SUBSCRIPTION_TYPE.YEARLY : SUBSCRIPTION_TYPE.FREE;
 
-    const startRecurringDate = expiredAt;
-    const nextRecurringDate = expiredAt;
     if (existSubscription) {
       if (existSubscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) {
         await Promise.all([
@@ -75,19 +70,28 @@ export class TransactionSubscriptionListener {
           this.userService.updateStats(existSubscription.userId, { 'stats.totalSubscriptions': 1 })
         ]);
       }
+      // eslint-disable-next-line no-nested-ternary
+      expiredAt = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION
+        ? moment(existSubscription.expiredAt).add(30, 'days').toDate()
+        : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION
+          ? moment(existSubscription.expiredAt).add(365, 'days').toDate() : moment(existSubscription.expiredAt).add(performer.durationFreeSubscriptionDays, 'days').toDate();
+      const nextRecurringDate = expiredAt;
       existSubscription.paymentGateway = transaction.paymentGateway;
-      existSubscription.expiredAt = new Date(expiredAt);
+      existSubscription.expiredAt = expiredAt;
       existSubscription.updatedAt = new Date();
       existSubscription.subscriptionType = subscriptionType;
       existSubscription.transactionId = transaction._id;
-      existSubscription.nextRecurringDate = nextRecurringDate
-        ? new Date(nextRecurringDate)
-        : new Date(expiredAt);
+      existSubscription.nextRecurringDate = nextRecurringDate;
       existSubscription.status = SUBSCRIPTION_STATUS.ACTIVE;
       existSubscription.usedFreeSubscription = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION;
       await existSubscription.save();
       return;
     }
+    // eslint-disable-next-line no-nested-ternary
+    expiredAt = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION
+      ? moment().add(30, 'days').toDate()
+      : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION
+        ? moment().add(365, 'days').toDate() : moment().add(performer.durationFreeSubscriptionDays, 'days').toDate();
     const newSubscription = await this.subscriptionModel.create({
       performerId: transaction.performerId,
       userId: transaction.sourceId,
@@ -97,13 +101,9 @@ export class TransactionSubscriptionListener {
       expiredAt: new Date(expiredAt),
       subscriptionType,
       subscriptionId,
-      meta: { },
-      startRecurringDate: startRecurringDate
-        ? new Date(startRecurringDate)
-        : new Date(),
-      nextRecurringDate: nextRecurringDate
-        ? new Date(nextRecurringDate)
-        : new Date(expiredAt),
+      meta: {},
+      startRecurringDate: new Date(),
+      nextRecurringDate: expiredAt,
       transactionId: transaction._id,
       status: SUBSCRIPTION_STATUS.ACTIVE,
       usedFreeSubscription: transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION
