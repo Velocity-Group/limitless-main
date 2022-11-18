@@ -25,6 +25,7 @@ module.exports.up = async function up(next) {
     const content = readFileSync(join(TEMPLATE_DIR, file)).toString();
     const key = parse(file).name;
     const exist = await DB.collection(COLLECTION.EMAIL_TEMPLATE).findOne({ key });
+
     if (!exist) {
       templateMap[key] && await DB.collection(COLLECTION.EMAIL_TEMPLATE).insertOne({
         key,
