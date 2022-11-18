@@ -15,6 +15,8 @@ import { SettingModule } from '../settings/setting.module';
 import { PaymentModule } from '../payment/payment.module';
 import { UserModule } from '../user/user.module';
 import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
+import { FollowModule } from '../follow/follow.module';
+import { MailerModule } from '../mailer/mailer.module';
 
 const agent = new https.Agent({
   rejectUnauthorized: process.env.REJECT_UNAUTHORIZED !== 'false'
@@ -38,7 +40,9 @@ const agent = new https.Agent({
     forwardRef(() => MessageModule),
     forwardRef(() => SettingModule),
     forwardRef(() => PaymentModule),
-    forwardRef(() => TokenTransactionModule)
+    forwardRef(() => TokenTransactionModule),
+    forwardRef(() => FollowModule),
+    forwardRef(() => MailerModule)
   ],
   providers: [
     ...assetsProviders,
