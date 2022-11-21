@@ -14,7 +14,7 @@
     "@stripe/stripe-js": "^1.15.0",
     "agora-rtc-sdk-ng": "^4.9.1",
     "antd": "^4.16.8",
-    "antd-img-crop": "^4.2.4",
+    "antd-img-crop": "4.2.4",
     "classnames": "^2.2.6",
     "countrycitystatejson": "^20.8.14",
     "dotenv": "^10.0.0",
