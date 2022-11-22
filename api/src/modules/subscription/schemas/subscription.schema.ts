@@ -30,7 +30,7 @@ const subscriptionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: SUBSCRIPTION_STATUS.ACTIVE,
+    default: SUBSCRIPTION_STATUS.CREATED,
     index: true
   },
   meta: {

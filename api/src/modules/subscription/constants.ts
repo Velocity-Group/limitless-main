@@ -5,6 +5,7 @@ export const SUBSCRIPTION_TYPE = {
 };
 
 export const SUBSCRIPTION_STATUS = {
+  CREATED: 'created',
   ACTIVE: 'active',
   DEACTIVATED: 'deactivated'
 };
