@@ -52,7 +52,7 @@ export class SubscriptionService {
         createdAt: new Date(),
         updatedAt: new Date(),
         expiredAt: new Date(),
-        status: SUBSCRIPTION_STATUS.DEACTIVATED,
+        status: SUBSCRIPTION_STATUS.CREATED,
         userId,
         performerId,
         transactionId
@@ -124,7 +124,9 @@ export class SubscriptionService {
   public async adminSearch(
     req: SubscriptionSearchRequestPayload
   ): Promise<PageableData<SubscriptionDto>> {
-    const query = {} as any;
+    const query = {
+      status: { $ne: SUBSCRIPTION_STATUS.CREATED }
+    } as any;
     if (req.userId) {
       query.userId = req.userId;
     }
@@ -191,7 +193,9 @@ export class SubscriptionService {
     req: SubscriptionSearchRequestPayload,
     user: UserDto
   ): Promise<PageableData<SubscriptionDto>> {
-    const query = {} as any;
+    const query = {
+      status: { $ne: SUBSCRIPTION_STATUS.CREATED }
+    } as any;
     if (req.performerId) {
       query.performerId = req.performerId;
     } else {
@@ -262,7 +266,8 @@ export class SubscriptionService {
     user: UserDto
   ): Promise<PageableData<SubscriptionDto>> {
     const query = {
-      userId: user._id
+      userId: user._id,
+      status: { $ne: SUBSCRIPTION_STATUS.CREATED }
     } as any;
     if (req.performerId) {
       query.performerId = req.performerId;

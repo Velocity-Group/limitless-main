@@ -185,8 +185,7 @@ export class PayoutRequestService {
       this.earningModel.aggregate([
         {
           $match: {
-            performerId: toObjectId(performerId),
-            isToken: true
+            performerId: toObjectId(performerId)
           }
         },
         {
