@@ -10,6 +10,13 @@ interface IProps {
 }
 
 export class SearchFilter extends PureComponent<IProps> {
+  state ={
+    q: '',
+    role: '',
+    status: '',
+    verifiedEmail: ''
+  }
+
   render() {
     const { onSubmit, defaultStatus, defaultEmailStatus } = this.props;
     return (

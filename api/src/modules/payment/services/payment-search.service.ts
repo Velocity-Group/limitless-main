@@ -30,8 +30,8 @@ export class PaymentSearchService {
     if (req.performerIds) query.performerId = { $in: req.performerIds };
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: moment(req.fromDate),
-        $lt: moment(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {
@@ -82,8 +82,8 @@ export class PaymentSearchService {
     if (req.paymentGateway) query.paymentGateway = req.paymentGateway;
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: moment(req.fromDate),
-        $lt: moment(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {

@@ -4,7 +4,6 @@ import { Model } from 'mongoose';
 import {
   PageableData,
   EntityNotFoundException
-  // AgendaService
 } from 'src/kernel';
 import { ObjectId } from 'mongodb';
 import { UserService, UserSearchService } from 'src/modules/user/services';
@@ -12,8 +11,7 @@ import { PerformerService } from 'src/modules/performer/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { UserSearchRequestPayload } from 'src/modules/user/payloads';
 import { PerformerDto } from 'src/modules/performer/dtos';
-// import { uniq } from 'lodash';
-// import { MailerService } from 'src/modules/mailer';
+import * as moment from 'moment';
 import { SubscriptionModel } from '../models/subscription.model';
 import { SUBSCRIPTION_MODEL_PROVIDER } from '../providers/subscription.provider';
 import {
@@ -26,8 +24,6 @@ import {
   SUBSCRIPTION_TYPE,
   SUBSCRIPTION_STATUS
 } from '../constants';
-
-// const CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY = 'CHECK_EXPIRED_SUBSCRIPTIONS_AND_NOTIFY';
 
 @Injectable()
 export class SubscriptionService {
@@ -143,8 +139,8 @@ export class SubscriptionService {
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     let sort = {
@@ -213,8 +209,8 @@ export class SubscriptionService {
 
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
 
@@ -277,8 +273,8 @@ export class SubscriptionService {
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     let sort = {
