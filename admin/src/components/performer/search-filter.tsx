@@ -12,6 +12,14 @@ interface IProps {
 }
 
 export class SearchFilter extends PureComponent<IProps> {
+  state = {
+    q: '',
+    status: '',
+    verifiedEmail: '',
+    verifiedDocument: '',
+    verifiedAccount: ''
+  }
+
   componentDidMount() {
     const { defaultValue } = this.props;
     defaultValue && this.setState({ ...defaultValue });

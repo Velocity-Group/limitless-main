@@ -71,8 +71,8 @@ export class OrderService {
     if (req.phoneNumber) query.phoneNumber = { $regex: req.phoneNumber };
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: moment(req.fromDate).startOf('day'),
-        $lte: moment(req.toDate).endOf('day')
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {
@@ -191,8 +191,8 @@ export class OrderService {
     if (req.phoneNumber) query.phoneNumber = { $regex: req.phoneNumber };
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: moment(req.fromDate),
-        $lt: moment(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {

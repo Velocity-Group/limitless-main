@@ -32,15 +32,27 @@ interface IProps {
 }
 
 export class SearchFilter extends PureComponent<IProps> {
+  state = {
+    q: '',
+    status: '',
+    type: '',
+    sourceType: '',
+    subscriptionType: '',
+    galleryId: '',
+    performerId: '',
+    isFree: '',
+    fromDate: '',
+    toDate: ''
+  }
+
   render() {
-    const { onSubmit } = this.props;
     const {
+      onSubmit,
       statuses = [],
       searchWithPerformer,
       performerId,
       galleryId,
       searchWithGallery,
-      keyFilter,
       dateRange,
       sourceType,
       keyword,
@@ -63,8 +75,7 @@ export class SearchFilter extends PureComponent<IProps> {
           <Col lg={6} md={8}>
             <Select
               onChange={(val) => {
-                const objectFilter = keyFilter ? { [keyFilter]: val } : { status: val };
-                this.setState(objectFilter, () => onSubmit(this.state));
+                this.setState({ status: val }, () => onSubmit(this.state));
               }}
               style={{ width: '100%' }}
               placeholder="Select status"
@@ -82,8 +93,7 @@ export class SearchFilter extends PureComponent<IProps> {
           <Col lg={6} md={8}>
             <Select
               onChange={(val) => {
-                const objectFilter = keyFilter ? { [keyFilter]: val } : { type: val };
-                this.setState(objectFilter, () => onSubmit(this.state));
+                this.setState({ type: val }, () => onSubmit(this.state));
               }}
               style={{ width: '100%' }}
               placeholder="Select type"
@@ -101,8 +111,7 @@ export class SearchFilter extends PureComponent<IProps> {
           <Col lg={6} md={8}>
             <Select
               onChange={(val) => {
-                const objectFilter = keyFilter ? { [keyFilter]: val } : { sourceType: val };
-                this.setState(objectFilter, () => onSubmit(this.state));
+                this.setState({ sourceType: val }, () => onSubmit(this.state));
               }}
               style={{ width: '100%' }}
               placeholder="Select type"

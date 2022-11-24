@@ -82,8 +82,8 @@ export class StreamService {
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: moment(req.fromDate).startOf('day'),
-        $lte: moment(req.toDate).endOf('day')
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = { isStreaming: -1, updatedAt: -1, createdAt: -1 };

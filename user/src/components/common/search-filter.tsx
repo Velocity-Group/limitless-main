@@ -26,6 +26,17 @@ interface IProps {
 }
 
 export class SearchFilter extends PureComponent<IProps> {
+  state = {
+    q: '',
+    status: '',
+    type: '',
+    subscriptionType: '',
+    performerId: '',
+    isFree: '',
+    fromDate: '',
+    toDate: ''
+  }
+
   render() {
     const {
       statuses = [],

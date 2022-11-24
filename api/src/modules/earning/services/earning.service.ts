@@ -4,6 +4,7 @@ import { EntityNotFoundException, PageableData } from 'src/kernel';
 import { toObjectId } from 'src/kernel/helpers/string.helper';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
+import * as moment from 'moment';
 import { EarningModel } from '../models/earning.model';
 import { EARNING_MODEL_PROVIDER } from '../providers/earning.provider';
 import {
@@ -30,8 +31,6 @@ export class EarningService {
   public async admminSearch(
     req: EarningSearchRequestPayload
   ): Promise<PageableData<EarningDto>> {
-    if (req.fromDate === 'undefined') req.fromDate = null;
-    if (req.toDate === 'undefined') req.toDate = null;
     const query = {} as any;
     if (req.performerId) {
       query.performerId = req.performerId;
@@ -58,8 +57,8 @@ export class EarningService {
 
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
 
@@ -106,9 +105,6 @@ export class EarningService {
     req: EarningSearchRequestPayload,
     user: UserDto
   ): Promise<PageableData<EarningDto>> {
-    if (req.fromDate === 'undefined') req.fromDate = null;
-    if (req.toDate === 'undefined') req.toDate = null;
-
     const query = {
       performerId: user._id
     } as any;
@@ -130,8 +126,8 @@ export class EarningService {
 
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
 
@@ -189,9 +185,6 @@ export class EarningService {
   public async stats(
     req: EarningSearchRequestPayload
   ): Promise<IEarningStatResponse> {
-    if (req.fromDate === 'undefined') req.fromDate = null;
-    if (req.toDate === 'undefined') req.toDate = null;
-
     const query = {} as any;
     if (req.performerId) {
       query.performerId = toObjectId(req.performerId);
@@ -210,8 +203,8 @@ export class EarningService {
     }
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: new Date(req.fromDate),
-        $lte: new Date(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const [totalGrossPrice, totalNetPrice] = await Promise.all([
