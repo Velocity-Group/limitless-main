@@ -28,79 +28,74 @@ export class TransactionMailerListener {
   }
 
   public async handleMailerTransaction(event: QueueEvent) {
-    try {
-      if (![EVENT.CREATED, EVENT.DELETED].includes(event.eventName)) {
-        return;
-      }
-      const transaction = event.data;
-      // TOTO handle more event transaction
-      if (transaction.status !== PAYMENT_STATUS.SUCCESS) {
-        return;
-      }
-      const adminEmail = SettingService.getByKey('adminEmail').value || process.env.ADMIN_EMAIL;
-      const performer = await this.performerService.findById(transaction.performerId);
-      const user = await this.userService.findById(transaction.sourceId);
-      if (!user || !performer) {
-        return;
-      }
-      // mail to performer
-      if (performer && performer.email) {
-        if ([PAYMENT_TYPE.FREE_SUBSCRIPTION, PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
-          await this.mailService.send({
-            subject: 'New subscription',
-            to: performer.email,
-            data: {
-              performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
-              userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
-              transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
-              products: transaction.products
-            },
-            template: 'performer-new-subscriber'
-          });
-        } else {
-          await this.mailService.send({
-            subject: 'New payment success',
-            to: performer.email,
-            data: {
-              performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
-              userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
-              transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
-              products: transaction.products
-            },
-            template: 'performer-payment-success'
-          });
-        }
-      }
-      // mail to admin
-      if (adminEmail) {
+    if (![EVENT.CREATED, EVENT.DELETED].includes(event.eventName)) {
+      return;
+    }
+    const transaction = event.data;
+    // TOTO handle more event transaction
+    if (transaction.status !== PAYMENT_STATUS.SUCCESS) {
+      return;
+    }
+    const adminEmail = SettingService.getByKey('adminEmail').value || process.env.ADMIN_EMAIL;
+    const performer = await this.performerService.findById(transaction.performerId);
+    const user = await this.userService.findById(transaction.sourceId);
+    if (!user || !performer) {
+      return;
+    }
+    // mail to performer
+    if (performer && performer.email) {
+      if ([PAYMENT_TYPE.FREE_SUBSCRIPTION, PAYMENT_TYPE.MONTHLY_SUBSCRIPTION, PAYMENT_TYPE.YEARLY_SUBSCRIPTION].includes(transaction.type)) {
         await this.mailService.send({
-          subject: 'New payment success',
-          to: adminEmail,
+          subject: 'New subscription',
+          to: performer.email,
           data: {
             performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
             userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
             transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
             products: transaction.products
           },
-          template: 'admin-payment-success'
+          template: 'performer-new-subscription'
         });
-      }
-      // mail to user
-      if (user.email) {
+      } else {
         await this.mailService.send({
           subject: 'New payment success',
-          to: user.email,
+          to: performer.email,
           data: {
+            performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
             userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
             transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
             products: transaction.products
           },
-          template: 'user-payment-success'
+          template: 'performer-payment-success'
         });
       }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('listen_transaction_error', e);
+    }
+    // mail to admin
+    if (adminEmail) {
+      await this.mailService.send({
+        subject: 'New payment success',
+        to: adminEmail,
+        data: {
+          performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
+          userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
+          transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
+          products: transaction.products
+        },
+        template: 'admin-payment-success'
+      });
+    }
+    // mail to user
+    if (user.email) {
+      await this.mailService.send({
+        subject: 'New payment success',
+        to: user.email,
+        data: {
+          userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
+          transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
+          products: transaction.products
+        },
+        template: 'user-payment-success'
+      });
     }
   }
 }
