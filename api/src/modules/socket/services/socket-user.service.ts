@@ -5,6 +5,7 @@ import { uniq } from 'lodash';
 import { WebSocketServer, WebSocketGateway } from '@nestjs/websockets';
 import { AgendaService, QueueEventService } from 'src/kernel';
 import { Server } from 'socket.io';
+import { LIVE_STREAM_EVENT_NAME, MEMBER_LIVE_STREAM_CHANNEL, MODEL_LIVE_STREAM_CHANNEL } from 'src/modules/stream/constant';
 import { PERFORMER_SOCKET_CONNECTED_CHANNEL, USER_SOCKET_CONNECTED_CHANNEL, USER_SOCKET_EVENT } from '../constants';
 
 export const CONNECTED_USER_REDIS_KEY = 'connected_users';
@@ -88,6 +89,16 @@ export class SocketUserService {
               source: 'performer',
               sourceId: userId
             }
+          });
+          this.queueEventService.publish({
+            channel: MEMBER_LIVE_STREAM_CHANNEL,
+            eventName: LIVE_STREAM_EVENT_NAME.DISCONNECTED,
+            data: userId
+          });
+          this.queueEventService.publish({
+            channel: MODEL_LIVE_STREAM_CHANNEL,
+            eventName: LIVE_STREAM_EVENT_NAME.DISCONNECTED,
+            data: userId
           });
         }
 
