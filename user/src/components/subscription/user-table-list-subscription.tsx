@@ -59,8 +59,8 @@ export const TableListSubscription = ({
     {
       title: 'Expiry Date',
       dataIndex: 'expiredAt',
-      render(date: Date) {
-        return <span>{formatDate(date, 'll')}</span>;
+      render(date: Date, record: ISubscription) {
+        return <span>{record.status !== 'active' ? formatDate(date, 'll') : ''}</span>;
       }
     },
     {

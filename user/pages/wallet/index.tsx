@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import {
-  Layout, message, InputNumber, Form, Input, Button
+  Layout, message, InputNumber, Form, Input, Button, Alert
 } from 'antd';
 import {
   ArrowLeftOutlined
@@ -42,6 +42,10 @@ class TokenPackages extends PureComponent<IProps> {
     const {
       couponCode, coupon
     } = this.state;
+    if ((settings.paymentGateway === 'ccbill' && amount < 2.95) || (settings.paymentGateway === 'ccbill' && amount > 300)) {
+      message.error('Minimum amount must be $2.95 and maximum amount must be 300');
+      return;
+    }
     if (settings.paymentGateway === 'stripe' && !user?.stripeCardIds?.length) {
       message.error('Please add a payment card to complete your purchase');
       Router.push('/user/cards');
@@ -110,6 +114,7 @@ class TokenPackages extends PureComponent<IProps> {
                 </span>
               </div>
             </div>
+            <Alert type="warning" style={{ width: '100%' }} message="Wallet Balances can be used as a convenient method to send tips to your favorite performers as well as digital content. Once your wallet balance depletes you can simply top off your wallet account to continue enjoying the benefits." />
             <Form
               onFinish={this.addFund}
               onFinishFailed={() => message.error('Please complete the required fields')}
@@ -125,7 +130,7 @@ class TokenPackages extends PureComponent<IProps> {
                 label="Enter Amount"
                 rules={[{ required: true, message: 'Amount is required!' }]}
               >
-                <InputNumber onChange={(val) => this.setState({ amount: val })} style={{ width: '100%' }} min={1} />
+                <InputNumber onChange={(val) => this.setState({ amount: val })} style={{ width: '100%' }} min={2.95} max={300} />
               </Form.Item>
               <Form.Item help={coupon && (
               <small style={{ color: 'red' }}>
@@ -140,7 +145,6 @@ class TokenPackages extends PureComponent<IProps> {
                   <Input disabled={!!coupon} placeholder="Enter coupon code here" onChange={(e) => this.setState({ couponCode: e.target.value })} />
                   {!coupon ? <Button disabled={!couponCode} onClick={this.applyCoupon.bind(this)}>Apply!</Button>
                     : <Button type="primary" onClick={() => this.setState({ couponCode: '', coupon: null })}>Use Later!</Button>}
-
                 </Button.Group>
               </Form.Item>
               <Form.Item className="total-price">

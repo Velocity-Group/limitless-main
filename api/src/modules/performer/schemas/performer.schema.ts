@@ -146,11 +146,11 @@ const performerSchema = new mongoose.Schema({
   },
   monthlyPrice: {
     type: Number,
-    default: 1
+    default: 2.95
   },
   yearlyPrice: {
     type: Number,
-    default: 1
+    default: 2.95
   },
   publicChatPrice: {
     type: Number,
