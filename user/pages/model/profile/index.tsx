@@ -112,7 +112,7 @@ class PerformerProfile extends PureComponent<IProps> {
     }
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     const { performer } = this.props;
     if (performer) {
       const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');
@@ -412,6 +412,9 @@ class PerformerProfile extends PureComponent<IProps> {
       subscriptionType,
       isFollowed
     } = this.state;
+
+    const haveContent = performer?.stats?.totalFeeds || performer?.stats?.totalVideos || performer?.stats?.totalPhotos || performer?.stats?.totalProducts;
+
     return (
       <Layout>
         <Head>
@@ -574,7 +577,7 @@ class PerformerProfile extends PureComponent<IProps> {
             <div className={user.isPerformer ? 'mar-0 pro-desc' : 'pro-desc'}>
               <PerformerInfo countries={countries} performer={performer} />
             </div>
-            {!performer?.isSubscribed && !user.isPerformer && (
+            {!performer?.isSubscribed && !user.isPerformer && haveContent && (
               <div className="subscription-bl">
                 <h5>Monthly Subscription</h5>
                 <button
@@ -592,7 +595,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {!performer?.isSubscribed && !user.isPerformer && (
+            {!performer?.isSubscribed && !user.isPerformer && haveContent && (
               <div className="subscription-bl">
                 <h5>Yearly Subscription</h5>
                 <button
@@ -610,7 +613,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 </button>
               </div>
             )}
-            {performer?.isFreeSubscription && !performer?.isSubscribed && !user.isPerformer && (
+            {performer?.isFreeSubscription && !performer?.isSubscribed && !user.isPerformer && haveContent && (
               <div className="subscription-bl">
                 <h5>Free Subscription</h5>
                 <button
