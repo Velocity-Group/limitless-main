@@ -240,7 +240,7 @@ export class GalleryService {
     dto.isSubscribed = !!(subscription && moment().isBefore(subscription.expiredAt));
     const isBought = user && await this.tokenTransactionService.checkBought(gallery, PurchaseItemType.GALLERY, user);
     dto.isBought = !!isBought;
-    if (user && user.roles && user.roles.includes('admin')) {
+    if ((user && user.roles && user.roles.includes('admin')) || (`${user?._id}` === `${gallery?.performerId}`)) {
       dto.isBought = true;
       dto.isSubscribed = true;
     }
