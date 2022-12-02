@@ -6,7 +6,8 @@ import {
   IPerformer,
   IUIConfig,
   ICountry,
-  IBody
+  IBody,
+  ISettings
 } from 'src/interfaces';
 import {
   updatePerformer,
@@ -30,6 +31,7 @@ interface IProps {
   updateCurrentUserCover: Function;
   countries: ICountry[];
   bodyInfo: IBody;
+  settings: ISettings;
 }
 class AccountSettings extends PureComponent<IProps> {
   static authenticate = true;
@@ -110,7 +112,7 @@ class AccountSettings extends PureComponent<IProps> {
 
   render() {
     const {
-      currentUser, updating, ui, countries, bodyInfo
+      currentUser, updating, ui, countries, bodyInfo, settings
     } = this.props;
     const { emailSending, countTime } = this.state;
     const uploadHeaders = {
@@ -167,6 +169,7 @@ class AccountSettings extends PureComponent<IProps> {
                 onFinish={this.submit.bind(this)}
                 updating={updating}
                 user={currentUser}
+                settings={settings}
               />
             </Tabs.TabPane>
             {/* <Tabs.TabPane tab={<span>Change Password</span>} key="password">
@@ -185,7 +188,8 @@ class AccountSettings extends PureComponent<IProps> {
 const mapStates = (state: any) => ({
   currentUser: state.user.current,
   updating: state.user.updating,
-  ui: { ...state.ui }
+  ui: { ...state.ui },
+  settings: state.settings
 });
 const mapDispatch = {
   updatePerformer,
