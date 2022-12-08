@@ -82,7 +82,7 @@ class TokenPackages extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, user } = this.props;
+    const { ui, user, settings } = this.props;
     const {
       submiting, couponCode, coupon, amount
     } = this.state;
@@ -130,7 +130,7 @@ class TokenPackages extends PureComponent<IProps> {
                 label="Enter Amount"
                 rules={[{ required: true, message: 'Amount is required!' }]}
               >
-                <InputNumber onChange={(val) => this.setState({ amount: val })} style={{ width: '100%' }} min={2.95} max={300} />
+                <InputNumber onChange={(val) => this.setState({ amount: val })} style={{ width: '100%' }} min={settings.paymentGateway === 'ccbill' && 2.95} max={settings.paymentGateway === 'ccbill' && 300} />
               </Form.Item>
               <Form.Item help={coupon && (
               <small style={{ color: 'red' }}>
