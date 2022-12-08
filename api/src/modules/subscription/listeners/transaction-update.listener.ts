@@ -47,7 +47,7 @@ export class TransactionSubscriptionListener {
       PAYMENT_TYPE.FREE_SUBSCRIPTION
     ].includes(transaction.type)) return;
 
-    const existSubscription = await this.subscriptionModel.findOne({
+    const subscription = await this.subscriptionModel.findOne({
       userId: transaction.sourceId,
       performerId: transaction.performerId
     });
@@ -63,28 +63,35 @@ export class TransactionSubscriptionListener {
       : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION
         ? SUBSCRIPTION_TYPE.YEARLY : SUBSCRIPTION_TYPE.FREE;
 
-    if (existSubscription) {
-      if (existSubscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) {
+    if (subscription) {
+      if (subscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) {
         await Promise.all([
-          this.performerService.updateSubscriptionStat(existSubscription.performerId, 1),
-          this.userService.updateStats(existSubscription.userId, { 'stats.totalSubscriptions': 1 })
+          this.performerService.updateSubscriptionStat(subscription.performerId, 1),
+          this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': 1 })
         ]);
       }
-      // eslint-disable-next-line no-nested-ternary
-      expiredAt = transaction.type === PAYMENT_TYPE.MONTHLY_SUBSCRIPTION
-        ? moment(existSubscription.expiredAt).add(30, 'days').toDate()
-        : transaction.type === PAYMENT_TYPE.YEARLY_SUBSCRIPTION
-          ? moment(existSubscription.expiredAt).add(365, 'days').toDate() : moment(existSubscription.expiredAt).add(performer.durationFreeSubscriptionDays, 'days').toDate();
+      switch (transaction.type) {
+        case PAYMENT_TYPE.MONTHLY_SUBSCRIPTION:
+          expiredAt = moment().isBefore(subscription.expiredAt) ? moment(subscription.expiredAt).add(30, 'days').toDate() : moment().add(30, 'days').toDate();
+          break;
+        case PAYMENT_TYPE.YEARLY_SUBSCRIPTION:
+          expiredAt = moment().isBefore(subscription.expiredAt) ? moment(subscription.expiredAt).add(365, 'days').toDate() : moment().add(365, 'days').toDate();
+          break;
+        case PAYMENT_TYPE.FREE_SUBSCRIPTION:
+          expiredAt = moment().add(performer.durationFreeSubscriptionDays, 'days').toDate();
+          break;
+        default: break;
+      }
       const nextRecurringDate = expiredAt;
-      existSubscription.paymentGateway = transaction.paymentGateway;
-      existSubscription.expiredAt = expiredAt;
-      existSubscription.updatedAt = new Date();
-      existSubscription.subscriptionType = subscriptionType;
-      existSubscription.transactionId = transaction._id;
-      existSubscription.nextRecurringDate = nextRecurringDate;
-      existSubscription.status = SUBSCRIPTION_STATUS.ACTIVE;
-      existSubscription.usedFreeSubscription = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION;
-      await existSubscription.save();
+      subscription.paymentGateway = transaction.paymentGateway;
+      subscription.expiredAt = expiredAt;
+      subscription.updatedAt = new Date();
+      subscription.subscriptionType = subscriptionType;
+      subscription.transactionId = transaction._id;
+      subscription.nextRecurringDate = nextRecurringDate;
+      subscription.status = SUBSCRIPTION_STATUS.ACTIVE;
+      subscription.usedFreeSubscription = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION;
+      await subscription.save();
       return;
     }
     // eslint-disable-next-line no-nested-ternary
