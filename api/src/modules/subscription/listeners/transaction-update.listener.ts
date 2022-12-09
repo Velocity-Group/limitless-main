@@ -64,7 +64,7 @@ export class TransactionSubscriptionListener {
         ? SUBSCRIPTION_TYPE.YEARLY : SUBSCRIPTION_TYPE.FREE;
 
     if (subscription) {
-      if (subscription.status === SUBSCRIPTION_STATUS.DEACTIVATED) {
+      if (subscription.status !== SUBSCRIPTION_STATUS.ACTIVE) {
         await Promise.all([
           this.performerService.updateSubscriptionStat(subscription.performerId, 1),
           this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': 1 })
