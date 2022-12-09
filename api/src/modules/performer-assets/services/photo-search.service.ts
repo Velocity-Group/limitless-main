@@ -9,7 +9,6 @@ import { PerformerDto } from 'src/modules/performer/dtos';
 import { STATUS } from 'src/kernel/constants';
 import { TokenTransactionSearchService } from 'src/modules/token-transaction/services';
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
-import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } from 'src/modules/token-transaction/constants';
 import { Storage } from 'src/modules/storage/contants';
 import { PERFORMER_PHOTO_MODEL_PROVIDER } from '../providers';

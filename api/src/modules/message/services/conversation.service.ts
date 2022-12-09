@@ -10,7 +10,6 @@ import { PerformerService, PerformerSearchService } from 'src/modules/performer/
 import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { StreamDto } from 'src/modules/stream/dtos';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { PerformerBlockService } from 'src/modules/block/services';

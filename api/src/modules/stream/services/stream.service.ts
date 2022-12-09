@@ -16,7 +16,6 @@ import * as moment from 'moment';
 import { merge, uniq } from 'lodash';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
-import { SUBSCRIPTION_STATUS } from 'src/modules/subscription/constants';
 import { TokenTransactionService } from 'src/modules/token-transaction/services';
 import { PURCHASE_ITEM_STATUS } from 'src/modules/token-transaction/constants';
 import { SocketUserService } from '../../socket/services/socket-user.service';
