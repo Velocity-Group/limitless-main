@@ -7,6 +7,7 @@ import { EVENT } from 'src/kernel/constants';
 import { MailerService } from 'src/modules/mailer';
 // import { SettingService } from 'src/modules/settings/services';
 import { UserService } from 'src/modules/user/services';
+import { SettingService } from 'src/modules/settings';
 import {
   TOKEN_TRANSACTION_SUCCESS_CHANNEL,
   PURCHASE_ITEM_STATUS,
@@ -44,13 +45,13 @@ export class PaymentTokenListener {
     if ([PURCHASE_ITEM_TYPE.PRIVATE_CHAT, PURCHASE_ITEM_TYPE.PUBLIC_CHAT, PURCHASE_ITEM_TYPE.GROUP_CHAT, PURCHASE_ITEM_TYPE.INVITATION_REGISTER].includes(transaction.type)) {
       return;
     }
-    // const adminEmail = await SettingService.getByKey('adminEmail').value || process.env.ADMIN_EMAIL;
+    const adminEmail = await SettingService.getByKey('adminEmail').value || process.env.ADMIN_EMAIL;
     const performer = await this.performerService.findById(transaction.performerId);
     const user = await this.userService.findById(transaction.sourceId);
     // mail to performer
     if (performer && performer.email) {
       await this.mailService.send({
-        subject: 'New payment success',
+        subject: 'New Wallet Purchased Success',
         to: performer.email,
         data: {
           performer,
@@ -62,31 +63,31 @@ export class PaymentTokenListener {
       });
     }
     // mail to admin
-    // if (adminEmail) {
-    //   await this.mailService.send({
-    //     subject: 'New payment success',
-    //     to: adminEmail,
-    //     data: {
-    //       performer,
-    //       user,
-    //       transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
-    //       products: transaction.products
-    //     },
-    //     template: 'admin-payment-success'
-    //   });
-    // }
+    if (adminEmail) {
+      await this.mailService.send({
+        subject: 'New Wallet Purchased Success',
+        to: adminEmail,
+        data: {
+          performerName: performer?.name || performer?.username || `${performer?.firstName} ${performer?.lastName}`,
+          userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
+          transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
+          products: transaction.products
+        },
+        template: 'admin-payment-success'
+      });
+    }
     // // mail to user
-    // if (user && user.email) {
-    //   await this.mailService.send({
-    //     subject: 'New payment success',
-    //     to: user.email,
-    //     data: {
-    //       user,
-    //       transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
-    //       products: transaction.products
-    //     },
-    //     template: 'user-payment-success'
-    //   });
-    // }
+    if (user && user.email) {
+      await this.mailService.send({
+        subject: 'New Wallet Purchased Success',
+        to: user.email,
+        data: {
+          userName: user?.name || user?.username || `${user?.firstName} ${user?.lastName}`,
+          transactionId: transaction._id.toString().slice(16, 24).toUpperCase(),
+          products: transaction.products
+        },
+        template: 'user-payment-success'
+      });
+    }
   }
 }
