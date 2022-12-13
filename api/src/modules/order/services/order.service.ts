@@ -157,19 +157,17 @@ export class OrderService {
     }
     await this.orderModel.updateOne({ _id: id }, data);
     if (data.deliveryStatus !== ORDER_STATUS.PROCESSING) {
-      const user = await this.performerService.findById(order.userId);
-      if (user) {
-        await this.mailService.send({
-          subject: 'Order Status Changed',
-          to: user.email,
-          data: {
-            user,
-            order,
-            deliveryStatus: data.deliveryStatus
-          },
-          template: 'update-order-status'
-        });
-      }
+      const user = await this.userService.findById(order.userId);
+      user?.email && await this.mailService.send({
+        subject: 'Order Status Changed',
+        to: user.email,
+        data: {
+          user,
+          order,
+          deliveryStatus: data.deliveryStatus
+        },
+        template: 'update-order-status'
+      });
     }
     if (data.deliveryStatus === ORDER_STATUS.REFUNDED) {
       await this.queueEventService.publish(

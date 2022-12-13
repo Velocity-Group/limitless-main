@@ -495,34 +495,6 @@ export class PerformerService {
       }
       data.username = data.username.trim().toLowerCase();
     }
-
-    if (
-      (payload.avatarId && !performer.avatarId)
-      || (performer.avatarId
-        && payload.avatarId
-        && payload.avatarId !== performer.avatarId.toString())
-    ) {
-      const avatar = await this.fileService.findById(payload.avatarId);
-      if (!avatar) {
-        throw new EntityNotFoundException('Avatar not found!');
-      }
-      // TODO - check for other storaged
-      data.avatarPath = avatar.path;
-    }
-
-    if (
-      (payload.coverId && !performer.coverId)
-      || (performer.coverId
-        && payload.coverId
-        && payload.coverId !== performer.coverId.toString())
-    ) {
-      const cover = await this.fileService.findById(payload.coverId);
-      if (!cover) {
-        throw new EntityNotFoundException('Cover not found!');
-      }
-      // TODO - check for other storaged
-      data.coverPath = cover.path;
-    }
     if (data.dateOfBirth) {
       data.dateOfBirth = new Date(data.dateOfBirth);
     }
@@ -530,17 +502,18 @@ export class PerformerService {
     const newPerformer = await this.performerModel.findById(performer._id);
     const oldStatus = performer.status;
     const oldGender = performer.gender;
-    const oldBalance = performer.balance;
+    const oldVerifiedDocument = performer.verifiedDocument;
+    // const oldBalance = performer.balance;
     // logs change token
-    if (oldBalance !== newPerformer.balance) {
-      await this.changeTokenLogService.changeTokenLog({
-        source: CHANGE_TOKEN_LOG_SOURCES.PERFORMER,
-        sourceId: newPerformer._id,
-        token: newPerformer.balance - oldBalance
-      });
-    }
+    // if (oldBalance !== newPerformer.balance) {
+    //   await this.changeTokenLogService.changeTokenLog({
+    //     source: CHANGE_TOKEN_LOG_SOURCES.PERFORMER,
+    //     sourceId: newPerformer._id,
+    //     token: newPerformer.balance - oldBalance
+    //   });
+    // }
     // fire event that updated performer status
-    if (data.status !== performer.status) {
+    if (oldVerifiedDocument !== newPerformer.verifiedDocument && newPerformer.verifiedDocument) {
       await this.queueEventService.publish(
         new QueueEvent({
           channel: PERFORMER_UPDATE_STATUS_CHANNEL,
