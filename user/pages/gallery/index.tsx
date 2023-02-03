@@ -194,7 +194,7 @@ class GalleryViewPage extends PureComponent<IProps> {
         performerId: gallery.performerId,
         paymentGateway: settings.paymentGateway
       });
-      if (paymentGateway === 'ccbill') {
+      if (paymentGateway === 'ccbill' && subscriptionType !== 'free') {
         window.location.href = resp?.data?.paymentUrl;
       } else {
         this.setState({ openSubscriptionModal: false });

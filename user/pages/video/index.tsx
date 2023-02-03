@@ -255,6 +255,7 @@ class VideoViewPage extends PureComponent<IProps> {
   async subscribe() {
     try {
       const { video, user, settings } = this.props;
+      const { subscriptionType } = this.state;
       if (!user._id) {
         message.error('Please log in!');
         Router.push('/');
@@ -268,14 +269,13 @@ class VideoViewPage extends PureComponent<IProps> {
         Router.push('/user/cards');
         return;
       }
-      const subscriptionType = video.performer.isFreeSubscription ? 'free' : 'monthly';
       this.setState({ submiting: true });
       const resp = await paymentService.subscribePerformer({
         type: subscriptionType,
         performerId: video.performerId,
         paymentGateway: settings.paymentGateway
       });
-      if (settings.paymentGateway === 'ccbill') {
+      if (settings.paymentGateway === 'ccbill' && subscriptionType !== 'free') {
         window.location.href = resp?.data?.paymentUrl;
       }
     } catch (e) {

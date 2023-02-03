@@ -125,7 +125,7 @@ class SubscriptionPage extends PureComponent<IProps> {
         performerId: performer._id,
         paymentGateway: settings.paymentGateway
       });
-      if (settings.paymentGateway === 'ccbill') {
+      if (settings.paymentGateway === 'ccbill' && subscriptionType !== 'free') {
         window.location.href = resp?.data?.paymentUrl;
       } else {
         this.setState({ openSubscriptionModal: false });
