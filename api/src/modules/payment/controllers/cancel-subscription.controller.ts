@@ -43,4 +43,16 @@ export class CancelSubscriptionController {
     const data = await this.paymentService.stripeCancelSubscription(subscriptionId, user);
     return DataResponse.ok(data);
   }
+
+  @Post('/system/cancel-subscription/:subscriptionId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async systemCancel(
+    @Param('subscriptionId') subscriptionId: string,
+    @CurrentUser() user: UserDto
+  ): Promise<DataResponse<any>> {
+    const data = await this.paymentService.systemCancelSubscription(subscriptionId, user);
+    return DataResponse.ok(data);
+  }
 }

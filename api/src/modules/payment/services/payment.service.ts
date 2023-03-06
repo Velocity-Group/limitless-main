@@ -653,4 +653,22 @@ export class PaymentService {
     ]);
     return { success: true };
   }
+
+  public async systemCancelSubscription(id: any, user: UserDto) {
+    const subscription = await this.subscriptionService.findById(id);
+    if (!subscription) {
+      throw new EntityNotFoundException();
+    }
+    if (!user.roles.includes('admin') && `${subscription.userId}` !== `${user._id}`) {
+      throw new ForbiddenException();
+    }
+    subscription.status = SUBSCRIPTION_STATUS.DEACTIVATED;
+    subscription.updatedAt = new Date();
+    await subscription.save();
+    await Promise.all([
+      this.performerService.updateSubscriptionStat(subscription.performerId, -1),
+      this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
+    ]);
+    return { success: true };
+  }
 }
