@@ -11,7 +11,9 @@ import { TickIcon } from 'src/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import Router from 'next/router';
 import { paymentService } from '@services/payment.service';
-import { useContext, useEffect, useState } from 'react';
+import {
+  memo, useContext, useEffect, useState
+} from 'react';
 import { setSubscription } from '@redux/subscription/actions';
 import Loader from '@components/common/base/loader';
 import { useStripe } from '@stripe/react-stripe-js';
@@ -23,7 +25,7 @@ interface IProps {
   showModal: boolean;
 }
 
-export function ConfirmSubscriptionPerformerForm() {
+function ConfirmSubscriptionPerformerForm() {
   const { subscriptionType, performer, showModal } = useSelector((state: any) => state.subscription) as IProps;
   const user = useSelector((state: any) => state.user.current) as IUser;
   const paymentGateway = useSelector((state: any) => state.settings.paymentGateway) || 'stripe';
@@ -70,7 +72,7 @@ export function ConfirmSubscriptionPerformerForm() {
   useEffect(() => {
     socket && socket.on('stripe_confirm_payment', onConfirmPayment);
     return () => socket && socket.off('stripe_confirm_payment', onConfirmPayment);
-  }, []);
+  }, [stripe]);
 
   return (
     <>
@@ -169,3 +171,5 @@ export function ConfirmSubscriptionPerformerForm() {
     </>
   );
 }
+
+export default memo(ConfirmSubscriptionPerformerForm);

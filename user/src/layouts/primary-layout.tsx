@@ -10,7 +10,7 @@ import {
 import './primary-layout.less';
 import { ISettings } from '@interfaces/setting';
 import { loadStripe } from '@stripe/stripe-js';
-import { ConfirmSubscriptionPerformerForm } from 'src/components/performer/confirm-subscription';
+import ConfirmSubscriptionPerformerForm from 'src/components/performer/confirm-subscription';
 
 const Header = dynamic(() => import('@components/common/layout/header'));
 const Footer = dynamic(() => import('@components/common/layout/footer'));
