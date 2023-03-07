@@ -198,10 +198,6 @@ export class PaymentService {
         transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.CREATED;
         transaction.paymentResponseInfo = plan;
         transaction.stripeInvoiceId = plan.latest_invoice as any;
-        // to test
-        transaction.stripeClientSecret = 'pi_3MiboqAZFPsK1bJM1QtLPzxY_secret_q869ie8wUTP51kdaF632kyvsX';
-        this.socketUserService.emitToUsers(transaction.sourceId, 'stripe_confirm_payment', new PaymentDto(transaction));
-        //
         await transaction.save();
         await this.subscriptionService.updateSubscriptionId({
           userId: transaction.sourceId,
@@ -596,7 +592,7 @@ export class PaymentService {
         transaction.status = PAYMENT_STATUS.REQUIRE_AUTHENTICATION;
         // redirectUrl = data?.object?.next_action?.use_stripe_sdk?.stripe_js || data?.object?.next_action?.redirect_to_url?.url || '/user/payment-history';
         transaction.stripeClientSecret = data?.object?.client_secret;
-        await this.socketUserService.emitToUsers(transaction.sourceId, 'stripe_confirm_payment', new PaymentDto(transaction));
+        transaction.stripeClientSecret && await this.socketUserService.emitToUsers(transaction.sourceId, 'stripe_confirm_payment', new PaymentDto(transaction));
         break;
       case 'payment_intent.succeeded':
         // create new record for renewal
