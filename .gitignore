@@ -58,3 +58,5 @@ package-lock.json
 obfuscator
 
 mobile-rn
+
+api/scripts/data

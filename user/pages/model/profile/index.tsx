@@ -5,11 +5,12 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { getVideos, moreVideo } from '@redux/video/actions';
 import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
+import { setSubscription } from '@redux/subscription/actions';
 import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, tokenTransctionService, feedService, reactionService, paymentService,
+  performerService, tokenTransctionService, feedService, reactionService,
   utilsService, followService
 } from 'src/services';
 import Head from 'next/head';
@@ -25,10 +26,9 @@ import ScrollListFeed from '@components/post/scroll-list';
 import { ScrollListVideo } from '@components/video/scroll-list-item';
 import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
 import { PerformerInfo } from '@components/performer/table-info';
-import { ConfirmSubscriptionPerformerForm, TipPerformerForm } from '@components/performer';
+import { TipPerformerForm } from '@components/performer';
 import ShareButtons from '@components/performer/share-profile';
 import SearchPostBar from '@components/post/search-bar';
-import Loader from '@components/common/base/loader';
 import { VideoPlayer } from '@components/common';
 import {
   IPerformer, IUser, IUIConfig, IFeed, ICountry, ISettings
@@ -60,6 +60,7 @@ interface IProps {
   updateBalance: Function;
   countries: ICountry[];
   settings: ISettings;
+  setSubscription: Function;
 }
 
 const { TabPane } = Tabs;
@@ -85,11 +86,9 @@ class PerformerProfile extends PureComponent<IProps> {
     submiting: false,
     isBookMarked: false,
     requesting: false,
-    openSubscriptionModal: false,
     tab: 'post',
     filter: initialFilter,
     isGrid: false,
-    subscriptionType: 'monthly',
     isFollowed: false
   };
 
@@ -274,38 +273,6 @@ class PerformerProfile extends PureComponent<IProps> {
     }
   }
 
-  async subscribe() {
-    const { performer, user, settings } = this.props;
-    const { subscriptionType } = this.state;
-    if (!user._id) {
-      message.error('Please log in!');
-      Router.push('/');
-      return;
-    }
-    if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
-      message.error('Please add a payment card');
-      Router.push('/user/cards');
-      return;
-    }
-    try {
-      this.setState({ submiting: true });
-      const resp = await paymentService.subscribePerformer({
-        type: subscriptionType,
-        performerId: performer._id,
-        paymentGateway: settings.paymentGateway
-      });
-      if (settings.paymentGateway === 'ccbill' && subscriptionType !== 'free') {
-        window.location.href = resp?.data?.paymentUrl;
-      } else {
-        this.setState({ openSubscriptionModal: false });
-      }
-    } catch (e) {
-      const err = await e;
-      message.error(err.message || 'error occured, please try again later');
-      this.setState({ openSubscriptionModal: false, submiting: false });
-    }
-  }
-
   async sendTip(price: number) {
     const { performer, user, updateBalance: handleUpdateBalance } = this.props;
     if (user.balance < price) {
@@ -392,7 +359,8 @@ class PerformerProfile extends PureComponent<IProps> {
       productState,
       galleryState,
       countries,
-      settings
+      settings,
+      setSubscription: updateSubscription
     } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
@@ -406,10 +374,8 @@ class PerformerProfile extends PureComponent<IProps> {
       openTipModal,
       submiting,
       isBookMarked,
-      openSubscriptionModal,
       tab,
       isGrid,
-      subscriptionType,
       isFollowed
     } = this.state;
 
@@ -585,7 +551,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   className="sub-btn"
                   disabled={(submiting)}
                   onClick={() => {
-                    this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
+                    updateSubscription({ showModal: true, performer, subscriptionType: 'monthly' });
                   }}
                 >
                   SUBSCRIBE FOR
@@ -603,7 +569,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   className="sub-btn"
                   disabled={(submiting)}
                   onClick={() => {
-                    this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
+                    updateSubscription({ showModal: true, performer, subscriptionType: 'yearly' });
                   }}
                 >
                   SUBSCRIBE FOR
@@ -621,7 +587,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   className="sub-btn"
                   disabled={(submiting)}
                   onClick={() => {
-                    this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
+                    updateSubscription({ showModal: true, performer, subscriptionType: 'free' });
                   }}
                 >
                   SUBSCRIBE FOR FREE FOR
@@ -783,25 +749,6 @@ class PerformerProfile extends PureComponent<IProps> {
             onFinish={this.sendTip.bind(this)}
           />
         </Modal>
-        <Modal
-          key="subscribe_performer"
-          className="subscription-modal"
-          width={600}
-          centered
-          title={null}
-          visible={openSubscriptionModal}
-          footer={null}
-          onCancel={() => this.setState({ openSubscriptionModal: false })}
-          destroyOnClose
-        >
-          <ConfirmSubscriptionPerformerForm
-            type={subscriptionType || 'monthly'}
-            performer={performer}
-            submiting={submiting}
-            onFinish={this.subscribe.bind(this)}
-          />
-        </Modal>
-        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );
   }
@@ -827,6 +774,7 @@ const mapDispatch = {
   getGalleries,
   moreGalleries,
   removeFeedSuccess,
-  updateBalance
+  updateBalance,
+  setSubscription
 };
 export default connect(mapStates, mapDispatch)(PerformerProfile);

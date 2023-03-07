@@ -26,19 +26,14 @@ import { addPrivateRequest, accessPrivateRequest } from '@redux/streaming/action
 import { updateUIValue } from 'src/redux/ui/actions';
 import { updateBalance } from '@redux/user/actions';
 import { shortenLargeNumber } from '@lib/number';
-import { SubscribePerformerModal } from 'src/components/subscription/subscribe-performer-modal';
 import './header.less';
 
 interface IProps {
   updateBalance: Function;
-  updateUIValue: Function;
   user: IUser;
   logout: Function;
   router: any;
   ui: IUIConfig;
-  privateRequests: any;
-  addPrivateRequest: Function;
-  accessPrivateRequest: Function;
   settings: StreamSettings;
   config: ISettings;
 }
@@ -79,13 +74,6 @@ class Header extends PureComponent<IProps> {
 
   handleMessage = async (event) => {
     event && this.setState({ totalNotReadMessage: event.total });
-  };
-
-  handleSubscribe = (username) => {
-    Router.push(
-      { pathname: '/streaming/details', query: { username } },
-      `/streaming/${username}`
-    );
   };
 
   async handleCountNotificationMessage() {
@@ -449,7 +437,6 @@ class Header extends PureComponent<IProps> {
               />
             </div> */}
           </Drawer>
-          <SubscribePerformerModal onSubscribed={this.handleSubscribe} />
         </div>
       </div>
     );

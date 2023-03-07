@@ -1,25 +1,22 @@
 import { PureComponent } from 'react';
-import { message, Layout, Modal } from 'antd';
+import { message, Layout } from 'antd';
 import PageHeading from '@components/common/page-heading';
 import { HeartOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import { TableListSubscription } from '@components/subscription/table-list-subscription';
 import {
-  ISettings,
   ISubscription, IUIConfig, IUser
 } from 'src/interfaces';
-import { paymentService, subscriptionService } from '@services/index';
+import { subscriptionService } from '@services/index';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
 import { SearchFilter } from '@components/common';
-import { ConfirmSubscriptionPerformerForm } from '@components/performer';
-import Loader from '@components/common/base/loader';
-import Router from 'next/router';
+import { setSubscription } from '@redux/subscription/actions';
 
 interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
-  settings: ISettings;
+  setSubscription: Function;
 }
 
 class SubscriptionPage extends PureComponent<IProps> {
@@ -28,7 +25,6 @@ class SubscriptionPage extends PureComponent<IProps> {
   state = {
     subscriptionList: [],
     loading: false,
-    submiting: false,
     pagination: {
       pageSize: 10,
       current: 1,
@@ -36,9 +32,7 @@ class SubscriptionPage extends PureComponent<IProps> {
     },
     sort: 'desc',
     sortBy: 'updatedAt',
-    filter: {},
-    openSubscriptionModal: false,
-    selectedSubscription: null
+    filter: {}
   };
 
   componentDidMount() {
@@ -98,48 +92,15 @@ class SubscriptionPage extends PureComponent<IProps> {
   }
 
   async activeSubscription(subscription: ISubscription) {
-    const { currentUser } = this.props;
+    const { currentUser, setSubscription: updateSubscription } = this.props;
     const { performerInfo: performer } = subscription;
     if (currentUser.isPerformer || !performer) return;
-    this.setState({ openSubscriptionModal: true, selectedSubscription: subscription });
-  }
-
-  async subscribe() {
-    const { selectedSubscription } = this.state;
-    const { performerInfo: performer, subscriptionType } = selectedSubscription;
-    const { currentUser, settings } = this.props;
-    if (!currentUser._id) {
-      message.error('Please log in!');
-      Router.push('/');
-      return;
-    }
-    if (settings.paymentGateway === 'stripe' && !currentUser.stripeCardIds.length) {
-      message.error('Please add a payment card');
-      Router.push('/user/cards');
-      return;
-    }
-    try {
-      await this.setState({ submiting: true });
-      const resp = await paymentService.subscribePerformer({
-        type: subscriptionType,
-        performerId: performer._id,
-        paymentGateway: settings.paymentGateway
-      });
-      if (settings.paymentGateway === 'ccbill' && subscriptionType !== 'free') {
-        window.location.href = resp?.data?.paymentUrl;
-      } else {
-        this.setState({ openSubscriptionModal: false });
-      }
-    } catch (e) {
-      const err = await e;
-      message.error(err.message || 'error occured, please try again later');
-      this.setState({ submiting: false, openSubscriptionModal: false });
-    }
+    updateSubscription({ showModal: true, performer, subscriptionType: subscription.subscriptionType });
   }
 
   render() {
     const {
-      subscriptionList, pagination, loading, submiting, openSubscriptionModal, selectedSubscription
+      subscriptionList, pagination, loading
     } = this.state;
     const { ui } = this.props;
     return (
@@ -168,25 +129,6 @@ class SubscriptionPage extends PureComponent<IProps> {
               activeSubscription={this.activeSubscription.bind(this)}
             />
           </div>
-          <Modal
-            key="subscribe_performer"
-            className="subscription-modal"
-            width={600}
-            centered
-            title={null}
-            visible={openSubscriptionModal}
-            footer={null}
-            onCancel={() => this.setState({ openSubscriptionModal: false })}
-            destroyOnClose
-          >
-            <ConfirmSubscriptionPerformerForm
-              type={selectedSubscription?.subscriptionType || 'monthly'}
-              performer={selectedSubscription?.performerInfo}
-              submiting={submiting}
-              onFinish={this.subscribe.bind(this)}
-            />
-          </Modal>
-          {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
         </div>
       </Layout>
     );
@@ -198,5 +140,5 @@ const mapState = (state: any) => ({
   currentUser: { ...state.user.current },
   settings: { ...state.settings }
 });
-const mapDispatch = { };
+const mapDispatch = { setSubscription };
 export default connect(mapState, mapDispatch)(SubscriptionPage);

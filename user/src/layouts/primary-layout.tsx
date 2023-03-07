@@ -1,11 +1,16 @@
-import { PureComponent } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Layout, BackTop } from 'antd';
 import { connect } from 'react-redux';
 import { Router } from 'next/router';
-import { IUIConfig } from 'src/interfaces/ui-config';
 import { loadUIValue } from '@redux/ui/actions';
+import {
+  Elements
+} from '@stripe/react-stripe-js';
 import './primary-layout.less';
+import { ISettings } from '@interfaces/setting';
+import { loadStripe } from '@stripe/stripe-js';
+import { ConfirmSubscriptionPerformerForm } from 'src/components/performer/confirm-subscription';
 
 const Header = dynamic(() => import('@components/common/layout/header'));
 const Footer = dynamic(() => import('@components/common/layout/footer'));
@@ -14,56 +19,49 @@ const Loader = dynamic(() => import('@components/common/base/loader'));
 interface DefaultProps {
   loadUIValue: Function;
   children: any;
-  ui: IUIConfig
+  settings: ISettings;
 }
 
-class PrimaryLayout extends PureComponent<DefaultProps> {
-  state = {
-    routerChange: false
-  };
+function PrimaryLayout({
+  children, loadUIValue: handleLoadUI, settings
+}: DefaultProps) {
+  const [routerChange, setRouterChange] = useState(false);
 
-  componentDidMount() {
-    const { loadUIValue: handleLoadUI } = this.props;
-    process.browser && handleLoadUI();
-    process.browser && this.handleStateChange();
-  }
+  useEffect(() => {
+    handleLoadUI();
+    Router.events.on('routeChangeStart', () => setRouterChange(true));
+    Router.events.on('routeChangeComplete', async () => setRouterChange(false));
+    return () => {
+      Router.events.off('routeChangeStart', () => setRouterChange(true));
+      Router.events.off('routeChangeComplete', async () => setRouterChange(false));
+    };
+  }, []);
 
-  handleStateChange() {
-    Router.events.on('routeChangeStart', async () => this.setState({ routerChange: true }));
-    Router.events.on('routeChangeComplete', async () => this.setState({ routerChange: false }));
-  }
-
-  render() {
-    const {
-      children, ui
-    } = this.props;
-    const { routerChange } = this.state;
-    return (
-      <>
-        <Layout>
-          <div
-            className={ui?.theme === 'dark' ? 'container dark' : 'container'}
-            id="primaryLayout"
+  return (
+    <Elements stripe={loadStripe(settings.stripePublishableKey)}>
+      <Layout>
+        <div
+          className="container"
+          id="primaryLayout"
+        >
+          <Header />
+          <Layout.Content
+            className="content"
           >
-            <Header />
-            <Layout.Content
-              className="content"
-              style={{ position: 'relative' }}
-            >
-              {routerChange && <Loader />}
-              {children}
-            </Layout.Content>
-            <BackTop className="backTop" />
-            <Footer />
-          </div>
-        </Layout>
-      </>
-    );
-  }
+            {routerChange && <Loader />}
+            {children}
+          </Layout.Content>
+          <BackTop className="backTop" />
+          <Footer />
+        </div>
+        <ConfirmSubscriptionPerformerForm />
+      </Layout>
+    </Elements>
+  );
 }
 
 const mapStateToProps = (state: any) => ({
-  ui: { ...state.ui }
+  settings: { ...state.settings }
 });
 const mapDispatchToProps = { loadUIValue };
 

@@ -198,6 +198,10 @@ export class PaymentService {
         transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.CREATED;
         transaction.paymentResponseInfo = plan;
         transaction.stripeInvoiceId = plan.latest_invoice as any;
+        // to test
+        transaction.stripeClientSecret = 'pi_3MiboqAZFPsK1bJM1QtLPzxY_secret_q869ie8wUTP51kdaF632kyvsX';
+        this.socketUserService.emitToUsers(transaction.sourceId, 'stripe_confirm_payment', new PaymentDto(transaction));
+        //
         await transaction.save();
         await this.subscriptionService.updateSubscriptionId({
           userId: transaction.sourceId,
@@ -323,6 +327,7 @@ export class PaymentService {
       });
       if (data) {
         transaction.stripeInvoiceId = data.id || (data.invoice && data.invoice.toString());
+        transaction.stripeClientSecret = data.client_secret;
         await transaction.save();
       }
       return new PaymentDto(transaction).toResponse();
@@ -561,7 +566,7 @@ export class PaymentService {
   }
 
   public async stripePaymentWebhook(payload: Record<string, any>) {
-    const { type, data, livemode } = payload;
+    const { type, data } = payload;
     if (type === 'payment_intent.created') return { ok: true };
     const transactionId = data?.object?.metadata?.transactionId;
     const stripeInvoiceId = data?.object?.invoice || data?.object?.id;
@@ -589,8 +594,9 @@ export class PaymentService {
         break;
       case 'payment_intent.requires_action':
         transaction.status = PAYMENT_STATUS.REQUIRE_AUTHENTICATION;
-        redirectUrl = data?.object?.next_action?.use_stripe_sdk?.stripe_js || data?.object?.next_action?.redirect_to_url?.url || '/user/payment-history';
-        transaction.stripeConfirmUrl = redirectUrl;
+        // redirectUrl = data?.object?.next_action?.use_stripe_sdk?.stripe_js || data?.object?.next_action?.redirect_to_url?.url || '/user/payment-history';
+        transaction.stripeClientSecret = data?.object?.client_secret;
+        await this.socketUserService.emitToUsers(transaction.sourceId, 'stripe_confirm_payment', new PaymentDto(transaction));
         break;
       case 'payment_intent.succeeded':
         // create new record for renewal
@@ -620,7 +626,6 @@ export class PaymentService {
     }
     transaction.paymentResponseInfo = payload;
     transaction.updatedAt = new Date();
-    transaction.liveMode = livemode;
     await transaction.save();
     redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { success: true };

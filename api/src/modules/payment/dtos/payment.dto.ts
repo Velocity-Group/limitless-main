@@ -40,7 +40,7 @@ export class IPaymentResponse {
 
   stripeInvoiceId?: string;
 
-  stripeConfirmUrl?: string;
+  stripeClientSecret?: string;
 
   totalPrice?: number;
 
@@ -49,8 +49,6 @@ export class IPaymentResponse {
   couponInfo?: ICouponResponse;
 
   status?: string;
-
-  liveMode?: boolean;
 
   createdAt: Date;
 
@@ -84,7 +82,7 @@ export class PaymentDto {
 
   stripeInvoiceId?: string;
 
-  stripeConfirmUrl?: string;
+  stripeClientSecret?: string;
 
   totalPrice?: number;
 
@@ -93,8 +91,6 @@ export class PaymentDto {
   couponInfo?: ICouponResponse;
 
   status?: string;
-
-  liveMode?: boolean;
 
   createdAt: Date;
 
@@ -118,12 +114,11 @@ export class PaymentDto {
           'products',
           'paymentResponseInfo',
           'stripeInvoiceId',
-          'stripeConfirmUrl',
+          'stripeClientSecret',
           'status',
           'totalPrice',
           'originalPrice',
           'couponInfo',
-          'liveMode',
           'createdAt',
           'updatedAt'
         ])
@@ -147,8 +142,7 @@ export class PaymentDto {
       originalPrice: this.originalPrice,
       couponInfo: this.couponInfo,
       status: this.status,
-      stripeConfirmUrl: this.stripeConfirmUrl,
-      liveMode: this.liveMode,
+      stripeClientSecret: this.stripeClientSecret,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

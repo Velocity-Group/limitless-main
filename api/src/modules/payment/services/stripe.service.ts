@@ -313,8 +313,7 @@ export class StripeService {
           transactionId: transaction._id.toString() // to track on webhook
         },
         receipt_email: user.email,
-        confirm: true,
-        return_url: `${process.env.USER_URL}/user/payment-history`
+        setup_future_usage: 'off_session'
       });
       return charge;
     } catch (e) {
