@@ -64,15 +64,13 @@ function ConfirmSubscriptionPerformerForm() {
   };
 
   const onConfirmPayment = (transaction: ITransaction) => {
-    if (paymentGateway === 'stripe') {
-      stripe && transaction?.stripeClientSecret && stripe.confirmCardPayment(transaction?.stripeClientSecret);
-    }
+    stripe && transaction?.stripeClientSecret && stripe.confirmCardPayment(transaction?.stripeClientSecret);
   };
 
   useEffect(() => {
     socket && socket.on('stripe_confirm_payment', onConfirmPayment);
     return () => socket && socket.off('stripe_confirm_payment', onConfirmPayment);
-  }, [stripe]);
+  }, [stripe, paymentGateway]);
 
   return (
     <>
