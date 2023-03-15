@@ -379,7 +379,7 @@ class PerformerProfile extends PureComponent<IProps> {
       isFollowed
     } = this.state;
 
-    const haveContent = performer?.stats?.totalFeeds || performer?.stats?.totalVideos || performer?.stats?.totalPhotos || performer?.stats?.totalProducts;
+    const haveContent = performer?.stats?.totalFeeds || performer?.stats?.totalVideos || performer?.stats?.totalPhotos || performer?.stats?.totalProducts > 0;
 
     return (
       <Layout>
