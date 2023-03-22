@@ -187,7 +187,7 @@ export class PerformerAssetsListener {
 
   public async handleFeedCount(event: QueueEvent) {
     const { eventName } = event;
-    if (![EVENT.CREATED, EVENT.DELETED].includes(eventName)) {
+    if (![EVENT.CREATED, EVENT.UPDATED, EVENT.DELETED].includes(eventName)) {
       return;
     }
     const {
