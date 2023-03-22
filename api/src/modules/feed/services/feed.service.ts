@@ -81,7 +81,8 @@ export class FeedService {
         isSchedule: true,
         scheduleAt: { $lte: new Date() }
       }).lean();
-      await Promise.all(feeds.map((feed) => {
+      feeds.reduce(async (lp, feed) => {
+        await lp;
         const v = new FeedDto(feed);
         this.feedModel.updateOne(
           {
@@ -100,11 +101,12 @@ export class FeedService {
             eventName: EVENT.UPDATED,
             data: {
               ...v,
+              status: STATUS.ACTIVE,
               oldStatus
             }
           })
         );
-      }));
+      }, Promise.resolve());
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('Schedule feed error', e);
@@ -478,7 +480,9 @@ export class FeedService {
         data.slug = `${data.slug}${StringHelper.randomString(8, '0123456789')}`;
       }
     }
+    const oldStatus = feed.status;
     await this.feedModel.updateOne({ _id: id }, data);
+    const newFeed = await this.feedModel.findById(id);
     if (payload.fileIds && payload.fileIds.length) {
       const ids = feed.fileIds.map((_id) => _id.toString());
       const Ids = payload.fileIds.filter((_id) => !ids.includes(_id));
@@ -495,6 +499,17 @@ export class FeedService {
     if ((feed.teaserId && `${feed.teaserId}` !== `${data.teaserId}`) || (feed.teaserId && !data.teaserId)) {
       await this.fileService.remove(feed.teaserId);
     }
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: PERFORMER_FEED_CHANNEL,
+        eventName: EVENT.UPDATED,
+        data: {
+          ...new FeedDto(newFeed),
+          status: newFeed.status,
+          oldStatus
+        }
+      })
+    );
     return { updated: true };
   }
 
