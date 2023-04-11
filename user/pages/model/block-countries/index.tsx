@@ -17,7 +17,7 @@ import PageHeading from '@components/common/page-heading';
 import '../../user/index.less';
 
 interface IProps {
-  performer: IPerformer;
+  currentUser: IPerformer;
   ui: IUIConfig;
   countries: ICountry[];
   updateUserSuccess: Function;
@@ -42,11 +42,11 @@ class BlockCountries extends PureComponent<IProps> {
   }
 
   async handleUpdateBlockCountries(data: IBlockCountries) {
-    const { performer, updateUserSuccess: onUpdateSuccess } = this.props;
+    const { currentUser, updateUserSuccess: onUpdateSuccess } = this.props;
     try {
       this.setState({ submiting: true });
       const resp = await blockService.blockCountries(data);
-      onUpdateSuccess({ ...performer, blockCountries: resp.data });
+      onUpdateSuccess({ ...currentUser, blockCountries: resp.data });
       this.setState({ submiting: false });
       message.success('Changes saved');
     } catch (e) {
@@ -58,7 +58,7 @@ class BlockCountries extends PureComponent<IProps> {
 
   render() {
     const {
-      performer, ui, countries
+      currentUser, ui, countries
     } = this.props;
     const { submiting } = this.state;
     return (
@@ -75,7 +75,7 @@ class BlockCountries extends PureComponent<IProps> {
           <PerformerBlockCountriesForm
             onFinish={this.handleUpdateBlockCountries.bind(this)}
             updating={submiting}
-            blockCountries={performer?.blockCountries || { countryCodes: [] }}
+            blockCountries={currentUser?.blockCountries || { countryCodes: [] }}
             countries={countries}
           />
         </div>
