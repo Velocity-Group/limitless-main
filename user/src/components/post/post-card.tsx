@@ -16,18 +16,17 @@ import {
 } from '@redux/comment/actions';
 import { formatDate, videoDuration, shortenLargeNumber } from '@lib/index';
 import {
-  reactionService, feedService, tokenTransctionService, paymentService, reportService
+  reactionService, feedService, tokenTransctionService, reportService
 } from '@services/index';
 import { connect } from 'react-redux';
+import { setSubscription } from '@redux/subscription/actions';
 import { TipPerformerForm } from '@components/performer/tip-form';
 import ReactMomentCountDown from 'react-moment-countdown';
 import moment from 'moment';
 import { VideoPlayer } from '@components/common/video-player';
-import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { ReportForm } from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
-import Loader from '@components/common/base/loader';
 import { IFeed, ISettings, IUser } from 'src/interfaces';
 import { PurchaseFeedForm } from './confirm-purchase';
 import FeedSlider from './post-slider';
@@ -46,6 +45,7 @@ interface IProps {
   comment: any;
   siteName: string;
   settings: ISettings;
+  setSubscription: Function;
 }
 
 class FeedCard extends Component<IProps> {
@@ -63,12 +63,9 @@ class FeedCard extends Component<IProps> {
     openTipModal: false,
     openPurchaseModal: false,
     openTeaser: false,
-    submiting: false,
     polls: [],
     requesting: false,
-    openSubscriptionModal: false,
-    openReportModal: false,
-    subscriptionType: ''
+    openReportModal: false
   }
 
   componentDidMount() {
@@ -237,39 +234,6 @@ class FeedCard extends Component<IProps> {
     handleDelete(item._id);
   }
 
-  subscribe = async () => {
-    const { feed, user, settings } = this.props;
-    const { subscriptionType } = this.state;
-    if (!user._id) {
-      message.error('Please log in!');
-      Router.push('/');
-      return;
-    }
-    if (user.isPerformer) return;
-    if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
-      message.error('Please add payment card');
-      Router.push('/user/cards');
-      return;
-    }
-    try {
-      this.setState({ submiting: true });
-      const resp = await paymentService.subscribePerformer({
-        type: subscriptionType || 'monthly',
-        performerId: feed.fromSourceId,
-        paymentGateway: settings.paymentGateway
-      });
-      if (settings.paymentGateway === 'ccbill') {
-        window.location.href = resp?.data?.paymentUrl;
-      } else {
-        this.setState({ openSubscriptionModal: false });
-      }
-    } catch (e) {
-      const err = await e;
-      message.error(err.message || 'error occured, please try again later');
-      this.setState({ openSubscriptionModal: false, submiting: false });
-    }
-  }
-
   sendTip = async (price) => {
     const { feed, user, updateBalance: handleUpdateBalance } = this.props;
     if (user._id === feed?.performer?._id) {
@@ -342,7 +306,8 @@ class FeedCard extends Component<IProps> {
 
   render() {
     const {
-      feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment, siteName
+      feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment, siteName,
+      setSubscription: updateSubscription
     } = this.props;
     const { performer } = feed;
     const { requesting: commenting } = comment;
@@ -351,8 +316,8 @@ class FeedCard extends Component<IProps> {
     const totalComments = commentMapping.hasOwnProperty(feed._id) ? commentMapping[feed._id].total : 0;
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
-      openTipModal, openPurchaseModal, submiting, polls, isBookMarked,
-      openTeaser, openSubscriptionModal, openReportModal, requesting, subscriptionType
+      openTipModal, openPurchaseModal, polls, isBookMarked,
+      openTeaser, openReportModal, requesting
     } = this.state;
     let canView = (!feed.isSale && feed.isSubscribed)
     || (feed.isSale && isBought)
@@ -483,7 +448,7 @@ class FeedCard extends Component<IProps> {
                     onMouseLeave={() => this.setState({ isHovered: false })}
                     disabled={user.isPerformer}
                     className="secondary"
-                    onClick={() => this.setState({ openSubscriptionModal: true })}
+                    onClick={() => updateSubscription({ showModal: true, performer: feed?.performer, subscriptionType: 'monthly' })}
                   >
                     Subscribe to unlock
                   </Button>
@@ -635,71 +600,6 @@ class FeedCard extends Component<IProps> {
           <ReportForm performer={performer} submiting={requesting} onFinish={this.handleReport.bind(this)} />
         </Modal>
         <Modal
-          key="subscribe_performer"
-          className="subscription-modal"
-          width={600}
-          centered
-          title={null}
-          visible={openSubscriptionModal}
-          footer={null}
-          destroyOnClose
-          onCancel={() => this.setState({ openSubscriptionModal: false, subscriptionType: '' })}
-        >
-          {!subscriptionType ? (
-            <div
-              className="subscription-btn-grp"
-            >
-              <h2 style={{ paddingTop: 25 }}>SUBSCRIBE TO UNLOCK</h2>
-              {feed?.performer?.isFreeSubscription && (
-              <Button
-                className="primary"
-                disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
-                onClick={() => {
-                  this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
-                }}
-              >
-                SUBSCRIBE FOR FREE FOR
-                {' '}
-                {feed?.performer?.durationFreeSubscriptionDays || 1}
-                {' '}
-                {feed?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
-              </Button>
-              )}
-              {feed?.performer?.monthlyPrice && (
-              <Button
-                className="primary"
-                disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
-                onClick={() => {
-                  this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
-                }}
-              >
-                MONTHLY SUBSCRIPTION FOR $
-                {(feed?.performer?.monthlyPrice || 0).toFixed(2)}
-              </Button>
-              )}
-              {feed?.performer.yearlyPrice && (
-              <Button
-                className="secondary"
-                disabled={!user || !user._id || (submiting && subscriptionType === 'yearly')}
-                onClick={() => {
-                  this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
-                }}
-              >
-                YEARLY SUBSCRIPTON FOR $
-                {(feed?.performer?.yearlyPrice || 0).toFixed(2)}
-              </Button>
-              )}
-            </div>
-          ) : (
-            <ConfirmSubscriptionPerformerForm
-              type={subscriptionType}
-              performer={performer}
-              submiting={submiting}
-              onFinish={this.subscribe.bind(this)}
-            />
-          )}
-        </Modal>
-        <Modal
           key="teaser_video"
           title="Teaser video"
           visible={openTeaser}
@@ -725,7 +625,6 @@ class FeedCard extends Component<IProps> {
             }}
           />
         </Modal>
-        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </div>
     );
   }
@@ -743,6 +642,6 @@ const mapStates = (state: any) => {
 };
 
 const mapDispatch = {
-  getComments, moreComment, createComment, deleteComment, updateBalance
+  getComments, moreComment, createComment, deleteComment, updateBalance, setSubscription
 };
 export default connect(mapStates, mapDispatch)(FeedCard);

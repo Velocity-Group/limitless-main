@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import {
-  Layout, Tabs, message, Button, Spin, Tooltip, Avatar, Modal
+  Layout, Tabs, message, Button, Spin, Tooltip, Avatar
 } from 'antd';
 import {
   BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined,
@@ -11,8 +11,9 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import {
-  videoService, reactionService, tokenTransctionService, paymentService
+  videoService, reactionService, tokenTransctionService
 } from '@services/index';
+import { setSubscription } from '@redux/subscription/actions';
 import {
   getComments, moreComment, createComment, deleteComment
 } from 'src/redux/comment/actions';
@@ -20,10 +21,8 @@ import { updateBalance } from '@redux/user/actions';
 import { getRelated } from 'src/redux/video/actions';
 import { RelatedListVideo } from '@components/video';
 import PageHeading from '@components/common/page-heading';
-import Loader from '@components/common/base/loader';
 import { VideoPlayer } from '@components/common/video-player';
 import { ListComments, CommentForm } from '@components/comment';
-import { ConfirmSubscriptionPerformerForm } from '@components/performer';
 import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
 import {
   IVideo, IUser, IUIConfig, IPerformer, ISettings
@@ -51,6 +50,7 @@ interface IProps {
   deleteComment: Function;
   updateBalance: Function;
   settings: ISettings;
+  setSubscription: Function;
 }
 
 class VideoViewPage extends PureComponent<IProps> {
@@ -84,11 +84,8 @@ class VideoViewPage extends PureComponent<IProps> {
     isBought: false,
     isSubscribed: false,
     totalComment: 0,
-    submiting: false,
     requesting: false,
-    activeTab: 'description',
-    openSubscriptionModal: false,
-    subscriptionType: 'monthly'
+    activeTab: 'description'
   };
 
   componentDidMount() {
@@ -124,8 +121,7 @@ class VideoViewPage extends PureComponent<IProps> {
       isLiked: video.isLiked,
       isBookmarked: video.isBookmarked,
       isBought: video.isBought,
-      isSubscribed: video.isSubscribed,
-      subscriptionType: video?.performer?.isFreeSubscription ? 'free' : 'monthly'
+      isSubscribed: video.isSubscribed
     });
     handleGetRelated({
       performerId: video.performerId,
@@ -252,39 +248,6 @@ class VideoViewPage extends PureComponent<IProps> {
     }
   }
 
-  async subscribe() {
-    try {
-      const { video, user, settings } = this.props;
-      if (!user._id) {
-        message.error('Please log in!');
-        Router.push('/');
-        return;
-      }
-      if (user.isPerformer) {
-        return;
-      }
-      if (settings.paymentGateway === 'stripe' && !user.stripeCardIds.length) {
-        message.error('Please add a payment card');
-        Router.push('/user/cards');
-        return;
-      }
-      const subscriptionType = video.performer.isFreeSubscription ? 'free' : 'monthly';
-      this.setState({ submiting: true });
-      const resp = await paymentService.subscribePerformer({
-        type: subscriptionType,
-        performerId: video.performerId,
-        paymentGateway: settings.paymentGateway
-      });
-      if (settings.paymentGateway === 'ccbill') {
-        window.location.href = resp?.data?.paymentUrl;
-      }
-    } catch (e) {
-      const err = await e;
-      message.error(err.message || 'Error occured, please try again later');
-      this.setState({ submiting: false });
-    }
-  }
-
   render() {
     const {
       user,
@@ -298,7 +261,8 @@ class VideoViewPage extends PureComponent<IProps> {
         items: []
       },
       commentMapping,
-      comment
+      comment,
+      setSubscription: updateSubscription
     } = this.props;
     if (error) {
       return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Video was not found'} />;
@@ -308,8 +272,7 @@ class VideoViewPage extends PureComponent<IProps> {
     const comments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].items : [];
     const totalComments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].total : 0;
     const {
-      videoStats, isLiked, isBookmarked, isSubscribed, isBought, submiting, requesting, activeTab, isFirstLoadComment,
-      openSubscriptionModal, subscriptionType
+      videoStats, isLiked, isBookmarked, isSubscribed, isBought, requesting, activeTab, isFirstLoadComment
     } = this.state;
     const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
     const videoJsOptions = {
@@ -422,9 +385,9 @@ class VideoViewPage extends PureComponent<IProps> {
                       {video?.performer?.isFreeSubscription && (
                       <Button
                         className="primary"
-                        disabled={!user || !user._id || (submiting && subscriptionType === 'free')}
+                        disabled={!user._id}
                         onClick={() => {
-                          this.setState({ openSubscriptionModal: true, subscriptionType: 'free' });
+                          updateSubscription({ showModal: true, performer: video?.performer, subscriptionType: 'free' });
                         }}
                       >
                         SUBSCRIBE FOR FREE FOR
@@ -437,9 +400,9 @@ class VideoViewPage extends PureComponent<IProps> {
                       {video?.performer?.monthlyPrice && (
                       <Button
                         className="primary"
-                        disabled={!user || !user._id || (submiting && subscriptionType === 'monthly')}
+                        disabled={!user || !user._id}
                         onClick={() => {
-                          this.setState({ openSubscriptionModal: true, subscriptionType: 'monthly' });
+                          updateSubscription({ showModal: true, performer: video?.performer, subscriptionType: 'monthly' });
                         }}
                       >
                         MONTHLY SUBSCRIPTION FOR $
@@ -449,9 +412,9 @@ class VideoViewPage extends PureComponent<IProps> {
                       {video?.performer.yearlyPrice && (
                       <Button
                         className="secondary"
-                        disabled={!user || !user._id || (submiting && subscriptionType === 'yearly')}
+                        disabled={!user._id}
                         onClick={() => {
-                          this.setState({ openSubscriptionModal: true, subscriptionType: 'yearly' });
+                          updateSubscription({ showModal: true, performer: video?.performer, subscriptionType: 'yearly' });
                         }}
                       >
                         YEARLY SUBSCRIPTON FOR $
@@ -650,24 +613,6 @@ class VideoViewPage extends PureComponent<IProps> {
             )}
           </div>
         </div>
-        <Modal
-          key="subscribe_performer"
-          className="subscription-modal"
-          width={600}
-          centered
-          title={null}
-          visible={openSubscriptionModal}
-          footer={null}
-          onCancel={() => this.setState({ openSubscriptionModal: false })}
-        >
-          <ConfirmSubscriptionPerformerForm
-            type={subscriptionType || 'monthly'}
-            performer={video?.performer}
-            submiting={submiting}
-            onFinish={this.subscribe.bind(this)}
-          />
-        </Modal>
-        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
       </Layout>
     );
   }
@@ -690,6 +635,7 @@ const mapDispatch = {
   moreComment,
   createComment,
   deleteComment,
-  updateBalance
+  updateBalance,
+  setSubscription
 };
 export default connect(mapStates, mapDispatch)(VideoViewPage);

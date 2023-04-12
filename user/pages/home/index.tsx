@@ -162,7 +162,7 @@ class HomePage extends PureComponent<IProps> {
       orientation,
       limit: itemPerPage,
       offset: itemPerPage * feedPage,
-      isHome: !!user.verifiedEmail
+      isHome: true
     });
   }
 
@@ -192,7 +192,7 @@ class HomePage extends PureComponent<IProps> {
       handleGetMore({
         limit: itemPerPage,
         offset: (feedPage + 1) * itemPerPage,
-        isHome: !!user.verifiedEmail
+        isHome: true
       });
     });
   }

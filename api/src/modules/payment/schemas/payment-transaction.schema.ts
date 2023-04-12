@@ -59,12 +59,8 @@ export const PaymentTransactionSchema = new Schema({
   stripeInvoiceId: {
     type: String
   },
-  stripeConfirmUrl: {
+  stripeClientSecret: {
     type: String
-  },
-  liveMode: {
-    type: Boolean,
-    default: false
   },
   status: {
     type: String,

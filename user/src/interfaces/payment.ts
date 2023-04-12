@@ -20,6 +20,7 @@ export interface ITransaction {
   targetId: string;
   type: string;
   paymentResponseInfo: any;
+  stripeClientSecret: string;
   status: string;
   createdAt: Date;
   updatedAt: Date;

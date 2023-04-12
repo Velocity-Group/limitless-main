@@ -10,7 +10,7 @@ import {
 import Page from '@components/common/layout/page';
 import { postService } from '@services/post.service';
 import { formatDate } from '@lib/date';
-import { SearchFilter } from '@components/post/search-filter';
+import { SearchFilter } from '@components/common/search-filter';
 import { getGlobalConfig } from '@services/config';
 
 interface IProps {}

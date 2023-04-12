@@ -14,7 +14,7 @@ import {
 import Page from '@components/common/layout/page';
 import { performerCategoryService } from '@services/perfomer-category.service';
 import { formatDate } from '@lib/date';
-import { SearchFilter } from '@components/performer/category/search-filter';
+import { SearchFilter } from '@components/common/search-filter';
 
 interface IProps {}
 

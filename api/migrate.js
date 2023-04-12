@@ -1,7 +1,9 @@
 require('dotenv').config();
 
 const migrate = require('migrate');
-const { MongoClient } = require('mongodb');
+const {
+  MongoClient
+} = require('mongodb');
 const mongoose = require('mongoose');
 
 class MongoDbStore {
@@ -35,9 +37,13 @@ class MongoDbStore {
             lastRun: set.lastRun
           },
           $push: {
-            migrations: { $each: set.migrations }
+            migrations: {
+              $each: set.migrations
+            }
           }
-        }, { upsert: true });
+        }, {
+          upsert: true
+        });
     } finally {
       client.close();
     }
@@ -53,7 +59,8 @@ migrate.load({
   // Set class as custom stateStore
   stateStore: new MongoDbStore(),
   // do not filter lib folder, load only js file
-  filterFunction: (fileName) => fileName.includes('.js') && !fileName.includes('lib/')
+  filterFunction: (fileName) => fileName.includes('.js') && !fileName.includes('lib/'),
+  ignoreMissing: true
 }, async (err, set) => {
   if (err) {
     throw err;

@@ -71,8 +71,8 @@ export class OrderService {
     if (req.phoneNumber) query.phoneNumber = { $regex: req.phoneNumber };
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gte: moment(req.fromDate).startOf('day'),
-        $lte: moment(req.toDate).endOf('day')
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {
@@ -157,19 +157,17 @@ export class OrderService {
     }
     await this.orderModel.updateOne({ _id: id }, data);
     if (data.deliveryStatus !== ORDER_STATUS.PROCESSING) {
-      const user = await this.performerService.findById(order.userId);
-      if (user) {
-        await this.mailService.send({
-          subject: 'Order Status Changed',
-          to: user.email,
-          data: {
-            user,
-            order,
-            deliveryStatus: data.deliveryStatus
-          },
-          template: 'update-order-status'
-        });
-      }
+      const user = await this.userService.findById(order.userId);
+      user?.email && await this.mailService.send({
+        subject: 'Order Status Changed',
+        to: user.email,
+        data: {
+          user,
+          order,
+          deliveryStatus: data.deliveryStatus
+        },
+        template: 'update-order-status'
+      });
     }
     if (data.deliveryStatus === ORDER_STATUS.REFUNDED) {
       await this.queueEventService.publish(
@@ -191,8 +189,8 @@ export class OrderService {
     if (req.phoneNumber) query.phoneNumber = { $regex: req.phoneNumber };
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: moment(req.fromDate),
-        $lt: moment(req.toDate)
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {

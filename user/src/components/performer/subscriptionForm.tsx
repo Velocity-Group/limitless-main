@@ -2,7 +2,7 @@ import { PureComponent } from 'react';
 import {
   Form, InputNumber, Button, Row, Col, Switch
 } from 'antd';
-import { IPerformer } from 'src/interfaces';
+import { IPerformer, ISettings } from 'src/interfaces';
 
 const layout = {
   labelCol: { span: 24 },
@@ -21,6 +21,7 @@ interface IProps {
   onFinish: Function;
   user: IPerformer;
   updating?: boolean;
+  settings: ISettings;
 }
 
 export class PerformerSubscriptionForm extends PureComponent<IProps> {
@@ -34,7 +35,9 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
   }
 
   render() {
-    const { onFinish, user, updating } = this.props;
+    const {
+      onFinish, user, updating, settings
+    } = this.props;
     const { isFreeSubscription } = this.state;
     return (
       <Form
@@ -69,14 +72,14 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
               label="Monthly Subscription Price"
               rules={[{ required: true }]}
             >
-              <InputNumber min={1} />
+              <InputNumber min={settings.paymentGateway === 'ccbill' ? 2.95 : 1} max={settings.paymentGateway === 'ccbill' ? 300 : 10000} />
             </Form.Item>
             <Form.Item
               name="yearlyPrice"
               label="Yearly Subscription Price"
               rules={[{ required: true }]}
             >
-              <InputNumber min={1} />
+              <InputNumber min={settings.paymentGateway === 'ccbill' ? 2.95 : 1} max={settings.paymentGateway === 'ccbill' ? 300 : 10000} />
             </Form.Item>
             <Form.Item
               key="publicChatPrice"
@@ -84,33 +87,9 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
               label="Default Streaming Price"
               rules={[{ required: true }]}
             >
-              <InputNumber min={1} />
+              <InputNumber min={1} max={10000} />
             </Form.Item>
           </Col>
-          {/* <Col xl={12} md={12} xs={24}>
-            <Form.Item
-              name="privateChatPrice"
-              label="Tokens per minute Private Chat"
-              rules={[{ required: true }]}
-            >
-              <InputNumber min={1} />
-            </Form.Item>
-            <Form.Item
-              name="groupChatPrice"
-              label="Tokens per minute Group Chat"
-              rules={[{ required: true }]}
-            >
-              <InputNumber min={1} />
-            </Form.Item>
-            <Form.Item
-              key="maxParticipantsAllowed"
-              name="maxParticipantsAllowed"
-              label="Maximum Participants on Group Chat"
-              rules={[{ required: true }]}
-            >
-              <InputNumber min={1} />
-            </Form.Item>
-          </Col> */}
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>

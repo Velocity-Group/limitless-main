@@ -49,9 +49,7 @@ export class PaymentTransactionModel extends Document {
 
   stripeInvoiceId: string;
 
-  stripeConfirmUrl: string;
-
-  liveMode: boolean;
+  stripeClientSecret: string;
 
   status: string;
 

@@ -34,8 +34,8 @@ export class TokenTransactionSearchService {
     if (req.performerId) query.performerId = req.performerId;
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: moment(req.fromDate).startOf('day'),
-        $lt: moment(req.toDate).endOf('day')
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {
@@ -81,8 +81,8 @@ export class TokenTransactionSearchService {
     if (req.performerId) query.performerId = req.performerId;
     if (req.fromDate && req.toDate) {
       query.createdAt = {
-        $gt: moment(req.fromDate).startOf('day'),
-        $lt: moment(req.toDate).endOf('day')
+        $gte: moment(req.fromDate).startOf('day').toDate(),
+        $lte: moment(req.toDate).endOf('day').toDate()
       };
     }
     const sort = {

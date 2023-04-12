@@ -16,14 +16,22 @@ import { QueueEventService } from 'src/kernel';
 import { STREAM_FEED_CHANNEL } from 'src/modules/feed/constants';
 import { EVENT } from 'src/kernel/constants';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
+import { SubscriptionService } from 'src/modules/subscription/services/subscription.service';
+import { FollowService } from 'src/modules/follow/services/follow.service';
+import { MailerService } from 'src/modules/mailer/services';
+import { uniq } from 'lodash';
 import { StreamModel } from '../models';
+import { STREAM_MODEL_PROVIDER } from '../providers/stream.provider';
 
 @WebSocketGateway()
 export class PublicStreamWsGateway {
   constructor(
+    @Inject(forwardRef(() => FollowService))
+    private readonly followService: FollowService,
+    @Inject(forwardRef(() => SubscriptionService))
+    private readonly subscriptionService: SubscriptionService,
     @Inject(forwardRef(() => UserService))
-  private readonly userService: UserService,
+    private readonly userService: UserService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
     @Inject(forwardRef(() => AuthService))
@@ -35,8 +43,9 @@ export class PublicStreamWsGateway {
     @Inject(STREAM_MODEL_PROVIDER)
     private readonly streamModel: Model<StreamModel>,
     private readonly streamService: StreamService,
-    private readonly queueEventService: QueueEventService
-  ) {}
+    private readonly queueEventService: QueueEventService,
+    private readonly mailService: MailerService
+  ) { }
 
   @SubscribeMessage('public-stream/live')
   async goLive(client: Socket, payload: { conversationId: string }) {
@@ -56,10 +65,34 @@ export class PublicStreamWsGateway {
       conversationId
     });
     await Promise.all([
-      this.queueEventService.publish({ channel: STREAM_FEED_CHANNEL, eventName: EVENT.CREATED, data: { conversation, stream } }),
+      // this.queueEventService.publish({ channel: STREAM_FEED_CHANNEL, eventName: EVENT.CREATED, data: { conversation, stream } }),
       this.performerService.goLive(user._id),
       this.streamModel.updateOne({ _id: conversation.streamId }, { $set: { isStreaming: 1 } })
     ]);
+    const [subs, follows] = await Promise.all([
+      this.subscriptionService.findSubscriptionList({
+        performerId: user._id
+      }),
+      this.followService.find({
+        followingId: user._id
+      })
+    ]);
+    const suids = subs.map((s) => s.userId.toString());
+    const fuids = follows.map((s) => s.followerId.toString());
+    const users = await this.userService.find({ _id: uniq(suids.concat(fuids)) });
+    const redirectLink = `${process.env.USER_URL}/streaming/${user.username}`;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const u of users) {
+      u.email && this.mailService.send({
+        subject: 'New live stream',
+        to: u.email,
+        data: {
+          redirectLink,
+          performerName: user.name || user.username
+        },
+        template: 'performer-live-notify-followers'
+      });
+    }
   }
 
   @SubscribeMessage('public-stream/join')

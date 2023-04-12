@@ -6,12 +6,10 @@ import PageHeading from '@components/common/page-heading';
 import { CreditCardOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import {
-  ISettings, IUIConfig
+  IUIConfig
 } from 'src/interfaces';
 import { paymentService } from '@services/index';
 import { connect } from 'react-redux';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, ElementsConsumer } from '@stripe/react-stripe-js';
 import { getCurrentUser } from '@redux/auth/actions';
 import StripeCardForm from '@components/user/stripe-card-form';
 import Router from 'next/router';
@@ -19,7 +17,6 @@ import './index.less';
 
 interface IProps {
   ui: IUIConfig;
-  settings: ISettings;
   getCurrentUser: Function;
 }
 
@@ -33,7 +30,7 @@ class NewCardPage extends PureComponent<IProps> {
   async handleAddCard(source: any) {
     const { getCurrentUser: handleUpdateCurrentUser } = this.props;
     try {
-      await this.setState({ submiting: true });
+      this.setState({ submiting: true });
       await paymentService.addStripeCard({ sourceToken: source.id });
       handleUpdateCurrentUser();
       message.success('Payment card added successfully');
@@ -46,7 +43,7 @@ class NewCardPage extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, settings } = this.props;
+    const { ui } = this.props;
     const { submiting } = this.state;
 
     return (
@@ -61,14 +58,7 @@ class NewCardPage extends PureComponent<IProps> {
         <div className="main-container">
           <PageHeading title="Add new Card" icon={<CreditCardOutlined />} />
           <div className="card-form">
-            <Elements stripe={loadStripe(settings.stripePublishableKey || '')}>
-              <ElementsConsumer>
-                {({ stripe, elements }) => (
-                  <StripeCardForm submit={this.handleAddCard.bind(this)} stripe={stripe} elements={elements} submiting={submiting} />
-                )}
-              </ElementsConsumer>
-
-            </Elements>
+            <StripeCardForm submit={this.handleAddCard.bind(this)} submiting={submiting} />
           </div>
         </div>
       </Layout>
@@ -77,8 +67,7 @@ class NewCardPage extends PureComponent<IProps> {
 }
 
 const mapState = (state: any) => ({
-  ui: { ...state.ui },
-  settings: { ...state.settings }
+  ui: { ...state.ui }
 });
 const mapDispatch = { getCurrentUser };
 export default connect(mapState, mapDispatch)(NewCardPage);

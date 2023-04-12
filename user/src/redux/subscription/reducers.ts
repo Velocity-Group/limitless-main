@@ -1,31 +1,21 @@
 import { merge } from 'lodash';
 import { createReducers } from '@lib/redux';
 import { IReduxAction } from 'src/interfaces';
-import { showSubscribePerformerModal, hideSubscribePerformerModal } from './actions';
+import { setSubscription } from './actions';
 
 const initialState = {
   showModal: false,
-  subscribingPerformerId: null
+  performer: {},
+  subscriptionType: 'monthly'
 };
 
 const reducers = [
   {
-    on: showSubscribePerformerModal,
+    on: setSubscription,
     reducer(state: any, action: IReduxAction<any>) {
       return {
         ...state,
-        showModal: true,
-        subscribingPerformerId: action.payload
-      };
-    }
-  },
-  {
-    on: hideSubscribePerformerModal,
-    reducer(state: any) {
-      return {
-        ...state,
-        showModal: false,
-        subscribingPerformerId: null
+        ...action.payload
       };
     }
   }

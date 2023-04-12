@@ -3,7 +3,7 @@ import { IUser } from '@interfaces/user';
 import { message } from 'antd';
 import Router from 'next/router';
 import { useDispatch } from 'react-redux';
-import { showSubscribePerformerModal } from '@redux/subscription/actions';
+import { setSubscription } from '@redux/subscription/actions';
 
 type Props = {
   stream: IStream;
@@ -21,7 +21,7 @@ export default function StreamListItem({ stream, user }: Props) {
     if (user.isPerformer) return;
     if (!stream?.isSubscribed) {
       message.error('Please subscribe to join live chat!', 5);
-      dispatch(showSubscribePerformerModal(stream.performerId));
+      dispatch(setSubscription({ showModal: true, performerId: stream.performerId }));
       return;
     }
     Router.push(

@@ -1,5 +1,4 @@
-import { PureComponent } from 'react';
-import { CardElement } from '@stripe/react-stripe-js';
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import {
   message
 } from 'antd';
@@ -7,16 +6,14 @@ import {
 interface IProps {
   submit: Function;
   submiting: boolean;
-  stripe: any;
-  elements: any;
 }
 
-class CardForm extends PureComponent<IProps> {
-  async handleSubmit(event) {
+function CardForm({ submit, submiting }: IProps) {
+  const stripe = useStripe();
+  const elements = useElements();
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const {
-      submit, submiting, stripe, elements
-    } = this.props;
     if (!stripe || !elements || submiting) {
       return;
     }
@@ -35,38 +32,35 @@ class CardForm extends PureComponent<IProps> {
       return;
     }
     submit(source);
-  }
+  };
 
-  render() {
-    const { submiting, stripe } = this.props;
-    return (
-      <form onSubmit={this.handleSubmit.bind(this)}>
-        <img src="/static/stripe-card.png" width="100%" alt="stripe-ico" />
-        <div className="stripe-card-form">
-          <CardElement
-            options={{
-              hidePostalCode: true,
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4'
-                  }
-                },
-                invalid: {
-                  color: '#9e2146'
+  return (
+    <form onSubmit={handleSubmit}>
+      <img src="/static/stripe-card.png" width="100%" alt="stripe-ico" />
+      <div className="stripe-card-form">
+        <CardElement
+          options={{
+            hidePostalCode: true,
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                  color: '#aab7c4'
                 }
+              },
+              invalid: {
+                color: '#9e2146'
               }
-            }}
-          />
-        </div>
-        <button className="ant-btn primary" type="submit" disabled={!stripe || submiting} style={{ width: '100%' }}>
-          SUBMIT
-        </button>
-      </form>
-    );
-  }
+            }
+          }}
+        />
+      </div>
+      <button className="ant-btn primary" type="submit" disabled={!stripe || submiting} style={{ width: '100%' }}>
+        SUBMIT
+      </button>
+    </form>
+  );
 }
 
 export default CardForm;

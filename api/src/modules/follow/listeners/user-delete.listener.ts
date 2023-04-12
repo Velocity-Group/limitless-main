@@ -27,7 +27,7 @@ export class DeletePerformerFollowListener {
     if (event.eventName !== EVENT.DELETED) return;
     const performer = event.data as PerformerDto;
     await this.followModel.deleteMany({
-      objectId: performer._id
+      followingId: performer._id
     });
   }
 }

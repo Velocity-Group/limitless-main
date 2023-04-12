@@ -73,7 +73,7 @@ export class SubscriptionForm extends PureComponent<IProps> {
               label="Yearly Subscription Price ($)"
               rules={[{ required: true }]}
             >
-              <InputNumber min={1} />
+              <InputNumber min={2.95} max={300} />
             </Form.Item>
             <Form.Item
               key="monthly"
@@ -81,7 +81,7 @@ export class SubscriptionForm extends PureComponent<IProps> {
               label="Monthly Subscription Price ($)"
               rules={[{ required: true }]}
             >
-              <InputNumber min={1} />
+              <InputNumber min={2.95} max={300} />
             </Form.Item>
             <Form.Item
               key="publicChatPrice"

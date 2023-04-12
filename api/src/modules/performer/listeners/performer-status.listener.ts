@@ -22,13 +22,13 @@ export class UpdatePerformerStatusListener {
 
   public async handleUpdateStatus(event: QueueEvent) {
     if (![EVENT.UPDATED].includes(event.eventName)) {
-      return false;
+      return;
     }
     const {
       oldStatus, status, email, name
     } = event.data;
     if (oldStatus === PERFORMER_STATUSES.ACTIVE) {
-      return false;
+      return;
     }
     if (email && status === PERFORMER_STATUSES.ACTIVE) {
       await this.mailService.send({
@@ -38,6 +38,5 @@ export class UpdatePerformerStatusListener {
         template: 'approved-performer-account'
       });
     }
-    return true;
   }
 }
