@@ -22,7 +22,6 @@ interface IProps {
   createComment: Function;
   deleteComment: Function;
   commentMapping: any;
-  siteName: string;
 }
 
 class CommentItem extends PureComponent<IProps> {
@@ -119,7 +118,7 @@ class CommentItem extends PureComponent<IProps> {
 
   render() {
     const {
-      item, user, canReply, onDelete, commentMapping, comment, siteName
+      item, user, canReply, onDelete, commentMapping, comment
     } = this.props;
     const { requesting: commenting } = comment;
     const fetchingComment = commentMapping.hasOwnProperty(item._id) ? commentMapping[item._id].requesting : false;
@@ -173,7 +172,6 @@ class CommentItem extends PureComponent<IProps> {
                   objectType="comment"
                   requesting={commenting}
                   isReply
-                  siteName={siteName}
                 />
               </div>
             </div>
@@ -216,8 +214,7 @@ const mapStates = (state: any) => {
   const { commentMapping, comment } = state.comment;
   return {
     commentMapping,
-    comment,
-    siteName: state.ui.siteName
+    comment
   };
 };
 
