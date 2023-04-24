@@ -417,7 +417,7 @@ class VideoViewPage extends PureComponent<IProps> {
                           updateSubscription({ showModal: true, performer: video?.performer, subscriptionType: 'yearly' });
                         }}
                       >
-                        YEARLY SUBSCRIPTON FOR $
+                        YEARLY SUBSCRIPTION FOR $
                         {(video?.performer?.yearlyPrice || 0).toFixed(2)}
                       </Button>
                       )}
@@ -545,7 +545,7 @@ class VideoViewPage extends PureComponent<IProps> {
                     <div key={per._id} className="participant-card">
                       <img
                         alt="per_atv"
-                        src={per?.avatar || '/no-avatar.png'}
+                        src={per?.avatar || '/static/no-avatar.png'}
                       />
                       <div className="participant-info">
                         <h4>

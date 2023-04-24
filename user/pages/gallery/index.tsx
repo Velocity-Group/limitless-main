@@ -296,7 +296,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                       updateSubscription({ showModal: true, subscriptionType: 'yearly', performer: gallery?.performer });
                     }}
                   >
-                    YEARLY SUBSCRIPTON FOR $
+                    YEARLY SUBSCRIPTION FOR $
                     {(gallery?.performer?.yearlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
