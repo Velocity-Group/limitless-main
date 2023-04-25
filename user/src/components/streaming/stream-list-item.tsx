@@ -21,7 +21,7 @@ export default function StreamListItem({ stream, user }: Props) {
     if (user.isPerformer) return;
     if (!stream?.isSubscribed) {
       message.error('Please subscribe to join live chat!', 5);
-      dispatch(setSubscription({ showModal: true, performerId: stream.performerId }));
+      dispatch(setSubscription({ showModal: true, performer: stream?.performerInfo }));
       return;
     }
     Router.push(

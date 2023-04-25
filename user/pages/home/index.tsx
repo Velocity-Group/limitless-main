@@ -153,7 +153,7 @@ class HomePage extends PureComponent<IProps> {
   }, 600)
 
   async getFeeds() {
-    const { getFeeds: handleGetFeeds, user } = this.props;
+    const { getFeeds: handleGetFeeds } = this.props;
     const {
       itemPerPage, feedPage, keyword, orientation
     } = this.state;
@@ -184,7 +184,7 @@ class HomePage extends PureComponent<IProps> {
   }
 
   async loadmoreFeeds() {
-    const { feedState, moreFeeds: handleGetMore, user } = this.props;
+    const { feedState, moreFeeds: handleGetMore } = this.props;
     const { items: posts, total: totalFeeds } = feedState;
     const { feedPage, itemPerPage } = this.state;
     if (posts.length >= totalFeeds) return;

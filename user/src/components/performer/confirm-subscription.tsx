@@ -58,7 +58,7 @@ function ConfirmSubscriptionPerformerForm() {
     } catch (e) {
       const err = await e;
       message.error(err?.message || 'Error occured, please try again later');
-      dispatch(setSubscription({ showModal: false, performerId: '' }));
+      dispatch(setSubscription({ showModal: false, performer: '' }));
       setSubmiting(false);
     }
   };
