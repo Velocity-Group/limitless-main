@@ -85,11 +85,8 @@ export class S3Service {
   }
 
   static getEndpoint(upload: AWS.S3.ManagedUpload.SendData): string {
-    // eslint-disable-next-line prefer-template
-    const regex = new RegExp(upload.Bucket + '[a-z0-9.-]+', 'g');
-    const path = upload.Location.match(regex)[0];
-    // eslint-disable-next-line prefer-template
-    return path.replace(upload.Bucket + '.', '');
+    const absolutPath = upload.Location.replace('https://', '');
+    return absolutPath.split('/')[0];
   }
 }
 
