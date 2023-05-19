@@ -72,6 +72,10 @@ class Compose extends PureComponent<IProps> {
   send() {
     const { text } = this.state;
     const { disabled, sendMessage: handleSendMessage } = this.props;
+    if (!text.trim().length) {
+      message.info('Enter the text');
+      return;
+    }
     if (!text || disabled) return;
     const { conversation } = this.props;
     handleSendMessage({
@@ -94,7 +98,7 @@ class Compose extends PureComponent<IProps> {
       handleUpdateBalance({ token: -price });
     } catch (e) {
       const err = await e;
-      message.error(err.message || 'error occured, please try again later');
+      message.error(err.message || 'error occurred, please try again later');
     } finally {
       this.setState({ submiting: false, openTipModal: false });
     }
