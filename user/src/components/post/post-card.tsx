@@ -43,7 +43,6 @@ interface IProps {
   deleteComment: Function;
   commentMapping: any;
   comment: any;
-  siteName: string;
   settings: ISettings;
   setSubscription: Function;
 }
@@ -306,7 +305,7 @@ class FeedCard extends Component<IProps> {
 
   render() {
     const {
-      feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment, siteName,
+      feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment,
       setSubscription: updateSubscription
     } = this.props;
     const { performer } = feed;
@@ -549,7 +548,6 @@ class FeedCard extends Component<IProps> {
                 objectId={feed._id}
                 objectType="feed"
                 requesting={commenting}
-                siteName={siteName}
               />
               <ListComments
                 key={`list_comments_${feed._id}_${comments.length}`}
@@ -633,7 +631,6 @@ class FeedCard extends Component<IProps> {
 const mapStates = (state: any) => {
   const { commentMapping, comment } = state.comment;
   return {
-    siteName: state.ui.siteName,
     user: state.user.current,
     commentMapping,
     comment,

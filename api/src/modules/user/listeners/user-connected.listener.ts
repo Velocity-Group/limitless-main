@@ -46,9 +46,6 @@ export class UserConnectedListener {
       default: return;
     }
     await this.userModel.updateOne({ _id: sourceId },
-      updateData,
-      {
-        upsert: false
-      });
+      updateData);
   }
 }

@@ -8,14 +8,12 @@ import { SmileOutlined, SendOutlined } from '@ant-design/icons';
 import { ImageMessageUpload } from '@components/messages/uploadPhoto';
 import { authService, messageService, tokenTransctionService } from '@services/index';
 import { TipPerformerForm } from '@components/performer/tip-form';
-import { IUIConfig } from 'src/interfaces';
 import { updateBalance } from '@redux/user/actions';
 import Router from 'next/router';
 import { Emotions } from './emotions';
 import './Compose.less';
 
 interface IProps {
-  ui: IUIConfig;
   updateBalance: Function;
   sendMessage: Function;
   sentFileSuccess: Function;
@@ -74,6 +72,10 @@ class Compose extends PureComponent<IProps> {
   send() {
     const { text } = this.state;
     const { disabled, sendMessage: handleSendMessage } = this.props;
+    if (!text.trim().length) {
+      message.info('Enter the text');
+      return;
+    }
     if (!text || disabled) return;
     const { conversation } = this.props;
     handleSendMessage({
@@ -96,7 +98,7 @@ class Compose extends PureComponent<IProps> {
       handleUpdateBalance({ token: -price });
     } catch (e) {
       const err = await e;
-      message.error(err.message || 'error occured, please try again later');
+      message.error(err.message || 'error occurred, please try again later');
     } finally {
       this.setState({ submiting: false, openTipModal: false });
     }
@@ -104,7 +106,7 @@ class Compose extends PureComponent<IProps> {
 
   render() {
     const {
-      disabled, sendMessageStatus: status, conversation, currentUser, ui
+      disabled, sendMessageStatus: status, conversation, currentUser
     } = this.props;
     const {
       text, openTipModal, submiting
@@ -124,7 +126,7 @@ class Compose extends PureComponent<IProps> {
           disabled={disabled || status.sending || !conversation._id}
           ref={(c) => { this._input = c; }}
         />
-        <Popover className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} siteName={ui?.siteName} />} trigger="click">
+        <Popover className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} trigger="click">
           <div className="grp-icons">
             <SmileOutlined />
           </div>
@@ -175,8 +177,7 @@ class Compose extends PureComponent<IProps> {
 
 const mapStates = (state: any) => ({
   sendMessageStatus: state.message.sendMessage,
-  currentUser: state.user.current,
-  ui: state.ui
+  currentUser: state.user.current
 });
 
 const mapDispatch = { sendMessage, sentFileSuccess, updateBalance };

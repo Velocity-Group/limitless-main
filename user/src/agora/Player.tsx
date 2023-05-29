@@ -21,7 +21,7 @@ interface Props {
 export const Player: React.FC<Props> = ({ tracks }: Props) => {
   const player = useRef<HTMLVideoElement>(null);
 
-  const ref = useRef<videojs.Player>();
+  const ref = useRef<any>();
 
   useEffect(() => {
     ref.current = videojs(player.current, {

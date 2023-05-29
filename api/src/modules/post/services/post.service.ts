@@ -144,9 +144,6 @@ export class PostService {
             postId: post._id,
             key: metaData.key,
             value: metaData.value
-          },
-          {
-            upsert: true
           }
         );
       }

@@ -41,8 +41,6 @@ class MongoDbStore {
               $each: set.migrations
             }
           }
-        }, {
-          upsert: true
         });
     } finally {
       client.close();

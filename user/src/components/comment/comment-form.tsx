@@ -19,7 +19,6 @@ interface IProps {
   creator: IUser;
   requesting: boolean;
   isReply?: boolean;
-  siteName?: string;
 }
 
 const { TextArea } = Input;
@@ -69,7 +68,7 @@ export class CommentForm extends PureComponent<IProps> {
 
   render() {
     const {
-      creator, requesting, isReply, siteName, objectId
+      creator, requesting, isReply, objectId
     } = this.props;
     if (!this.formRef) this.formRef = createRef();
     return (
@@ -88,7 +87,7 @@ export class CommentForm extends PureComponent<IProps> {
             >
               <TextArea disabled={!creator || !creator._id} maxLength={150} showCount minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
             </Form.Item>
-            <Popover key={objectId} className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} siteName={siteName} />} title={null} trigger="click">
+            <Popover key={objectId} className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
               <div className="grp-emotions">
                 <SmileOutlined />
               </div>

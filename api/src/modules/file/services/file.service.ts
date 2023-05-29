@@ -414,68 +414,104 @@ export class FileService {
       // check s3 settings
       const checkS3Settings = await this.s3StorageService.checkSetting();
       if (fileData.server === Storage.S3 && checkS3Settings) {
-        const video = readFileSync(respVideo.toPath);
-        const result = await this.s3StorageService.upload(
-          respVideo.fileName,
-          fileData.acl,
-          video,
-          'video/mp4'
-        );
-        newAbsolutePath = result.Key;
-        newPath = result.Location;
-        // eslint-disable-next-line prefer-template
-        metadata = {
-          ...metadata,
-          bucket: result.Bucket,
-          endpoint: S3Service.getEndpoint(result)
-        };
-        if (respThumb.length) {
-          // eslint-disable-next-line no-restricted-syntax
-          for (const name of respThumb) {
-            if (existsSync(join(videoDir, name))) {
-              const file = readFileSync(join(videoDir, name));
-              // eslint-disable-next-line no-await-in-loop
-              const thumb = await this.s3StorageService.upload(
-                name,
-                S3ObjectCannelACL.PublicRead,
-                file,
-                'image/png'
-              );
-              thumbnails.push({
-                path: thumb.Location,
-                absolutePath: thumb.Key
-              });
-              unlinkSync(join(videoDir, name));
+        const chunks = [];
+        const fileStream = createReadStream(respVideo.toPath);
+        fileStream.once('error', (err) => {
+          // Be sure to handle this properly!
+          throw err;
+        });
+        // Data is flushed from fileStream in chunks,
+        // this callback will be executed for each chunk
+        fileStream.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+        // File is done being read
+        fileStream.once('end', async () => {
+          // create the final data Buffer from data chunks;
+          const fileBuffer = Buffer.concat(chunks);
+
+          const result = await this.s3StorageService.upload(
+            respVideo.fileName,
+            fileData.acl,
+            fileBuffer,
+            'video/mp4'
+          );
+          newAbsolutePath = result.Key;
+          newPath = result.Location;
+          // eslint-disable-next-line prefer-template
+          metadata = {
+            ...metadata,
+            bucket: result.Bucket,
+            endpoint: S3Service.getEndpoint(result)
+          };
+
+          if (respThumb.length) {
+            // eslint-disable-next-line no-restricted-syntax
+            for (const name of respThumb) {
+              if (existsSync(join(videoDir, name))) {
+                const file = readFileSync(join(videoDir, name));
+                // eslint-disable-next-line no-await-in-loop
+                const thumb = await this.s3StorageService.upload(
+                  name,
+                  S3ObjectCannelACL.PublicRead,
+                  file,
+                  'image/png'
+                );
+                thumbnails.push({
+                  path: thumb.Location,
+                  absolutePath: thumb.Key
+                });
+                unlinkSync(join(videoDir, name));
+              }
             }
           }
-        }
-        // remove converted file once uploaded s3 done
-        existsSync(respVideo.toPath) && unlinkSync(respVideo.toPath);
+          // remove converted file once uploaded s3 done
+          existsSync(respVideo.toPath) && unlinkSync(respVideo.toPath);
+          // remove origin file
+          existsSync(videoPath) && unlinkSync(videoPath);
+          // update data
+          await this.fileModel.updateOne(
+            { _id: fileData._id },
+            {
+              $set: {
+                status: 'finished',
+                absolutePath: newAbsolutePath,
+                path: newPath,
+                thumbnails,
+                duration: parseInt(meta.format.duration, 10),
+                metadata,
+                server,
+                width,
+                height
+              }
+            }
+          );
+        });
       } else {
         server = Storage.DiskStorage;
         thumbnails = respThumb.map((name) => ({
           absolutePath: join(videoDir, name),
           path: join(videoDir, name).replace(publicDir, '')
         }));
-      }
-      // remove old file
-      existsSync(videoPath) && unlinkSync(videoPath);
-      await this.fileModel.updateOne(
-        { _id: fileData._id },
-        {
-          $set: {
-            status: 'finished',
-            absolutePath: newAbsolutePath,
-            path: newPath,
-            thumbnails,
-            duration: parseInt(meta.format.duration, 10),
-            metadata,
-            server,
-            width,
-            height
+        // remove old file
+        existsSync(videoPath) && unlinkSync(videoPath);
+        await this.fileModel.updateOne(
+          { _id: fileData._id },
+          {
+            $set: {
+              status: 'finished',
+              absolutePath: newAbsolutePath,
+              path: newPath,
+              thumbnails,
+              duration: parseInt(meta.format.duration, 10),
+              metadata,
+              server,
+              width,
+              height
+            }
           }
-        }
-      );
+        );
+      }
     } catch (e) {
       existsSync(videoPath) && unlinkSync(videoPath);
       existsSync(newAbsolutePath) && unlinkSync(newAbsolutePath);

@@ -145,8 +145,6 @@ export class PerformerAssetsListener {
           $inc: {
             'stats.totalProducts': count
           }
-        }, {
-          upsert: true
         }
       );
       return;
@@ -200,8 +198,6 @@ export class PerformerAssetsListener {
           $inc: {
             'stats.totalFeeds': count
           }
-        }, {
-          upsert: true
         }
       );
       return;
@@ -235,8 +231,6 @@ export class PerformerAssetsListener {
           $inc: {
             'stats.totalFeeds': increase
           }
-        }, {
-          upsert: true
         }
       );
     }

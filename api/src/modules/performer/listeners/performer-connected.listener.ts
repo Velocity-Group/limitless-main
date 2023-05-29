@@ -49,9 +49,6 @@ export class PerformerConnectedListener {
       default: return;
     }
     await this.performerModel.updateOne({ _id: sourceId },
-      updateData,
-      {
-        upsert: false
-      });
+      updateData);
   }
 }
