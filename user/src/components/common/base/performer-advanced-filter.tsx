@@ -246,7 +246,7 @@ export class PerformerAdvancedFilter extends PureComponent<IProps> {
                 All weights
               </Select.Option>
               {weights.map((i) => (
-                <Select.Option key={i.text} value={i.text}>
+                <Select.Option key={i.value} value={i.value}>
                   {i.text}
                 </Select.Option>
               ))}
