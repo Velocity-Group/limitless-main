@@ -2,6 +2,7 @@ import { Descriptions, Collapse } from 'antd';
 import { PureComponent } from 'react';
 import { ICountry, IPerformer } from 'src/interfaces';
 import { formatDate } from '@lib/date';
+import { HEIGHTS, WEIGHTS } from 'src/constants';
 
 interface IProps {
   performer: IPerformer;
@@ -33,6 +34,8 @@ export class PerformerInfo extends PureComponent<IProps> {
   render() {
     const { performer, countries = [] } = this.props;
     const country = countries.length && countries.find((c) => c.code === performer?.country);
+    const height = HEIGHTS.find((m) => m.value === performer.height);
+    const weight = WEIGHTS.find((m) => m.value === performer.weight);
     return (
       <div className="per-infor">
         <Collapse defaultActiveKey={['1']} bordered={false} accordion>
@@ -62,8 +65,8 @@ export class PerformerInfo extends PureComponent<IProps> {
               {performer?.bodyType && <Descriptions.Item label="Body Type">{performer?.bodyType}</Descriptions.Item>}
               {performer?.state && <Descriptions.Item label="State">{performer?.state}</Descriptions.Item>}
               {performer?.city && <Descriptions.Item label="City">{performer?.city}</Descriptions.Item>}
-              {performer?.height && <Descriptions.Item label="Height">{performer?.height}</Descriptions.Item>}
-              {performer?.weight && <Descriptions.Item label="Weight">{performer?.weight}</Descriptions.Item>}
+              {height && <Descriptions.Item label="Height">{height.text}</Descriptions.Item>}
+              {weight && <Descriptions.Item label="Weight">{weight.text}</Descriptions.Item>}
               {performer?.eyes && <Descriptions.Item label="Eye color">{performer?.eyes}</Descriptions.Item>}
               {performer?.ethnicity && <Descriptions.Item label="Ethnicity">{performer?.ethnicity}</Descriptions.Item>}
               {performer?.hair && <Descriptions.Item label="Hair color">{performer?.hair}</Descriptions.Item>}
