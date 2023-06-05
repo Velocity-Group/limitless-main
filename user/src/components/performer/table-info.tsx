@@ -34,8 +34,8 @@ export class PerformerInfo extends PureComponent<IProps> {
   render() {
     const { performer, countries = [] } = this.props;
     const country = countries.length && countries.find((c) => c.code === performer?.country);
-    const height = HEIGHTS.find((m) => m.value === performer?.height).text;
-    const weight = WEIGHTS.find((m) => m.value === performer?.weight).text;
+    const height = HEIGHTS.find((f) => f.value === performer?.height)?.text;
+    const weight = WEIGHTS.find((f) => f.value === performer?.weight)?.text;
     return (
       <div className="per-infor">
         <Collapse defaultActiveKey={['1']} bordered={false} accordion>
