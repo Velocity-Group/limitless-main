@@ -48,7 +48,7 @@ export class TipPerformerForm extends PureComponent<IProps> {
             <span className="username">{`@${performer?.username}` || 'the model'}</span>
           </h2>
           <h3>
-            <span className="price">{price.toFixed(2)}</span>
+            <span className="price">{(price || 0).toFixed(2)}</span>
             {' '}
             USD
           </h3>
