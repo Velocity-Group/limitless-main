@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button, Form, Input, message, InputNumber, Select
 } from 'antd';
@@ -28,7 +28,7 @@ export const PurchaseProductForm = ({
   const [addresses, setAddresses] = useState<any>([]);
   const [isNewAddress, setNewAddress] = useState(false);
   const [loading, setSubmiting] = useState(false);
-  const formRef = useRef() as any;
+  const [formRef] = Form.useForm();
 
   const handleChangeQuantity = (q: number) => {
     if (q < 1) return;
@@ -68,7 +68,7 @@ export const PurchaseProductForm = ({
       const index = addresses.findIndex((f) => f._id === id);
       addresses.splice(index, 1);
       setSubmiting(false);
-      formRef.current.resetFields(['deliveryAddressId']);
+      formRef.resetFields(['deliveryAddressId']);
     } catch (e) {
       setSubmiting(false);
       const err = await e;
@@ -83,7 +83,7 @@ export const PurchaseProductForm = ({
   return (
     <>
       {!isNewAddress && (
-      <div className="text-center">
+      <div className="text-center" style={{ marginBottom: 20 }}>
         <h3 className="secondary-color">
           Confirm purchase:
           {' '}
@@ -94,7 +94,7 @@ export const PurchaseProductForm = ({
       )}
       {!isNewAddress && (
       <Form
-        ref={formRef}
+        form={formRef}
         {...layout}
         onFinish={onFinish.bind(this)}
         onFinishFailed={() => message.error('Please complete the required fields')}
@@ -121,7 +121,7 @@ export const PurchaseProductForm = ({
             label="Delivery address"
           >
             <Button.Group style={{ width: '100%', overflow: 'auto' }}>
-              <Select defaultActiveFirstOption onChange={(val: string) => formRef.current.setFieldsValue({ deliveryAddressId: val })}>
+              <Select defaultActiveFirstOption onChange={(val: string) => formRef.setFieldsValue({ deliveryAddressId: val })}>
                 {addresses.map((a: IAddress) => (
                   <Select.Option value={a._id} key={a._id}>
                     <div className="address-option">

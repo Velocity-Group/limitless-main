@@ -215,13 +215,13 @@ export class OrderService {
     orders.forEach((order) => {
       if (order.performerId) {
         const performerInfo = performers.find(
-          (t) => t._id.toString() === order.performerId.toString()
+          (t) => `${t?._id}` === `${order?.performerId}`
         );
         if (performerInfo) {
           order.performerInfo = performerInfo.toResponse();
         }
         if (order.productId) {
-          const productInfo = products.find((p) => order.productId.toString() === p._id.toString());
+          const productInfo = products.find((p) => `${order?.productId}` === `${p?._id}`);
           order.productInfo = productInfo || null;
         }
       }

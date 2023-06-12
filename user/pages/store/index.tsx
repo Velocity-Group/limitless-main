@@ -316,6 +316,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
             {loading && <div style={{ margin: 10, textAlign: 'center' }}><Spin /></div>}
           </div>
         </div>
+        {openPurchaseModal && (
         <Modal
           key="purchase-product"
           width={660}
@@ -334,6 +335,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
             onFinish={this.purchaseProduct.bind(this)}
           />
         </Modal>
+        )}
       </Layout>
     );
   }
