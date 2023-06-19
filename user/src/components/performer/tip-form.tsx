@@ -26,7 +26,6 @@ export class TipPerformerForm extends PureComponent<IProps> {
       onFinish, submiting = false, performer
     } = this.props;
     const { price } = this.state;
-    console.log({ price });
     return (
       <div className="confirm-purchase-form">
         <div className="left-col">
