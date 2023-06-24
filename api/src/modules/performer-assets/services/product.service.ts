@@ -212,11 +212,11 @@ export class ProductService {
     const bookmark = user && await this.reactionService.checkExisting(product._id, user._id, REACTION.BOOK_MARK, REACTION_TYPE.PRODUCT);
     const dto = new ProductDto(product);
     dto.isBookMarked = !!bookmark;
-    dto.image = image ? image.getUrl() : null;
+    dto.image = image ? image.getUrl() : '';
     if (digitalFile) {
       const bought = await this.tokenTransactionService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
       const canView = !!bought || (user && `${user._id}` === `${product.performerId}`) || (user && user.roles && user.roles.includes('admin'));
-      let fileUrl = digitalFile.getUrl(canView);
+      let fileUrl = await digitalFile.getUrl(canView);
       if (digitalFile.server !== Storage.S3) {
         fileUrl = `${fileUrl}?productId=${product._id}&token=${jwToken}`;
       }
@@ -289,7 +289,7 @@ export class ProductService {
     if (!file) throw new EntityNotFoundException();
     const bought = await this.tokenTransactionService.checkBought(new ProductDto(product), PurchaseItemType.PRODUCT, user);
     const canView = !!bought || (`${user._id}` === `${product.performerId}`) || (user && user.roles && user.roles.includes('admin'));
-    let fileUrl = file.getUrl(canView);
+    let fileUrl = await file.getUrl(canView);
     if (file.server !== Storage.S3) {
       fileUrl = `${fileUrl}?productId=${product._id}&token=${jwToken}`;
     }

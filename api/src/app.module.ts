@@ -29,7 +29,6 @@ import { StatisticsModule } from './modules/statistics/statistic.module';
 import { TokenPackageModule } from './modules/token-package/token-package.module';
 import { PayoutRequestModule } from './modules/payout-request/payout.module';
 import { OrderModule } from './modules/order/order.module';
-import { ChangeTokenLogModule } from './modules/change-token-logs/change-token-log.module';
 import { BlockModule } from './modules/block/block.module';
 import { ReportModule } from './modules/report/report.module';
 import { StorageModule } from './modules/storage/storage.module';
@@ -67,7 +66,6 @@ import { FollowModule } from './modules/follow/follow.module';
     TokenPackageModule,
     PayoutRequestModule,
     OrderModule,
-    ChangeTokenLogModule,
     BlockModule,
     ReportModule,
     FollowModule

@@ -14,7 +14,6 @@ import {
 import { UserDto } from 'src/modules/user/dtos';
 import { isObjectId } from 'src/kernel/helpers/string.helper';
 import { FileService } from 'src/modules/file/services';
-import { FileResponseDto, FileDto } from 'src/modules/file';
 import { PostDto } from '../dtos';
 import { PostCreatePayload, PostUpdatePayload } from '../payloads';
 import { PostModel, PostMetaModel } from '../models';
@@ -190,7 +189,7 @@ export class PostService {
     if (isObjectId(post.image)) {
       const file = await this.fileService.findById(post.image);
       if (file) {
-        image = FileResponseDto.fromFile(new FileDto(file));
+        image = file.getUrl();
       }
     }
 

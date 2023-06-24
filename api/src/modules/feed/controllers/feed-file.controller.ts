@@ -57,7 +57,7 @@ export class FeedFileController {
   async uploadVideo(
     @FileUploaded() file: FileDto
   ): Promise<any> {
-    await this.feedFileService.validateTeaser(file);
+    await this.feedFileService.validateVideo(file);
     return DataResponse.ok({
       success: true,
       ...file.toResponse(),
@@ -123,7 +123,7 @@ export class FeedFileController {
   async uploadTeaser(
     @FileUploaded() file: FileDto
   ): Promise<any> {
-    await this.feedFileService.validateVideo(file);
+    await this.feedFileService.validateTeaser(file);
     return DataResponse.ok({
       success: true,
       ...file.toResponse(),

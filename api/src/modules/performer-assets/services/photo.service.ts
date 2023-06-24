@@ -211,7 +211,7 @@ export class PhotoService {
     const isBought = user && gallery ? this.tokenTransactionService.checkBought(new GalleryDto(gallery), PurchaseItemType.GALLERY, user) : false;
     const canView = (gallery.isSale && isBought) || (!gallery.isSale && isSubscribed) || (`${user?._id}` === `${gallery?.performerId}`) || (user && user.roles && user.roles.includes('admin'));
     if (file) {
-      let fileUrl = file.getUrl(canView);
+      let fileUrl = await file.getUrl(canView);
       if (file.server !== Storage.S3) {
         fileUrl = `${fileUrl}?photoId=${dto._id}&token=${jwToken}`;
       }

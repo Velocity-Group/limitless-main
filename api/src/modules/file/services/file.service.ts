@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { ConfigService } from 'nestjs-config';
@@ -10,10 +10,14 @@ import {
   writeFileSync, unlinkSync, existsSync, createReadStream, readFileSync
 } from 'fs';
 import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
-import { S3Service, S3StorageService } from 'src/modules/storage/services';
+import {
+  AwsS3Service, AwsS3storageService, GCSs3Service, GCSstorageService
+} from 'src/modules/storage/services';
 import { formatFileName } from 'src/kernel/helpers/multer.helper';
 import { join } from 'path';
 import * as jwt from 'jsonwebtoken';
+import { SettingService } from 'src/modules/settings';
+import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { FILE_MODEL_PROVIDER } from '../providers';
 import { FileModel } from '../models';
 import { IMulterUploadedFile } from '../lib/multer/multer.utils';
@@ -33,11 +37,13 @@ export const FILE_EVENT = {
   AUDIO_PROCESSED: 'AUDIO_PROCESSED'
 };
 
+const s3 = SettingService.getValueByKey(SETTING_KEYS.S3_SERVICE_PROVIDER) || 'gcs';
+
 @Injectable()
 export class FileService {
   constructor(
-    @Inject(forwardRef(() => S3StorageService))
-    private readonly s3StorageService: S3StorageService,
+    private readonly awsS3storageService: AwsS3storageService,
+    private readonly gcsStorageService: GCSstorageService,
     @Inject(FILE_MODEL_PROVIDER)
     private readonly fileModel: Model<FileModel>,
     private readonly imageService: ImageService,
@@ -51,13 +57,11 @@ export class FileService {
       'PROCESS_VIDEO',
       this._processVideo.bind(this)
     );
-
     this.queueEventService.subscribe(
       AUDIO_QUEUE_CHANNEL,
       'PROCESS_AUDIO',
       this._processAudio.bind(this)
     );
-
     this.queueEventService.subscribe(
       PHOTO_QUEUE_CHANNEL,
       'PROCESS_PHOTO',
@@ -103,7 +107,7 @@ export class FileService {
     const options = { ...fileUploadOptions } || {};
     const publicDir = this.config.get('file.publicDir');
     const photoDir = this.config.get('file.photoDir');
-    const checkS3Settings = await this.s3StorageService.checkSetting();
+    const checkS3Settings = s3 === 'gcs' ? GCSs3Service.getCredentials() : AwsS3Service.checkSetting();
     let absolutePath = multerData.path;
     let path = multerData.path.replace(publicDir, '');
     let { metadata = {} } = multerData;
@@ -113,23 +117,33 @@ export class FileService {
     }
     const thumbnails = [];
 
-    if (multerData.mimetype.includes('image') && options.uploadImmediately) {
-      if (options.generateThumbnail) {
+    if (options.uploadImmediately) {
+      if (options.generateThumbnail && multerData.mimetype.includes('image')) {
         const thumbBuffer = await this.imageService.createThumbnail(
           multerData.path,
           options.thumbnailSize || { width: 500, height: 500 }
         ) as Buffer;
         const thumbName = `${StringHelper.randomString(5)}_thumb${StringHelper.getExt(multerData.path)}`;
         if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
-          const [uploadThumb] = await Promise.all([
-            this.s3StorageService.upload(
+          if (s3 === 'gcs') {
+            await this.gcsStorageService.uploadFromBuffer(
+              thumbName,
+              fileUploadOptions.acl,
+              thumbBuffer
+            );
+            const { file, path: _absolutePath } = await GCSs3Service.getFileByName(thumbName, fileUploadOptions.acl);
+            thumbnails.push({
+              thumbnailSize: options.thumbnailSize || { width: 500, height: 500 },
+              path: file.publicUrl(),
+              absolutePath: _absolutePath
+            });
+          } else if (s3 === 'aws') {
+            const uploadThumb = await this.awsS3storageService.upload(
               thumbName,
               fileUploadOptions.acl,
               thumbBuffer,
               multerData.mimetype
-            )
-          ]);
-          if (uploadThumb.Key && uploadThumb.Location) {
+            ) as any;
             thumbnails.push({
               thumbnailSize: options.thumbnailSize || { width: 500, height: 500 },
               path: uploadThumb.Location,
@@ -145,54 +159,38 @@ export class FileService {
           });
         }
       }
-      const buffer = await this.imageService.replaceWithoutExif(multerData.path);
       if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
-        const upload = await this.s3StorageService.upload(
-          formatFileName(multerData),
-          fileUploadOptions.acl,
-          buffer,
-          multerData.mimetype
-        );
-        if (upload.Key && upload.Location) {
+        const buffer = multerData.mimetype.includes('image') ? await this.imageService.replaceWithoutExif(multerData.path) : readFileSync(multerData.path);
+        if (s3 === 'gcs') {
+          await this.gcsStorageService.uploadFromBuffer(
+            formatFileName(multerData),
+            fileUploadOptions.acl,
+            buffer
+          );
+          const { file, path: _absolutePath, bucket } = await GCSs3Service.getFileByName(formatFileName(multerData), fileUploadOptions.acl);
+          absolutePath = _absolutePath;
+          path = file.publicUrl();
+          metadata.bucket = bucket;
+        } else if (s3 === 'aws') {
+          const upload = await this.awsS3storageService.upload(
+            formatFileName(multerData),
+            fileUploadOptions.acl,
+            buffer,
+            multerData.mimetype
+          ) as any;
           absolutePath = upload.Key;
           path = upload.Location;
+          metadata.bucket = upload.Bucket;
+          metadata.endpoint = AwsS3Service.getEndpoint(upload);
         }
-        server = Storage.S3;
         metadata = {
           ...metadata,
-          bucket: upload.Bucket,
-          endpoint: S3Service.getEndpoint(upload)
+          s3
         };
         // remove old file once upload s3 done
         existsSync(multerData.path) && unlinkSync(multerData.path);
       } else {
         server = Storage.DiskStorage;
-        writeFileSync(multerData.path, buffer);
-      }
-    }
-    // other file not image
-    if (!multerData.mimetype.includes('image') && options.uploadImmediately) {
-      const buffer = readFileSync(multerData.path);
-      if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
-        const upload = await this.s3StorageService.upload(
-          formatFileName(multerData),
-          fileUploadOptions.acl,
-          buffer,
-          multerData.mimetype
-        );
-        if (upload.Key && upload.Location) {
-          absolutePath = upload.Key;
-          path = upload.Location;
-        }
-        metadata = {
-          ...metadata,
-          bucket: upload.Bucket,
-          endpoint: S3Service.getEndpoint(upload)
-        };
-        // remove old file once upload s3 done
-        existsSync(multerData.path) && unlinkSync(multerData.path);
-      } else {
-        writeFileSync(multerData.path, buffer);
       }
     }
     const data = {
@@ -201,8 +199,8 @@ export class FileService {
       description: '',
       mimeType: multerData.mimetype,
       server,
-      path: path || multerData.location,
-      absolutePath: absolutePath || multerData.key || multerData.path,
+      path,
+      absolutePath,
       acl: multerData.acl || options.acl,
       thumbnails,
       metadata,
@@ -241,9 +239,7 @@ export class FileService {
     if (!file) {
       return false;
     }
-
     await file.remove();
-
     const filePaths = [
       {
         absolutePath: file.absolutePath,
@@ -253,7 +249,16 @@ export class FileService {
 
     if (file.server === Storage.S3) {
       const del = filePaths.map((fp) => ({ Key: fp.absolutePath }));
-      await this.s3StorageService.deleteObjects({ Objects: del });
+      if (file.metadata.s3 === 'aws') {
+        await this.awsS3storageService.deleteObjects({ Objects: del });
+      }
+      if (file.metadata.s3 === 'gcs') {
+        await del.reduce(async (cb, p) => {
+          await cb;
+          await this.gcsStorageService.deleteObject(p.Key);
+          return Promise.resolve();
+        }, Promise.resolve());
+      }
       return true;
     }
 
@@ -280,31 +285,39 @@ export class FileService {
       }
     });
     await this.fileModel.deleteMany({ _id: files.map((f) => f._id) });
-    // remove files
-    await Promise.all([
-      files.map((file) => {
-        const filePaths = [
-          {
-            absolutePath: file.absolutePath,
-            path: file.path
-          }
-        ].concat(file.thumbnails || []);
-        if (file.server === Storage.S3) {
-          const del = filePaths.map((fp) => ({ Key: fp.absolutePath }));
-          return this.s3StorageService.deleteObjects({ Objects: del });
+    await files.reduce(async (cb, file) => {
+      await cb;
+      const filePaths = [
+        {
+          absolutePath: file.absolutePath,
+          path: file.path
         }
-        return filePaths.map((fp) => {
-          if (existsSync(fp.absolutePath)) {
-            unlinkSync(fp.absolutePath);
-          } else {
-            const publicDir = this.config.get('file.publicDir');
-            const filePublic = join(publicDir, fp.path);
-            existsSync(filePublic) && unlinkSync(filePublic);
-          }
-          return fp;
-        });
-      })
-    ]);
+      ].concat(file.thumbnails || []);
+      if (file.server === Storage.S3) {
+        const del = filePaths.map((fp) => ({ Key: fp.absolutePath }));
+        if (file.metadata.s3 === 'aws') {
+          await this.awsS3storageService.deleteObjects({ Objects: del });
+        }
+        if (file.metadata.s3 === 'gcs') {
+          await del.reduce(async (lp, p) => {
+            await lp;
+            await this.gcsStorageService.deleteObject(p.Key);
+            return Promise.resolve();
+          }, Promise.resolve());
+        }
+        return Promise.resolve();
+      }
+      filePaths.forEach((fp) => {
+        if (existsSync(fp.absolutePath)) {
+          unlinkSync(fp.absolutePath);
+        } else {
+          const publicDir = this.config.get('file.publicDir');
+          const filePublic = join(publicDir, fp.path);
+          existsSync(filePublic) && unlinkSync(filePublic);
+        }
+      });
+      return Promise.resolve();
+    }, Promise.resolve());
   }
 
   public async removeIfNotHaveRef(fileId: string | ObjectId) {
@@ -321,7 +334,16 @@ export class FileService {
 
     if (file.server === Storage.S3) {
       const del = [{ Key: file.absolutePath }];
-      await this.s3StorageService.deleteObjects({ Objects: del });
+      if (file.metadata.s3 === 'aws') {
+        await this.awsS3storageService.deleteObjects({ Objects: del });
+      }
+      if (file.metadata.s3 === 'gcs') {
+        await del.reduce(async (lp, p) => {
+          await lp;
+          await this.gcsStorageService.deleteObject(p.Key);
+          return Promise.resolve();
+        }, Promise.resolve());
+      }
       return true;
     }
 
@@ -411,107 +433,118 @@ export class FileService {
         count: options?.count || 1
       });
       let thumbnails: any = [];
-      // check s3 settings
-      const checkS3Settings = await this.s3StorageService.checkSetting();
-      if (fileData.server === Storage.S3 && checkS3Settings) {
-        const chunks = [];
-        const fileStream = createReadStream(respVideo.toPath);
-        fileStream.once('error', (err) => {
-          // Be sure to handle this properly!
-          throw err;
-        });
-        // Data is flushed from fileStream in chunks,
-        // this callback will be executed for each chunk
-        fileStream.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-        // File is done being read
-        fileStream.once('end', async () => {
-          // create the final data Buffer from data chunks;
-          const fileBuffer = Buffer.concat(chunks);
 
-          const result = await this.s3StorageService.upload(
+      // check s3 settings
+      const checkS3Settings = s3 === 'gcs' ? GCSs3Service.getCredentials() : AwsS3Service.checkSetting();
+      if (fileData.server === Storage.S3 && checkS3Settings) {
+        const buffer = readFileSync(respVideo.toPath);
+
+        if (s3 === 'gcs') {
+          const result = await this.gcsStorageService.streamFileUpload(
             respVideo.fileName,
             fileData.acl,
-            fileBuffer,
-            'video/mp4'
+            buffer
           );
+          result.on('error', () => {
+            existsSync(videoPath) && unlinkSync(videoPath);
+            existsSync(newAbsolutePath) && unlinkSync(newAbsolutePath);
+            this.fileModel.updateOne(
+              { _id: fileData._id },
+              {
+                $set: {
+                  status: 'error'
+                }
+              }
+            );
+            if (options.publishChannel) {
+              this.queueEventService.publish(
+                new QueueEvent({
+                  channel: options.publishChannel,
+                  eventName: FILE_EVENT.VIDEO_PROCESSED,
+                  data: {
+                    meta: options.meta,
+                    fileId: fileData._id
+                  }
+                })
+              );
+            }
+          });
+          const { file, path, bucket } = await GCSs3Service.getFileByName(respVideo.fileName, fileData.acl);
+          newAbsolutePath = path;
+          newPath = file.publicUrl();
+          metadata.bucket = bucket;
+        } else if (s3 === 'aws') {
+          const result = await this.awsS3storageService.upload(
+            respVideo.fileName,
+            fileData.acl,
+            buffer,
+            'video/mp4'
+          ) as any;
           newAbsolutePath = result.Key;
           newPath = result.Location;
-          // eslint-disable-next-line prefer-template
-          metadata = {
-            ...metadata,
-            bucket: result.Bucket,
-            endpoint: S3Service.getEndpoint(result)
-          };
+          metadata.bucket = result.Bucket;
+          metadata.endpoint = AwsS3Service.getEndpoint(result);
+        }
+        // eslint-disable-next-line prefer-template
+        metadata = {
+          ...metadata,
+          s3
+        };
 
-          if (respThumb.length) {
-            // eslint-disable-next-line no-restricted-syntax
-            for (const name of respThumb) {
-              if (existsSync(join(videoDir, name))) {
-                const file = readFileSync(join(videoDir, name));
-                // eslint-disable-next-line no-await-in-loop
-                const thumb = await this.s3StorageService.upload(
+        if (respThumb.length) {
+          // eslint-disable-next-line no-restricted-syntax
+          for (const name of respThumb) {
+            if (existsSync(join(videoDir, name))) {
+              // eslint-disable-next-line no-await-in-loop
+              const thumb = s3 === 'gcs' ? await this.gcsStorageService.uploadFromPath(
+                name,
+                join(videoDir, name),
+                S3ObjectCannelACL.PublicRead
+              ) // eslint-disable-next-line no-await-in-loop
+                : await this.awsS3storageService.upload(
                   name,
                   S3ObjectCannelACL.PublicRead,
-                  file,
+                  readFileSync(join(videoDir, name)),
                   'image/png'
-                );
-                thumbnails.push({
-                  path: thumb.Location,
-                  absolutePath: thumb.Key
-                });
-                unlinkSync(join(videoDir, name));
-              }
+                ) as any;
+                // eslint-disable-next-line no-await-in-loop
+              const { file: uploaded, path: abPath } = await GCSs3Service.getFileByName(name, S3ObjectCannelACL.PublicRead);
+
+              thumbnails.push({
+                path: s3 === 'gcs' ? uploaded.publicUrl() : thumb.Location,
+                absolutePath: s3 === 'gcs' ? abPath : thumb.Key
+              });
+              unlinkSync(join(videoDir, name));
             }
           }
-          // remove converted file once uploaded s3 done
-          existsSync(respVideo.toPath) && unlinkSync(respVideo.toPath);
-          // remove origin file
-          existsSync(videoPath) && unlinkSync(videoPath);
-          // update data
-          await this.fileModel.updateOne(
-            { _id: fileData._id },
-            {
-              $set: {
-                status: 'finished',
-                absolutePath: newAbsolutePath,
-                path: newPath,
-                thumbnails,
-                duration: parseInt(meta.format.duration, 10),
-                metadata,
-                server,
-                width,
-                height
-              }
-            }
-          );
-        });
+        }
+        // remove converted file once uploaded s3 done
+        existsSync(respVideo.toPath) && unlinkSync(respVideo.toPath);
       } else {
         server = Storage.DiskStorage;
         thumbnails = respThumb.map((name) => ({
           absolutePath: join(videoDir, name),
           path: join(videoDir, name).replace(publicDir, '')
         }));
-        // remove old file
-        existsSync(videoPath) && unlinkSync(videoPath);
-        await this.fileModel.updateOne(
-          { _id: fileData._id },
-          {
-            $set: {
-              status: 'finished',
-              absolutePath: newAbsolutePath,
-              path: newPath,
-              thumbnails,
-              duration: parseInt(meta.format.duration, 10),
-              metadata,
-              server,
-              width,
-              height
-            }
-          }
-        );
       }
+      // remove old file
+      existsSync(videoPath) && unlinkSync(videoPath);
+      await this.fileModel.updateOne(
+        { _id: fileData._id },
+        {
+          $set: {
+            status: 'finished',
+            absolutePath: newAbsolutePath,
+            path: newPath,
+            thumbnails,
+            duration: parseInt(meta.format.duration, 10),
+            metadata,
+            server,
+            width,
+            height
+          }
+        }
+      );
     } catch (e) {
       existsSync(videoPath) && unlinkSync(videoPath);
       existsSync(newAbsolutePath) && unlinkSync(newAbsolutePath);
@@ -531,135 +564,6 @@ export class FileService {
           new QueueEvent({
             channel: options.publishChannel,
             eventName: FILE_EVENT.VIDEO_PROCESSED,
-            data: {
-              meta: options.meta,
-              fileId: fileData._id
-            }
-          })
-        );
-      }
-    }
-  }
-
-  /**
-   * generate mp4 video & thumbnail
-   * @param fileId
-   * @param options
-   */
-  public async queueProcessAudio(
-    fileId: string | ObjectId,
-    options?: {
-      meta?: Record<string, any>;
-      publishChannel?: string;
-    }
-  ) {
-    // add queue and convert file to mp4 and generate thumbnail
-    const file = await this.fileModel.findOne({ _id: fileId });
-    if (!file || file.status === 'processing') {
-      return false;
-    }
-    await this.queueEventService.publish(
-      new QueueEvent({
-        channel: AUDIO_QUEUE_CHANNEL,
-        eventName: 'processAudio',
-        data: {
-          file: new FileDto(file),
-          options
-        }
-      })
-    );
-    return true;
-  }
-
-  private async _processAudio(event: QueueEvent) {
-    if (event.eventName !== 'processAudio') {
-      return;
-    }
-    const fileData = event.data.file as FileDto;
-    const options = event.data.options || {};
-    const publicDir = this.config.get('file.publicDir');
-    let audioPath = '';
-    let newAbsolutePath = '';
-    let newPath = '';
-    let { metadata = {}, server } = fileData;
-    if (existsSync(fileData.absolutePath)) {
-      audioPath = fileData.absolutePath;
-    } else if (existsSync(join(publicDir, fileData.path))) {
-      audioPath = join(publicDir, fileData.path);
-    }
-    try {
-      await this.fileModel.updateOne(
-        { _id: fileData._id },
-        {
-          $set: {
-            status: 'processing'
-          }
-        }
-      );
-
-      const respAudio = await this.audioFileService.convert2Mp3(audioPath);
-      newAbsolutePath = respAudio.toPath;
-      newPath = respAudio.toPath.replace(publicDir, '');
-      // check s3 settings
-      const checkS3Settings = await this.s3StorageService.checkSetting();
-      if (fileData.server === Storage.S3 && checkS3Settings) {
-        const audio = readFileSync(respAudio.toPath);
-        const result = await this.s3StorageService.upload(
-          respAudio.fileName,
-          fileData.acl,
-          audio,
-          'audio/mp3'
-        );
-        newAbsolutePath = result.Key;
-        newPath = result.Location;
-        // eslint-disable-next-line prefer-template
-        metadata = {
-          ...metadata,
-          bucket: result.Bucket,
-          endpoint: S3Service.getEndpoint(result)
-        };
-        existsSync(respAudio.toPath) && unlinkSync(respAudio.toPath);
-      } else {
-        server = Storage.DiskStorage;
-      }
-      const meta = await this.videoService.getMetaData(audioPath);
-      existsSync(audioPath) && unlinkSync(audioPath);
-
-      await this.fileModel.updateOne(
-        { _id: fileData._id },
-        {
-          $set: {
-            status: 'finished',
-            absolutePath: newAbsolutePath,
-            path: newPath,
-            duration: parseInt(meta.format.duration, 10),
-            mimeType: 'audio/mp3',
-            name: fileData.name.replace(`.${fileData.mimeType.split('audio/')[1]}`, '.mp3'),
-            metadata,
-            server
-          }
-        }
-      );
-    } catch (e) {
-      existsSync(audioPath) && unlinkSync(audioPath);
-      existsSync(newAbsolutePath) && unlinkSync(newAbsolutePath);
-      await this.fileModel.updateOne(
-        { _id: fileData._id },
-        {
-          $set: {
-            status: 'error'
-          }
-        }
-      );
-
-      throw e;
-    } finally {
-      // TODO - fire event to subscriber
-      if (options.publishChannel) {
-        await this.queueEventService.publish(
-          new QueueEvent({
-            channel: options.publishChannel,
-            eventName: FILE_EVENT.AUDIO_PROCESSED,
             data: {
               meta: options.meta,
               fileId: fileData._id
@@ -716,14 +620,13 @@ export class FileService {
     let photoPath = '';
     let thumbnailAbsolutePath = '';
     let thumbnailPath = '';
-    let absolutePath = '';
+    let { absolutePath } = fileData;
 
     if (existsSync(fileData.absolutePath)) {
       photoPath = fileData.absolutePath;
     } else if (existsSync(join(publicDir, fileData.path))) {
       photoPath = join(publicDir, fileData.path);
     }
-
     try {
       await this.fileModel.updateOne(
         { _id: fileData._id },
@@ -747,17 +650,28 @@ export class FileService {
         5
       )}_thumb${StringHelper.getExt(fileData.name)}`;
       // check s3 settings
-      const checkS3Settings = await this.s3StorageService.checkSetting();
+      const checkS3Settings = s3 === 'gcs' ? GCSs3Service.getCredentials() : AwsS3Service.checkSetting();
       // upload thumb to s3
       if (fileData.server === Storage.S3 && checkS3Settings) {
-        const upload = await this.s3StorageService.upload(
-          thumbName,
-          S3ObjectCannelACL.PublicRead,
-          thumbBuffer,
-          fileData.mimeType
-        );
-        thumbnailAbsolutePath = upload.Key;
-        thumbnailPath = upload.Location;
+        if (s3 === 'gcs') {
+          await this.gcsStorageService.uploadFromBuffer(
+            thumbName,
+            S3ObjectCannelACL.PublicRead,
+            thumbBuffer
+          );
+          const { file, path } = await GCSs3Service.getFileByName(thumbName, S3ObjectCannelACL.PublicRead);
+          thumbnailAbsolutePath = path;
+          thumbnailPath = file.publicUrl();
+        } else if (s3 === 'aws') {
+          const upload = await this.awsS3storageService.upload(
+            thumbName,
+            S3ObjectCannelACL.PublicRead,
+            thumbBuffer,
+            fileData.mimeType
+          ) as any;
+          thumbnailAbsolutePath = upload.Key;
+          thumbnailPath = upload.Location;
+        }
       } else {
         thumbnailPath = join(photoDir, thumbName).replace(publicDir, '');
         thumbnailAbsolutePath = join(photoDir, thumbName);
@@ -766,20 +680,31 @@ export class FileService {
       const buffer = await this.imageService.replaceWithoutExif(photoPath);
       // upload file to s3
       if (fileData.server === Storage.S3 && checkS3Settings) {
-        const upload = await this.s3StorageService.upload(
+        const upload = s3 === 'gcs' ? await this.gcsStorageService.uploadFromBuffer(
+          fileData.name,
+          fileData.acl,
+          buffer
+        ) : await this.awsS3storageService.upload(
           fileData.name,
           fileData.acl,
           buffer,
           fileData.mimeType
-        );
-        if (upload.Key && upload.Location) {
+        ) as any;
+        if (s3 === 'gcs') {
+          const { file, path, bucket } = await GCSs3Service.getFileByName(fileData.name, fileData.acl);
+          absolutePath = path;
+          photoPath = file.publicUrl();
+          metadata.bucket = bucket;
+        } else if (s3 === 'aws') {
           absolutePath = upload.Key;
           photoPath = upload.Location;
+          metadata.bucket = upload.Bucket;
+          metadata.endpoint = AwsS3Service.getEndpoint(upload);
         }
+
         metadata = {
           ...metadata,
-          bucket: upload.Bucket,
-          endpoint: S3Service.getEndpoint(upload)
+          s3
         };
         // remove old file once upload s3 done
         existsSync(fileData.absolutePath) && unlinkSync(fileData.absolutePath);
@@ -818,7 +743,6 @@ export class FileService {
           }
         }
       );
-
       throw e;
     } finally {
       // TODO - fire event to subscriber
@@ -827,6 +751,148 @@ export class FileService {
           new QueueEvent({
             channel: options.publishChannel,
             eventName: FILE_EVENT.PHOTO_PROCESSED,
+            data: {
+              meta: options.meta,
+              fileId: fileData._id
+            }
+          })
+        );
+      }
+    }
+  }
+
+  /**
+   * convert mp3 audio
+   * @param fileId
+   * @param options
+   */
+  public async queueProcessAudio(
+    fileId: string | ObjectId,
+    options?: {
+      meta?: Record<string, any>;
+      publishChannel?: string;
+    }
+  ) {
+    // add queue and convert file to mp3
+    const file = await this.fileModel.findOne({ _id: fileId });
+    if (!file || file.status === 'processing') {
+      return false;
+    }
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: AUDIO_QUEUE_CHANNEL,
+        eventName: 'processAudio',
+        data: {
+          file: new FileDto(file),
+          options
+        }
+      })
+    );
+    return true;
+  }
+
+  private async _processAudio(event: QueueEvent) {
+    if (event.eventName !== 'processAudio') {
+      return;
+    }
+    const fileData = event.data.file as FileDto;
+    const options = event.data.options || {};
+    const publicDir = this.config.get('file.publicDir');
+    let audioPath = '';
+    let newAbsolutePath = '';
+    let newPath = '';
+    let { metadata = {}, server } = fileData;
+    if (existsSync(fileData.absolutePath)) {
+      audioPath = fileData.absolutePath;
+    } else if (existsSync(join(publicDir, fileData.path))) {
+      audioPath = join(publicDir, fileData.path);
+    }
+    try {
+      await this.fileModel.updateOne(
+        { _id: fileData._id },
+        {
+          $set: {
+            status: 'processing'
+          }
+        }
+      );
+
+      const respAudio = await this.audioFileService.convert2Mp3(audioPath);
+      newAbsolutePath = respAudio.toPath;
+      newPath = respAudio.toPath.replace(publicDir, '');
+      // check s3 settings
+      const checkS3Settings = s3 === 'gcs' ? GCSs3Service.getCredentials() : AwsS3Service.checkSetting();
+      if (fileData.server === Storage.S3 && checkS3Settings) {
+        if (s3 === 'gcs') {
+          await this.gcsStorageService.uploadFromPath(
+            respAudio.fileName,
+            respAudio.toPath,
+            fileData.acl
+          );
+          const { file, path, bucket } = await GCSs3Service.getFileByName(respAudio.fileName, fileData.acl);
+          newAbsolutePath = path;
+          newPath = file.publicUrl();
+          metadata.bucket = bucket;
+        } else if (s3 === 'aws') {
+          const result = await this.awsS3storageService.upload(
+            respAudio.fileName,
+            fileData.acl,
+            readFileSync(respAudio.toPath),
+            'audio/mp3'
+          ) as any;
+          newAbsolutePath = result.Key;
+          newPath = result.Location;
+          metadata.bucket = result.Bucket;
+          metadata.endpoint = AwsS3Service.getEndpoint(result);
+        }
+        // eslint-disable-next-line prefer-template
+        metadata = {
+          ...metadata,
+          s3
+        };
+        // remove convert file
+        existsSync(respAudio.toPath) && unlinkSync(respAudio.toPath);
+      } else {
+        server = Storage.DiskStorage;
+      }
+      const meta = await this.videoService.getMetaData(audioPath);
+      existsSync(audioPath) && unlinkSync(audioPath);
+
+      await this.fileModel.updateOne(
+        { _id: fileData._id },
+        {
+          $set: {
+            status: 'finished',
+            absolutePath: newAbsolutePath,
+            path: newPath,
+            duration: parseInt(meta.format.duration, 10),
+            mimeType: 'audio/mp3',
+            name: fileData.name.replace(`.${fileData.mimeType.split('audio/')[1]}`, '.mp3'),
+            metadata,
+            server
+          }
+        }
+      );
+    } catch (e) {
+      existsSync(audioPath) && unlinkSync(audioPath);
+      existsSync(newAbsolutePath) && unlinkSync(newAbsolutePath);
+      await this.fileModel.updateOne(
+        { _id: fileData._id },
+        {
+          $set: {
+            status: 'error'
+          }
+        }
+      );
+
+      throw e;
+    } finally {
+      // TODO - fire event to subscriber
+      if (options.publishChannel) {
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: options.publishChannel,
+            eventName: FILE_EVENT.AUDIO_PROCESSED,
             data: {
               meta: options.meta,
               fileId: fileData._id

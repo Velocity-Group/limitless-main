@@ -68,7 +68,7 @@ export class StockProductListener {
     const jwToken = this.authService.generateJWT(pick(auth, ['_id', 'source', 'sourceId']), { expiresIn: 3 * 60 * 60 }); // 3hours expiration
     const file = await this.fileService.findById(fileId);
     if (file) {
-      const digitalLink = jwToken ? `${new FileDto(file).getUrl()}?productId=${transaction.targetId}&token=${jwToken}` : new FileDto(file).getUrl();
+      const digitalLink = jwToken ? `${new FileDto(file).getUrl()}?productId=${transaction.targetId}&token=${jwToken}` : await new FileDto(file).getUrl(true);
       user && user.email && await this.mailService.send({
         subject: 'Digital file',
         to: user.email,

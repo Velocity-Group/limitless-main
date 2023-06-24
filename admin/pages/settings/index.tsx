@@ -15,6 +15,7 @@ import { FormInstance } from 'antd/lib/form';
 import { getResponseError } from '@lib/utils';
 import dynamic from 'next/dynamic';
 import { PaymentSettingsForm } from '@components/setting/payment-settings';
+import { S3SettingsForm } from '@components/setting/s3-settings';
 
 const WYSIWYG = dynamic(() => import('@components/wysiwyg'), {
   ssr: false
@@ -322,7 +323,7 @@ class Settings extends PureComponent {
               <Menu.Item key="mailer">SMTP</Menu.Item>
               <Menu.Item key="custom">SEO</Menu.Item>
               <Menu.Item key="commission">Commission</Menu.Item>
-              {/* <Menu.Item key="s3">S3</Menu.Item> */}
+              <Menu.Item key="s3">S3</Menu.Item>
               <Menu.Item key="agora">Agora Live</Menu.Item>
               <Menu.Item key="paymentGateways">Payment Gateways</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
@@ -334,7 +335,8 @@ class Settings extends PureComponent {
             <Loader />
           ) : (
             <>
-              {selectedTab === 'paymentGateways' ? <PaymentSettingsForm settings={list} /> : (
+              {/* eslint-disable-next-line no-nested-ternary */}
+              {selectedTab === 'paymentGateways' ? <PaymentSettingsForm settings={list} /> : selectedTab === 's3' ? <S3SettingsForm settings={list} /> : (
                 <Form
                   {...layout}
                   layout="horizontal"

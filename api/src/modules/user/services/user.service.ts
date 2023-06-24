@@ -12,8 +12,6 @@ import { EVENT, STATUS } from 'src/kernel/constants';
 import { AuthService } from 'src/modules/auth/services';
 import { PerformerService } from 'src/modules/performer/services';
 import { PerformerDto } from 'src/modules/performer/dtos';
-import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
-import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { omit } from 'lodash';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
@@ -30,8 +28,6 @@ import { UsernameExistedException } from '../exceptions/username-existed.excepti
 @Injectable()
 export class UserService {
   constructor(
-    @Inject(forwardRef(() => ChangeTokenLogService))
-    private readonly changeTokenLogService: ChangeTokenLogService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
     @Inject(forwardRef(() => PerformerService))
@@ -70,15 +66,19 @@ export class UserService {
   }
 
   public async getMe(id: string, jwToken: string): Promise<any> {
-    const user = await this.userModel.findById(id);
-    if (user) {
-      return new UserDto(user).toResponse(true);
+    try {
+      const user = await this.userModel.findById(id);
+      if (user) {
+        return new UserDto(user).toResponse(true);
+      }
+      const performer = await this.performerService.getDetails(id, jwToken);
+      if (!performer && !user) {
+        throw new EntityNotFoundException();
+      }
+      return new PerformerDto(performer).toResponse(true);
+    } catch (e) {
+      console.log(e);
     }
-    const performer = await this.performerService.getDetails(id, jwToken);
-    if (!performer && !user) {
-      throw new EntityNotFoundException();
-    }
-    return new PerformerDto(performer).toResponse(true);
   }
 
   public async findByUsername(username: string): Promise<UserDto> {
@@ -257,16 +257,6 @@ export class UserService {
       data.verifiedEmail = false;
     }
     await this.userModel.updateOne({ _id: id }, data);
-    const newUser = await this.userModel.findById(id);
-    const oldBalance = user.balance;
-    // logs change token
-    if (oldBalance !== newUser.balance) {
-      await this.changeTokenLogService.changeTokenLog({
-        source: CHANGE_TOKEN_LOG_SOURCES.USER,
-        sourceId: newUser._id,
-        token: newUser.balance - oldBalance
-      });
-    }
     if (data.email && data.email.toLowerCase() !== user.email) {
       await this.authService.sendVerificationEmail({ _id: user._id, email: data.email.toLowerCase() });
       await this.authService.updateKey({

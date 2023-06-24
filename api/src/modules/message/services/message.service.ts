@@ -100,7 +100,7 @@ export class MessageService {
     });
 
     const dto = new MessageDto(message);
-    dto.imageUrl = file.getUrl();
+    dto.imageUrl = await file.getUrl();
     await this.queueEventService.publish({
       channel: MESSAGE_CHANNEL,
       eventName: MESSAGE_EVENT.CREATED,
@@ -137,14 +137,18 @@ export class MessageService {
 
     const fileIds = data.map((d) => d.fileId);
     const files = await this.fileService.findByIds(fileIds);
-    const messages = data.map((m) => new MessageDto(m));
-    messages.forEach((message) => {
-      if (message.fileId) {
-        const file = files.find((f) => f._id.toString() === message.fileId.toString());
+    const messages = data.map((d) => new MessageDto(d));
+    const result = [];
+    await messages.reduce(async (lb, m) => {
+      await lb;
+      if (m.fileId) {
+        const file = files.find((f) => f._id.toString() === m.fileId.toString());
         // eslint-disable-next-line no-param-reassign
-        message.imageUrl = file ? file.getUrl() : null;
+        m.imageUrl = (file ? file.getUrl() : '') as string;
       }
-    });
+      result.push(m);
+      return Promise.resolve();
+    }, Promise.resolve());
 
     return {
       data: messages,

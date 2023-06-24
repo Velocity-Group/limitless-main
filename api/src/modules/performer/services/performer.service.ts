@@ -25,8 +25,6 @@ import {
 import { MailerService } from 'src/modules/mailer';
 import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';
-import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
-import { CHANGE_TOKEN_LOG_SOURCES } from 'src/modules/change-token-logs/constant';
 import { PerformerBlockService } from 'src/modules/block/services';
 import { isObjectId, toObjectId, randomString } from 'src/kernel/helpers/string.helper';
 import { Storage } from 'src/modules/storage/contants';
@@ -65,8 +63,6 @@ export class PerformerService {
     private readonly followService: FollowService,
     @Inject(forwardRef(() => PerformerBlockService))
     private readonly performerBlockService: PerformerBlockService,
-    @Inject(forwardRef(() => ChangeTokenLogService))
-    private readonly changeTokenLogService: ChangeTokenLogService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     @Inject(forwardRef(() => AuthService))
@@ -113,7 +109,7 @@ export class PerformerService {
       return;
     }
 
-    performer.welcomeVideoPath = file.getUrl();
+    performer.welcomeVideoPath = (file ? file.getUrl() : '') as string;
     await performer.save();
   }
 
@@ -202,7 +198,7 @@ export class PerformerService {
       const welcomeVideo = await this.fileService.findById(
         model.welcomeVideoId
       );
-      dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : '';
+      dto.welcomeVideoPath = (welcomeVideo ? welcomeVideo.getUrl() : '') as string;
       dto.welcomeVideoPath && await this.performerModel.updateOne({ _id: model._id }, { welcomeVideoPath: dto.welcomeVideoPath });
     }
     await this.increaseViewStats(dto._id);
@@ -256,10 +252,10 @@ export class PerformerService {
     const dto = new PerformerDto(performer);
     dto.avatar = dto.avatarPath ? FileDto.getPublicUrl(dto.avatarPath) : null; // TODO - get default avatar
     dto.cover = dto.coverPath ? FileDto.getPublicUrl(dto.coverPath) : null;
-    dto.welcomeVideoName = welcomeVideo ? welcomeVideo.name : null;
-    dto.welcomeVideoPath = welcomeVideo ? welcomeVideo.getUrl() : null;
+    dto.welcomeVideoName = welcomeVideo ? welcomeVideo.name : '';
+    dto.welcomeVideoPath = (welcomeVideo ? welcomeVideo.getUrl() : '') as string;
     if (idVerification) {
-      let fileUrl = idVerification.getUrl(true);
+      let fileUrl = await idVerification.getUrl(true);
       if (idVerification.server !== Storage.S3) {
         fileUrl = `${fileUrl}?documentId=${idVerification._id}&token=${jwToken}`;
       }
@@ -270,7 +266,7 @@ export class PerformerService {
       };
     }
     if (documentVerification) {
-      let fileUrl = documentVerification.getUrl(true);
+      let fileUrl = await documentVerification.getUrl(true);
       if (documentVerification.server !== Storage.S3) {
         fileUrl = `${fileUrl}?documentId=${documentVerification._id}&token=${jwToken}`;
       }

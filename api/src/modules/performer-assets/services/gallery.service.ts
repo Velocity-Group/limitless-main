@@ -172,7 +172,7 @@ export class GalleryService {
     ]);
     const fileIds = coverPhotos.map((c) => c.fileId);
     const files = await this.fileService.findByIds(fileIds);
-    galleries.forEach((g) => {
+    galleries.map(async (g) => {
       const performer = performers.find((p) => p._id.toString() === g.performerId.toString());
       g.performer = performer ? new PerformerDto(performer).toPublicDetailsResponse() : null;
       const bookmarked = reactions.find((l) => l.objectId.toString() === g._id.toString() && l.action === REACTION.BOOK_MARK);
@@ -186,7 +186,7 @@ export class GalleryService {
             (f) => f._id.toString() === coverPhoto.fileId.toString()
           );
           if (file) {
-            let fileUrl = file.getUrl(true);
+            let fileUrl = await file.getUrl(true);
             if (file.server !== Storage.S3) {
               fileUrl = `${fileUrl}?photoId=${g.coverPhotoId._id}&token=${jwToken}`;
             }
@@ -202,6 +202,7 @@ export class GalleryService {
       g.isSubscribed = !user ? false : !!((isSubscribed || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
       const bought = transactions.find((transaction) => `${transaction.targetId}` === `${g._id}`);
       g.isBought = !user ? false : !!((bought || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      return g;
     });
     return galleries;
   }
@@ -276,7 +277,14 @@ export class GalleryService {
     const photos = await this.photoModel.find({ galleryId });
     const fileIds = photos.map((d) => d.fileId);
     const files = await this.fileService.findByIds(fileIds);
-    return files.map((f) => ({ path: f.getUrl(), name: f.name }));
+    const data = [];
+    await files.reduce(async (cb, f) => {
+      await cb;
+      const path = await f.getUrl(true);
+      data.push({ path, name: f.name });
+      return Promise.resolve();
+    }, Promise.resolve());
+    return data;
   }
 
   public async adminSearch(

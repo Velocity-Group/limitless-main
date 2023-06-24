@@ -1,10 +1,12 @@
 import { PureComponent } from 'react';
 import { blockService } from '@services/index';
-import BlankLayout from './blank-layout';
-import PrimaryLayout from './primary-layout';
-import MaintenaceLayout from './maintenance-layout';
-import GEOLayout from './geoBlocked-layout';
-import PublicLayout from './public-layout';
+import dynamic from 'next/dynamic';
+
+const BlankLayout = dynamic(() => import('./blank-layout'));
+const PrimaryLayout = dynamic(() => import('./primary-layout'));
+const MaintenaceLayout = dynamic(() => import('./maintenance-layout'));
+const GEOLayout = dynamic(() => import('./geoBlocked-layout'));
+const PublicLayout = dynamic(() => import('./public-layout'));
 
 interface DefaultProps {
   children: any;

@@ -1,7 +1,9 @@
 import { Module, DynamicModule } from '@nestjs/common';
 import { QueueModule } from 'src/kernel';
 import { SettingModule } from '../settings/setting.module';
-import { S3StorageService, S3ConfigurationService } from './services';
+import {
+  AwsS3storageService, AwsS3ConfigurationService, GCSstorageService
+} from './services';
 
 @Module({
   imports: [
@@ -9,11 +11,13 @@ import { S3StorageService, S3ConfigurationService } from './services';
     SettingModule
   ],
   providers: [
-    S3ConfigurationService,
-    S3StorageService
+    AwsS3ConfigurationService,
+    AwsS3storageService,
+    GCSstorageService
   ],
   exports: [
-    S3StorageService
+    AwsS3storageService,
+    GCSstorageService
   ]
 })
 export class StorageModule {

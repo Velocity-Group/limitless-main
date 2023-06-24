@@ -136,8 +136,8 @@ export class VideoService {
     return videos;
   }
 
-  public getVideoForView(file: FileDto, video: VideoDto, canView: boolean, jwToken: string) {
-    let fileUrl = file.getUrl(canView);
+  public async getVideoForView(file: FileDto, video: VideoDto, canView: boolean, jwToken: string) {
+    let fileUrl = await file.getUrl(canView);
     if (file.server !== Storage.S3) {
       fileUrl = `${fileUrl}?videoId=${video._id}&token=${jwToken}`;
     }

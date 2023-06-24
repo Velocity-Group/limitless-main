@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import { getConfig } from 'src/kernel';
 import { isUrl } from 'src/kernel/helpers/string.helper';
 import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
-import { S3Service } from 'src/modules/storage/services';
+import { AwsS3Service, GCSs3Service } from 'src/modules/storage/services';
 import { FileModel } from '../models';
 
 export class FileDto {
@@ -90,7 +90,7 @@ export class FileDto {
     return this.path || '';
   }
 
-  public getUrl(authenticated = false): string {
+  public getUrl(authenticated = false) {
     if (!this.path) return '';
     if (isUrl(this.path) && this.server !== Storage.S3) {
       return this.path;
@@ -105,8 +105,13 @@ export class FileDto {
         return this.path;
       }
 
-      const { bucket, expires, endpoint } = this.metadata;
-      return S3Service.getSignedUrl(
+      const {
+        bucket, expires, endpoint, s3
+      } = this.metadata;
+      if (s3 === 'gcs') {
+        return this.gcsPromiseUrl();
+      }
+      return AwsS3Service.getSignedUrl(
         {
           Bucket: bucket,
           Key: this.absolutePath,
@@ -119,6 +124,11 @@ export class FileDto {
     }
 
     return new URL(this.path, getConfig('app').baseUrl).href;
+  }
+
+  private async gcsPromiseUrl() {
+    const url = await GCSs3Service.getSignUrl(this.absolutePath);
+    return url;
   }
 
   public getThumbnails(): string[] {

@@ -8,7 +8,6 @@ import { loadUIValue } from '@redux/ui/actions';
 import './primary-layout.less';
 import Head from 'next/head';
 
-const LoadScripts = dynamic(() => import('@components/common/base/stream-scripts'), { ssr: false });
 const Header = dynamic(() => import('@components/common/layout/header'));
 const Footer = dynamic(() => import('@components/common/layout/footer'));
 const Loader = dynamic(() => import('@components/common/base/loader'));
@@ -44,8 +43,10 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
       <Layout>
         <Head>
           <script src="/static/lib/webrtc_adaptor.js" />
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/7.4.0/adapter.min.js" />
+          <script src="https://vjs.zencdn.net/7.10.2/video.min.js" />
+          <script src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@2.6.2/dist/videojs-http-streaming.min.js" />
         </Head>
-        <LoadScripts />
         <div
           className={ui?.theme === 'dark' ? 'container dark' : 'container'}
           id="primaryLayout"

@@ -12,7 +12,6 @@ import { AuthModule } from '../auth/auth.module';
 import { FileModule } from '../file/file.module';
 import { UserConnectedListener, StripeSettingsUpdatedListener } from './listeners';
 import { PerformerModule } from '../performer/performer.module';
-import { ChangeTokenLogModule } from '../change-token-logs/change-token-log.module';
 import { BlockModule } from '../block/block.module';
 
 @Module({
@@ -22,7 +21,6 @@ import { BlockModule } from '../block/block.module';
     forwardRef(() => AuthModule),
     forwardRef(() => PerformerModule),
     forwardRef(() => FileModule),
-    forwardRef(() => ChangeTokenLogModule),
     forwardRef(() => BlockModule)
   ],
   providers: [

@@ -185,9 +185,10 @@ export class PerformerController {
     @Param('type') type: any
   ): Promise<any> {
     await this.performerService.updateDocument(currentUser._id, file, type);
+    const url = await file.getUrl(true);
     return DataResponse.ok({
       ...file,
-      url: `${file.getUrl(true)}`
+      url
     });
   }
 
@@ -258,7 +259,7 @@ export class PerformerController {
     await this.performerService.updateWelcomeVideo(performer._id, file);
     return DataResponse.ok({
       ...file,
-      url: file.getUrl(true)
+      url: file.getUrl()
     });
   }
 

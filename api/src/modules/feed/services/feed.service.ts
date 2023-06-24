@@ -173,8 +173,10 @@ export class FeedService {
         followingId: { $in: performerIds }
       }) : []
     ]);
+    const data = [];
 
-    return feeds.map((f) => {
+    await feeds.reduce(async (cb, f) => {
+      await cb;
       const feed = new FeedDto(f);
       const like = actions.find((l) => l.objectId.toString() === f._id.toString() && l.action === REACTION.LIKE);
       feed.isLiked = !!like;
@@ -201,18 +203,21 @@ export class FeedService {
       const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (feed.isSale && !feed.price);
 
       if (feedFiles.length) {
-        feed.files = feedFiles.map((file) => {
+        feed.files = [];
+        await feedFiles.reduce(async (lb, file) => {
+          await lb;
           // track server s3 or local, assign jwtoken if local
-          let fileUrl = file.getUrl(canView);
+          let fileUrl = await file.getUrl(canView);
           if (file.server !== Storage.S3) {
             fileUrl = `${fileUrl}?feedId=${feed._id}&token=${jwToken}`;
           }
-          return {
+          feed.files.push({
             ...file.toResponse(),
             thumbnails: file.getThumbnails(),
             url: fileUrl
-          };
-        });
+          });
+          return Promise.resolve();
+        }, Promise.resolve());
       }
       if (feed.thumbnailId) {
         const thumbnail = files.find((file) => file._id.toString() === feed.thumbnailId.toString());
@@ -237,8 +242,9 @@ export class FeedService {
           feed.performer.isFreeSubscription = false;
         }
       }
-      return feed;
-    });
+      data.push(feed);
+    }, Promise.resolve());
+    return data;
   }
 
   public async findOne(id: string, user: UserDto, jwToken: string): Promise<FeedDto> {

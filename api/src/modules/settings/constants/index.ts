@@ -55,13 +55,21 @@ export const SETTING_KEYS = {
   AWS_S3_SECRET_ACCESS_KEY: 's3SecretAccessKey',
   AWS_S3_BUCKET_ENDPOINT: 's3BucketEnpoint',
   AWS_S3_BUCKET_NAME: 's3BucketName',
-  AWS_S3_ENABLE: 's3Enabled',
   AGORA_APPID: 'agoraAppId',
   AGORA_CERTIFICATE: 'agoraCertificate',
   AGORA_ENABLE: 'agoraEnable',
   CCBILL_SINGLE_SUB_ACCOUNT_NUMBER: 'ccbillSingleSubAccountNumber',
   CCBILL_RECURRING_SUB_ACCOUNT_NUMBER: 'ccbillRecurringSubAccountNumber',
-  PAYMENT_GATEWAY: 'paymentGateway'
+  PAYMENT_GATEWAY: 'paymentGateway',
+  // GCS
+  S3_SERVICE_PROVIDER: 's3ServiceProvider',
+  GCS_PROJECT_ID: 'gcsProjectId',
+  GCS_BUCKET_NAME: 'gcsBucketName',
+  GCS_PRIVATE_KEY_ID: 'gcsPrivateKeyId',
+  GCS_PRIVATE_KEY_SECRET: 'gcsPrivateKeySecret',
+  GCS_CLIENT_EMAIL: 'gcsClientEmail',
+  GCS_CLIENT_ID: 'gcsClientId',
+  GCS_CLIENT_CERT_URL: 'gcsClientCertUrl'
 };
 
 export const MENU_SECTION = {

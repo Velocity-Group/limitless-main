@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Button, message } from 'antd';
-import Tabs from 'src/components/common/base/tabs';
+import { Button, Tabs, message } from 'antd';
+// import Tabs from 'src/components/common/base/tabs';
 import StreamMessenger from '@components/stream-chat/Messenger';
 import { getResponseError } from '@lib/utils';
 import { messageService } from 'src/services';

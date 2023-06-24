@@ -57,34 +57,36 @@ export class PhotoSearchService {
     const performerIds = data.map((d) => d.performerId);
     const galleryIds = data.map((d) => d.galleryId);
     const fileIds = data.map((d) => d.fileId);
-    const photos = data.map((v) => new PhotoDto(v));
     const [performers, galleries, files] = await Promise.all([
       performerIds.length ? this.performerService.findByIds(performerIds) : [],
       galleryIds.length ? this.galleryService.findByIds(galleryIds) : [],
       fileIds.length ? this.fileService.findByIds(fileIds) : []
     ]);
-    photos.forEach((v) => {
+    const photos = [];
+    await data.reduce(async (lb, v) => {
+      await lb;
+      const photo = new PhotoDto(v);
       // TODO - should get picture (thumbnail if have?)
       const performer = performers.find((p) => p._id.toString() === v.performerId.toString());
       if (performer) {
         // eslint-disable-next-line no-param-reassign
-        v.performer = new PerformerDto(performer).toResponse();
+        photo.performer = new PerformerDto(performer).toResponse();
       }
 
       if (v.galleryId) {
         const gallery = galleries.find((p) => p._id.toString() === v.galleryId.toString());
         // eslint-disable-next-line no-param-reassign
-        if (gallery) v.gallery = gallery;
+        if (gallery) photo.gallery = gallery;
       }
 
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
-        let fileUrl = file.getUrl(true);
+        let fileUrl = await file.getUrl(true);
         if (file.server !== Storage.S3) {
           fileUrl = `${fileUrl}?photoId=${v._id}&token=${jwToken}`;
         }
         // eslint-disable-next-line no-param-reassign
-        v.photo = {
+        photo.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
           url: fileUrl,
@@ -93,7 +95,9 @@ export class PhotoSearchService {
           mimeType: file.mimeType
         };
       }
-    });
+      photos.push(photo);
+      return Promise.resolve();
+    }, Promise.resolve());
 
     return {
       data: photos,
@@ -119,27 +123,29 @@ export class PhotoSearchService {
 
     const performerIds = data.map((d) => d.performerId);
     const fileIds = data.map((d) => d.fileId);
-    const photos = data.map((v) => new PhotoDto(v));
     const [performers, files] = await Promise.all([
       performerIds.length ? this.performerService.findByIds(performerIds) : [],
       fileIds.length ? this.fileService.findByIds(fileIds) : []
     ]);
-    photos.forEach((v) => {
+    const photos = [];
+    await data.reduce(async (lb, v) => {
+      await lb;
+      const photo = new PhotoDto(v);
       // TODO - should get picture (thumbnail if have?)
       const performer = performers.find((p) => p._id.toString() === v.performerId.toString());
       if (performer) {
         // eslint-disable-next-line no-param-reassign
-        v.performer = new PerformerDto(performer).toResponse();
+        photo.performer = new PerformerDto(performer).toResponse();
       }
 
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
-        let fileUrl = file.getUrl(`${v.performerId}` === `${user._id}`);
+        let fileUrl = await file.getUrl(true);
         if (file.server !== Storage.S3) {
           fileUrl = `${fileUrl}?photoId=${v._id}&token=${jwToken}`;
         }
         // eslint-disable-next-line no-param-reassign
-        v.photo = {
+        photo.photo = {
           size: file.size,
           thumbnails: file.getThumbnails(),
           url: fileUrl,
@@ -148,7 +154,9 @@ export class PhotoSearchService {
           mimeType: file.mimeType
         };
       }
-    });
+      photos.push(photo);
+      return Promise.resolve();
+    }, Promise.resolve());
 
     return {
       data: photos,
@@ -174,7 +182,6 @@ export class PhotoSearchService {
     ]);
 
     const fileIds = data.map((d) => d.fileId);
-    const photos = data.map((v) => new PhotoDto(v));
     const performerIds = uniq(data.map((v) => v.performerId));
     const galleryIds = data.filter((d) => d.galleryId).map((p) => p.galleryId);
     const [galleries, files, subscriptions, transactions] = await Promise.all([
@@ -192,7 +199,10 @@ export class PhotoSearchService {
         status: PURCHASE_ITEM_STATUS.SUCCESS
       }) : []
     ]);
-    photos.forEach((v) => {
+    const photos = [];
+    await data.reduce(async (cb, photo) => {
+      await cb;
+      const v = new PhotoDto(photo);
       if (v.galleryId) {
         const gallery = galleries.find(
           (p) => p._id.toString() === v.galleryId.toString()
@@ -205,7 +215,7 @@ export class PhotoSearchService {
       const canView = (v.gallery && !v.gallery.isSale && !!subscription) || (v.gallery && v.gallery.isSale && !!bought) || (user && `${user._id}` === `${v.performerId}`) || (user && user.roles && user.roles.includes('admin'));
       const file = files.find((f) => f._id.toString() === v.fileId.toString());
       if (file) {
-        let fileUrl = file.getUrl(canView);
+        let fileUrl = await file.getUrl(canView);
         if (file.server !== Storage.S3) {
           fileUrl = `${fileUrl}?photoId=${v._id}&token=${jwToken}`;
         }
@@ -219,7 +229,9 @@ export class PhotoSearchService {
           mimeType: file.mimeType
         };
       }
-    });
+      photos.push(v);
+      return Promise.resolve();
+    }, Promise.resolve());
 
     return {
       data: photos,

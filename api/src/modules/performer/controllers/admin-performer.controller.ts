@@ -159,9 +159,10 @@ export class AdminPerformerController {
     @Param('type') type: string
   ): Promise<any> {
     await this.performerService.updateDocument(id, file, type);
+    const url = await file.getUrl(true);
     return DataResponse.ok({
       ...file,
-      url: `${file.getUrl(true)}`
+      url
     });
   }
 
@@ -230,7 +231,7 @@ export class AdminPerformerController {
     await this.performerService.updateWelcomeVideo(performerId, file);
     return DataResponse.ok({
       ...file,
-      url: file.getUrl(true)
+      url: file.getUrl()
     });
   }
 
