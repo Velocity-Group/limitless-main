@@ -116,7 +116,7 @@ const authSagas = [
     on: logout,
     * worker() {
       yield authService.removeToken();
-      Router.replace('/auth/login');
+      Router.replace('/');
     }
   },
   {
