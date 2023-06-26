@@ -38,7 +38,7 @@ function ConfirmSubscriptionPerformerForm() {
     try {
       if (!user._id) {
         message.error('Please log in!');
-        Router.push('/');
+        Router.push('/auth/login');
         return;
       }
       if (paymentGateway === 'stripe' && !user.stripeCardIds.length) {

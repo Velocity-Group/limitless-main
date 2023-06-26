@@ -116,6 +116,7 @@ export class FileService {
       server = Storage.DiskStorage;
     }
     const thumbnails = [];
+    const fileName = formatFileName(multerData);
 
     if (options.uploadImmediately) {
       if (options.generateThumbnail && multerData.mimetype.includes('image')) {
@@ -124,14 +125,14 @@ export class FileService {
           options.thumbnailSize || { width: 500, height: 500 }
         ) as Buffer;
         const thumbName = `${StringHelper.randomString(5)}_thumb${StringHelper.getExt(multerData.path)}`;
-        if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
+        if (options.server === Storage.S3 && checkS3Settings) {
           if (s3 === 'gcs') {
             await this.gcsStorageService.uploadFromBuffer(
               thumbName,
-              fileUploadOptions.acl,
+              options.acl,
               thumbBuffer
             );
-            const { file, path: _absolutePath } = await GCSs3Service.getFileByName(thumbName, fileUploadOptions.acl);
+            const { file, path: _absolutePath } = await GCSs3Service.getFileByName(thumbName, options.acl);
             thumbnails.push({
               thumbnailSize: options.thumbnailSize || { width: 500, height: 500 },
               path: file.publicUrl(),
@@ -140,7 +141,7 @@ export class FileService {
           } else if (s3 === 'aws') {
             const uploadThumb = await this.awsS3storageService.upload(
               thumbName,
-              fileUploadOptions.acl,
+              options.acl,
               thumbBuffer,
               multerData.mimetype
             ) as any;
@@ -159,22 +160,23 @@ export class FileService {
           });
         }
       }
-      if (fileUploadOptions.server === Storage.S3 && checkS3Settings) {
+      if (options.server === Storage.S3 && checkS3Settings) {
         const buffer = multerData.mimetype.includes('image') ? await this.imageService.replaceWithoutExif(multerData.path) : readFileSync(multerData.path);
+
         if (s3 === 'gcs') {
           await this.gcsStorageService.uploadFromBuffer(
-            formatFileName(multerData),
-            fileUploadOptions.acl,
+            fileName,
+            options.acl,
             buffer
           );
-          const { file, path: _absolutePath, bucket } = await GCSs3Service.getFileByName(formatFileName(multerData), fileUploadOptions.acl);
+          const { file, path: _absolutePath, bucket } = await GCSs3Service.getFileByName(fileName, options.acl);
           absolutePath = _absolutePath;
           path = file.publicUrl();
           metadata.bucket = bucket;
         } else if (s3 === 'aws') {
           const upload = await this.awsS3storageService.upload(
-            formatFileName(multerData),
-            fileUploadOptions.acl,
+            fileName,
+            options.acl,
             buffer,
             multerData.mimetype
           ) as any;
@@ -195,13 +197,13 @@ export class FileService {
     }
     const data = {
       type,
-      name: multerData.filename,
+      name: fileName || multerData.filename,
       description: '',
       mimeType: multerData.mimetype,
       server,
       path,
       absolutePath,
-      acl: multerData.acl || options.acl,
+      acl: options.acl,
       thumbnails,
       metadata,
       size: multerData.size,

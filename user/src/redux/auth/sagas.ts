@@ -81,7 +81,7 @@ const authSagas = [
         const payload = data.payload as IFanRegister;
         const resp = (yield authService.register(payload)).data;
         message.success(resp?.message || 'Sign up success!', 10);
-        Router.push('/');
+        Router.push('/auth/login');
         yield put(registerFanSuccess(resp));
       } catch (e) {
         const error = yield Promise.resolve(e);
@@ -116,7 +116,7 @@ const authSagas = [
     on: logout,
     * worker() {
       yield authService.removeToken();
-      Router.replace('/');
+      Router.replace('/auth/login');
     }
   },
   {

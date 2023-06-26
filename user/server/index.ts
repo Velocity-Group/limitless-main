@@ -1,5 +1,6 @@
 import next from 'next';
 import express from 'express';
+import path from 'path';
 import routes from './routes';
 
 require('dotenv').config();
@@ -20,6 +21,15 @@ const handler = routes.getRequestHandler(app, ({
 app.prepare().then(() => {
   const expressApp = express();
   expressApp.use('/static', express.static('../static'));
+
+  expressApp.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../static/landing-page/demo2/index.html'));
+  });
+
+  expressApp.get('/became-a-models', (req, res) => {
+    res.sendFile(path.join(__dirname, '../static/landing-page/demo4/index.html'));
+  });
+
   expressApp.use(handler).listen(port);
   // eslint-disable-next-line no-console
   console.log(`> Server listening at http://localhost:${port} as ${dev ? 'development' : process.env.NODE_ENV}`);

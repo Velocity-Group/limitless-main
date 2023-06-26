@@ -33,7 +33,7 @@ declare global {
 function redirectLogin(ctx: any) {
   if (process.browser) {
     authService.removeToken();
-    Router.push('/');
+    Router.push('/auth/login');
     return;
   }
 

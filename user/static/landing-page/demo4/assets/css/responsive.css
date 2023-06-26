@@ -1,0 +1,215 @@
+/*================================
+Template Name: OnlyFun
+Author: Zethic Technologies
+Author website: zethic.com 
+Version: 1.0
+================================== */
+
+[data-theme="dark"] {
+    --primary-color: rgb(107, 106, 134);
+    --secondary-color: #000000;
+    --font-color: #ffffff;
+    --bg-color: #181A20;
+    --heading-color: #ffffff;
+    --color: #fdf9f6ad !important;
+    --display: none;
+    --icon-color: #e3455a;
+    --border-color: #2f2f2f;
+    --bg-none: none;
+    --display-block: block;
+  
+  }
+
+@media (min-width: 576px) and (max-width: 767.98px) {}
+
+@media (min-width: 768px) and (max-width: 991.98px) {}
+
+@media (min-width: 992px) and (min-width: 1199.98px) {}
+
+
+@media (min-width: 992px) {}
+
+@media (max-width: 1200px) {}
+
+@media (max-width: 1199.98px) {}
+
+@media (max-width: 991.98px) {
+
+    [data-theme="dark"].normal-logo {
+        display: var(--display);
+    }
+
+    .hidden-logo {
+        display: none;
+    }
+    .mobile-icon-box{
+        padding-left: 0!important;
+    }
+
+    .mobile-icon-box li{
+        padding: 2rem!important;
+    }
+    .steps-bg {
+        display: none;
+    }
+    .mobile-reverse{
+        flex-direction: column-reverse;
+    }
+
+    .mobile-block{
+        display: block;
+    }
+    .cta-one:before {
+        content: '';
+        position: absolute;
+        right: 0;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-image: url('../img/cta-bg.svg');
+    }
+    .navbar{
+        background-color: #ffffff;
+    }
+    [data-theme="dark"] .navbar{
+        background-color: var(--secondary-color)!important;
+    }
+   
+    .cta-two:before {
+        content: '';
+        position: absolute;
+        right: 0;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-image: url('../img/creator-signup/cta-bg-1.svg');
+    }
+
+    .cta-one {
+        padding: 3rem;
+    }
+
+    .cta-two {
+        padding: 3rem;
+    }
+
+    .mobile-hidden {
+        display: none;
+    }
+
+    .faq-banner-img {
+        width: 100%;
+        height: auto;
+    }
+
+    .works-money {
+        width: 100%;
+        height: auto;
+    }
+
+    .banner-img {
+        width: 100%;
+        height: auto;
+        vertical-align: bottom;
+    }
+
+    .mobile-pt-0 {
+        padding-top: 0;
+    }
+
+    .mobile-pb-0 {
+        padding-bottom: 0;
+    }
+
+    .mobile-mt-0 {
+        margin-top: 0;
+    }
+
+    .mobile-mt-3 {
+        margin-top: 2rem;
+    }
+
+    .mobile-mt-4 {
+        margin-top: 3rem;
+    }
+
+    .footer-link {
+        display: block;
+    }
+
+    .footer-item {
+        display: none;
+    }
+    .footer-link li {
+
+        padding-right: 2rem;
+        padding-left: 2rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+ .header .mb-navbar-mt {
+    margin-top: 1rem;
+ }
+
+    /* .header .nav-item {
+        margin-bottom: 1rem !important;
+    } */
+
+    i {
+        font-size: 15px;
+        cursor: pointer;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        top: 14%;
+        left: 75%;
+    }
+
+    .bg-overlay {
+        position: absolute;
+        content: '';
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8) 0);
+    }
+
+    [data-theme="dark"] .bg-overlay {
+        position: absolute;
+        content: '';
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, #000000b5 42.24%, rgb(0 0 0 / 53%) 129.57%, rgb(0 0 0 / 56%) 129.57%)
+    }
+
+
+
+}
+
+
+
+
+@media (max-width: 767.98px) {}
+
+@media (max-width: 575.98px) {}
+
+@media (min-width: 575.98px) {}
+
+@media (max-width: 768px) {}
+
+@media (min-width: 768px) {}
+
+@media (max-width: 980px) {}

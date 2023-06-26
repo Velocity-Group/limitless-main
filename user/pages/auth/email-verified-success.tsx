@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { connect } from 'react-redux';
 import {
-  Layout, message, Button
+  Layout, message
 } from 'antd';
 import './index.less';
 import { IUser } from '@interfaces/user';
@@ -59,7 +59,7 @@ class EmailVerifiedSuccess extends PureComponent<IProps> {
           <div className="email-verify-succsess">
             <p>
               Your email has been verified,
-              <Link href="/">
+              <Link href="/auth/login">
                 <a> click here to login</a>
               </Link>
             </p>

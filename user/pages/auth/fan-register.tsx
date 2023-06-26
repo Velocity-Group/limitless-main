@@ -1,5 +1,7 @@
 /* eslint-disable prefer-promise-reject-errors */
-import { Row, Col, Button, Layout, Form, Input, message, Divider } from 'antd';
+import {
+  Row, Col, Button, Layout, Form, Input, message, Divider
+} from 'antd';
 import { PureComponent } from 'react';
 import Link from 'next/link';
 import { registerFan, loginSocial } from '@redux/auth/actions';
@@ -85,13 +87,18 @@ class FanRegister extends PureComponent<IProps> {
     return (
       <Layout>
         <Head>
-          <title>{ui && ui.siteName} | Sign up</title>
+          <title>
+            {ui && ui.siteName}
+            {' '}
+            | Sign up
+          </title>
         </Head>
         <div className="main-container">
           <div className="login-box">
             <p className="text-center">
               <small>
-                Do not create an account on this page if you are a model. Models must create an account on{' '}
+                Do not create an account on this page if you are a model. Models must create an account on
+                {' '}
                 <a href="/auth/model-register">this link</a>
               </small>
             </p>
@@ -113,8 +120,11 @@ class FanRegister extends PureComponent<IProps> {
                       type="button"
                       disabled={!settings.twitterClientId}
                       onClick={() => this.loginTwitter()}
-                      className="twitter-button">
-                      <TwitterOutlined /> SIGN UP WITH TWITTER
+                      className="twitter-button"
+                    >
+                      <TwitterOutlined />
+                      {' '}
+                      SIGN UP WITH TWITTER
                     </button>
                     <GoogleLoginButton
                       clientId={settings.googleClientId}
@@ -137,7 +147,8 @@ class FanRegister extends PureComponent<IProps> {
                       name="member_register"
                       initialValues={{ remember: true, gender: 'male' }}
                       onFinish={this.handleRegister.bind(this)}
-                      scrollToFirstError>
+                      scrollToFirstError
+                    >
                       <Form.Item
                         name="firstName"
                         validateTrigger={['onChange', 'onBlur']}
@@ -149,7 +160,8 @@ class FanRegister extends PureComponent<IProps> {
                             ),
                             message: 'First name can not contain number and special character'
                           }
-                        ]}>
+                        ]}
+                      >
                         <Input placeholder="First name" />
                       </Form.Item>
                       <Form.Item
@@ -163,7 +175,8 @@ class FanRegister extends PureComponent<IProps> {
                             ),
                             message: 'Last name can not contain number and special character'
                           }
-                        ]}>
+                        ]}
+                      >
                         <Input placeholder="Last name" />
                       </Form.Item>
                       <Form.Item
@@ -178,7 +191,8 @@ class FanRegister extends PureComponent<IProps> {
                             required: true,
                             message: 'Please input your email address!'
                           }
-                        ]}>
+                        ]}
+                      >
                         <Input placeholder="Email address" />
                       </Form.Item>
                       <Form.Item
@@ -191,7 +205,8 @@ class FanRegister extends PureComponent<IProps> {
                               'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
                           },
                           { required: true, message: 'Please enter your password!' }
-                        ]}>
+                        ]}
+                      >
                         <Input.Password placeholder="Password" />
                       </Form.Item>
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
@@ -201,15 +216,19 @@ class FanRegister extends PureComponent<IProps> {
                           htmlType="submit"
                           className="login-form-button"
                           disabled={submiting || isLoading}
-                          loading={submiting || isLoading}>
+                          loading={submiting || isLoading}
+                        >
                           SIGN UP
                         </Button>
                         <p>
-                          By signing up you agree to our{' '}
+                          By signing up you agree to our
+                          {' '}
                           <a href="/page/terms-of-service" target="_blank">
                             Terms of Service
-                          </a>{' '}
-                          and{' '}
+                          </a>
+                          {' '}
+                          and
+                          {' '}
                           <a href="/page/privacy-policy" target="_blank">
                             Privacy Policy
                           </a>
@@ -217,7 +236,7 @@ class FanRegister extends PureComponent<IProps> {
                         </p>
                         <p>
                           Have an account already?
-                          <Link href="/">
+                          <Link href="/auth/login">
                             <a> Log in here.</a>
                           </Link>
                         </p>

@@ -131,7 +131,6 @@ export class GCSstorageService {
       public: isPublic,
       private: isPrivate
     } as any;
-
     return file.save(buffer, options);
   }
 

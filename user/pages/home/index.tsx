@@ -102,7 +102,7 @@ class HomePage extends PureComponent<IProps> {
     const { user } = this.props;
     if (!user._id) {
       message.error('Please log in or register!', 5);
-      Router.push('/');
+      Router.push('/auth/login');
       return;
     }
     if (user.isPerformer) return;

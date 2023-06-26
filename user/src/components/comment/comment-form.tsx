@@ -41,7 +41,7 @@ export class CommentForm extends PureComponent<IProps> {
     const data = values;
     if (!creator || !creator._id) {
       message.error('Please login!');
-      return Router.push('/');
+      return Router.push('/auth/login');
     }
     if (!data.content) {
       return message.error('Please add a comment!');

@@ -15,7 +15,7 @@ export default function StreamListItem({ stream, user }: Props) {
   const handleClick = () => {
     if (!user._id) {
       message.error('Please log in or register!', 5);
-      Router.push('/');
+      Router.push('/auth/login');
       return;
     }
     if (user.isPerformer) return;

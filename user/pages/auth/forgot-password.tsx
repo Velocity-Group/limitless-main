@@ -131,7 +131,7 @@ class Forgot extends PureComponent<IProps, IState> {
                   className="login-content right"
                   style={{ paddingTop: '80px' }}
                 >
-                  {ui.logo && <div className="login-logo"><a href="/"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
+                  {ui.logo && <div className="login-logo"><a href="/auth/login"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
                   <h3
                     style={{
                       fontSize: 30,
@@ -174,7 +174,7 @@ class Forgot extends PureComponent<IProps, IState> {
                         </Button>
                         <p>
                           Have an account already?
-                          <Link href="/">
+                          <Link href="/auth/login">
                             <a> Log in here.</a>
                           </Link>
                         </p>

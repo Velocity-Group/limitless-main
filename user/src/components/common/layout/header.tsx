@@ -183,8 +183,8 @@ class Header extends PureComponent<IProps> {
                       <a>{ui.logo ? <img src={ui.logo} alt="logo" /> : `${ui.siteName}`}</a>
                     </Link>
                   </li>,
-                  <li key="login" className={router.pathname === '/' ? 'active' : ''}>
-                    <Link href="/">
+                  <li key="login" className={router.pathname === '/auth/login' ? 'active' : ''}>
+                    <Link href="/auth/login">
                       <a>Log In</a>
                     </Link>
                   </li>,

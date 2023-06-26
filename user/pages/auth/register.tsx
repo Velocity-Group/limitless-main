@@ -157,7 +157,7 @@ class Dashboard extends PureComponent<IProps> {
                   </div>
                   <p className="text-center">
                     Have an account already?
-                    <Link href="/">
+                    <Link href="/auth/login">
                       <a> Log in here.</a>
                     </Link>
                   </p>

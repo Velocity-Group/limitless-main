@@ -229,7 +229,7 @@ class VideoViewPage extends PureComponent<IProps> {
     const { video, user, updateBalance: handleUpdateBalance } = this.props;
     if (!user._id) {
       message.error('Please log in!');
-      Router.push('/');
+      Router.push('/auth/login');
       return;
     }
     if (user.isPerformer) {

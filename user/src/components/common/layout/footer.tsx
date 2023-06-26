@@ -24,8 +24,8 @@ class Footer extends PureComponent<IProps> {
           <ul>
             {!currentUser._id ? (
               <>
-                <li key="login" className={router.pathname === '/' ? 'active' : ''}>
-                  <Link href="/">
+                <li key="login" className={router.pathname === '/auth/login' ? 'active' : ''}>
+                  <Link href="/auth/login">
                     <a>Log in</a>
                   </Link>
                 </li>
