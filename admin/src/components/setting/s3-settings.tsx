@@ -135,6 +135,14 @@ export class S3SettingsForm extends PureComponent<IProps> {
               <Input />
             </Form.Item>
             <Form.Item
+              label="GCS private key secret"
+              name="gcsPrivateKeySecret"
+              rules={[{ required: true }]}
+              extra={gcsPrivateKeySecret?.description || ''}
+            >
+              <Input.TextArea rows={5} />
+            </Form.Item>
+            <Form.Item
               label="GCS client Email"
               name="gcsClientEmail"
               rules={[{ required: true }]}

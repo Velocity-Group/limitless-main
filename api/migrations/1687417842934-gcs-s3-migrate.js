@@ -60,7 +60,10 @@ const settings = [
     public: false,
     group: 's3',
     editable: true,
-    visible: true
+    visible: true,
+    meta: {
+      textarea: true
+    }
   },
   {
     key: SETTING_KEYS.GCS_CLIENT_EMAIL,
