@@ -227,6 +227,17 @@ class Application extends App<IApp> {
             // eslint-disable-next-line react/no-danger
             <div dangerouslySetInnerHTML={{ __html: settings.headerScript }} />
           )}
+          <script
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{
+              __html: `
+              function googleTranslateElementInit() {
+                new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+              };
+             `
+            }}
+          />
+          <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" />
         </Head>
         <Socket>
           <BaseLayout layout={layout} maintenance={settings.maintenanceMode}>
@@ -237,6 +248,7 @@ class Application extends App<IApp> {
           // eslint-disable-next-line react/no-danger
           <div dangerouslySetInnerHTML={{ __html: settings.afterBodyScript }} />
         )}
+        <div id="google_translate_element" />
       </Provider>
     );
   }
