@@ -5,11 +5,15 @@ import { SubscriptionModule } from 'src/modules/subscription/subscription.module
 import { assetsProviders } from './providers/stream.provider';
 import { PerformerModule } from '../performer/performer.module';
 import { AuthModule } from '../auth/auth.module';
-import { StreamService, AgoraService } from './services';
-import { AgoraController, StreamController } from './controllers';
+import { StreamService, AgoraService, StreamRequestSerivce } from './services';
+import {
+  AgoraController,
+  StreamController,
+  StreamRequestController
+} from './controllers';
 import { MessageModule } from '../message/message.module';
 import { SocketModule } from '../socket/socket.module';
-import { PublicStreamWsGateway } from './gateways';
+import { PrivateStreamWsGateway, PublicStreamWsGateway } from './gateways';
 import { StreamConnectListener } from './listeners';
 import { SettingModule } from '../settings/setting.module';
 import { PaymentModule } from '../payment/payment.module';
@@ -49,9 +53,11 @@ const agent = new https.Agent({
     StreamService,
     AgoraService,
     StreamConnectListener,
-    PublicStreamWsGateway
+    PublicStreamWsGateway,
+    StreamRequestSerivce,
+    PrivateStreamWsGateway
   ],
-  controllers: [StreamController, AgoraController],
+  controllers: [StreamController, AgoraController, StreamRequestController],
   exports: [StreamService]
 })
 export class StreamModule {}

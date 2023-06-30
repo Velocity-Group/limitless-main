@@ -16,7 +16,8 @@ import {
 import Head from 'next/head';
 import {
   ArrowLeftOutlined, FireOutlined, EditOutlined, HeartOutlined, DollarOutlined, HeartFilled,
-  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined
+  UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined,
+  TeamOutlined
 } from '@ant-design/icons';
 import {
   TickIcon, ShareIcon, MessageIcon
@@ -501,6 +502,20 @@ class PerformerProfile extends PureComponent<IProps> {
                   onClick={() => this.handleFollow()}
                 >
                   {isFollowed ? <HeartFilled /> : <HeartOutlined />}
+                </Button>
+              </Tooltip>
+              <Tooltip title="1-1 Live Streaming">
+                <Button
+                  disabled={!user._id || user.isPerformer}
+                  className="normal"
+                  onClick={() => Router.push({
+                    pathname: '/schedule/live-streaming',
+                    query: {
+                      performerId: performer._id
+                    }
+                  }, `/schedule/live-streaming?performerId=${performer._id}`)}
+                >
+                  <TeamOutlined />
                 </Button>
               </Tooltip>
               <Tooltip title="Send Tip">

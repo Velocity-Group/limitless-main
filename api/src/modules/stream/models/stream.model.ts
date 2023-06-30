@@ -30,4 +30,8 @@ export class StreamModel extends Document {
   createdAt: Date;
 
   updatedAt: Date;
+
+  includeIds: ObjectId[];
+
+  refId: ObjectId;
 }

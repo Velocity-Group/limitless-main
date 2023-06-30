@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import { streamService } from '@services/stream.service';
 import { IAgoraRTCRemoteUser, UID } from 'agora-rtc-sdk-ng';
 import React, { useEffect, useRef, useState } from 'react';
@@ -8,7 +9,7 @@ export type SubscriberProps = {
   localUId: UID;
   remoteUId: UID;
   forwardedRef?: any;
-  onStreamStatusChange: Function;
+  onStreamStatusChange?: Function;
   sessionId: string;
 };
 
@@ -21,12 +22,13 @@ export default function Subscriber({
   const clientRef = useRef<any>();
 
   const join = async () => {
-    if (!client || !sessionId) return;
+    if (!client || !sessionId) return null;
 
     const resp = await streamService.fetchAgoraAppToken({
       channelName: sessionId
     });
     await client.join(agoraAppId, sessionId, resp.data, localUId);
+    return client;
   };
 
   const leave = () => {

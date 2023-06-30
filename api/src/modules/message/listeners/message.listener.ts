@@ -4,9 +4,17 @@ import { Model } from 'mongoose';
 import { SocketUserService } from 'src/modules/socket/services/socket-user.service';
 import { ObjectId } from 'mongodb';
 import { StreamService } from 'src/modules/stream/services';
-import { MESSAGE_CHANNEL, MESSAGE_EVENT, MESSAGE_PRIVATE_STREAM_CHANNEL } from '../constants';
+import { PRIVATE_CHAT } from 'src/modules/stream/constant';
+import {
+  MESSAGE_CHANNEL,
+  MESSAGE_EVENT,
+  MESSAGE_PRIVATE_STREAM_CHANNEL
+} from '../constants';
 import { MessageDto } from '../dtos';
-import { CONVERSATION_MODEL_PROVIDER, NOTIFICATION_MESSAGE_MODEL_PROVIDER } from '../providers';
+import {
+  CONVERSATION_MODEL_PROVIDER,
+  NOTIFICATION_MESSAGE_MODEL_PROVIDER
+} from '../providers';
 import { ConversationModel, NotificationMessageModel } from '../models';
 
 const MESSAGE_NOTIFY = 'MESSAGE_NOTIFY';
@@ -53,17 +61,23 @@ export class MessageListener {
     await this.updateLastMessage(conversation, message);
   }
 
-  private async updateLastMessage(conversation, message: MessageDto): Promise<void> {
+  private async updateLastMessage(
+    conversation,
+    message: MessageDto
+  ): Promise<void> {
     const lastMessage = StringHelper.truncate(message.text || '', 30);
     const lastSenderId = message.senderId;
     const lastMessageCreatedAt = message.createdAt;
-    await this.conversationModel.updateOne({ _id: conversation._id }, {
-      $set: {
-        lastMessage,
-        lastSenderId,
-        lastMessageCreatedAt
+    await this.conversationModel.updateOne(
+      { _id: conversation._id },
+      {
+        $set: {
+          lastMessage,
+          lastSenderId,
+          lastMessageCreatedAt
+        }
       }
-    });
+    );
   }
 
   // eslint-disable-next-line consistent-return
@@ -97,26 +111,53 @@ export class MessageListener {
       }
     ]);
     let total = 0;
-    totalNotReadMessage && totalNotReadMessage.length && totalNotReadMessage.forEach((data) => {
-      if (data.total) {
-        total += 1;
-      }
-    });
-    await this.notifyCountingNotReadMessageInConversation(recipient.sourceId, total);
+    totalNotReadMessage
+      && totalNotReadMessage.length
+      && totalNotReadMessage.forEach((data) => {
+        if (data.total) {
+          total += 1;
+        }
+      });
+    await this.notifyCountingNotReadMessageInConversation(
+      recipient.sourceId,
+      total
+    );
   }
 
-  private async notifyCountingNotReadMessageInConversation(receiverId, total): Promise<void> {
-    await this.socketUserService.emitToUsers(new ObjectId(receiverId), 'nofify_read_messages_in_conversation', { total });
+  private async notifyCountingNotReadMessageInConversation(
+    receiverId,
+    total
+  ): Promise<void> {
+    await this.socketUserService.emitToUsers(
+      new ObjectId(receiverId),
+      'nofify_read_messages_in_conversation',
+      { total }
+    );
   }
 
   private async handleSent(recipientId, message): Promise<void> {
-    await this.socketUserService.emitToUsers(recipientId, 'message_created', message);
+    await this.socketUserService.emitToUsers(
+      recipientId,
+      'message_created',
+      message
+    );
   }
 
   private async handleStreamMessage(event: QueueEvent): Promise<void> {
-    if (![MESSAGE_EVENT.CREATED, MESSAGE_EVENT.DELETED].includes(event.eventName)) return;
+    if (
+      ![MESSAGE_EVENT.CREATED, MESSAGE_EVENT.DELETED].includes(event.eventName)
+    ) { return; }
     const { message, conversation } = event.data;
-    const roomName = this.streamService.getRoomName(conversation._id, conversation.type);
-    await this.socketUserService.emitToRoom(roomName, `message_${event.eventName}_conversation_${conversation._id}`, message);
+    const stream = await this.streamService.findById(conversation.streamId);
+    if (!stream) return;
+
+    const roomName = stream.type === PRIVATE_CHAT
+      ? stream.sessionId
+      : this.streamService.getRoomName(conversation._id, conversation.type);
+    await this.socketUserService.emitToRoom(
+      roomName,
+      `message_${event.eventName}_conversation_${conversation._id}`,
+      message
+    );
   }
 }

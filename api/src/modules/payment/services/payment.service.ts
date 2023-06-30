@@ -556,6 +556,14 @@ export class PaymentService {
     if (existedTransaction) {
       existedTransaction.stripeInvoiceId = data?.object?.latest_invoice;
       existedTransaction.updatedAt = new Date();
+      if (data?.object?.status === 'active') {
+        // update transaction status
+        existedTransaction.status = PAYMENT_STATUS.SUCCESS;
+      } else {
+        // update transaction status
+        existedTransaction.status = PAYMENT_STATUS.FAIL;
+      }
+
       await existedTransaction.save();
     }
     return { success: true };

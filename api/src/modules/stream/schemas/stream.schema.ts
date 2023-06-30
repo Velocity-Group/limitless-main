@@ -26,5 +26,7 @@ export const StreamSchema = new Schema({
   title: String,
   description: String,
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  refId: { type: ObjectId, index: true },
+  includeIds: [{ type: ObjectId, index: true }]
 });

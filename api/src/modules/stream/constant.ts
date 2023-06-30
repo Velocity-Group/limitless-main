@@ -24,6 +24,12 @@ export enum BroadcastType {
   Vod = 'Vod'
 }
 
+export enum StreamRequestStatus {
+  PENDING = 'pending',
+  APPROVE = 'approved',
+  REJECT = 'rejected'
+}
+
 export const defaultStreamValue = {
   publish: true,
   publicStream: true,

@@ -197,6 +197,16 @@ class Application extends App<IApp> {
     setGlobalConfig(this.props.config);
   }
 
+  // componentDidMount() {
+  //   const script = document.createElement('script');
+  //   script.async = true;
+  //   script.innerHTML = `function googleTranslateElementInit() {
+  //       new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+  //     };`;
+  //   script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  //   document.getElementsByTagName('head')[0].appendChild(script);
+  // }
+
   render() {
     const {
       Component, pageProps, store, settings

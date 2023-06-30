@@ -74,6 +74,7 @@ export interface IStream {
   title: string;
   description: string;
   performerId: string;
+  userId?: string;
   performerInfo: IPerformer;
   type: 'public' | 'group' | 'private';
   sessionId: string;

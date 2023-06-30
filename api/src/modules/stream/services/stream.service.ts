@@ -58,6 +58,10 @@ export class StreamService {
     return streams;
   }
 
+  public findById(id: string | ObjectId) {
+    return this.streamModel.findById(id);
+  }
+
   async adminSearch(
     req: SearchStreamPayload
   ): Promise<PageableData<StreamDto>> {

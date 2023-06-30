@@ -12,7 +12,7 @@ import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
   VideoCameraOutlined, FireOutlined, NotificationOutlined, BookOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
-  LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined
+  LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined, TeamOutlined
 } from '@ant-design/icons';
 import {
   HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon, TickIcon, WalletSvg
@@ -332,6 +332,13 @@ class Header extends PureComponent<IProps> {
                     My Galleries
                   </div>
                 </Link>
+                <Link href="/model/live-streaming/request" as="/model/live-streaming/request">
+                  <div className={router.pathname === '/model/live-streaming/request' ? 'menu-item active' : 'menu-item'}>
+                    <TeamOutlined />
+                    {' '}
+                    My Live Streaming Request
+                  </div>
+                </Link>
                 <Divider />
                 <Link href={{ pathname: '/model/my-order' }} as="/model/my-order">
                   <div className={router.pathname === '/model/my-order' ? 'menu-item active' : 'menu-item'}>
@@ -392,6 +399,13 @@ class Header extends PureComponent<IProps> {
                     <HeartOutlined />
                     {' '}
                     Subscriptions
+                  </div>
+                </Link>
+                <Link href="/schedule/live-streaming/request" as="/schedule/live-streaming/request">
+                  <div className={router.pathname === '/schedule/live-streaming/request' ? 'menu-item active' : 'menu-item'}>
+                    <TeamOutlined />
+                    {' '}
+                    Live Streaming Request
                   </div>
                 </Link>
                 <Divider />

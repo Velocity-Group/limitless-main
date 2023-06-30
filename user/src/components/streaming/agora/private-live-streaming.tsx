@@ -5,14 +5,13 @@ import { Player, useAgora } from 'src/agora';
 import { createLocalTracks } from 'src/agora/utils';
 import { SocketContext } from 'src/socket';
 import { streamService } from '@services/stream.service';
-import { UID, ILocalTrack } from 'agora-rtc-sdk-ng';
+import { UID, ILocalTrack, IAgoraRTCRemoteUser } from 'agora-rtc-sdk-ng';
 import { Router } from 'next/router';
 
 type Props = {
-  uid: UID;
+  localUID: UID;
+  remoteUID: UID;
   forwardedRef: any;
-  // eslint-disable-next-line react/require-default-props
-  onStatusChange?: Function;
   conversationId: string;
   sessionId: string;
   // eslint-disable-next-line react/require-default-props
@@ -24,10 +23,11 @@ type LocalTracks = {
   audioTrack: ILocalTrack;
 }
 
-export default function Publisher({
-  uid, forwardedRef, onStatusChange, conversationId, sessionId, eventName
+export default function PrivateLiveStreaming({
+  localUID, forwardedRef, conversationId, sessionId, eventName, remoteUID
 }: Props) {
   const [tracks, setTracks] = useState([]);
+  const [remoteTracks, setRemoteTracks] = useState([]);
   const { client, appConfiguration } = useAgora();
   const { agoraAppId } = appConfiguration;
   const socket = useContext(SocketContext);
@@ -36,12 +36,11 @@ export default function Publisher({
   const publish = async () => {
     if (!client || !conversationId || !sessionId) return null;
 
-    // const uid = generateUid(performerId);
     const resp = await streamService.fetchAgoraAppToken({
       channelName: sessionId
     });
 
-    await client.join(agoraAppId, sessionId, resp.data, uid);
+    await client.join(agoraAppId, sessionId, resp.data, localUID);
 
     const [microphoneTrack, cameraTrack] = await createLocalTracks(
       {},
@@ -50,7 +49,6 @@ export default function Publisher({
 
     await client.publish([microphoneTrack, cameraTrack]);
     setTracks([microphoneTrack, cameraTrack]);
-    onStatusChange && onStatusChange(true);
     localTracks.current = { videoTrack: cameraTrack, audioTrack: microphoneTrack };
     socket && conversationId && socket.emit(eventName || 'public-stream/live', { conversationId });
     return client;
@@ -65,9 +63,31 @@ export default function Publisher({
     });
     localTracks.current = { videoTrack: null, audioTrack: null };
     setTracks([]);
-    onStatusChange && onStatusChange(false);
+    setRemoteTracks([]);
     if (clientRef.current && clientRef.current.uid) {
       await clientRef.current.leave();
+    }
+  };
+
+  const subscribe = async (
+    remoteUsers: IAgoraRTCRemoteUser,
+    mediaType: 'audio' | 'video'
+  ) => {
+    if (!client) return;
+
+    await client.subscribe(remoteUsers, mediaType);
+
+    const remoteUser = client.remoteUsers.find(({ uid }) => uid === remoteUID);
+    if (remoteUser) {
+      if (mediaType === 'audio') remoteUser.audioTrack.play();
+      if (mediaType === 'video') setRemoteTracks([remoteUser.videoTrack]);
+    }
+  };
+
+  const unsubscribe = (user: IAgoraRTCRemoteUser) => {
+    const remoteUser = user.uid === remoteUID;
+    if (remoteUser) {
+      setRemoteTracks([]);
     }
   };
 
@@ -83,6 +103,8 @@ export default function Publisher({
       // eslint-disable-next-line no-console
       console.log(state);
     });
+    client.on('user-published', subscribe);
+    client.on('user-unpublished', unsubscribe);
   }, [client]);
 
   useEffect(() => {
@@ -101,5 +123,15 @@ export default function Publisher({
     leave
   }));
 
-  return <Player tracks={tracks} />;
+  return (
+    <div className="private-live-streaming">
+      <div className="publisher">
+        <Player tracks={tracks} />
+      </div>
+      <hr />
+      <div className="subscriber">
+        <Player tracks={remoteTracks} />
+      </div>
+    </div>
+  );
 }

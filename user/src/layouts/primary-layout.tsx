@@ -53,6 +53,7 @@ function PrimaryLayout({
           </Layout.Content>
           <BackTop className="backTop" />
           <Footer />
+          {/* <div id="google_translate_element" /> */}
         </div>
         <ConfirmSubscriptionPerformerForm />
       </Layout>

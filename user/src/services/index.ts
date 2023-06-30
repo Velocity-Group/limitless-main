@@ -28,3 +28,4 @@ export * from './report.service';
 export * from './cookies.service';
 export * from './shipping-address.service';
 export * from './follow.service';
+export * from './stream-request.service';
