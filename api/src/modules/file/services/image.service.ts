@@ -32,4 +32,34 @@ export class ImageService {
       .rotate()
       .toBuffer();
   }
+
+  // generate video watermark - do not jpg
+  public async generateImagePattern(textPattern, options) {
+    const { width = 750, height = 750 } = options || {};
+    const text = textPattern;
+    let textStr = '';
+    let textSpan = '';
+    const textLength = 10;
+    const textHeight = 100;
+    const textSpace = 10;
+
+    for (let j = 0; j < width; j += textLength) {
+      textStr += ` ${text}`;
+    }
+
+    for (let i = 0; i < height; i += textHeight + textSpace) {
+      textSpan += `<tspan x="0" y="${i}">${textStr}</tspan>`;
+    }
+    const svgImage = `
+    <svg width="${width}" height="${height}">
+      <style>
+      .title { fill: #fff; font-size: 30px; opacity: 1}
+      </style>
+      <text x="0" y="0" text-anchor="middle" class="title">${textSpan}</text>
+    </svg>
+    `;
+    const svgBuffer = Buffer.from(svgImage);
+    return sharp(svgBuffer)
+      .toBuffer();
+  }
 }

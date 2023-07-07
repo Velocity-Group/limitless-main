@@ -14,7 +14,7 @@ import { feedService } from '@services/index';
 import Router from 'next/router';
 import moment from 'moment';
 import { formatDate } from '@lib/date';
-import { Emotions } from '@components/messages/emotions';
+import Emotions from '@components/messages/emotions';
 import { getGlobalConfig } from '@services/config';
 import { VideoPlayer } from '@components/common';
 import AddPollDurationForm from './add-poll-duration';

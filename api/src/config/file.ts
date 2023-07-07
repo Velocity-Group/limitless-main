@@ -53,5 +53,14 @@ export default {
     'public',
     'digital-products',
     'protected'
+  ),
+  messageDir: join(__dirname, '..', '..', 'public', 'messages'),
+  messageProtectedDir: join(
+    __dirname,
+    '..',
+    '..',
+    'public',
+    'messages',
+    'protected'
   )
 };

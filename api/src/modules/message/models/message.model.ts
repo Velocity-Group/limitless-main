@@ -6,7 +6,7 @@ export class MessageModel extends Document {
 
   type: string;
 
-  fileId?: ObjectId;
+  fileIds: ObjectId[];
 
   text: string;
 
@@ -14,9 +14,13 @@ export class MessageModel extends Document {
 
   senderId: ObjectId;
 
-  meta?: any;
+  meta: any;
 
-  createdAt?: Date;
+  createdAt: Date;
 
-  updatedAt?: Date;
+  updatedAt: Date;
+
+  isSale: boolean;
+
+  price: number;
 }

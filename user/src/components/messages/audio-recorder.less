@@ -1,0 +1,109 @@
+@import '../../../style/vars.less';
+
+@keyframes quiet {
+  25% {
+    transform: scaleY(.6);
+  }
+
+  50% {
+    transform: scaleY(.4);
+  }
+
+  75% {
+    transform: scaleY(.8);
+  }
+}
+
+@keyframes normal {
+  25% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(.6);
+  }
+
+  75% {
+    transform: scaleY(.8);
+  }
+}
+
+@keyframes loud {
+  25% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(.4);
+  }
+
+  75% {
+    transform: scaleY(1.4);
+  }
+}
+
+.audio-recorder {
+  display: none;
+  &.active {
+    display: block;
+  }
+  .recorder {
+    margin: 10px 0;
+    padding: 10px 0;
+    .timer {
+      font-size: 24px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .microphone {
+      margin: 15px 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .waves {
+        z-index: 0;
+        position: absolute;
+        height: 50px;
+        background-image: url('/static/sound-wave.gif');
+        background-size: contain;
+        background-position: center;
+        width: 100%;
+        display: none;
+        &.active {
+          display: block;
+        }
+      }
+      .start-btn {
+        z-index: 1;
+        height: 55px;
+        font-size: 55px;
+        line-height: 55px;
+        padding: 0;
+        color: @primary-color;
+        border: none;
+        box-shadow: none;
+        opacity: 1;
+      }
+    }
+    .mic-txt {
+      text-align: center;
+      font-size: 11px;
+      color: @gray;
+    }
+    .btn-grps {
+      display: flex;
+      justify-content: center;
+      .ant-btn {
+        border: none;
+        font-size: 14px;
+        color: @primary-color;
+        display: inline-flex;
+        align-items: center;
+        svg {
+          font-size: 32px;
+        }
+      }
+    }
+  }
+}

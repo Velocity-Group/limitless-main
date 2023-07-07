@@ -51,6 +51,14 @@ export class VideoService extends APIRequest {
   getBookmarks(payload) {
     return this.get(this.buildUrl('/reactions/videos/bookmark', payload));
   }
+
+  getTranscodeVideoUrl(videoId: string, fileId: string) {
+    return this.post(`/user/performer-assets/videos/${videoId}/${fileId}/url`);
+  }
+
+  getVideoFileStatus(videoId: string, fileId: string) {
+    return this.post(`/user/performer-assets/videos/${videoId}/${fileId}/status`);
+  }
 }
 
 export const videoService = new VideoService();

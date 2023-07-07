@@ -1,6 +1,6 @@
 import { APIRequest } from './api-request';
 
-export class TokenTransctionService extends APIRequest {
+export class TokenTransactionService extends APIRequest {
   sendTip(performerId: string, payload: any) {
     return this.post(`/wallet/charges/tip/${performerId}`, payload);
   }
@@ -34,4 +34,4 @@ export class TokenTransctionService extends APIRequest {
   }
 }
 
-export const tokenTransctionService = new TokenTransctionService();
+export const tokenTransactionService = new TokenTransactionService();

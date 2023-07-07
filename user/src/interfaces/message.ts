@@ -1,3 +1,4 @@
+import { IFile } from './file';
 import { IUser } from './user';
 
 export interface IConversation {
@@ -39,6 +40,12 @@ export interface IMessage {
 
   fileId: string;
 
+  fileIds: string[];
+
+  files: IFile[];
+
+  isBought: boolean;
+
   text: string;
 
   senderId: string;
@@ -49,7 +56,11 @@ export interface IMessage {
 
   updatedAt: Date;
 
-  imageUrl: string;
-
   senderInfo: IUser
+
+  isSale: boolean;
+
+  price: number;
+
+  isDeleted: boolean;
 }

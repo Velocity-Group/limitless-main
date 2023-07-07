@@ -10,7 +10,7 @@ import { listProducts, moreProduct } from '@redux/product/actions';
 import { moreGalleries, getGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
 import {
-  performerService, tokenTransctionService, feedService, reactionService,
+  performerService, tokenTransactionService, feedService, reactionService,
   utilsService, followService
 } from 'src/services';
 import Head from 'next/head';
@@ -283,7 +283,7 @@ class PerformerProfile extends PureComponent<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await tokenTransctionService.sendTip(performer?._id, { performerId: performer?._id, price });
+      await tokenTransactionService.sendTip(performer?._id, { performerId: performer?._id, price });
       message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
     } catch (e) {

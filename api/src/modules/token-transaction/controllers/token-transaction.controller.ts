@@ -80,18 +80,18 @@ export class PaymentTokenController {
     return DataResponse.ok(info);
   }
 
-  // @Post('/message/:id')
-  // @HttpCode(HttpStatus.OK)
-  // @UseGuards(RoleGuard)
-  // @Roles('user')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async purchaseMessage(
-  //   @CurrentUser() user: PerformerDto,
-  //   @Param('id') id: string
-  // ): Promise<DataResponse<any>> {
-  //   const info = await this.tokenTransactionService.purchaseMessage(id, user);
-  //   return DataResponse.ok(info);
-  // }
+  @Post('/message/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('user')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async purchaseMessage(
+    @CurrentUser() user: PerformerDto,
+    @Param('id') id: string
+  ): Promise<DataResponse<any>> {
+    const info = await this.tokenTransactionService.purchaseMessage(id, user);
+    return DataResponse.ok(info);
+  }
 
   @Post('/tip/:performerId')
   @HttpCode(HttpStatus.OK)

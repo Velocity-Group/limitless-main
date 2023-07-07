@@ -5,13 +5,23 @@ export const MessageSchema = new Schema({
     type: Schema.Types.ObjectId,
     index: true
   },
+  isSale: {
+    type: Boolean,
+    default: false
+  },
+  price: {
+    type: Number,
+    default: 0
+  },
   // text, file, etc...
   type: {
     type: String,
     default: 'text',
     index: true
   },
-  fileId: Schema.Types.ObjectId,
+  fileIds: [{
+    type: Schema.Types.ObjectId
+  }],
   text: String,
   senderSource: String,
   senderId: Schema.Types.ObjectId,

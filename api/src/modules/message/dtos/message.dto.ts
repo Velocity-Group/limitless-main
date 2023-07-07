@@ -8,7 +8,9 @@ export class MessageDto {
 
   type: string;
 
-  fileId: ObjectId;
+  fileIds: ObjectId[];
+
+  files: any;
 
   text: string;
 
@@ -20,14 +22,30 @@ export class MessageDto {
 
   updatedAt: Date;
 
-  imageUrl?: string;
+  senderInfo: any;
 
-  senderInfo?: any
+  isSale: boolean;
+
+  price: number;
+
+  isBought: boolean;
 
   constructor(data?: Partial<MessageDto>) {
     Object.assign(this, pick(data, [
-      '_id', 'conversationId', 'type', 'fileId', 'imageUrl', 'senderInfo',
-      'text', 'senderId', 'meta', 'createdAt', 'updatedAt'
+      '_id',
+      'conversationId',
+      'type',
+      'fileIds',
+      'files',
+      'senderInfo',
+      'text',
+      'senderId',
+      'meta',
+      'createdAt',
+      'updatedAt',
+      'isSale',
+      'price',
+      'isBought'
     ]));
   }
 }

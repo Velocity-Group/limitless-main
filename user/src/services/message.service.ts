@@ -31,7 +31,7 @@ export class MessageService extends APIRequest {
   }
 
   readAllInConversation(conversationId: string) {
-    return this.post(`/messages/read-all/${conversationId}`);
+    return this.post(`/messages/read-all/conversation/${conversationId}`);
   }
 
   getMessageUploadUrl() {
@@ -69,6 +69,110 @@ export class MessageService extends APIRequest {
 
   updateConversationName(conversationId, data) {
     return this.put(`/conversations/${conversationId}/update`, data);
+  }
+
+  uploadPrivatePhoto(file: File, payload: any, onProgress?: Function) {
+    return this.upload(
+      '/messages/private/file/photo',
+      [
+        {
+          fieldname: 'file',
+          file
+        }
+      ],
+      {
+        onProgress,
+        customData: payload
+      }
+    );
+  }
+
+  uploadPublicPhoto(file: File, payload: any, onProgress?: Function) {
+    return this.upload(
+      '/messages/public/file/photo',
+      [
+        {
+          fieldname: 'file',
+          file
+        }
+      ],
+      {
+        onProgress,
+        customData: payload
+      }
+    );
+  }
+
+  uploadVideo(file: File, payload: any, onProgress?: Function) {
+    return this.upload(
+      '/messages/private/file/video',
+      [
+        {
+          fieldname: 'file',
+          file
+        }
+      ],
+      {
+        onProgress,
+        customData: payload
+      }
+    );
+  }
+
+  uploadTeaser(file: File, payload: any, onProgress?: Function) {
+    return this.upload(
+      '/messages/public/file/video',
+      [
+        {
+          fieldname: 'file',
+          file
+        }
+      ],
+      {
+        onProgress,
+        customData: payload
+      }
+    );
+  }
+
+  uploadPublicThumbnail(file: File, payload: any, onProgress?: Function) {
+    return this.upload(
+      '/messages/public/file/thumbnail',
+      [
+        {
+          fieldname: 'file',
+          file
+        }
+      ],
+      {
+        onProgress,
+        customData: payload
+      }
+    );
+  }
+
+  uploadAudio(file: File, payload: any, onProgress?: Function) {
+    return this.upload(
+      '/messages/public/file/audio',
+      [
+        {
+          fieldname: 'file',
+          file
+        }
+      ],
+      {
+        onProgress,
+        customData: payload
+      }
+    );
+  }
+
+  getTranscodeVideoUrl(messageId: string, fileId: string) {
+    return this.post(`/messages/${messageId}/videos/${fileId}/url`);
+  }
+
+  getVideoFileStatus(messageId: string, fileId: string) {
+    return this.post(`/messages/${messageId}/videos/${fileId}/url`);
   }
 }
 

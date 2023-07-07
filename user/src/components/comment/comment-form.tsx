@@ -6,7 +6,7 @@ import {
   SendOutlined, SmileOutlined
 } from '@ant-design/icons';
 import { IUser } from 'src/interfaces';
-import { Emotions } from '@components/messages/emotions';
+import Emotions from '@components/messages/emotions';
 import { FormInstance } from 'antd/lib/form';
 import { ICreateComment } from 'src/interfaces/comment';
 import Router from 'next/router';

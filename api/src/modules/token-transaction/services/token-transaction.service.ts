@@ -31,6 +31,7 @@ import { SocketUserService } from 'src/modules/socket/services/socket-user.servi
 import { UserDto } from 'src/modules/user/dtos';
 import { MessageService } from 'src/modules/message/services';
 import { MESSAGE_TYPE } from 'src/modules/message/constants';
+import { PaymentDto } from 'src/modules/payment/dtos';
 import { PAYMENT_TOKEN_MODEL_PROVIDER } from '../providers';
 import { TokenTransactionModel } from '../models';
 import {
@@ -376,8 +377,8 @@ export class TokenTransactionService {
         conversationId,
         {
           type: MESSAGE_TYPE.TIP,
-          text: `${user?.name || user?.username} tipped $${price.toFixed(2)}`
-        },
+          text: `${user?.name || user?.username} tipped - ${price.toFixed(2)}`
+        } as any,
         {
           source: paymentTransaction.source,
           sourceId: paymentTransaction.sourceId
@@ -506,6 +507,55 @@ export class TokenTransactionService {
         productId: toObjectId(feed._id),
         productType: PURCHASE_ITEM_TARTGET_TYPE.FEED,
         performerId: toObjectId(feed.fromSourceId),
+        quantity: 1
+      }
+    ];
+    paymentTransaction.status = PURCHASE_ITEM_STATUS.SUCCESS;
+    return paymentTransaction.save();
+  }
+
+  public async purchaseMessage(messageId: string | ObjectId, user: PerformerDto) {
+    const message = await this.messageService.findById(messageId);
+    if (!message || !message.isSale) {
+      throw new EntityNotFoundException();
+    }
+    if (user.balance < message.price) throw new NotEnoughMoneyException();
+    const transaction = await this.createPaymentTokenMessage(
+      message,
+      user
+    );
+    // TODO - earning listener, order listener
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: TOKEN_TRANSACTION_SUCCESS_CHANNEL,
+        eventName: EVENT.CREATED,
+        data: new PaymentDto(transaction)
+      })
+    );
+    return transaction;
+  }
+
+  public async createPaymentTokenMessage(
+    message,
+    user
+  ) {
+    const paymentTransaction = new this.TokenPaymentModel();
+    paymentTransaction.originalPrice = message.price;
+    paymentTransaction.source = PURCHASE_ITEM_TARGET_SOURCE.USER;
+    paymentTransaction.sourceId = user._id;
+    paymentTransaction.target = PURCHASE_ITEM_TARTGET_TYPE.MESSAGE;
+    paymentTransaction.targetId = message._id;
+    paymentTransaction.performerId = message.senderId;
+    paymentTransaction.type = PURCHASE_ITEM_TYPE.MESSAGE;
+    paymentTransaction.totalPrice = message.price;
+    paymentTransaction.products = [
+      {
+        name: 'Unlock message',
+        description: message.text || 'Unlock message',
+        price: message.price,
+        productId: message._id,
+        productType: PURCHASE_ITEM_TARTGET_TYPE.MESSAGE,
+        performerId: message.senderId,
         quantity: 1
       }
     ];

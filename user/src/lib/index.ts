@@ -7,3 +7,4 @@ export * from './duration';
 export * from './utils';
 export * from './number';
 export * from './array';
+export * from './file';

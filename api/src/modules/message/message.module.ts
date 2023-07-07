@@ -14,6 +14,9 @@ import { MessageController } from './controllers/message.controller';
 import { BlockModule } from '../block/block.module';
 import { UtilsModule } from '../utils/utils.module';
 import { StreamModule } from '../stream/stream.module';
+import { FollowModule } from '../follow/follow.module';
+import { MailerModule } from '../mailer/mailer.module';
+import { TokenTransactionModule } from '../token-transaction/token-transaction.module';
 
 @Module({
   imports: [
@@ -27,7 +30,10 @@ import { StreamModule } from '../stream/stream.module';
     forwardRef(() => FileModule),
     forwardRef(() => SubscriptionModule),
     forwardRef(() => BlockModule),
-    forwardRef(() => StreamModule)
+    forwardRef(() => StreamModule),
+    forwardRef(() => FollowModule),
+    forwardRef(() => MailerModule),
+    forwardRef(() => TokenTransactionModule)
   ],
   providers: [
     ...messageProviders,

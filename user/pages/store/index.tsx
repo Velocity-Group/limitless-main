@@ -12,7 +12,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Error from 'next/error';
 import {
-  productService, tokenTransctionService, reactionService, utilsService
+  productService, tokenTransactionService, reactionService, utilsService
 } from '@services/index';
 import { PerformerListProduct } from '@components/product/performer-list-product';
 import { PurchaseProductForm } from '@components/product/confirm-purchase';
@@ -147,7 +147,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     }
     try {
       await this.setState({ submiting: true });
-      await tokenTransctionService.purchaseProduct(product._id, payload);
+      await tokenTransactionService.purchaseProduct(product._id, payload);
       message.success('Payment success');
       handleUpdateBalance({ token: -product.price });
       Router.push('/user/orders');

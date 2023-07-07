@@ -87,7 +87,7 @@ const conversationSagas = [
           yield put(loadMessages({ conversationId: conversation._id, limit: 25, offset: 0 }));
         }
       } catch (e) {
-        message.error('Error occured, please try again later');
+        message.error('Error occurred, please try again later');
       }
     }
   },

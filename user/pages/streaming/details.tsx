@@ -18,7 +18,7 @@ import {
   streamService,
   performerService,
   messageService,
-  tokenTransctionService
+  tokenTransactionService
 } from 'src/services';
 import { SocketContext, Event } from 'src/socket';
 import nextCookie from 'next-cookies';
@@ -189,7 +189,7 @@ class LivePage extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      await tokenTransctionService.purchaseStream(activeStream._id);
+      await tokenTransactionService.purchaseStream(activeStream._id);
       handleUpdateBalance({ token: -activeStream.price });
       await this.joinConversation(true);
     } catch (e) {
@@ -325,7 +325,7 @@ class LivePage extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      await tokenTransctionService.sendTip(performer?._id, {
+      await tokenTransactionService.sendTip(performer?._id, {
         price: token,
         conversationId: activeConversation?.data?._id,
         sessionId: activeStream?.sessionId,

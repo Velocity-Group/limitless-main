@@ -88,7 +88,8 @@ function LiveStreamingSchedule() {
             <DatePicker
               disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
               showTime={{ format: 'HH:mm a' }}
-              format="YYYY-MM-DD HH:mm a" />
+              format="YYYY-MM-DD HH:mm a"
+            />
           </Form.Item>
           <Form.Item>
             <Button className="primary" htmlType="submit">

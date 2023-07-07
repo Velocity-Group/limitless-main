@@ -9,22 +9,26 @@ import {
   UsePipes,
   ValidationPipe,
   Body,
-  ForbiddenException,
   Get,
   Query,
   Param,
   Delete,
-  UseInterceptors
+  UseInterceptors,
+  ForbiddenException
 } from '@nestjs/common';
 import { DataResponse, getConfig } from 'src/kernel';
 import { AuthGuard, RoleGuard } from 'src/modules/auth/guards';
-import { MultiFileUploadInterceptor, FilesUploaded } from 'src/modules/file';
+import {
+  MultiFileUploadInterceptor, FileUploadInterceptor, FileUploaded, FileDto
+} from 'src/modules/file';
 import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
+import { AuthService } from 'src/modules/auth/services';
+import { FileService } from 'src/modules/file/services';
 import { MessageService, NotificationMessageService } from '../services';
 import {
-  MessageListRequest, MessageCreatePayload, PrivateMessageCreatePayload
+  MessageListRequest, MessageCreatePayload
 } from '../payloads';
 import { MessageDto } from '../dtos';
 
@@ -32,9 +36,195 @@ import { MessageDto } from '../dtos';
 @Controller('messages')
 export class MessageController {
   constructor(
+    private readonly authService: AuthService,
     private readonly messageService: MessageService,
-    private readonly notificationMessageService: NotificationMessageService
+    private readonly notificationMessageService: NotificationMessageService,
+    private readonly fileService: FileService
   ) { }
+
+  @Post('/read-all/conversation/:conversationId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async readAllMessage(
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: UserDto
+  ): Promise<DataResponse<MessageDto>> {
+    const message = await this.notificationMessageService.recipientReadAllMessageInConversation(user, conversationId);
+    return DataResponse.ok(message);
+  }
+
+  @Post('/public/file/photo')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @UseInterceptors(
+    FileUploadInterceptor(
+      'message-photo',
+      'file',
+      {
+        destination: getConfig('file').messageDir,
+        acl: S3ObjectCannelACL.PublicRead,
+        server: Storage.S3
+      }
+    )
+  )
+  async validatePublicPhoto(
+    @FileUploaded() file: FileDto
+  ) {
+    await this.messageService.validatePhotoFile(
+      file, true
+    );
+    return DataResponse.ok({
+      ...file.toResponse(),
+      url: file.getUrl()
+    });
+  }
+
+  @Post('/private/file/photo')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
+  @UseInterceptors(
+    FileUploadInterceptor(
+      'message-photo',
+      'file',
+      {
+        destination: getConfig('file').messageProtectedDir,
+        acl: S3ObjectCannelACL.AuthenticatedRead,
+        server: Storage.S3
+      }
+    )
+  )
+  async validatePrivatePhoto(
+    @FileUploaded() file: FileDto
+  ) {
+    await this.messageService.validatePhotoFile(
+      file
+    );
+    return DataResponse.ok({
+      ...file.toResponse(),
+      url: file.getUrl()
+    });
+  }
+
+  @Post('/private/file/video')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
+  @UseInterceptors(
+    FileUploadInterceptor(
+      'message-video',
+      'file',
+      {
+        destination: getConfig('file').messageProtectedDir,
+        acl: S3ObjectCannelACL.AuthenticatedRead,
+        server: Storage.S3
+      }
+    )
+  )
+  async createVideoFileMessage(
+    @FileUploaded() file: FileDto
+  ) {
+    await this.messageService.validateVideoFile(
+      file
+    );
+    return DataResponse.ok({
+      ...file.toResponse(),
+      url: file.getUrl()
+    });
+  }
+
+  @Post('/public/file/video')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
+  @UseInterceptors(
+    FileUploadInterceptor(
+      'message-teaser',
+      'file',
+      {
+        destination: getConfig('file').messageDir,
+        acl: S3ObjectCannelACL.PublicRead,
+        server: Storage.S3
+      }
+    )
+  )
+  async createTeaserFileMessage(
+    @FileUploaded() file: FileDto
+  ) {
+    await this.messageService.validateVideoFile(
+      file
+    );
+    return DataResponse.ok({
+      ...file.toResponse(),
+      url: file.getUrl()
+    });
+  }
+
+  @Post('/public/file/thumbnail')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @UseInterceptors(
+    FileUploadInterceptor(
+      'message-thumbnail',
+      'file',
+      {
+        destination: getConfig('file').messageDir,
+        acl: S3ObjectCannelACL.PublicRead,
+        server: Storage.S3,
+        uploadImmediately: true
+      }
+    )
+  )
+  async validateThumbPhoto(
+    @FileUploaded() file: FileDto
+  ) {
+    // await this.messageService.validatePhotoFile(
+    //   file, true
+    // );
+    return DataResponse.ok({
+      ...file.toResponse(),
+      url: file.getUrl()
+    });
+  }
+
+  @Post('/public/file/audio')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
+  @UseInterceptors(
+    FileUploadInterceptor(
+      'message-audio',
+      'file',
+      {
+        destination: getConfig('file').messageDir,
+        acl: S3ObjectCannelACL.PublicRead,
+        server: Storage.S3,
+        uploadImmediately: true
+      }
+    )
+  )
+  async createAudioFileMessage(
+    @FileUploaded() file: FileDto
+  ) {
+    return DataResponse.ok({
+      ...file.toResponse(),
+      url: file.getUrl()
+    });
+  }
+
+  @Post('/:messageId/videos/:fileId/url')
+  @UseGuards(AuthGuard)
+  async getVideoLinkFeed(
+    @Param('messageId') messageId: string,
+    @Param('fileId') fileId: string,
+    @Request() req: any
+  ) {
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const data = await this.fileService.getFileStatus(fileId, messageId, jwToken);
+    return DataResponse.ok(data);
+  }
 
   @Post('/private/file')
   @HttpCode(HttpStatus.OK)
@@ -59,40 +249,42 @@ export class MessageController {
       }
     ])
   )
-  async createPrivateFileMessage(
-    @FilesUploaded() files: Record<string, any>,
-    @Body() payload: PrivateMessageCreatePayload,
+  // async createPrivateFileMessage(
+  //   @FilesUploaded() files: Record<string, any>,
+  //   @Body() payload: PrivateMessageCreatePayload,
+  //   @Request() req: any
+  // ): Promise<DataResponse<MessageDto>> {
+  //   if (req.authUser.sourceId.toString() === payload.recipientId.toString()) {
+  //     throw new ForbiddenException();
+  //   }
+
+  //   const message = await this.messageService.createPrivateFileMessage(
+  //     {
+  //       source: req.authUser.source,
+  //       sourceId: req.authUser.sourceId
+  //     },
+  //     {
+  //       source: payload.recipientType,
+  //       sourceId: payload.recipientId
+  //     },
+  //     files['message-photo'],
+  //     payload
+  //   );
+  //   return DataResponse.ok(message);
+  // }
+
+  @Get('/auth/check')
+  @HttpCode(HttpStatus.OK)
+  async checkAuth(
     @Request() req: any
-  ): Promise<DataResponse<MessageDto>> {
-    if (req.authUser.sourceId.toString() === payload.recipientId.toString()) {
+  ) {
+    if (!req.query.token) throw new ForbiddenException();
+    const user = await this.authService.getSourceFromJWT(req.query.token);
+    if (!user) {
       throw new ForbiddenException();
     }
-
-    const message = await this.messageService.createPrivateFileMessage(
-      {
-        source: req.authUser.source,
-        sourceId: req.authUser.sourceId
-      },
-      {
-        source: payload.recipientType,
-        sourceId: payload.recipientId
-      },
-      files['message-photo'],
-      payload
-    );
-    return DataResponse.ok(message);
-  }
-
-  @Post('/read-all/:conversationId')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async readAllMessage(
-    @Param('conversationId') conversationId: string,
-    @CurrentUser() user: UserDto
-  ): Promise<DataResponse<MessageDto>> {
-    const message = await this.notificationMessageService.recipientReadAllMessageInConversation(user, conversationId);
-    return DataResponse.ok(message);
+    const valid = await this.messageService.checkAuth(req, user);
+    return DataResponse.ok(valid);
   }
 
   @Get('/counting-not-read-messages')
@@ -111,20 +303,23 @@ export class MessageController {
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async loadMessages(
-    @Query() req: MessageListRequest,
+    @Query() query: MessageListRequest,
     @Param('conversationId') conversationId: string,
-    @CurrentUser() user: UserDto
+    @CurrentUser() user: UserDto,
+    @Request() req: any
   ): Promise<DataResponse<any>> {
     // eslint-disable-next-line no-param-reassign
-    req.conversationId = conversationId;
-    const data = await this.messageService.loadMessages(req, user);
+    query.conversationId = conversationId;
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const data = await this.messageService.loadPrivateMessages(query, user, jwToken);
     return DataResponse.ok(data);
   }
 
   @Post('/conversations/:conversationId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async createMessage(
     @Body() payload: MessageCreatePayload,
     @Param('conversationId') conversationId: string,
@@ -136,7 +331,8 @@ export class MessageController {
       {
         source: req.authUser.source,
         sourceId: req.authUser.sourceId
-      }
+      },
+      req.jwToken
     );
     return DataResponse.ok(data);
   }

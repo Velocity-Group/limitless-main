@@ -16,7 +16,7 @@ import {
 } from '@redux/comment/actions';
 import { formatDate, videoDuration, shortenLargeNumber } from '@lib/index';
 import {
-  reactionService, feedService, tokenTransctionService, reportService
+  reactionService, feedService, tokenTransactionService, reportService
 } from '@services/index';
 import { connect } from 'react-redux';
 import { setSubscription } from '@redux/subscription/actions';
@@ -246,7 +246,7 @@ class FeedCard extends Component<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await tokenTransctionService.sendTip(feed?.performer?._id, { performerId: feed?.performer?._id, price });
+      await tokenTransactionService.sendTip(feed?.performer?._id, { performerId: feed?.performer?._id, price });
       message.success('Thank you for the tip');
       handleUpdateBalance({ token: -price });
     } catch (e) {
@@ -266,7 +266,7 @@ class FeedCard extends Component<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await tokenTransctionService.purchaseFeed(feed._id, {});
+      await tokenTransactionService.purchaseFeed(feed._id, {});
       message.success('Unlocked successfully!');
       this.setState({ isBought: true });
       handleUpdateBalance({ token: -feed.price });

@@ -1,20 +1,113 @@
+@import '../../../style/vars.less';
+
 .list-photos {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 3px;
 
   .ant-image {
-    width: 12.5%;
-    padding: 2px;
+    animation: skeleton-loading 1s linear infinite alternate;
+    padding: 1px;
     overflow: hidden;
+    cursor: pointer;
+    width: 130px;
+    height: 75px;
 
-    @media (max-width: 450px) {
-      width: 20%;
+    img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    &.blured {
+      pointer-events: none;
+
+      img {
+        filter: blur(20px);
+      }
+    }
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+.keen-slider {
+  &.photos {
+    .ant-image {
+      animation: skeleton-loading 1s linear infinite alternate;
+      border-radius: 14px;
+
+      img.keen-slider__slide {
+        height: 583px;
+        object-fit: cover;
+        width: 100%;
+        border-radius: 14px;
+        cursor: pointer;
+
+        &:hover {
+          opacity: 0.9;
+        }
+
+      }
+
+      @media screen and (max-width: @mobile-screen) {
+        border-radius: 0;
+
+        img.keen-slider__slide {
+          border-radius: 0;
+          height: 420px;
+        }
+      }
     }
   }
 
-  &.blur {
-    img {
-      filter: blur(20px);
+  &.thumbnails {
+    margin-top: 12px;
+
+    img.keen-slider__slide {
+      height: 78px;
+      object-fit: cover;
+      border-radius: 14px;
+      cursor: pointer;
+      animation: skeleton-loading 1s linear infinite alternate;
+
+      &.active {
+        opacity: 0.4;
+      }
+
+      @media screen and (max-width: @mobile-screen) {
+        border-radius: 6px;
+      }
     }
+  }
+}
+
+.padding-thumbnails {
+  @media only screen and (max-width: 767px) {
+    padding: 0px 10px;
+  }
+}
+
+.ril__outer {
+  background-color: @white;
+}
+
+.PhotoView-Portal {
+
+  .PhotoView-Slider__ArrowLeft,
+  .PhotoView-Slider__ArrowRight {
+    width: 50px;
+    margin: unset;
+    top: calc(50% - 50px);
+    z-index: 99;
+  }
+
+  .PhotoView__PhotoWrap {
+    transition: transform 300ms ease-in-out 0s;
   }
 }

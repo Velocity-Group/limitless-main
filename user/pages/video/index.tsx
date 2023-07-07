@@ -11,7 +11,7 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import {
-  videoService, reactionService, tokenTransctionService
+  videoService, reactionService, tokenTransactionService
 } from '@services/index';
 import { setSubscription } from '@redux/subscription/actions';
 import {
@@ -237,7 +237,7 @@ class VideoViewPage extends PureComponent<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await (await tokenTransctionService.purchaseVideo(video._id, {})).data;
+      await (await tokenTransactionService.purchaseVideo(video._id, {})).data;
       message.success('Video is unlocked!');
       handleUpdateBalance({ token: -video.price });
       this.setState({ isBought: true, requesting: false });

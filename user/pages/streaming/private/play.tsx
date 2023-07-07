@@ -14,7 +14,7 @@ import {
 } from 'src/interfaces';
 import { connect } from 'react-redux';
 import {
-  tokenTransctionService,
+  tokenTransactionService,
   streamRequestService
 } from 'src/services';
 import { SocketContext, Event } from 'src/socket';
@@ -132,7 +132,7 @@ class LivePage extends PureComponent<IProps> {
     }
     try {
       this.setState({ submiting: true });
-      await tokenTransctionService.purchaseStream(activeStream._id);
+      await tokenTransactionService.purchaseStream(activeStream._id);
       this.setState({ tokenSpent: tokenSpent + activeStream.price });
       handleUpdateBalance({ token: -activeStream.price });
       setTimeout(() => {
@@ -277,7 +277,7 @@ class LivePage extends PureComponent<IProps> {
     }
     try {
       await this.setState({ submiting: true });
-      await tokenTransctionService.sendTip(performer?._id, {
+      await tokenTransactionService.sendTip(performer?._id, {
         price: token,
         conversationId: activeConversation?.data?._id,
         sessionId: activeStream?.sessionId,

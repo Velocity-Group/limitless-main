@@ -18,3 +18,19 @@ export const generateUuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
 })
+
+export const replaceURLs = (str: string) => {
+  if (!str) return '';
+
+  const urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+  const result = str.replace(urlRegex, (url: string) => {
+    let hyperlink = url;
+    if (!hyperlink.match('^https?:\\/\\/')) {
+      hyperlink = `http://${hyperlink}`;
+    }
+    return `<a href="${hyperlink}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+
+  // eslint-disable-next-line consistent-return
+  return result;
+}

@@ -277,6 +277,42 @@ export class FileService {
     return true;
   }
 
+  public async removeMany(fileIds: string[] | ObjectId[]) {
+    const files = await this.fileModel.find({ _id: { $in: fileIds } });
+    if (!files.length) {
+      return false;
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of files) {
+      // eslint-disable-next-line no-await-in-loop
+      await file.remove();
+      const filePaths = [
+        {
+          absolutePath: file.absolutePath,
+          path: file.path
+        }
+      ].concat(file.thumbnails || []);
+
+      if (file.server === Storage.S3) {
+        const del = filePaths.map((fp) => ({ Key: fp.absolutePath }));
+        // eslint-disable-next-line no-await-in-loop
+        await this.awsS3storageService.deleteObjects({ Objects: del });
+        return true;
+      }
+
+      filePaths.forEach((fp) => {
+        if (existsSync(fp.absolutePath)) {
+          unlinkSync(fp.absolutePath);
+        } else {
+          const publicDir = this.config.get('file.publicDir');
+          const filePublic = join(publicDir, fp.path);
+          existsSync(filePublic) && unlinkSync(filePublic);
+        }
+      });
+    }
+    return true;
+  }
+
   public async deleteManyByRefIds(refIds: string[] | ObjectId[]) {
     if (!refIds.length) return;
     const files = await this.fileModel.find({
@@ -955,5 +991,31 @@ export class FileService {
     } catch (e) {
       throw new EntityNotFoundException();
     }
+  }
+
+  public async getFileStatus(fileId: string, id: string, jwToken: string): Promise<any> {
+    const file = await this.findById(
+      fileId
+    );
+    if (!file) throw new EntityNotFoundException();
+    let fileUrl = await file.getUrl(true);
+    switch (file?.type) {
+      case 'message-video':
+        if (file?.status === 'finished') {
+          if (file.server !== Storage.S3) {
+            fileUrl = `${file.getUrl()}?messageId=${id}&token=${jwToken}`;
+          }
+          return {
+            status: 'success',
+            url: fileUrl
+          };
+        }
+        break;
+      default:
+        break;
+    }
+    return {
+      status: file.status
+    };
   }
 }

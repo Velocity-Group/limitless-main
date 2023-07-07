@@ -64,7 +64,9 @@ class MessageList extends PureComponent<IProps> {
   }
 
   renderMessages = () => {
-    const { message, currentUser, conversation } = this.props;
+    const {
+      message, currentUser, conversation, conversation: activeConversation
+    } = this.props;
     const recipientInfo = conversation && conversation.recipientInfo;
     const messages = message.items;
     let i = 0;
@@ -110,7 +112,7 @@ class MessageList extends PureComponent<IProps> {
       if (current._id) {
         tempMessages.push(
           <Message
-            key={i}
+            key={current.isDeleted ? `${current._id}_deleted` : `${current._id}`}
             isMine={isMine}
             startsSequence={startsSequence}
             endsSequence={endsSequence}
@@ -118,6 +120,7 @@ class MessageList extends PureComponent<IProps> {
             data={current}
             recipient={recipientInfo}
             currentUser={currentUser}
+            isSubscribed={activeConversation.isSubscribed}
           />
         );
       }

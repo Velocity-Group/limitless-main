@@ -6,7 +6,7 @@ import {
   SendOutlined, SmileOutlined
 } from '@ant-design/icons';
 import { IPerformer } from '@interfaces/performer';
-import { Emotions } from '@components/messages/emotions';
+import Emotions from '@components/messages/emotions';
 // import GiftsStreamBox from '@components/gift/gift-box';
 import '@components/messages/Compose.less';
 

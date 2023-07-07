@@ -8,7 +8,7 @@ import './performer.less';
 
 interface IProps {
   performer: IPerformer;
-  onFinish(price: any): Function;
+  onFinish: Function;
   submiting: boolean;
 }
 

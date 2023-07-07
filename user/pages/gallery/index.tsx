@@ -9,7 +9,7 @@ import { TickIcon } from 'src/icons';
 import { connect } from 'react-redux';
 import Head from 'next/head';
 import {
-  galleryService, photoService, tokenTransctionService, reactionService
+  galleryService, photoService, tokenTransactionService, reactionService
 } from '@services/index';
 import { getRelatedGalleries } from '@redux/gallery/actions';
 import { updateBalance } from '@redux/user/actions';
@@ -159,7 +159,7 @@ class GalleryViewPage extends PureComponent<IProps> {
     }
     try {
       await this.setState({ requesting: true });
-      await (await tokenTransctionService.purchaseGallery(gallery._id, { })).data;
+      await (await tokenTransactionService.purchaseGallery(gallery._id, { })).data;
       message.success('Gallery is unlocked!');
       handleUpdateBalance({ token: -gallery.price });
       this.setState({ isBought: true, openPurchaseModal: false, requesting: false });

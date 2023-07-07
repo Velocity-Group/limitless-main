@@ -114,6 +114,10 @@ export class FeedService extends APIRequest {
   getBookmark(payload) {
     return this.get(this.buildUrl('/reactions/feeds/bookmark', payload));
   }
+
+  getTranscodeVideoUrl(feedId, fileId) {
+    return this.post(`/feeds/file/${feedId}/videos/${fileId}/url`);
+  }
 }
 
 export const feedService = new FeedService();

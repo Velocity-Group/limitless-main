@@ -1,117 +1,141 @@
 @import '../../../style/vars.less';
 
-.compose {
-  display: flex;
-  align-items: center;
+.message-compose-form {
   position: absolute;
-  width: calc(100% + 2px);
-  bottom: -1px;
-  left: -1px;
-  border: 1px solid @light-card;
+  bottom: 0px;
+  left: 0;
+  padding: 15px;
+  width: 100%;
+  max-height: 70%;
+  overflow: auto;
   background-color: @white;
+  border-top: 1px solid #d9d9d9;
+  z-index: 1;
 
-  .toolbar-button {
-    color: @grey-color;
-    margin-left: 15px;
+  .audio-player {
+    display: flex;
+    align-items: center;
   }
 
-  .toolbar-button:hover {
-    color: @grey-color;
-  }
+  .top-btn-groups {
+    margin-bottom: 12px;
 
-  .compose-input {
-    flex: 1;
-    border: none;
-    font-size: 14px;
-    height: 48px;
-    background: none;
-    color: @black;
-    outline: thin;
-    padding: 5px 10px;
-  }
+    .ant-btn {
+      border: none;
+      margin-right: 25px;
+      background-color: transparent;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
 
-  .compose-input::placeholder {
-    opacity: 0.3;
-  }
+      svg {
+        margin-right: 5px;
+        font-size: 14px;
+      }
 
-  .grp-icons {
-    padding: 0 10px;
-    cursor: pointer;
-    position: relative;
-    font-size: 22px;
-    color: @grey-color;
+      &.preview-btn {
+        color: #3F8CFF;
 
-    &.custom {
-      display: flex;
+        .ant-upload {
+          font-size: 13px;
+          color: #3F8CFF;
+        }
+      }
 
-      .anticon-send {
-        margin-left: 15px;
+      &.sale-btn {
+        color: #3AC176;
+      }
+
+      &.active {
+        color: @primary-color;
+
+        .ant-upload {
+          color: @primary-color;
+        }
       }
     }
   }
 
-  .grp-file-icon {
-    height: 25px;
-    width: 28px;
+  .compose-text-area {
+    height: 68px;
+  }
 
-    .avatar-uploader {
-      .ant-upload {
-        width: auto;
-        height: auto;
-        background: transparent;
+  .bottom-btn-groups {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+
+    .grp-left {
+      .ant-btn {
         border: none;
-        margin: 0;
+        height: 43px;
+        line-height: 43px;
+        width: 43px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border-radius: 50%;
+        margin-right: 2px;
 
-        img {
-          display: none;
-          width: 20px !important;
-          height: 20px;
-          object-fit: cover;
+        &.active {
+          background-color: @primary-color;
+          color: @white;
+        }
+
+        svg {
+          font-size: 20px;
         }
       }
     }
 
-    .ant-upload-select.ant-upload-select-picture-card .anticon {
-      position: unset;
-      top: unset;
-      left: unset;
-      color: @grey-color;
-      ;
-      font-size: 22px;
-      padding: 0;
-      background: transparent;
-    }
-  }
+    .grp-right {
+      .ant-btn.primary {
+        margin-left: 10px;
+      }
 
-  .grp-send {
-    height: 48px;
-    background: @theme-color;
-    padding: 12px 15px;
+      @media (max-width: @mobile-screen) {
+        .ant-btn.primary {
+          margin-left: 0;
+        }
 
-    .anticon {
-      font-size: 18px;
-      color: @white;
-      transform: rotate(-45deg);
-    }
-
-    &:hover {
-      background: @primary-color;
-    }
-  }
-
-  &.stream {
-    border-color: @primary-color;
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
-    .grp-icons {
-      .grp-emotions {
-        position: relative;
-        right: 0;
-        top: 0
+        .ant-btn.secondary {
+          display: none;
+        }
       }
     }
-    .grp-send {
-      padding: 5px 15px;
+  }
+
+  @media (max-width: @mobile-screen) {
+    position: fixed;
+    border-top: none;
+    padding: 5px;
+  }
+}
+
+.message-price-modal {
+  .ant-modal-body {
+    @media screen and (max-width: @mobile-screen) {
+      padding: 5px;
+    }
+  }
+
+  .price-message-form {
+    .form-lb {
+      font-size: 16px;
+    }
+
+    .btn-grps {
+      display: flex;
+      justify-content: flex-end;
+      padding: 15px 5px;
+
+      .ant-btn {
+        margin-left: 10px;
+      }
     }
   }
 }
