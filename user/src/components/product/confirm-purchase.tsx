@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Button, Form, Input, message, InputNumber, Select
 } from 'antd';
+import { IntlShape, useIntl } from 'react-intl';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { ICountry, IProduct, IAddress } from '@interfaces/index';
 import { shippingAddressService } from 'src/services';
@@ -29,11 +30,12 @@ export const PurchaseProductForm = ({
   const [isNewAddress, setNewAddress] = useState(false);
   const [loading, setSubmiting] = useState(false);
   const [formRef] = Form.useForm();
+  const intl: IntlShape = useIntl();
 
   const handleChangeQuantity = (q: number) => {
     if (q < 1) return;
     if (product.stock < q) {
-      message.error('Quantity is out of product stock!');
+      message.error(intl.formatMessage({ id: 'quantityIsOutOfProductStock', defaultMessage: 'Quantity is out of product stock!' }));
       return;
     }
     setQuantity(q);
@@ -55,7 +57,7 @@ export const PurchaseProductForm = ({
       setNewAddress(false);
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later!');
+      message.error(err?.message || intl.formatMessage({ id: 'errorOccuredPleaseTryAgainLater', defaultMessage: 'Error occured, please try again later!' }));
       setSubmiting(false);
       setNewAddress(false);
     }
@@ -72,7 +74,7 @@ export const PurchaseProductForm = ({
     } catch (e) {
       setSubmiting(false);
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later!');
+      message.error(err?.message || intl.formatMessage({ id: 'errorOccuredPleaseTryAgainLater', defaultMessage: 'Error occured, please try again later!' }));
     }
   };
 
@@ -85,7 +87,7 @@ export const PurchaseProductForm = ({
       {!isNewAddress && (
       <div className="text-center" style={{ marginBottom: 20 }}>
         <h3 className="secondary-color">
-          Confirm purchase:
+          {intl.formatMessage({ id: 'confirmPurchase', defaultMessage: 'Confirm purchase:' })}
           {' '}
           {product?.name}
         </h3>
@@ -97,7 +99,7 @@ export const PurchaseProductForm = ({
         form={formRef}
         {...layout}
         onFinish={onFinish.bind(this)}
-        onFinishFailed={() => message.error('Please complete the required fields')}
+        onFinishFailed={() => message.error(intl.formatMessage({ id: 'pleaseCompleteTheRequiredFields', defaultMessage: 'Please complete the required fields' }))}
         name="form-order"
         initialValues={{
           quantity: 1,
@@ -110,15 +112,15 @@ export const PurchaseProductForm = ({
         <>
           <Form.Item
             name="quantity"
-            rules={[{ required: true, message: 'Please input quantity of product' }]}
-            label="Quantity"
+            rules={[{ required: true, message: intl.formatMessage({ id: 'pleaseInputQuantityOfProduct', defaultMessage: 'Please input quantity of product' }) }]}
+            label={intl.formatMessage({ id: 'quantity', defaultMessage: 'Quantity' })}
           >
             <InputNumber onChange={handleChangeQuantity} min={1} max={product.stock} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item
             name="deliveryAddressId"
-            rules={[{ required: true, message: 'Please select delivery address!' }]}
-            label="Delivery address"
+            rules={[{ required: true, message: intl.formatMessage({ id: 'pleaseSelectDeliveryAddress', defaultMessage: 'Please select delivery address!' }) }]}
+            label={intl.formatMessage({ id: 'deliveryAddress', defaultMessage: 'Delivery address' })}
           >
             <Button.Group style={{ width: '100%', overflow: 'auto' }}>
               <Select defaultActiveFirstOption onChange={(val: string) => formRef.setFieldsValue({ deliveryAddressId: val })}>
@@ -140,19 +142,19 @@ export const PurchaseProductForm = ({
           </Form.Item>
           <Form.Item
             name="phoneNumber"
-            label="Phone number"
+            label={intl.formatMessage({ id: 'phoneNumber', defaultMessage: 'Phone number' })}
             rules={[
-              { required: true, message: 'Please enter your phone number!' },
+              { required: true, message: intl.formatMessage({ id: 'pleaseEnterYourPhoneNumber', defaultMessage: 'Please enter your phone number!' }) },
               {
-                pattern: new RegExp(/^([+]\d{2,4})?\d{9,12}$/g), message: 'Please provide valid digit numbers'
+                pattern: new RegExp(/^([+]\d{2,4})?\d{9,12}$/g), message: intl.formatMessage({ id: 'pleaseProvideValidDigitNumbers', defaultMessage: 'Please provide valid digit numbers' })
               }
             ]}
           >
-            <Input placeholder="Phone number (+910123456789)" />
+            <Input placeholder={intl.formatMessage({ id: 'phoneNumbers', defaultMessage: 'Phone number (+910123456789)' })} />
           </Form.Item>
           <Form.Item
             name="userNote"
-            label="Comments"
+            label={intl.formatMessage({ id: 'comments', defaultMessage: 'Comments' })}
           >
             <Input.TextArea rows={2} />
           </Form.Item>
@@ -166,7 +168,8 @@ export const PurchaseProductForm = ({
             loading={submiting}
             disabled={submiting || (product.type === 'physical' && product.stock < quantity)}
           >
-            CONFIRM PURCHASE FOR&nbsp;
+            {intl.formatMessage({ id: 'confirmPurchaseFor', defaultMessage: 'CONFIRM PURCHASE FOR' })}
+            {' '}
             $
             {(quantity * product.price).toFixed(2)}
           </Button>
@@ -176,7 +179,7 @@ export const PurchaseProductForm = ({
       {isNewAddress && (
       <div className="text-center">
         <h3 className="secondary-color">
-          Save your address for the future use
+          {intl.formatMessage({ id: ' saveYourAddressForTheFutureUse', defaultMessage: 'Save your address for the future use' })}
         </h3>
       </div>
       )}

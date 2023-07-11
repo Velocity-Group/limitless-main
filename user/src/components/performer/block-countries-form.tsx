@@ -1,9 +1,8 @@
 /* eslint-disable no-template-curly-in-string */
 import { PureComponent } from 'react';
-import {
-  Form, Button, Select
-} from 'antd';
+import { Form, Button, Select } from 'antd';
 import { IBlockCountries, ICountry } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const layout = {
   labelCol: { span: 24 },
@@ -26,14 +25,15 @@ interface IProps {
   blockCountries?: IBlockCountries;
   updating?: boolean;
   countries?: ICountry[];
+  intl: IntlShape;
 }
 
 const { Option } = Select;
 
-export class PerformerBlockCountriesForm extends PureComponent<IProps> {
+class PerformerBlockCountriesForm extends PureComponent<IProps> {
   render() {
     const {
-      onFinish, blockCountries, updating, countries
+      onFinish, blockCountries, updating, countries, intl
     } = this.props;
     return (
       <Form
@@ -45,29 +45,41 @@ export class PerformerBlockCountriesForm extends PureComponent<IProps> {
         labelAlign="left"
         className="account-form"
       >
-        <Form.Item name="countryCodes" label="Select countries you want to block">
-          <Select
-            showSearch
-            optionFilterProp="label"
-            mode="multiple"
-          >
+        <Form.Item
+          name="countryCodes"
+          label={intl.formatMessage({
+            id: 'selectCountriesYouWantToBlock',
+            defaultMessage: 'Select countries you want to block'
+          })}
+        >
+          <Select showSearch optionFilterProp="label" mode="multiple">
             {countries
-                  && countries.length > 0
-                  && countries.map((c) => (
-                    <Option value={c.code} label={c.name} key={c.code}>
-                      <img alt="country_flag" src={c.flag} width="25px" />
-                      {' '}
-                      {c.name}
-                    </Option>
-                  ))}
+              && countries.length > 0
+              && countries.map((c) => (
+                <Option value={c.code} label={c.name} key={c.code}>
+                  <img alt="country_flag" src={c.flag} width="25px" />
+                  {' '}
+                  {c.name}
+                </Option>
+              ))}
           </Select>
         </Form.Item>
         <Form.Item className="text-center">
-          <Button type="primary" htmlType="submit" className="primary" loading={updating}>
-            Save Changes
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="primary"
+            loading={updating}
+          >
+            {intl.formatMessage({
+              id: 'saveChanges',
+              defaultMessage: 'Save Changes'
+            })}
           </Button>
         </Form.Item>
       </Form>
     );
   }
 }
+
+export default injectIntl(PerformerBlockCountriesForm);

@@ -3,6 +3,7 @@ import { Upload, message } from 'antd';
 import { LoadingOutlined, CameraOutlined } from '@ant-design/icons';
 import ImgCrop from 'antd-img-crop';
 import { getGlobalConfig } from '@services/config';
+import { injectIntl, IntlShape } from 'react-intl';
 
 function getBase64(img, callback) {
   const reader = new FileReader();
@@ -33,9 +34,10 @@ interface IProps {
   uploadUrl?: string;
   headers?: any;
   onUploaded?: Function;
+  intl: IntlShape
 }
 
-export class AvatarUpload extends PureComponent<IProps, IState> {
+class AvatarUpload extends PureComponent<IProps, IState> {
   state = {
     loading: false,
     imageUrl: '/static/no-avatar.png'
@@ -88,9 +90,9 @@ export class AvatarUpload extends PureComponent<IProps, IState> {
   render() {
     const { loading } = this.state;
     const { imageUrl } = this.state;
-    const { headers, uploadUrl } = this.props;
+    const { headers, uploadUrl, intl } = this.props;
     return (
-      <ImgCrop rotate shape="round" quality={1} modalTitle="Edit Avatar" modalWidth={767}>
+      <ImgCrop rotate shape="round" quality={1} modalTitle={intl.formatMessage({ id: 'editAvatar', defaultMessage: 'Edit Avatar' })} modalWidth={767}>
         <Upload
           accept="image/*"
           name="avatar"
@@ -116,3 +118,5 @@ export class AvatarUpload extends PureComponent<IProps, IState> {
     );
   }
 }
+
+export default injectIntl(AvatarUpload);

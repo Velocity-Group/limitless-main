@@ -2,6 +2,7 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import {
   message
 } from 'antd';
+import { IntlShape, useIntl } from 'react-intl';
 
 interface IProps {
   submit: Function;
@@ -11,6 +12,7 @@ interface IProps {
 function CardForm({ submit, submiting }: IProps) {
   const stripe = useStripe();
   const elements = useElements();
+  const intl: IntlShape = useIntl();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -28,7 +30,7 @@ function CardForm({ submit, submiting }: IProps) {
     if (error) {
       // eslint-disable-next-line no-console
       console.log('[error]', error);
-      message.error(error?.message || 'Invalid card information, please check then try again');
+      message.error(error?.message || intl.formatMessage({ id: 'invalidCardInformationPleaseCheckThenTryAgain', defaultMessage: 'Invalid card information, please check then try again' }));
       return;
     }
     submit(source);
@@ -56,8 +58,8 @@ function CardForm({ submit, submiting }: IProps) {
           }}
         />
       </div>
-      <button className="ant-btn primary" type="submit" disabled={!stripe || submiting} style={{ width: '100%' }}>
-        SUBMIT
+      <button className="ant-btn primary" type="submit" disabled={!stripe || submiting} style={{ width: '100%', textTransform: 'uppercase' }}>
+        {intl.formatMessage({ id: 'submit', defaultMessage: 'SUBMIT' })}
       </button>
     </form>
   );

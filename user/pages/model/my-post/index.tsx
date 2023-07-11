@@ -1,18 +1,18 @@
 import Head from 'next/head';
 import { PureComponent } from 'react';
-import {
-  message, Layout
-} from 'antd';
+import { message, Layout } from 'antd';
 import { feedService } from '@services/index';
-import { SearchFilter } from '@components/common/search-filter';
+import SearchFilter from '@components/common/search-filter';
 import Link from 'next/link';
 import { connect } from 'react-redux';
 import { IUIConfig } from 'src/interfaces/index';
 import FeedList from '@components/post/table-list';
 import { PlusCircleOutlined } from '@ant-design/icons';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 class PostListing extends PureComponent<IProps> {
@@ -45,11 +45,15 @@ class PostListing extends PureComponent<IProps> {
 
   async handleFilter(values) {
     const { pagination, filter } = this.state;
-    await this.setState({ filter: { ...filter, ...values }, pagination: { ...pagination, current: 1 } });
+    await this.setState({
+      filter: { ...filter, ...values },
+      pagination: { ...pagination, current: 1 }
+    });
     this.getData();
   }
 
   async getData() {
+    const { intl } = this.props;
     try {
       const {
         filter, sort, sortBy, pagination
@@ -69,44 +73,73 @@ class PostListing extends PureComponent<IProps> {
       });
     } catch (error) {
       const err = await error;
-      message.error(err?.message || 'An error occured. Please try again.');
+      message.error(
+        err?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
       this.setState({ loading: false });
     }
   }
 
   async deleteFeed(feed) {
-    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) {
+    const { intl } = this.props;
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'allEarningsRelatedToThisPostWillBeRefunded',
+          defaultMessage:
+            'All earnings related to this post will be refunded. Are you sure to remove it?'
+        })
+      )
+    ) {
       return;
     }
     try {
       await feedService.delete(feed._id);
-      message.success('Post deleted successfully');
+      message.success(
+        intl.formatMessage({
+          id: 'postDeletedSuccessfully',
+          defaultMessage: 'Post deleted successfully'
+        })
+      );
       this.getData();
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
-      message.error(err.message || 'An error occurred, please try again!');
+      message.error(
+        err.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     }
   }
 
   render() {
     const { items, loading, pagination } = this.state;
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const type = [
       {
         key: '',
-        text: 'All types'
+        text: `${intl.formatMessage({
+          id: 'allType',
+          defaultMessage: 'All type'
+        })}`
       },
       {
         key: 'text',
-        text: 'Text'
+        text: `${intl.formatMessage({ id: 'text', defaultMessage: 'Text' })}`
       },
       {
         key: 'video',
-        text: 'Video'
+        text: `${intl.formatMessage({ id: 'video', defaultMessage: 'Video' })}`
       },
       {
         key: 'photo',
-        text: 'Photo'
+        text: `${intl.formatMessage({ id: 'photo', defaultMessage: 'Photo' })}`
       }
       // {
       //   key: 'audio',
@@ -117,20 +150,33 @@ class PostListing extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            { ui?.siteName }
+            {ui?.siteName}
             {' '}
-            | My Posts
+            |
+            {' '}
+            {intl.formatMessage({ id: 'myPosts', defaultMessage: 'My Posts' })}
           </title>
         </Head>
         <div className="main-container">
-          <div className="page-heading" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>My Posts</span>
+          <div
+            className="page-heading"
+            style={{ display: 'flex', justifyContent: 'space-between' }}
+          >
+            <span>
+              {intl.formatMessage({
+                id: 'myPosts',
+                defaultMessage: 'My Posts'
+              })}
+            </span>
             <Link href="/model/my-post/create">
               <a>
                 {' '}
                 <PlusCircleOutlined />
                 {' '}
-                New Post
+                {intl.formatMessage({
+                  id: 'newPost',
+                  defaultMessage: 'New Post'
+                })}
               </a>
             </Link>
           </div>
@@ -159,4 +205,4 @@ class PostListing extends PureComponent<IProps> {
 const mapStates = (state) => ({
   ui: { ...state.ui }
 });
-export default connect(mapStates)(PostListing);
+export default injectIntl(connect(mapStates)(PostListing));

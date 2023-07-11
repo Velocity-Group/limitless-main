@@ -10,12 +10,14 @@ import { authService } from '@services/auth.service';
 import { userService } from '@services/user.service';
 import { IUser, IUIConfig } from 'src/interfaces';
 import Router from 'next/router';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   user: IUser;
   clearCart: Function;
   updateCurrentUser: Function;
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 class PaymentSuccess extends PureComponent<IProps> {
@@ -26,7 +28,9 @@ class PaymentSuccess extends PureComponent<IProps> {
   componentDidMount() {
     const { clearCart: clearCartHandler } = this.props;
     this.updateCurrentUser();
-    setTimeout(() => { clearCartHandler(); }, 1000);
+    setTimeout(() => {
+      clearCartHandler();
+    }, 1000);
     localStorage.setItem('cart', JSON.stringify([]));
   }
 
@@ -45,29 +49,62 @@ class PaymentSuccess extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, user } = this.props;
+    const { ui, user, intl } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Payment successful
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'paymentSuccessful',
+              defaultMessage: 'Payment Successful'
+            })}
           </title>
         </Head>
         <div className="main-container">
           <Result
             status="success"
-            title="Payment Successful"
-            subTitle={`Hi ${user?.name || user?.username || 'there'}, your payment has been successfully processed`}
+            title={intl.formatMessage({
+              id: 'paymentSuccessful',
+              defaultMessage: 'Payment Successful'
+            })}
+            subTitle={`${intl.formatMessage({
+              id: 'hi',
+              defaultMessage: 'Hi'
+            })} ${user?.name
+              || user?.username
+              || intl.formatMessage({ id: 'there', defaultMessage: 'there' })
+            }, ${intl.formatMessage({
+              id: 'paymentHasBeenSuccessfullyProcessed',
+              defaultMessage: 'your payment has been successfully processed'
+            })}`}
             extra={[
-              <Button className="secondary" key="console" onClick={() => Router.push('/home')}>
+              <Button
+                className="secondary"
+                key="console"
+                onClick={() => Router.push('/home')}
+                style={{ textTransform: 'uppercase' }}
+              >
                 <HomeIcon />
-                BACK HOME
+                {intl.formatMessage({
+                  id: 'backHome',
+                  defaultMessage: 'Back Home'
+                })}
               </Button>,
-              <Button key="buy" className="primary" onClick={() => Router.push('/user/payment-history')}>
+              <Button
+                key="buy"
+                className="primary"
+                onClick={() => Router.push('/user/payment-history')}
+                style={{ textTransform: 'uppercase' }}
+              >
                 <HistoryOutlined />
-                PAYMENT HISTORY
+                {intl.formatMessage({
+                  id: 'paymentHistory',
+                  defaultMessage: 'Payment History'
+                })}
               </Button>
             ]}
           />
@@ -83,4 +120,4 @@ const mapStates = (state: any) => ({
 });
 
 const mapDispatch = { clearCart, updateCurrentUser };
-export default connect(mapStates, mapDispatch)(PaymentSuccess);
+export default injectIntl(connect(mapStates, mapDispatch)(PaymentSuccess));

@@ -8,6 +8,7 @@ import { IGallery } from 'src/interfaces';
 import Router from 'next/router';
 import PhotoUploadList from '@components/file/upload-list';
 import './gallery.less';
+import { useIntl } from 'react-intl';
 
 interface IProps {
   gallery?: IGallery;
@@ -32,6 +33,7 @@ const FormGallery = ({
 }: IProps) => {
   const [form] = Form.useForm();
   const [isSale, setSale] = useState(gallery?.isSale || false);
+  const intl = useIntl();
 
   return (
     <Form
@@ -50,47 +52,83 @@ const FormGallery = ({
     >
       <Form.Item
         name="title"
-        rules={[{ required: true, message: 'Please input gallery title!' }]}
-        label="Title"
+        rules={[{
+          required: true,
+          message: intl.formatMessage({
+            id: 'pleaseInputGalleryTitle',
+            defaultMessage: 'Please input gallery title!'
+          })
+        }]}
+        label={intl.formatMessage({ id: 'title', defaultMessage: 'Title' })}
       >
         <Input />
       </Form.Item>
       <Form.Item
         name="description"
-        label="Description"
+        label={intl.formatMessage({ id: 'description', defaultMessage: 'Description' })}
       >
         <Input.TextArea rows={3} />
       </Form.Item>
       <Form.Item
         name="isSale"
-        label="For sale?"
+        label={intl.formatMessage({ id: 'forSale', defaultMessage: 'For sale?' })}
       >
-        <Switch checkedChildren="Pay per view" unCheckedChildren="Subscribe to view" checked={isSale} onChange={(val) => setSale(val)} />
+        <Switch
+          checkedChildren={intl.formatMessage({
+            id: 'payPerView',
+            defaultMessage: 'Pay per view'
+          })}
+          unCheckedChildren={intl.formatMessage({
+            id: 'subscribeToView',
+            defaultMessage: 'Subscribe to view'
+          })}
+          checked={isSale}
+          onChange={(val) => setSale(val)}
+        />
       </Form.Item>
       {isSale && (
         <Form.Item
           name="price"
-          rules={[{ required: true, message: 'Please input the price' }]}
-          label="Price"
+          rules={[{
+            required: true,
+            message: `${intl.formatMessage({
+              id: 'pleaseInputThePrice',
+              defaultMessage: 'Please input the price'
+            })}`
+          }]}
+          label={intl.formatMessage({ id: 'price', defaultMessage: 'Price' })}
         >
           <InputNumber min={1} />
         </Form.Item>
       )}
       <Form.Item
         name="status"
-        label="Status"
-        rules={[{ required: true, message: 'Please select status!' }]}
+        label={intl.formatMessage({ id: 'status', defaultMessage: 'Status' })}
+        rules={[{
+          required: true,
+          message: intl.formatMessage({
+            id: 'pleaseSelectStatus',
+            defaultMessage: 'Please select status'
+          })
+        }]}
       >
         <Select>
           <Select.Option key="active" value="active">
-            Active
+            {intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}
           </Select.Option>
           <Select.Option key="inactive" value="inactive">
-            Inactive
+            {intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}
           </Select.Option>
         </Select>
       </Form.Item>
-      {gallery && <Divider>Upload Photos</Divider>}
+      {gallery && (
+      <Divider>
+        {intl.formatMessage({
+          id: 'uploadPhotos',
+          defaultMessage: 'Upload Photos'
+        })}
+      </Divider>
+      )}
       {gallery && (
         <Dragger
           accept="image/*"
@@ -104,7 +142,10 @@ const FormGallery = ({
             <InboxOutlined />
           </p>
           <p className="ant-upload-text">
-            Drag and drop your photos to this area, or browse your computer to upload
+            {intl.formatMessage({
+              id: 'clickOrDragFilesToThisAreaToUpload',
+              defaultMessage: 'Click or drag files to this area to upload'
+            })}
           </p>
         </Dragger>
       )}
@@ -123,13 +164,13 @@ const FormGallery = ({
           disabled={submiting}
           style={{ marginRight: '20px' }}
         >
-          Submit
+          {intl.formatMessage({ id: 'submit', defaultMessage: 'Submit' })}
         </Button>
         <Button
           className="secondary"
           onClick={() => Router.push('/model/my-gallery')}
         >
-          Cancel
+          {intl.formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
         </Button>
       </Form.Item>
     </Form>

@@ -9,6 +9,7 @@ import {
 import { Event } from 'src/socket';
 import { debounce } from 'lodash';
 import { IUser } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 import ConversationSearch from './ConversationSearch';
 import ConversationListItem from './ConversationListItem';
 import './ConversationList.less';
@@ -38,6 +39,7 @@ interface IProps {
     sendMessage: {};
   };
   user: IUser;
+  intl: IntlShape
 }
 class ConversationList extends PureComponent<IProps> {
   state = {
@@ -122,7 +124,7 @@ class ConversationList extends PureComponent<IProps> {
   };
 
   render() {
-    const { conversation } = this.props;
+    const { conversation, intl } = this.props;
     const { data: conversations, requesting } = conversation.list;
     const { mapping, activeConversation = {} } = conversation;
     return (
@@ -131,7 +133,7 @@ class ConversationList extends PureComponent<IProps> {
         <div className="user-bl">
           <MessageIcon />
           {' '}
-          Chats
+          {intl.formatMessage({ id: 'chats', defaultMessage: 'Chats' })}
         </div>
         <ConversationSearch
           onSearch={(e) => {
@@ -153,7 +155,7 @@ class ConversationList extends PureComponent<IProps> {
           <div className="text-center" style={{ margin: 30 }}><Spin /></div>
           )}
           {!requesting && !conversations.length && (
-          <p className="text-center">No conversation found.</p>
+          <p className="text-center">{intl.formatMessage({ id: 'noConversationFound', defaultMessage: 'No conversation found.' })}</p>
           )}
         </div>
       </div>
@@ -175,4 +177,4 @@ const mapDispatch = {
   getConversationDetail,
   receiveMessageSuccess
 };
-export default connect(mapStates, mapDispatch)(ConversationList);
+export default injectIntl(connect(mapStates, mapDispatch)(ConversationList));

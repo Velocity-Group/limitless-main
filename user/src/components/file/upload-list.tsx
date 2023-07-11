@@ -4,15 +4,19 @@ import {
   DeleteOutlined, PictureOutlined, FileDoneOutlined
 } from '@ant-design/icons';
 import { Progress } from 'antd';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   remove: Function;
   setCover: Function;
   files: any[];
+  intl:IntlShape
 }
-export default class PhotoUploadList extends PureComponent<IProps> {
+class PhotoUploadList extends PureComponent<IProps> {
   render() {
-    const { files, remove, setCover } = this.props;
+    const {
+      files, remove, setCover, intl
+    } = this.props;
     return (
       <div className="ant-upload-list ant-upload-list-picture">
         {files.length > 0 && files.map((file) => (
@@ -35,12 +39,15 @@ export default class PhotoUploadList extends PureComponent<IProps> {
                   <div>
                     {file.isGalleryCover && (
                       <a aria-hidden>
-                        Cover IMG
+                        {intl.formatMessage({ id: 'cover', defaultMessage: 'Cover' })}
+                        {' '}
+                        IMG
                       </a>
                     )}
                     {!file.isGalleryCover && file._id && (
                       <a aria-hidden onClick={setCover.bind(this, file)}>
-                        Set as Cover IMG
+                        {intl.formatMessage({ id: 'setAsCover', defaultMessage: 'Set as Cover' })}
+                        IMG
                       </a>
                     )}
                   </div>
@@ -61,3 +68,4 @@ export default class PhotoUploadList extends PureComponent<IProps> {
     );
   }
 }
+export default injectIntl(PhotoUploadList);

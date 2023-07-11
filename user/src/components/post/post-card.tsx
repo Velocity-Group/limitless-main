@@ -10,7 +10,8 @@ import {
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import Link from 'next/link';
-import { CommentForm, ListComments } from '@components/comment';
+import CommentForm from '@components/comment/comment-form';
+import ListComments from '@components/comment/list-comments';
 import {
   getComments, moreComment, createComment, deleteComment
 } from '@redux/comment/actions';
@@ -20,17 +21,19 @@ import {
 } from '@services/index';
 import { connect } from 'react-redux';
 import { setSubscription } from '@redux/subscription/actions';
-import { TipPerformerForm } from '@components/performer/tip-form';
+import TipPerformerForm from '@components/performer/tip-form';
 import ReactMomentCountDown from 'react-moment-countdown';
 import moment from 'moment';
 import { VideoPlayer } from '@components/common/video-player';
-import { ReportForm } from '@components/report/report-form';
+import ReportForm from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
 import { IFeed, ISettings, IUser } from 'src/interfaces';
-import { PurchaseFeedForm } from './confirm-purchase';
+import PurchaseFeedForm from './confirm-purchase';
 import FeedSlider from './post-slider';
 import './index.less';
+// eslint-disable-next-line import/order
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   feed: IFeed;
@@ -45,6 +48,7 @@ interface IProps {
   comment: any;
   settings: ISettings;
   setSubscription: Function;
+  intl: IntlShape;
 }
 
 class FeedCard extends Component<IProps> {
@@ -92,14 +96,14 @@ class FeedCard extends Component<IProps> {
   }
 
   handleJoinStream = () => {
-    const { user, feed } = this.props;
+    const { user, feed, intl } = this.props;
     if (!user._id) {
-      message.error('Please log in or register!');
+      message.error(intl.formatMessage({ id: 'pleaseLogInOrRegister', defaultMessage: 'Please log in or register!' }));
       return;
     }
     if (user.isPerformer) return;
     if (!feed?.isSubscribed) {
-      message.error('Please subscribe to this model!');
+      message.error(intl.formatMessage({ id: 'pleaseSubscribeToThisModel', defaultMessage: 'Please subscribe to this model!' }));
       return;
     }
     Router.push({
@@ -112,7 +116,7 @@ class FeedCard extends Component<IProps> {
   }
 
   handleLike = async () => {
-    const { feed } = this.props;
+    const { feed, intl } = this.props;
     const { isLiked, totalLike, requesting } = this.state;
     if (requesting) return;
     try {
@@ -134,13 +138,16 @@ class FeedCard extends Component<IProps> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(error.message || intl.formatMessage({
+        id: 'errorOccurredPleaseTryAgainLater',
+        defaultMessage: 'Error occurred, please try again later'
+      }));
       this.setState({ requesting: false });
     }
   }
 
   handleBookmark = async () => {
-    const { feed, user } = this.props;
+    const { feed, user, intl } = this.props;
     const { isBookMarked, requesting } = this.state;
     if (requesting || !user._id || user.isPerformer) return;
     try {
@@ -162,22 +169,31 @@ class FeedCard extends Component<IProps> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(error.message || intl.formatMessage({
+        id: 'errorOccurredPleaseTryAgainLater',
+        defaultMessage: 'Error occurred, please try again later'
+      }));
       this.setState({ requesting: false });
     }
   }
 
   handleReport = async (payload: any) => {
-    const { feed } = this.props;
+    const { feed, intl } = this.props;
     try {
       await this.setState({ requesting: true });
       await reportService.create({
         ...payload, target: 'feed', targetId: feed._id, performerId: feed.fromSourceId
       });
-      message.success('Your report has been sent');
+      message.success(intl.formatMessage({
+        id: 'yourReportHasBeenSent',
+        defaultMessage: 'Your report has been sent'
+      }));
     } catch (e) {
       const err = await e;
-      message.error(err.message || 'error occured, please try again later');
+      message.error(err.message || intl.formatMessage({
+        id: 'errorOccurredPleaseTryAgainLater',
+        defaultMessage: 'Error occurred, please try again later'
+      }));
     } finally {
       this.setState({ requesting: false, openReportModal: false });
     }
@@ -200,7 +216,7 @@ class FeedCard extends Component<IProps> {
   }
 
   copyLink = () => {
-    const { feed } = this.props;
+    const { feed, intl } = this.props;
     const str = `${window.location.origin}/post/${feed?.slug || feed?._id}`;
     const el = document.createElement('textarea');
     el.value = str;
@@ -211,7 +227,7 @@ class FeedCard extends Component<IProps> {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
-    message.success('Copied to clipboard');
+    message.success(intl.formatMessage({ id: 'copiedToClipboard', defaultMessage: 'Copied to clipboard' }));
   }
 
   moreComment = async () => {
@@ -228,62 +244,84 @@ class FeedCard extends Component<IProps> {
   }
 
   deleteComment = (item) => {
-    const { deleteComment: handleDelete } = this.props;
-    if (!window.confirm('Are you sure to remove this comment?')) return;
+    const { intl, deleteComment: handleDelete } = this.props;
+    if (!window.confirm(intl.formatMessage({ id: 'areYouSureToRemoveThisComment', defaultMessage: 'Are you sure to remove this comment?' }))) return;
     handleDelete(item._id);
   }
 
   sendTip = async (price) => {
-    const { feed, user, updateBalance: handleUpdateBalance } = this.props;
+    const {
+      feed, user, updateBalance: handleUpdateBalance, intl
+    } = this.props;
     if (user._id === feed?.performer?._id) {
-      message.error('Models cannot tip for themselves');
+      message.error(intl.formatMessage({
+        id: 'modelsCannotTipForThemselves',
+        defaultMessage: 'Models cannot tip for themselves'
+      }));
       return;
     }
     if (user.balance < price) {
-      message.error('Your wallet balance is not enough');
+      message.error(intl.formatMessage({ id: 'Your wallet balance is not enough', defaultMessage: 'Your wallet balance is not enough' }));
       Router.push('/wallet');
       return;
     }
     try {
       await this.setState({ requesting: true });
       await tokenTransactionService.sendTip(feed?.performer?._id, { performerId: feed?.performer?._id, price });
-      message.success('Thank you for the tip');
+      message.success(intl.formatMessage({
+        id: 'thankYouForTheTip',
+        defaultMessage: 'Thank you for the tip'
+      }));
       handleUpdateBalance({ token: -price });
     } catch (e) {
       const err = await e;
-      message.error(err.message || 'error occured, please try again later');
+      message.error(err.message || intl.formatMessage({
+        id: 'errorOccurredPleaseTryAgainLater',
+        defaultMessage: 'Error occurred, please try again later'
+      }));
     } finally {
       this.setState({ requesting: false, openTipModal: false });
     }
   }
 
   purchaseFeed = async () => {
-    const { feed, user, updateBalance: handleUpdateBalance } = this.props;
+    const {
+      intl, feed, user, updateBalance: handleUpdateBalance
+    } = this.props;
     if (user.balance < feed.price) {
-      message.error('Your wallet balance is not enough');
+      message.error(intl.formatMessage({ id: 'yourWalletBalanceIsNotEnough', defaultMessage: 'Your wallet balance is not enough' }));
       Router.push('/wallet');
       return;
     }
     try {
       await this.setState({ requesting: true });
       await tokenTransactionService.purchaseFeed(feed._id, {});
-      message.success('Unlocked successfully!');
+      message.success(intl.formatMessage({
+        id: 'unlockedSuccessfully',
+        defaultMessage: 'Unlocked successfully!'
+      }));
       this.setState({ isBought: true });
       handleUpdateBalance({ token: -feed.price });
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(error.message || intl.formatMessage({
+        id: 'errorOccurredPleaseTryAgainLater',
+        defaultMessage: 'Error occurred, please try again later'
+      }));
     } finally {
       this.setState({ requesting: false, openPurchaseModal: false });
     }
   }
 
   votePoll = async (poll: any) => {
-    const { feed } = this.props;
+    const { feed, intl } = this.props;
     const { polls } = this.state;
     const isExpired = new Date(feed.pollExpiredAt) < new Date();
     if (isExpired) {
-      message.error('The poll is now closed');
+      message.error(intl.formatMessage({
+        id: 'thePollIsNowClosed',
+        defaultMessage: 'The poll is now closed'
+      }));
       return;
     }
     if (!window.confirm('Vote it?')) return;
@@ -298,7 +336,10 @@ class FeedCard extends Component<IProps> {
       });
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Something went wrong, please try again later');
+      message.error(error.message || intl.formatMessage({
+        id: 'somethingWentWrong',
+        defaultMessage: 'Something went wrong, please try again!'
+      }));
       this.setState({ requesting: false });
     }
   }
@@ -306,7 +347,7 @@ class FeedCard extends Component<IProps> {
   render() {
     const {
       feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment,
-      setSubscription: updateSubscription
+      setSubscription: updateSubscription, intl
     } = this.props;
     const { performer } = feed;
     const { requesting: commenting } = comment;
@@ -342,7 +383,7 @@ class FeedCard extends Component<IProps> {
         <Menu.Item key={`post_detail_${feed._id}`}>
           <Link href={{ pathname: '/post', query: { id: feed.slug || feed._id } }} as={`/post/${feed.slug || feed._id}`}>
             <a>
-              Details
+              {intl.formatMessage({ id: 'details', defaultMessage: 'Details' })}
             </a>
           </Link>
         </Menu.Item>
@@ -350,18 +391,27 @@ class FeedCard extends Component<IProps> {
           <Menu.Item key={`edit_post_${feed._id}`}>
             <Link href={{ pathname: '/model/my-post/edit', query: { id: feed._id } }}>
               <a>
-                Edit post
+                {intl.formatMessage({ id: 'editPost', defaultMessage: 'Edit Post' })}
               </a>
             </Link>
           </Menu.Item>
         )}
         <Menu.Item key={`copy_link_${feed._id}`} onClick={() => this.copyLink()}>
           <a>
-            Copy link to clipboard
+            {intl.formatMessage({ id: 'copyLinkToClipboard', defaultMessage: 'Copy link to clipboard' })}
           </a>
         </Menu.Item>
         {user._id === feed.fromSourceId && <Divider style={{ margin: '10px 0' }} />}
-        {user._id === feed.fromSourceId && <Menu.Item key={`delete_post_${feed._id}`}><a aria-hidden onClick={handleDelete.bind(this, feed)}>Delete post</a></Menu.Item>}
+        {user._id === feed.fromSourceId && (
+          <Menu.Item key={`delete_post_${feed._id}`}>
+            <a aria-hidden onClick={handleDelete.bind(this, feed)}>
+              {intl.formatMessage({
+                id: 'deletePost',
+                defaultMessage: 'Delete post'
+              })}
+            </a>
+          </Menu.Item>
+        )}
       </Menu>
     );
     const dropdown = (
@@ -414,18 +464,18 @@ class FeedCard extends Component<IProps> {
                 ))}
                 <div className="total-vote">
                   <span>
-                    Total
+                    {intl.formatMessage({ id: 'total', defaultMessage: 'Total' })}
                     {' '}
                     {shortenLargeNumber(totalVote)}
                     {' '}
-                    {totalVote < 2 ? 'vote' : 'votes'}
+                    {totalVote < 2 ? intl.formatMessage({ id: 'vote', defaultMessage: 'vote' }) : intl.formatMessage({ id: 'votes', defaultMessage: 'votes' })}
                   </span>
                   {feed.pollExpiredAt && moment(feed.pollExpiredAt).isAfter(moment()) ? (
                     <span>
                       {`${moment(feed.pollExpiredAt).diff(moment(), 'days')}d `}
                       <ReactMomentCountDown toDate={moment(feed.pollExpiredAt)} />
                     </span>
-                  ) : <span>Closed</span>}
+                  ) : <span>{intl.formatMessage({ id: 'closed', defaultMessage: 'Closed' })}</span>}
                 </div>
               </div>
             )}
@@ -449,7 +499,7 @@ class FeedCard extends Component<IProps> {
                     className="secondary"
                     onClick={() => updateSubscription({ showModal: true, performer: feed?.performer, subscriptionType: 'monthly' })}
                   >
-                    Subscribe to unlock
+                    {intl.formatMessage({ id: 'subscribeToUnlock', defaultMessage: 'Subscribe to unlock' })}
                   </Button>
                 )}
                 {feed.isSale && feed.price > 0 && !isBought && (
@@ -460,10 +510,12 @@ class FeedCard extends Component<IProps> {
                     className="secondary"
                     onClick={() => this.setState({ openPurchaseModal: true })}
                   >
-                    Pay $
+                    {intl.formatMessage({ id: 'pay', defaultMessage: 'Pay' })}
+                    {' '}
+                    $
                     {(feed.price || 0).toFixed(2)}
                     {' '}
-                    to unlock
+                    {intl.formatMessage({ id: 'toUnlockLowCase', defaultMessage: 'to unlock' })}
                   </Button>
                 )}
                 {(feed.isSale && !feed.price && !user._id) && (
@@ -474,12 +526,12 @@ class FeedCard extends Component<IProps> {
                   className="secondary"
                   onClick={() => Router.push({ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }, `/${performer?.username || performer?._id}`)}
                 >
-                  Follow for free
+                  {intl.formatMessage({ id: 'followForFree', defaultMessage: 'Follow for free' })}
                 </Button>
                 )}
                 {feed.teaser && (
                   <Button className="teaser-btn" type="link" onClick={() => this.setState({ openTeaser: true })}>
-                    View teaser
+                    {intl.formatMessage({ id: 'viewTeaser', defaultMessage: 'View teaser' })}
                   </Button>
                 )}
               </div>
@@ -527,16 +579,25 @@ class FeedCard extends Component<IProps> {
                 <span aria-hidden className="action-ico" onClick={() => this.setState({ openTipModal: true })}>
                   <DollarOutlined />
                   {' '}
-                  Send tip
+                  {intl.formatMessage({ id: 'sendTip', defaultMessage: 'Send Tip' })}
                 </span>
               )}
             </div>
             <div className="action-item">
               <span aria-hidden className={openReportModal ? 'action-ico active' : 'action-ico'} onClick={() => this.setState({ openReportModal: true })}>
-                <Tooltip title="Report"><FlagOutlined /></Tooltip>
+                <Tooltip title={intl.formatMessage({ id: 'report', defaultMessage: 'Report' })}><FlagOutlined /></Tooltip>
               </span>
               <span aria-hidden className={isBookMarked ? 'action-ico active' : 'action-ico'} onClick={this.handleBookmark.bind(this)}>
-                <Tooltip title={!isBookMarked ? 'Add to Bookmarks' : 'Remove from Bookmarks'}><BookOutlined /></Tooltip>
+                <Tooltip title={!isBookMarked ? intl.formatMessage({
+                  id: 'addToBookmarks',
+                  defaultMessage: 'Add to Bookmarks'
+                }) : intl.formatMessage({
+                  id: 'removeFromBookmarks',
+                  defaultMessage: 'Remove from Bookmarks'
+                })}
+                >
+                  <BookOutlined />
+                </Tooltip>
               </span>
             </div>
           </div>
@@ -558,7 +619,14 @@ class FeedCard extends Component<IProps> {
                 user={user}
                 canReply
               />
-              {comments.length < totalComments && <p className="text-center"><a aria-hidden onClick={this.moreComment.bind(this)}>More comments...</a></p>}
+              {comments.length < totalComments && (
+                <p className="text-center">
+                  <a aria-hidden onClick={this.moreComment.bind(this)}>
+                    {intl.formatMessage({ id: 'moreComments', defaultMessage: 'More comments' })}
+                    ...
+                  </a>
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -641,4 +709,4 @@ const mapStates = (state: any) => {
 const mapDispatch = {
   getComments, moreComment, createComment, deleteComment, updateBalance, setSubscription
 };
-export default connect(mapStates, mapDispatch)(FeedCard);
+export default injectIntl(connect(mapStates, mapDispatch)(FeedCard));

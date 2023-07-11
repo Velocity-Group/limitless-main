@@ -6,18 +6,23 @@ import { PureComponent } from 'react';
 import { DollarOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import {
-  IPerformer, IUIConfig, IEarning, IPerformerStats
+  IPerformer,
+  IUIConfig,
+  IEarning,
+  IPerformerStats
 } from 'src/interfaces';
 import { earningService } from 'src/services';
 import { getResponseError } from '@lib/utils';
-import { TableListEarning } from '@components/performer/table-earning';
-import { SearchFilter } from 'src/components/common/search-filter';
+import TableListEarning from '@components/performer/table-earning';
 import PageHeading from '@components/common/page-heading';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
+import SearchFilter from '@components/common/search-filter';
 
 interface IProps {
   performer: IPerformer;
   ui: IUIConfig;
+  intl: IntlShape;
 }
 interface IStates {
   loading: boolean;
@@ -124,7 +129,7 @@ class EarningPage extends PureComponent<IProps, IStates> {
     const {
       loading, earning, pagination, stats
     } = this.state;
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     return (
       <Layout>
         <Head>
@@ -133,38 +138,38 @@ class EarningPage extends PureComponent<IProps, IStates> {
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading icon={<DollarOutlined />} title="Earnings" />
+          <PageHeading icon={<DollarOutlined />} title={intl.formatMessage({ id: 'earnings', defaultMessage: 'Earnings' })} />
           <SearchFilter
             type={[
-              { key: '', text: 'All types' },
-              { key: 'product', text: 'Product' },
-              { key: 'gallery', text: 'Gallery' },
-              { key: 'feed', text: 'Post' },
-              { key: 'video', text: 'Video' },
-              { key: 'tip', text: 'Tip' },
-              { key: 'stream_tip', text: 'Streaming tip' },
-              { key: 'public_chat', text: 'Paid steaming' },
-              { key: 'monthly_subscription', text: 'Monthly Subscription' },
-              { key: 'yearly_subscription', text: 'Yearly Subscription' }
+              { key: '', text: intl.formatMessage({ id: 'allTypes', defaultMessage: 'All types' }) },
+              { key: 'product', text: intl.formatMessage({ id: 'product', defaultMessage: 'Product' }) },
+              { key: 'gallery', text: intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' }) },
+              { key: 'feed', text: intl.formatMessage({ id: 'post', defaultMessage: 'Post' }) },
+              { key: 'video', text: intl.formatMessage({ id: 'video', defaultMessage: 'Video' }) },
+              { key: 'tip', text: intl.formatMessage({ id: 'tip', defaultMessage: 'Tip' }) },
+              { key: 'stream_tip', text: intl.formatMessage({ id: 'streamingTip', defaultMessage: 'Streaming tip' }) },
+              { key: 'public_chat', text: intl.formatMessage({ id: 'paidSteaming', defaultMessage: 'Paid steaming' }) },
+              { key: 'monthly_subscription', text: intl.formatMessage({ id: 'monthlySubscription', defaultMessage: 'Monthly Subscription' }) },
+              { key: 'yearly_subscription', text: intl.formatMessage({ id: 'yearlySubscription', defaultMessage: 'Yearly Subscription' }) }
             ]}
             onSubmit={this.handleFilter.bind(this)}
             dateRange
           />
           <div className="stats-earning">
             <Statistic
-              title="Total"
+              title={intl.formatMessage({ id: 'total', defaultMessage: 'Total' })}
               prefix="$"
               value={stats?.totalGrossPrice || 0}
               precision={2}
             />
             <Statistic
-              title="Platform commission"
+              title={intl.formatMessage({ id: 'platformCommission', defaultMessage: 'Platform commission' })}
               prefix="$"
               value={stats?.totalSiteCommission || 0}
               precision={2}
             />
             <Statistic
-              title="Your Earnings"
+              title={intl.formatMessage({ id: 'yourEarnings', defaultMessage: 'Your Earnings' })}
               prefix="$"
               value={stats?.totalNetPrice || 0}
               precision={2}
@@ -189,4 +194,4 @@ const mapStates = (state) => ({
   ui: { ...state.ui },
   performer: { ...state.user.current }
 });
-export default connect(mapStates)(EarningPage);
+export default injectIntl(connect(mapStates)(EarningPage));

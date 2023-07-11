@@ -15,6 +15,7 @@ import { IProduct } from 'src/interfaces';
 import { FileAddOutlined, CameraOutlined } from '@ant-design/icons';
 import { FormInstance } from 'antd/lib/form';
 import { getGlobalConfig } from '@services/config';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   product?: IProduct;
@@ -22,6 +23,7 @@ interface IProps {
   beforeUpload?: Function;
   uploading?: boolean;
   uploadPercentage?: number;
+  intl: IntlShape
 }
 
 const layout = {
@@ -29,11 +31,7 @@ const layout = {
   wrapperCol: { span: 24 }
 };
 
-const validateMessages = {
-  required: 'This field is required!'
-};
-
-export class FormProduct extends PureComponent<IProps> {
+class FormProduct extends PureComponent<IProps> {
   state = {
     previewImageProduct: null,
     isDigitalProduct: false,
@@ -65,14 +63,20 @@ export class FormProduct extends PureComponent<IProps> {
   }
 
   beforeUploadThumb(file) {
-    const { beforeUpload } = this.props;
+    const { beforeUpload, intl } = this.props;
     const config = getGlobalConfig();
     const reader = new FileReader();
     reader.addEventListener('load', () => this.setState({ previewImageProduct: reader.result }));
     reader.readAsDataURL(file);
     const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
     if (!isValid) {
-      message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
+      message.error(`${intl.formatMessage({
+        id: 'fileIsTooLargePleaseProvideAnFile',
+        defaultMessage: 'File is too large please provide an file'
+      })} ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB ${intl.formatMessage({
+        id: 'orBelow',
+        defaultMessage: 'or below'
+      })}`);
       return false;
     }
     beforeUpload && beforeUpload(file, 'image');
@@ -80,11 +84,17 @@ export class FormProduct extends PureComponent<IProps> {
   }
 
   beforeUploadDigitalFile(file) {
-    const { beforeUpload } = this.props;
+    const { beforeUpload, intl } = this.props;
     const config = getGlobalConfig();
     const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
     if (!isValid) {
-      message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
+      message.error(`${intl.formatMessage({
+        id: 'fileIsTooLargePleaseProvideAnFile',
+        defaultMessage: 'File is too large please provide an file'
+      })} ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB ${intl.formatMessage({
+        id: 'orBelow',
+        defaultMessage: 'or below'
+      })}`);
       return false;
     }
     this.setState({ digitalFileAdded: true });
@@ -95,17 +105,23 @@ export class FormProduct extends PureComponent<IProps> {
   render() {
     if (!this.formRef) this.formRef = createRef();
     const {
-      product, submit, uploading, uploadPercentage
+      product, submit, uploading, uploadPercentage, intl
     } = this.props;
     const {
       previewImageProduct, isDigitalProduct, digitalFileAdded
     } = this.state;
     const haveProduct = !!product;
+    const validateMessages = {
+      required: intl.formatMessage({ id: 'thisFieldIsRequired', defaultMessage: 'This field is required!' })
+    };
     return (
       <Form
         {...layout}
         onFinish={submit.bind(this)}
-        onFinishFailed={() => message.error('Please complete the required fields')}
+        onFinishFailed={() => message.error(intl.formatMessage({
+          id: 'pleaseCompleteTheRequiredFields',
+          defaultMessage: 'Please complete the required fields'
+        }))}
         name="form-upload"
         ref={this.formRef}
         validateMessages={validateMessages}
@@ -127,7 +143,7 @@ export class FormProduct extends PureComponent<IProps> {
           <Col md={12} xs={24}>
             <Form.Item
               name="name"
-              rules={[{ required: true, message: 'Please input name of product!' }]}
+              rules={[{ required: true, message: intl.formatMessage({ id: 'inputProductName', defaultMessage: 'Please input product name' }) }]}
               label="Name"
             >
               <Input />
@@ -136,15 +152,15 @@ export class FormProduct extends PureComponent<IProps> {
           <Col md={12} xs={12}>
             <Form.Item
               name="type"
-              label="Type"
-              rules={[{ required: true, message: 'Please select type!' }]}
+              label={intl.formatMessage({ id: 'type', defaultMessage: 'Type' })}
+              rules={[{ required: true, message: intl.formatMessage({ id: 'pleaseSelectType', defaultMessage: 'Please select type' }) }]}
             >
               <Select onChange={(val) => this.setFormVal('type', val)}>
                 <Select.Option key="physical" value="physical">
-                  Physical
+                  {intl.formatMessage({ id: 'physical', defaultMessage: 'Physical' })}
                 </Select.Option>
                 <Select.Option key="digital" value="digital">
-                  Digital
+                  {intl.formatMessage({ id: 'digital', defaultMessage: 'Digital' })}
                 </Select.Option>
               </Select>
             </Form.Item>
@@ -152,15 +168,25 @@ export class FormProduct extends PureComponent<IProps> {
           <Col md={12} xs={12}>
             <Form.Item
               name="price"
-              label="Price"
-              rules={[{ required: true, message: 'Price is required!' }]}
+              label={intl.formatMessage({ id: 'price', defaultMessage: 'Price' })}
+              rules={[{ required: true, message: intl.formatMessage({ id: 'priceIsRequired!', defaultMessage: 'Price is required!' }) }]}
             >
               <InputNumber style={{ width: '100%' }} min={1} />
             </Form.Item>
           </Col>
           {!isDigitalProduct && (
           <Col md={12} xs={12}>
-            <Form.Item name="stock" label="Stock" rules={[{ required: true, message: 'Stock is required!' }]}>
+            <Form.Item
+              name="stock"
+              label="Stock"
+              rules={[{
+                required: true,
+                message: intl.formatMessage({
+                  id: 'stockIsRequired',
+                  defaultMessage: 'Stock is required'
+                })
+              }]}
+            >
               <InputNumber style={{ width: '100%' }} min={1} />
             </Form.Item>
           </Col>
@@ -169,25 +195,41 @@ export class FormProduct extends PureComponent<IProps> {
             <Form.Item
               name="status"
               label="Status"
-              rules={[{ required: true, message: 'Please select status!' }]}
+              rules={[{
+                required: true,
+                message: intl.formatMessage({
+                  id: 'pleaseSelectStatus',
+                  defaultMessage: 'Please select status'
+                })
+              }]}
             >
               <Select>
                 <Select.Option key="active" value="active">
-                  Active
+                  {intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}
                 </Select.Option>
                 <Select.Option key="inactive" value="inactive">
-                  Inactive
+                  {intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}
                 </Select.Option>
               </Select>
             </Form.Item>
           </Col>
           <Col span={24}>
-            <Form.Item name="description" label="Description">
+            <Form.Item
+              name="description"
+              label={intl.formatMessage({
+                id: 'description',
+                defaultMessage: 'Description'
+              })}
+            >
               <Input.TextArea rows={3} />
             </Form.Item>
           </Col>
           <Col md={12} xs={12}>
-            <Form.Item label="Image">
+            <Form.Item label={intl.formatMessage({
+              id: 'image',
+              defaultMessage: 'Image'
+            })}
+            >
               <Upload
                 accept="image/*"
                 listType="picture-card"
@@ -240,10 +282,18 @@ export class FormProduct extends PureComponent<IProps> {
             loading={uploading}
             disabled={uploading}
           >
-            {haveProduct ? 'Update' : 'Upload'}
+            {haveProduct ? intl.formatMessage({
+              id: 'update',
+              defaultMessage: 'Update'
+            }) : intl.formatMessage({
+              id: 'upload',
+              defaultMessage: 'Upload'
+            })}
           </Button>
         </Form.Item>
       </Form>
     );
   }
 }
+
+export default injectIntl(FormProduct);

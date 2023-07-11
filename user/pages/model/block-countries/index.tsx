@@ -3,23 +3,26 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { message, Layout } from 'antd';
 import {
-  IPerformer, IUIConfig, ICountry, IBlockCountries
+  IPerformer,
+  IUIConfig,
+  ICountry,
+  IBlockCountries
 } from 'src/interfaces';
 import { StopOutlined } from '@ant-design/icons';
 import {
   blockService, utilsService
 } from '@services/index';
-import {
-  PerformerBlockCountriesForm
-} from '@components/performer';
 import { updateUserSuccess } from '@redux/user/actions';
 import PageHeading from '@components/common/page-heading';
 import '../../user/index.less';
+import { injectIntl, IntlShape } from 'react-intl';
+import PerformerBlockCountriesForm from '../../../src/components/performer/block-countries-form';
 
 interface IProps {
   currentUser: IPerformer;
   ui: IUIConfig;
   countries: ICountry[];
+  intl: IntlShape;
   updateUserSuccess: Function;
 }
 
@@ -29,9 +32,7 @@ class BlockCountries extends PureComponent<IProps> {
   static onlyPerformer = true;
 
   static async getInitialProps() {
-    const [countries] = await Promise.all([
-      utilsService.countriesList()
-    ]);
+    const [countries] = await Promise.all([utilsService.countriesList()]);
     return {
       countries: countries && countries.data ? countries.data : []
     };
@@ -39,26 +40,37 @@ class BlockCountries extends PureComponent<IProps> {
 
   state = {
     submiting: false
-  }
+  };
 
   async handleUpdateBlockCountries(data: IBlockCountries) {
-    const { currentUser, updateUserSuccess: onUpdateSuccess } = this.props;
+    const { intl, currentUser, updateUserSuccess: onUpdateSuccess } = this.props;
     try {
       this.setState({ submiting: true });
       const resp = await blockService.blockCountries(data);
       onUpdateSuccess({ ...currentUser, blockCountries: resp.data });
       this.setState({ submiting: false });
-      message.success('Changes saved');
+      message.success(
+        intl.formatMessage({
+          id: 'changesSaved',
+          defaultMessage: 'Changes saved'
+        })
+      );
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try againl later');
+      message.error(
+        err?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
       this.setState({ submiting: false });
     }
   }
 
   render() {
     const {
-      currentUser, ui, countries
+      currentUser, ui, countries, intl
     } = this.props;
     const { submiting } = this.state;
     return (
@@ -67,11 +79,22 @@ class BlockCountries extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Block Countries
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'blockCountries',
+              defaultMessage: 'Block Countries'
+            })}
           </title>
         </Head>
         <div className="main-container user-account">
-          <PageHeading title="Block Countries" icon={<StopOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'blockCountries',
+              defaultMessage: 'Block Countries'
+            })}
+            icon={<StopOutlined />}
+          />
           <PerformerBlockCountriesForm
             onFinish={this.handleUpdateBlockCountries.bind(this)}
             updating={submiting}
@@ -91,4 +114,4 @@ const mapStates = (state: any) => ({
 const mapDispatch = {
   updateUserSuccess
 };
-export default connect(mapStates, mapDispatch)(BlockCountries);
+export default injectIntl(connect(mapStates, mapDispatch)(BlockCountries));

@@ -5,6 +5,7 @@ import {
 import { DeleteOutlined } from '@ant-design/icons';
 import { ImageProduct } from '@components/product/image-product';
 import { IProduct } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   dataSource: IProduct[];
@@ -14,10 +15,11 @@ interface IProps {
   onChange?: Function;
   deleteItem?: Function;
   onChangeQuantity?: Function;
+  intl: IntlShape;
   onRemoveItemCart?: Function;
 }
 
-export class TableCart extends PureComponent<IProps> {
+class TableCart extends PureComponent<IProps> {
   timeout = 0;
 
   render() {
@@ -26,7 +28,8 @@ export class TableCart extends PureComponent<IProps> {
       rowKey,
       loading,
       onRemoveItemCart,
-      onChangeQuantity
+      onChangeQuantity,
+      intl
     } = this.props;
     const changeQuantity = async (item, quantity: any) => {
       if (!quantity) return;
@@ -36,12 +39,12 @@ export class TableCart extends PureComponent<IProps> {
         this.timeout = window.setTimeout(async () => {
           if (quantity > item.stock) {
             remainQuantity = item.stock;
-            message.error('Quantity must not be larger than quantity in stock');
+            message.error(intl.formatMessage({ id: 'quantityMustNotBeLargerThanQuantityInStock', defaultMessage: 'Quantity must not be larger than quantity in stock' }));
           }
           onChangeQuantity(item, remainQuantity);
         }, 300);
       } catch (error) {
-        message.error('An error occurred, please try again!');
+        message.error(intl.formatMessage({ id: 'anErrorOccurredPleaseTryAgain', defaultMessage: 'An error occurred, please try again!' }));
       }
     };
     const columns = [
@@ -53,11 +56,11 @@ export class TableCart extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Name',
+        title: intl.formatMessage({ id: 'name', defaultMessage: 'Name' }),
         dataIndex: 'name'
       },
       {
-        title: 'Price',
+        title: intl.formatMessage({ id: 'price', defaultMessage: 'Price' }),
         dataIndex: 'price',
         render(price: number) {
           return (
@@ -69,14 +72,18 @@ export class TableCart extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Type',
+        title: intl.formatMessage({ id: 'type', defaultMessage: 'Type' }),
         dataIndex: 'type',
         render(type: string) {
           switch (type) {
             case 'physical':
-              return <Tag color="#7b5cbd">Physical</Tag>;
+              return (
+                <Tag color="#7b5cbd">
+                  {intl.formatMessage({ id: 'physical', defaultMessage: 'Physical' })}
+                </Tag>
+              );
             case 'digital':
-              return <Tag color="#00dcff">Digital</Tag>;
+              return <Tag color="#00dcff">{intl.formatMessage({ id: 'digital', defaultMessage: 'Digital' })}</Tag>;
             default:
               break;
           }
@@ -84,14 +91,14 @@ export class TableCart extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Stock',
+        title: intl.formatMessage({ id: 'stock', defaultMessage: 'Stock' }),
         dataIndex: 'stock',
         render(stock: number, record) {
-          return <span>{record.type === 'physical' && (stock || 'Out of stock')}</span>;
+          return <span>{record.type === 'physical' && (stock || intl.formatMessage({ id: 'outOfStock', defaultMessage: 'Out of stock' }))}</span>;
         }
       },
       {
-        title: 'Quantity',
+        title: intl.formatMessage({ id: 'quantity', defaultMessage: 'Quantity' }),
         dataIndex: 'quantity',
         render(quantity, record) {
           return (
@@ -106,7 +113,7 @@ export class TableCart extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Provisionally charged',
+        title: intl.formatMessage({ id: 'provisionallyCharged', defaultMessage: 'Provisionally charged' }),
         dataIndex: 'quantity',
         render(data, record) {
           return (
@@ -118,7 +125,7 @@ export class TableCart extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Action',
+        title: intl.formatMessage({ id: 'action', defaultMessage: 'Action' }),
         dataIndex: '',
         render(data, record) {
           return (
@@ -142,3 +149,4 @@ export class TableCart extends PureComponent<IProps> {
     );
   }
 }
+export default injectIntl(TableCart);

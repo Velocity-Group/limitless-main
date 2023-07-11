@@ -5,6 +5,7 @@ import {
 } from 'antd';
 import { VideoPlayer } from '@components/common';
 import '../post/index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   remove: Function;
@@ -12,8 +13,9 @@ interface IProps {
   onAddMore: Function;
   uploading: boolean;
   type?: string;
+  intl: IntlShape
 }
-export default class UploadList extends PureComponent<IProps> {
+class UploadList extends PureComponent<IProps> {
   state = {
     isShowPreview: false,
     previewUrl: ''
@@ -26,7 +28,7 @@ export default class UploadList extends PureComponent<IProps> {
 
   render() {
     const {
-      files, remove: handleRemove, uploading, type
+      files, remove: handleRemove, uploading, type, intl
     } = this.props;
     const { isShowPreview, previewUrl } = this.state;
     return (
@@ -75,7 +77,7 @@ export default class UploadList extends PureComponent<IProps> {
           >
             <PlusOutlined />
             {' '}
-            Add
+            {intl.formatMessage({ id: 'add', defaultMessage: 'Add' })}
             {' '}
             {/* eslint-disable-next-line no-nested-ternary */}
             {type === 'photo' ? 'photos' : type === 'video' ? 'video' : 'files'}
@@ -109,3 +111,5 @@ export default class UploadList extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(UploadList);

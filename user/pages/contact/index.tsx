@@ -10,11 +10,13 @@ import { connect } from 'react-redux';
 // import { GoogleReCaptcha } from '@components/common';
 import { IUIConfig } from 'src/interfaces';
 import '../auth/index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const { TextArea } = Input;
 
 interface IProps {
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 class ContactPage extends PureComponent<IProps> {
@@ -31,7 +33,7 @@ class ContactPage extends PureComponent<IProps> {
   state = {
     submiting: false,
     countTime: 60
-  }
+  };
 
   componentDidMount() {
     if (!this.formRef) this.formRef = createRef();
@@ -57,7 +59,7 @@ class ContactPage extends PureComponent<IProps> {
     }
     this.setState({ countTime: countTime - 1 });
     this._intervalCountdown = setInterval(this.coundown.bind(this), 1000);
-  }
+  };
 
   handleVerifyCapcha(resp: any) {
     if (resp?.data?.success) {
@@ -73,13 +75,25 @@ class ContactPage extends PureComponent<IProps> {
     //   message.error('Are you a robot?', 10);
     //   return;
     // }
+    const { intl } = this.props;
     try {
       await this.setState({ submiting: true });
       await settingService.contact(values);
-      message.success('Thank you for contact us, we will reply within 48hrs.');
+      message.success(
+        intl.formatMessage({
+          id: 'mssgThankYouWhenSendingContactSuccessfully',
+          defaultMessage:
+            'Thank you for contact us, we will reply within 48hrs.'
+        })
+      );
       this.handleCountdown();
     } catch (e) {
-      message.error('Error occured, please try again later');
+      message.error(
+        intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
     } finally {
       this.formRef.current.resetFields();
       this.setState({ submiting: false });
@@ -93,7 +107,7 @@ class ContactPage extends PureComponent<IProps> {
 
   render() {
     if (!this.formRef) this.formRef = createRef();
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const { submiting, countTime } = this.state;
     return (
       <Layout>
@@ -102,7 +116,12 @@ class ContactPage extends PureComponent<IProps> {
             {' '}
             {ui?.siteName}
             {' '}
-            | Contact Us
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'contactUs',
+              defaultMessage: 'Contact Us'
+            })}
           </title>
         </Head>
         <div className="main-container">
@@ -114,7 +133,11 @@ class ContactPage extends PureComponent<IProps> {
                 md={12}
                 lg={12}
                 className="login-content left fixed"
-                style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
+                style={
+                  ui.loginPlaceholderImage
+                    ? { backgroundImage: `url(${ui.loginPlaceholderImage})` }
+                    : null
+                }
               />
               <Col
                 xs={24}
@@ -124,13 +147,22 @@ class ContactPage extends PureComponent<IProps> {
                 className="login-content right"
               >
                 <p className="text-center">
-                  <span className="title">Contact Us</span>
+                  <span className="title">
+                    {intl.formatMessage({
+                      id: 'contactUs',
+                      defaultMessage: 'Contact Us'
+                    })}
+                  </span>
                 </p>
                 <h5
                   className="text-center"
                   style={{ fontSize: 13, color: '#888' }}
                 >
-                  Please fill out the form below and we will get back to you as soon as possible
+                  {intl.formatMessage({
+                    id: 'pleaseFillOutTheFormBelow',
+                    defaultMessage:
+                      'Please fill out the form below and we will get back to you as soon as possible'
+                  })}
                 </h5>
                 <Form
                   layout="vertical"
@@ -141,33 +173,76 @@ class ContactPage extends PureComponent<IProps> {
                 >
                   <Form.Item
                     name="name"
-                    rules={[{ required: true, message: 'Tell us your full name' }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: `${intl.formatMessage({
+                          id: 'tellUsYourFullName',
+                          defaultMessage: 'Tell us your full name'
+                        })}`
+                      }
+                    ]}
                   >
-                    <Input placeholder="Full name" />
+                    <Input
+                      placeholder={intl.formatMessage({
+                        id: 'fullName',
+                        defaultMessage: 'Full name'
+                      })}
+                    />
                   </Form.Item>
                   <Form.Item
                     name="email"
                     rules={[
                       {
                         required: true,
-                        message: 'Tell us your email address.'
+                        message: `${intl.formatMessage({
+                          id: 'tellUsYourEmailAddress',
+                          defaultMessage: 'Tell us your email address'
+                        })}`
                       },
-                      { type: 'email', message: 'Invalid email format' }
+                      {
+                        type: 'email',
+                        message: `${intl.formatMessage({
+                          id: 'invalidEmailFormat',
+                          defaultMessage: 'Invalid email format!'
+                        })}`
+                      }
                     ]}
                   >
-                    <Input placeholder="Email address" />
+                    <Input
+                      placeholder={intl.formatMessage({
+                        id: 'emailAddress',
+                        defaultMessage: 'Email address'
+                      })}
+                    />
                   </Form.Item>
                   <Form.Item
                     name="message"
                     rules={[
-                      { required: true, message: 'What can we help you?' },
+                      {
+                        required: true,
+                        message: `${intl.formatMessage({
+                          id: 'whatCanWeHelpYou',
+                          defaultMessage: 'What can we help you?'
+                        })}`
+                      },
                       {
                         min: 20,
-                        message: 'Please input at least 20 characters.'
+                        message: `${intl.formatMessage({
+                          id: 'inputAtLeast20Characters',
+                          defaultMessage:
+                            'Please input at least 20 characters.'
+                        })}`
                       }
                     ]}
                   >
-                    <TextArea rows={3} placeholder="Message" />
+                    <TextArea
+                      rows={3}
+                      placeholder={intl.formatMessage({
+                        id: 'message',
+                        defaultMessage: 'Message'
+                      })}
+                    />
                   </Form.Item>
                   {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                   <div className="text-center">
@@ -178,9 +253,21 @@ class ContactPage extends PureComponent<IProps> {
                       htmlType="submit"
                       loading={submiting || countTime < 60}
                       disabled={submiting || countTime < 60}
-                      style={{ fontWeight: 600, width: '100%' }}
+                      style={{
+                        fontWeight: 600,
+                        width: '100%',
+                        textTransform: 'uppercase'
+                      }}
                     >
-                      {countTime < 60 ? 'RESEND IN' : 'SEND'}
+                      {countTime < 60
+                        ? `${intl.formatMessage({
+                          id: 'resendIn',
+                          defaultMessage: 'Resend in'
+                        })}`
+                        : `${intl.formatMessage({
+                          id: 'send',
+                          defaultMessage: 'Send'
+                        })}`}
                       {' '}
                       {countTime < 60 && `${countTime}s`}
                     </Button>
@@ -197,4 +284,4 @@ class ContactPage extends PureComponent<IProps> {
 const mapStates = (state: any) => ({
   ui: state.ui
 });
-export default connect(mapStates)(ContactPage);
+export default injectIntl(connect(mapStates)(ContactPage));

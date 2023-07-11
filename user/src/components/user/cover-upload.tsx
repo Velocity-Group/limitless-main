@@ -3,6 +3,7 @@ import { Upload, message } from 'antd';
 import { LoadingOutlined, EditOutlined } from '@ant-design/icons';
 import ImgCrop from 'antd-img-crop';
 import { getGlobalConfig } from '@services/config';
+import { injectIntl, IntlShape } from 'react-intl';
 
 function getBase64(img, callback) {
   const reader = new FileReader();
@@ -29,9 +30,10 @@ interface IProps {
   headers?: any;
   onUploaded?: Function;
   options?: any;
+  intl: IntlShape
 }
 
-export class CoverUpload extends PureComponent<IProps, IState> {
+class CoverUpload extends PureComponent<IProps, IState> {
   state = {
     loading: false
   };
@@ -74,9 +76,11 @@ export class CoverUpload extends PureComponent<IProps, IState> {
 
   render() {
     const { loading } = this.state;
-    const { headers, uploadUrl, options } = this.props;
+    const {
+      headers, uploadUrl, options, intl
+    } = this.props;
     return (
-      <ImgCrop aspect={4.5 / 1} shape="rect" quality={1} modalTitle="Edit cover image" modalWidth={767}>
+      <ImgCrop aspect={4.5 / 1} shape="rect" quality={1} modalTitle={intl.formatMessage({ id: 'editCoverImage', defaultMessage: 'Edit cover image' })} modalWidth={767}>
         <Upload
           accept="image/*"
           name={options.fieldName || 'file'}
@@ -90,9 +94,10 @@ export class CoverUpload extends PureComponent<IProps, IState> {
         >
           {loading ? <LoadingOutlined /> : <EditOutlined />}
           {' '}
-          Edit cover
+          {intl.formatMessage({ id: 'editCover', defaultMessage: 'Edit cover' })}
         </Upload>
       </ImgCrop>
     );
   }
 }
+export default injectIntl(CoverUpload);

@@ -5,14 +5,16 @@ import { message, Layout } from 'antd';
 import { VideoCameraOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { videoService } from '@services/video.service';
-import { FormUploadVideo } from '@components/video/form-upload';
+import FormUploadVideo from '@components/video/form-upload';
 import Router from 'next/router';
 import { IUIConfig, IPerformer, ISettings } from 'src/interfaces';
 import { getResponseError } from '@lib/utils';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   user: IPerformer;
+  intl: IntlShape;
   settings: ISettings;
 }
 
@@ -46,9 +48,15 @@ class UploadVideo extends PureComponent<IProps> {
   };
 
   componentDidMount() {
-    const { user, settings } = this.props;
+    const { user, intl } = this.props;
     if (!user || !user.verifiedDocument) {
-      message.warning('Your ID documents are not verified yet! You could not post any content right now.');
+      message.warning(
+        intl.formatMessage({
+          id: 'yourIdDocumentsAreNotVerifiedYet',
+          defaultMessage:
+            'Your ID documents are not verified yet! You could not post any content right now.'
+        })
+      );
       Router.back();
     }
     // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
@@ -66,17 +74,33 @@ class UploadVideo extends PureComponent<IProps> {
   }
 
   async submit(data: any) {
+    const { intl } = this.props;
     if (!this._files.video) {
-      message.error('Please select video!');
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseSelectVideo',
+          defaultMessage: 'Please select video!'
+        })
+      );
       return;
     }
     const submitData = { ...data };
     if ((data.isSale && !data.price) || (data.isSale && data.price < 1)) {
-      message.error('Invalid amount of tokens');
+      message.error(
+        intl.formatMessage({
+          id: 'invalidAmountOfTokens',
+          defaultMessage: 'Invalid amount of tokens'
+        })
+      );
       return;
     }
     if (data.isSchedule && !data.scheduledAt) {
-      message.error('Invalid schedule date');
+      message.error(
+        intl.formatMessage({
+          id: 'invalidScheduleDate',
+          defaultMessage: 'Invalid schedule date'
+        })
+      );
       return;
     }
     submitData.tags = [...[], ...data.tags];
@@ -100,11 +124,20 @@ class UploadVideo extends PureComponent<IProps> {
         data,
         this.onUploading.bind(this)
       )) as IResponse;
-      message.success('Your video has been uploaded');
+      message.success(
+        intl.formatMessage({
+          id: 'videosHaveBeenUploaded',
+          defaultMessage: 'Videos have been uploaded!'
+        })
+      );
       Router.replace('/model/my-video');
     } catch (error) {
       message.error(
-        getResponseError(error) || 'An error occurred, please try again!'
+        getResponseError(error)
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
       );
     } finally {
       this.setState({ uploading: false });
@@ -113,18 +146,29 @@ class UploadVideo extends PureComponent<IProps> {
 
   render() {
     const { uploading, uploadPercentage } = this.state;
-    const { ui, user } = this.props;
+    const { ui, user, intl } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Upload Video
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'uploadVideo',
+              defaultMessage: 'Upload Video'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Upload Video" icon={<VideoCameraOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'uploadVideo',
+              defaultMessage: 'Upload Video'
+            })}
+            icon={<VideoCameraOutlined />}
+          />
           <FormUploadVideo
             user={user}
             submit={this.submit.bind(this)}
@@ -142,4 +186,4 @@ const mapStates = (state: any) => ({
   user: state.user.current,
   settings: state.settings
 });
-export default connect(mapStates)(UploadVideo);
+export default injectIntl(connect(mapStates)(UploadVideo));

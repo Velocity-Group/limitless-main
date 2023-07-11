@@ -3,20 +3,23 @@ import { PureComponent } from 'react';
 import { ICountry, IPerformer } from 'src/interfaces';
 import { formatDate } from '@lib/date';
 import { HEIGHTS, WEIGHTS } from 'src/constants';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   performer: IPerformer;
   countries: ICountry[];
+  intl: IntlShape
 }
 
-export class PerformerInfo extends PureComponent<IProps> {
+class PerformerInfo extends PureComponent<IProps> {
   detectURLs(str: string) {
     const urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
     return str.match(urlRegex);
   }
 
   replaceURLs(str: string) {
-    if (!str) return 'No bio yet';
+    const { intl } = this.props;
+    if (!str) return intl.formatMessage({ id: 'noBioYet', defaultMessage: 'No bio yet' });
 
     const urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
     const result = str.replace(urlRegex, (url: string) => {
@@ -32,10 +35,10 @@ export class PerformerInfo extends PureComponent<IProps> {
   }
 
   render() {
-    const { performer, countries = [] } = this.props;
+    const { performer, countries = [], intl } = this.props;
     const country = countries.length && countries.find((c) => c.code === performer?.country);
-    const height = HEIGHTS.find((f) => f.value === performer?.height)?.text;
-    const weight = WEIGHTS.find((f) => f.value === performer?.weight)?.text;
+    const height = HEIGHTS.find((f) => f.value === performer?.height);
+    const weight = WEIGHTS.find((f) => f.value === performer?.weight);
     return (
       <div className="per-infor">
         <Collapse defaultActiveKey={['1']} bordered={false} accordion>
@@ -46,7 +49,7 @@ export class PerformerInfo extends PureComponent<IProps> {
                 &nbsp;
                 {country?.name}
               </>
-            ) : 'BIOGRAPHY'}
+            ) : intl.formatMessage({ id: 'biographyUpCase', defaultMessage: 'BIOGRAPHY' })}
             key="1"
           >
             <p
@@ -56,21 +59,21 @@ export class PerformerInfo extends PureComponent<IProps> {
             />
             <Descriptions className="performer-info">
               {performer?.gender && (
-                <Descriptions.Item label="Gender">
-                  {performer?.gender}
+                <Descriptions.Item label={intl.formatMessage({ id: 'gender', defaultMessage: 'Gender' })}>
+                  {intl.formatMessage({ id: performer?.gender, defaultMessage: performer?.gender })}
                 </Descriptions.Item>
               )}
-              {performer?.sexualOrientation && <Descriptions.Item label="Sexual orientation">{performer?.sexualOrientation}</Descriptions.Item>}
-              {performer?.dateOfBirth && <Descriptions.Item label="Date of Birth">{formatDate(performer?.dateOfBirth, 'DD/MM/YYYY')}</Descriptions.Item>}
-              {performer?.bodyType && <Descriptions.Item label="Body Type">{performer?.bodyType}</Descriptions.Item>}
-              {performer?.state && <Descriptions.Item label="State">{performer?.state}</Descriptions.Item>}
-              {performer?.city && <Descriptions.Item label="City">{performer?.city}</Descriptions.Item>}
-              {height && <Descriptions.Item label="Height">{height}</Descriptions.Item>}
-              {weight && <Descriptions.Item label="Weight">{weight}</Descriptions.Item>}
-              {performer?.eyes && <Descriptions.Item label="Eye color">{performer?.eyes}</Descriptions.Item>}
-              {performer?.ethnicity && <Descriptions.Item label="Ethnicity">{performer?.ethnicity}</Descriptions.Item>}
-              {performer?.hair && <Descriptions.Item label="Hair color">{performer?.hair}</Descriptions.Item>}
-              {performer?.butt && <Descriptions.Item label="Butt size">{performer?.butt}</Descriptions.Item>}
+              {performer?.sexualOrientation && <Descriptions.Item label={intl.formatMessage({ id: 'sexualOrientation', defaultMessage: 'Sexual orientation' })}>{intl.formatMessage({ id: performer?.sexualOrientation, defaultMessage: performer?.sexualOrientation })}</Descriptions.Item>}
+              {performer?.dateOfBirth && <Descriptions.Item label={intl.formatMessage({ id: 'dateOfBirth', defaultMessage: 'Date of Birth' })}>{formatDate(performer?.dateOfBirth, 'DD/MM/YYYY')}</Descriptions.Item>}
+              {performer?.bodyType && <Descriptions.Item label={intl.formatMessage({ id: 'bodyType', defaultMessage: 'Body type' })}>{intl.formatMessage({ id: performer?.bodyType, defaultMessage: performer?.bodyType })}</Descriptions.Item>}
+              {performer?.state && <Descriptions.Item label={intl.formatMessage({ id: 'state', defaultMessage: 'State' })}>{intl.formatMessage({ id: performer?.state, defaultMessage: performer?.state })}</Descriptions.Item>}
+              {performer?.city && <Descriptions.Item label={intl.formatMessage({ id: 'city', defaultMessage: 'City' })}>{intl.formatMessage({ id: performer?.city, defaultMessage: performer?.city })}</Descriptions.Item>}
+              {performer?.height && <Descriptions.Item label={intl.formatMessage({ id: 'height', defaultMessage: 'Height' })}>{intl.formatMessage({ id: height.value, defaultMessage: height.text })}</Descriptions.Item>}
+              {performer?.weight && <Descriptions.Item label={intl.formatMessage({ id: 'weight', defaultMessage: 'Weight' })}>{intl.formatMessage({ id: weight.value, defaultMessage: weight.text })}</Descriptions.Item>}
+              {performer?.eyes && <Descriptions.Item label={intl.formatMessage({ id: 'eyeColor', defaultMessage: 'Eye color' })}>{intl.formatMessage({ id: performer?.eyes, defaultMessage: performer?.eyes })}</Descriptions.Item>}
+              {performer?.ethnicity && <Descriptions.Item label={intl.formatMessage({ id: 'ethnicity', defaultMessage: 'Ethnicity' })}>{intl.formatMessage({ id: performer?.ethnicity, defaultMessage: performer?.ethnicity })}</Descriptions.Item>}
+              {performer?.hair && <Descriptions.Item label={intl.formatMessage({ id: 'hairColor', defaultMessage: 'Hair color' })}>{intl.formatMessage({ id: performer?.hair, defaultMessage: performer?.hair })}</Descriptions.Item>}
+              {performer?.butt && <Descriptions.Item label={intl.formatMessage({ id: 'buttSize', defaultMessage: 'Butt size' })}>{intl.formatMessage({ id: performer?.butt, defaultMessage: performer?.butt })}</Descriptions.Item>}
             </Descriptions>
           </Collapse.Panel>
         </Collapse>
@@ -78,3 +81,5 @@ export class PerformerInfo extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(PerformerInfo);

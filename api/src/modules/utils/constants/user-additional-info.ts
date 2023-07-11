@@ -81,9 +81,9 @@ export const ETHNICITIES = [
   { value: 'white', text: 'White' },
   { value: 'latino', text: 'Latino' },
   { value: 'hispanic', text: 'Hispanic' },
-  { value: 'black or african america', text: 'Black or African American' },
-  { value: 'american indian or alaska native', text: 'American Indian or Alaska Native' },
-  { value: 'native hawaiian or other pacific islander', text: 'Native Hawaiian or Other Pacific Islander' }
+  { value: 'blackOrAfricanAmerica', text: 'Black or African American' },
+  { value: 'americanIndianOrAlaskaNative', text: 'American Indian or Alaska Native' },
+  { value: 'nativeHawaiianOrOtherPacificIslander', text: 'Native Hawaiian or Other Pacific Islander' }
 ];
 
 export const BUTTS = [

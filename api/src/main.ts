@@ -12,6 +12,7 @@ import { AppModule } from './app.module';
 import { renderFile } from './kernel/helpers/view.helper';
 import { HttpExceptionLogFilter } from './kernel/logger/http-exception-log.filter';
 import { RedisIoAdapter } from './modules/socket/redis-io.adapter';
+import { LanguageExceptionFilter } from './modules/language/filters';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,6 +21,7 @@ async function bootstrap() {
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionLogFilter(httpAdapter));
+  app.useGlobalFilters(new LanguageExceptionFilter(httpAdapter));
   app.engine('html', renderFile);
   app.set('view engine', 'html');
   // socket io redis - for chat

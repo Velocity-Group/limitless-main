@@ -5,38 +5,58 @@ import {
   Row, Col, Button, message, Modal, Layout, Card
 } from 'antd';
 import {
-  ClockCircleOutlined, PlayCircleOutlined, EditOutlined, EyeOutlined
+  ClockCircleOutlined,
+  PlayCircleOutlined,
+  EditOutlined,
+  EyeOutlined
 } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import {
-  IPerformer, IUIConfig, IUser, StreamSettings, IStream
+  IPerformer,
+  IUIConfig,
+  IUser,
+  StreamSettings,
+  IStream
 } from 'src/interfaces';
 import { streamService } from 'src/services';
 import StreamPriceForm from '@components/streaming/set-price-session';
 import { SocketContext, Event } from 'src/socket';
 import {
-  getStreamConversation, resetStreamMessage, resetAllStreamMessage
+  getStreamConversation,
+  resetStreamMessage,
+  resetAllStreamMessage
 } from '@redux/stream-chat/actions';
 import ChatBox from '@components/stream-chat/chat-box';
 import Router, { Router as RouterEvent } from 'next/router';
 import { videoDuration } from '@lib/index';
 import dynamic from 'next/dynamic';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
-const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), { ssr: false });
-const Publisher = dynamic(() => import('@components/streaming/agora/publisher'), { ssr: false });
-const ForwardedPublisher = forwardRef((props: {
-  uid: string,
-  onStatusChange: Function,
-  conversationId: string;
-  sessionId: string;
-}, ref) => <Publisher {...props} forwardedRef={ref} />);
+const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), {
+  ssr: false
+});
+const Publisher = dynamic(
+  () => import('@components/streaming/agora/publisher'),
+  { ssr: false }
+);
+const ForwardedPublisher = forwardRef(
+  (
+    props: {
+      uid: string;
+      onStatusChange: Function;
+      conversationId: string;
+      sessionId: string;
+    },
+    ref
+  ) => <Publisher {...props} forwardedRef={ref} />
+);
 
 // eslint-disable-next-line no-shadow
 enum EVENT_NAME {
   ROOM_INFORMATIOM_CHANGED = 'public-room-changed',
   ADMIN_END_SESSION_STREAM = 'admin-end-session-stream',
-  LEAVE_STREAM = 'public-stream/leave'
+  LEAVE_STREAM = 'public-stream/leave',
 }
 
 interface IProps {
@@ -47,6 +67,7 @@ interface IProps {
   getStreamConversation: Function;
   activeConversation: any;
   user: IPerformer;
+  intl: IntlShape;
 }
 
 interface IStates {
@@ -65,7 +86,7 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
 
   static authenticate = true;
 
-  private publisherRef = createRef<{publish: any, leave: any}>();
+  private publisherRef = createRef<{ publish: any; leave: any }>();
 
   private streamDurationTimeOut: any;
 
@@ -84,9 +105,15 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
   };
 
   componentDidMount() {
-    const { user } = this.props;
+    const { user, intl } = this.props;
     if (!user || !user.verifiedDocument) {
-      message.warning('Your account is not verified ID documents yet! You could not post any content right now.');
+      message.warning(
+        intl.formatMessage({
+          id: 'yourAccountIsNotVerifiedIdDocumentsYet',
+          defaultMessage:
+            'Your account is not verified ID documents yet! You could not post any content right now.'
+        })
+      );
       Router.back();
       return;
     }
@@ -104,15 +131,21 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     const { callTime } = this.state;
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
     this.setState({ callTime: callTime + 1 });
-    this.streamDurationTimeOut = setTimeout(this.handleDuration.bind(this), 1000);
+    this.streamDurationTimeOut = setTimeout(
+      this.handleDuration.bind(this),
+      1000
+    );
   }
 
   onRoomChange = ({ total, conversationId }) => {
     const { activeConversation } = this.props;
-    if (activeConversation?.data?._id && activeConversation.data._id === conversationId) {
+    if (
+      activeConversation?.data?._id
+      && activeConversation.data._id === conversationId
+    ) {
       this.setState({ total });
     }
-  }
+  };
 
   onStreamStatusChange = (started: boolean) => {
     if (started) {
@@ -121,18 +154,20 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
       this.updateStreamDuration();
     } else {
       this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
-      this.setDurationStreamTimeOut && clearTimeout(this.setDurationStreamTimeOut);
+      this.setDurationStreamTimeOut
+        && clearTimeout(this.setDurationStreamTimeOut);
     }
-  }
+  };
 
   onbeforeunload = () => {
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
-    this.setDurationStreamTimeOut && clearTimeout(this.setDurationStreamTimeOut);
+    this.setDurationStreamTimeOut
+      && clearTimeout(this.setDurationStreamTimeOut);
     this.leavePublicRoom();
-  }
+  };
 
   async joinPublicRoom(payload: any) {
-    const { getStreamConversation: dispatchGetStreamConversation } = this.props;
+    const { getStreamConversation: dispatchGetStreamConversation, intl } = this.props;
     const socket = this.context;
     try {
       await this.setState({ loading: true });
@@ -144,13 +179,20 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
       dispatchGetStreamConversation({
         conversation: resp.conversation
       });
-      socket && socket.emit('public-stream/join', {
-        conversationId: resp.conversation._id
-      });
+      socket
+        && socket.emit('public-stream/join', {
+          conversationId: resp.conversation._id
+        });
       this.publisherRef.current && this.publisherRef.current.publish();
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Stream server error, please try again later');
+      message.error(
+        error?.message
+          || intl.formatMessage({
+            id: 'streamServerError',
+            defaultMessage: 'Stream server error, please try again later'
+          })
+      );
     } finally {
       this.setState({ loading: false });
     }
@@ -161,20 +203,30 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
     const socket = this.context;
     const conversation = { ...activeConversation.data };
     if (socket && conversation && conversation._id) {
-      socket.emit(EVENT_NAME.LEAVE_STREAM, { conversationId: conversation._id });
+      socket.emit(EVENT_NAME.LEAVE_STREAM, {
+        conversationId: conversation._id
+      });
       reset();
     }
   }
 
   async updateStreamDuration() {
-    this.setDurationStreamTimeOut && clearTimeout(this.setDurationStreamTimeOut);
+    this.setDurationStreamTimeOut
+      && clearTimeout(this.setDurationStreamTimeOut);
     const { callTime, activeStream } = this.state;
     if (!activeStream) return;
-    await streamService.updateStreamDuration({ streamId: activeStream._id, duration: callTime });
-    this.setDurationStreamTimeOut = setTimeout(this.updateStreamDuration.bind(this), 15 * 1000);
+    await streamService.updateStreamDuration({
+      streamId: activeStream._id,
+      duration: callTime
+    });
+    this.setDurationStreamTimeOut = setTimeout(
+      this.updateStreamDuration.bind(this),
+      15 * 1000
+    );
   }
 
   async editLive() {
+    const { intl } = this.props;
     try {
       const { activeStream } = this.state;
       if (!activeStream) return;
@@ -183,23 +235,39 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
       this.setState({ activeStream: { ...activeStream, description } });
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Stream server error, please try again later');
+      message.error(
+        error?.message
+          || intl.formatMessage({
+            id: 'streamServerError',
+            defaultMessage: 'Stream server error, please try again later'
+          })
+      );
     } finally {
       this.setState({ editting: false });
     }
   }
 
   render() {
-    const { user, ui } = this.props;
+    const { user, ui, intl } = this.props;
     const {
-      loading, initialized, total, openPriceModal, callTime, activeStream, editting
+      loading,
+      initialized,
+      total,
+      openPriceModal,
+      callTime,
+      activeStream,
+      editting
     } = this.state;
     return (
       <AgoraProvider config={{ mode: 'live', codec: 'h264', role: 'host' }}>
         <Layout>
           <Head>
             <title>
-              {`${ui?.siteName} | Live`}
+              {`${ui?.siteName} | ${intl.formatMessage({
+                id: 'live',
+                defaultMessage: 'Live'
+              })}`}
+
             </title>
           </Head>
           <Event
@@ -243,58 +311,87 @@ class PerformerLivePage extends PureComponent<IProps, IStates> {
                     >
                       <PlayCircleOutlined />
                       {' '}
-                      Start Broadcasting
+                      {intl.formatMessage({
+                        id: 'startBroadcasting',
+                        defaultMessage: 'Start Broadcasting'
+                      })}
                     </Button>
                   ) : (
                     <Button
                       key="start-btn"
                       className="primary"
-                      onClick={() => Router.push({ pathname: '/model/profile', query: { username: user?.username || user?._id } }, `/${user?.username || user?._id}`)}
+                      onClick={() => Router.push(
+                        {
+                          pathname: '/model/profile',
+                          query: { username: user?.username || user?._id }
+                        },
+                        `/${user?.username || user?._id}`
+                      )}
                       disabled={loading}
                       block
                     >
                       <PlayCircleOutlined />
                       {' '}
-                      Stop Broadcasting
+                      {intl.formatMessage({
+                        id: 'stopBroadcasting',
+                        defaultMessage: 'Stop Broadcasting'
+                      })}
                     </Button>
                   )}
                 </div>
                 <Card bordered={false} bodyStyle={{ padding: 0 }}>
                   <Card.Meta
                     title={activeStream?.title}
-                    description={activeStream?.description && (
-                    <p>
-                      {editting ? (
-                        <Row>
-                          <Col xs={24}>
-                            <textarea className="ant-input" ref={this.descriptionRef} defaultValue={activeStream.description} />
-                          </Col>
-                          <Col xs={24}>
-                            <Button className="primary" icon={<EditOutlined />} onClick={() => this.editLive()}>Update</Button>
-                          </Col>
-                        </Row>
-                      ) : (
-                        <>
-                          {activeStream.description}
-                          {' '}
-                          <EditOutlined onClick={() => this.setState({ editting: true })} />
-                        </>
-                      )}
-                    </p>
-                    )}
+                    description={
+                      activeStream?.description && (
+                        <p>
+                          {editting ? (
+                            <Row>
+                              <Col xs={24}>
+                                <textarea
+                                  className="ant-input"
+                                  ref={this.descriptionRef}
+                                  defaultValue={activeStream.description}
+                                />
+                              </Col>
+                              <Col xs={24}>
+                                <Button
+                                  className="primary"
+                                  icon={<EditOutlined />}
+                                  onClick={() => this.editLive()}
+                                >
+                                  {intl.formatMessage({
+                                    id: 'update',
+                                    defaultMessage: 'Update'
+                                  })}
+                                </Button>
+                              </Col>
+                            </Row>
+                          ) : (
+                            <>
+                              {activeStream.description}
+                              {' '}
+                              <EditOutlined
+                                onClick={() => this.setState({ editting: true })}
+                              />
+                            </>
+                          )}
+                        </p>
+                      )
+                    }
                   />
-
                 </Card>
               </Col>
               <Col xs={24} sm={24} md={8} style={{ padding: 10 }}>
-                <ChatBox
-                  {...this.props}
-                />
+                <ChatBox {...this.props} />
               </Col>
               <Modal
                 centered
                 key="update_stream"
-                title="Update stream information"
+                title={intl.formatMessage({
+                  id: 'updateStreamInformation',
+                  defaultMessage: 'Update stream information'
+                })}
                 visible={openPriceModal}
                 footer={null}
                 onCancel={() => this.setState({ openPriceModal: false })}
@@ -326,4 +423,6 @@ const mapDispatchs = {
   resetStreamMessage,
   resetAllStreamMessage
 };
-export default connect(mapStateToProps, mapDispatchs)(PerformerLivePage);
+export default injectIntl(
+  connect(mapStateToProps, mapDispatchs)(PerformerLivePage)
+);

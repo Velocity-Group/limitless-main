@@ -13,7 +13,7 @@ import {
   videoDuration, replaceURLs
 } from '@lib/index';
 // import { deleteMessageSuccess } from '@redux/message/actions';
-import { AudioPlayer } from '@components/common/audio-player';
+import { AudioPlayer } from '@components/common';
 import { useState } from 'react';
 import { tokenTransactionService } from '@services/index';
 import { useDispatch, useSelector } from 'react-redux';

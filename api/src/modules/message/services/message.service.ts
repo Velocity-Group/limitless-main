@@ -1,3 +1,4 @@
+import { toObjectId } from 'src/kernel/helpers/string.helper';
 /* eslint-disable no-param-reassign */
 import {
   Injectable, Inject, ForbiddenException, HttpException, forwardRef
@@ -17,11 +18,14 @@ import { flatten } from 'lodash';
 import { Storage } from 'src/modules/storage/contants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { ObjectId } from 'mongodb';
+import { SUBSCRIPTION_TYPE } from 'src/modules/subscription/constants';
+import { SubscriptionModel } from 'src/modules/subscription/models/subscription.model';
+import { SUBSCRIPTION_MODEL_PROVIDER } from 'src/modules/subscription/providers/subscription.provider';
 import {
   MessageModel, IRecipient
 } from '../models';
 import { MESSAGE_MODEL_PROVIDER } from '../providers/message.provider';
-import { MessageCreatePayload } from '../payloads/message-create.payload';
+import { MassMessagesToSubscribersCreatePayload, MessageCreatePayload } from '../payloads/message-create.payload';
 import {
   MESSAGE_CHANNEL, MESSAGE_EVENT, MESSAGE_PRIVATE_STREAM_CHANNEL
 } from '../constants';
@@ -46,12 +50,65 @@ export class MessageService {
     private readonly conversationService: ConversationService,
     @Inject(MESSAGE_MODEL_PROVIDER)
     private readonly messageModel: Model<MessageModel>,
+    @Inject(SUBSCRIPTION_MODEL_PROVIDER)
+    private readonly subscriptionModel: Model<SubscriptionModel>,
     private readonly queueEventService: QueueEventService,
     private readonly fileService: FileService
   ) { }
 
   public findById(id: string | ObjectId) {
     return this.messageModel.findById(id);
+  }
+
+  public async sendMassMessagesToSubscribers(user: UserDto, payload: MassMessagesToSubscribersCreatePayload) {
+    if (!payload.text && !payload.subscriptionType) {
+      throw new HttpException('Enter enough fields!', 422);
+    }
+    if (payload.subscriptionType === SUBSCRIPTION_TYPE.FREE) {
+      // send mass messages to free subscribers
+      const freeSubscribers = await this.subscriptionModel.find({
+        performerId: user._id,
+        subscriptionType: SUBSCRIPTION_TYPE.FREE,
+        expiredAt: { $gt: new Date() }
+      });
+      const userIds = freeSubscribers.map((i) => i.userId.toString());
+      if (!userIds.length) {
+        return;
+      }
+
+      userIds.reduce(async (cb, userId) => {
+        await cb;
+        const sender = { source: 'performer', sourceId: user._id };
+        const receiver = { source: 'user', sourceId: toObjectId(userId) };
+        const conversation = await this.conversationService.createPrivateConversation(sender, receiver);
+        const newPayload = { text: payload.text } as MessageCreatePayload;
+        await this.createPrivateMessage((conversation._id).toString(), newPayload, sender, '');
+
+        return Promise.resolve();
+      }, Promise.resolve());
+    } else {
+      // send mass messages to paid subscribers
+      const paidSubscribers = await this.subscriptionModel.find({
+        performerId: user._id,
+        subscriptionType: { $ne: SUBSCRIPTION_TYPE.FREE },
+        expiredAt: { $gt: new Date() }
+      });
+      const userIds = paidSubscribers.map((i) => i.userId.toString());
+      if (!userIds.length) {
+        return;
+      }
+
+      userIds.reduce(async (cb, userId) => {
+        await cb;
+        const sender = { source: 'performer', sourceId: user._id };
+        const receiver = { source: 'user', sourceId: toObjectId(userId) };
+        const conversation = await this.conversationService.createPrivateConversation(sender, receiver);
+        const newPayload = { text: payload.text } as MessageCreatePayload;
+        await this.createPrivateMessage((conversation._id).toString(), newPayload, sender, '');
+
+        return Promise.resolve();
+      }, Promise.resolve());
+    }
   }
 
   public async createPrivateMessage(

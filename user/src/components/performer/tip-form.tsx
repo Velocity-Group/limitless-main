@@ -5,14 +5,16 @@ import {
 import { TickIcon } from 'src/icons';
 import { IPerformer } from '@interfaces/index';
 import './performer.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   performer: IPerformer;
   onFinish: Function;
   submiting: boolean;
+  intl: IntlShape
 }
 
-export class TipPerformerForm extends PureComponent<IProps> {
+class TipPerformerForm extends PureComponent<IProps> {
   state = {
     price: 10
   }
@@ -23,7 +25,7 @@ export class TipPerformerForm extends PureComponent<IProps> {
 
   render() {
     const {
-      onFinish, submiting = false, performer
+      onFinish, submiting = false, performer, intl
     } = this.props;
     const { price } = this.state;
     return (
@@ -43,7 +45,7 @@ export class TipPerformerForm extends PureComponent<IProps> {
         </div>
         <div className="right-col">
           <h2>
-            TIP
+            {intl.formatMessage({ id: 'tip', defaultMessage: 'TIP' })}
             {' '}
             <span className="username">{`@${performer?.username}` || 'the model'}</span>
           </h2>
@@ -82,7 +84,7 @@ export class TipPerformerForm extends PureComponent<IProps> {
             </Button>
           </div>
           <div className="tip-input">
-            <p>Enter tip amount</p>
+            <p>{intl.formatMessage({ id: 'enterTipAmount', defaultMessage: 'Enter tip amount' })}</p>
             <InputNumber min={1} onChange={this.onChangeValue.bind(this)} value={price} />
           </div>
           <Button
@@ -91,11 +93,12 @@ export class TipPerformerForm extends PureComponent<IProps> {
             loading={submiting}
             onClick={() => onFinish(price)}
           >
-            SEND TIP
+            {intl.formatMessage({ id: 'sendTip', defaultMessage: 'SEND TIP' })}
           </Button>
         </div>
-
       </div>
     );
   }
 }
+
+export default injectIntl(TipPerformerForm);

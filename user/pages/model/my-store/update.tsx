@@ -5,14 +5,16 @@ import { ShopOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { productService } from '@services/product.service';
 import { IProduct, IUIConfig } from 'src/interfaces';
-import { FormProduct } from '@components/product/form-product';
+import FormProduct from '@components/product/form-product';
 import Router from 'next/router';
 import { connect } from 'react-redux';
 import { getResponseError } from '@lib/utils';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   id: string;
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 interface IFiles {
@@ -45,13 +47,19 @@ class ProductUpdate extends PureComponent<IProps> {
   };
 
   async componentDidMount() {
+    const { id, intl } = this.props;
     try {
-      const { id } = this.props;
       const resp = await productService.findById(id);
       this.setState({ product: resp.data });
     } catch (e) {
       const err = await Promise.resolve(e);
-      message.error(getResponseError(err) || 'Product not found!');
+      message.error(
+        getResponseError(err)
+          || intl.formatMessage({
+            id: 'productNotFound',
+            defaultMessage: 'Product not found!'
+          })
+      );
       Router.back();
     } finally {
       this.setState({ fetching: false });
@@ -69,8 +77,8 @@ class ProductUpdate extends PureComponent<IProps> {
   }
 
   async submit(data: any) {
+    const { id, intl } = this.props;
     try {
-      const { id } = this.props;
       const files = Object.keys(this._files).reduce((tmpFiles, key) => {
         if (this._files[key]) {
           tmpFiles.push({
@@ -92,12 +100,21 @@ class ProductUpdate extends PureComponent<IProps> {
         submitData,
         this.onUploading.bind(this)
       );
-      message.success('Changes saved.');
+      message.success(
+        intl.formatMessage({
+          id: 'changesSaved',
+          defaultMessage: 'Changes saved'
+        })
+      );
       this.setState({ submiting: false }, () => Router.push('/model/my-store'));
     } catch (e) {
       // TODO - check and show error here
       message.error(
-        getResponseError(e) || 'Something went wrong, please try again!'
+        getResponseError(e)
+          || intl.formatMessage({
+            id: 'somethingWentWrong',
+            defaultMessage: 'Something went wrong, please try again!'
+          })
       );
       this.setState({ submiting: false });
     }
@@ -107,18 +124,29 @@ class ProductUpdate extends PureComponent<IProps> {
     const {
       product, submiting, fetching, uploadPercentage
     } = this.state;
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Edit Product
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'editProduct',
+              defaultMessage: 'Edit Product'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Edit Product" icon={<ShopOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'editProduct',
+              defaultMessage: 'Edit Product'
+            })}
+            icon={<ShopOutlined />}
+          />
           {!fetching && product && (
             <FormProduct
               product={product}
@@ -128,7 +156,11 @@ class ProductUpdate extends PureComponent<IProps> {
               uploadPercentage={uploadPercentage}
             />
           )}
-          {fetching && <div className="text-center"><Spin /></div>}
+          {fetching && (
+            <div className="text-center">
+              <Spin />
+            </div>
+          )}
         </div>
       </Layout>
     );
@@ -138,4 +170,4 @@ class ProductUpdate extends PureComponent<IProps> {
 const mapStates = (state: any) => ({
   ui: state.ui
 });
-export default connect(mapStates)(ProductUpdate);
+export default injectIntl(connect(mapStates)(ProductUpdate));

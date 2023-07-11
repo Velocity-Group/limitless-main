@@ -2,12 +2,14 @@ import { Upload, message } from 'antd';
 import { LoadingOutlined, FileAddOutlined, FileDoneOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import { getGlobalConfig } from '@services/config';
+import { IntlShape } from 'react-intl';
 
 function beforeUpload(file) {
+  const { intl } = this.props;
   const config = getGlobalConfig();
   const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_FILE || 100);
   if (!isLt2M) {
-    message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB or below`);
+    message.error(`${intl.formatMessage({ id: 'fileIsTooLargePleaseProvideAnFile', defaultMessage: 'File is too large please provide an file' })} ${config.NEXT_PUBLIC_MAX_SIZE_FILE || 100}MB ${intl.formatMessage({ id: 'orBelow', defaultMessage: 'or below' })}`);
   }
   return isLt2M;
 }
@@ -25,6 +27,7 @@ interface IProps {
   headers?: any;
   onUploaded?: Function;
   onFileReaded?: Function;
+  intl: IntlShape
 }
 
 export class FileUpload extends PureComponent<IProps, IState> {

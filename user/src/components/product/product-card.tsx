@@ -3,18 +3,20 @@ import { IProduct } from 'src/interfaces';
 import { Tooltip } from 'antd';
 import Link from 'next/link';
 import './product.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   product: IProduct;
+  intl: IntlShape
 }
 interface IStates {
   isBookMarked: boolean;
   requesting: boolean;
 }
 
-export class ProductCard extends PureComponent<IProps, IStates> {
+class ProductCard extends PureComponent<IProps, IStates> {
   render() {
-    const { product } = this.props;
+    const { product, intl } = this.props;
     const image = product?.image || '/static/no-image.jpg';
     return (
       <Link
@@ -31,17 +33,17 @@ export class ProductCard extends PureComponent<IProps, IStates> {
               </span>
               )}
               {!product.stock && product.type === 'physical' && (
-              <div className="label-wrapper-digital">Out of stock!</div>
+                <div className="label-wrapper-digital">{intl.formatMessage({ id: 'outOfStock', defaultMessage: 'Out of stock!' })}</div>
               )}
               {product.stock > 0 && product.type === 'physical' && (
-              <div className="label-wrapper-digital">
-                {product.stock}
-                {' '}
-                in stock
-              </div>
+                <div className="label-wrapper-digital">
+                  {product.stock}
+                  {' '}
+                  {intl.formatMessage({ id: 'inStock', defaultMessage: 'in stock' })}
+                </div>
               )}
               {product.type === 'digital' && (
-              <span className="label-wrapper-digital">Digital</span>
+                <span className="label-wrapper-digital">{intl.formatMessage({ id: 'digital', defaultMessage: 'Digital' })}</span>
               )}
             </div>
             <Tooltip title={product.name}>
@@ -55,3 +57,5 @@ export class ProductCard extends PureComponent<IProps, IStates> {
     );
   }
 }
+
+export default injectIntl(ProductCard);

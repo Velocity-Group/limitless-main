@@ -58,6 +58,7 @@ export const SETTING_KEYS = {
   AGORA_APPID: 'agoraAppId',
   AGORA_CERTIFICATE: 'agoraCertificate',
   AGORA_ENABLE: 'agoraEnable',
+  DEFAULT_LOCALE: 'defaultLocale',
   CCBILL_SINGLE_SUB_ACCOUNT_NUMBER: 'ccbillSingleSubAccountNumber',
   CCBILL_RECURRING_SUB_ACCOUNT_NUMBER: 'ccbillRecurringSubAccountNumber',
   PAYMENT_GATEWAY: 'paymentGateway',

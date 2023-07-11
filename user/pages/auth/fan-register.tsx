@@ -13,6 +13,7 @@ import { TwitterOutlined } from '@ant-design/icons';
 import { authService } from '@services/auth.service';
 import './index.less';
 import GoogleLoginButton from '@components/auth/google-login-button';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
@@ -20,6 +21,7 @@ interface IProps {
   registerFan: Function;
   registerFanData: any;
   loginSocial: Function;
+  intl: IntlShape;
 }
 
 class FanRegister extends PureComponent<IProps> {
@@ -50,7 +52,7 @@ class FanRegister extends PureComponent<IProps> {
     if (!resp?.credential) {
       return;
     }
-    const { loginSocial: handleLogin } = this.props;
+    const { loginSocial: handleLogin, intl } = this.props;
     const payload = { tokenId: resp.credential, role: 'user' };
     try {
       await this.setState({ isLoading: true });
@@ -58,30 +60,52 @@ class FanRegister extends PureComponent<IProps> {
       response.token && handleLogin({ token: response.token });
     } catch (e) {
       const error = await e;
-      message.error(error && error.message ? error.message : 'Google login authenticated fail');
+      message.error(
+        error && error.message
+          ? error.message
+          : `${intl.formatMessage({
+            id: 'googleLoginAuthenticatedFail',
+            defaultMessage: 'Google login authenticated fail'
+          })}`
+      );
     } finally {
       this.setState({ isLoading: false });
     }
   }
 
   async loginTwitter() {
+    const { intl } = this.props;
     try {
       await this.setState({ isLoading: true });
       const resp = await (await authService.loginTwitter()).data;
       if (resp && resp.url) {
-        authService.setTwitterToken({ oauthToken: resp.oauthToken, oauthTokenSecret: resp.oauthTokenSecret }, 'user');
+        authService.setTwitterToken(
+          {
+            oauthToken: resp.oauthToken,
+            oauthTokenSecret: resp.oauthTokenSecret
+          },
+          'user'
+        );
         window.location.href = resp.url;
       }
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Something went wrong, please try again later');
+      message.error(
+        error?.message
+          || `${intl.formatMessage({
+            id: 'somethingWentWrong',
+            defaultMessage: 'Something went wrong, please try again!'
+          })}`
+      );
     } finally {
       this.setState({ isLoading: false });
     }
   }
 
   render() {
-    const { ui, registerFanData, settings } = this.props;
+    const {
+      ui, registerFanData, settings, intl
+    } = this.props;
     const { requesting: submiting } = registerFanData;
     const { isLoading } = this.state;
     return (
@@ -97,23 +121,46 @@ class FanRegister extends PureComponent<IProps> {
           <div className="login-box">
             <p className="text-center">
               <small>
-                Do not create an account on this page if you are a model. Models must create an account on
+                {intl.formatMessage({
+                  id: 'doNotCreateAnAccountOnThisPageIfYouAreAModelModelsMustCreateAnAccountOn',
+                  defaultMessage:
+                    'Do not create an account on this page if you are a model. Models must create an account on'
+                })}
                 {' '}
-                <a href="/auth/model-register">this link</a>
+                <a href="/auth/model-register">
+                  {intl.formatMessage({
+                    id: 'thisLink',
+                    defaultMessage: 'this link'
+                  })}
+                </a>
               </small>
             </p>
             <Row>
               <Col xs={24} sm={24} md={6} lg={12}>
                 <div
                   className="login-content left"
-                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
+                  style={
+                    ui.loginPlaceholderImage
+                      ? { backgroundImage: `url(${ui.loginPlaceholderImage})` }
+                      : null
+                  }
                 />
               </Col>
               <Col xs={24} sm={24} md={18} lg={12}>
                 <div className="login-content right">
-                  <div className="title">Fan Sign Up</div>
+                  <div className="title">
+                    {intl.formatMessage({
+                      id: 'fanSignUp',
+                      defaultMessage: 'Fan Sign Up'
+                    })}
+                  </div>
                   <p className="text-center">
-                    <small>Sign up to interact with your idols!</small>
+                    <small>
+                      {intl.formatMessage({
+                        id: 'signUpToInteractWithYourIdols',
+                        defaultMessage: 'Sign up to interact with your idols!'
+                      })}
+                    </small>
                   </p>
                   <div className="social-login">
                     <button
@@ -124,7 +171,10 @@ class FanRegister extends PureComponent<IProps> {
                     >
                       <TwitterOutlined />
                       {' '}
-                      SIGN UP WITH TWITTER
+                      {intl.formatMessage({
+                        id: 'signUpWithTwitterCase',
+                        defaultMessage: 'SIGN UP WITH TWITTER'
+                      })}
                     </button>
                     <GoogleLoginButton
                       clientId={settings.googleClientId}
@@ -140,7 +190,12 @@ class FanRegister extends PureComponent<IProps> {
                       cookiePolicy="single_host_origin"
                     /> */}
                   </div>
-                  <Divider>Or</Divider>
+                  <Divider>
+                    {intl.formatMessage({
+                      id: 'or',
+                      defaultMessage: 'or'
+                    })}
+                  </Divider>
                   <div className="login-form">
                     <Form
                       labelCol={{ span: 24 }}
@@ -153,31 +208,61 @@ class FanRegister extends PureComponent<IProps> {
                         name="firstName"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
-                          { required: true, message: 'Please input your name!' },
+                          {
+                            required: true,
+                            message: `${intl.formatMessage({
+                              id: 'inputName',
+                              defaultMessage: 'Please input your name!'
+                            })}`
+                          },
                           {
                             pattern: new RegExp(
                               /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                             ),
-                            message: 'First name can not contain number and special character'
+                            message: `${intl.formatMessage({
+                              id: 'firstNameCanNotContain',
+                              defaultMessage:
+                                'First name can not contain number and special character'
+                            })}`
                           }
                         ]}
                       >
-                        <Input placeholder="First name" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'firstName',
+                            defaultMessage: 'First name'
+                          })}
+                        />
                       </Form.Item>
                       <Form.Item
                         name="lastName"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
-                          { required: true, message: 'Please input your name!' },
+                          {
+                            required: true,
+                            message: `${intl.formatMessage({
+                              id: 'inputName',
+                              defaultMessage: 'Please input your name!'
+                            })}`
+                          },
                           {
                             pattern: new RegExp(
                               /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                             ),
-                            message: 'Last name can not contain number and special character'
+                            message: `${intl.formatMessage({
+                              id: 'lastNameCanNotContain',
+                              defaultMessage:
+                                'Last name can not contain number and special character'
+                            })}`
                           }
                         ]}
                       >
-                        <Input placeholder="Last name" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'lastName',
+                            defaultMessage: 'Last name'
+                          })}
+                        />
                       </Form.Item>
                       <Form.Item
                         name="email"
@@ -185,29 +270,57 @@ class FanRegister extends PureComponent<IProps> {
                         rules={[
                           {
                             type: 'email',
-                            message: 'Invalid email address!'
+                            message: `${intl.formatMessage({
+                              id: 'invalidEmailAddress',
+                              defaultMessage: 'Invalid email address!'
+                            })}`
                           },
                           {
                             required: true,
-                            message: 'Please input your email address!'
+                            message: `${intl.formatMessage({
+                              id: 'inputEmailAddress',
+                              defaultMessage:
+                                'Please input your email address!'
+                            })}`
                           }
                         ]}
                       >
-                        <Input placeholder="Email address" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'emailAddress',
+                            defaultMessage: 'Email address'
+                          })}
+                        />
                       </Form.Item>
                       <Form.Item
                         name="password"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
                           {
-                            pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
-                            message:
-                              'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                            pattern: new RegExp(
+                              /^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g
+                            ),
+                            message: `${intl.formatMessage({
+                              id: 'passwordPattern',
+                              defaultMessage:
+                                'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                            })}`
                           },
-                          { required: true, message: 'Please enter your password!' }
+                          {
+                            required: true,
+                            message: `${intl.formatMessage({
+                              id: 'inputPassword',
+                              defaultMessage: 'Please enter your password!'
+                            })}`
+                          }
                         ]}
                       >
-                        <Input.Password placeholder="Password" />
+                        <Input.Password
+                          placeholder={intl.formatMessage({
+                            id: 'password',
+                            defaultMessage: 'Password'
+                          })}
+                        />
                       </Form.Item>
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                       <Form.Item style={{ textAlign: 'center' }}>
@@ -218,32 +331,71 @@ class FanRegister extends PureComponent<IProps> {
                           disabled={submiting || isLoading}
                           loading={submiting || isLoading}
                         >
-                          SIGN UP
+                          {intl.formatMessage({
+                            id: 'signUpCase',
+                            defaultMessage: 'SIGN UP'
+                          })}
                         </Button>
                         <p>
-                          By signing up you agree to our
+                          {intl.formatMessage({
+                            id: 'bySigningUpYouAgreeToOur',
+                            defaultMessage: 'By signing up you agree to our'
+                          })}
                           {' '}
                           <a href="/page/terms-of-service" target="_blank">
-                            Terms of Service
+                            {intl.formatMessage({
+                              id: 'termsOfService',
+                              defaultMessage: 'Terms of Service'
+                            })}
                           </a>
                           {' '}
-                          and
+                          {intl.formatMessage({
+                            id: 'and',
+                            defaultMessage: 'and'
+                          })}
                           {' '}
                           <a href="/page/privacy-policy" target="_blank">
-                            Privacy Policy
+                            {intl.formatMessage({
+                              id: 'privacyPolicy',
+                              defaultMessage: 'Privacy Policy'
+                            })}
                           </a>
-                          , and confirm that you are at least 18 years old.
+                          ,
+                          {' '}
+                          {intl.formatMessage({
+                            id: 'andConfirmThatYouAreAtLeastEighteenYearsOld',
+                            defaultMessage:
+                              'and confirm that you are at least 18 years old.'
+                          })}
                         </p>
                         <p>
-                          Have an account already?
+                          {intl.formatMessage({
+                            id: 'haveAccountAlready',
+                            defaultMessage: 'Have an account already?'
+                          })}
                           <Link href="/auth/login">
-                            <a> Log in here.</a>
+                            <a>
+                              {' '}
+                              {intl.formatMessage({
+                                id: 'logInHere',
+                                defaultMessage: 'Log in here.'
+                              })}
+                            </a>
                           </Link>
                         </p>
                         <p>
-                          Are you a model?
+                          {intl.formatMessage({
+                            id: 'areYouAModel',
+                            defaultMessage: 'Are you a model?'
+                          })}
                           <Link href="/auth/model-register">
-                            <a> Sign up here.</a>
+                            <a>
+                              {' '}
+                              {intl.formatMessage({
+                                id: 'signUpHere',
+                                defaultMessage: 'Sign Up Here.'
+                              })}
+                            </a>
                           </Link>
                         </p>
                       </Form.Item>
@@ -266,4 +418,6 @@ const mapStatesToProps = (state: any) => ({
 
 const mapDispatchToProps = { registerFan, loginSocial };
 
-export default connect(mapStatesToProps, mapDispatchToProps)(FanRegister);
+export default injectIntl(
+  connect(mapStatesToProps, mapDispatchToProps)(FanRegister)
+);

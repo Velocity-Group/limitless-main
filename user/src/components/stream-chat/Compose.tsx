@@ -9,6 +9,7 @@ import { IPerformer } from '@interfaces/performer';
 import Emotions from '@components/messages/emotions';
 // import GiftsStreamBox from '@components/gift/gift-box';
 import '@components/messages/Compose.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const { TextArea } = Input;
 interface IProps {
@@ -17,6 +18,7 @@ interface IProps {
   sentFileSuccess?: Function;
   sendMessageStatus: any;
   conversation: any;
+  intl: IntlShape
 }
 
 class StreamChatCompose extends PureComponent<IProps> {
@@ -56,10 +58,12 @@ class StreamChatCompose extends PureComponent<IProps> {
   }
 
   send() {
-    const { sendStreamMessage: _sendStreamMessage, conversation, user } = this.props;
+    const {
+      sendStreamMessage: _sendStreamMessage, conversation, user, intl
+    } = this.props;
     const { text } = this.state;
     if (!user._id) {
-      message.error('Please login');
+      message.error(intl.formatMessage({ id: 'pleaseLogin', defaultMessage: 'Please login!' }));
       return;
     }
     if (!text) {
@@ -77,14 +81,14 @@ class StreamChatCompose extends PureComponent<IProps> {
 
   render() {
     const { text } = this.state;
-    const { sendMessageStatus: status } = this.props;
+    const { sendMessageStatus: status, intl } = this.props;
     if (!this._input) this._input = createRef();
     return (
       <div className="compose stream">
         <TextArea
           value={text}
           className="compose-input"
-          placeholder="Enter message here."
+          placeholder={intl.formatMessage({ id: 'writeYourMessage', defaultMessage: 'Write your message...' })}
           onKeyDown={this.onKeyDown}
           onChange={this.onChange}
           disabled={status.sending}
@@ -120,4 +124,4 @@ const mapStates = (state: any) => ({
 });
 
 const mapDispatch = { sendStreamMessage };
-export default connect(mapStates, mapDispatch)(StreamChatCompose);
+export default injectIntl(connect(mapStates, mapDispatch)(StreamChatCompose));

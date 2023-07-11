@@ -6,7 +6,7 @@ import withReduxSaga from '@redux/withReduxSaga';
 import { Store } from 'redux';
 import BaseLayout from '@layouts/base-layout';
 import {
-  authService, userService, settingService
+  authService, userService, settingService, languageService, utilsService
 } from '@services/index';
 import Router from 'next/router';
 import { NextPageContext } from 'next';
@@ -19,8 +19,17 @@ import { SETTING_KEYS } from 'src/constants';
 import { pick } from 'lodash';
 import { updateLiveStreamSettings } from '@redux/streaming/actions';
 import { updateSettings } from '@redux/settings/actions';
-import '../style/index.less';
 import { setGlobalConfig } from '@services/config';
+
+import I18nextProvider from 'src/i18n/I18nextProvider';
+import { updateI18next } from '@redux/i18n/action';
+import { isLocale } from 'src/lib/utils';
+import { ConfigProvider } from 'antd';
+
+import '../style/index.less';
+import { updateUtils } from '@redux/utils/actions';
+
+export const DEFAULT_LOCALE = 'en-US';
 
 declare global {
   interface Window {
@@ -113,20 +122,32 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
 
   store.dispatch(
     updateSettings(
-      pick(settings, [
-        SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
-        SETTING_KEYS.TOKEN_CONVERSION_RATE,
-        SETTING_KEYS.STRIPE_PUBLISHABLE_KEY,
-        SETTING_KEYS.GOOGLE_RECAPTCHA_SITE_KEY,
-        SETTING_KEYS.ENABLE_GOOGLE_RECAPTCHA,
-        SETTING_KEYS.GOOGLE_CLIENT_ID,
-        SETTING_KEYS.TWITTER_CLIENT_ID,
-        SETTING_KEYS.PAYMENT_GATEWAY,
-        SETTING_KEYS.META_KEYWORDS,
-        SETTING_KEYS.META_DESCRIPTION
-      ])
+      {
+        ...pick(settings, [
+          SETTING_KEYS.REQUIRE_EMAIL_VERIFICATION,
+          SETTING_KEYS.TOKEN_CONVERSION_RATE,
+          SETTING_KEYS.STRIPE_PUBLISHABLE_KEY,
+          SETTING_KEYS.GOOGLE_RECAPTCHA_SITE_KEY,
+          SETTING_KEYS.ENABLE_GOOGLE_RECAPTCHA,
+          SETTING_KEYS.GOOGLE_CLIENT_ID,
+          SETTING_KEYS.TWITTER_CLIENT_ID,
+          SETTING_KEYS.PAYMENT_GATEWAY,
+          SETTING_KEYS.META_KEYWORDS,
+          SETTING_KEYS.META_DESCRIPTION
+        ]),
+        locale: settings.locale,
+        supportedLocales: settings.supportedLocales
+      }
     )
   );
+
+  store.dispatch(
+    updateUtils({
+      countries: settings.countries
+    })
+  );
+
+  store.dispatch(updateI18next(settings.messages));
 }
 
 interface AppComponent extends NextPageContext {
@@ -145,7 +166,7 @@ const publicConfig = {} as any;
 class Application extends App<IApp> {
   // TODO - consider if we need to use get static props in children component instead?
   // or check in render?
-  static async getInitialProps({ Component, ctx }) {
+  static async getInitialProps({ Component, ctx, router }) {
     // load configuration from ENV and put to config
     if (!process.browser) {
       // eslint-disable-next-line global-require
@@ -172,12 +193,28 @@ class Application extends App<IApp> {
     const { token } = nextCookie(ctx);
     ctx.token = token || '';
     // server side to load settings, once time only
-    let settings = {};
+    let settings: any = {};
+    let locale: string;
     if (!process.browser) {
-      const [setting] = await Promise.all([
-        settingService.all('all', true)
+      const [setting, countryList] = await Promise.all([
+        settingService.all('all', true),
+        utilsService.countriesList()
       ]);
-      settings = { ...setting.data };
+      const _cookie = nextCookie(ctx);
+      // router.locale is default locale when router custom
+      // const _locale = router.query[lookupQuerystring] || _cookie[lookupCookie];
+      const _locale = router.query[process.env.NEXT_PUBLIC_LOOKUP_QUERY_STRING || 'locale'] || _cookie[process.env.NEXT_PUBLIC_LOOKUP_COOKIE || 'i18nextLng'];
+      locale = isLocale(_locale) ? _locale : '';
+      const _messages = locale
+        ? await languageService.search({ locale })
+        : null;
+
+      settings = {
+        ...setting.data,
+        countries: countryList.data || [],
+        messages: _messages?.data?.data || [],
+        locale
+      };
       await updateSettingsStore(ctx, settings);
     }
     let pageProps = {};
@@ -196,16 +233,6 @@ class Application extends App<IApp> {
     super(props);
     setGlobalConfig(this.props.config);
   }
-
-  // componentDidMount() {
-  //   const script = document.createElement('script');
-  //   script.async = true;
-  //   script.innerHTML = `function googleTranslateElementInit() {
-  //       new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
-  //     };`;
-  //   script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-  //   document.getElementsByTagName('head')[0].appendChild(script);
-  // }
 
   render() {
     const {
@@ -237,28 +264,20 @@ class Application extends App<IApp> {
             // eslint-disable-next-line react/no-danger
             <div dangerouslySetInnerHTML={{ __html: settings.headerScript }} />
           )}
-          <script
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: `
-              function googleTranslateElementInit() {
-                new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
-              };
-             `
-            }}
-          />
-          <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" />
         </Head>
         <Socket>
-          <BaseLayout layout={layout} maintenance={settings.maintenanceMode}>
-            <Component {...pageProps} />
-          </BaseLayout>
+          <I18nextProvider defaultLocale={settings.defaultLocale || DEFAULT_LOCALE}>
+            <ConfigProvider>
+              <BaseLayout layout={layout} maintenance={settings.maintenanceMode}>
+                <Component {...pageProps} />
+              </BaseLayout>
+            </ConfigProvider>
+          </I18nextProvider>
         </Socket>
         {settings && settings.afterBodyScript && (
           // eslint-disable-next-line react/no-danger
           <div dangerouslySetInnerHTML={{ __html: settings.afterBodyScript }} />
         )}
-        <div id="google_translate_element" />
       </Provider>
     );
   }

@@ -7,6 +7,7 @@ import {
 } from 'antd';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { IntlShape, useIntl } from 'react-intl';
 
 function MyLiveStreamingScheduleListing() {
   const [filterQuery, setFilterQuery] = useState({
@@ -18,6 +19,7 @@ function MyLiveStreamingScheduleListing() {
     pageSize: 10
   });
   const [requests, setRequests] = useState([]);
+  const intl: IntlShape = useIntl();
 
   const search = async () => {
     try {
@@ -82,27 +84,27 @@ function MyLiveStreamingScheduleListing() {
 
   const columns = [
     {
-      title: 'Username',
+      title: intl.formatMessage({ id: 'username', defaultMessage: 'Username' }),
       render: (record: any) => record?.userInfo?.username,
       key: 'username'
     },
     {
-      title: 'Balance',
+      title: intl.formatMessage({ id: 'balance', defaultMessage: 'Balance' }),
       render: (record: any) => record?.userInfo?.balance,
       key: 'balance'
     },
     {
-      title: 'Date',
+      title: intl.formatMessage({ id: 'date', defaultMessage: 'Date' }),
       dataIndex: 'startAt',
       key: 'startAt'
     },
     {
-      title: 'Timezone',
+      title: intl.formatMessage({ id: 'timezone', defaultMessage: 'Timezone' }),
       dataIndex: 'timezone',
       key: 'timezone'
     },
     {
-      title: 'Status',
+      title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
       dataIndex: 'status',
       key: 'status'
     },
@@ -114,7 +116,7 @@ function MyLiveStreamingScheduleListing() {
           menuOptions={[
             {
               key: 'start-request',
-              name: 'Start Request',
+              name: intl.formatMessage({ id: 'startRequest', defaultMessage: 'Start Request' }),
               children: (
                 <Link
                   href={{
@@ -126,14 +128,14 @@ function MyLiveStreamingScheduleListing() {
                   as={`/model/live/private?key=${record._id}`}
                 >
                   <a>
-                    Start
+                    {intl.formatMessage({ id: 'start', defaultMessage: 'Start' })}
                   </a>
                 </Link>
               )
             },
             {
               key: 'approve-request',
-              name: 'Approve Request',
+              name: intl.formatMessage({ id: 'approveRequest', defaultMessage: 'Approve Request' }),
               children: (
                 <>
                   <a
@@ -142,14 +144,14 @@ function MyLiveStreamingScheduleListing() {
                       approve(record);
                     }}
                   >
-                    Approve
+                    {intl.formatMessage({ id: 'approve', defaultMessage: 'Approve' })}
                   </a>
                 </>
               )
             },
             {
               key: 'reject-request',
-              name: 'Reject Request',
+              name: intl.formatMessage({ id: 'rejectRequest', defaultMessage: 'Reject Request' }),
               children: (
                 <>
                   <a
@@ -158,7 +160,7 @@ function MyLiveStreamingScheduleListing() {
                       reject(record);
                     }}
                   >
-                    Reject
+                    {intl.formatMessage({ id: 'reject', defaultMessage: 'Reject' })}
                   </a>
                 </>
               )
@@ -172,7 +174,7 @@ function MyLiveStreamingScheduleListing() {
   return (
     <Layout>
       <div className="main-container">
-        <PageHeading title="Live Streaming Schedule" />
+        <PageHeading title={intl.formatMessage({ id: 'liveStreamingSchedule', defaultMessage: 'Live Streaming Schedule' })} />
         <Table
           rowKey="_id"
           dataSource={requests}

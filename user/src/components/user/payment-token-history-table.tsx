@@ -5,6 +5,7 @@ import {
 import { ITransaction } from 'src/interfaces';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
+import { useIntl } from 'react-intl';
 
 interface IProps {
   dataSource: ITransaction[];
@@ -21,9 +22,10 @@ const PaymentTableList = ({
   loading,
   onChange
 }: IProps) => {
+  const intl = useIntl();
   const columns = [
     {
-      title: 'ID',
+      title: intl.formatMessage({ id: 'id', defaultMessage: 'ID' }),
       dataIndex: '_id',
       key: 'id',
       render(data, record) {
@@ -99,7 +101,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Model',
+      title: intl.formatMessage({ id: 'model', defaultMessage: 'Model' }),
       dataIndex: 'performerInfo',
       key: 'performer',
       render(data) {
@@ -113,7 +115,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Description',
+      title: intl.formatMessage({ id: 'description', defaultMessage: 'Description' }),
       key: 'description',
       render(data, record) {
         return record?.products.map((re) => (
@@ -126,33 +128,33 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Type',
+      title: intl.formatMessage({ id: 'type', defaultMessage: 'Type' }),
       dataIndex: 'type',
       key: 'type',
       render(type: string) {
         switch (type) {
           case 'feed':
-            return <Tag color="blue">Post</Tag>;
+            return <Tag color="blue">{intl.formatMessage({ id: 'post', defaultMessage: 'Post' })}</Tag>;
           case 'video':
-            return <Tag color="pink">Video</Tag>;
+            return <Tag color="pink">{intl.formatMessage({ id: 'video', defaultMessage: 'Video' })}</Tag>;
           case 'product':
-            return <Tag color="orange">Product</Tag>;
+            return <Tag color="orange">{intl.formatMessage({ id: 'product', defaultMessage: 'Product' })}</Tag>;
           case 'gallery':
-            return <Tag color="violet">Gallery</Tag>;
+            return <Tag color="violet">{intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })}</Tag>;
           case 'message':
-            return <Tag color="red">Message</Tag>;
+            return <Tag color="red">{intl.formatMessage({ id: 'message', defaultMessage: 'Message' })}</Tag>;
           case 'tip':
-            return <Tag color="red">Model Tip</Tag>;
+            return <Tag color="red">{intl.formatMessage({ id: 'tip', defaultMessage: 'Tip' })}</Tag>;
           case 'stream_tip':
-            return <Tag color="red">Streaming Tip</Tag>;
+            return <Tag color="red">{intl.formatMessage({ id: 'streamingTip', defaultMessage: 'Streaming tip' })}</Tag>;
           case 'public_chat':
-            return <Tag color="pink">Paid Streaming</Tag>;
+            return <Tag color="pink">{intl.formatMessage({ id: 'paidStreaming', defaultMessage: 'Paid streaming' })}</Tag>;
           default: return <Tag color="default">{type}</Tag>;
         }
       }
     },
     {
-      title: 'Price',
+      title: intl.formatMessage({ id: 'price', defaultMessage: 'Price' }),
       dataIndex: 'totalPrice',
       key: 'tokens',
       render(totalPrice) {
@@ -165,7 +167,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Status',
+      title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
       dataIndex: 'status',
       key: 'status',
       render(status: string) {
@@ -181,7 +183,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Date',
+      title: intl.formatMessage({ id: 'date', defaultMessage: 'Date' }),
       key: 'createdAt',
       dataIndex: 'createdAt',
       sorter: true,

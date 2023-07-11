@@ -1,10 +1,15 @@
 import {
-  Layout, Button, message, Spin, Modal, Avatar, Tooltip, Image
+  Layout,
+  Button,
+  message,
+  Spin,
+  Modal,
+  Avatar,
+  Tooltip,
+  Image
 } from 'antd';
 import PageHeading from '@components/common/page-heading';
-import {
-  BookOutlined, DollarOutlined, ShopOutlined
-} from '@ant-design/icons';
+import { BookOutlined, DollarOutlined, ShopOutlined } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -15,13 +20,14 @@ import {
   productService, tokenTransactionService, reactionService, utilsService
 } from '@services/index';
 import { PerformerListProduct } from '@components/product/performer-list-product';
-import { PurchaseProductForm } from '@components/product/confirm-purchase';
 import { updateBalance } from '@redux/user/actions';
 import {
   IProduct, IUser, IUIConfig, IError, ICountry
 } from 'src/interfaces';
 import Router from 'next/router';
 import './store.less';
+import { injectIntl, IntlShape } from 'react-intl';
+import { PurchaseProductForm } from '@components/product/confirm-purchase';
 
 interface IProps {
   user: IUser;
@@ -29,6 +35,7 @@ interface IProps {
   error: IError;
   updateBalance: Function;
   product: IProduct;
+  intl: IntlShape;
   countries: ICountry[];
 }
 
@@ -87,7 +94,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
 
   async handleBookmark() {
     const { isBookmarked } = this.state;
-    const { product } = this.props;
+    const { product, intl } = this.props;
     try {
       await this.setState({ submiting: true });
       if (!isBookmarked) {
@@ -107,21 +114,29 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(
+        error.message
+        || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
     } finally {
       await this.setState({ submiting: false });
     }
   }
 
   async updateProductShallowRoute() {
-    const { product } = this.props;
+    const { product, intl } = this.props;
     try {
       await this.setState({ loading: true });
-      const relatedProducts = await (await productService.userSearch({
-        limit: 24,
-        excludedId: product._id,
-        performerId: product.performerId
-      })).data;
+      const relatedProducts = await (
+        await productService.userSearch({
+          limit: 24,
+          excludedId: product._id,
+          performerId: product.performerId
+        })
+      ).data;
       this.setState({
         isBookmarked: product.isBookMarked,
         relatedProducts: relatedProducts.data,
@@ -129,16 +144,30 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
+      message.error(
+        err?.message
+        || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
       this.setState({ loading: false });
     }
   }
 
   async purchaseProduct(payload: any) {
-    const { user, updateBalance: handleUpdateBalance, product } = this.props;
+    const {
+      user, updateBalance: handleUpdateBalance, product, intl
+    } = this.props;
     if (user?.isPerformer) return;
     if (user.balance < product.price) {
-      message.error('You have an insufficient token balance. Please top up.');
+      message.error(
+        intl.formatMessage({
+          id: 'youHaveAnInsufficientTokenBalance',
+          defaultMessage:
+            'You have an insufficient token balance. Please top up.'
+        })
+      );
       return;
     }
     if (product.type === 'physical' && !payload.deliveryAddressId) {
@@ -148,22 +177,44 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
     try {
       await this.setState({ submiting: true });
       await tokenTransactionService.purchaseProduct(product._id, payload);
-      message.success('Payment success');
+      message.success(
+        intl.formatMessage({
+          id: 'paymentSuccess',
+          defaultMessage: 'Payment success'
+        })
+      );
       handleUpdateBalance({ token: -product.price });
       Router.push('/user/orders');
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
+      message.error(
+        err?.message
+        || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
       this.setState({ submiting: false, openPurchaseModal: false });
     }
   }
 
   render() {
     const {
-      ui, product, error, user, countries
+      ui, product, error, user, countries, intl
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Product was not found'} />;
+      return (
+        <Error
+          statusCode={error?.statusCode || 404}
+          title={
+            error?.message
+            || intl.formatMessage({
+              id: 'productWasNotFound',
+              defaultMessage: 'Product was not found'
+            })
+          }
+        />
+      );
     }
     const {
       relatedProducts,
@@ -176,31 +227,35 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${product?.name || 'Product'}`}
+            {`${ui?.siteName} | ${product?.name
+              || intl.formatMessage({ id: 'product', defaultMessage: 'Product' })
+            }`}
           </title>
           <meta name="keywords" content={product?.description} />
           <meta name="description" content={product?.description} />
           {/* OG tags */}
           <meta
             property="og:title"
-            content={`${ui?.siteName} | ${product?.name || 'Product'}`}
+            content={`${ui?.siteName} | ${product?.name
+              || intl.formatMessage({ id: 'product', defaultMessage: 'Product' })
+            }`}
             key="title"
           />
-          <meta property="og:image" content={product?.image || '/static/empty_product.svg'} />
           <meta
-            property="og:description"
-            content={product?.description}
+            property="og:image"
+            content={product?.image || '/static/empty_product.svg'}
           />
+          <meta property="og:description" content={product?.description} />
           {/* Twitter tags */}
           <meta
             name="twitter:title"
             content={`${ui.siteName} | ${product.name || 'Product'}`}
           />
-          <meta name="twitter:image" content={product?.image || '/static/empty_product.svg'} />
           <meta
-            name="twitter:description"
-            content={product.description}
+            name="twitter:image"
+            content={product?.image || '/static/empty_product.svg'}
           />
+          <meta name="twitter:description" content={product.description} />
         </Head>
         <div className="main-container">
           <PageHeading title={product.name || 'N/A'} icon={<ShopOutlined />} />
@@ -215,18 +270,26 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   <span className="prod-stock">
                     {product.stock}
                     {' '}
-                    in stock
+                    {intl.formatMessage({ id: 'inStock', defaultMessage: 'in stock' })}
                   </span>
                 ) : null}
                 {!product.stock && product.type === 'physical' && (
-                  <span className="prod-stock">Out of stock!</span>
+                  <span className="prod-stock">{intl.formatMessage({ id: 'outOfStock', defaultMessage: 'Out of stock!' })}</span>
                 )}
-                {product.type === 'digital' && <span className="prod-digital">Digital</span>}
+                {product.type === 'digital' && (
+                  <span className="prod-digital">{intl.formatMessage({ id: 'digital', defaultMessage: 'Digital' })}</span>
+                )}
               </div>
-            ) : <div className="text-center"><Spin /></div>}
+            ) : (
+              <div className="text-center">
+                <Spin />
+              </div>
+            )}
             {product && (
               <div className="prod-info">
-                <p className="prod-desc">{product?.description || 'No description yet'}</p>
+                <p className="prod-desc">
+                  {product?.description || 'No description yet'}
+                </p>
                 <div className="add-cart">
                   <p className="prod-price">
                     $
@@ -253,7 +316,7 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                       }}
                     >
                       <DollarOutlined />
-                      Get it now!
+                      {intl.formatMessage({ id: 'getItNow', defaultMessage: 'Get it now!' })}
                     </Button>
                   </div>
                 </div>
@@ -268,14 +331,20 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 <Link
                   href={{
                     pathname: '/model/profile',
-                    query: { username: product?.performer?.username || product?.performer?._id }
+                    query: {
+                      username:
+                        product?.performer?.username || product?.performer?._id
+                    }
                   }}
-                  as={`/model/${product?.performer?.username || product?.performer?._id}`}
+                  as={`/model/${product?.performer?.username || product?.performer?._id
+                  }`}
                 >
                   <a>
                     <Avatar
                       alt="performer avatar"
-                      src={product?.performer?.avatar || '/static/no-avatar.png'}
+                      src={
+                        product?.performer?.avatar || '/static/no-avatar.png'
+                      }
                     />
                     <div className="owner-name">
                       <div className="name">
@@ -292,7 +361,11 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                 </Link>
               </div>
               <div className="act-btns">
-                <Tooltip title={isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                <Tooltip
+                  title={
+                    isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'
+                  }
+                >
                   <button
                     type="button"
                     className={isBookmarked ? 'react-btn active' : 'react-btn'}
@@ -308,12 +381,28 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
         </div>
         <div className="main-container">
           <div className="related-items">
-            <h4 className="ttl-1">You may also like</h4>
+            <h4 className="ttl-1">
+              {intl.formatMessage({
+                id: 'youMayAlsoLike',
+                defaultMessage: 'You may also like'
+              })}
+            </h4>
             {!loading && relatedProducts.length > 0 && (
               <PerformerListProduct products={relatedProducts} />
             )}
-            {!loading && !relatedProducts.length && <p>No product was found</p>}
-            {loading && <div style={{ margin: 10, textAlign: 'center' }}><Spin /></div>}
+            {!loading && !relatedProducts.length && (
+              <p>
+                {intl.formatMessage({
+                  id: 'noProductWasFound',
+                  defaultMessage: 'No product was found'
+                })}
+              </p>
+            )}
+            {loading && (
+              <div style={{ margin: 10, textAlign: 'center' }}>
+                <Spin />
+              </div>
+            )}
           </div>
         </div>
         {openPurchaseModal && (
@@ -346,4 +435,4 @@ const mapStates = (state: any) => ({
 });
 
 const mapDispatch = { updateBalance };
-export default connect(mapStates, mapDispatch)(ProductViewPage);
+export default injectIntl(connect(mapStates, mapDispatch)(ProductViewPage));

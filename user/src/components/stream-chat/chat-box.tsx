@@ -5,6 +5,7 @@ import StreamMessenger from '@components/stream-chat/Messenger';
 import { getResponseError } from '@lib/utils';
 import { messageService } from 'src/services';
 import './chat-box.less';
+import { useIntl } from 'react-intl';
 
 interface IProps {
   resetAllStreamMessage?: Function;
@@ -13,7 +14,10 @@ interface IProps {
 }
 
 const checkPermission = (user, conversation) => {
-  if (user?._id === conversation?.data?.performerId || user?.roles?.includes('admin')) {
+  if (
+    user?._id === conversation?.data?.performerId
+    || user?.roles?.includes('admin')
+  ) {
     return true;
   }
   return false;
@@ -26,6 +30,7 @@ const ChatBox = ({
 }: IProps) => {
   const [removing, setRemoving] = useState(false);
   const [canReset, setCanReset] = useState(false);
+  const intl = useIntl();
 
   useEffect(() => {
     setCanReset(checkPermission(user, activeConversation));
@@ -33,19 +38,32 @@ const ChatBox = ({
 
   const removeAllMessage = async () => {
     if (!canReset) {
-      message.error('You don\'t have permission!');
+      message.error(
+        intl.formatMessage({
+          id: 'YouDontHavePermission',
+          defaultMessage: 'You don\'t have permission!'
+        })
+      );
       return;
     }
 
     try {
       setRemoving(true);
-      if (!window.confirm('Are you sure you want to clear all chat history?')) {
+      if (
+        !window.confirm(
+          intl.formatMessage({
+            id: 'areYouSureYouWantToClearAllChatHistory',
+            defaultMessage: 'Are you sure you want to clear all chat history?'
+          })
+        )
+      ) {
         return;
       }
       await messageService.deleteAllMessageInConversation(
         activeConversation.data._id
       );
-      resetAllStreamMessage && resetAllStreamMessage({ conversationId: activeConversation.data._id });
+      resetAllStreamMessage
+        && resetAllStreamMessage({ conversationId: activeConversation.data._id });
     } catch (e) {
       const error = await Promise.resolve(e);
       message.error(getResponseError(error));
@@ -60,23 +78,33 @@ const ChatBox = ({
         <Tabs defaultActiveKey="chat_content">
           <Tabs.TabPane tab="CHAT" key="chat_content">
             {activeConversation
-            && activeConversation.data
-            && activeConversation.data.streamId ? (
-              <StreamMessenger streamId={activeConversation.data.streamId} />
-              ) : <p className="text-center">Let start a converstion</p>}
+              && activeConversation.data
+              && activeConversation.data.streamId ? (
+                <StreamMessenger streamId={activeConversation.data.streamId} />
+              ) : (
+                <p className="text-center">
+                  {intl.formatMessage({
+                    id: 'letStartAConversation',
+                    defaultMessage: 'Let start a conversation'
+                  })}
+                </p>
+              )}
           </Tabs.TabPane>
         </Tabs>
       </div>
       {canReset && (
-      <div style={{ margin: '10px' }}>
-        <Button
-          type="primary"
-          loading={removing}
-          onClick={() => removeAllMessage()}
-        >
-          Clear chat history
-        </Button>
-      </div>
+        <div style={{ margin: '10px' }}>
+          <Button
+            type="primary"
+            loading={removing}
+            onClick={() => removeAllMessage()}
+          >
+            {intl.formatMessage({
+              id: 'clearChatHistory',
+              defaultMessage: 'Clear chat history'
+            })}
+          </Button>
+        </div>
       )}
     </>
   );

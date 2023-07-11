@@ -4,14 +4,16 @@ import {
   Col, Modal
 } from 'antd';
 import { } from '@ant-design/icons';
+import { injectIntl, IntlShape } from 'react-intl';
 import './index.less';
 
 interface IProps {
   onAddPollDuration: Function;
   openDurationPollModal: boolean;
+  intl:IntlShape
 }
 
-export default class AddPollDurationForm extends PureComponent<IProps> {
+class AddPollDurationForm extends PureComponent<IProps> {
   state = {
     limitTime: 7
   };
@@ -21,34 +23,51 @@ export default class AddPollDurationForm extends PureComponent<IProps> {
   }
 
   render() {
-    const { onAddPollDuration, openDurationPollModal = false } = this.props;
+    const { intl, onAddPollDuration, openDurationPollModal = false } = this.props;
     const { limitTime } = this.state;
 
     return (
       <Modal
-        title={`Poll duration - ${!limitTime ? 'No limit' : `${limitTime} days`}`}
+        title={`${intl.formatMessage({ id: 'pollDuration', defaultMessage: 'Poll duration' })} - ${!limitTime ? intl.formatMessage({ id: 'noLimit', defaultMessage: 'No limit' }) : `${limitTime} ${intl.formatMessage({ id: 'days', defaultMessage: 'days' })}`}`}
         visible={openDurationPollModal}
         onCancel={() => onAddPollDuration(7)}
         onOk={() => onAddPollDuration(limitTime)}
       >
         <Row>
           <Col span={4.5}>
-            <Button type={limitTime === 1 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 1)}>1 day</Button>
+            <Button type={limitTime === 1 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 1)}>
+              1
+              {' '}
+              {intl.formatMessage({ id: 'day', defaultMessage: 'day' })}
+            </Button>
           </Col>
           <Col span={4.5}>
-            <Button type={limitTime === 3 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 3)}>3 days</Button>
+            <Button type={limitTime === 3 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 3)}>
+              3
+              {' '}
+              {intl.formatMessage({ id: 'days', defaultMessage: 'days' })}
+            </Button>
           </Col>
           <Col span={4.5}>
-            <Button type={limitTime === 7 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 7)}>7 days</Button>
+            <Button type={limitTime === 7 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 7)}>
+              7
+              {' '}
+              {intl.formatMessage({ id: 'days', defaultMessage: 'days' })}
+            </Button>
           </Col>
           <Col span={4.5}>
-            <Button type={limitTime === 30 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 30)}>30 days</Button>
+            <Button type={limitTime === 30 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 30)}>
+              30
+              {' '}
+              {intl.formatMessage({ id: 'days', defaultMessage: 'days' })}
+            </Button>
           </Col>
           <Col span={6}>
-            <Button type={limitTime === 0 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 0)}>No limit</Button>
+            <Button type={limitTime === 0 ? 'primary' : 'default'} onClick={this.onChangePoll.bind(this, 0)}>{intl.formatMessage({ id: 'noLimit', defaultMessage: 'No limit' })}</Button>
           </Col>
         </Row>
       </Modal>
     );
   }
 }
+export default injectIntl(AddPollDurationForm);

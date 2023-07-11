@@ -26,6 +26,7 @@ import Router from 'next/router';
 import { VideoPlayer } from '@components/common';
 import { getGlobalConfig } from '@services/config';
 import './video.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   user: IPerformer;
@@ -34,6 +35,7 @@ interface IProps {
   beforeUpload?: Function;
   uploading?: boolean;
   uploadPercentage?: number;
+  intl: IntlShape
 }
 
 const layout = {
@@ -43,11 +45,7 @@ const layout = {
 
 const { Option } = Select;
 
-const validateMessages = {
-  required: 'This field is required!'
-};
-
-export class FormUploadVideo extends PureComponent<IProps> {
+class FormUploadVideo extends PureComponent<IProps> {
   state = {
     previewThumbnail: null,
     previewTeaser: null,
@@ -82,6 +80,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
   }
 
   async handleRemovefile(type: string) {
+    const { intl } = this.props;
     if (!window.confirm('Confirm to remove file!')) return;
     const { video } = this.props;
     try {
@@ -90,11 +89,15 @@ export class FormUploadVideo extends PureComponent<IProps> {
       type === 'thumbnail' && this.setState({ removedThumbnail: true });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
+      message.error(err?.message || intl.formatMessage({
+        id: 'errorOccurredPleaseTryAgainLater',
+        defaultMessage: 'Error occurred, please try again later'
+      }));
     }
   }
 
   getPerformers = debounce(async (q, performerIds) => {
+    const { intl } = this.props;
     try {
       const resp = await (
         await performerService.search({
@@ -107,7 +110,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
       this.setState({ performers });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured');
+      message.error(err?.message || intl.formatMessage({
+        id: 'errorOccurredPleaseTryAgainLater',
+        defaultMessage: 'Error occurred, please try again later'
+      }));
     }
   }, 500);
 
@@ -153,12 +159,18 @@ export class FormUploadVideo extends PureComponent<IProps> {
   };
 
   beforeUpload(file: File, field: string) {
-    const { beforeUpload: beforeUploadHandler } = this.props;
+    const { beforeUpload: beforeUploadHandler, intl } = this.props;
     const config = getGlobalConfig();
     if (field === 'thumbnail') {
       const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!isValid) {
-        message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+        message.error(`${intl.formatMessage({
+          id: 'fileIsTooLargePleaseProvideAnFile',
+          defaultMessage: 'File is too large please provide an file'
+        })} ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB ${intl.formatMessage({
+          id: 'orBelow',
+          defaultMessage: 'or below'
+        })}`);
         return isValid;
       }
       this.setState({ selectedThumbnail: file });
@@ -166,7 +178,13 @@ export class FormUploadVideo extends PureComponent<IProps> {
     if (field === 'teaser') {
       const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
       if (!isValid) {
-        message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
+        message.error(`${intl.formatMessage({
+          id: 'fileIsTooLargePleaseProvideAnFile',
+          defaultMessage: 'File is too large please provide an file'
+        })} ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB ${intl.formatMessage({
+          id: 'orBelow',
+          defaultMessage: 'or below'
+        })}`);
         return isValid;
       }
       this.setState({ selectedTeaser: file });
@@ -174,7 +192,13 @@ export class FormUploadVideo extends PureComponent<IProps> {
     if (field === 'video') {
       const isValid = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000);
       if (!isValid) {
-        message.error(`File is too large please provide an file ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB or below`);
+        message.error(`${intl.formatMessage({
+          id: 'fileIsTooLargePleaseProvideAnFile',
+          defaultMessage: 'File is too large please provide an file'
+        })} ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB ${intl.formatMessage({
+          id: 'orBelow',
+          defaultMessage: 'or below'
+        })}`);
         return isValid;
       }
       this.setState({ selectedVideo: file });
@@ -184,7 +208,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
 
   render() {
     const {
-      video, submit, uploading, uploadPercentage, user
+      video, submit, uploading, uploadPercentage, user, intl
     } = this.props;
     const {
       previewThumbnail,
@@ -201,6 +225,9 @@ export class FormUploadVideo extends PureComponent<IProps> {
       removedThumbnail
     } = this.state;
     const config = getGlobalConfig();
+    const validateMessages = {
+      required: intl.formatMessage({ id: 'thisFieldIsRequired', defaultMessage: 'This field is required!' })
+    };
 
     return (
       <Form
@@ -215,7 +242,10 @@ export class FormUploadVideo extends PureComponent<IProps> {
           }
           submit(data);
         }}
-        onFinishFailed={() => message.error('Please complete the required fields')}
+        onFinishFailed={() => message.error(intl.formatMessage({
+          id: 'pleaseCompleteTheRequiredFields',
+          defaultMessage: 'Please complete the required fields'
+        }))}
         name="form-upload"
         validateMessages={validateMessages}
         initialValues={
@@ -236,22 +266,34 @@ export class FormUploadVideo extends PureComponent<IProps> {
         <Row>
           <Col md={24} xs={24}>
             <Form.Item
-              label="Title"
+              label={intl.formatMessage({ id: 'title', defaultMessage: 'Title' })}
               name="title"
               rules={[
-                { required: true, message: 'Please input title of video!' }
+                {
+                  required: true,
+                  message: intl.formatMessage({
+                    id: 'pleaseInputTitleOfVideo',
+                    defaultMessage: 'Please input title of video!'
+                  })
+                }
               ]}
             >
               <Input />
             </Form.Item>
           </Col>
           <Col md={24} xs={24}>
-            <Form.Item label="Participants" name="participantIds">
+            <Form.Item
+              label={intl.formatMessage({
+                id: 'participants',
+                defaultMessage: 'Participants'
+              })}
+              name="participantIds"
+            >
               <Select
                 mode="multiple"
                 style={{ width: '100%' }}
                 showSearch
-                placeholder="Search performers here"
+                placeholder={intl.formatMessage({ id: 'searchModel', defaultMessage: 'Search model here' })}
                 optionFilterProp="children"
                 onSearch={this.getPerformers.bind(this)}
                 loading={uploading}
@@ -270,7 +312,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col md={12} xs={24}>
-            <Form.Item label="Tags" name="tags">
+            <Form.Item label={intl.formatMessage({ id: 'tags', defaultMessage: 'Tags' })} name="tags">
               <Select
                 mode="tags"
                 style={{ width: '100%' }}
@@ -283,45 +325,51 @@ export class FormUploadVideo extends PureComponent<IProps> {
           <Col md={12} xs={24}>
             <Form.Item
               name="status"
-              label="Status"
-              rules={[{ required: true, message: 'Please select status!' }]}
+              label={intl.formatMessage({ id: 'status', defaultMessage: 'Status' })}
+              rules={[{
+                required: true,
+                message: intl.formatMessage({
+                  id: 'pleaseSelectStatus',
+                  defaultMessage: 'Please select status'
+                })
+              }]}
             >
               <Select>
                 <Select.Option key="active" value="active">
-                  Active
+                  {intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}
                 </Select.Option>
                 <Select.Option key="inactive" value="inactive">
-                  Inactive
+                  {intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}
                 </Select.Option>
               </Select>
             </Form.Item>
           </Col>
           <Col md={12} xs={24}>
-            <Form.Item name="isSale" label="For sale?">
+            <Form.Item name="isSale" label={intl.formatMessage({ id: 'forSale', defaultMessage: 'For sale?' })}>
               <Switch
-                checkedChildren="Pay per view"
-                unCheckedChildren="Subscribe to view"
+                checkedChildren={intl.formatMessage({ id: 'payPerView', defaultMessage: 'Pay per view' })}
+                unCheckedChildren={intl.formatMessage({ id: 'subscribeToView', defaultMessage: 'Subscribe to view' })}
                 checked={isSale}
                 onChange={(val) => this.setState({ isSale: val })}
               />
             </Form.Item>
             {isSale && (
-            <Form.Item name="price" label="Price">
+            <Form.Item name="price" label={intl.formatMessage({ id: 'Price', defaultMessage: 'Price' })}>
               <InputNumber style={{ width: '100%' }} min={1} />
             </Form.Item>
             )}
           </Col>
           <Col md={12} xs={24}>
-            <Form.Item name="isSchedule" label="Scheduled?">
+            <Form.Item name="isSchedule" label={`${intl.formatMessage({ id: 'scheduled', defaultMessage: 'Scheduled' })}?`}>
               <Switch
-                checkedChildren="Scheduled"
-                unCheckedChildren="Not scheduled"
+                checkedChildren={intl.formatMessage({ id: 'scheduled', defaultMessage: 'Scheduled' })}
+                unCheckedChildren={intl.formatMessage({ id: 'notScheduled', defaultMessage: 'Not scheduled' })}
                 checked={isSchedule}
                 onChange={(val) => this.setState({ isSchedule: val })}
               />
             </Form.Item>
             {isSchedule && (
-            <Form.Item label="Scheduled for">
+            <Form.Item label={intl.formatMessage({ id: 'scheduledFor', defaultMessage: 'Scheduled for' })}>
               <DatePicker
                 style={{ width: '100%' }}
                 disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
@@ -332,13 +380,13 @@ export class FormUploadVideo extends PureComponent<IProps> {
             )}
           </Col>
           <Col span={24}>
-            <Form.Item name="description" label="Description">
+            <Form.Item name="description" label={intl.formatMessage({ id: 'description', defaultMessage: 'Description' })}>
               <Input.TextArea rows={3} />
             </Form.Item>
           </Col>
           <Col xs={24} md={8}>
             <Form.Item
-              label="Video"
+              label={intl.formatMessage({ id: 'video', defaultMessage: 'Video' })}
               className="upload-bl"
               help={
                   (previewVideo && (
@@ -348,11 +396,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
                       isShowPreview: true, previewUrl: previewVideo?.url, previewType: 'video'
                     })}
                   >
-                    {previewVideo?.name || 'Click here to preview'}
+                    {previewVideo?.name || intl.formatMessage({ id: 'clickHereToPreview', defaultMessage: 'Click here to preview' })}
                   </a>
                   ))
                   || (selectedVideo && <a>{selectedVideo.name}</a>)
-                  || `Video file is ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB or below`
+                  || `Video file is ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2048}MB ${intl.formatMessage({
+                    id: 'orBelow',
+                    defaultMessage: 'or below'
+                  })}`
                 }
             >
               <Upload
@@ -375,7 +426,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
           </Col>
           <Col xs={24} md={8}>
             <Form.Item
-              label="Teaser"
+              label={intl.formatMessage({ id: 'teaser', defaultMessage: 'Teaser' })}
               className="upload-bl"
               help={
                 (previewTeaser && !removedTeaser && (
@@ -385,11 +436,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
                       isShowPreview: true, previewUrl: previewTeaser?.url, previewType: 'teaser'
                     })}
                   >
-                    {previewTeaser?.name || 'Click here to preview'}
+                    {previewTeaser?.name || intl.formatMessage({ id: 'clickHereToPreview', defaultMessage: 'Click here to preview' })}
                   </a>
                 ))
                   || (selectedTeaser && <a>{selectedTeaser.name}</a>)
-                  || `Teaser is ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`
+                  || `Teaser is ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB ${intl.formatMessage({
+                    id: 'orBelow',
+                    defaultMessage: 'or below'
+                  })}`
                 }
             >
               <Upload
@@ -414,7 +468,7 @@ export class FormUploadVideo extends PureComponent<IProps> {
           <Col xs={24} md={8}>
             <Form.Item
               className="upload-bl"
-              label="Thumbnail"
+              label={intl.formatMessage({ id: 'thumbnail', defaultMessage: 'Thumbnail' })}
               help={
                 (previewThumbnail && !removedThumbnail && (
                   <a
@@ -423,11 +477,14 @@ export class FormUploadVideo extends PureComponent<IProps> {
                       isShowPreview: true, previewUrl: previewThumbnail?.url, previewType: 'thumbnail'
                     })}
                   >
-                    {previewThumbnail?.name || 'Click here to preview'}
+                    {previewThumbnail?.name || intl.formatMessage({ id: 'clickHereToPreview', defaultMessage: 'Click here to preview' })}
                   </a>
                 ))
                   || (selectedThumbnail && <a>{selectedThumbnail.name}</a>)
-                  || `Thumbnail is ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`
+                  || `Thumbnail is ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB ${intl.formatMessage({
+                    id: 'orBelow',
+                    defaultMessage: 'or below'
+                  })}`
                 }
             >
               <Upload
@@ -459,14 +516,20 @@ export class FormUploadVideo extends PureComponent<IProps> {
             loading={uploading}
             disabled={uploading}
           >
-            {video ? 'Update' : 'Upload'}
+            {video ? intl.formatMessage({
+              id: 'update',
+              defaultMessage: 'Update'
+            }) : intl.formatMessage({
+              id: 'upload',
+              defaultMessage: 'Upload'
+            })}
           </Button>
           <Button
             className="secondary"
             onClick={() => Router.back()}
             disabled={uploading}
           >
-            Back
+            {intl.formatMessage({ id: 'back', defaultMessage: 'Back' })}
           </Button>
         </Form.Item>
         {this.previewModal()}
@@ -474,3 +537,5 @@ export class FormUploadVideo extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(FormUploadVideo);

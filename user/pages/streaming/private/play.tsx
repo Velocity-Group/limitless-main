@@ -28,7 +28,7 @@ import {
   resetStreamMessage
 } from '@redux/stream-chat/actions';
 import { getResponseError } from '@lib/index';
-import { TipPerformerForm } from '@components/performer';
+import TipPerformerForm from '@components/performer/tip-form';
 import dynamic from 'next/dynamic';
 import Error from 'next/error';
 import { IAgoraRTCClient } from 'agora-rtc-sdk-ng';

@@ -9,10 +9,12 @@ import { galleryService } from 'src/services';
 import { getResponseError } from '@lib/utils';
 import Router from 'next/router';
 import { connect } from 'react-redux';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   user: IPerformer;
+  intl: IntlShape;
   settings: ISettings;
 }
 
@@ -30,9 +32,15 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
   };
 
   componentDidMount() {
-    const { user, settings } = this.props;
+    const { user, intl } = this.props;
     if (!user.verifiedDocument) {
-      message.warning('Your ID documents are not verified yet! You could not post any content right now.');
+      message.warning(
+        intl.formatMessage({
+          id: 'yourIdDocumentsAreNotVerifiedYet',
+          defaultMessage:
+            'Your ID documents are not verified yet! You could not post any content right now.'
+        })
+      );
       Router.back();
     }
     // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
@@ -42,20 +50,27 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
   }
 
   async onFinish(data) {
+    const { intl } = this.props;
     try {
       await this.setState({ submiting: true });
       const resp = await galleryService.create(data);
       message.success('New gallery created successfully');
       Router.replace(`/model/my-gallery/update?id=${resp.data._id}`);
     } catch (e) {
-      message.error(getResponseError(e) || 'An error occurred, please try again!');
+      message.error(
+        getResponseError(e)
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     } finally {
       this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const { submiting } = this.state;
     return (
       <Layout>
@@ -64,12 +79,23 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
             {' '}
             {ui && ui.siteName}
             {' '}
-            | New Gallery
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'newGallery',
+              defaultMessage: 'New Gallery'
+            })}
             {' '}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="New Gallery" icon={<PictureOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'newGallery',
+              defaultMessage: 'New Gallery'
+            })}
+            icon={<PictureOutlined />}
+          />
           <FormGallery
             submiting={submiting}
             onFinish={this.onFinish.bind(this)}
@@ -85,4 +111,4 @@ const mapStates = (state: any) => ({
   user: { ...state.user.current },
   settings: { ...state.settings }
 });
-export default connect(mapStates)(GalleryCreatePage);
+export default injectIntl(connect(mapStates)(GalleryCreatePage));

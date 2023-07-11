@@ -15,6 +15,8 @@ export class SettingService {
   // key and value
   static _publicSettingsCache = {} as any;
 
+  static _publicSettingsCacheArray = [];
+
   constructor(
     @Inject(SETTING_MODEL_PROVIDER)
     private readonly settingModel: Model<SettingModel>,
@@ -39,13 +41,18 @@ export class SettingService {
 
   public async syncCache(): Promise<void> {
     const settings = await this.settingModel.find();
+    const publicSettingArray = [];
     settings.forEach((setting) => {
       const dto = new SettingDto(setting);
       SettingService._settingCache[dto.key] = dto;
       if (dto.visible && dto.public) {
         SettingService._publicSettingsCache[dto.key] = dto.value;
+
+        publicSettingArray.push(dto);
       }
     });
+
+    SettingService._publicSettingsCacheArray = publicSettingArray;
   }
 
   async get(key: string): Promise<SettingDto> {
@@ -140,5 +147,9 @@ export class SettingService {
 
   public static getValueByKey(key: string) {
     return SettingService._settingCache[key] ? SettingService._settingCache[key].value : null;
+  }
+
+  public getPublicSettingsArray() {
+    return SettingService._publicSettingsCacheArray;
   }
 }

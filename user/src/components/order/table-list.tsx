@@ -1,9 +1,12 @@
 /* eslint-disable react/destructuring-assignment */
-import { Table, Tag, Tooltip } from 'antd';
+import {
+  Empty, Table, Tag, Tooltip
+} from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 import { IOrder, IUser } from 'src/interfaces';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
+import { useIntl } from 'react-intl';
 
 interface IProps {
   dataSource: IOrder[];
@@ -22,9 +25,10 @@ const OrderTableList = ({
   onChange,
   user
 }: IProps) => {
+  const intl = useIntl();
   const columns = [
     {
-      title: 'ID',
+      title: intl.formatMessage({ id: 'id', defaultMessage: 'ID' }),
       dataIndex: 'orderNumber',
       key: 'orderNumber',
       render(orderNumber, record) {
@@ -38,7 +42,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Product',
+      title: intl.formatMessage({ id: 'product', defaultMessage: 'Product' }),
       dataIndex: 'productInfo',
       key: 'productInfo',
       render(product) {
@@ -57,7 +61,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Price',
+      title: intl.formatMessage({ id: 'price', defaultMessage: 'Price' }),
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
@@ -69,26 +73,26 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Delivery status',
+      title: intl.formatMessage({ id: 'deliveryStatus', defaultMessage: 'Delivery Status' }),
       dataIndex: 'deliveryStatus',
       render(status: string) {
         switch (status) {
           case 'created':
-            return <Tag color="gray">Created</Tag>;
+            return <Tag color="gray">{intl.formatMessage({ id: 'created', defaultMessage: 'Created' })}</Tag>;
           case 'processing':
-            return <Tag color="#FFCF00">Processing</Tag>;
+            return <Tag color="#FFCF00">{intl.formatMessage({ id: 'processing', defaultMessage: 'Processing' })}</Tag>;
           case 'shipping':
-            return <Tag color="#00dcff">Shipping</Tag>;
+            return <Tag color="#00dcff">{intl.formatMessage({ id: 'shipping', defaultMessage: 'Shipping' })}</Tag>;
           case 'delivered':
-            return <Tag color="#00c12c">Delivered</Tag>;
+            return <Tag color="#00c12c">{intl.formatMessage({ id: 'delivered', defaultMessage: 'Delivered' })}</Tag>;
           case 'refunded':
-            return <Tag color="red">Refunded</Tag>;
+            return <Tag color="red">{intl.formatMessage({ id: 'refunded', defaultMessage: 'Refunded' })}</Tag>;
           default: return <Tag color="#FFCF00">{status}</Tag>;
         }
       }
     },
     {
-      title: 'Updated On',
+      title: intl.formatMessage({ id: 'updatedOn', defaultMessage: 'Updated On' }),
       dataIndex: 'createdAt',
       sorter: true,
       render(date: Date) {
@@ -96,7 +100,7 @@ const OrderTableList = ({
       }
     },
     {
-      title: 'Action',
+      title: intl.formatMessage({ id: 'action', defaultMessage: 'Action' }),
       dataIndex: '_id',
       render(id: string) {
         return (
@@ -104,7 +108,7 @@ const OrderTableList = ({
             <a>
               <EyeOutlined />
               {' '}
-              view
+              {intl.formatMessage({ id: 'view', defaultMessage: 'view' })}
             </a>
           </Link>
         );
@@ -114,6 +118,11 @@ const OrderTableList = ({
   return (
     <div className="table-responsive">
       <Table
+        locale={{
+          emptyText: <Empty
+            description={intl.formatMessage({ id: 'emptyData', defaultMessage: 'No Data' })}
+          />
+        }}
         dataSource={dataSource}
         columns={columns}
         pagination={pagination}

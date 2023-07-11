@@ -1,7 +1,7 @@
 import { PureComponent } from 'react';
 import { Row, Col } from 'antd';
 import { IProduct } from 'src/interfaces/product';
-import { ProductCard } from './product-card';
+import ProductCard from './product-card';
 
 interface IProps {
   products: IProduct[];

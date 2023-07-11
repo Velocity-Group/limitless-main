@@ -3,6 +3,7 @@ import { PureComponent } from 'react';
 import { Table, Tag } from 'antd';
 import { formatDate } from '@lib/date';
 import { IEarning } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   dataSource: IEarning[];
@@ -10,16 +11,17 @@ interface IProps {
   pagination: {};
   onChange: Function;
   loading: boolean;
+  intl: IntlShape
 }
 
-export class TableListEarning extends PureComponent<IProps> {
+class TableListEarning extends PureComponent<IProps> {
   render() {
     const {
-      dataSource, rowKey, pagination, onChange, loading
+      dataSource, rowKey, pagination, onChange, loading, intl
     } = this.props;
     const columns = [
       {
-        title: 'User',
+        title: intl.formatMessage({ id: 'user', defaultMessage: 'User' }),
         dataIndex: 'userInfo',
         render(userInfo) {
           return (
@@ -30,36 +32,36 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Type',
+        title: intl.formatMessage({ id: 'type', defaultMessage: 'Type' }),
         dataIndex: 'type',
         render(type: string) {
           switch (type) {
             case 'monthly_subscription':
-              return <Tag color="red">Monthly</Tag>;
+              return <Tag color="red">{intl.formatMessage({ id: 'monthly', defaultMessage: 'Monthly' })}</Tag>;
             case 'yearly_subscription':
-              return <Tag color="red">Yearly</Tag>;
+              return <Tag color="red">{intl.formatMessage({ id: 'Yearly', defaultMessage: 'Yearly' })}</Tag>;
             case 'public_chat':
-              return <Tag color="violet">Paid Streaming</Tag>;
+              return <Tag color="violet">{intl.formatMessage({ id: 'paidStreaming', defaultMessage: 'Paid streaming' })}</Tag>;
             case 'feed':
-              return <Tag color="green">Post</Tag>;
+              return <Tag color="green">{intl.formatMessage({ id: 'post', defaultMessage: 'Post' })}</Tag>;
             case 'tip':
-              return <Tag color="orange">Tip</Tag>;
+              return <Tag color="orange">{intl.formatMessage({ id: 'tip', defaultMessage: 'Tip' })}</Tag>;
             case 'gift':
-              return <Tag color="orange">Gift</Tag>;
+              return <Tag color="orange">{intl.formatMessage({ id: 'gift', defaultMessage: 'Gift' })}</Tag>;
             case 'message':
-              return <Tag color="pink">Message</Tag>;
+              return <Tag color="pink">{intl.formatMessage({ id: 'message', defaultMessage: 'Message' })}</Tag>;
             case 'product':
-              return <Tag color="blue">Product</Tag>;
+              return <Tag color="blue">{intl.formatMessage({ id: 'product', defaultMessage: 'Product' })}</Tag>;
             case 'gallery':
-              return <Tag color="success">Gallery</Tag>;
+              return <Tag color="success">{intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })}</Tag>;
             case 'stream_tip':
-              return <Tag color="orange">Streaming tip</Tag>;
+              return <Tag color="orange">{intl.formatMessage({ id: 'streamingTip', defaultMessage: 'Streaming tip' })}</Tag>;
           }
           return <Tag color="success">{type}</Tag>;
         }
       },
       {
-        title: 'GROSS',
+        title: intl.formatMessage({ id: 'gross', defaultMessage: 'GROSS' }),
         dataIndex: 'grossPrice',
         render(grossPrice: number) {
           return (
@@ -71,7 +73,7 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Commission',
+        title: intl.formatMessage({ id: 'commission', defaultMessage: 'Commission' }),
         dataIndex: 'siteCommission',
         render(commission: number) {
           return (
@@ -83,7 +85,7 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'NET',
+        title: intl.formatMessage({ id: 'net', defaultMessage: 'NET' }),
         dataIndex: 'netPrice',
         render(netPrice: number) {
           return (
@@ -95,7 +97,7 @@ export class TableListEarning extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Date',
+        title: intl.formatMessage({ id: 'date', defaultMessage: 'Date' }),
         dataIndex: 'createdAt',
         sorter: true,
         render(date: Date) {
@@ -117,3 +119,5 @@ export class TableListEarning extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(TableListEarning);

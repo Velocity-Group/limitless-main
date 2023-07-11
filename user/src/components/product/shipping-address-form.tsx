@@ -3,6 +3,7 @@ import {
 } from 'antd';
 import { ICountry } from '@interfaces/index';
 import { useRef, useState } from 'react';
+import { useIntl } from 'react-intl';
 
 const citystatejson = require('countrycitystatejson');
 
@@ -24,6 +25,7 @@ export const ShippingAddressForm = ({
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const formRef = useRef() as any;
+  const intl = useIntl();
 
   const handleGetStates = async (countryCode: string) => {
     if (!countryCode) return;
@@ -42,7 +44,7 @@ export const ShippingAddressForm = ({
       ref={formRef}
       {...layout}
       onFinish={(data) => onFinish(data)}
-      onFinishFailed={() => message.error('Please complete the required fields')}
+      onFinishFailed={() => message.error(intl.formatMessage({ id: 'pleaseCompleteTheRequiredFields', defaultMessage: 'Please complete the required fields' }))}
       name="form-address"
       className="account-form"
     >
@@ -50,23 +52,23 @@ export const ShippingAddressForm = ({
         <Col md={24} xs={24}>
           <Form.Item
             name="name"
-            label="Address Name"
+            label={intl.formatMessage({ id: 'addressName', defaultMessage: 'Address Name' })}
             rules={[
               {
-                required: true, message: 'Please enter address name!'
+                required: true, message: `${intl.formatMessage({ id: 'pleaseEnterAddressName!', defaultMessage: 'Please enter address name!' })}`
               }
             ]}
           >
-            <Input placeholder="School, home, Work,..." />
+            <Input placeholder={intl.formatMessage({ id: 'schoolHomeWork', defaultMessage: 'School, home, Work,...' })} />
           </Form.Item>
         </Col>
         <Col md={12} xs={12}>
           <Form.Item
             name="country"
-            label="Country"
+            label={intl.formatMessage({ id: 'country', defaultMessage: 'Country' })}
             rules={[
               {
-                required: true, message: 'Please select your country!'
+                required: true, message: `${intl.formatMessage({ id: 'pleaseSelectYourCountry', defaultMessage: 'Please select your country!' })}`
               }
             ]}
           >
@@ -88,10 +90,10 @@ export const ShippingAddressForm = ({
         <Col md={12} xs={12}>
           <Form.Item
             name="state"
-            label="State"
+            label={intl.formatMessage({ id: 'state', defaultMessage: 'State' })}
             rules={[
               {
-                required: true, message: 'Please select your state!'
+                required: true, message: `${intl.formatMessage({ id: 'pleaseSelectYourState', defaultMessage: 'Please select your state!' })}`
               }
             ]}
           >
@@ -115,10 +117,10 @@ export const ShippingAddressForm = ({
         <Col md={12} xs={12}>
           <Form.Item
             name="city"
-            label="City"
+            label={intl.formatMessage({ id: 'city', defaultMessage: 'City' })}
             rules={[
               {
-                required: true, message: 'Please select your city!'
+                required: true, message: `${intl.formatMessage({ id: 'pleaseSelectYourCity', defaultMessage: 'Please select your city!' })}`
               }
             ]}
           >
@@ -141,75 +143,75 @@ export const ShippingAddressForm = ({
         <Col md={12} xs={12}>
           <Form.Item
             name="district"
-            label="District"
+            label={intl.formatMessage({ id: 'district', defaultMessage: 'District' })}
             rules={[
               {
-                required: true, message: 'Please enter your district!'
+                required: true, message: `${intl.formatMessage({ id: 'pleaseEnterYourDistrict', defaultMessage: 'Please enter your district!' })} `
               }
             ]}
           >
-            <Input placeholder="District" />
+            <Input placeholder={intl.formatMessage({ id: 'district', defaultMessage: 'District' })} />
           </Form.Item>
         </Col>
         <Col md={12} xs={12}>
           <Form.Item
             name="ward"
-            label="Ward"
+            label={intl.formatMessage({ id: 'ward', defaultMessage: 'Ward' })}
             rules={[
               {
-                required: true, message: 'Please enter your ward!'
+                required: true, message: `${intl.formatMessage({ id: 'pleaseEnterYourWard', defaultMessage: 'Please enter your ward!' })}`
               }
             ]}
           >
-            <Input placeholder="Ward" />
+            <Input placeholder={intl.formatMessage({ id: 'ward', defaultMessage: 'Ward' })} />
           </Form.Item>
         </Col>
         <Col md={12} xs={12}>
           <Form.Item
             name="streetAddress"
-            label="Street Address"
+            label={intl.formatMessage({ id: 'streetAddress', defaultMessage: 'Street Address' })}
             rules={[
               {
-                required: true, message: 'Please select your street address!'
+                required: true, message: `${intl.formatMessage({ id: 'pleaseSelectYourStreetAddress', defaultMessage: 'Please select your street address!' })}`
               }
             ]}
           >
-            <Input placeholder="Street Address" />
+            <Input placeholder={intl.formatMessage({ id: 'streetAddress', defaultMessage: 'Street Address' })} />
           </Form.Item>
         </Col>
         <Col md={12} xs={12}>
           <Form.Item
             name="streetNumber"
-            label="Street Number"
+            label={intl.formatMessage({ id: 'streetNumber', defaultMessage: 'Street Number' })}
             rules={[
               {
-                required: true, message: 'Please select your street number!'
+                required: true, message: `${intl.formatMessage({ id: 'pleaseSelectYourStreetNumber', defaultMessage: 'Please select your street number!' })}`
               }
             ]}
           >
-            <Input placeholder="Street Number" />
+            <Input placeholder={intl.formatMessage({ id: 'streetNumber', defaultMessage: 'Street Number' })} />
           </Form.Item>
         </Col>
         <Col md={12} xs={12}>
           <Form.Item
             name="zipCode"
-            label="Zip Code"
+            label={intl.formatMessage({ id: 'zipCode', defaultMessage: 'Zip Code' })}
             rules={[
-              { required: true, message: 'Please provide your zip code' },
+              { required: true, message: `${intl.formatMessage({ id: 'pleaseProvideYourZipCode', defaultMessage: 'Please provide your zip code' })}` },
               {
-                pattern: new RegExp(/^\d{2,10}$/g), message: 'Please provide valid digit numbers'
+                pattern: new RegExp(/^\d{2,10}$/g), message: `${intl.formatMessage({ id: 'pleaseProvideValidDigitNumbers', defaultMessage: 'Please provide valid digit numbers' })}`
               }
             ]}
           >
-            <Input placeholder="Zip code" />
+            <Input placeholder={intl.formatMessage({ id: 'zipCode', defaultMessage: 'Zip Code' })} />
           </Form.Item>
         </Col>
         <Col md={24} xs={24}>
           <Form.Item
             name="description"
-            label="Description"
+            label={intl.formatMessage({ id: 'description', defaultMessage: 'Description' })}
           >
-            <Input.TextArea placeholder="Description" />
+            <Input.TextArea placeholder={intl.formatMessage({ id: 'description', defaultMessage: 'Description' })} />
           </Form.Item>
 
         </Col>
@@ -222,13 +224,13 @@ export const ShippingAddressForm = ({
           loading={submiting}
           disabled={submiting}
         >
-          Save
+          {intl.formatMessage({ id: 'save', defaultMessage: 'Save' })}
         </Button>
         <Button
           className="secondary"
           onClick={() => onCancel()}
         >
-          Cancel
+          {intl.formatMessage({ id: 'Cancel', defaultMessage: 'Cancel' })}
         </Button>
       </div>
     </Form>

@@ -14,6 +14,9 @@ const handler = routes.getRequestHandler(app, ({
   if (route.name === 'model') {
     // eslint-disable-next-line no-param-reassign
     route.page = '/model/profile';
+  } else if (route.name === 'i18n-dashboard') {
+    // eslint-disable-next-line no-param-reassign
+    route.page = '/';
   }
   app.render(req, res, route.page, query);
 });

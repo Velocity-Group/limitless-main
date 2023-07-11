@@ -5,13 +5,15 @@ import { HistoryOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { tokenTransactionService } from 'src/services';
 import { ITransaction, IUIConfig } from 'src/interfaces';
-import { SearchFilter } from '@components/common/search-filter';
+import SearchFilter from '@components/common/search-filter';
 import PaymentTableList from '@components/user/payment-token-history-table';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
+  intl: IntlShape;
 }
 interface IStates {
   loading: boolean;
@@ -94,42 +96,47 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
   }
 
   render() {
-    const {
-      loading, paymentList, pagination
-    } = this.state;
-    const { ui } = this.props;
+    const { loading, paymentList, pagination } = this.state;
+    const { ui, intl } = this.props;
     const type = [
       {
         key: '',
-        text: 'All types'
+        text: intl.formatMessage({
+          id: 'allType',
+          defaultMessage: 'All type'
+        })
       },
       {
         key: 'feed',
-        text: 'Post'
+        text: intl.formatMessage({ id: 'post', defaultMessage: 'Post' })
       },
       {
         key: 'product',
-        text: 'Product'
+        text: intl.formatMessage({ id: 'product', defaultMessage: 'Product' })
       },
       {
         key: 'gallery',
-        text: 'Gallery'
+        text: intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })
       },
       {
         key: 'video',
-        text: 'Video'
+        text: intl.formatMessage({ id: 'video', defaultMessage: 'Video' })
+      },
+      {
+        key: 'message',
+        text: intl.formatMessage({ id: 'message', defaultMessage: 'Message' })
       },
       {
         key: 'tip',
-        text: 'Model Tip'
+        text: intl.formatMessage({ id: 'tip', defaultMessage: 'Tip' })
       },
       {
         key: 'stream_tip',
-        text: 'Streaming Tip'
+        text: intl.formatMessage({ id: 'streamingTip', defaultMessage: 'Streaming tip' })
       },
       {
         key: 'public_chat',
-        text: 'Paid Streaming'
+        text: intl.formatMessage({ id: 'paidStreaming', defaultMessage: 'Paid streaming' })
       }
     ];
     return (
@@ -138,11 +145,22 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Wallet Transactions
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'walletTransactions',
+              defaultMessage: 'Wallet Transactions'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Wallet Transactions" icon={<HistoryOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'walletTransactions',
+              defaultMessage: 'Wallet Transactions'
+            })}
+            icon={<HistoryOutlined />}
+          />
           <SearchFilter
             type={type}
             searchWithPerformer
@@ -164,4 +182,4 @@ class PurchasedItemHistoryPage extends PureComponent<IProps, IStates> {
 const mapStates = (state: any) => ({
   ui: state.ui
 });
-export default connect(mapStates)(PurchasedItemHistoryPage);
+export default injectIntl(connect(mapStates)(PurchasedItemHistoryPage));

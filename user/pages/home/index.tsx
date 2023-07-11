@@ -9,22 +9,40 @@ import { Banner } from '@components/common';
 import HomeFooter from '@components/common/layout/footer';
 import { getFeeds, moreFeeds, removeFeedSuccess } from '@redux/feed/actions';
 import {
-  performerService, feedService, bannerService, utilsService, streamService
+  performerService,
+  feedService,
+  bannerService,
+  utilsService,
+  streamService
 } from '@services/index';
 import {
-  IFeed, IPerformer, ISettings, IUser, IBanner, IUIConfig, ICountry, IStream
+  IFeed,
+  IPerformer,
+  ISettings,
+  IUser,
+  IBanner,
+  IUIConfig,
+  ICountry,
+  IStream
 } from 'src/interfaces';
 import ScrollListFeed from '@components/post/scroll-list';
 import {
-  SyncOutlined, TagOutlined, SearchOutlined, CloseOutlined
+  SyncOutlined,
+  TagOutlined,
+  SearchOutlined,
+  CloseOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import Router from 'next/router';
 import { debounce } from 'lodash';
 import dynamic from 'next/dynamic';
+import { injectIntl, IntlShape } from 'react-intl';
 import './index.less';
 
-const StreamListItem = dynamic(() => import('@components/streaming/stream-list-item'), { ssr: false });
+const StreamListItem = dynamic(
+  () => import('@components/streaming/stream-list-item'),
+  { ssr: false }
+);
 
 interface IProps {
   countries: ICountry[];
@@ -38,14 +56,13 @@ interface IProps {
   moreFeeds: Function;
   feedState: any;
   removeFeedSuccess: Function;
+  intl: IntlShape;
 }
 
 function isInViewport(el) {
   const rect = el.getBoundingClientRect();
   const bodyHeight = window.innerHeight || document.documentElement.clientHeight;
-  return (
-    rect.bottom <= bodyHeight + 250
-  );
+  return rect.bottom <= bodyHeight + 250;
 }
 
 class HomePage extends PureComponent<IProps> {
@@ -76,7 +93,7 @@ class HomePage extends PureComponent<IProps> {
     keyword: '',
     openSearch: false,
     showFooter: false
-  }
+  };
 
   componentDidMount() {
     this.getPerformers();
@@ -96,32 +113,53 @@ class HomePage extends PureComponent<IProps> {
     } else {
       this.setState({ showFooter: true });
     }
-  }
+  };
 
   handleClick = (stream: IStream) => {
-    const { user } = this.props;
+    const { user, intl } = this.props;
     if (!user._id) {
-      message.error('Please log in or register!', 5);
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseLoginOrRegister',
+          defaultMessage: 'Please login or register!'
+        }),
+        5
+      );
       Router.push('/auth/login');
       return;
     }
     if (user.isPerformer) return;
     if (!stream?.isSubscribed) {
-      message.error('Please subscribe to join live chat!', 5);
-      Router.push({
-        pathname: '/model/profile',
-        query: {
-          username: stream?.performerInfo?.username || stream?.performerInfo?._id
-        }
-      }, `/${stream?.performerInfo?.username || stream?.performerInfo?._id}`);
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseSubscribeToJoinLiveChat',
+          defaultMessage: 'Please subscribe to join live chat!'
+        }),
+        5
+      );
+      Router.push(
+        {
+          pathname: '/model/profile',
+          query: {
+            username:
+              stream?.performerInfo?.username || stream?.performerInfo?._id
+          }
+        },
+        `/${stream?.performerInfo?.username || stream?.performerInfo?._id}`
+      );
       return;
     }
-    Router.push({
-      pathname: '/streaming/details',
-      query: {
-        username: stream?.performerInfo?.username || stream?.performerInfo?._id
-      }
-    }, `/streaming/${stream?.performerInfo?.username || stream?.performerInfo?._id}`);
+    Router.push(
+      {
+        pathname: '/streaming/details',
+        query: {
+          username:
+            stream?.performerInfo?.username || stream?.performerInfo?._id
+        }
+      },
+      `/streaming/${stream?.performerInfo?.username || stream?.performerInfo?._id
+      }`
+    );
   };
 
   async onGetFreePerformers() {
@@ -131,14 +169,32 @@ class HomePage extends PureComponent<IProps> {
   }
 
   async onDeleteFeed(feed: IFeed) {
-    const { removeFeedSuccess: handleRemoveFeed } = this.props;
-    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) return;
+    const { removeFeedSuccess: handleRemoveFeed, intl } = this.props;
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'allEarningsRelatedToThisPostWillBeRefunded',
+          defaultMessage:
+            'All earnings related to this post will be refunded. Are you sure to remove it?'
+        })
+      )
+    ) { return; }
     try {
       await feedService.delete(feed._id);
-      message.success('Post deleted successfully');
+      message.success(
+        intl.formatMessage({
+          id: 'postDeletedSuccessfully',
+          defaultMessage: 'Post deleted successfully'
+        })
+      );
       handleRemoveFeed({ feed });
     } catch (e) {
-      message.error('Something went wrong, please try again later');
+      message.error(
+        intl.formatMessage({
+          id: 'somethingWentWrong',
+          defaultMessage: 'Something went wrong, please try again!'
+        })
+      );
     }
   }
 
@@ -150,7 +206,7 @@ class HomePage extends PureComponent<IProps> {
   onSearchFeed = debounce(async (e) => {
     await this.setState({ keyword: e, feedPage: 0 });
     this.getFeeds();
-  }, 600)
+  }, 600);
 
   async getFeeds() {
     const { getFeeds: handleGetFeeds } = this.props;
@@ -199,12 +255,22 @@ class HomePage extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, feedState, user, settings, banners, countries, streams
+      ui, feedState, user, settings, banners, countries, streams, intl
     } = this.props;
-    const { items: feeds, total: totalFeeds, requesting: loadingFeed } = feedState;
-    const topBanners = banners && banners.length > 0 && banners.filter((b) => b.position === 'top');
     const {
-      randomPerformers, loadingPerformer, isFreeSubscription, openSearch, showFooter
+      items: feeds,
+      total: totalFeeds,
+      requesting: loadingFeed
+    } = feedState;
+    const topBanners = banners
+      && banners.length > 0
+      && banners.filter((b) => b.position === 'top');
+    const {
+      randomPerformers,
+      loadingPerformer,
+      isFreeSubscription,
+      openSearch,
+      showFooter
     } = this.state;
     return (
       <Layout>
@@ -221,31 +287,72 @@ class HomePage extends PureComponent<IProps> {
             <div className="main-container">
               <div className="home-heading">
                 <h3>
-                  HOME
+                  {intl.formatMessage({
+                    id: 'homeUpCase',
+                    defaultMessage: 'HOME'
+                  })}
                 </h3>
                 <div className="search-bar-feed">
                   <Input
                     className={openSearch ? 'active' : ''}
                     prefix={<SearchOutlined />}
-                    placeholder="Type to search here ..."
+                    placeholder={intl.formatMessage({
+                      id: 'typeToSearchHere',
+                      defaultMessage: 'Type to search here ...'
+                    })}
                     onChange={(e) => {
                       e.persist();
                       this.onSearchFeed(e.target.value);
                     }}
                   />
-                  <a aria-hidden className="open-search" onClick={() => this.setState({ openSearch: !openSearch })}>
+                  <a
+                    aria-hidden
+                    className="open-search"
+                    onClick={() => this.setState({ openSearch: !openSearch })}
+                  >
                     {!openSearch ? <SearchOutlined /> : <CloseOutlined />}
                   </a>
                 </div>
               </div>
               <div className="home-container">
                 <div className="left-container">
-                  {user._id && !user.verifiedEmail && settings.requireEmailVerification && <Link href={user.isPerformer ? '/model/account' : '/user/account'}><a><Alert type="error" style={{ margin: '15px 0', textAlign: 'center' }} message="Please verify your email address, click here to update!" /></a></Link>}
-                  {streams?.length > 0 && (
+                  {user._id
+                    && !user.verifiedEmail
+                    && settings.requireEmailVerification && (
+                      <Link
+                        href={
+                          user.isPerformer ? '/model/account' : '/user/account'
+                        }
+                      >
+                        <a>
+                          <Alert
+                            type="error"
+                            style={{ margin: '15px 0', textAlign: 'center' }}
+                            message={intl.formatMessage({
+                              id: 'pleaseVerifyYourEmailAddressClickHereToUpdate',
+                              defaultMessage:
+                                'Please verify your email address, click here to update!'
+                            })}
+                          />
+                        </a>
+                      </Link>
+                  )}
                   <div className="visit-history">
                     <div className="top-story">
-                      <a>Live Videos</a>
-                      <a href="/model"><small>View all</small></a>
+                      <a>
+                        {intl.formatMessage({
+                          id: 'liveVideos',
+                          defaultMessage: 'Live Videos'
+                        })}
+                      </a>
+                      <a href="/model">
+                        <small>
+                          {intl.formatMessage({
+                            id: 'liveVideos',
+                            defaultMessage: 'Live Videos'
+                          })}
+                        </small>
+                      </a>
                     </div>
                     <div className="story-list">
                       {streams.length > 0 && streams.map((s) => (
@@ -254,16 +361,21 @@ class HomePage extends PureComponent<IProps> {
                       {/* {!streams?.length && <p className="text-center" style={{ margin: '30px 0' }}>No live for now</p>} */}
                     </div>
                   </div>
-                  )}
                   {!loadingFeed && !totalFeeds && (
-                    <div className="main-container custom text-center" style={{ margin: '10px 0' }}>
+                    <div
+                      className="main-container custom text-center"
+                      style={{ margin: '10px 0' }}
+                    >
                       <Alert
                         type="warning"
                         message={(
                           <a href="/model">
                             <SearchOutlined />
                             {' '}
-                            Find someone to follow
+                            {intl.formatMessage({
+                              id: 'findSomeoneToFollow',
+                              defaultMessage: 'Find someone to follow'
+                            })}
                           </a>
                         )}
                       />
@@ -280,15 +392,70 @@ class HomePage extends PureComponent<IProps> {
                 <div className="right-container" id="home-right-container">
                   <div className="suggestion-bl">
                     <div className="sug-top">
-                      <span className="sug-text">SUGGESTIONS</span>
-                      <span className="btns-grp" style={{ textAlign: randomPerformers.length < 5 ? 'right' : 'left' }}>
-                        <a aria-hidden className="free-btn" onClick={this.onGetFreePerformers.bind(this)}><Tooltip title={isFreeSubscription ? 'Show all' : 'Show only free'}><TagOutlined className={isFreeSubscription ? 'active' : ''} /></Tooltip></a>
-                        <a aria-hidden className="reload-btn" onClick={this.getPerformers.bind(this)}><Tooltip title="Refresh"><SyncOutlined spin={loadingPerformer} /></Tooltip></a>
+                      <span className="sug-text">
+                        {intl.formatMessage({
+                          id: 'suggestionsUpCase',
+                          defaultMessage: 'SUGGESTIONS'
+                        })}
+                      </span>
+                      <span
+                        className="btns-grp"
+                        style={{
+                          textAlign:
+                            randomPerformers.length < 5 ? 'right' : 'left'
+                        }}
+                      >
+                        <a
+                          aria-hidden
+                          className="free-btn"
+                          onClick={this.onGetFreePerformers.bind(this)}
+                        >
+                          <Tooltip
+                            title={
+                              isFreeSubscription
+                                ? intl.formatMessage({
+                                  id: 'showAll',
+                                  defaultMessage: 'Show all'
+                                })
+                                : intl.formatMessage({
+                                  id: 'showOnlyFree',
+                                  defaultMessage: 'Show only free'
+                                })
+                            }
+                          >
+                            <TagOutlined
+                              className={isFreeSubscription ? 'active' : ''}
+                            />
+                          </Tooltip>
+                        </a>
+                        <a
+                          aria-hidden
+                          className="reload-btn"
+                          onClick={this.getPerformers.bind(this)}
+                        >
+                          <Tooltip title={intl.formatMessage({ id: 'refresh', defaultMessage: 'Refresh' })}>
+                            <SyncOutlined spin={loadingPerformer} />
+                          </Tooltip>
+                        </a>
                       </span>
                     </div>
-                    <HomePerformers countries={countries} performers={randomPerformers} />
-                    {!loadingPerformer && !randomPerformers?.length && <p className="text-center">No profile was found</p>}
-                    <div className={!showFooter ? 'home-footer' : 'home-footer active'}>
+                    <HomePerformers
+                      countries={countries}
+                      performers={randomPerformers}
+                    />
+                    {!loadingPerformer && !randomPerformers?.length && (
+                      <p className="text-center">
+                        {intl.formatMessage({
+                          id: 'noProfileWasFound',
+                          defaultMessage: 'No profile was found'
+                        })}
+                      </p>
+                    )}
+                    <div
+                      className={
+                        !showFooter ? 'home-footer' : 'home-footer active'
+                      }
+                    >
                       <HomeFooter customId="home-footer" />
                     </div>
                   </div>
@@ -310,6 +477,8 @@ const mapStates = (state: any) => ({
 });
 
 const mapDispatch = {
-  getFeeds, moreFeeds, removeFeedSuccess
+  getFeeds,
+  moreFeeds,
+  removeFeedSuccess
 };
-export default connect(mapStates, mapDispatch)(HomePage);
+export default injectIntl(connect(mapStates, mapDispatch)(HomePage));

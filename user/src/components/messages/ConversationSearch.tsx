@@ -1,12 +1,15 @@
 import React from 'react';
 import './ConversationSearch.less';
 import { SearchOutlined } from '@ant-design/icons';
+import { useIntl } from 'react-intl';
 
 interface IProps {
   onSearch: any;
 }
 
-export default function ConversationSearch({ onSearch }: IProps) {
+const ConversationSearch = ({ onSearch }: IProps) => {
+  const intl = useIntl();
+
   return (
     <div className="conversation-search">
       <SearchOutlined />
@@ -14,8 +17,10 @@ export default function ConversationSearch({ onSearch }: IProps) {
         onChange={onSearch}
         type="search"
         className="conversation-search-input"
-        placeholder="Search contact..."
+        placeholder={intl.formatMessage({ id: 'searchContact', defaultMessage: 'Search Contact...' })}
       />
     </div>
   );
-}
+};
+
+export default ConversationSearch;

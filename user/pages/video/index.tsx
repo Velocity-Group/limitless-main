@@ -1,10 +1,16 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-prototype-builtins */
 import {
   Layout, Tabs, message, Button, Spin, Tooltip, Avatar
 } from 'antd';
 import {
-  BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined,
-  CalendarOutlined, VideoCameraOutlined
+  BookOutlined,
+  EyeOutlined,
+  HourglassOutlined,
+  LikeOutlined,
+  CommentOutlined,
+  CalendarOutlined,
+  VideoCameraOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { PureComponent } from 'react';
@@ -15,14 +21,17 @@ import {
 } from '@services/index';
 import { setSubscription } from '@redux/subscription/actions';
 import {
-  getComments, moreComment, createComment, deleteComment
+  getComments,
+  moreComment,
+  createComment,
+  deleteComment
 } from 'src/redux/comment/actions';
 import { updateBalance } from '@redux/user/actions';
 import { getRelated } from 'src/redux/video/actions';
-import { RelatedListVideo } from '@components/video';
 import PageHeading from '@components/common/page-heading';
 import { VideoPlayer } from '@components/common/video-player';
-import { ListComments, CommentForm } from '@components/comment';
+import ListComments from '@components/comment/list-comments';
+import CommentForm from '@components/comment/comment-form';
 import { videoDuration, shortenLargeNumber, formatDate } from '@lib/index';
 import {
   IVideo, IUser, IUIConfig, IPerformer, ISettings
@@ -31,6 +40,8 @@ import Link from 'next/link';
 import Router from 'next/router';
 import Error from 'next/error';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
+import RelatedListVideo from '@components/video/related-list';
 
 const { TabPane } = Tabs;
 
@@ -49,6 +60,7 @@ interface IProps {
   video: IVideo;
   deleteComment: Function;
   updateBalance: Function;
+  intl: IntlShape;
   settings: ISettings;
   setSubscription: Function;
 }
@@ -61,11 +73,11 @@ class VideoViewPage extends PureComponent<IProps> {
   static async getInitialProps({ ctx }) {
     const { query } = ctx;
     try {
-      const video = (await (
+      const video = await (
         await videoService.findOne(query.id, {
           Authorization: ctx.token
         })
-      ).data);
+      ).data;
       return { video };
     } catch (e) {
       return { error: await e };
@@ -74,7 +86,10 @@ class VideoViewPage extends PureComponent<IProps> {
 
   state = {
     videoStats: {
-      likes: 0, comments: 0, views: 0, bookmarks: 0
+      likes: 0,
+      comments: 0,
+      views: 0,
+      bookmarks: 0
     },
     isLiked: false,
     isBookmarked: false,
@@ -93,19 +108,13 @@ class VideoViewPage extends PureComponent<IProps> {
   }
 
   componentDidUpdate(prevProps) {
-    const {
-      video, commentMapping, comment
-    } = this.props;
+    const { video, commentMapping, comment } = this.props;
     const { totalComment } = this.state;
     if (prevProps.video._id !== video._id) {
       this.onShallowRouteChange();
     }
     if (
-      (!prevProps.comment.data
-        && comment.data
-        && comment.data.objectId === video._id)
-      || (prevProps.commentMapping[video._id]
-        && totalComment !== commentMapping[video._id].total)
+      (!prevProps.comment.data && comment.data && comment.data.objectId === video._id) || (prevProps.commentMapping[video._id] && totalComment !== commentMapping[video._id].total)
     ) {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ totalComment: commentMapping[video._id].total });
@@ -113,9 +122,7 @@ class VideoViewPage extends PureComponent<IProps> {
   }
 
   onShallowRouteChange() {
-    const {
-      video, getRelated: handleGetRelated
-    } = this.props;
+    const { video, getRelated: handleGetRelated } = this.props;
     this.setState({
       videoStats: video.stats,
       isLiked: video.isLiked,
@@ -154,18 +161,20 @@ class VideoViewPage extends PureComponent<IProps> {
 
   async onReaction(action: string) {
     const { videoStats, isLiked, isBookmarked } = this.state;
-    const { video } = this.props;
+    const { video, intl } = this.props;
     try {
       if (action === 'like') {
-        !isLiked ? await reactionService.create({
-          objectId: video._id,
-          action,
-          objectType: 'video'
-        }) : await reactionService.delete({
-          objectId: video._id,
-          action,
-          objectType: 'video'
-        });
+        !isLiked
+          ? await reactionService.create({
+            objectId: video._id,
+            action,
+            objectType: 'video'
+          })
+          : await reactionService.delete({
+            objectId: video._id,
+            action,
+            objectType: 'video'
+          });
         this.setState({
           isLiked: !isLiked,
           videoStats: {
@@ -176,16 +185,28 @@ class VideoViewPage extends PureComponent<IProps> {
         message.success(!isLiked ? 'Liked' : 'Unliked');
       }
       if (action === 'book_mark') {
-        !isBookmarked ? await reactionService.create({
-          objectId: video._id,
-          action,
-          objectType: 'video'
-        }) : await reactionService.delete({
-          objectId: video._id,
-          action,
-          objectType: 'video'
-        });
-        message.success(!isBookmarked ? 'Added to Bookmarks' : 'Removed from Bookmarks');
+        !isBookmarked
+          ? await reactionService.create({
+            objectId: video._id,
+            action,
+            objectType: 'video'
+          })
+          : await reactionService.delete({
+            objectId: video._id,
+            action,
+            objectType: 'video'
+          });
+        message.success(
+          !isBookmarked
+            ? intl.formatMessage({
+              id: 'addedToBookmarks',
+              defaultMessage: 'Added to Bookmarks'
+            })
+            : intl.formatMessage({
+              id: 'removedFromBookmarks',
+              defaultMessage: 'Removed from Bookmarks'
+            })
+        );
         this.setState({
           isBookmarked: !isBookmarked,
           videoStats: {
@@ -196,7 +217,12 @@ class VideoViewPage extends PureComponent<IProps> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(
+        error.message || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
     }
   }
 
@@ -220,15 +246,27 @@ class VideoViewPage extends PureComponent<IProps> {
   };
 
   async deleteComment(item) {
+    const { intl } = this.props;
     const { deleteComment: handleDeleteComment } = this.props;
-    if (!window.confirm('Are you sure to remove this comment?')) return;
+    if (!window.confirm(intl.formatMessage({
+      id: 'areYouSureToRemoveThisComment',
+      defaultMessage: 'Are you sure to remove this comment?'
+    }))
+    ) return;
     handleDeleteComment(item._id);
   }
 
   async purchaseVideo() {
-    const { video, user, updateBalance: handleUpdateBalance } = this.props;
+    const {
+      video, user, updateBalance: handleUpdateBalance, intl
+    } = this.props;
     if (!user._id) {
-      message.error('Please log in!');
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseLogIn',
+          defaultMessage: 'Please log in!'
+        })
+      );
       Router.push('/auth/login');
       return;
     }
@@ -244,7 +282,13 @@ class VideoViewPage extends PureComponent<IProps> {
     } catch (e) {
       const error = await e;
       this.setState({ requesting: false });
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(
+        error.message
+        || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
     }
   }
 
@@ -262,19 +306,40 @@ class VideoViewPage extends PureComponent<IProps> {
       },
       commentMapping,
       comment,
-      setSubscription: updateSubscription
+      setSubscription: updateSubscription,
+      intl
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Video was not found'} />;
+      return (
+        <Error
+          statusCode={error?.statusCode || 404}
+          title={
+            error?.message
+            || intl.formatMessage({
+              id: 'videoNotFoundMediaControl',
+              defaultMessage: 'Video not found!'
+            })
+          }
+        />
+      );
     }
     const { requesting: commenting } = comment;
-    const fetchingComment = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].requesting : false;
-    const comments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].items : [];
-    const totalComments = commentMapping.hasOwnProperty(video._id) ? commentMapping[video._id].total : 0;
+    const fetchingComment = commentMapping.hasOwnProperty(video._id)
+      ? commentMapping[video._id].requesting
+      : false;
+    const comments = commentMapping.hasOwnProperty(video._id)
+      ? commentMapping[video._id].items
+      : [];
+    const totalComments = commentMapping.hasOwnProperty(video._id)
+      ? commentMapping[video._id].total
+      : 0;
     const {
       videoStats, isLiked, isBookmarked, isSubscribed, isBought, requesting, activeTab, isFirstLoadComment
     } = this.state;
-    const thumbUrl = video?.thumbnail?.url || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0]) || (video?.video?.thumbnails && video?.video?.thumbnails[0]) || '/static/no-image.jpg';
+    const thumbUrl = video?.thumbnail?.url
+      || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0])
+      || (video?.video?.thumbnails && video?.video?.thumbnails[0])
+      || '/static/no-image.jpg';
     const videoJsOptions = {
       key: video._id,
       autoplay: true,
@@ -304,33 +369,33 @@ class VideoViewPage extends PureComponent<IProps> {
     return (
       <Layout>
         <Head>
-          <title>
-            {`${ui.siteName} | ${video.title}`}
-          </title>
+          <title>{`${ui.siteName} | ${video.title}`}</title>
           <meta name="description" content={video.description} />
           {/* OG tags */}
           <meta
             property="og:title"
-            content={`${ui.siteName} | ${video.title || 'Video'}`}
+            content={`${ui.siteName} | ${video.title
+              || intl.formatMessage({ id: 'video', defaultMessage: 'Video' })}`}
           />
           <meta property="og:image" content={thumbUrl} />
-          <meta
-            property="og:description"
-            content={video.description}
-          />
+          <meta property="og:description" content={video.description} />
           {/* Twitter tags */}
           <meta
             name="twitter:title"
-            content={`${ui.siteName} | ${video.title || 'Video'}`}
+            content={`${ui.siteName} | ${video.title
+              || intl.formatMessage({ id: 'video', defaultMessage: 'Video' })}`}
           />
           <meta name="twitter:image" content={thumbUrl} />
-          <meta
-            name="twitter:description"
-            content={video.description}
-          />
+          <meta name="twitter:description" content={video.description} />
         </Head>
         <div className="main-container">
-          <PageHeading icon={<VideoCameraOutlined />} title={video.title || 'Video'} />
+          <PageHeading
+            icon={<VideoCameraOutlined />}
+            title={
+              video.title
+              || intl.formatMessage({ id: 'video', defaultMessage: 'Video' })
+            }
+          />
           <div className="vid-duration">
             <a>
               <HourglassOutlined />
@@ -355,7 +420,7 @@ class VideoViewPage extends PureComponent<IProps> {
                 <div className="text-center">
                   <Spin />
                   <br />
-                  Teaser is currently on processing
+                  {intl.formatMessage({ id: 'teaserIsCurrentlyOnProcessing', defaultMessage: 'Teaser is currently on processing' })}
                 </div>
               </div>
               )}
@@ -371,10 +436,12 @@ class VideoViewPage extends PureComponent<IProps> {
                 <div className="text-center">
                   {video.isSale && !isBought && (
                   <Button block className="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
-                    PAY $
+                    {intl.formatMessage({ id: 'pay', defaultMessage: 'PAY' })}
+                    {' '}
+                    $
                     {video.price.toFixed(2)}
                     {' '}
-                    TO UNLOCK
+                    {intl.formatMessage({ id: 'tuUnlock', defaultMessage: 'TO UNLOCK' })}
                   </Button>
                   )}
                   {!video.isSale && !isSubscribed && (
@@ -390,11 +457,11 @@ class VideoViewPage extends PureComponent<IProps> {
                           updateSubscription({ showModal: true, performer: video?.performer, subscriptionType: 'free' });
                         }}
                       >
-                        SUBSCRIBE FOR FREE FOR
+                        {intl.formatMessage({ id: 'subscribeForFreeFor', defaultMessage: 'SUBSCRIBE FOR FREE FOR' })}
                         {' '}
                         {video?.performer?.durationFreeSubscriptionDays || 1}
                         {' '}
-                        {video?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
+                        {video?.performer?.durationFreeSubscriptionDays > 1 ? intl.formatMessage({ id: 'days', defaultMessage: 'DAYS' }) : intl.formatMessage({ id: 'day', defaultMessage: 'DAY' })}
                       </Button>
                       )}
                       {video?.performer?.monthlyPrice && (
@@ -405,7 +472,9 @@ class VideoViewPage extends PureComponent<IProps> {
                           updateSubscription({ showModal: true, performer: video?.performer, subscriptionType: 'monthly' });
                         }}
                       >
-                        MONTHLY SUBSCRIPTION FOR $
+                        {intl.formatMessage({ id: 'monthlySubscriptionFor', defaultMessage: 'MONTHLY SUBSCRIPTION FOR' })}
+                        {' '}
+                        $
                         {(video?.performer?.monthlyPrice || 0).toFixed(2)}
                       </Button>
                       )}
@@ -417,17 +486,65 @@ class VideoViewPage extends PureComponent<IProps> {
                           updateSubscription({ showModal: true, performer: video?.performer, subscriptionType: 'yearly' });
                         }}
                       >
-                        YEARLY SUBSCRIPTION FOR $
+                        {intl.formatMessage({ id: 'yearlySubscriptionFor', defaultMessage: 'YEARLY SUBSCRIPTION FOR' })}
+                        {' '}
+                        $
                         {(video?.performer?.yearlyPrice || 0).toFixed(2)}
                       </Button>
                       )}
 
                   </div>
                   )}
+                  {!video.teaser && (
+                    <div className="video-thumbs">
+                      <img alt="thumbnail" src={thumbUrl} />
+                    </div>
+                  )}
+                  <div className="vid-exl-group">
+                    {/* eslint-disable-next-line no-nested-ternary */}
+                    <h3>
+                      {video.isSale && !isBought && !video.isSchedule
+                        ? intl.formatMessage({ id: 'unlockToViewFullContent', defaultMessage: 'UNLOCK TO VIEW FULL CONTENT' })
+                        : !video.isSale && !isSubscribed && !video.isSchedule
+                          ? intl.formatMessage({ id: 'subscribeToViewFullContent', defaultMessage: 'SUBSCRIBE TO VIEW FULL CONTENT' })
+                          : intl.formatMessage({ id: 'videoIsUpcoming', defaultMessage: 'VIDEO IS UPCOMING' })}
+                    </h3>
+                    <div className="text-center">
+                      {video.isSale && !isBought && (
+                        <Button
+                          type="primary"
+                          loading={requesting}
+                          disabled={requesting}
+                          onClick={this.purchaseVideo.bind(this)}
+                          style={{ textTransform: 'uppercase' }}
+                        >
+                          {intl.formatMessage({ id: 'pay', defaultMessage: 'Pay' })}
+                          {' '}
+                          &nbsp;
+                          <img
+                            alt="token"
+                            src="/static/coin-ico.png"
+                            height="20px"
+                          />
+                          {' '}
+                          {video.price.toFixed(2)}
+                          {' '}
+                          {intl.formatMessage({ id: 'toUnlock', defaultMessage: 'To Unlock' })}
+                        </Button>
+                      )}
+                    </div>
+                    {video.isSchedule && (
+                      <h4>
+                        {intl.formatMessage({ id: 'mainVideoWillBePremieredAt', defaultMessage: 'Main video will be premiered at' })}
+                        {' '}
+                        {formatDate(video.scheduledAt, 'll')}
+                      </h4>
+                    )}
+                  </div>
                 </div>
                 {video.isSchedule && (
                 <h4 style={{ marginTop: 15 }}>
-                  Main video will be premiered on
+                  {intl.formatMessage({ id: 'MainVideoWillBePremieredOn', defaultMessage: 'Main video will be premiered on' })}
                   {' '}
                   {formatDate(video.scheduledAt, 'll')}
                 </h4>
@@ -442,7 +559,7 @@ class VideoViewPage extends PureComponent<IProps> {
                   <div className="text-center">
                     <Spin />
                     <br />
-                    Video file is currently on processing
+                    {intl.formatMessage({ id: 'videoFileIsCurrentlyOnProcessing', defaultMessage: 'Video file is currently on processing' })}
                   </div>
                 </div>
               ) : <VideoPlayer {...videoJsOptions} />}
@@ -456,7 +573,10 @@ class VideoViewPage extends PureComponent<IProps> {
               <Link
                 href={{
                   pathname: '/model/profile',
-                  query: { username: video?.performer?.username || video?.performer?._id }
+                  query: {
+                    username:
+                      video?.performer?.username || video?.performer?._id
+                  }
                 }}
                 as={`/${video?.performer?.username || video?.performer?._id}`}
               >
@@ -501,9 +621,13 @@ class VideoViewPage extends PureComponent<IProps> {
                 <button
                   onClick={() => this.setState({ activeTab: 'comment' })}
                   type="button"
-                  className={activeTab === 'comment' ? 'react-btn active' : 'react-btn'}
+                  className={
+                    activeTab === 'comment' ? 'react-btn active' : 'react-btn'
+                  }
                 >
-                  {!isFirstLoadComment && !fetchingComment ? shortenLargeNumber(videoStats.comments || 0) : shortenLargeNumber(totalComments)}
+                  {!isFirstLoadComment && !fetchingComment
+                    ? shortenLargeNumber(videoStats.comments || 0)
+                    : shortenLargeNumber(totalComments)}
                   {' '}
                   <CommentOutlined />
                 </button>
@@ -513,14 +637,14 @@ class VideoViewPage extends PureComponent<IProps> {
         </div>
         <div className="main-container">
           {video.tags && video.tags.length > 0 && (
-          <div className="vid-tags">
-            {video.tags.map((tag) => (
-              <a color="magenta" key={tag} style={{ marginRight: 5 }}>
-                #
-                {tag || 'tag'}
-              </a>
-            ))}
-          </div>
+            <div className="vid-tags">
+              {video.tags.map((tag) => (
+                <a color="magenta" key={tag} style={{ marginRight: 5 }}>
+                  #
+                  {tag || intl.formatMessage({ id: 'tag', defaultMessage: 'Tag' })}
+                </a>
+              ))}
+            </div>
           )}
           <Tabs
             defaultActiveKey="description"
@@ -528,10 +652,10 @@ class VideoViewPage extends PureComponent<IProps> {
             onChange={(tab) => this.onChangeTab(tab)}
             className="custom"
           >
-            <TabPane tab="Description" key="description">
-              <p>{video.description || 'No description...'}</p>
+            <TabPane tab={intl.formatMessage({ id: 'description', defaultMessage: 'Description' })} key="description">
+              <p>{video.description || `${intl.formatMessage({ id: 'noDescription', defaultMessage: 'No description' })}...`}</p>
             </TabPane>
-            <TabPane tab="Participants" key="participants">
+            <TabPane tab={intl.formatMessage({ id: 'participants', defaultMessage: 'Participants' })} key="participants">
               {video.participants && video.participants.length > 0 ? (
                 video.participants.map((per: IPerformer) => (
                   <Link
@@ -558,22 +682,17 @@ class VideoViewPage extends PureComponent<IProps> {
                           {per?.username || 'n/a'}
                         </h5>
                         <Tooltip title={per?.bio}>
-                          <div className="p-bio">
-                            {per?.bio || 'No bio'}
-                          </div>
+                          <div className="p-bio">{per?.bio || intl.formatMessage({ id: 'noBioYet', defaultMessage: 'No bio yet' })}</div>
                         </Tooltip>
                       </div>
                     </div>
                   </Link>
                 ))
               ) : (
-                <p>No profile was found.</p>
+                <p>{intl.formatMessage({ id: 'noProfileWasFound', defaultMessage: 'No profile was found' })}</p>
               )}
             </TabPane>
-            <TabPane
-              tab="Comments"
-              key="comment"
-            >
+            <TabPane tab={intl.formatMessage({ id: 'comments', defaultMessage: 'Comments' })} key="comment">
               <CommentForm
                 creator={user}
                 onSubmit={this.onSubmitComment.bind(this)}
@@ -595,20 +714,24 @@ class VideoViewPage extends PureComponent<IProps> {
               {comments.length < totalComments && (
                 <p className="text-center">
                   <a aria-hidden onClick={this.loadMoreComment.bind(this)}>
-                    More comments
+                    {intl.formatMessage({ id: 'moreComments', defaultMessage: 'More comments' })}
                   </a>
                 </p>
               )}
             </TabPane>
           </Tabs>
           <div className="related-items">
-            <h4 className="ttl-1">You may also like</h4>
-            {relatedVideos.requesting && <div className="text-center"><Spin /></div>}
+            <h4 className="ttl-1">{intl.formatMessage({ id: 'youMayAlsoLike', defaultMessage: 'You may also like' })}</h4>
+            {relatedVideos.requesting && (
+              <div className="text-center">
+                <Spin />
+              </div>
+            )}
             {relatedVideos.items.length > 0 && !relatedVideos.requesting && (
               <RelatedListVideo videos={relatedVideos.items} />
             )}
             {!relatedVideos.items.length && !relatedVideos.requesting && (
-              <p>No video was found</p>
+              <p>{intl.formatMessage({ id: 'noVideoFound', defaultMessage: 'No video found.' })}</p>
             )}
           </div>
         </div>
@@ -637,4 +760,4 @@ const mapDispatch = {
   updateBalance,
   setSubscription
 };
-export default connect(mapStates, mapDispatch)(VideoViewPage);
+export default injectIntl(connect(mapStates, mapDispatch)(VideoViewPage));

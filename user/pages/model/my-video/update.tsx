@@ -4,17 +4,19 @@ import { connect } from 'react-redux';
 import { videoService } from '@services/video.service';
 import { VideoCameraOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
-import { FormUploadVideo } from '@components/video/form-upload';
+import FormUploadVideo from '@components/video/form-upload';
 import { IVideo, IUIConfig, IPerformer } from 'src/interfaces';
 import Router from 'next/router';
 import { Layout, message, Spin } from 'antd';
 import { getResponseError } from '@lib/utils';
 import moment from 'moment';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   id: string;
   ui: IUIConfig;
   user: IPerformer;
+  intl: IntlShape;
 }
 
 interface IFiles {
@@ -49,12 +51,17 @@ class VideoUpdate extends PureComponent<IProps> {
   };
 
   async componentDidMount() {
+    const { id, intl } = this.props;
     try {
-      const { id } = this.props;
       const resp = await videoService.findById(id);
       this.setState({ video: resp.data });
     } catch (e) {
-      message.error('Video not found!');
+      message.error(
+        intl.formatMessage({
+          id: 'videoNotFoundMediaControl',
+          defaultMessage: 'Video not found!'
+        })
+      );
       Router.back();
     } finally {
       this.setState({ fetching: false });
@@ -70,14 +77,28 @@ class VideoUpdate extends PureComponent<IProps> {
   }
 
   async submit(data: any) {
+    const { intl } = this.props;
     const { video } = this.state;
     const submitData = { ...data };
     if ((data.isSale && !data.price) || (data.isSale && data.price < 1)) {
-      message.error('Invalid price');
+      message.error(
+        intl.formatMessage({
+          id: 'invalidPrice',
+          defaultMessage: 'Invalid price'
+        })
+      );
       return;
     }
-    if ((data.isSchedule && !data.scheduledAt) || (data.isSchedule && moment(data.scheduledAt).isBefore(moment()))) {
-      message.error('Invalid schedule date');
+    if (
+      (data.isSchedule && !data.scheduledAt)
+      || (data.isSchedule && moment(data.scheduledAt).isBefore(moment()))
+    ) {
+      message.error(
+        intl.formatMessage({
+          id: 'invalidScheduleDate',
+          defaultMessage: 'Invalid schedule date'
+        })
+      );
       return;
     }
     submitData.tags = [...data.tags];
@@ -103,10 +124,21 @@ class VideoUpdate extends PureComponent<IProps> {
         this.onUploading.bind(this)
       );
 
-      message.success('Your video has been updated');
+      message.success(
+        intl.formatMessage({
+          id: 'yourVideoHasBeenUpdated',
+          defaultMessage: 'Your video has been updated!'
+        })
+      );
       Router.replace('/model/my-video');
     } catch (error) {
-      message.error(getResponseError(error) || 'An error occurred, please try again!');
+      message.error(
+        getResponseError(error)
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     } finally {
       this.setState({ uploading: false });
     }
@@ -116,29 +148,44 @@ class VideoUpdate extends PureComponent<IProps> {
     const {
       video, uploading, fetching, uploadPercentage
     } = this.state;
-    const { ui, user } = this.props;
+    const { ui, user, intl } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Edit Video
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'editVideo',
+              defaultMessage: 'Edit Video'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Edit Video" icon={<VideoCameraOutlined />} />
-          {!fetching && video && (
-          <FormUploadVideo
-            user={user}
-            video={video}
-            submit={this.submit.bind(this)}
-            uploading={uploading}
-            beforeUpload={this.beforeUpload.bind(this)}
-            uploadPercentage={uploadPercentage}
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'editVideo',
+              defaultMessage: 'Edit Video'
+            })}
+            icon={<VideoCameraOutlined />}
           />
+          {!fetching && video && (
+            <FormUploadVideo
+              user={user}
+              video={video}
+              submit={this.submit.bind(this)}
+              uploading={uploading}
+              beforeUpload={this.beforeUpload.bind(this)}
+              uploadPercentage={uploadPercentage}
+            />
           )}
-          {fetching && <div className="text-center"><Spin /></div>}
+          {fetching && (
+            <div className="text-center">
+              <Spin />
+            </div>
+          )}
         </div>
       </Layout>
     );
@@ -148,4 +195,4 @@ const mapStates = (state: any) => ({
   ui: state.ui,
   user: state.user.current
 });
-export default connect(mapStates)(VideoUpdate);
+export default injectIntl(connect(mapStates)(VideoUpdate));

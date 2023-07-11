@@ -3,17 +3,19 @@ import {
   Carousel, Spin, Image
 } from 'antd';
 import { VideoPlayer } from '@components/common/video-player';
-import { AudioPlayer } from '@components/common/audio-player';
+import { AudioPlayer } from '@components/common';
 import { IFeed } from '@interfaces/feed';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   feed: IFeed;
+  intl: IntlShape
 }
 
-export default class FeedSlider extends PureComponent<IProps> {
+class FeedSlider extends PureComponent<IProps> {
   render() {
-    const { feed } = this.props;
+    const { feed, intl } = this.props;
     const images = feed.files && feed.files.filter((f) => f.type === 'feed-photo');
     const videos = feed.files && feed.files.filter((f) => f.type === 'feed-video');
     const audios = feed.files && feed.files.filter((f) => f.type === 'feed-audio');
@@ -83,10 +85,17 @@ export default class FeedSlider extends PureComponent<IProps> {
         {processing && (
           <div className="proccessing">
             <Spin />
-            <p>Your media is currently proccessing</p>
+            <p>
+              {intl.formatMessage({
+                id: 'yourMediaIsCurrentlyProcessing',
+                defaultMessage: 'Your media is currently processing'
+              })}
+            </p>
           </div>
         )}
       </div>
     );
   }
 }
+
+export default injectIntl(FeedSlider);

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import {
   Row, Col, Button, Form, InputNumber, Select, FormInstance
 } from 'antd';
+import { IntlShape, useIntl } from 'react-intl';
 
 const layout = {
   labelCol: { span: 24 },
@@ -19,6 +20,7 @@ export const MessagePriceForm = ({
   onClose, onFinish, price, isSale
 }: IProps) => {
   const [_isSale, setSale] = useState(isSale.toString());
+  const intl: IntlShape = useIntl();
 
   const formRef = useRef() as any;
 
@@ -51,12 +53,12 @@ export const MessagePriceForm = ({
       }}
     >
       <Row>
-        <Col span={24} className="form-lb">Message type</Col>
+        <Col span={24} className="form-lb">{intl.formatMessage({ id: 'messageType', defaultMessage: 'Message type' })}</Col>
         <Col span={18} style={{ padding: '5px 0' }}>
           <Form.Item name="isSale">
             <Select onChange={(val) => onChangeSale(val)}>
-              <Select.Option key="true" value="true">Pay - Charge for content</Select.Option>
-              <Select.Option key="false" value="false">Public - Everyone can access</Select.Option>
+              <Select.Option key="true" value="true">{intl.formatMessage({ id: 'payChargeForContent', defaultMessage: 'Pay - Charge for content' })}</Select.Option>
+              <Select.Option key="false" value="false">{intl.formatMessage({ id: 'publicEveryoneCanAccess', defaultMessage: 'Public - Everyone can access' })}</Select.Option>
             </Select>
           </Form.Item>
         </Col>
@@ -65,7 +67,7 @@ export const MessagePriceForm = ({
             name="price"
             style={{ width: '100%' }}
             rules={[
-              { required: _isSale === 'true', message: 'Add price' }
+              { required: _isSale === 'true', message: intl.formatMessage({ id: 'addPrice', defaultMessage: 'Add price' }) }
             ]}
           >
             <InputNumber placeholder="$" style={{ width: '100%' }} disabled={_isSale === 'false'} min={1} />
@@ -77,13 +79,13 @@ export const MessagePriceForm = ({
           className="secondary"
           onClick={() => onClose()}
         >
-          Cancel
+          {intl.formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
         </Button>
         <Button
           className="primary"
           htmlType="submit"
         >
-          Save
+          {intl.formatMessage({ id: 'save', defaultMessage: 'Save' })}
         </Button>
       </div>
     </Form>

@@ -5,17 +5,19 @@ import {
 import { IFeed } from '@interfaces/index';
 import { TickIcon } from 'src/icons';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   feed: IFeed;
   onFinish: Function;
   submiting: boolean;
+  intl: IntlShape
 }
 
-export class PurchaseFeedForm extends PureComponent<IProps> {
+class PurchaseFeedForm extends PureComponent<IProps> {
   render() {
     const {
-      onFinish, submiting = false, feed
+      onFinish, submiting = false, feed, intl
     } = this.props;
 
     return (
@@ -35,7 +37,7 @@ export class PurchaseFeedForm extends PureComponent<IProps> {
         </div>
         <div className="right-col">
           <h2>
-            Unlock Content
+            {intl.formatMessage({ id: 'unlockContent', defaultMessage: 'Unlock Content' })}
           </h2>
           <h3>
             <span className="price">{(feed.price || 0).toFixed(2)}</span>
@@ -51,10 +53,24 @@ export class PurchaseFeedForm extends PureComponent<IProps> {
             loading={submiting}
             onClick={() => onFinish()}
           >
-            CONFIRM TO UNLOCK
+            {intl.formatMessage({ id: 'confirmToUnlock', defaultMessage: 'CONFIRM TO UNLOCK' })}
           </Button>
         </div>
+        <Button
+          type="primary"
+          loading={submiting}
+          onClick={() => onFinish()}
+          style={{ textTransform: 'uppercase' }}
+        >
+          {intl.formatMessage({ id: 'unlockThisPostFor', defaultMessage: 'Unlock this post for' })}
+          {' '}
+          &nbsp;
+          <img src="/static/coin-ico.png" width="20px" alt="coin" />
+          {feed.price.toFixed(2)}
+        </Button>
       </div>
     );
   }
 }
+
+export default injectIntl(PurchaseFeedForm);

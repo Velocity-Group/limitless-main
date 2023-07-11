@@ -1,5 +1,12 @@
 import {
-  Layout, Tabs, Button, message, Modal, Image, Popover, Tooltip
+  Layout,
+  Tabs,
+  Button,
+  message,
+  Modal,
+  Image,
+  Popover,
+  Tooltip
 } from 'antd';
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
@@ -19,15 +26,13 @@ import {
   UsergroupAddOutlined, VideoCameraOutlined, PictureOutlined, ShoppingOutlined, BookOutlined,
   TeamOutlined
 } from '@ant-design/icons';
-import {
-  TickIcon, ShareIcon, MessageIcon
-} from 'src/icons';
-import { ScrollListProduct } from '@components/product/scroll-list-item';
+import { TickIcon, ShareIcon, MessageIcon } from 'src/icons';
+import ScrollListProduct from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
-import { ScrollListVideo } from '@components/video/scroll-list-item';
-import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
-import { PerformerInfo } from '@components/performer/table-info';
-import { TipPerformerForm } from '@components/performer';
+import ScrollListVideo from '@components/video/scroll-list-item';
+import ScrollListGallery from '@components/gallery/scroll-list-gallery';
+import PerformerInfo from '@components/performer/table-info';
+import TipPerformerForm from '@components/performer/tip-form';
 import ShareButtons from '@components/performer/share-profile';
 import SearchPostBar from '@components/post/search-bar';
 import { VideoPlayer } from '@components/common';
@@ -39,6 +44,7 @@ import Link from 'next/link';
 import Router from 'next/router';
 import Error from 'next/error';
 import '@components/performer/performer.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
@@ -60,6 +66,7 @@ interface IProps {
   removeFeedSuccess: Function;
   updateBalance: Function;
   countries: ICountry[];
+  intl: IntlShape;
   settings: ISettings;
   setSubscription: Function;
 }
@@ -128,27 +135,52 @@ class PerformerProfile extends PureComponent<IProps> {
     const notShownWelcomeVideos = localStorage.getItem('notShownWelcomeVideos');
     if (!notShownWelcomeVideos?.includes(performer._id)) {
       const Ids = JSON.parse(notShownWelcomeVideos || '[]');
-      const values = Array.isArray(Ids) ? Ids.concat([performer._id]) : [performer._id];
+      const values = Array.isArray(Ids)
+        ? Ids.concat([performer._id])
+        : [performer._id];
       localStorage.setItem('notShownWelcomeVideos', JSON.stringify(values));
     }
     this.setState({ showWelcomVideo: false });
   }
 
   async handleDeleteFeed(feed: IFeed) {
-    const { user, removeFeedSuccess: handleRemoveFeed } = this.props;
+    const { intl, user, removeFeedSuccess: handleRemoveFeed } = this.props;
     if (user._id !== feed.fromSourceId) {
-      message.error('Permission denied');
+      message.error(
+        intl.formatMessage({
+          id: 'permissionDenied',
+          defaultMessage: 'Permission denied'
+        })
+      );
       return;
     }
-    if (!window.confirm('All earnings are related to this post will be refunded. Are you sure to remove?')) {
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'allEarningsRelatedToThisPostWillBeRefunded',
+          defaultMessage:
+            'All earnings related to this post will be refunded. Are you sure to remove it?'
+        })
+      )
+    ) {
       return;
     }
     try {
       await feedService.delete(feed._id);
-      message.success('Deleted post success');
+      message.success(
+        intl.formatMessage({
+          id: 'postDeletedSuccessfully',
+          defaultMessage: 'Post deleted successfully'
+        })
+      );
       handleRemoveFeed({ feed });
     } catch {
-      message.error('Something went wrong, please try again later');
+      message.error(
+        intl.formatMessage({
+          id: 'somethingWentWrong',
+          defaultMessage: 'Something went wrong, please try again!'
+        })
+      );
     }
   }
 
@@ -180,7 +212,7 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   async handleBookmark() {
-    const { performer, user } = this.props;
+    const { performer, user, intl } = this.props;
     const { isBookMarked, requesting } = this.state;
     if (requesting || user.isPerformer) return;
     try {
@@ -202,7 +234,13 @@ class PerformerProfile extends PureComponent<IProps> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(
+        error.message
+        || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
       this.setState({ requesting: false });
     }
   }
@@ -214,33 +252,47 @@ class PerformerProfile extends PureComponent<IProps> {
   }
 
   handleJoinStream = () => {
-    const { user, performer } = this.props;
+    const { user, performer, intl } = this.props;
     if (!user._id) {
-      message.error('Please log in or register!');
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseLoginOrRegister',
+          defaultMessage: 'Please login or register!'
+        })
+      );
       return;
     }
     if (user.isPerformer) return;
     if (!performer?.isSubscribed) {
-      message.error('Please subscribe to this model!');
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseSubscribeToThisModel',
+          defaultMessage: 'Please subscribe to this model!'
+        })
+      );
       return;
     }
-    Router.push({
-      pathname: '/streaming/details',
-      query: {
-        performer: JSON.stringify(performer),
-        username: performer?.username || performer?._id
-      }
-    }, `/streaming/${performer?.username || performer?._id}`);
-  }
+    Router.push(
+      {
+        pathname: '/streaming/details',
+        query: {
+          performer: JSON.stringify(performer),
+          username: performer?.username || performer?._id
+        }
+      },
+      `/streaming/${performer?.username || performer?._id}`
+    );
+  };
 
   async loadItems() {
     const {
-      performer, getGalleries: handleGetGalleries, getVideos: handleGetVids, getFeeds: handleGetFeeds,
+      performer,
+      getGalleries: handleGetGalleries,
+      getVideos: handleGetVids,
+      getFeeds: handleGetFeeds,
       listProducts: handleGetProducts
     } = this.props;
-    const {
-      itemPerPage, filter, tab
-    } = this.state;
+    const { itemPerPage, filter, tab } = this.state;
     const query = {
       limit: itemPerPage,
       offset: 0,
@@ -270,25 +322,48 @@ class PerformerProfile extends PureComponent<IProps> {
           ...query
         }));
         break;
-      default: break;
+      default:
+        break;
     }
   }
 
   async sendTip(price: number) {
-    const { performer, user, updateBalance: handleUpdateBalance } = this.props;
+    const {
+      performer, user, updateBalance: handleUpdateBalance, intl
+    } = this.props;
     if (user.balance < price) {
-      message.error('You have an insufficient wallet balance. Please top up.');
+      message.error(
+        intl.formatMessage({
+          id: 'youHaveAnInsufficientTokenBalance',
+          defaultMessage:
+            'You have an insufficient token balance. Please top up.'
+        })
+      );
       Router.push('/wallet');
       return;
     }
     try {
       await this.setState({ requesting: true });
-      await tokenTransactionService.sendTip(performer?._id, { performerId: performer?._id, price });
-      message.success('Thank you for the tip');
+      await tokenTransactionService.sendTip(performer?._id, {
+        performerId: performer?._id,
+        price
+      });
+      message.success(
+        intl.formatMessage({
+          id: 'thankYouForTheTip',
+          defaultMessage: 'Thank you for the tip'
+        })
+      );
       handleUpdateBalance({ token: -price });
     } catch (e) {
       const err = await e;
-      message.error(err.message || 'error occured, please try again later');
+      message.error(
+        err.message
+        || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
     } finally {
       this.setState({ requesting: false, openTipModal: false });
     }
@@ -296,8 +371,13 @@ class PerformerProfile extends PureComponent<IProps> {
 
   async loadMoreItem() {
     const {
-      feedPage, videoPage, productPage, itemPerPage, galleryPage,
-      tab, filter
+      feedPage,
+      videoPage,
+      productPage,
+      itemPerPage,
+      galleryPage,
+      tab,
+      filter
     } = this.state;
     const {
       moreFeeds: getMoreFeed,
@@ -314,38 +394,50 @@ class PerformerProfile extends PureComponent<IProps> {
       toDate: filter.toDate || ''
     };
     if (tab === 'post') {
-      this.setState({
-        feedPage: feedPage + 1
-      }, () => getMoreFeed({
-        ...query,
-        offset: (feedPage + 1) * itemPerPage
-      }));
+      this.setState(
+        {
+          feedPage: feedPage + 1
+        },
+        () => getMoreFeed({
+          ...query,
+          offset: (feedPage + 1) * itemPerPage
+        })
+      );
     }
     if (tab === 'video') {
-      this.setState({
-        videoPage: videoPage + 1
-      }, () => getMoreVids({
-        ...query,
-        offset: (videoPage + 1) * itemPerPage
-      }));
+      this.setState(
+        {
+          videoPage: videoPage + 1
+        },
+        () => getMoreVids({
+          ...query,
+          offset: (videoPage + 1) * itemPerPage
+        })
+      );
     }
     if (tab === 'photo') {
-      await this.setState({
-        galleryPage: galleryPage + 1
-      }, () => {
-        getMoreGallery({
-          ...query,
-          offset: (galleryPage + 1) * itemPerPage
-        });
-      });
+      await this.setState(
+        {
+          galleryPage: galleryPage + 1
+        },
+        () => {
+          getMoreGallery({
+            ...query,
+            offset: (galleryPage + 1) * itemPerPage
+          });
+        }
+      );
     }
     if (tab === 'store') {
-      this.setState({
-        productPage: productPage + 1
-      }, () => getMoreProd({
-        ...query,
-        offset: (productPage + 1) * itemPerPage
-      }));
+      this.setState(
+        {
+          productPage: productPage + 1
+        },
+        () => getMoreProd({
+          ...query,
+          offset: (productPage + 1) * itemPerPage
+        })
+      );
     }
   }
 
@@ -361,15 +453,43 @@ class PerformerProfile extends PureComponent<IProps> {
       galleryState,
       countries,
       settings,
-      setSubscription: updateSubscription
+      setSubscription: updateSubscription,
+      intl
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Sorry, we can\'t find this page'} />;
+      return (
+        <Error
+          statusCode={error?.statusCode || 404}
+          title={
+            error?.message
+            || intl.formatMessage({
+              id: 'cannotFindThisPage',
+              defaultMessage: 'Sorry, we can\'t find this page'
+            })
+          }
+        />
+      );
     }
-    const { items: feeds = [], total: totalFeed = 0, requesting: loadingFeed } = feedState;
-    const { items: videos = [], total: totalVideos = 0, requesting: loadingVideo } = videoState;
-    const { items: products = [], total: totalProducts = 0, requesting: loadingPrd } = productState;
-    const { items: galleries = [], total: totalGalleries = 0, requesting: loadingGallery } = galleryState;
+    const {
+      items: feeds = [],
+      total: totalFeed = 0,
+      requesting: loadingFeed
+    } = feedState;
+    const {
+      items: videos = [],
+      total: totalVideos = 0,
+      requesting: loadingVideo
+    } = videoState;
+    const {
+      items: products = [],
+      total: totalProducts = 0,
+      requesting: loadingPrd
+    } = productState;
+    const {
+      items: galleries = [],
+      total: totalGalleries = 0,
+      requesting: loadingGallery
+    } = galleryState;
     const {
       showWelcomVideo,
       openTipModal,
@@ -396,26 +516,41 @@ class PerformerProfile extends PureComponent<IProps> {
           <meta property="og:type" content="website" />
           <meta
             property="og:title"
-            content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
+            content={`${ui?.siteName} | ${performer?.name || performer?.username
+            }`}
           />
-          <meta property="og:image" content={performer?.avatar || '/static/no-avatar.png'} />
           <meta
-            property="og:description"
-            content={performer?.bio}
+            property="og:image"
+            content={performer?.avatar || '/static/no-avatar.png'}
           />
+          <meta property="og:description" content={performer?.bio} />
           <meta name="twitter:card" content="summary" />
           <meta
             name="twitter:title"
-            content={`${ui?.siteName} | ${performer?.name || performer?.username}`}
+            content={`${ui?.siteName} | ${performer?.name || performer?.username
+            }`}
           />
-          <meta name="twitter:image" content={performer?.avatar || '/static/no-avatar.png'} />
+          <meta
+            name="twitter:image"
+            content={performer?.avatar || '/static/no-avatar.png'}
+          />
           <meta name="twitter:description" content={performer?.bio} />
         </Head>
         <div className="main-container">
-          <div className="top-profile" style={{ backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'}')` }}>
+          <div
+            className="top-profile"
+            style={{
+              backgroundImage: `url('${performer?.cover || '/static/banner-image.jpg'
+              }')`
+            }}
+          >
             <div className="bg-2nd">
               <div className="top-banner">
-                <a aria-hidden className="arrow-back" onClick={() => Router.back()}>
+                <a
+                  aria-hidden
+                  className="arrow-back"
+                  onClick={() => Router.back()}
+                >
                   <ArrowLeftOutlined />
                 </a>
                 <div className="stats-row">
@@ -443,7 +578,9 @@ class PerformerProfile extends PureComponent<IProps> {
                     </div>
                     <div className="tab-item">
                       <span>
-                        {shortenLargeNumber(performer?.stats?.totalProducts || 0)}
+                        {shortenLargeNumber(
+                          performer?.stats?.totalProducts || 0
+                        )}
                         {' '}
                         <ShoppingOutlined />
                       </span>
@@ -481,9 +618,7 @@ class PerformerProfile extends PureComponent<IProps> {
                 <h4>
                   {performer?.name || 'N/A'}
                   &nbsp;
-                  {performer?.verifiedAccount && (
-                    <TickIcon />
-                  )}
+                  {performer?.verifiedAccount && <TickIcon />}
                   &nbsp;
                   {performer?.live > 0 && user?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
                   {user?._id === performer?._id && <Link href="/model/account"><a><EditOutlined className="primary-color" /></a></Link>}
@@ -495,7 +630,14 @@ class PerformerProfile extends PureComponent<IProps> {
               </div>
             </div>
             <div className="btn-grp">
-              <Tooltip title={isFollowed ? 'Following' : 'Follow'}>
+              <Tooltip title={isFollowed ? intl.formatMessage({
+                id: 'following',
+                defaultMessage: 'Following'
+              }) : intl.formatMessage({
+                id: 'follow',
+                defaultMessage: 'Follow'
+              })}
+              >
                 <Button
                   disabled={!user._id || user.isPerformer}
                   className={isBookMarked ? 'active' : ''}
@@ -504,7 +646,7 @@ class PerformerProfile extends PureComponent<IProps> {
                   {isFollowed ? <HeartFilled /> : <HeartOutlined />}
                 </Button>
               </Tooltip>
-              <Tooltip title="1-1 Live Streaming">
+              <Tooltip title={intl.formatMessage({ id: 'oneOneLiveStreaming', defaultMessage: '1-1 Live Streaming' })}>
                 <Button
                   disabled={!user._id || user.isPerformer}
                   className="normal"
@@ -518,7 +660,11 @@ class PerformerProfile extends PureComponent<IProps> {
                   <TeamOutlined />
                 </Button>
               </Tooltip>
-              <Tooltip title="Send Tip">
+              <Tooltip title={intl.formatMessage({
+                id: 'sendTip',
+                defaultMessage: 'Send Tip'
+              })}
+              >
                 <Button
                   disabled={!user._id || user.isPerformer}
                   onClick={() => this.setState({ openTipModal: true })}
@@ -526,7 +672,11 @@ class PerformerProfile extends PureComponent<IProps> {
                   <DollarOutlined />
                 </Button>
               </Tooltip>
-              <Tooltip title="Send Message">
+              <Tooltip title={intl.formatMessage({
+                id: 'sendMessage',
+                defaultMessage: 'Send Message'
+              })}
+              >
                 <Button
                   disabled={!user._id || user.isPerformer}
                   onClick={() => Router.push({
@@ -540,7 +690,14 @@ class PerformerProfile extends PureComponent<IProps> {
                   <MessageIcon />
                 </Button>
               </Tooltip>
-              <Tooltip title={isBookMarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+              <Tooltip title={isBookMarked ? intl.formatMessage({
+                id: 'removeFromBookmarks',
+                defaultMessage: 'Remove from Bookmarks'
+              }) : intl.formatMessage({
+                id: 'addToBookmarks',
+                defaultMessage: 'Add to Bookmarks'
+              })}
+              >
                 <Button
                   disabled={!user._id || user.isPerformer}
                   className={isBookMarked ? 'active' : ''}
@@ -549,7 +706,13 @@ class PerformerProfile extends PureComponent<IProps> {
                   <BookOutlined />
                 </Button>
               </Tooltip>
-              <Popover title="Share to social network" content={<ShareButtons siteName={ui.siteName} performer={performer} />}>
+              <Popover
+                title={intl.formatMessage({
+                  id: 'shareToSocialNetwork',
+                  defaultMessage: 'Share to social network'
+                })}
+                content={<ShareButtons siteName={ui.siteName} performer={performer} />}
+              >
                 <Button className="normal">
                   <ShareIcon />
                 </Button>
@@ -560,16 +723,25 @@ class PerformerProfile extends PureComponent<IProps> {
             </div>
             {!performer?.isSubscribed && !user.isPerformer && haveContent && (
               <div className="subscription-bl">
-                <h5>Monthly Subscription</h5>
+                <h5>
+                  {intl.formatMessage({
+                    id: 'monthlySubscription',
+                    defaultMessage: 'Monthly Subscription'
+                  })}
+                </h5>
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting)}
+                  disabled={submiting}
                   onClick={() => {
                     updateSubscription({ showModal: true, performer, subscriptionType: 'monthly' });
                   }}
+                  style={{ textTransform: 'uppercase' }}
                 >
-                  SUBSCRIBE FOR
+                  {intl.formatMessage({
+                    id: 'monthlySubscriptionFor',
+                    defaultMessage: 'Monthly Subscription For'
+                  })}
                   {' '}
                   $
                   {performer && performer?.monthlyPrice.toFixed(2)}
@@ -578,16 +750,25 @@ class PerformerProfile extends PureComponent<IProps> {
             )}
             {!performer?.isSubscribed && !user.isPerformer && haveContent && (
               <div className="subscription-bl">
-                <h5>Yearly Subscription</h5>
+                <h5>
+                  {intl.formatMessage({
+                    id: 'yearlySubscription',
+                    defaultMessage: 'Yearly Subscription'
+                  })}
+                </h5>
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting)}
+                  disabled={submiting}
                   onClick={() => {
                     updateSubscription({ showModal: true, performer, subscriptionType: 'yearly' });
                   }}
+                  style={{ textTransform: 'uppercase' }}
                 >
-                  SUBSCRIBE FOR
+                  {intl.formatMessage({
+                    id: 'yearlySubscriptionFor',
+                    defaultMessage: 'Yearly Subscription For'
+                  })}
                   {' '}
                   $
                   {performer?.yearlyPrice.toFixed(2)}
@@ -596,21 +777,42 @@ class PerformerProfile extends PureComponent<IProps> {
             )}
             {performer?.isFreeSubscription && !performer?.isSubscribed && !user.isPerformer && haveContent && (
               <div className="subscription-bl">
-                <h5>Free Subscription</h5>
+                <h5>
+                  {intl.formatMessage({
+                    id: 'freeSubscription',
+                    defaultMessage: 'Free Subscription'
+                  })}
+                </h5>
                 <button
                   type="button"
                   className="sub-btn"
-                  disabled={(submiting)}
+                  disabled={submiting}
                   onClick={() => {
                     updateSubscription({ showModal: true, performer, subscriptionType: 'free' });
                   }}
+                  style={{ textTransform: 'uppercase' }}
                 >
-                  SUBSCRIBE FOR FREE FOR
+                  {intl.formatMessage({
+                    id: 'subscribeForFreeFor',
+                    defaultMessage: 'Subscribe For Free For'
+                  })}
                   {' '}
                   {performer?.durationFreeSubscriptionDays || 1}
                   {' '}
-                  {performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
-                  {settings.paymentGateway === 'stripe' && ` THEN ${performer?.monthlyPrice.toFixed(2)} PER MONTH`}
+                  {performer?.durationFreeSubscriptionDays > 1 ? intl.formatMessage({
+                    id: 'days',
+                    defaultMessage: 'DAYS'
+                  }) : intl.formatMessage({
+                    id: 'day',
+                    defaultMessage: 'DAY'
+                  })}
+                  {settings.paymentGateway === 'stripe' && ` ${intl.formatMessage({
+                    id: 'then',
+                    defaultMessage: 'THEN'
+                  })} ${performer?.monthlyPrice.toFixed(2)} ${intl.formatMessage({
+                    id: 'thenMonth',
+                    defaultMessage: 'PER MONTH'
+                  })}`}
                 </button>
               </div>
             )}
@@ -623,7 +825,10 @@ class PerformerProfile extends PureComponent<IProps> {
               defaultActiveKey="post"
               size="large"
               onTabClick={(t: string) => {
-                this.setState({ tab: t, filter: initialFilter, isGrid: false }, () => this.loadItems());
+                this.setState(
+                  { tab: t, filter: initialFilter, isGrid: false },
+                  () => this.loadItems()
+                );
               }}
             >
               <TabPane tab={<FireOutlined />} key="post">
@@ -631,11 +836,28 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalFeed > 0 && totalFeed}
                     {' '}
-                    {totalFeed > 1 ? 'POSTS' : 'POST'}
+                    {totalFeed > 1
+                      ? intl.formatMessage({
+                        id: 'posts',
+                        defaultMessage: 'Posts'
+                      })
+                      : intl.formatMessage({
+                        id: 'post',
+                        defaultMessage: 'Post'
+                      })}
                   </h4>
-                  <SearchPostBar searching={loadingFeed} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+                  <SearchPostBar
+                    searching={loadingFeed}
+                    tab={tab}
+                    handleSearch={this.handleFilterSearch.bind(this)}
+                    handleViewGrid={(val) => this.setState({ isGrid: val })}
+                  />
                 </div>
-                <div className={isGrid ? 'main-container' : 'main-container custom'}>
+                <div
+                  className={
+                    isGrid ? 'main-container' : 'main-container custom'
+                  }
+                >
                   <ScrollListFeed
                     items={feeds}
                     loading={loadingFeed}
@@ -651,9 +873,22 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalVideos > 0 && totalVideos}
                     {' '}
-                    {totalVideos > 1 ? 'VIDEOS' : 'VIDEO'}
+                    {totalVideos > 1
+                      ? intl.formatMessage({
+                        id: 'videos',
+                        defaultMessage: 'Videos'
+                      })
+                      : intl.formatMessage({
+                        id: 'video',
+                        defaultMessage: 'Videos'
+                      })}
                   </h4>
-                  <SearchPostBar searching={loadingVideo} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+                  <SearchPostBar
+                    searching={loadingVideo}
+                    tab={tab}
+                    handleSearch={this.handleFilterSearch.bind(this)}
+                    handleViewGrid={(val) => this.setState({ isGrid: val })}
+                  />
                 </div>
                 <div className="main-container">
                   <ScrollListVideo
@@ -669,9 +904,22 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalGalleries > 0 && totalGalleries}
                     {' '}
-                    {totalGalleries > 1 ? 'GALLERIES' : 'GALLERY'}
+                    {totalGalleries > 1
+                      ? intl.formatMessage({
+                        id: 'galleries',
+                        defaultMessage: 'Galleries'
+                      })
+                      : intl.formatMessage({
+                        id: 'gallery',
+                        defaultMessage: 'Gallery'
+                      })}
                   </h4>
-                  <SearchPostBar searching={loadingGallery} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} handleViewGrid={(val) => this.setState({ isGrid: val })} />
+                  <SearchPostBar
+                    searching={loadingGallery}
+                    tab={tab}
+                    handleSearch={this.handleFilterSearch.bind(this)}
+                    handleViewGrid={(val) => this.setState({ isGrid: val })}
+                  />
                 </div>
                 <div className="main-container">
                   <ScrollListGallery
@@ -687,9 +935,21 @@ class PerformerProfile extends PureComponent<IProps> {
                   <h4>
                     {totalProducts > 0 && totalProducts}
                     {' '}
-                    {totalProducts > 1 ? 'PRODUCTS' : 'PRODUCT'}
+                    {totalProducts > 1
+                      ? intl.formatMessage({
+                        id: 'products',
+                        defaultMessage: 'Products'
+                      })
+                      : intl.formatMessage({
+                        id: 'product',
+                        defaultMessage: 'Product'
+                      })}
                   </h4>
-                  <SearchPostBar searching={loadingPrd} tab={tab} handleSearch={this.handleFilterSearch.bind(this)} />
+                  <SearchPostBar
+                    searching={loadingPrd}
+                    tab={tab}
+                    handleSearch={this.handleFilterSearch.bind(this)}
+                  />
                 </div>
                 <ScrollListProduct
                   items={products}
@@ -703,8 +963,7 @@ class PerformerProfile extends PureComponent<IProps> {
         </div>
         {performer
           && performer?.welcomeVideoPath
-          && performer?.activateWelcomeVideo
-          && (
+          && performer?.activateWelcomeVideo && (
             <Modal
               key="welcome-video"
               className="welcome-video"
@@ -722,31 +981,32 @@ class PerformerProfile extends PureComponent<IProps> {
                   className="secondary"
                   onClick={() => this.setState({ showWelcomVideo: false })}
                 >
-                  Close
+                  {intl.formatMessage({ id: 'close', defaultMessage: 'Close' })}
                 </Button>,
                 <Button
                   key="not-show"
                   className="primary"
                   onClick={this.handleViewWelcomeVideo.bind(this)}
                 >
-                  Don&apos;t show this again
+                  {intl.formatMessage({ id: 'dontShowThisAgain', defaultMessage: 'Don\'t show this again' })}
                 </Button>
               ]}
             >
-              <VideoPlayer {...{
-                key: `${performer._id}`,
-                controls: true,
-                playsinline: true,
-                sources: [
-                  {
-                    src: performer?.welcomeVideoPath,
-                    type: 'video/mp4'
-                  }
-                ]
-              }}
+              <VideoPlayer
+                {...{
+                  key: `${performer._id}`,
+                  controls: true,
+                  playsinline: true,
+                  sources: [
+                    {
+                      src: performer?.welcomeVideoPath,
+                      type: 'video/mp4'
+                    }
+                  ]
+                }}
               />
             </Modal>
-          )}
+        )}
         <Modal
           key="tip_performer"
           className="subscription-modal"
@@ -792,4 +1052,4 @@ const mapDispatch = {
   updateBalance,
   setSubscription
 };
-export default connect(mapStates, mapDispatch)(PerformerProfile);
+export default injectIntl(connect(mapStates, mapDispatch)(PerformerProfile));

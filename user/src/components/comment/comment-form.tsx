@@ -11,6 +11,7 @@ import { FormInstance } from 'antd/lib/form';
 import { ICreateComment } from 'src/interfaces/comment';
 import Router from 'next/router';
 import './comment.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   objectId: string;
@@ -19,11 +20,12 @@ interface IProps {
   creator: IUser;
   requesting: boolean;
   isReply?: boolean;
+  intl: IntlShape
 }
 
 const { TextArea } = Input;
 
-export class CommentForm extends PureComponent<IProps> {
+class CommentForm extends PureComponent<IProps> {
   formRef: any;
 
   state = {
@@ -36,18 +38,18 @@ export class CommentForm extends PureComponent<IProps> {
 
   onFinish(values: ICreateComment) {
     const {
-      onSubmit: handleComment, objectId, objectType, creator
+      onSubmit: handleComment, objectId, objectType, creator, intl
     } = this.props;
     const data = values;
     if (!creator || !creator._id) {
-      message.error('Please login!');
+      message.error(intl.formatMessage({ id: 'pleaseLogin', defaultMessage: 'Please login!' }));
       return Router.push('/auth/login');
     }
     if (!data.content) {
-      return message.error('Please add a comment!');
+      return message.error(intl.formatMessage({ id: 'pleaseAddAComment', defaultMessage: 'Please add a comment!' }));
     }
     if (data.content.length > 150) {
-      return message.error('Comment is over 150 characters');
+      return message.error(intl.formatMessage({ id: 'commentIsOverOneHundredFiveTeenCharacters', defaultMessage: 'Comment is over 150 characters' }));
     }
     data.objectId = objectId;
     data.objectType = objectType || 'video';
@@ -68,7 +70,7 @@ export class CommentForm extends PureComponent<IProps> {
 
   render() {
     const {
-      creator, requesting, isReply, objectId
+      creator, requesting, isReply, objectId, intl
     } = this.props;
     if (!this.formRef) this.formRef = createRef();
     return (
@@ -85,7 +87,14 @@ export class CommentForm extends PureComponent<IProps> {
             <Form.Item
               name="content"
             >
-              <TextArea disabled={!creator || !creator._id} maxLength={150} showCount minLength={1} rows={!isReply ? 2 : 1} placeholder={!isReply ? 'Add a comment here' : 'Add a reply here'} />
+              <TextArea
+                disabled={!creator || !creator._id}
+                maxLength={150}
+                showCount
+                minLength={1}
+                rows={!isReply ? 2 : 1}
+                placeholder={!isReply ? intl.formatMessage({ id: 'addCommentHere', defaultMessage: 'Add a comment here' }) : intl.formatMessage({ id: 'addReplyHere', defaultMessage: 'Add a reply here' })}
+              />
             </Form.Item>
             <Popover key={objectId} className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
               <div className="grp-emotions">
@@ -94,10 +103,12 @@ export class CommentForm extends PureComponent<IProps> {
             </Popover>
           </div>
           <Button className={!isReply ? 'submit-btn' : ''} htmlType="submit" disabled={requesting}>
-            {!isReply ? <SendOutlined /> : 'Reply'}
+            {!isReply ? <SendOutlined /> : intl.formatMessage({ id: 'reply', defaultMessage: 'Reply' })}
           </Button>
         </div>
       </Form>
     );
   }
 }
+
+export default injectIntl(CommentForm);

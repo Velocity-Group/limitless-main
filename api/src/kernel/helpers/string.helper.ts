@@ -1,6 +1,7 @@
 /* eslint: no-confusing-arrow: 0 */
-import * as mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
+
+const mongoose = require('mongoose');
 
 const extTypes = {
   '3gp': 'video/3gpp',

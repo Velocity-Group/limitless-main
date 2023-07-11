@@ -6,9 +6,10 @@ import { searchService } from '@services/index';
 import './search-bar.less';
 import { debounce } from 'lodash';
 import Router from 'next/router';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const { Search } = Input;
-interface IProps { }
+interface IProps { intl: IntlShape }
 
 class SearchBar extends PureComponent<IProps> {
   state = {
@@ -19,6 +20,7 @@ class SearchBar extends PureComponent<IProps> {
   }
 
   onSearch = debounce(async (e) => {
+    const { intl } = this.props;
     this.setState({ keyword: e });
     if (!e) {
       this.setState({ searched: false });
@@ -32,7 +34,7 @@ class SearchBar extends PureComponent<IProps> {
       }
     } catch (error) {
       const err = await error;
-      message.error(err?.message || 'Error occured, please try again later');
+      message.error(err?.message || intl.formatMessage({ id: 'errorOccuredPleaseTryAgainLater', defaultMessage: 'Error occured, please try again later' }));
     } finally {
       this.setState({ searching: false, searched: true });
     }
@@ -60,6 +62,7 @@ class SearchBar extends PureComponent<IProps> {
     const {
       searching, result, searched
     } = this.state;
+    const { intl } = this.props;
     const {
       totalPerformer = 0, totalFeed = 0, totalStory = 0, totalProduct = 0
     } = result;
@@ -78,10 +81,10 @@ class SearchBar extends PureComponent<IProps> {
         />
         {!searching && searched && (
           <ul className="drop-hint">
-            <li aria-hidden onClick={() => this.onChangeRoute('performer')}><a>{`${totalPerformer} Models`}</a></li>
-            <li aria-hidden onClick={() => this.onChangeRoute('feed')}><a>{`${totalFeed} Posts`}</a></li>
-            <li aria-hidden onClick={() => this.onChangeRoute('story')}><a>{`${totalStory} Stories`}</a></li>
-            <li aria-hidden onClick={() => this.onChangeRoute('product')}><a>{`${totalProduct} Products`}</a></li>
+            <li aria-hidden onClick={() => this.onChangeRoute('performer')}><a>{`${totalPerformer} ${intl.formatMessage({ id: 'models', defaultMessage: 'Models' })}`}</a></li>
+            <li aria-hidden onClick={() => this.onChangeRoute('feed')}><a>{`${totalFeed} ${intl.formatMessage({ id: 'posts', defaultMessage: 'Posts' })}`}</a></li>
+            <li aria-hidden onClick={() => this.onChangeRoute('story')}><a>{`${totalStory} ${intl.formatMessage({ id: 'stories', defaultMessage: 'Stories' })}`}</a></li>
+            <li aria-hidden onClick={() => this.onChangeRoute('product')}><a>{`${totalProduct} ${intl.formatMessage({ id: 'products', defaultMessage: 'Products' })}`}</a></li>
           </ul>
         )}
       </div>
@@ -89,4 +92,4 @@ class SearchBar extends PureComponent<IProps> {
   }
 }
 
-export default SearchBar;
+export default injectIntl(SearchBar);

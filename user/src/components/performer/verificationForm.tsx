@@ -1,11 +1,12 @@
 import { PureComponent } from 'react';
 import {
-  Form, Button, Row, Col, message, Image
+  Form, Row, Col, message, Image
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
 import { ImageUpload } from '@components/file';
 import { performerService, authService } from '@services/index';
 import './performer.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const layout = {
   labelCol: { span: 24 },
@@ -14,9 +15,10 @@ const layout = {
 
 interface IProps {
   user: IPerformer;
+  intl: IntlShape
 }
 
-export class PerformerVerificationForm extends PureComponent<IProps> {
+class PerformerVerificationForm extends PureComponent<IProps> {
   idVerificationFileId: string;
 
   documentVerificationFileId: string;
@@ -39,6 +41,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
   }
 
   onFileUploaded(type, file) {
+    const { intl } = this.props;
     if (file && type === 'idFile') {
       this.idVerificationFileId = file?.response?.data?._id;
       this.setState({ idImage: file?.response?.data.url });
@@ -47,10 +50,13 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
       this.documentVerificationFileId = file?.response?.data?._id;
       this.setState({ documentImage: file?.response?.data.url });
     }
-    message.success('Photo has been uploaded!');
+    message.success(intl.formatMessage({ id: 'photoHasBeenUploaded', defaultMessage: 'Photo has been uploaded!' }));
   }
 
   render() {
+    const {
+      intl
+    } = this.props;
     const {
       idImage, documentImage
     } = this.state;
@@ -69,7 +75,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
           <Col xs={24} sm={24} md={12}>
             <Form.Item
               labelCol={{ span: 24 }}
-              label="Your government issued ID"
+              label={intl.formatMessage({ id: 'yourGovernmentIssuedId', defaultMessage: 'Your government issued ID' })}
               className="model-photo-verification"
             >
               <div className="document-upload">
@@ -80,10 +86,10 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               </div>
               <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
                 <ul className="list-issued-id">
-                  <li>Government-issued ID card</li>
-                  <li>National Id card</li>
-                  <li>Passport</li>
-                  <li>Driving license</li>
+                  <li>{intl.formatMessage({ id: 'governmentIssuedIdCard', defaultMessage: 'Government-issued ID card' })}</li>
+                  <li>{intl.formatMessage({ id: 'nationalIdCard', defaultMessage: 'National Id card' })}</li>
+                  <li>{intl.formatMessage({ id: 'passport', defaultMessage: 'Passport' })}</li>
+                  <li>{intl.formatMessage({ id: 'drivingLicense', defaultMessage: 'Driving license' })}</li>
                 </ul>
               </div>
             </Form.Item>
@@ -91,7 +97,7 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
           <Col xs={24} sm={24} md={12}>
             <Form.Item
               labelCol={{ span: 24 }}
-              label="Your selfie with your ID and handwritten note"
+              label={intl.formatMessage({ id: 'selfieImageUpload', defaultMessage: 'Your selfie with your ID and handwritten note' })}
               className="model-photo-verification"
             >
               <div className="document-upload">
@@ -103,12 +109,25 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
               <div className="ant-form-item-explain" style={{ textAlign: 'left' }}>
                 <ul className="list-issued-id">
                   <li>
-                    On a blank piece of white paper write your name, today&apos;s date and our website address
+                    {intl.formatMessage({
+                      id: 'onABlankPieceOfWhitePaperWriteYourNameTodaysDateAndOurWebsiteAddress',
+                      defaultMessage: 'On a blank piece of white paper write your name, today\'s date and our website address'
+                    })}
                     {' '}
                     {window.location.hash}
                   </li>
-                  <li>Hold your paper and your ID so we can clearly see hoth</li>
-                  <li>Take a selfie of you, your ID and your handwritten note. All three elements (you, your ID and your writting) must be clearly visible without copying or editing</li>
+                  <li>
+                    {intl.formatMessage({
+                      id: 'holdYourPaperAndYourIdSoWeCanClearlySeeHoth',
+                      defaultMessage: 'Hold your paper and your ID so we can clearly see hoth'
+                    })}
+                  </li>
+                  <li>
+                    {intl.formatMessage({
+                      id: 'takeASelfieOfYouYourIdAndYourHandwrittenNoteAllThreeElementsYouYourIdAndYourWritingMustBeClearlyVisibleWithoutCopyingOrEditing',
+                      defaultMessage: 'Take a selfie of you, your ID and your handwritten note. All three elements (you, your ID and your writing) must be clearly visible without copying or editing'
+                    })}
+                  </li>
                 </ul>
               </div>
             </Form.Item>
@@ -118,3 +137,5 @@ export class PerformerVerificationForm extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(PerformerVerificationForm);

@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import { Select, message, Avatar } from 'antd';
 import { debounce } from 'lodash';
 import { userService } from '@services/user.service';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   placeholder?: string;
@@ -9,15 +10,17 @@ interface IProps {
   onSelect: Function;
   defaultValue?: string;
   disabled?: boolean;
+  intl: IntlShape
 }
 
-export class SelectUserDropdown extends PureComponent<IProps> {
+class SelectUserDropdown extends PureComponent<IProps> {
   state = {
     loading: false,
     data: [] as any
   };
 
   loadUsers = debounce(async (q) => {
+    const { intl } = this.props;
     try {
       await this.setState({ loading: true });
       const resp = await (await userService.search({ q, limit: 99 })).data;
@@ -27,7 +30,7 @@ export class SelectUserDropdown extends PureComponent<IProps> {
       });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured');
+      message.error(err?.message || intl.formatMessage({ id: 'errorOccurredPleaseTryAgainLater', defaultMessage: 'Error occurred, please try again later' }));
       this.setState({ loading: false });
     }
   }, 500);
@@ -38,14 +41,14 @@ export class SelectUserDropdown extends PureComponent<IProps> {
 
   render() {
     const {
-      style, onSelect, defaultValue, disabled
+      style, onSelect, defaultValue, disabled, intl
     } = this.props;
     const { data, loading } = this.state;
     return (
       <Select
         showSearch
         defaultValue={defaultValue}
-        placeholder="Type to search user"
+        placeholder={intl.formatMessage({ id: 'typeToSearchUser', defaultMessage: 'Type to search user' })}
         style={style}
         onSearch={this.loadUsers.bind(this)}
         onChange={onSelect.bind(this)}
@@ -64,3 +67,5 @@ export class SelectUserDropdown extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(SelectUserDropdown);

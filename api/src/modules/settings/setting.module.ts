@@ -10,6 +10,8 @@ import { SettingFileUploadController } from './controllers/setting-file-upload.c
 import { FileModule } from '../file/file.module';
 import { AdminSettingController } from './controllers/admin-setting.controller';
 import { MenuController } from './controllers/menu.controller';
+import { TranslationModule } from '../translation/translation.module';
+import { LanguageModule } from '../language/language.module';
 
 @Module({
   imports: [
@@ -18,7 +20,9 @@ import { MenuController } from './controllers/menu.controller';
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
     forwardRef(() => FileModule),
-    forwardRef(() => MailerModule)
+    forwardRef(() => MailerModule),
+    forwardRef(() => TranslationModule),
+    forwardRef(() => LanguageModule)
   ],
   providers: [
     ...settingProviders,

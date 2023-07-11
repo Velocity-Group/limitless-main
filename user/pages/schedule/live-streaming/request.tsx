@@ -10,6 +10,7 @@ import {
   DeleteOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
+import { IntlShape, useIntl } from 'react-intl';
 
 function LiveStreamingScheduleListing() {
   const [filterQuery, setFilterQuery] = useState({
@@ -21,6 +22,7 @@ function LiveStreamingScheduleListing() {
     pageSize: 10
   });
   const [requests, setRequests] = useState([]);
+  const intl: IntlShape = useIntl();
 
   const search = async () => {
     try {
@@ -60,22 +62,22 @@ function LiveStreamingScheduleListing() {
 
   const columns = [
     {
-      title: 'Performer',
+      title: intl.formatMessage({ id: 'performer', defaultMessage: 'Performer' }),
       render: (record: any) => record?.performerInfo?.username,
       key: 'performer'
     },
     {
-      title: 'Date',
+      title: intl.formatMessage({ id: 'date', defaultMessage: 'Date' }),
       dataIndex: 'startAt',
       key: 'startAt'
     },
     {
-      title: 'Timezone',
+      title: intl.formatMessage({ id: 'timezone', defaultMessage: 'Timezone' }),
       dataIndex: 'timezone',
       key: 'timezone'
     },
     {
-      title: 'Status',
+      title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
       dataIndex: 'status',
       key: 'status'
     },
@@ -87,7 +89,7 @@ function LiveStreamingScheduleListing() {
           menuOptions={[
             {
               key: 'start-request',
-              name: 'Start Request',
+              name: intl.formatMessage({ id: 'startRequest', defaultMessage: 'Start Request' }),
               children: (
                 <Link
                   href={{
@@ -99,14 +101,14 @@ function LiveStreamingScheduleListing() {
                   as={`/streaming/private/play?key=${record._id}`}
                 >
                   <a>
-                    Start
+                    {intl.formatMessage({ id: 'start', defaultMessage: 'Start' })}
                   </a>
                 </Link>
               )
             },
             {
               key: 'view-photo',
-              name: 'Delete',
+              name: intl.formatMessage({ id: 'delete', defaultMessage: 'Delete' }),
               children: (
                 <>
                   <a
@@ -117,7 +119,7 @@ function LiveStreamingScheduleListing() {
                   >
                     <DeleteOutlined />
                     {' '}
-                    Delete
+                    {intl.formatMessage({ id: 'delete', defaultMessage: 'Delete' })}
                   </a>
                 </>
               )
@@ -132,7 +134,7 @@ function LiveStreamingScheduleListing() {
   return (
     <Layout>
       <div className="main-container">
-        <PageHeading title="Live Streaming Schedule" />
+        <PageHeading title={intl.formatMessage({ id: 'liveStreamingSchedule', defaultMessage: 'Live Streaming Schedule' })} />
         <Table
           rowKey="_id"
           dataSource={requests}

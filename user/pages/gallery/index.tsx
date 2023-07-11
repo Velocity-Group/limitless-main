@@ -1,9 +1,21 @@
 import { PureComponent } from 'react';
 import {
-  Layout, message, Row, Col, Spin, Button, Modal, Tabs, Avatar, Tooltip
+  Layout,
+  message,
+  Row,
+  Col,
+  Spin,
+  Button,
+  Modal,
+  Tabs,
+  Avatar,
+  Tooltip
 } from 'antd';
 import {
-  EyeOutlined, PictureOutlined, CalendarOutlined, BookOutlined
+  EyeOutlined,
+  PictureOutlined,
+  CalendarOutlined,
+  BookOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { connect } from 'react-redux';
@@ -17,7 +29,7 @@ import {
   IGallery, IUser, IUIConfig
 } from 'src/interfaces';
 import { setSubscription } from '@redux/subscription/actions';
-import { PurchaseGalleryForm } from '@components/gallery/confirm-purchase';
+import PurchaseGalleryForm from '@components/gallery/confirm-purchase';
 import GalleryCard from '@components/gallery/gallery-card';
 import Router from 'next/router';
 import Link from 'next/link';
@@ -26,6 +38,7 @@ import { shortenLargeNumber, formatDate } from '@lib/index';
 import PageHeading from '@components/common/page-heading';
 import PhotoPreviewList from '@components/photo/photo-preview-list';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   gallery: IGallery;
@@ -36,6 +49,7 @@ interface IProps {
   updateBalance: Function;
   relatedGalleries: any;
   setSubscription: Function;
+  intl: IntlShape;
 }
 
 class GalleryViewPage extends PureComponent<IProps> {
@@ -83,7 +97,7 @@ class GalleryViewPage extends PureComponent<IProps> {
 
   async handleBookmark() {
     const { isBookmarked } = this.state;
-    const { gallery } = this.props;
+    const { gallery, intl } = this.props;
     try {
       await this.setState({ requesting: true });
       if (!isBookmarked) {
@@ -103,14 +117,24 @@ class GalleryViewPage extends PureComponent<IProps> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(
+        error.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
       this.setState({ requesting: false });
     }
   }
 
   handleUpdateState() {
     const { gallery, getRelatedGalleries: getRelatedHandler } = this.props;
-    this.setState({ isBought: gallery.isBought, isBookmarked: gallery.isBookMarked, photos: [] });
+    this.setState({
+      isBought: gallery.isBought,
+      isBookmarked: gallery.isBookMarked,
+      photos: []
+    });
     this.getPhotos();
     getRelatedHandler({
       performerId: gallery.performerId,
@@ -121,24 +145,34 @@ class GalleryViewPage extends PureComponent<IProps> {
   }
 
   async getPhotos() {
-    const { gallery } = this.props;
+    const { gallery, intl } = this.props;
     const { offset, photos } = this.state;
     try {
       await this.setState({ fetching: true });
-      const resp = await (await photoService.userSearch({
-        galleryId: gallery._id,
-        limit: 40,
-        offset: offset * 40
-      })).data;
+      const resp = await (
+        await photoService.userSearch({
+          galleryId: gallery._id,
+          limit: 40,
+          offset: offset * 40
+        })
+      ).data;
       this.setState({ photos: photos.concat(resp.data), total: resp.total });
       // preload image
       resp.data.forEach((img) => {
-        setTimeout(() => { new Image().src = img?.photo?.url; }, 1000);
+        setTimeout(() => {
+          new Image().src = img?.photo?.url;
+        }, 1000);
         return img;
       });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error on getting photos, please try again later');
+      message.error(
+        err?.message
+          || intl.formatMessage({
+            id: 'errorOnGettingPhotos',
+            defaultMessage: 'Error on getting photos, please try again later'
+          })
+      );
     } finally {
       this.setState({ fetching: false });
     }
@@ -151,21 +185,49 @@ class GalleryViewPage extends PureComponent<IProps> {
   }
 
   async purchaseGallery() {
-    const { gallery, user, updateBalance: handleUpdateBalance } = this.props;
+    const {
+      gallery,
+      user,
+      updateBalance: handleUpdateBalance,
+      intl
+    } = this.props;
     if (user?.balance < gallery.price) {
-      message.error('You have an insufficient token balance. Please top up.');
+      message.error(
+        intl.formatMessage({
+          id: 'youHaveAnInsufficientTokenBalance',
+          defaultMessage:
+            'You have an insufficient token balance. Please top up.'
+        })
+      );
       Router.push('/wallet');
       return;
     }
     try {
       await this.setState({ requesting: true });
-      await (await tokenTransactionService.purchaseGallery(gallery._id, { })).data;
-      message.success('Gallery is unlocked!');
+      await (
+        await tokenTransactionService.purchaseGallery(gallery._id, {})
+      ).data;
+      message.success(
+        intl.formatMessage({
+          id: 'galleryIsUnlocked',
+          defaultMessage: 'Gallery is unlocked!'
+        })
+      );
       handleUpdateBalance({ token: -gallery.price });
-      this.setState({ isBought: true, openPurchaseModal: false, requesting: false });
+      this.setState({
+        isBought: true,
+        openPurchaseModal: false,
+        requesting: false
+      });
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(
+        error.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
       this.setState({ requesting: false });
     }
   }
@@ -182,49 +244,71 @@ class GalleryViewPage extends PureComponent<IProps> {
         success: false,
         items: []
       },
-      setSubscription: updateSubscription
+      setSubscription: updateSubscription,
+      intl
     } = this.props;
     if (error) {
-      return <Error statusCode={error?.statusCode || 404} title={error?.message || 'Galley was not found'} />;
+      return (
+        <Error
+          statusCode={error?.statusCode || 404}
+          title={
+            error?.message
+            || intl.formatMessage({
+              id: 'galleryWasNotFound',
+              defaultMessage: 'Gallery was not found'
+            })
+          }
+        />
+      );
     }
     const {
       fetching, photos, total, isBought, requesting, openPurchaseModal,
       isBookmarked
     } = this.state;
-    const canview = (gallery?.isSale && isBought) || (!gallery?.isSale && gallery?.isSubscribed);
+    const canview = (gallery?.isSale && isBought)
+      || (!gallery?.isSale && gallery?.isSubscribed);
     const thumbUrl = gallery?.coverPhoto?.url || ui?.logo;
     return (
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName} | ${gallery?.title || 'Gallery'}`}
+            {`${ui?.siteName} | ${
+              gallery?.title
+              || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })
+            }`}
           </title>
           <meta name="keywords" content={gallery?.description} />
           <meta name="description" content={gallery?.description} />
           {/* OG tags */}
           <meta
             property="og:title"
-            content={`${ui?.siteName} | ${gallery?.title || 'Gallery'}`}
+            content={`${ui?.siteName} | ${
+              gallery?.title
+              || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })
+            }`}
             key="title"
           />
           <meta property="og:image" content={thumbUrl} />
-          <meta
-            property="og:description"
-            content={gallery?.description}
-          />
+          <meta property="og:description" content={gallery?.description} />
           {/* Twitter tags */}
           <meta
             name="twitter:title"
-            content={`${ui.siteName} | ${gallery.title || 'Gallery'}`}
+            content={`${ui.siteName} | ${
+              gallery.title
+              || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })
+            }`}
           />
           <meta name="twitter:image" content={thumbUrl} />
-          <meta
-            name="twitter:description"
-            content={gallery.description}
-          />
+          <meta name="twitter:description" content={gallery.description} />
         </Head>
         <div className="main-container">
-          <PageHeading icon={<PictureOutlined />} title={gallery?.title || 'Gallery'} />
+          <PageHeading
+            icon={<PictureOutlined />}
+            title={
+              gallery?.title
+              || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })
+            }
+          />
           <div className="gal-stats">
             <a>
               <EyeOutlined />
@@ -238,19 +322,53 @@ class GalleryViewPage extends PureComponent<IProps> {
             </a>
           </div>
           <div className="photo-carousel">
-            {!fetching && photos && photos.length > 0 && <PhotoPreviewList isBlur={!user || !user._id || !canview} photos={photos} />}
-            {!fetching && !photos.length && <p className="text-center">No photo was found.</p>}
-            {fetching && <div className="text-center"><Spin /></div>}
-            {!fetching && total > photos.length && <div className="text-center" style={{ margin: 10 }}><Button type="link" onClick={this.getMorePhotos.bind(this)}>More photos ...</Button></div>}
+            {!fetching && photos && photos.length > 0 && (
+              <PhotoPreviewList
+                isBlur={!user || !user._id || !canview}
+                photos={photos}
+              />
+            )}
+            {!fetching && !photos.length && (
+              <p className="text-center">
+                {intl.formatMessage({
+                  id: 'noPhotoWasFound',
+                  defaultMessage: 'No photo was found.'
+                })}
+              </p>
+            )}
+            {fetching && (
+              <div className="text-center">
+                <Spin />
+              </div>
+            )}
+            {!fetching && total > photos.length && (
+              <div className="text-center" style={{ margin: 10 }}>
+                <Button type="link" onClick={this.getMorePhotos.bind(this)}>
+                  {intl.formatMessage({
+                    id: 'morePhotos',
+                    defaultMessage: 'More photos'
+                  })}
+                  {' '}
+                  ...
+                </Button>
+              </div>
+            )}
             {!canview && (
             <div className="text-center" style={{ margin: '20px 0' }}>
               {gallery?.isSale && !isBought && (
               <Button disabled={!user || !user._id || requesting} className="primary" onClick={() => this.setState({ openPurchaseModal: true })}>
-                PAY&nbsp;
+                {intl.formatMessage({
+                  id: 'pay',
+                  defaultMessage: 'PAY'
+                })}
+                {' '}
                 $
                 {(gallery?.price || 0).toFixed(2)}
                 {' '}
-                TO UNLOCK
+                {intl.formatMessage({
+                  id: 'toUnlock',
+                  defaultMessage: 'TO UNLOCK'
+                })}
               </Button>
               )}
               {!gallery?.isSale && !gallery?.isSubscribed && (
@@ -258,7 +376,12 @@ class GalleryViewPage extends PureComponent<IProps> {
                 style={{ padding: '25px 5px' }}
                 className="subscription"
               >
-                <h3>Subscribe to view full content</h3>
+                <h3>
+                  {intl.formatMessage({
+                    id: 'subscribeToViewFullContent',
+                    defaultMessage: 'Subscribe to view full content'
+                  })}
+                </h3>
                   {gallery?.performer?.isFreeSubscription && (
                   <Button
                     className="primary"
@@ -268,11 +391,20 @@ class GalleryViewPage extends PureComponent<IProps> {
                       updateSubscription({ showModal: true, subscriptionType: 'free', performer: gallery?.performer });
                     }}
                   >
-                    SUBSCRIBE FOR FREE
+                    {intl.formatMessage({
+                      id: 'subscribeForFree',
+                      defaultMessage: 'SUBSCRIBE FOR FREE'
+                    })}
                     {' '}
                     {gallery?.performer?.durationFreeSubscriptionDays || 1}
                     {' '}
-                    {gallery?.performer?.durationFreeSubscriptionDays > 1 ? 'DAYS' : 'DAY'}
+                    {gallery?.performer?.durationFreeSubscriptionDays > 1 ? intl.formatMessage({
+                      id: 'days',
+                      defaultMessage: 'DAYS'
+                    }) : intl.formatMessage({
+                      id: 'day',
+                      defaultMessage: 'DAY'
+                    })}
                   </Button>
                   )}
                   {gallery?.performer?.monthlyPrice && (
@@ -284,7 +416,10 @@ class GalleryViewPage extends PureComponent<IProps> {
                       updateSubscription({ showModal: true, subscriptionType: 'monthly', performer: gallery?.performer });
                     }}
                   >
-                    MONTHLY SUBSCRIPTION FOR $
+                    {intl.formatMessage({
+                      id: 'monthlySubscriptionForDollar',
+                      defaultMessage: 'MONTHLY SUBSCRIPTION FOR $'
+                    })}
                     {(gallery?.performer?.monthlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
@@ -296,7 +431,10 @@ class GalleryViewPage extends PureComponent<IProps> {
                       updateSubscription({ showModal: true, subscriptionType: 'yearly', performer: gallery?.performer });
                     }}
                   >
-                    YEARLY SUBSCRIPTION FOR $
+                    {intl.formatMessage({
+                      id: 'yearlySubscriptionForDollar',
+                      defaultMessage: 'YEARLY SUBSCRIPTION FOR $'
+                    })}
                     {(gallery?.performer?.yearlyPrice || 0).toFixed(2)}
                   </Button>
                   )}
@@ -312,15 +450,22 @@ class GalleryViewPage extends PureComponent<IProps> {
               <Link
                 href={{
                   pathname: '/model/profile',
-                  query: { username: gallery?.performer?.username || gallery?.performer?._id }
+                  query: {
+                    username:
+                      gallery?.performer?.username || gallery?.performer?._id
+                  }
                 }}
-                as={`/${gallery?.performer?.username || gallery?.performer?._id}`}
+                as={`/${
+                  gallery?.performer?.username || gallery?.performer?._id
+                }`}
               >
                 <a>
                   <div className="o-w-ner">
                     <Avatar
                       alt="performer avatar"
-                      src={gallery?.performer?.avatar || '/static/no-avatar.png'}
+                      src={
+                        gallery?.performer?.avatar || '/static/no-avatar.png'
+                      }
                     />
                     <div className="owner-name">
                       <div className="name">
@@ -336,7 +481,19 @@ class GalleryViewPage extends PureComponent<IProps> {
                 </a>
               </Link>
               <div className="act-btns">
-                <Tooltip title={isBookmarked ? 'Remove from Bookmarks' : 'Add to Bookmarks'}>
+                <Tooltip
+                  title={
+                    isBookmarked
+                      ? intl.formatMessage({
+                        id: 'removeFromBookmarks',
+                        defaultMessage: 'Remove from Bookmarks'
+                      })
+                      : intl.formatMessage({
+                        id: 'addToBookmarks',
+                        defaultMessage: 'Add to Bookmarks'
+                      })
+                  }
+                >
                   <button
                     type="button"
                     className={isBookmarked ? 'react-btn active' : 'react-btn'}
@@ -351,24 +508,51 @@ class GalleryViewPage extends PureComponent<IProps> {
           </div>
         </div>
         <div className="main-container">
-          <Tabs
-            defaultActiveKey="description"
-          >
-            <Tabs.TabPane tab="Description" key="description">
-              <p>{gallery?.description || 'No description...'}</p>
+          <Tabs defaultActiveKey="description">
+            <Tabs.TabPane
+              tab={intl.formatMessage({
+                id: 'description',
+                defaultMessage: 'Description'
+              })}
+              key="description"
+            >
+              <p>
+                {gallery?.description
+                  || `${intl.formatMessage({
+                    id: 'noDescription',
+                    defaultMessage: 'No description'
+                  })}...`}
+              </p>
             </Tabs.TabPane>
           </Tabs>
           <div className="related-items">
-            <h4 className="ttl-1">You may also like</h4>
-            {relatedGalleries.requesting && <div className="text-center"><Spin /></div>}
-            {!relatedGalleries.requesting && !relatedGalleries.items.length && <p>No gallery was found</p>}
+            <h4 className="ttl-1">
+              {intl.formatMessage({
+                id: 'youMayAlsoLike',
+                defaultMessage: 'You may also like'
+              })}
+            </h4>
+            {relatedGalleries.requesting && (
+              <div className="text-center">
+                <Spin />
+              </div>
+            )}
+            {!relatedGalleries.requesting && !relatedGalleries.items.length && (
+              <p>
+                {intl.formatMessage({
+                  id: 'noGalleryWasFound',
+                  defaultMessage: 'No gallery was found'
+                })}
+              </p>
+            )}
             <Row>
-              {!relatedGalleries.requesting && relatedGalleries.items.length > 0
-                  && relatedGalleries.items.map((item: IGallery) => (
-                    <Col xs={12} sm={12} md={6} lg={6} key={item._id}>
-                      <GalleryCard gallery={item} />
-                    </Col>
-                  ))}
+              {!relatedGalleries.requesting
+                && relatedGalleries.items.length > 0
+                && relatedGalleries.items.map((item: IGallery) => (
+                  <Col xs={12} sm={12} md={6} lg={6} key={item._id}>
+                    <GalleryCard gallery={item} />
+                  </Col>
+                ))}
             </Row>
           </div>
         </div>
@@ -380,9 +564,12 @@ class GalleryViewPage extends PureComponent<IProps> {
           footer={null}
           onCancel={() => this.setState({ openPurchaseModal: false })}
         >
-          <PurchaseGalleryForm gallery={gallery} submiting={requesting} onFinish={this.purchaseGallery.bind(this)} />
+          <PurchaseGalleryForm
+            gallery={gallery}
+            submiting={requesting}
+            onFinish={this.purchaseGallery.bind(this)}
+          />
         </Modal>
-
       </Layout>
     );
   }
@@ -400,4 +587,4 @@ const mapDispatch = {
   updateBalance,
   setSubscription
 };
-export default connect(mapStates, mapDispatch)(GalleryViewPage);
+export default injectIntl(connect(mapStates, mapDispatch)(GalleryViewPage));

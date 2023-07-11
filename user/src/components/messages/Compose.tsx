@@ -15,6 +15,7 @@ import { IConversation } from 'src/interfaces';
 import { sendMessageSuccess, deactiveConversation } from '@redux/message/actions';
 import { convertBlobUrlToFile } from '@lib/index';
 import { AudioPlayer } from '@components/common';
+import { IntlShape, useIntl } from 'react-intl';
 import Emotions from './emotions';
 import { MessagePriceForm } from './set-price-form';
 import { AudioRecorder } from './audio-recorder';
@@ -42,6 +43,7 @@ function Compose({ conversation, disabled }: IProps) {
   const [, updateState] = useState();
   const forceUpdate = useCallback(() => updateState({} as any), []);
   const dispatch = useDispatch();
+  const intl: IntlShape = useIntl();
   const _input = useRef() as any;
 
   const resetState = () => {
@@ -67,11 +69,11 @@ function Compose({ conversation, disabled }: IProps) {
 
   const onSubmit = async () => {
     if (openMediaUpload && !files.length) {
-      message.error('Select a media');
+      message.error(intl.formatMessage({ id: 'selectAMedia', defaultMessage: 'Select a media' }));
       return;
     }
     if (!text) {
-      message.error('Enter your message');
+      message.error(intl.formatMessage({ id: 'enterYourMessage', defaultMessage: 'Enter your message' }));
       return;
     }
     setSubmitting(true);
@@ -133,9 +135,9 @@ function Compose({ conversation, disabled }: IProps) {
       const err = await e;
 
       if (err?.message === 'Entity is not found') {
-        message.error('Not found');
+        message.error(intl.formatMessage({ id: 'notFound', defaultMessage: 'Not found' }));
       } else {
-        message.error(err?.message || 'An error occurred, please try again');
+        message.error(err?.message || intl.formatMessage({ id: 'errorOccurredPleaseTryAgainLater', defaultMessage: 'Error occurred, please try again later' }));
       }
     }
   };
@@ -171,7 +173,7 @@ function Compose({ conversation, disabled }: IProps) {
   const onSelectTeaser = (file) => {
     const valid = file.size / 1024 / 1024 < 100;
     if (!valid) {
-      message.error('The teaser must be less than 100 MB!');
+      message.error(intl.formatMessage({ id: 'theTeaserMustBeLessThan100MB', defaultMessage: 'The teaser must be less than 100 MB!' }));
       return false;
     }
     setTeaser(file);
@@ -181,7 +183,7 @@ function Compose({ conversation, disabled }: IProps) {
   const onSelectThumbnail = (file) => {
     const valid = file.size / 1024 / 1024 < 20;
     if (!valid) {
-      message.error('Thumbnail must be less than 20 MB!');
+      message.error(intl.formatMessage({ id: 'thumbnailMustBeLessThan20MB', defaultMessage: 'Thumbnail must be less than 20 MB!' }));
       return false;
     }
     setThumbnail(file);
@@ -207,7 +209,7 @@ function Compose({ conversation, disabled }: IProps) {
                 listType="picture"
               >
                 <SwapOutlined />
-                Change preview
+                {intl.formatMessage({ id: 'changePreview', defaultMessage: 'Change preview' })}
               </Upload>
             ) : (
               <Upload
@@ -219,17 +221,17 @@ function Compose({ conversation, disabled }: IProps) {
                 listType="picture"
               >
                 <UploadOutlined />
-                Insert preview
+                {intl.formatMessage({ id: 'insertPreview', defaultMessage: 'Insert preview' })}
               </Upload>
             )}
           </Button>
-          {!conversation?.recipientInfo?.isPerformer && <Button disabled={submitting} onClick={() => setOpenPriceModal(true)} className={isSale ? 'sale-btn active' : 'sale-btn'}>{!isSale ? 'Public' : `$${price}`}</Button>}
+          {!conversation?.recipientInfo?.isPerformer && <Button disabled={submitting} onClick={() => setOpenPriceModal(true)} className={isSale ? 'sale-btn active' : 'sale-btn'}>{!isSale ? intl.formatMessage({ id: 'public', defaultMessage: 'Public' }) : `$${price}`}</Button>}
         </div>
       )}
       {openMediaUpload && <MessageUploadList onFilesSelected={(_files) => setFiles(_files)} type={mediaType} />}
       <Input.TextArea
         className="compose-text-area"
-        placeholder="Message"
+        placeholder={intl.formatMessage({ id: 'message', defaultMessage: 'Message' })}
         rows={3}
         autoFocus
         onChange={(e) => setText(e.target.value)}
@@ -269,8 +271,8 @@ function Compose({ conversation, disabled }: IProps) {
           </Popover>
         </div>
         <div className="grp-right">
-          <Button className="secondary" onClick={() => onDiscard()} disabled={submitting}>Cancel</Button>
-          <Button disabled={disabled || submitting} loading={submitting} className="primary" onClick={() => onSubmit()}>Send</Button>
+          <Button className="secondary" onClick={() => onDiscard()} disabled={submitting}>{intl.formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}</Button>
+          <Button disabled={disabled || submitting} loading={submitting} className="primary" onClick={() => onSubmit()}>{intl.formatMessage({ id: 'send', defaultMessage: 'Send' })}</Button>
         </div>
       </div>
       <Modal

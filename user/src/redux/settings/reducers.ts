@@ -18,6 +18,7 @@ const settingReducers = [
     on: updateSettings,
     reducer(state: any, data: any) {
       return {
+        ...state,
         ...data.payload
       };
     }

@@ -9,12 +9,15 @@ import { connect } from 'react-redux';
 import Router from 'next/router';
 import { followService } from 'src/services';
 import './performer.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   performer: IPerformer;
   countries: ICountry[];
   user: IUser;
   onFollow?: Function;
+  intl: IntlShape;
+
 }
 
 class PerformerCard extends PureComponent<IProps> {
@@ -75,7 +78,9 @@ class PerformerCard extends PureComponent<IProps> {
   };
 
   render() {
-    const { performer, countries, user } = this.props;
+    const {
+      performer, countries, user, intl
+    } = this.props;
     const { isFollowed } = this.state;
     const country = countries && countries.length && countries.find((c) => c.code === performer.country);
 
@@ -88,7 +93,7 @@ class PerformerCard extends PureComponent<IProps> {
       >
         <div className="hovering">
           {performer?.isFreeSubscription && (
-          <span className="card-free">Free</span>
+            <span className="card-free">{intl.formatMessage({ id: 'free', defaultMessage: 'Free' })}</span>
           )}
           {performer?.live > 0 && <span className="live-status" aria-hidden onClick={this.handleJoinStream.bind(this)}>Live</span>}
 
@@ -112,7 +117,7 @@ class PerformerCard extends PureComponent<IProps> {
                   {performer?.name || 'N/A'}
                   {' '}
                   {country && (
-                  <img alt="performer-country" className="model-country" src={country?.flag} />
+                    <img alt="performer-country" className="model-country" src={country?.flag} />
                   )}
                   {' '}
                   {performer?.verifiedAccount && <TickIcon />}
@@ -126,7 +131,7 @@ class PerformerCard extends PureComponent<IProps> {
           </Link>
           {!user?.isPerformer && (
             <a aria-hidden onClick={() => this.handleFollow()} className={!isFollowed ? 'follow-btn' : 'follow-btn active'}>
-              {isFollowed ? <Tooltip title="Following"><HeartFilled /></Tooltip> : <Tooltip title="Follow"><HeartOutlined /></Tooltip>}
+              {isFollowed ? <Tooltip title={intl.formatMessage({ id: 'following', defaultMessage: 'Following' })}><HeartFilled /></Tooltip> : <Tooltip title={intl.formatMessage({ id: 'follow', defaultMessage: 'Follow' })}><HeartOutlined /></Tooltip>}
             </a>
           )}
         </div>
@@ -136,4 +141,4 @@ class PerformerCard extends PureComponent<IProps> {
 }
 
 const maptStateToProps = (state) => ({ user: { ...state.user.current } });
-export default connect(maptStateToProps)(PerformerCard);
+export default injectIntl(connect(maptStateToProps)(PerformerCard));

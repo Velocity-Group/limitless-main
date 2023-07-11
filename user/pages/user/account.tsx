@@ -8,12 +8,17 @@ import { UserAccountForm } from '@components/user';
 import { IUser } from 'src/interfaces/user';
 import { authService } from '@services/auth.service';
 import { userService } from '@services/user.service';
-import { updateUser, updateCurrentUserAvatar, updatePassword } from 'src/redux/user/actions';
+import {
+  updateUser,
+  updateCurrentUserAvatar,
+  updatePassword
+} from 'src/redux/user/actions';
 import { IUIConfig } from 'src/interfaces';
 import { SocketContext } from 'src/socket';
 import { logout } from '@redux/auth/actions';
 import PageHeading from '@components/common/page-heading';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   user: IUser;
@@ -24,6 +29,7 @@ interface IProps {
   updateSuccess: boolean;
   ui: IUIConfig;
   logout: Function;
+  intl: IntlShape;
 }
 interface IState {
   emailSending: boolean;
@@ -60,25 +66,47 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
     }
     this.setState({ countTime: countTime - 1 });
     this._intervalCountdown = setInterval(this.coundown.bind(this), 1000);
-  }
+  };
 
   async handleSwitchToPerformer() {
-    const { user, logout: handleLogout } = this.props;
+    const { user, logout: handleLogout, intl } = this.props;
     if (!user._id) return;
-    if (!window.confirm('By confirm to become a model, your current account will be change immediately!')) return;
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'mssgConfirmModel',
+          defaultMessage:
+            'By confirm to become a model, your current account will be change immediately!'
+        })
+      )
+    ) { return; }
     try {
       const resp = await authService.userSwitchToPerformer(user._id);
-      message.success(resp?.data?.message || 'Switched account success!');
+      message.success(
+        resp?.data?.message
+          || intl.formatMessage({
+            id: 'switchedAccountSuccess',
+            defaultMessage: 'Switched account success!'
+          })
+      );
       const token = authService.getToken();
       const socket = this.context;
-      token && socket && await socket.emit('auth/logout', {
-        token
-      });
+      token
+        && socket
+        && (await socket.emit('auth/logout', {
+          token
+        }));
       socket && socket.close();
       handleLogout();
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
+      message.error(
+        err?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     }
   }
 
@@ -103,7 +131,7 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
   }
 
   async verifyEmail() {
-    const { user } = this.props;
+    const { user, intl } = this.props;
     try {
       await this.setState({ emailSending: true });
       const resp = await authService.verifyEmail({
@@ -114,14 +142,22 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
       resp.data && resp.data.message && message.success(resp.data.message);
     } catch (e) {
       const error = await e;
-      message.success(error?.message || 'An error occured, please try again later');
+      message.success(
+        error?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     } finally {
       this.setState({ emailSending: false });
     }
   }
 
   render() {
-    const { user, updating, ui } = this.props;
+    const {
+      user, updating, ui, intl
+    } = this.props;
     const { countTime, emailSending } = this.state;
     const uploadHeader = {
       authorization: authService.getToken()
@@ -132,11 +168,22 @@ class UserAccountSettingPage extends PureComponent<IProps, IState> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Edit Profile
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'editProfile',
+              defaultMessage: 'Edit Profile'
+            })}
           </title>
         </Head>
         <div className="main-container user-account">
-          <PageHeading title="Edit Profile" icon={<EditOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'editProfile',
+              defaultMessage: 'Edit Profile'
+            })}
+            icon={<EditOutlined />}
+          />
           <UserAccountForm
             onFinish={this.onFinish.bind(this)}
             updating={updating || emailSending}
@@ -165,6 +212,11 @@ const mapStates = (state) => ({
   ui: { ...state.ui }
 });
 const mapDispatch = {
-  updateUser, updateCurrentUserAvatar, updatePassword, logout
+  updateUser,
+  updateCurrentUserAvatar,
+  updatePassword,
+  logout
 };
-export default connect(mapStates, mapDispatch)(UserAccountSettingPage);
+export default injectIntl(
+  connect(mapStates, mapDispatch)(UserAccountSettingPage)
+);

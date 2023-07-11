@@ -7,10 +7,12 @@ import { connect } from 'react-redux';
 import Router from 'next/router';
 import { IPostResponse } from '@interfaces/post';
 import PageHeading from '@components/common/page-heading';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: any;
   post: IPostResponse;
+  intl: IntlShape
 }
 class PostDetail extends PureComponent<IProps> {
   static authenticate = true;
@@ -24,10 +26,10 @@ class PostDetail extends PureComponent<IProps> {
       return { post };
     } catch (e) {
       if (process.browser) {
-        return Router.replace('/404');
+        return Router.replace('/');
       }
 
-      ctx.res.writeHead && ctx.res.writeHead(302, { Location: '/404' });
+      ctx.res.writeHead && ctx.res.writeHead(302, { Location: '/' });
       ctx.res.end && ctx.res.end();
       return {};
     }
@@ -51,7 +53,7 @@ class PostDetail extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, post } = this.props;
+    const { ui, post, intl } = this.props;
     return (
       <Layout>
         <Head>
@@ -62,7 +64,7 @@ class PostDetail extends PureComponent<IProps> {
         </Head>
         <div className="main-container">
           <div className="page-container">
-            <PageHeading title={post?.title || 'Page was not found'} icon={<ReadOutlined />} />
+            <PageHeading title={post?.title || intl.formatMessage({ id: 'pageWasNotFound', defaultMessage: 'Page was not found' })} icon={<ReadOutlined />} />
             <div
               className="page-content"
               // eslint-disable-next-line react/no-danger
@@ -80,4 +82,4 @@ const mapProps = (state: any) => ({
   ui: state.ui
 });
 
-export default connect(mapProps)(PostDetail);
+export default injectIntl(connect(mapProps)(PostDetail));

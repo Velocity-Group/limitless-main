@@ -4,6 +4,7 @@ import {
 } from 'antd';
 import { utilsService } from 'src/services';
 import { IPerformer, ICountry } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const { Option } = Select;
 const layout = {
@@ -28,9 +29,10 @@ interface IProps {
   user: IPerformer;
   updating?: boolean;
   countries?: ICountry[];
+  intl:IntlShape
 }
 
-export class PerformerBankingForm extends PureComponent<IProps> {
+class PerformerBankingForm extends PureComponent<IProps> {
   state = {
     states: [],
     cities: []
@@ -75,7 +77,7 @@ export class PerformerBankingForm extends PureComponent<IProps> {
   render() {
     if (!this.formRef) this.formRef = createRef();
     const {
-      onFinish, user, updating, countries
+      onFinish, user, updating, countries, intl
     } = this.props;
     const { states, cities } = this.state;
     return (
@@ -92,53 +94,53 @@ export class PerformerBankingForm extends PureComponent<IProps> {
         <Row>
           <Col xl={12} md={12} xs={12}>
             <Form.Item
-              label="First name"
+              label={intl.formatMessage({ id: 'firstName', defaultMessage: 'First name' })}
               name="firstName"
               rules={[
-                { required: true, message: 'Please input your first name!' }
+                { required: true, message: `${intl.formatMessage({ id: 'pleaseInputYourFirstName', defaultMessage: 'Please input your first name!' })}` }
               ]}
             >
-              <Input placeholder="First name" />
+              <Input placeholder={intl.formatMessage({ id: 'firstName', defaultMessage: 'First name' })} />
             </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={12}>
             <Form.Item
               name="lastName"
-              label="Last name"
+              label={intl.formatMessage({ id: 'lastName', defaultMessage: 'Last name' })}
               rules={[
-                { required: true, message: 'Please input your last name!' }
+                { required: true, message: `${intl.formatMessage({ id: 'pleaseInputYourLastName', defaultMessage: 'Please input your last name!' })}` }
               ]}
             >
-              <Input placeholder="Last name" />
+              <Input placeholder={intl.formatMessage({ id: 'lastName', defaultMessage: 'Last name' })} />
             </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={12}>
             <Form.Item
               name="bankName"
-              label="Bank name"
+              label={intl.formatMessage({ id: 'bankName', defaultMessage: 'Bank name' })}
               rules={[
-                { required: true, message: 'Please input your bank name!' }
+                { required: true, message: `${intl.formatMessage({ id: 'pleaseInputYourBankName', defaultMessage: 'Please input your bank name!' })}` }
               ]}
             >
-              <Input placeholder="Bank name" />
+              <Input placeholder={intl.formatMessage({ id: 'bankName', defaultMessage: 'Bank name' })} />
             </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={12}>
             <Form.Item
               name="bankAccount"
-              label="Bank Account"
+              label={intl.formatMessage({ id: 'bankAccount', defaultMessage: 'Bank Account' })}
               rules={[
-                { required: true, message: 'Please input your bank account!' }
+                { required: true, message: `${intl.formatMessage({ id: 'pleaseInputYourBankAccount', defaultMessage: 'Please input your bank account!' })}` }
               ]}
             >
-              <Input placeholder="Bank account" />
+              <Input placeholder={intl.formatMessage({ id: 'bankAccount', defaultMessage: 'Bank Account' })} />
             </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={12}>
             <Form.Item
               name="country"
-              label="Country"
-              rules={[{ required: true, message: 'Please choose country!' }]}
+              label={intl.formatMessage({ id: 'country', defaultMessage: 'Country' })}
+              rules={[{ required: true, message: `${intl.formatMessage({ id: 'pleaseChooseCountry', defaultMessage: 'Please choose country!' })}` }]}
             >
               <Select
                 showSearch
@@ -156,9 +158,9 @@ export class PerformerBankingForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={12}>
-            <Form.Item name="state" label="State">
+            <Form.Item name="state" label={intl.formatMessage({ id: 'state', defaultMessage: 'State' })}>
               <Select
-                placeholder="Select your state"
+                placeholder={intl.formatMessage({ id: 'selectYourState', defaultMessage: 'Select your state' })}
                 optionFilterProp="label"
                 showSearch
                 onChange={(val: string) => this.handleGetCities(val, this.formRef.getFieldValue('country'))}
@@ -174,10 +176,10 @@ export class PerformerBankingForm extends PureComponent<IProps> {
           <Col xl={12} md={12} xs={12}>
             <Form.Item
               name="city"
-              label="City"
+              label={intl.formatMessage({ id: 'city', defaultMessage: 'City' })}
             >
               <Select
-                placeholder="Select your city"
+                placeholder={intl.formatMessage({ id: 'selectYourCity', defaultMessage: 'Select your city' })}
                 showSearch
                 optionFilterProp="label"
               >
@@ -190,18 +192,18 @@ export class PerformerBankingForm extends PureComponent<IProps> {
             </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={12}>
-            <Form.Item name="address" label="Address">
-              <Input placeholder="Address" />
+            <Form.Item name="address" label={intl.formatMessage({ id: 'address', defaultMessage: 'Address' })}>
+              <Input placeholder={intl.formatMessage({ id: 'address', defaultMessage: 'Address' })} />
             </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={12}>
-            <Form.Item name="bankRouting" label="Bank Routing">
-              <Input placeholder="Bank routing" />
+            <Form.Item name="bankRouting" label={intl.formatMessage({ id: 'bankRouting', defaultMessage: 'Bank Routing' })}>
+              <Input placeholder={intl.formatMessage({ id: 'bankRouting', defaultMessage: 'Bank Routing' })} />
             </Form.Item>
           </Col>
           <Col xl={12} md={12} xs={12}>
-            <Form.Item name="bankSwiftCode" label="Bank swift code">
-              <Input placeholder="Bank swift code" />
+            <Form.Item name="bankSwiftCode" label={intl.formatMessage({ id: 'bankSwiftCode', defaultMessage: 'Bank swift code' })}>
+              <Input placeholder={intl.formatMessage({ id: 'bankSwiftCode', defaultMessage: 'Bank swift code' })} />
             </Form.Item>
           </Col>
           {/* <Col xl={12} md={12} xs={12}>
@@ -217,10 +219,11 @@ export class PerformerBankingForm extends PureComponent<IProps> {
             loading={updating}
             disabled={updating}
           >
-            Save Changes
+            {intl.formatMessage({ id: 'saveChanges', defaultMessage: 'Save Changes' })}
           </Button>
         </Form.Item>
       </Form>
     );
   }
 }
+export default injectIntl(PerformerBankingForm);

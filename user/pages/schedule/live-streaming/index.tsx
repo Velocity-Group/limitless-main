@@ -9,11 +9,13 @@ import {
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { IntlShape, useIntl } from 'react-intl';
 import timezones from 'timezones-list';
 
 function LiveStreamingSchedule() {
   const { query } = useRouter();
   const [performer, setPerformer] = useState<IPerformer>();
+  const intl: IntlShape = useIntl();
 
   useEffect(() => {
     const initProfile = async () => {
@@ -33,7 +35,7 @@ function LiveStreamingSchedule() {
         performerId: performer._id,
         startAt: (values.startAt as moment.Moment).format('YYYY-MM-DD HH:mm a')
       });
-      message.success('Request has been sent');
+      message.success(intl.formatMessage({ id: 'requestHasBeenSend', defaultMessage: 'Your request has been sent.' }));
     } catch (e) {
       const error = await Promise.resolve(e);
       message.error(getResponseError(error));
@@ -45,7 +47,7 @@ function LiveStreamingSchedule() {
   return (
     <Layout>
       <div className="main-container">
-        <PageHeading title="Live Streaming Schedule" />
+        <PageHeading title={intl.formatMessage({ id: 'liveStreamingSchedule', defaultMessage: 'Live Streaming Schedule' })} />
         <Form
           layout="vertical"
           onFinish={submit}
@@ -60,16 +62,16 @@ function LiveStreamingSchedule() {
         >
           <Form.Item
             name="timezone"
-            label="Timezone"
+            label={intl.formatMessage({ id: 'timezone', defaultMessage: 'Timezone' })}
             rules={[
               {
                 required: true,
-                message: 'Timezone is required'
+                message: intl.formatMessage({ id: 'timezoneIsRequired', defaultMessage: 'Timezone is required' })
               }
             ]}
           >
             <Select>
-              <Select.Option value="">Please select</Select.Option>
+              <Select.Option value="">{intl.formatMessage({ id: 'pleaseSelect', defaultMessage: 'Please select' })}</Select.Option>
               {timezones.map((tz) => (
                 <Select.Option value={tz.tzCode}>{tz.label}</Select.Option>
               ))}
@@ -77,11 +79,11 @@ function LiveStreamingSchedule() {
           </Form.Item>
           <Form.Item
             name="startAt"
-            label="Date"
+            label={intl.formatMessage({ id: 'date', defaultMessage: 'Date' })}
             rules={[
               {
                 required: true,
-                message: 'Date is required'
+                message: intl.formatMessage({ id: 'dateIsRequired', defaultMessage: 'Date is required' })
               }
             ]}
           >
@@ -93,7 +95,7 @@ function LiveStreamingSchedule() {
           </Form.Item>
           <Form.Item>
             <Button className="primary" htmlType="submit">
-              Submit
+              {intl.formatMessage({ id: 'submit', defaultMessage: 'Submit' })}
             </Button>
           </Form.Item>
         </Form>

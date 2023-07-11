@@ -17,10 +17,11 @@ import {
 import {
   authService, performerService, utilsService
 } from '@services/index';
-import {
-  PerformerAccountForm, PerformerSubscriptionForm, PerformerVerificationForm
-} from '@components/performer';
+import PerformerAccountForm from '@components/performer/accountForm';
+import PerformerSubscriptionForm from '@components/performer/subscriptionForm';
+import PerformerVerificationForm from '@components/performer/verificationForm';
 import '../../user/index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   currentUser: IPerformer;
@@ -31,6 +32,7 @@ interface IProps {
   updateCurrentUserCover: Function;
   countries: ICountry[];
   bodyInfo: IBody;
+  intl: IntlShape
   settings: ISettings;
 }
 class AccountSettings extends PureComponent<IProps> {
@@ -68,14 +70,14 @@ class AccountSettings extends PureComponent<IProps> {
   }
 
   onAvatarUploaded(data: any) {
-    const { updateCurrentUserAvatar: handleUpdateAvt } = this.props;
-    message.success('Changes saved');
+    const { updateCurrentUserAvatar: handleUpdateAvt, intl } = this.props;
+    message.success(intl.formatMessage({ id: 'changesSaved', defaultMessage: 'Changes saved' }));
     handleUpdateAvt(data.response.data.url);
   }
 
   onCoverUploaded(data: any) {
-    const { updateCurrentUserCover: handleUpdateCover } = this.props;
-    message.success('Changes saved');
+    const { updateCurrentUserCover: handleUpdateCover, intl } = this.props;
+    message.success(intl.formatMessage({ id: 'changesSaved', defaultMessage: 'Changes saved' }));
     handleUpdateCover(data.response.data.url);
   }
 
@@ -93,7 +95,7 @@ class AccountSettings extends PureComponent<IProps> {
   }
 
   async verifyEmail() {
-    const { currentUser } = this.props;
+    const { currentUser, intl } = this.props;
     try {
       await this.setState({ emailSending: true });
       const resp = await authService.verifyEmail({
@@ -104,7 +106,7 @@ class AccountSettings extends PureComponent<IProps> {
       resp.data && resp.data.message && message.success(resp.data.message);
     } catch (e) {
       const error = await e;
-      message.success(error?.message || 'An error occured, please try again later');
+      message.success(error?.message || intl.formatMessage({ id: 'errorOccurredPleaseTryAgainLater', defaultMessage: 'Error occurred, please try again later' }));
     } finally {
       this.setState({ emailSending: false });
     }
@@ -112,7 +114,7 @@ class AccountSettings extends PureComponent<IProps> {
 
   render() {
     const {
-      currentUser, updating, ui, countries, bodyInfo, settings
+      currentUser, updating, ui, countries, bodyInfo, settings, intl
     } = this.props;
     const { emailSending, countTime } = this.state;
     const uploadHeaders = {
@@ -124,20 +126,22 @@ class AccountSettings extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Edit Profile
+            |
+            {' '}
+            {intl.formatMessage({ id: 'editProfile', defaultMessage: 'Edit Profile' })}
           </title>
         </Head>
         <div className="main-container user-account">
           {!currentUser.verifiedDocument && (
-          <div className="verify-info">
-            Your ID documents are not verified yet! You could not post any content right now.
-            <p>
-              If you have any question, please contact our administrator to get more information.
-            </p>
-          </div>
+            <div className="verify-info">
+              {intl.formatMessage({ id: 'yourIdDocumentsAreNotVerifiedYet', defaultMessage: 'Your ID documents are not verified yet! You could not post any content right now.' })}
+              <p>
+                {intl.formatMessage({ id: 'ifYouHaveAnyQuestion', defaultMessage: 'If you have any question, please contact our administrator to get more information.' })}
+              </p>
+            </div>
           )}
           <Tabs defaultActiveKey="basic" tabPosition="top" className="nav-tabs custom">
-            <Tabs.TabPane tab={<span>Basic Settings</span>} key="basic">
+            <Tabs.TabPane tab={<span>{intl.formatMessage({ id: 'basicSettings', defaultMessage: 'Basic Settings' })}</span>} key="basic">
               <PerformerAccountForm
                 onFinish={this.submit.bind(this)}
                 updating={updating || emailSending}
@@ -156,13 +160,13 @@ class AccountSettings extends PureComponent<IProps> {
                 bodyInfo={bodyInfo}
               />
             </Tabs.TabPane>
-            <Tabs.TabPane tab={<span>ID Documents</span>} key="verification">
+            <Tabs.TabPane tab={<span>{intl.formatMessage({ id: 'idDocuments', defaultMessage: 'ID Documents' })}</span>} key="verification">
               <PerformerVerificationForm
                 user={currentUser}
               />
             </Tabs.TabPane>
             <Tabs.TabPane
-              tab={<span>Pricing Settings</span>}
+              tab={<span>{intl.formatMessage({ id: 'pricingSettings', defaultMessage: 'Pricing Settings' })}</span>}
               key="subscription"
             >
               <PerformerSubscriptionForm
@@ -196,4 +200,4 @@ const mapDispatch = {
   updateCurrentUserAvatar,
   updateCurrentUserCover
 };
-export default connect(mapStates, mapDispatch)(AccountSettings);
+export default injectIntl(connect(mapStates, mapDispatch)(AccountSettings));

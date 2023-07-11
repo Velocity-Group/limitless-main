@@ -10,11 +10,13 @@ import { loginSuccess } from '@redux/auth/actions';
 import { updateCurrentUser } from '@redux/user/actions';
 import Router from 'next/router';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   loginSuccess: Function;
   updateCurrentUser: Function;
+  intl: IntlShape;
 }
 class Dashboard extends PureComponent<IProps> {
   static layout = 'blank';
@@ -53,7 +55,7 @@ class Dashboard extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const { loginAs } = this.state;
     return (
       <div className="container">
@@ -61,29 +63,25 @@ class Dashboard extends PureComponent<IProps> {
           <title>
             {ui?.siteName}
             {' '}
-            | Register
+            |
+            {' '}
+            {intl.formatMessage({ id: 'register', defaultMessage: 'Register' })}
           </title>
         </Head>
         <div className="main-container">
           <div className="login-box">
             <Row>
-              <Col
-                xs={24}
-                sm={24}
-                md={8}
-                lg={12}
-              >
+              <Col xs={24} sm={24} md={8} lg={12}>
                 <div
                   className="login-content left fixed"
-                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui.loginPlaceholderImage})` } : null}
+                  style={
+                    ui.loginPlaceholderImage
+                      ? { backgroundImage: `url(${ui.loginPlaceholderImage})` }
+                      : null
+                  }
                 />
               </Col>
-              <Col
-                xs={24}
-                sm={24}
-                md={16}
-                lg={12}
-              >
+              <Col xs={24} sm={24} md={16} lg={12}>
                 <div className="login-content right custom">
                   <div className="switch-btn">
                     <button
@@ -92,73 +90,200 @@ class Dashboard extends PureComponent<IProps> {
                       onClick={this.handleSwitch.bind(this, 'user')}
                       style={{ marginRight: '20px' }}
                     >
-                      Fan Signup
+                      {intl.formatMessage({
+                        id: 'fanSignUp',
+                        defaultMessage: 'Fan Sign Up'
+                      })}
                     </button>
                     <button
                       type="button"
                       className={loginAs === 'performer' ? 'active' : ''}
                       onClick={this.handleSwitch.bind(this, 'performer')}
                     >
-                      Model Signup
+                      {intl.formatMessage({
+                        id: 'modelSignUp',
+                        defaultMessage: 'Model Sign Up'
+                      })}
                     </button>
                   </div>
                   <div className="welcome-box">
                     <h3>
-                      {loginAs === 'user' ? 'Fan' : 'Model'}
+                      {loginAs === 'user'
+                        ? `${intl.formatMessage({
+                          id: 'fan',
+                          defaultMessage: 'Fan'
+                        })}`
+                        : `${intl.formatMessage({
+                          id: 'model',
+                          defaultMessage: 'Model'
+                        })}`}
                       {' '}
-                      Benefits
+                      {intl.formatMessage({
+                        id: 'benefits',
+                        defaultMessage: 'Benefits'
+                      })}
                     </h3>
                     {loginAs === 'performer' ? (
                       <div>
-                        {ui && ui.modelBenefit
-                          ? <div dangerouslySetInnerHTML={{ __html: ui.modelBenefit }} />
-                          : (
-                            <ul>
-                              <li>Lightning fast uploading</li>
-                              <li>Multi-video uploading</li>
-                              <li>Chat with fans</li>
-                              <li>Cross-over-content between models</li>
-                              <li>Individual model store</li>
-                              <li>
-                                Affiliate program for blogs to promote your
-                                content
-                              </li>
-                              <li>80% Standard commission rate</li>
-                              <li>(Deduct 5% when gained from affiliates)</li>
-                            </ul>
-                          )}
+                        {ui && ui.modelBenefit ? (
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: ui.modelBenefit
+                            }}
+                          />
+                        ) : (
+                          <ul>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'lightningFastUploading',
+                                defaultMessage: 'Lightning fast uploading'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'multi-videoUploading',
+                                defaultMessage: 'Multi-video uploading'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'chatWithFans',
+                                defaultMessage: 'Chat with fans'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'contentBetweenModels',
+                                defaultMessage:
+                                  'Cross-over-content between models'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'individualModelStore',
+                                defaultMessage: 'Individual model store'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'affiliateProgramFoBlogsToPromoteYourContent',
+                                defaultMessage:
+                                  'Affiliate program for blogs to promote your content'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'eightyPercentStandardCommissionRate',
+                                defaultMessage: '80% Standard commission rate'
+                              })}
+                            </li>
+                            <li>
+                              (
+                              {intl.formatMessage({
+                                id: 'deductFivePercentWhenGainedFromAffiliates',
+                                defaultMessage:
+                                  'Deduct 5% when gained from affiliates'
+                              })}
+                              )
+                            </li>
+                          </ul>
+                        )}
                         <Link href="/auth/model-register">
                           <a className="btn-primary ant-btn ant-btn-primary ant-btn-lg">
-                            MODEL SIGN UP
+                            {intl.formatMessage({
+                              id: 'modelSignUp',
+                              defaultMessage: 'Model Sign Up'
+                            })}
                           </a>
                         </Link>
                       </div>
                     ) : (
                       <div>
-                        {ui && ui.userBenefit ? <div dangerouslySetInnerHTML={{ __html: ui.userBenefit }} /> : (
+                        {ui && ui.userBenefit ? (
+                          <div
+                            dangerouslySetInnerHTML={{ __html: ui.userBenefit }}
+                          />
+                        ) : (
                           <ul>
-                            <li>View exclusive content</li>
-                            <li>Monthly and Yearly subscriptions</li>
-                            <li>Fast and reliable buffering and viewing</li>
-                            <li>Multiple solution options to choose from</li>
-                            <li>Chat with model</li>
-                            <li>Access model&apos;s personal store</li>
-                            <li>Search and filter capabilities</li>
-                            <li>Favorite your video for future viewing</li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'viewExclusiveContent',
+                                defaultMessage: 'View exclusive content'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'monthlyAndYearlySubscriptions',
+                                defaultMessage:
+                                  'Monthly and Yearly subscriptions'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'fastAndReliableBufferingAndViewing',
+                                defaultMessage:
+                                  'Fast and reliable buffering and viewing'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'multipleSolutionOptionsToChooseFrom',
+                                defaultMessage:
+                                  'Multiple solution options to choose from'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'chatWithModel',
+                                defaultMessage: 'Chat with model'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'accessModelsPersonalStore',
+                                defaultMessage: 'Access model\'s personal store'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'searchAndFilterCapabilities',
+                                defaultMessage:
+                                  'Search and filter capabilities'
+                              })}
+                            </li>
+                            <li>
+                              {intl.formatMessage({
+                                id: 'favoriteYourVideoForFutureViewing',
+                                defaultMessage:
+                                  'Favorite your video for future viewing'
+                              })}
+                            </li>
+                            <li />
                           </ul>
                         )}
                         <Link href="/auth/fan-register">
                           <a className="btn-primary ant-btn ant-btn-primary ant-btn-lg">
-                            FAN SIGN UP
+                            {intl.formatMessage({
+                              id: 'fanSignUp',
+                              defaultMessage: 'Fan Sign Up'
+                            })}
                           </a>
                         </Link>
                       </div>
                     )}
                   </div>
                   <p className="text-center">
-                    Have an account already?
+                    {intl.formatMessage({
+                      id: 'haveAccountAlready',
+                      defaultMessage: 'Have an account already?'
+                    })}
                     <Link href="/auth/login">
-                      <a> Log in here.</a>
+                      <a>
+                        {intl.formatMessage({
+                          id: 'logInHere',
+                          defaultMessage: 'Log in here.'
+                        })}
+                      </a>
                     </Link>
                   </p>
                 </div>
@@ -177,4 +302,4 @@ const mapStatesToProps = (state: any) => ({
 
 const mapDispatch = { loginSuccess, updateCurrentUser };
 
-export default connect(mapStatesToProps, mapDispatch)(Dashboard);
+export default injectIntl(connect(mapStatesToProps, mapDispatch)(Dashboard));

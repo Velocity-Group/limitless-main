@@ -8,10 +8,12 @@ import { ISubscription, IUIConfig } from 'src/interfaces';
 import { subscriptionService } from '@services/subscription.service';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
-import { SearchFilter } from '@components/common/search-filter';
+import { injectIntl, IntlShape } from 'react-intl';
+import SearchFilter from '@components/common/search-filter';
 
 interface IProps {
   ui: IUIConfig;
+  intl: IntlShape;
 }
 interface IStates {
   subscriptionList: ISubscription[];
@@ -66,6 +68,7 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
   }
 
   async getData() {
+    const { intl } = this.props;
     try {
       const {
         filter, sort, sortBy, pagination
@@ -84,7 +87,11 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
       });
     } catch (error) {
       message.error(
-        getResponseError(await error) || 'An error occured. Please try again.'
+        getResponseError(await error)
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
       );
     } finally {
       this.setState({ loading: false });
@@ -93,37 +100,37 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
 
   render() {
     const { subscriptionList, pagination, loading } = this.state;
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const statuses = [
       {
         key: '',
-        text: 'All Statuses'
+        text: `${intl.formatMessage({ id: 'allStatuses', defaultMessage: 'All Statuses' })}`
       },
       {
         key: 'active',
-        text: 'Active'
+        text: `${intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}`
       },
       {
         key: 'deactivated',
-        text: 'Inactive'
+        text: `${intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}`
       }
     ];
     const types = [
       {
         key: '',
-        text: 'All Types'
+        text: `${intl.formatMessage({ id: 'allTypes', defaultMessage: 'All Types' })}`
       },
       {
         key: 'free',
-        text: 'Free Subscription'
+        text: `${intl.formatMessage({ id: 'freeSubscriptio', defaultMessage: 'Free Subscriptio' })}`
       },
       {
         key: 'monthly',
-        text: 'Monthly Subscription'
+        text: `${intl.formatMessage({ id: 'monthlySubscription', defaultMessage: 'Monthly Subscription' })}`
       },
       {
         key: 'yearly',
-        text: 'Yearly Subscription'
+        text: `${intl.formatMessage({ id: 'yearlySubscription', defaultMessage: 'Yearly Subscription' })}`
       }
     ];
     return (
@@ -132,11 +139,22 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | My Subscribers
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'mySubscribers',
+              defaultMessage: 'My Subscribers'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="My Subscribers" icon={<UserAddOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'mySubscribers',
+              defaultMessage: 'My Subscribers'
+            })}
+            icon={<UserAddOutlined />}
+          />
           <SearchFilter
             subscriptionTypes={types}
             statuses={statuses}
@@ -159,5 +177,4 @@ class SubscriberPage extends PureComponent<IProps, IStates> {
 }
 
 const mapState = (state: any) => ({ ui: state.ui });
-const mapDispatch = {};
-export default connect(mapState, mapDispatch)(SubscriberPage);
+export default injectIntl(connect(mapState)(SubscriberPage));

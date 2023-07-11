@@ -10,11 +10,12 @@ import Router from 'next/router';
 import { connect } from 'react-redux';
 import { registerPerformer, loginSocial } from '@redux/auth/actions';
 import { ISettings, IUIConfig, ICountry } from 'src/interfaces';
-import { ImageUploadModel } from '@components/file';
 import moment from 'moment';
 import { authService, utilsService } from 'src/services';
 import './index.less';
 import GoogleLoginButton from '@components/auth/google-login-button';
+import { injectIntl, IntlShape } from 'react-intl';
+import ImageUploadModel from '@components/file/image-upload-model';
 
 const { Option } = Select;
 
@@ -25,6 +26,7 @@ interface IProps {
   ui: IUIConfig;
   settings: ISettings;
   countries: ICountry[];
+  intl: IntlShape;
 }
 
 class RegisterPerformer extends PureComponent<IProps> {
@@ -48,17 +50,30 @@ class RegisterPerformer extends PureComponent<IProps> {
   };
 
   componentDidUpdate(prevProps) {
-    const { registerPerformerData, ui } = this.props;
+    const { registerPerformerData, ui, intl } = this.props;
     if (
       !prevProps?.registerPerformerData?.success
       && prevProps?.registerPerformerData?.success !== registerPerformerData?.success
     ) {
       message.success(
         <div>
-          <h4>{`Thank you for applying to be an ${ui?.siteName || 'Fanso'} creator!`}</h4>
+          <h4>
+            {`${intl.formatMessage({
+              id: 'thankYouForApplyingToBeAn',
+              defaultMessage: 'Thank you for applying to be an'
+            })} ${ui?.siteName || 'Fanso'} ${intl.formatMessage({
+              id: 'creator',
+              defaultMessage: 'creator'
+            })}!`}
+
+          </h4>
           <p>
             {registerPerformerData?.data?.message
-              || 'Your application will be processed withing 24 to 48 hours, most times sooner. You will get an email notification sent to your email address with the status update.'}
+              || `${intl.formatMessage({
+                id: 'notificationOfSuccessfulApplicationSubmissionModel',
+                defaultMessage:
+                  'Your application will be processed withing 24 to 48 hours, most times sooner. You will get an email notification sent to your email address with the status update.'
+              })}`}
           </p>
         </div>,
         15
@@ -80,7 +95,7 @@ class RegisterPerformer extends PureComponent<IProps> {
     if (!resp?.credential) {
       return;
     }
-    const { loginSocial: handleLogin } = this.props;
+    const { loginSocial: handleLogin, intl } = this.props;
     const payload = { tokenId: resp.credential, role: 'performer' };
     try {
       await this.setState({ isLoading: true });
@@ -88,7 +103,14 @@ class RegisterPerformer extends PureComponent<IProps> {
       response.token && handleLogin({ token: response.token });
     } catch (e) {
       const error = await e;
-      message.error(error && error.message ? error.message : 'Google login authenticated fail');
+      message.error(
+        error && error.message
+          ? error.message
+          : `${intl.formatMessage({
+            id: 'googleLoginAuthenticatedFail',
+            defaultMessage: 'Google login authenticated fail'
+          })}`
+      );
     } finally {
       this.setState({ isLoading: false });
     }
@@ -96,9 +118,14 @@ class RegisterPerformer extends PureComponent<IProps> {
 
   register = (values: any) => {
     const data = values;
-    const { registerPerformer: registerPerformerHandler } = this.props;
+    const { registerPerformer: registerPerformerHandler, intl } = this.props;
     if (!this.idVerificationFile || !this.documentVerificationFile) {
-      return message.error('ID documents are required!');
+      return message.error(
+        intl.formatMessage({
+          id: 'idDocumentsAreRequired',
+          defaultMessage: 'ID documents are required!'
+        })
+      );
     }
     data.idVerificationFile = this.idVerificationFile;
     data.documentVerificationFile = this.documentVerificationFile;
@@ -106,19 +133,29 @@ class RegisterPerformer extends PureComponent<IProps> {
   };
 
   async loginTwitter() {
+    const { intl } = this.props;
     try {
       await this.setState({ isLoading: true });
       const resp = await (await authService.loginTwitter()).data;
       if (resp && resp.url) {
         authService.setTwitterToken(
-          { oauthToken: resp.oauthToken, oauthTokenSecret: resp.oauthTokenSecret },
+          {
+            oauthToken: resp.oauthToken,
+            oauthTokenSecret: resp.oauthTokenSecret
+          },
           'performer'
         );
         window.location.href = resp.url;
       }
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Something went wrong, please try again later');
+      message.error(
+        error?.message
+          || `${intl.formatMessage({
+            id: 'somethingWentWrong',
+            defaultMessage: 'Something went wrong, please try again!'
+          })}`
+      );
     } finally {
       this.setState({ isLoading: false });
     }
@@ -126,7 +163,11 @@ class RegisterPerformer extends PureComponent<IProps> {
 
   render() {
     const {
-      registerPerformerData = { requesting: false }, ui, settings, countries
+      registerPerformerData = { requesting: false },
+      ui,
+      settings,
+      countries,
+      intl
     } = this.props;
     const { isLoading } = this.state;
     return (
@@ -135,16 +176,32 @@ class RegisterPerformer extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Model Sign Up
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'modelSignUp',
+              defaultMessage: 'Model Sign Up'
+            })}
           </title>
         </Head>
         <div className="main-container">
           <div className="login-box register-box">
             <div className="text-center">
-              <span className="title">Model Sign Up</span>
+              <span className="title">
+                {intl.formatMessage({
+                  id: 'modelSignUp',
+                  defaultMessage: 'Model Sign Up'
+                })}
+              </span>
             </div>
             <p className="text-center">
-              <small>Sign up to make money and interact with your fans!</small>
+              <small>
+                {intl.formatMessage({
+                  id: 'signUpToMakeMoneyAndInteractWithYourFans',
+                  defaultMessage:
+                    'Sign up to make money and interact with your fans!'
+                })}
+              </small>
             </p>
             <div className="social-login">
               <button
@@ -155,7 +212,10 @@ class RegisterPerformer extends PureComponent<IProps> {
               >
                 <TwitterOutlined />
                 {' '}
-                SIGN UP WITH TWITTER
+                {intl.formatMessage({
+                  id: 'signUpWithTwitterCase',
+                  defaultMessage: 'SIGN UP WITH TWITTER'
+                })}
               </button>
               <GoogleLoginButton
                 clientId={settings.googleClientId}
@@ -163,7 +223,9 @@ class RegisterPerformer extends PureComponent<IProps> {
                 onFailure={this.onGoogleLogin.bind(this)}
               />
             </div>
-            <Divider>Or</Divider>
+            <Divider>
+              {intl.formatMessage({ id: 'or', defaultMessage: 'or' })}
+            </Divider>
             <Form
               name="member_register"
               initialValues={{
@@ -182,16 +244,31 @@ class RegisterPerformer extends PureComponent<IProps> {
                         name="firstName"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
-                          { required: true, message: 'Please input your name!' },
+                          {
+                            required: true,
+                            message: `${intl.formatMessage({
+                              id: 'inputName',
+                              defaultMessage: 'Please input your name!'
+                            })}`
+                          },
                           {
                             pattern: new RegExp(
                               /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                             ),
-                            message: 'First name can not contain number and special character'
+                            message: `${intl.formatMessage({
+                              id: 'firstNameCanNotContain',
+                              defaultMessage:
+                                'First name can not contain number and special character'
+                            })}`
                           }
                         ]}
                       >
-                        <Input placeholder="First name" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'firstName',
+                            defaultMessage: 'First name'
+                          })}
+                        />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -199,16 +276,31 @@ class RegisterPerformer extends PureComponent<IProps> {
                         name="lastName"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
-                          { required: true, message: 'Please input your name!' },
+                          {
+                            required: true,
+                            message: `${intl.formatMessage({
+                              id: 'inputName',
+                              defaultMessage: 'Please input your name!'
+                            })}`
+                          },
                           {
                             pattern: new RegExp(
                               /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
                             ),
-                            message: 'Last name can not contain number and special character'
+                            message: `${intl.formatMessage({
+                              id: 'lastNameCanNotContain',
+                              defaultMessage:
+                                'Last name can not contain number and special character'
+                            })}`
                           }
                         ]}
                       >
-                        <Input placeholder="Last name" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'lastName',
+                            defaultMessage: 'Last name'
+                          })}
+                        />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -216,18 +308,34 @@ class RegisterPerformer extends PureComponent<IProps> {
                         name="name"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
-                          { required: true, message: 'Please input your display name!' },
+                          {
+                            required: true,
+                            message: 'Please input your display name!'
+                          },
                           {
                             pattern: new RegExp(/^(?=.*\S).+$/g),
-                            message: 'Display name can not contain only whitespace'
+                            message: `${intl.formatMessage({
+                              id: 'displayNameCannotContain',
+                              defaultMessage:
+                                'Display name can not contain only whitespace'
+                            })}`
                           },
                           {
                             min: 3,
-                            message: 'Display name must containt at least 3 characters'
+                            message: `${intl.formatMessage({
+                              id: 'displayNameContainAtLeastThreeCharacters',
+                              defaultMessage:
+                                'Display name must containt at least 3 characters'
+                            })}`
                           }
                         ]}
                       >
-                        <Input placeholder="Display name" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'displayName',
+                            defaultMessage: 'Display name'
+                          })}
+                        />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -235,15 +343,37 @@ class RegisterPerformer extends PureComponent<IProps> {
                         name="username"
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
-                          { required: true, message: 'Please input your username!' },
+                          {
+                            required: true,
+                            message: `${intl.formatMessage({
+                              id: 'pleaseInputYourUsername',
+                              defaultMessage: 'Please input your username!'
+                            })}`
+                          },
                           {
                             pattern: new RegExp(/^[a-z0-9]+$/g),
-                            message: 'Username must contain only lowercase alphanumerics only!'
+                            message: `${intl.formatMessage({
+                              id: 'usernameMustContainOnlyLowercaseAlphanumericsOnly',
+                              defaultMessage:
+                                'Username must contain only lowercase alphanumerics only!'
+                            })}`
                           },
-                          { min: 3, message: 'username must containt at least 3 characters' }
+                          {
+                            min: 3,
+                            message:
+                              intl.formatMessage({
+                                id: 'usernameMustContaintAtLeast3Characters',
+                                defaultMessage: 'Username must containt at least 3 characters'
+                              })
+                          }
                         ]}
                       >
-                        <Input placeholder="Username" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'username',
+                            defaultMessage: 'Username'
+                          })}
+                        />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -254,15 +384,27 @@ class RegisterPerformer extends PureComponent<IProps> {
                         rules={[
                           {
                             type: 'email',
-                            message: 'The input is not valid E-mail!'
+                            message: `${intl.formatMessage({
+                              id: 'invalidEmailAddress',
+                              defaultMessage: 'Invalid email address!'
+                            })}`
                           },
                           {
                             required: true,
-                            message: 'Please input your E-mail!'
+                            message: `${intl.formatMessage({
+                              id: 'inputEmailAddress',
+                              defaultMessage:
+                                'Please input your email address!'
+                            })}`
                           }
                         ]}
                       >
-                        <Input placeholder="Email address" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'emailAddress',
+                            defaultMessage: 'Email address'
+                          })}
+                        />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -272,13 +414,21 @@ class RegisterPerformer extends PureComponent<IProps> {
                         rules={[
                           {
                             required: true,
-                            message: 'Select your date of birth'
+                            message: `${intl.formatMessage({
+                              id: 'selectDateOfBirth',
+                              defaultMessage: 'Select your date of birth!'
+                            })}`
                           }
                         ]}
                       >
                         <DatePicker
-                          placeholder="Date of Birth"
-                          disabledDate={(currentDate) => currentDate && currentDate > moment().subtract(18, 'year').endOf('day')}
+                          placeholder={intl.formatMessage({
+                            id: 'dateOfBirth',
+                            defaultMessage: 'Date of Birth'
+                          })}
+                          disabledDate={(currentDate) => currentDate
+                            && currentDate
+                              > moment().subtract(18, 'year').endOf('day')}
                         />
                       </Form.Item>
                     </Col>
@@ -287,9 +437,13 @@ class RegisterPerformer extends PureComponent<IProps> {
                         <Select showSearch optionFilterProp="label">
                           {countries.map((c) => (
                             <Option value={c.code} key={c.code} label={c.name}>
-                              <img alt="country_flag" src={c.flag} width="25px" />
+                              <img
+                                alt="country_flag"
+                                src={c.flag}
+                                width="25px"
+                              />
                               {' '}
-                              {c.name}
+                              {intl.formatMessage({ id: c.code, defaultMessage: c.name })}
                             </Option>
                           ))}
                         </Select>
@@ -299,17 +453,31 @@ class RegisterPerformer extends PureComponent<IProps> {
                       <Form.Item
                         name="gender"
                         validateTrigger={['onChange', 'onBlur']}
-                        rules={[{ required: true, message: 'Please select your gender' }]}
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select your gender'
+                          }
+                        ]}
                       >
                         <Select>
                           <Option value="male" key="male">
-                            Male
+                            {intl.formatMessage({
+                              id: 'male',
+                              defaultMessage: 'Male'
+                            })}
                           </Option>
                           <Option value="female" key="female">
-                            Female
+                            {intl.formatMessage({
+                              id: 'female',
+                              defaultMessage: 'Female'
+                            })}
                           </Option>
                           <Option value="transgender" key="trans">
-                            Trans
+                            {intl.formatMessage({
+                              id: 'transgender',
+                              defaultMessage: 'Transgender'
+                            })}
                           </Option>
                         </Select>
                       </Form.Item>
@@ -320,14 +488,30 @@ class RegisterPerformer extends PureComponent<IProps> {
                         validateTrigger={['onChange', 'onBlur']}
                         rules={[
                           {
-                            pattern: new RegExp(/^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g),
-                            message:
-                              'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                            pattern: new RegExp(
+                              /^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[^\w\d]).*$/g
+                            ),
+                            message: `${intl.formatMessage({
+                              id: 'passwordPattern',
+                              defaultMessage:
+                                'Password must have minimum 8 characters, at least 1 number, 1 uppercase letter, 1 lowercase letter & 1 special character'
+                            })}`
                           },
-                          { required: true, message: 'Please input your password!' }
+                          {
+                            required: true,
+                            message: `${intl.formatMessage({
+                              id: 'inputPassword',
+                              defaultMessage: 'Please enter your password!'
+                            })}`
+                          }
                         ]}
                       >
-                        <Input.Password placeholder="Password" />
+                        <Input.Password
+                          placeholder={intl.formatMessage({
+                            id: 'password',
+                            defaultMessage: 'Password'
+                          })}
+                        />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -338,19 +522,37 @@ class RegisterPerformer extends PureComponent<IProps> {
                         rules={[
                           {
                             required: true,
-                            message: 'Please enter confirm password!'
+                            message: `${intl.formatMessage({
+                              id: 'inputPasswordConfirm',
+                              defaultMessage: 'Please enter confirm password!'
+                            })}`
                           },
                           ({ getFieldValue }) => ({
                             validator(rule, value) {
-                              if (!value || getFieldValue('password') === value) {
+                              if (
+                                !value
+                                || getFieldValue('password') === value
+                              ) {
                                 return Promise.resolve();
                               }
-                              return Promise.reject('Passwords do not match together!');
+                              return Promise.reject(
+                                intl.formatMessage({
+                                  id: 'passwordsDoNotMatchTogether',
+                                  defaultMessage:
+                                    'Passwords do not match together!'
+                                })
+                              );
                             }
                           })
                         ]}
                       >
-                        <Input type="password" placeholder="Confirm password" />
+                        <Input
+                          type="password"
+                          placeholder={intl.formatMessage({
+                            id: 'passwordConfirm',
+                            defaultMessage: 'Confirm password'
+                          })}
+                        />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -361,22 +563,42 @@ class RegisterPerformer extends PureComponent<IProps> {
                       labelCol={{ span: 24 }}
                       name="idVerificationId"
                       className="model-photo-verification"
-                      help="Your government issued ID card, National ID card, Passport or Driving license"
+                      help={intl.formatMessage({
+                        id: 'idCardUpload',
+                        defaultMessage:
+                          'Your government issued ID card, National ID card, Passport or Driving license'
+                      })}
                     >
                       <div className="id-block">
-                        <ImageUploadModel onFileReaded={(f) => this.onFileReaded(f, 'idFile')} />
-                        <img alt="id-img" className="img-id" src="/static/front-id.png" />
+                        <ImageUploadModel
+                          onFileReaded={(f) => this.onFileReaded(f, 'idFile')}
+                        />
+                        <img
+                          alt="id-img"
+                          className="img-id"
+                          src="/static/front-id.png"
+                        />
                       </div>
                     </Form.Item>
                     <Form.Item
                       labelCol={{ span: 24 }}
                       name="documentVerificationId"
                       className="model-photo-verification"
-                      help="Your selfie with your ID and handwritten note"
+                      help={intl.formatMessage({
+                        id: 'selfieImageUpload',
+                        defaultMessage:
+                          'Your selfie with your ID and handwritten note'
+                      })}
                     >
                       <div className="id-block">
-                        <ImageUploadModel onFileReaded={(f) => this.onFileReaded(f, 'documentFile')} />
-                        <img alt="holdinh-img" className="img-id" src="/static/holding-id.jpg" />
+                        <ImageUploadModel
+                          onFileReaded={(f) => this.onFileReaded(f, 'documentFile')}
+                        />
+                        <img
+                          alt="holdinh-img"
+                          className="img-id"
+                          src="/static/holding-id.jpg"
+                        />
                       </div>
                     </Form.Item>
                   </div>
@@ -391,32 +613,71 @@ class RegisterPerformer extends PureComponent<IProps> {
                   className="login-form-button"
                   style={{ maxWidth: 300 }}
                 >
-                  CREATE YOUR ACCOUNT
+                  {intl.formatMessage({
+                    id: 'createYourAccountCase',
+                    defaultMessage: 'CREATE YOUR ACCOUNT'
+                  })}
                 </Button>
                 <p>
-                  By signing up you agree to our
+                  {intl.formatMessage({
+                    id: 'bySigningUpYouAgreeToOur',
+                    defaultMessage: 'By signing up you agree to our'
+                  })}
                   {' '}
                   <a href="/page/term-of-service" target="_blank">
-                    Terms of Service
+                    {intl.formatMessage({
+                      id: 'termsOfService',
+                      defaultMessage: 'Terms of Service'
+                    })}
                   </a>
                   {' '}
-                  and
+                  {intl.formatMessage({
+                    id: 'and',
+                    defaultMessage: 'and'
+                  })}
                   {' '}
                   <a href="/page/privacy-policy" target="_blank">
-                    Privacy Policy
+                    {intl.formatMessage({
+                      id: 'privacyPolicy',
+                      defaultMessage: 'Privacy Policy'
+                    })}
                   </a>
-                  , and confirm that you are at least 18 years old.
+                  ,
+                  {' '}
+                  {intl.formatMessage({
+                    id: 'andConfirmThatYouAreAtLeastEighteenYearsOld',
+                    defaultMessage:
+                      'and confirm that you are at least 18 years old.'
+                  })}
                 </p>
                 <p>
-                  Have an account already?
+                  {intl.formatMessage({
+                    id: 'haveAccountAlready',
+                    defaultMessage: 'Have an account already?'
+                  })}
                   <Link href="/auth/login">
-                    <a> Log in here.</a>
+                    <a>
+                      {' '}
+                      {intl.formatMessage({
+                        id: 'logInHere',
+                        defaultMessage: 'Log in here.'
+                      })}
+                    </a>
                   </Link>
                 </p>
                 <p>
-                  Are you a fan?
+                  {intl.formatMessage({
+                    id: 'areYouAFan',
+                    defaultMessage: 'Are you a fan?'
+                  })}
                   <Link href="/auth/fan-register">
-                    <a> Sign up here.</a>
+                    <a>
+                      {' '}
+                      {intl.formatMessage({
+                        id: 'signUpHere',
+                        defaultMessage: 'Sign Up Here.'
+                      })}
+                    </a>
                   </Link>
                 </p>
               </Form.Item>
@@ -436,4 +697,6 @@ const mapStatesToProps = (state: any) => ({
 
 const mapDispatchToProps = { registerPerformer, loginSocial };
 
-export default connect(mapStatesToProps, mapDispatchToProps)(RegisterPerformer);
+export default injectIntl(
+  connect(mapStatesToProps, mapDispatchToProps)(RegisterPerformer)
+);

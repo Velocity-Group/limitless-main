@@ -7,6 +7,7 @@ import {
 } from '@ant-design/icons';
 import { debounce } from 'lodash';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const { RangePicker } = DatePicker;
 
@@ -16,9 +17,10 @@ interface IProps {
   handleSearch: Function;
   handleViewGrid?: Function;
   tab: string;
+  intl: IntlShape
 }
 
-export default class SearchFeedBar extends PureComponent<IProps> {
+class SearchFeedBar extends PureComponent<IProps> {
   state = {
     q: '',
     isGrid: false,
@@ -62,13 +64,19 @@ export default class SearchFeedBar extends PureComponent<IProps> {
     const {
       q, isGrid, showSearch, showCalendar
     } = this.state;
-    const { searching, tab } = this.props;
+    const { searching, tab, intl } = this.props;
     return (
       <div className="search-post-bar">
-        {showCalendar && <RangePicker onChange={this.searchDateRange.bind(this)} />}
+        {showCalendar && (
+        <RangePicker
+          onChange={this.searchDateRange.bind(this)}
+          placeholder={[intl.formatMessage({ id: 'startDate', defaultMessage: 'Start Date' }),
+            intl.formatMessage({ id: 'endDate', defaultMessage: 'End Date' })]}
+        />
+        )}
         {showSearch && (
         <Search
-          placeholder="Enter keyword here..."
+          placeholder={`${intl.formatMessage({ id: 'enterKeyword', defaultMessage: 'Enter keyword' })}...`}
           onChange={(e) => {
             e.persist();
             this.setState({ q: e?.target?.value || '' });
@@ -90,3 +98,5 @@ export default class SearchFeedBar extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(SearchFeedBar);

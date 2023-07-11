@@ -32,11 +32,12 @@ import {
   resetStreamMessage
 } from '@redux/stream-chat/actions';
 import { getResponseError, videoDuration } from '@lib/index';
-import { PurchaseStreamForm } from '@components/streaming/confirm-purchase';
-import { TipPerformerForm } from '@components/performer';
+import PurchaseStreamForm from '@components/streaming/confirm-purchase';
+import TipPerformerForm from '@components/performer/tip-form';
 import dynamic from 'next/dynamic';
 import '../model/live/index.less';
 import { SubscriberProps } from '@components/streaming/agora/subscriber';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const AgoraProvider = dynamic(() => import('src/agora/AgoraProvider'), {
   ssr: false
@@ -68,6 +69,7 @@ interface IProps {
   performer: IPerformer;
   stream: IStream;
   settings: StreamSettings;
+  intl: IntlShape;
 }
 
 class LivePage extends PureComponent<IProps> {
@@ -115,13 +117,19 @@ class LivePage extends PureComponent<IProps> {
   };
 
   componentDidMount() {
-    const { performer, user } = this.props;
+    const { performer, user, intl } = this.props;
     if (!performer || user.isPerformer) {
       Router.back();
       return;
     }
     if (!performer.isSubscribed) {
-      message.error('Please subscribe to join live chat!', 5);
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseSubscribeToJoinLiveChat',
+          defaultMessage: 'Please subscribe to join live chat!'
+        }),
+        5
+      );
       Router.push(
         {
           pathname: '/model/profile',
@@ -176,12 +184,16 @@ class LivePage extends PureComponent<IProps> {
   }
 
   async purchaseStream() {
-    const { stream: activeStream } = this.props;
+    const { stream: activeStream, intl } = this.props;
     const { user, updateBalance: handleUpdateBalance } = this.props;
     if (activeStream.isFree || !activeStream.sessionId) return;
     if (user.balance < activeStream.price) {
       message.error(
-        'You have an insufficient wallet balance. Please top up.',
+        intl.formatMessage({
+          id: 'youHaveAnInsufficientWalletBalancePleaseTopUp',
+          defaultMessage:
+            'You have an insufficient wallet balance. Please top up.'
+        }),
         10
       );
       Router.push('/wallet');
@@ -194,7 +206,13 @@ class LivePage extends PureComponent<IProps> {
       await this.joinConversation(true);
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Error occured, please try again later');
+      message.error(
+        error?.message
+        || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
     } finally {
       this.setState({ submiting: false });
     }
@@ -239,7 +257,8 @@ class LivePage extends PureComponent<IProps> {
       performer,
       getStreamConversationSuccess: dispatchGetStreamConversationSuccess,
       getStreamConversation: dispatchGetStreamConversation,
-      stream
+      stream,
+      intl
     } = this.props;
 
     const socket = this.context;
@@ -265,7 +284,12 @@ class LivePage extends PureComponent<IProps> {
             conversationId: conversation._id
           });
       } else {
-        message.info('No available stream. Try again later');
+        message.info(
+          intl.formatMessage({
+            id: 'noAvailableStream',
+            defaultMessage: 'No available stream. Try again later'
+          })
+        );
       }
     } catch (e) {
       const error = await Promise.resolve(e);
@@ -288,7 +312,7 @@ class LivePage extends PureComponent<IProps> {
   }
 
   modelLeftHandler({ conversationId, performerId }) {
-    const { performer, activeConversation } = this.props;
+    const { performer, activeConversation, intl } = this.props;
     if (
       activeConversation?.data?._id !== conversationId
       || performer?._id !== performerId
@@ -298,7 +322,13 @@ class LivePage extends PureComponent<IProps> {
 
     this.setState({ sessionDuration: 0 });
     this.streamDurationTimeOut && clearTimeout(this.streamDurationTimeOut);
-    message.info('Streaming session ended! Redirecting after 10s', 10);
+    message.info(
+      intl.formatMessage({
+        id: 'streamingSessionEnded',
+        defaultMessage: 'Streaming session ended! Redirecting after 10s'
+      }),
+      10
+    );
     setTimeout(() => {
       Router.push(
         {
@@ -315,11 +345,18 @@ class LivePage extends PureComponent<IProps> {
       performer,
       user,
       updateBalance: handleUpdateBalance,
-      activeConversation
+      activeConversation,
+      intl
     } = this.props;
     const { stream: activeStream } = this.props;
     if (user.balance < token) {
-      message.error('You have an insufficient wallet balance. Please top up.');
+      message.error(
+        intl.formatMessage({
+          id: 'youHaveAnInsufficientWalletBalancePleaseTopUp',
+          defaultMessage:
+            'You have an insufficient wallet balance. Please top up.'
+        })
+      );
       Router.push('/wallet');
       return;
     }
@@ -331,11 +368,22 @@ class LivePage extends PureComponent<IProps> {
         sessionId: activeStream?.sessionId,
         streamType: 'stream_public'
       });
-      message.success('Thank you for the tip!');
+      message.success(
+        intl.formatMessage({
+          id: 'thankYouForTheTip',
+          defaultMessage: 'Thank you for the tip'
+        })
+      );
       handleUpdateBalance({ token: -token });
     } catch (e) {
       const err = await e;
-      message.error(err.message || 'Error occured, please try again later');
+      message.error(
+        err.message
+        || intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
     } finally {
       this.setState({ submiting: false, openTipModal: false });
     }
@@ -343,7 +391,7 @@ class LivePage extends PureComponent<IProps> {
 
   render() {
     const {
-      performer, user, ui, stream: activeStream
+      performer, user, ui, stream: activeStream, intl
     } = this.props;
     const {
       total,
@@ -356,9 +404,16 @@ class LivePage extends PureComponent<IProps> {
       <Layout>
         <Head>
           <title>
-            {`${ui?.siteName || ''} | ${
-              performer?.name || performer?.username
-            } Broadcast`}
+            {ui?.siteName || ''}
+            {' '}
+            |
+            {' '}
+            {performer?.name || performer?.username}
+            {' '}
+            {intl.formatMessage({
+              id: 'broadcast',
+              defaultMessage: 'Broadcast'
+            })}
           </title>
         </Head>
         <Event
@@ -410,10 +465,10 @@ class LivePage extends PureComponent<IProps> {
                       <Card.Meta
                         title={
                           activeStream?.title
-                          || `${performer?.name || performer?.username} Live`
+                          || `${performer?.name || performer?.username} ${intl.formatMessage({ id: 'live', defaultMessage: 'Live' })}`
                         }
                         description={
-                          activeStream?.description || 'No description'
+                          activeStream?.description || intl.formatMessage({ id: 'noDescription', defaultMessage: 'No description' })
                         }
                       />
                     </Card>
@@ -433,7 +488,10 @@ class LivePage extends PureComponent<IProps> {
                           `/${performer?.username || performer?._id}`
                         )}
                       >
-                        Leave Chat
+                        {intl.formatMessage({
+                          id: 'leaveChat',
+                          defaultMessage: 'Leave Chat'
+                        })}
                       </Button>
                       <Button
                         block
@@ -441,7 +499,10 @@ class LivePage extends PureComponent<IProps> {
                         disabled={submiting}
                         onClick={() => this.setState({ openTipModal: true })}
                       >
-                        Send Tip
+                        {intl.formatMessage({
+                          id: 'sendTip',
+                          defaultMessage: 'Send Tip'
+                        })}
                       </Button>
                     </div>
                   </Col>
@@ -470,9 +531,7 @@ class LivePage extends PureComponent<IProps> {
             <Modal
               centered
               key="confirm_join_stream"
-              title={`Join ${
-                performer?.name || performer?.username || 'N/A'
-              } live chat`}
+              title={`Join ${performer?.name || performer?.username || 'N/A'} ${intl.formatMessage({ id: 'liveChat', defaultMessage: 'live chat' })}`}
               visible={openPurchaseModal}
               footer={null}
               destroyOnClose
@@ -509,4 +568,4 @@ const mapDispatch = {
   resetStreamMessage,
   getStreamConversation
 };
-export default connect(mapStateToProps, mapDispatch)(LivePage);
+export default injectIntl(connect(mapStateToProps, mapDispatch)(LivePage));

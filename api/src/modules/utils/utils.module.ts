@@ -6,6 +6,7 @@ import {
   PhoneCodeService,
   RecaptchaService,
   UserAdditionalInfoService,
+  LocaleService,
   StateService,
   CityService
 } from './services';
@@ -15,6 +16,7 @@ import {
   PhoneCodeController,
   UserAdditionalInfoController,
   RecaptchaController,
+  LocaleController,
   StateController,
   CityController
 } from './controllers';
@@ -35,12 +37,14 @@ import { AuthModule } from '../auth/auth.module';
     PhoneCodeController,
     UserAdditionalInfoController,
     RecaptchaController,
+    LocaleController,
     StateController,
     CityController
   ],
   providers: [
     CountryService, LanguageService, PhoneCodeService,
     UserAdditionalInfoService, RecaptchaService,
+    LocaleService,
     StateService, CityService
   ],
   exports: [CountryService, LanguageService, PhoneCodeService]

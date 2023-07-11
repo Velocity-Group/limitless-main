@@ -2,6 +2,7 @@ import { Upload, message } from 'antd';
 import { LoadingOutlined, CameraOutlined } from '@ant-design/icons';
 import { PureComponent } from 'react';
 import { getGlobalConfig } from '@services/config';
+import { injectIntl, IntlShape } from 'react-intl';
 
 function getBase64(img, callback) {
   const reader = new FileReader();
@@ -22,9 +23,10 @@ interface IProps {
   onUploaded?: Function;
   onFileReaded?: Function;
   options?: any;
+  intl:IntlShape
 }
 
-export class ImageUploadModel extends PureComponent<IProps, IState> {
+class ImageUploadModel extends PureComponent<IProps, IState> {
   state = {
     loading: false,
     imageUrl: ''
@@ -36,11 +38,12 @@ export class ImageUploadModel extends PureComponent<IProps, IState> {
   }
 
   beforeUpload(file) {
-    const { onFileReaded } = this.props;
+    const { onFileReaded, intl } = this.props;
     const config = getGlobalConfig();
     const isLt5M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 20);
     if (!isLt5M) {
-      message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 20}MB or below`);
+      message.error(`${intl.formatMessage({ id: 'imageIsTooLargePleaseProvideAnImage', defaultMessage: 'Image is too large please provide an image' })} ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 20}MB ${intl.formatMessage({ id: 'orBelow', defaultMessage: 'or below' })}`);
+
       return false;
     }
     getBase64(file, (imageUrl) => {
@@ -83,3 +86,5 @@ export class ImageUploadModel extends PureComponent<IProps, IState> {
     );
   }
 }
+
+export default injectIntl(ImageUploadModel);

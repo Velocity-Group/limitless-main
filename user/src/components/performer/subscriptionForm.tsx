@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import {
   Form, InputNumber, Button, Row, Col, Switch
 } from 'antd';
+import { injectIntl, IntlShape } from 'react-intl';
 import { IPerformer, ISettings } from 'src/interfaces';
 
 const layout = {
@@ -21,10 +22,11 @@ interface IProps {
   onFinish: Function;
   user: IPerformer;
   updating?: boolean;
+  intl: IntlShape;
   settings: ISettings;
 }
 
-export class PerformerSubscriptionForm extends PureComponent<IProps> {
+class PerformerSubscriptionForm extends PureComponent<IProps> {
   state = {
     isFreeSubscription: false
   }
@@ -36,7 +38,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
 
   render() {
     const {
-      onFinish, user, updating, settings
+      onFinish, user, updating, settings, intl
     } = this.props;
     const { isFreeSubscription } = this.state;
     return (
@@ -55,28 +57,28 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
         <Row>
           <Col xl={12} md={12} xs={24}>
             <Form.Item name="isFreeSubscription" valuePropName="checked">
-              <Switch unCheckedChildren="Paid Subscription" checkedChildren="Unpaid Subcription" onChange={(val) => this.setState({ isFreeSubscription: val })} />
+              <Switch unCheckedChildren={intl.formatMessage({ id: 'paidSubscription', defaultMessage: 'Paid Subscription' })} checkedChildren={intl.formatMessage({ id: 'unpaidSubscription', defaultMessage: 'Unpaid Subscription' })} onChange={(val) => this.setState({ isFreeSubscription: val })} />
             </Form.Item>
             {isFreeSubscription && (
-            <Form.Item
-              name="durationFreeSubscriptionDays"
-              label="Duration (days)"
-              help="Try free subscription for xx days"
-              rules={[{ required: true }]}
-            >
-              <InputNumber min={1} />
-            </Form.Item>
+              <Form.Item
+                name="durationFreeSubscriptionDays"
+                label={intl.formatMessage({ id: 'durationDays', defaultMessage: 'Duration (days)' })}
+                help={intl.formatMessage({ id: 'tryFreeSubscriptionForxxDays', defaultMessage: 'Try free subscription for xx days' })}
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={1} />
+              </Form.Item>
             )}
             <Form.Item
               name="monthlyPrice"
-              label="Monthly Subscription Price"
+              label={intl.formatMessage({ id: 'monthlySubscriptionPrice', defaultMessage: 'Monthly Subscription Price' })}
               rules={[{ required: true }]}
             >
               <InputNumber min={settings.paymentGateway === 'ccbill' ? 2.95 : 1} max={settings.paymentGateway === 'ccbill' ? 300 : 10000} />
             </Form.Item>
             <Form.Item
               name="yearlyPrice"
-              label="Yearly Subscription Price"
+              label={intl.formatMessage({ id: 'yearlySubscriptionPrice', defaultMessage: 'Yearly Subscription Price ($)' })}
               rules={[{ required: true }]}
             >
               <InputNumber min={settings.paymentGateway === 'ccbill' ? 2.95 : 1} max={settings.paymentGateway === 'ccbill' ? 300 : 10000} />
@@ -84,7 +86,7 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
             <Form.Item
               key="publicChatPrice"
               name="publicChatPrice"
-              label="Default Streaming Price"
+              label={intl.formatMessage({ id: 'defaultStreamingPrice', defaultMessage: 'Default Streaming Price' })}
               rules={[{ required: true }]}
             >
               <InputNumber min={1} max={10000} />
@@ -93,10 +95,12 @@ export class PerformerSubscriptionForm extends PureComponent<IProps> {
         </Row>
         <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 4 }}>
           <Button className="primary" type="primary" htmlType="submit" disabled={updating} loading={updating}>
-            Save Changes
+            {intl.formatMessage({ id: 'saveChanges', defaultMessage: 'Save Changes' })}
           </Button>
         </Form.Item>
       </Form>
     );
   }
 }
+
+export default injectIntl(PerformerSubscriptionForm);

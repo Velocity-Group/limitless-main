@@ -10,6 +10,7 @@ import {
 } from './controllers';
 import { UserModule } from '../user/user.module';
 import { FileModule } from '../file/file.module';
+import { TranslationModule } from '../translation/translation.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { FileModule } from '../file/file.module';
     // inject user module because we request guard from auth, need to check and fix dependencies if not needed later
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
-    forwardRef(() => FileModule)
+    forwardRef(() => FileModule),
+    forwardRef(() => TranslationModule)
   ],
   providers: [
     ...postProviders,

@@ -4,14 +4,16 @@ import { message, Layout } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { orderService } from '@services/index';
-import { OrderSearchFilter } from '@components/order';
+import OrderSearchFilter from '@components/order/search-filter';
 import OrderTableList from '@components/order/table-list';
 import { connect } from 'react-redux';
 import { IUIConfig, IUser } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   user: IUser;
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 class ModelOrderPage extends PureComponent<IProps> {
@@ -61,6 +63,7 @@ class ModelOrderPage extends PureComponent<IProps> {
   }
 
   async search(page = 1) {
+    const { intl } = this.props;
     try {
       const {
         filter, limit, sort, sortBy, pagination
@@ -83,14 +86,19 @@ class ModelOrderPage extends PureComponent<IProps> {
         }
       });
     } catch (e) {
-      message.error('An error occurred, please try again!');
+      message.error(
+        intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
       this.setState({ searching: false });
     }
   }
 
   render() {
     const { list, searching, pagination } = this.state;
-    const { ui, user } = this.props;
+    const { ui, user, intl } = this.props;
 
     return (
       <Layout>
@@ -98,14 +106,23 @@ class ModelOrderPage extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | My Orders
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'myOrders',
+              defaultMessage: 'My Orders'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="My Orders" icon={<ShoppingCartOutlined />} />
-          <OrderSearchFilter
-            onSubmit={this.handleFilter.bind(this)}
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'myOrders',
+              defaultMessage: 'My Orders'
+            })}
+            icon={<ShoppingCartOutlined />}
           />
+          <OrderSearchFilter onSubmit={this.handleFilter.bind(this)} />
           <OrderTableList
             user={user}
             dataSource={list}
@@ -124,4 +141,4 @@ const mapStates = (state: any) => ({
   ui: state.ui,
   user: state.user.current
 });
-export default connect(mapStates)(ModelOrderPage);
+export default injectIntl(connect(mapStates)(ModelOrderPage));

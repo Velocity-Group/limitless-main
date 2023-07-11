@@ -7,6 +7,7 @@ import { dobToAge, shortenLargeNumber } from '@lib/index';
 import { connect } from 'react-redux';
 import { message, Tooltip } from 'antd';
 import Router from 'next/router';
+import { injectIntl, IntlShape } from 'react-intl';
 import { followService } from 'src/services';
 import './performer.less';
 
@@ -14,6 +15,8 @@ interface IProps {
   performer: IPerformer;
   user: IUser;
   countries: ICountry[];
+  intl: IntlShape
+
 }
 
 class PerformerGridCard extends PureComponent<IProps> {
@@ -28,10 +31,10 @@ class PerformerGridCard extends PureComponent<IProps> {
   }
 
   handleFollow = async () => {
-    const { performer, user } = this.props;
+    const { performer, user, intl } = this.props;
     const { isFollowed, requesting } = this.state;
     if (!user._id) {
-      message.error('Please log in or register!');
+      message.error(intl.formatMessage({ id: 'pleaseLogInOrRegister', defaultMessage: 'Please log in or register!' }));
       return;
     }
     if (requesting || user.isPerformer) return;
@@ -46,21 +49,22 @@ class PerformerGridCard extends PureComponent<IProps> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(error.message || intl.formatMessage({ id: 'errorOccuredPleaseTryAgainLater', defaultMessage: 'Error occured, please try again later' }));
       this.setState({ requesting: false });
     }
   }
 
   handleJoinStream = (e) => {
+    const { intl } = this.props;
     e.preventDefault();
     const { user, performer } = this.props;
     if (!user._id) {
-      message.error('Please log in or register!');
+      message.error(intl.formatMessage({ id: 'pleaseLoginOrRegister', defaultMessage: 'Please login or register!' }));
       return;
     }
     if (user.isPerformer) return;
     if (!performer?.isSubscribed) {
-      message.error('Please subscribe to this model!');
+      message.error(intl.formatMessage({ id: 'pleaseSubscribeToThisModel', defaultMessage: 'Please subscribe to this model!' }));
       return;
     }
     Router.push({
@@ -73,7 +77,9 @@ class PerformerGridCard extends PureComponent<IProps> {
   }
 
   render() {
-    const { performer, user, countries } = this.props;
+    const {
+      performer, user, countries, intl
+    } = this.props;
     const { isFollowed } = this.state;
     const country = countries && countries.length && countries.find((c) => c.code === performer.country);
 
@@ -81,10 +87,16 @@ class PerformerGridCard extends PureComponent<IProps> {
       <div className="grid-card" style={{ backgroundImage: `url(${performer?.avatar || '/static/no-avatar.png'})` }}>
         {/* {performer?.isFreeSubscription && <span className="free-status">Free</span>} */}
         <span className={performer?.isOnline > 0 ? 'online-status active' : 'online-status'} />
-        {performer?.live > 0 && <div className="live-status">Live</div>}
+        {performer?.live > 0 && (
+        <div className="live-status">
+          {intl.formatMessage({
+            id: 'live', defaultMessage: 'Live'
+          })}
+        </div>
+        )}
         {!user?.isPerformer && (
         <a aria-hidden onClick={() => this.handleFollow()} className={!isFollowed ? 'follow-btn' : 'follow-btn active'}>
-          {isFollowed ? <Tooltip title="Following"><HeartFilled /></Tooltip> : <Tooltip title="Follow"><HeartOutlined /></Tooltip>}
+          {isFollowed ? <Tooltip title={intl.formatMessage({ id: 'following', defaultMessage: 'Following' })}><HeartFilled /></Tooltip> : <Tooltip title={intl.formatMessage({ id: 'follow', defaultMessage: 'Follow' })}><HeartOutlined /></Tooltip>}
         </a>
         )}
         <div className="card-stat">
@@ -123,4 +135,4 @@ class PerformerGridCard extends PureComponent<IProps> {
 }
 
 const maptStateToProps = (state) => ({ user: { ...state.user.current } });
-export default connect(maptStateToProps)(PerformerGridCard);
+export default injectIntl(connect(maptStateToProps)(PerformerGridCard));

@@ -5,6 +5,7 @@ import {
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
+import { injectIntl, IntlShape } from 'react-intl';
 import { ThumbnailVideo } from './thumbnail-video';
 
 interface IProps {
@@ -14,9 +15,10 @@ interface IProps {
   pagination: {};
   onChange: Function;
   onDelete: Function;
+  intl: IntlShape
 }
 
-export class TableListVideo extends PureComponent<IProps> {
+class TableListVideo extends PureComponent<IProps> {
   render() {
     const {
       dataSource,
@@ -24,11 +26,12 @@ export class TableListVideo extends PureComponent<IProps> {
       loading,
       pagination,
       onChange,
-      onDelete
+      onDelete,
+      intl
     } = this.props;
     const columns = [
       {
-        title: 'Thumbnail',
+        title: intl.formatMessage({ id: 'thumbnail', defaultMessage: 'Thumbnail' }),
         render(record: any) {
           return (
             <Link href={{ pathname: '/video', query: { id: record.slug || record._id } }} as={`/video/${record.slug || record._id}`}><a><ThumbnailVideo video={record} /></a></Link>
@@ -36,7 +39,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Title',
+        title: intl.formatMessage({ id: 'title', defaultMessage: 'Title' }),
         dataIndex: 'title',
         render(title: string, record: any) {
           return (
@@ -54,7 +57,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Sale?',
+        title: `${intl.formatMessage({ id: 'sale', defaultMessage: 'Sale' })}?`,
         dataIndex: 'isSale',
         render(isSale: boolean) {
           switch (isSale) {
@@ -67,7 +70,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Schedule?',
+        title: `${intl.formatMessage({ id: 'schedule', defaultMessage: 'Schedule' })}?`,
         dataIndex: 'isSchedule',
         render(isSchedule: boolean) {
           switch (isSchedule) {
@@ -80,21 +83,21 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Status',
+        title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
         dataIndex: 'status',
         render(status: string) {
           switch (status) {
             case 'active':
-              return <Tag color="success">Active</Tag>;
+              return <Tag color="success">{intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}</Tag>;
             case 'inactive':
-              return <Tag color="orange">Inactive</Tag>;
+              return <Tag color="orange">{intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}</Tag>;
             default:
               return <Tag color="red">{status}</Tag>;
           }
         }
       },
       {
-        title: 'Updated On',
+        title: intl.formatMessage({ id: 'updatedOn', defaultMessage: 'Updated On' }),
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -102,7 +105,7 @@ export class TableListVideo extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Action',
+        title: intl.formatMessage({ id: 'action', defaultMessage: 'Action' }),
         dataIndex: '_id',
         render: (id: string) => (
           <div style={{ whiteSpace: 'nowrap' }}>
@@ -141,3 +144,5 @@ export class TableListVideo extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(TableListVideo);

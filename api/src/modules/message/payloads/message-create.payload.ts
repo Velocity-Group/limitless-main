@@ -31,3 +31,16 @@ export class MessageCreatePayload {
   @IsOptional()
   fileIds: string[];
 }
+
+export class MassMessagesToSubscribersCreatePayload {
+  @ApiProperty()
+  @ValidateIf((o) => o.type === MESSAGE_TYPE.TEXT)
+  @IsNotEmpty()
+  @IsString()
+  text: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  subscriptionType: string;
+}

@@ -6,16 +6,18 @@ import { ModelIcon } from 'src/icons';
 import { connect } from 'react-redux';
 import PerformerGridCard from '@components/performer/grid-card';
 import Head from 'next/head';
-import { PerformerAdvancedFilter } from '@components/common/base/performer-advanced-filter';
+import PerformerAdvancedFilter from '@components/common/base/performer-advanced-filter';
 import PageHeading from '@components/common/page-heading';
 import { IUIConfig } from 'src/interfaces/';
 import { performerService, utilsService } from 'src/services';
 import '@components/performer/performer.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   countries: any;
   bodyInfo: any;
+  intl: IntlShape;
 }
 
 class Performers extends PureComponent<IProps> {
@@ -56,9 +58,8 @@ class Performers extends PureComponent<IProps> {
   }
 
   async getPerformers() {
-    const {
-      limit, offset, filter
-    } = this.state;
+    const { intl } = this.props;
+    const { limit, offset, filter } = this.state;
     try {
       await this.setState({ fetching: true });
       const resp = await performerService.search({
@@ -66,9 +67,18 @@ class Performers extends PureComponent<IProps> {
         offset: limit * offset,
         ...filter
       });
-      this.setState({ performers: resp.data.data, total: resp.data.total, fetching: false });
+      this.setState({
+        performers: resp.data.data,
+        total: resp.data.total,
+        fetching: false
+      });
     } catch {
-      message.error('Error occured, please try again later');
+      message.error(
+        intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
       this.setState({ fetching: false });
     }
   }
@@ -76,11 +86,11 @@ class Performers extends PureComponent<IProps> {
   pageChanged = async (page: number) => {
     await this.setState({ offset: page - 1 });
     this.getPerformers();
-  }
+  };
 
   render() {
     const {
-      ui, countries, bodyInfo
+      ui, countries, bodyInfo, intl
     } = this.props;
     const {
       limit, offset, performers, fetching, total
@@ -92,11 +102,19 @@ class Performers extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Models
+            |
+            {' '}
+            {intl.formatMessage({ id: 'models', defaultMessage: 'Models' })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Models" icon={<ModelIcon />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'models',
+              defaultMessage: 'Models'
+            })}
+            icon={<ModelIcon />}
+          />
           <PerformerAdvancedFilter
             onSubmit={this.handleFilter.bind(this)}
             countries={countries}
@@ -109,7 +127,14 @@ class Performers extends PureComponent<IProps> {
               </Col>
             ))}
           </Row>
-          {!total && !fetching && <p className="text-center" style={{ margin: 20 }}>No profile was found</p>}
+          {!total && !fetching && (
+            <p className="text-center" style={{ margin: 20 }}>
+              {intl.formatMessage({
+                id: 'noProfileWasFound',
+                defaultMessage: 'No profile was found'
+              })}
+            </p>
+          )}
           {fetching && (
             <div className="text-center" style={{ margin: 30 }}>
               <Spin />
@@ -118,6 +143,10 @@ class Performers extends PureComponent<IProps> {
           {total && total > limit ? (
             <Pagination
               showQuickJumper
+              locale={{
+                jump_to: intl.formatMessage({ id: 'goTo', defaultMessage: 'Go to' }),
+                items_per_page: intl.formatMessage({ id: 'page', defaultMessage: 'page' })
+              }}
               defaultCurrent={offset + 1}
               total={total}
               pageSize={limit}
@@ -134,5 +163,4 @@ const mapStates = (state: any) => ({
   ui: { ...state.ui }
 });
 
-const mapDispatch = { };
-export default connect(mapStates, mapDispatch)(Performers);
+export default injectIntl(connect(mapStates)(Performers));

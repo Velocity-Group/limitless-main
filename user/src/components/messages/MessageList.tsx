@@ -7,6 +7,7 @@ import { loadMoreMessages, deactiveConversation } from '@redux/message/actions';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import Router from 'next/router';
+import { injectIntl, IntlShape } from 'react-intl';
 import Compose from './Compose';
 import Message from './Message';
 import './MessageList.less';
@@ -18,6 +19,7 @@ interface IProps {
   message: any;
   conversation: any;
   currentUser: any;
+  intl: IntlShape
 }
 
 class MessageList extends PureComponent<IProps> {
@@ -152,7 +154,7 @@ class MessageList extends PureComponent<IProps> {
   };
 
   render() {
-    const { conversation, message } = this.props;
+    const { conversation, message, intl } = this.props;
     const { fetching } = message;
     return (
       <div className="message-list" onScroll={this.handleScroll.bind(this)}>
@@ -176,18 +178,28 @@ class MessageList extends PureComponent<IProps> {
               <div className="message-list-container" ref={this.messagesRef as any}>
                 {fetching && <div className="text-center" style={{ margin: '30px 0' }}><Spin /></div>}
                 {this.renderMessages()}
-                {!fetching && !message.items.length && <p className="text-center" style={{ margin: '30px 0' }}>Let&apos;s talk</p>}
+                {!fetching && !message.items.length && <p className="text-center" style={{ margin: '30px 0' }}>{intl.formatMessage({ id: 'letsTalk', defaultMessage: 'Let\'s talk' })}</p>}
                 {!conversation.isSubscribed && (
                   <Link href={{ pathname: '/model/profile', query: { username: conversation?.recipientInfo?.username || conversation?.recipientInfo?._id } }} as={`/${conversation?.recipientInfo?.username || conversation?.recipientInfo?._id}`}>
-                    <div className="sub-text">Please subscribe to this model to start the conversation!</div>
+                    <div className="sub-text">
+                      {intl.formatMessage({ id: 'pleaseSubscribeToThisModelToStartTheConversation', defaultMessage: 'Please subscribe to this model to start the conversation!' })}
+                    </div>
                   </Link>
                 )}
-                {conversation.isBlocked && <div className="sub-text">This model has blocked you!</div>}
+                {conversation.isBlocked && (
+                <div className="sub-text">
+                  {intl.formatMessage({ id: 'thisModelHasBlockedYou', defaultMessage: 'This model has blocked you!' })}
+                </div>
+                )}
               </div>
               <Compose disabled={!conversation.isSubscribed || conversation.isBlocked} conversation={conversation} />
             </>
           )
-          : <p className="text-center" style={{ margin: '30px 0' }}>Click on conversation to start</p>}
+          : (
+            <p className="text-center" style={{ margin: '30px 0' }}>
+              {intl.formatMessage({ id: 'clickOnConversationToStart', defaultMessage: 'Click on conversation to start' })}
+            </p>
+          )}
       </div>
     );
   }
@@ -217,4 +229,4 @@ const mapStates = (state: any) => {
 };
 
 const mapDispatch = { loadMoreMessages, deactiveConversation };
-export default connect(mapStates, mapDispatch)(MessageList);
+export default injectIntl(connect(mapStates, mapDispatch)(MessageList));

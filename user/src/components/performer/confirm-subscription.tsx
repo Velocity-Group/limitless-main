@@ -18,6 +18,7 @@ import { setSubscription } from '@redux/subscription/actions';
 import Loader from '@components/common/base/loader';
 import { useStripe } from '@stripe/react-stripe-js';
 import { SocketContext } from 'src/socket';
+import { IntlShape, useIntl } from 'react-intl';
 
 interface IProps {
   subscriptionType: string;
@@ -33,16 +34,17 @@ function ConfirmSubscriptionPerformerForm() {
   const dispatch = useDispatch();
   const stripe = useStripe();
   const socket = useContext(SocketContext);
+  const intl: IntlShape = useIntl();
 
   const subscribe = async () => {
     try {
       if (!user._id) {
-        message.error('Please log in!');
+        message.error(intl.formatMessage({ id: 'pleaseLogin', defaultMessage: 'Please login!' }));
         Router.push('/auth/login');
         return;
       }
       if (paymentGateway === 'stripe' && !user.stripeCardIds.length) {
-        message.error('Please add a payment card');
+        message.error(intl.formatMessage({ id: 'pleaseAddAPaymentCard', defaultMessage: 'Please add a payment card!' }));
         Router.push('/user/cards');
         return;
       }
@@ -101,33 +103,33 @@ function ConfirmSubscriptionPerformerForm() {
           </div>
           <div className="right-col">
             <h2>
-              Subscribe
+              {intl.formatMessage({ id: 'subscribe', defaultMessage: 'Subscribe' })}
               {' '}
-              <span className="username">{`@${performer?.username}` || 'the model'}</span>
+              <span className="username">{`@${performer?.username}` || intl.formatMessage({ id: 'theModel', defaultMessage: 'the model' })}</span>
             </h2>
             {subscriptionType === 'monthly' && (
             <h3>
               <span className="price">{(performer?.monthlyPrice || 0).toFixed(2)}</span>
               {' '}
-              USD/month
+              {intl.formatMessage({ id: 'usdMonth', defaultMessage: 'USD/month' })}
             </h3>
             )}
             {subscriptionType === 'yearly' && (
             <h3>
               <span className="price">{(performer?.yearlyPrice || 0).toFixed(2)}</span>
               {' '}
-              USD/year
+              {intl.formatMessage({ id: 'usdYear', defaultMessage: 'USD/year' })}
             </h3>
             )}
             {subscriptionType === 'free' && (
             <h3>
-              <span className="price">FREE</span>
+              <span className="price" style={{ textTransform: 'uppercase' }}>{intl.formatMessage({ id: 'free', defaultMessage: 'Free' })}</span>
               {' '}
-              for
+              {intl.formatMessage({ id: 'for', defaultMessage: 'for' })}
               {' '}
               {performer?.durationFreeSubscriptionDays}
               {' '}
-              day
+              {intl.formatMessage({ id: 'day', defaultMessage: 'day' })}
               {performer?.durationFreeSubscriptionDays > 1 ? 's' : ''}
             </h3>
             )}
@@ -135,22 +137,22 @@ function ConfirmSubscriptionPerformerForm() {
               <li>
                 <CheckSquareOutlined />
                 {' '}
-                Full access to this model&apos;s exclusive content
+                {intl.formatMessage({ id: 'fullAccessToThisModelsContent', defaultMessage: 'Full access to this model\'s content' })}
               </li>
               <li>
                 <CheckSquareOutlined />
                 {' '}
-                Direct message with this model
+                {intl.formatMessage({ id: 'directMessageWithThisModel', defaultMessage: 'Direct message with this model' })}
               </li>
               <li>
                 <CheckSquareOutlined />
                 {' '}
-                Requested personalised Pay Per View content
+                {intl.formatMessage({ id: 'requestedPersonalisedPayPerViewContent', defaultMessage: 'Requested personalised Pay Per View conten' })}
               </li>
               <li>
                 <CheckSquareOutlined />
                 {' '}
-                Cancel your subscription at any time
+                {intl.formatMessage({ id: 'cancelYourSubscriptionAtAnyTime', defaultMessage: 'Cancel your subscription at any time' })}
               </li>
             </ul>
             <Button
@@ -158,14 +160,15 @@ function ConfirmSubscriptionPerformerForm() {
               disabled={submiting}
               loading={submiting}
               onClick={() => subscribe()}
+              style={{ textTransform: 'uppercase' }}
             >
-              SUBSCRIBE
+              {intl.formatMessage({ id: 'subscribe', defaultMessage: 'Subscribe' })}
             </Button>
-            <p className="sub-text">Clicking &quot;Subscribe&quot; will take you to the payment screen to finalize you subscription</p>
+            <p className="sub-text">{intl.formatMessage({ id: 'clickingSubscribeConfirmWillTakeYouToThePaymentScreenToFinalizeYouSubscription', defaultMessage: 'Clicking \'Subscribe\' Confirm will take you to the payment screen to finalize you subscription' })}</p>
           </div>
         </div>
       </Modal>
-      {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
+      {submiting && <Loader customText={intl.formatMessage({ id: 'weAreProcessingYourPayment', defaultMessage: 'We are processing your payment, please do not reload this page until it\'s done.' })} />}
     </>
   );
 }

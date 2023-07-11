@@ -32,6 +32,8 @@ import { OrderModule } from './modules/order/order.module';
 import { BlockModule } from './modules/block/block.module';
 import { ReportModule } from './modules/report/report.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { TranslationModule } from './modules/translation/translation.module';
+import { LanguageModule } from './modules/language/language.module';
 import { FollowModule } from './modules/follow/follow.module';
 
 @Module({
@@ -68,6 +70,8 @@ import { FollowModule } from './modules/follow/follow.module';
     OrderModule,
     BlockModule,
     ReportModule,
+    TranslationModule,
+    LanguageModule,
     FollowModule
   ],
   controllers: [AppController],

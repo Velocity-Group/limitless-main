@@ -3,9 +3,9 @@ import { GoogleOutlined } from '@ant-design/icons';
 import useGoogleLogin from '@lib/hook/use-google-login';
 import { Typography } from 'antd';
 import './google-login-button.less';
+import { useIntl } from 'react-intl';
 
 const { Text } = Typography;
-
 interface IProps {
   clientId: string;
   onSuccess: Function;
@@ -18,6 +18,8 @@ const GoogleLoginButton = ({ clientId, onSuccess, onFailure }: IProps) => {
     onFailure,
     onScriptLoadFailure: onFailure
   });
+
+  const intl = useIntl();
 
   const [clickedOnGoogleLoginButton, setClicked] = useState(false);
 
@@ -37,12 +39,23 @@ const GoogleLoginButton = ({ clientId, onSuccess, onFailure }: IProps) => {
       <button type="button" disabled={!clientId || !loaded} onClick={() => loginWithGoogle()} className="google-button">
         <GoogleOutlined />
         {' '}
-        LOG IN / SIGN UP WITH GOOGLE
+        {intl.formatMessage({ id: 'loginUpCase', defaultMessage: 'LOG IN' })}
+        {' '}
+        /
+        {' '}
+        {intl.formatMessage({
+          id: 'signUpWithGoogleCase',
+          defaultMessage: 'SIGN UP WITH GOOGLE'
+        })}
       </button>
       {clickedOnGoogleLoginButton && (
         <div className="btn-google-login-box">
           <Text type="secondary">
-            If no prompt appears just click the button bellow to start the authentication flow:
+            {intl.formatMessage({
+              id: 'ifNoPromptAppearsJustClickTheButtonBellowToStartTheAuthenticationFlow',
+              defaultMessage:
+                'If no prompt appears just click the button bellow to start the authentication flow:'
+            })}
           </Text>
           <div id="btnLoginWithGoogle" className="btn-google-login" />
         </div>

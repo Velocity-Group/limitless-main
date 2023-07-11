@@ -9,7 +9,7 @@ import {
   PieChartOutlined, ContainerOutlined, UserOutlined, WomanOutlined,
   VideoCameraOutlined, CameraOutlined, StopOutlined, FileImageOutlined,
   SkinOutlined, DollarOutlined, HeartOutlined, MenuOutlined,
-  FireOutlined, MailOutlined, LinkOutlined, NotificationOutlined
+  FireOutlined, MailOutlined, LinkOutlined, NotificationOutlined, TranslationOutlined
 } from '@ant-design/icons';
 import Header from '@components/common/layout/header';
 import { Router } from 'next/router';
@@ -404,6 +404,23 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
             id: 'payout',
             name: 'All payout requests',
             route: '/payout-request'
+          }
+        ]
+      },
+      {
+        id: 'language-setting',
+        name: 'Language',
+        icon: <TranslationOutlined />,
+        children: [
+          {
+            id: 'language-setting-listing',
+            route: '/language',
+            name: 'Listing'
+          },
+          {
+            id: 'language-setting-create',
+            name: 'Create',
+            route: '/language/create'
           }
         ]
       },

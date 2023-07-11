@@ -10,7 +10,8 @@ exports.COLLECTION = {
   MENU: 'menus',
   PERFORMER: 'performers',
   PERFORMER_VIDEO: 'performervideos',
-  EMAIL_TEMPLATE: 'emailtemplates'
+  EMAIL_TEMPLATE: 'emailtemplates',
+  LANGUAGE_SETTING: 'languagesettings'
 };
 
 exports.DB = mongoose.connection;

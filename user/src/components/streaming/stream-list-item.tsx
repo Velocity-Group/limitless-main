@@ -4,6 +4,7 @@ import { message } from 'antd';
 import Router from 'next/router';
 import { useDispatch } from 'react-redux';
 import { setSubscription } from '@redux/subscription/actions';
+import { useIntl } from 'react-intl';
 
 type Props = {
   stream: IStream;
@@ -11,16 +12,17 @@ type Props = {
 }
 
 export default function StreamListItem({ stream, user }: Props) {
+  const intl = useIntl();
   const dispatch = useDispatch();
   const handleClick = () => {
     if (!user._id) {
-      message.error('Please log in or register!', 5);
+      message.error(intl.formatMessage({ id: 'PleaseLogInOrRegister', defaultMessage: 'Please log in or register!' }), 5);
       Router.push('/auth/login');
       return;
     }
     if (user.isPerformer) return;
     if (!stream?.isSubscribed) {
-      message.error('Please subscribe to join live chat!', 5);
+      message.error(intl.formatMessage({ id: 'PleaseSubscribeToJoinLiveChat', defaultMessage: 'Please subscribe to join live chat!' }), 5);
       dispatch(setSubscription({ showModal: true, performer: stream?.performerInfo }));
       return;
     }
@@ -48,7 +50,7 @@ export default function StreamListItem({ stream, user }: Props) {
     >
       <div className="blink-border" />
       <img className="per-avatar" alt="avatar" src={stream?.performerInfo?.avatar || '/static/no-avatar.png'} />
-      <div className="live-tag">LIVE</div>
+      <div className="live-tag">{intl.formatMessage({ id: 'live', defaultMessage: 'LIVE' })}</div>
     </div>
   );
 }

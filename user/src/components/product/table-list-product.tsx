@@ -1,11 +1,12 @@
 import { PureComponent } from 'react';
 import {
-  Table, Button, Tag, Tooltip
+  Table, Button, Tag, Tooltip, Empty
 } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
 import { ImageProduct } from '@components/product/image-product';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   dataSource: [];
@@ -14,9 +15,10 @@ interface IProps {
   pagination: {};
   onChange: Function;
   deleteProduct?: Function;
+  intl: IntlShape
 }
 
-export class TableListProduct extends PureComponent<IProps> {
+class TableListProduct extends PureComponent<IProps> {
   render() {
     const {
       dataSource,
@@ -24,11 +26,12 @@ export class TableListProduct extends PureComponent<IProps> {
       loading,
       pagination,
       onChange,
-      deleteProduct
+      deleteProduct,
+      intl
     } = this.props;
     const columns = [
       {
-        title: 'Thumbnail',
+        title: intl.formatMessage({ id: 'thumbnail', defaultMessage: 'Thumbnail' }),
         dataIndex: 'image',
         render(data, record) {
           return (
@@ -42,11 +45,11 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Name',
+        title: intl.formatMessage({ id: 'name', defaultMessage: 'Name' }),
         dataIndex: 'name',
         render(name: string, record: any) {
           return (
-            <Tooltip title={name}>
+            <Tooltip title={intl.formatMessage({ id: 'name', defaultMessage: 'Name' })}>
               <div style={{
                 maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
               }}
@@ -60,7 +63,7 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Price',
+        title: intl.formatMessage({ id: 'price', defaultMessage: 'Price' }),
         dataIndex: 'price',
         render(price: number) {
           return (
@@ -72,21 +75,21 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Stock',
+        title: intl.formatMessage({ id: 'stock', defaultMessage: 'Stock' }),
         dataIndex: 'stock',
         render(stock: number, record) {
-          return <span>{(record.type === 'physical' && stock) || ''}</span>;
+          return <span>{(record.type === 'physical' && intl.formatMessage({ id: 'stock', defaultMessage: 'Stock' })) || ''}</span>;
         }
       },
       {
-        title: 'Type',
+        title: intl.formatMessage({ id: 'type', defaultMessage: 'Type' }),
         dataIndex: 'type',
         render(type: string) {
           switch (type) {
             case 'physical':
-              return <Tag color="#007bff">Physical</Tag>;
+              return <Tag color="#007bff">{intl.formatMessage({ id: 'physical', defaultMessage: 'Physical' })}</Tag>;
             case 'digital':
-              return <Tag color="#ff0066">Digital</Tag>;
+              return <Tag color="#ff0066">{intl.formatMessage({ id: 'digital', defaultMessage: 'Digital' })}</Tag>;
             default:
               break;
           }
@@ -94,14 +97,14 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Status',
+        title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
         dataIndex: 'status',
         render(status: string) {
           switch (status) {
             case 'active':
-              return <Tag color="success">Active</Tag>;
+              return <Tag color="success">{intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}</Tag>;
             case 'inactive':
-              return <Tag color="orange">Inactive</Tag>;
+              return <Tag color="orange">{intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}</Tag>;
             default:
               break;
           }
@@ -109,7 +112,7 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Updated On',
+        title: intl.formatMessage({ id: 'updatedOn', defaultMessage: 'Updated On' }),
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -117,7 +120,7 @@ export class TableListProduct extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Action',
+        title: intl.formatMessage({ id: 'action', defaultMessage: 'Action' }),
         dataIndex: '_id',
         render: (id: string) => (
           <div style={{ whiteSpace: 'nowrap' }}>
@@ -147,6 +150,11 @@ export class TableListProduct extends PureComponent<IProps> {
     return (
       <div className="table-responsive">
         <Table
+          locale={{
+            emptyText: <Empty
+              description={intl.formatMessage({ id: 'emptyData', defaultMessage: 'No Data' })}
+            />
+          }}
           dataSource={dataSource}
           columns={columns}
           rowKey={rowKey}
@@ -158,3 +166,5 @@ export class TableListProduct extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(TableListProduct);

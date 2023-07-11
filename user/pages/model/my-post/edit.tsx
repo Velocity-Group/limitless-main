@@ -1,8 +1,6 @@
 import Head from 'next/head';
 import { PureComponent } from 'react';
-import {
-  Layout
-} from 'antd';
+import { Layout } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { feedService } from '@services/index';
@@ -10,10 +8,12 @@ import { connect } from 'react-redux';
 import { IFeed, IUIConfig } from '@interfaces/index';
 import FeedForm from '@components/post/form';
 import Router from 'next/router';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   feed: IFeed;
+  intl: IntlShape;
 }
 
 class EditPost extends PureComponent<IProps> {
@@ -23,7 +23,9 @@ class EditPost extends PureComponent<IProps> {
 
   static async getInitialProps({ ctx }) {
     try {
-      const feed = await (await feedService.findById(ctx.query.id, { Authorization: ctx.token })).data;
+      const feed = await (
+        await feedService.findById(ctx.query.id, { Authorization: ctx.token })
+      ).data;
       return { feed };
     } catch (e) {
       return { ctx };
@@ -38,7 +40,7 @@ class EditPost extends PureComponent<IProps> {
   }
 
   render() {
-    const { feed, ui } = this.props;
+    const { feed, ui, intl } = this.props;
     return (
       <>
         {feed && (
@@ -47,11 +49,22 @@ class EditPost extends PureComponent<IProps> {
               <title>
                 {ui?.siteName}
                 {' '}
-                | Edit Post
+                |
+                {' '}
+                {intl.formatMessage({
+                  id: 'editPost',
+                  defaultMessage: 'Edit Post'
+                })}
               </title>
             </Head>
             <div className="main-container">
-              <PageHeading icon={<ArrowLeftOutlined />} title=" Edit Post" />
+              <PageHeading
+                icon={<ArrowLeftOutlined />}
+                title={` ${intl.formatMessage({
+                  id: 'editPost',
+                  defaultMessage: 'Edit Post'
+                })}`}
+              />
               <div>
                 <FeedForm feed={feed} />
               </div>
@@ -65,4 +78,4 @@ class EditPost extends PureComponent<IProps> {
 const mapStates = (state) => ({
   ui: { ...state.ui }
 });
-export default connect(mapStates)(EditPost);
+export default injectIntl(connect(mapStates)(EditPost));

@@ -17,6 +17,8 @@ import feed from './feed/reducers';
 import streaming from './streaming/reducers';
 import conversation from './stream-chat/reducers';
 import subscription from './subscription/reducers';
+import i18n from './i18n/reducer';
+import utils from './utils/reducers';
 
 const reducers = merge(
   settings,
@@ -33,7 +35,9 @@ const reducers = merge(
   feed,
   streaming,
   conversation,
-  subscription
+  subscription,
+  i18n,
+  utils
 );
 
 export default combineReducers(reducers);

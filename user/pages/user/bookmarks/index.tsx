@@ -1,6 +1,4 @@
-import {
-  Layout, message, Tabs
-} from 'antd';
+import { Layout, message, Tabs } from 'antd';
 import { PureComponent } from 'react';
 import PageHeading from '@components/common/page-heading';
 import {
@@ -12,19 +10,25 @@ import {
 } from 'src/services';
 import Head from 'next/head';
 import ScrollListPerformers from '@components/performer/scroll-list';
-import { ScrollListProduct } from '@components/product/scroll-list-item';
+import ScrollListProduct from '@components/product/scroll-list-item';
 import ScrollListFeed from '@components/post/scroll-list';
-import { ScrollListVideo } from '@components/video/scroll-list-item';
-import { ScrollListGallery } from '@components/gallery/scroll-list-gallery';
+import ScrollListVideo from '@components/video/scroll-list-item';
+import ScrollListGallery from '@components/gallery/scroll-list-gallery';
 import {
-  FireOutlined, VideoCameraOutlined, PictureOutlined, ShopOutlined, BookOutlined
+  FireOutlined,
+  VideoCameraOutlined,
+  PictureOutlined,
+  ShopOutlined,
+  BookOutlined
 } from '@ant-design/icons';
 import { ModelIcon } from 'src/icons';
 import '../index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   user: IUser;
+  intl: IntlShape;
   countries: ICountry[];
 }
 interface IStates {
@@ -122,21 +126,41 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
   }
 
   async onDeleteFeed(feed: IFeed) {
-    const { user } = this.props;
+    const { user, intl } = this.props;
     const { feeds } = this.state;
     if (user._id !== feed.fromSourceId) return;
-    if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) return;
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'allEarningsRelatedToThisPostWillBeRefunded',
+          defaultMessage:
+            'All earnings related to this post will be refunded. Are you sure to remove it?'
+        })
+      )
+    ) { return; }
     try {
       await feedService.delete(feed._id);
       feeds.filter((f) => f._id !== feed._id);
-      message.success('Post deleted successfully');
+      message.success(
+        intl.formatMessage({
+          id: 'postDeletedSuccessfully',
+          defaultMessage: 'Post deleted successfully'
+        })
+      );
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Something went wrong, please try again later');
+      message.error(
+        error?.message
+        || intl.formatMessage({
+          id: 'somethingWentWrong',
+          defaultMessage: 'Something went wrong, please try again!'
+        })
+      );
     }
   }
 
   async getBookmarkedPosts() {
+    const { intl } = this.props;
     const { currentPage, limit, feeds } = this.state;
     try {
       await this.setState({ loading: true });
@@ -149,13 +173,20 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         totalFeeds: resp.data.total
       });
     } catch (error) {
-      message.error('Server error');
+      message.error(
+        error?.message
+        || intl.formatMessage({
+          id: 'serverError',
+          defaultMessage: 'Server error'
+        })
+      );
     } finally {
       this.setState({ loading: false });
     }
   }
 
   async getBookmarkedVideos() {
+    const { intl } = this.props;
     const { currentPage, limit, videos } = this.state;
     try {
       await this.setState({ loading: true });
@@ -168,13 +199,19 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         totalVideos: resp.data.total
       });
     } catch (error) {
-      message.error('Server error');
+      message.error(
+        intl.formatMessage({
+          id: 'serverError',
+          defaultMessage: 'Server error'
+        })
+      );
     } finally {
       this.setState({ loading: false });
     }
   }
 
   async getBookmarkedGalleries() {
+    const { intl } = this.props;
     const { currentPage, limit, galleries } = this.state;
     try {
       await this.setState({ loading: true });
@@ -187,13 +224,19 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         totalGalleries: resp.data.total
       });
     } catch (error) {
-      message.error('Server error');
+      message.error(
+        intl.formatMessage({
+          id: 'serverError',
+          defaultMessage: 'Server error'
+        })
+      );
     } finally {
       this.setState({ loading: false });
     }
   }
 
   async getBookmarkedProducts() {
+    const { intl } = this.props;
     const { currentPage, limit, products } = this.state;
     try {
       await this.setState({ loading: true });
@@ -206,13 +249,19 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         totalProducts: resp.data.total
       });
     } catch (error) {
-      message.error('Server error');
+      message.error(
+        intl.formatMessage({
+          id: 'serverError',
+          defaultMessage: 'Server error'
+        })
+      );
     } finally {
       this.setState({ loading: false });
     }
   }
 
   async getBookmarkedPerformers() {
+    const { intl } = this.props;
     const { currentPage, limit, performers } = this.state;
     try {
       await this.setState({ loading: true });
@@ -226,7 +275,12 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
         totalPerformers: resp.data.total
       });
     } catch (error) {
-      message.error('Server error');
+      message.error(
+        intl.formatMessage({
+          id: 'serverError',
+          defaultMessage: 'Server error'
+        })
+      );
     } finally {
       this.setState({ loading: false });
     }
@@ -265,18 +319,29 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
       totalProducts,
       tab
     } = this.state;
-    const { ui, countries } = this.props;
+    const { ui, countries, intl } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Bookmarks
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'bookmarks',
+              defaultMessage: 'Bookmarks'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Bookmarks" icon={<BookOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'bookmarks',
+              defaultMessage: 'Bookmarks'
+            })}
+            icon={<BookOutlined />}
+          />
           <div className="user-account">
             <Tabs
               defaultActiveKey={tab || 'feeds'}
@@ -288,7 +353,15 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalFeeds > 0 && totalFeeds}
                     {' '}
-                    {totalFeeds > 1 ? 'POSTS' : 'POST'}
+                    {totalFeeds > 1
+                      ? intl.formatMessage({
+                        id: 'posts',
+                        defaultMessage: 'Posts'
+                      })
+                      : intl.formatMessage({
+                        id: 'post',
+                        defaultMessage: 'Post'
+                      })}
                   </h4>
                 </div>
                 <ScrollListFeed
@@ -298,7 +371,10 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   canLoadmore={totalFeeds > feeds.length}
                   onDelete={this.onDeleteFeed.bind(this)}
                   loadMore={this.handlePagechange.bind(this, 'feeds')}
-                  notFoundText="No bookmarked posts found"
+                  notFoundText={intl.formatMessage({
+                    id: 'noBookmarkedPostsFound',
+                    defaultMessage: 'No bookmarked posts found'
+                  })}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<VideoCameraOutlined />} key="videos">
@@ -306,7 +382,15 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalVideos > 0 && totalVideos}
                     {' '}
-                    {totalVideos > 1 ? 'VIDEOS' : 'VIDEO'}
+                    {totalVideos > 1
+                      ? intl.formatMessage({
+                        id: 'videos',
+                        defaultMessage: 'Videos'
+                      })
+                      : intl.formatMessage({
+                        id: 'video',
+                        defaultMessage: 'Videos'
+                      })}
                   </h4>
                 </div>
                 <ScrollListVideo
@@ -314,7 +398,10 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   loading={loading}
                   canLoadmore={totalVideos > videos.length}
                   loadMore={this.handlePagechange.bind(this, 'videos')}
-                  notFoundText="No bookmarked videos found"
+                  notFoundText={intl.formatMessage({
+                    id: 'noBookmarkedVideosFound',
+                    defaultMessage: 'No bookmarked videos found'
+                  })}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<PictureOutlined />} key="galleries">
@@ -322,7 +409,15 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalGalleries > 0 && totalGalleries}
                     {' '}
-                    {totalGalleries > 1 ? 'GALLERIES' : 'GALLERY'}
+                    {totalGalleries > 1
+                      ? intl.formatMessage({
+                        id: 'galleries',
+                        defaultMessage: 'Galleries'
+                      })
+                      : intl.formatMessage({
+                        id: 'gallery',
+                        defaultMessage: 'Gallery'
+                      })}
                   </h4>
                 </div>
                 <ScrollListGallery
@@ -330,7 +425,10 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   loading={loading}
                   canLoadmore={totalGalleries > galleries.length}
                   loadMore={this.handlePagechange.bind(this, 'galleries')}
-                  notFoundText="No bookmarked galleries found"
+                  notFoundText={intl.formatMessage({
+                    id: 'noBookmarkedGalleriesFound',
+                    defaultMessage: 'No bookmarked galleries found'
+                  })}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<ShopOutlined />} key="products">
@@ -338,7 +436,15 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalProducts > 0 && totalProducts}
                     {' '}
-                    {totalProducts > 1 ? 'PRODUCTS' : 'PRODUCT'}
+                    {totalProducts > 1
+                      ? intl.formatMessage({
+                        id: 'products',
+                        defaultMessage: 'Products'
+                      })
+                      : intl.formatMessage({
+                        id: 'product',
+                        defaultMessage: 'Product'
+                      })}
                   </h4>
                 </div>
                 <ScrollListProduct
@@ -346,7 +452,10 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   items={products.map((p) => p.objectInfo)}
                   canLoadmore={totalProducts > products.length}
                   loadMore={this.handlePagechange.bind(this, 'products')}
-                  notFoundText="No bookmarked products found"
+                  notFoundText={intl.formatMessage({
+                    id: 'noBookmarkedProductsFound',
+                    defaultMessage: 'No bookmarked products found'
+                  })}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<ModelIcon />} key="performers">
@@ -354,18 +463,26 @@ class FavouriteVideoPage extends PureComponent<IProps, IStates> {
                   <h4>
                     {totalPerformers > 0 && totalPerformers}
                     {' '}
-                    {totalPerformers > 1 ? 'MODELS' : 'MODEL'}
+                    {totalPerformers > 1
+                      ? intl.formatMessage({
+                        id: 'models',
+                        defaultMessage: 'Models'
+                      })
+                      : intl.formatMessage({
+                        id: 'model',
+                        defaultMessage: 'Model'
+                      })}
                   </h4>
                 </div>
                 <ScrollListPerformers
                   loading={loading}
                   performers={performers.map((p) => p.objectInfo)}
                   total={totalPerformers}
-                  loadMore={this.handlePagechange.bind(
-                    this,
-                    'performers'
-                  )}
-                  notFoundText="No bookmarked profiles found"
+                  loadMore={this.handlePagechange.bind(this, 'performers')}
+                  notFoundText={intl.formatMessage({
+                    id: 'noBookmarkedProfilesFound',
+                    defaultMessage: 'No bookmarked profiles found'
+                  })}
                   countries={countries}
                 />
               </Tabs.TabPane>
@@ -380,4 +497,4 @@ const mapState = (state: any) => ({
   ui: { ...state.ui },
   user: { ...state.user.current }
 });
-export default connect(mapState)(FavouriteVideoPage);
+export default injectIntl(connect(mapState)(FavouriteVideoPage));

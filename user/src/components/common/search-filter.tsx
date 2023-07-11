@@ -2,7 +2,8 @@ import { PureComponent } from 'react';
 import {
   Input, Row, Col, Select, DatePicker
 } from 'antd';
-import { SelectPerformerDropdown } from '@components/performer/common/select-performer-dropdown';
+import SelectPerformerDropdown from '@components/performer/common/select-performer-dropdown';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const { RangePicker } = DatePicker;
 interface IProps {
@@ -23,9 +24,10 @@ interface IProps {
   searchWithKeyword?: boolean;
   dateRange?: boolean;
   isFree?: boolean;
+  intl: IntlShape;
 }
 
-export class SearchFilter extends PureComponent<IProps> {
+class SearchFilter extends PureComponent<IProps> {
   state = {
     q: '',
     status: '',
@@ -46,6 +48,7 @@ export class SearchFilter extends PureComponent<IProps> {
       dateRange,
       isFree,
       onSubmit,
+      intl,
       subscriptionTypes
     } = this.props;
     return (
@@ -53,7 +56,7 @@ export class SearchFilter extends PureComponent<IProps> {
         {searchWithKeyword && (
           <Col lg={8} md={8} xs={12}>
             <Input
-              placeholder="Enter keyword"
+              placeholder={intl.formatMessage({ id: 'enterKeyword', defaultMessage: 'Enter keyword' })}
               onChange={(evt) => this.setState({ q: evt.target.value })}
               onPressEnter={() => onSubmit(this.state)}
             />
@@ -64,7 +67,7 @@ export class SearchFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ status: val }, () => onSubmit(this.state))}
               style={{ width: '100%' }}
-              placeholder="Select status"
+              placeholder={intl.formatMessage({ id: 'selectStatus', defaultMessage: 'Select status' })}
               defaultValue=""
             >
               {statuses.map((s) => (
@@ -80,7 +83,7 @@ export class SearchFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ type: val }, () => onSubmit(this.state))}
               style={{ width: '100%' }}
-              placeholder="Select type"
+              placeholder={intl.formatMessage({ id: 'selectType', defaultMessage: 'Select type' })}
               defaultValue=""
             >
               {type.map((s) => (
@@ -110,7 +113,7 @@ export class SearchFilter extends PureComponent<IProps> {
         {searchWithPerformer && (
           <Col lg={8} md={8} xs={12}>
             <SelectPerformerDropdown
-              placeholder="Search model here"
+              placeholder={intl.formatMessage({ id: 'searchModel', defaultMessage: 'Search model here' })}
               style={{ width: '100%' }}
               onSelect={(val) => this.setState({ performerId: val || '' }, () => onSubmit(this.state))}
             />
@@ -124,6 +127,8 @@ export class SearchFilter extends PureComponent<IProps> {
                 fromDate: dateStrings[0],
                 toDate: dateStrings[1]
               }, () => onSubmit(this.state))}
+              placeholder={[intl.formatMessage({ id: 'startDate', defaultMessage: 'Start Date' }),
+                intl.formatMessage({ id: 'endDate', defaultMessage: 'End Date' })]}
             />
           </Col>
         )}
@@ -132,17 +137,17 @@ export class SearchFilter extends PureComponent<IProps> {
             <Select
               onChange={(val) => this.setState({ isFree: val }, () => onSubmit(this.state))}
               style={{ width: '100%' }}
-              placeholder="Select type"
+              placeholder={intl.formatMessage({ id: 'selectType', defaultMessage: 'Select type' })}
               defaultValue=""
             >
               <Select.Option key="" value="">
-                All Type
+                {intl.formatMessage({ id: 'allType', defaultMessage: 'All type' })}
               </Select.Option>
               <Select.Option key="free" value="true">
-                Free
+                {intl.formatMessage({ id: 'free', defaultMessage: 'Free' })}
               </Select.Option>
               <Select.Option key="paid" value="false">
-                Paid
+                {intl.formatMessage({ id: 'paid', defaultMessage: 'Paid' })}
               </Select.Option>
             </Select>
           </Col>
@@ -151,3 +156,5 @@ export class SearchFilter extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(SearchFilter);

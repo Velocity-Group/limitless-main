@@ -6,13 +6,15 @@ import { HistoryOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { paymentService } from 'src/services';
 import { IUIConfig } from 'src/interfaces';
-import { SearchFilter } from '@components/common/search-filter';
 import PaymentTableList from '@components/payment/table-list';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
+import { injectIntl, IntlShape } from 'react-intl';
+import SearchFilter from '@components/common/search-filter';
 
 interface IProps {
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 class PaymentHistoryPage extends PureComponent<IProps> {
@@ -81,38 +83,54 @@ class PaymentHistoryPage extends PureComponent<IProps> {
   }
 
   render() {
-    const {
-      loading, paymentList, pagination
-    } = this.state;
-    const { ui } = this.props;
+    const { loading, paymentList, pagination } = this.state;
+    const { ui, intl } = this.props;
     const statuses = [
       {
         key: '',
-        text: 'All Statuses'
+        text: intl.formatMessage({
+          id: 'allStatus',
+          defaultMessage: 'All Status'
+        })
       },
       {
         key: 'created',
-        text: 'Created'
+        text: intl.formatMessage({
+          id: 'created',
+          defaultMessage: 'Created'
+        })
       },
       {
         key: 'processing',
-        text: 'Processing'
+        text: intl.formatMessage({
+          id: 'processing',
+          defaultMessage: 'Processing'
+        })
       },
       {
         key: 'require_authentication',
-        text: 'Require authentication'
+        text: intl.formatMessage({
+          id: 'requireAuthentication',
+          defaultMessage: 'Require authentication'
+        })
       },
       {
         key: 'fail',
-        text: 'Fail'
+        text: intl.formatMessage({ id: 'fail', defaultMessage: 'Fail' })
       },
       {
         key: 'success',
-        text: 'Success'
+        text: intl.formatMessage({
+          id: 'success',
+          defaultMessage: 'Success'
+        })
       },
       {
         key: 'canceled',
-        text: 'Cancelled'
+        text: intl.formatMessage({
+          id: 'cancelled',
+          defaultMessage: 'Cancelled'
+        })
       }
     ];
     return (
@@ -121,11 +139,22 @@ class PaymentHistoryPage extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Payment History
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'paymentHistory',
+              defaultMessage: 'Payment History'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Payment History" icon={<HistoryOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'paymentHistory',
+              defaultMessage: 'Payment History'
+            })}
+            icon={<HistoryOutlined />}
+          />
           <SearchFilter
             statuses={statuses}
             onSubmit={this.handleFilter.bind(this)}
@@ -147,4 +176,4 @@ class PaymentHistoryPage extends PureComponent<IProps> {
 const mapStates = (state: any) => ({
   ui: state.ui
 });
-export default connect(mapStates)(PaymentHistoryPage);
+export default injectIntl(connect(mapStates)(PaymentHistoryPage));

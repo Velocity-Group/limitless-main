@@ -9,15 +9,18 @@ import {
 import {
   updatePerformer, updateUserSuccess
 } from 'src/redux/user/actions';
-import { StripeConnectForm, PerformerPaypalForm, PerformerBankingForm } from '@components/performer';
 import { paymentService, performerService, utilsService } from '@services/index';
 import PageHeading from '@components/common/page-heading';
 import '../../user/index.less';
+import { injectIntl, IntlShape } from 'react-intl';
+import PerformerBankingForm from '@components/performer/banking-form';
+import PerformerPaypalForm from '../../../src/components/performer/paypalForm';
 
 interface IProps {
   user: IPerformer;
   ui: IUIConfig;
   updatePerformer: Function;
+  intl: IntlShape;
   settings: ISettings;
   countries: ICountry[];
   updateUserSuccess: Function;
@@ -41,7 +44,7 @@ class BankingSettings extends PureComponent<IProps> {
     submiting: false,
     loginUrl: '',
     stripeAccount: null
-  }
+  };
 
   componentDidMount() {
     const { settings } = this.props;
@@ -49,17 +52,28 @@ class BankingSettings extends PureComponent<IProps> {
   }
 
   async handleUpdatePaypal(data) {
-    const { user, updateUserSuccess: onUpdateSuccess } = this.props;
+    const { user, intl, updateUserSuccess: onUpdateSuccess } = this.props;
     try {
       this.setState({ submiting: true });
       const payload = { key: 'paypal', value: data, performerId: user._id };
       const resp = await performerService.updatePaymentGateway(user._id, payload);
       onUpdateSuccess({ ...user, paypalSetting: resp.data });
       this.setState({ submiting: false });
-      message.success('Paypal account was updated successfully!');
+      message.success(
+        intl.formatMessage({
+          id: 'paypalAccountWasUpdatedSuccessfully',
+          defaultMessage: 'Paypal account was updated successfully'
+        })
+      );
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try againl later');
+      message.error(
+        err?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
       this.setState({ submiting: false });
     }
   }
@@ -100,6 +114,7 @@ class BankingSettings extends PureComponent<IProps> {
   }
 
   async connectAccount() {
+    const { intl } = this.props;
     try {
       await this.setState({ submiting: true });
       const resp = (await paymentService.connectStripeAccount()).data;
@@ -108,7 +123,13 @@ class BankingSettings extends PureComponent<IProps> {
       }
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured, please try again later');
+      message.error(
+        err?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     } finally {
       this.setState({ submiting: false });
     }
@@ -116,7 +137,7 @@ class BankingSettings extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, user, settings, countries
+      ui, user, settings, countries, intl
     } = this.props;
     const {
       loading, submiting, loginUrl, stripeAccount
@@ -127,17 +148,32 @@ class BankingSettings extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | Banking (to earn)
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'bankingToEarn',
+              defaultMessage: 'Banking (To Earn)'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading icon={<BankOutlined />} title="Banking (to earn)" />
+          <PageHeading
+            icon={<BankOutlined />}
+            title={intl.formatMessage({
+              id: 'bankingToEarn',
+              defaultMessage: 'Banking (To Earn)'
+            })}
+          />
           <Tabs>
             {/* {settings.paymentGateway === 'stripe' && (
             <Tabs.TabPane
               tab={(
                 <span>
-                  <img src="/static/stripe-icon.jpeg" alt="stripe-icon" height="30px" />
+                  <img
+                    src="/static/stripe-icon.jpeg"
+                    alt="stripe-icon"
+                    height="30px"
+                  />
                 </span>
               )}
               key="stripe"
@@ -168,7 +204,11 @@ class BankingSettings extends PureComponent<IProps> {
             <Tabs.TabPane
               tab={(
                 <span>
-                  <img src="/static/paypal-ico.png" alt="paypal-icon" height="30px" />
+                  <img
+                    src="/static/paypal-ico.png"
+                    alt="paypal-icon"
+                    height="30px"
+                  />
                 </span>
               )}
               key="paypal"
@@ -192,4 +232,4 @@ const mapStates = (state: any) => ({
   settings: state.settings
 });
 const mapDispatch = { updatePerformer, updateUserSuccess };
-export default connect(mapStates, mapDispatch)(BankingSettings);
+export default injectIntl(connect(mapStates, mapDispatch)(BankingSettings));

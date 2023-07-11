@@ -60,11 +60,11 @@ export default function Message(props: IProps) {
             {data.text}
           </div>
           {isMine && !data.isDeleted && (
-          <Dropdown overlay={menu} placement="topRight" trigger={['click']}>
-            <a>
-              <EllipsisOutlined style={{ transform: 'rotate(90deg)' }} />
-            </a>
-          </Dropdown>
+            <Dropdown overlay={menu} placement="topRight" trigger={['click']}>
+              <a>
+                <EllipsisOutlined style={{ transform: 'rotate(90deg)' }} />
+              </a>
+            </Dropdown>
           )}
         </div>
       )}
@@ -76,9 +76,9 @@ export default function Message(props: IProps) {
       </div>
       )}
       {data.text && data.isGift && (
-      <div className="tip-box">
-        <span dangerouslySetInnerHTML={{ __html: data.text }} />
-      </div>
+        <div className="tip-box">
+          <span dangerouslySetInnerHTML={{ __html: data.text }} />
+        </div>
       )}
     </div>
   );

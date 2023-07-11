@@ -3,6 +3,7 @@ import React from 'react';
 import { Table, Tag } from 'antd';
 import { ITransaction } from 'src/interfaces';
 import { formatDate } from '@lib/date';
+import { useIntl } from 'react-intl';
 // import Link from 'next/link';
 
 interface IProps {
@@ -20,9 +21,10 @@ const PaymentTableList = ({
   loading,
   onChange
 }: IProps) => {
+  const intl = useIntl();
   const columns = [
     {
-      title: 'ID',
+      title: intl.formatMessage({ id: 'id', defaultMessage: 'ID' }),
       dataIndex: '_id',
       key: '_id',
       render(id) {
@@ -34,28 +36,28 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Description',
+      title: intl.formatMessage({ id: 'description', defaultMessage: 'Description' }),
       key: 'description',
       render(record: any) {
         return <span>{record?.products && record?.products[0]?.description}</span>;
       }
     },
     {
-      title: 'Type',
+      title: intl.formatMessage({ id: 'type', defaultMessage: 'Type' }),
       dataIndex: 'type',
       key: 'type',
       render(type: string) {
         switch (type) {
-          case 'token_package': return <Tag color="blue">Wallet Purchase</Tag>;
-          case 'monthly_subscription': return <Tag color="orange">Monthly Subscription</Tag>;
-          case 'yearly_subscription': return <Tag color="red">Yearly Subscription</Tag>;
-          case 'free_subscription': return <Tag color="green">Free Subscription</Tag>;
+          case 'token_package': return <Tag color="blue">{intl.formatMessage({ id: 'walletPurchase', defaultMessage: 'Wallet Purchase' })}</Tag>;
+          case 'monthly_subscription': return <Tag color="orange">{intl.formatMessage({ id: 'monthlySubscription', defaultMessage: 'Monthly Subscription' })}</Tag>;
+          case 'yearly_subscription': return <Tag color="red">{intl.formatMessage({ id: 'yearlySubscription', defaultMessage: 'Yearly Subscription' })}</Tag>;
+          case 'free_subscription': return <Tag color="green">{intl.formatMessage({ id: 'freeSubscription', defaultMessage: 'Free Subscription' })}</Tag>;
           default: return <Tag>{type}</Tag>;
         }
       }
     },
     {
-      title: 'Original price',
+      title: intl.formatMessage({ id: 'originalPrice', defaultMessage: 'Original Price' }),
       dataIndex: 'originalPrice',
       key: 'originalPrice',
       render(originalPrice) {
@@ -68,7 +70,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Discount',
+      title: intl.formatMessage({ id: 'discount', defaultMessage: 'Discount' }),
       dataIndex: 'couponInfo',
       render(couponInfo, record) {
         return couponInfo ? (
@@ -84,7 +86,7 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'End price',
+      title: intl.formatMessage({ id: 'endPrice', defaultMessage: 'End Price' }),
       dataIndex: 'totalPrice',
       render(totalPrice) {
         return (
@@ -96,44 +98,49 @@ const PaymentTableList = ({
       }
     },
     {
-      title: 'Status',
+      title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
       dataIndex: 'status',
       render(status: string) {
         switch (status) {
           case 'success':
-            return <Tag color="green">Success</Tag>;
+            return <Tag color="green">{intl.formatMessage({ id: 'success', defaultMessage: 'Success' })}</Tag>;
           case 'fail':
-            return <Tag color="red">Fail</Tag>;
+            return <Tag color="red">{intl.formatMessage({ id: 'fail', defaultMessage: 'Fail' })}</Tag>;
           case 'processing':
-            return <Tag color="orange">Processing</Tag>;
+            return <Tag color="orange">{intl.formatMessage({ id: 'processing', defaultMessage: 'Processing' })}</Tag>;
           case 'canceled':
-            return <Tag color="pink">Cancelled</Tag>;
+            return <Tag color="pink">{intl.formatMessage({ id: 'cancelled', defaultMessage: 'Cancelled' })}</Tag>;
           case 'refunded':
-            return <Tag color="violet">Refunded</Tag>;
+            return <Tag color="violet">{intl.formatMessage({ id: 'refunded', defaultMessage: 'Refunded' })}</Tag>;
           case 'created':
-            return <Tag color="default">Created</Tag>;
+            return <Tag color="default">{intl.formatMessage({ id: 'created', defaultMessage: 'Created' })}</Tag>;
           case 'require_authentication':
-            return <Tag color="default">Require Authentication</Tag>;
+            return <Tag color="default">{intl.formatMessage({ id: 'requireAuthentication', defaultMessage: 'Require authentication' })}</Tag>;
           default: break;
         }
         return <Tag color="red">{status}</Tag>;
       }
     },
     {
-      title: 'Gateway',
+      title: intl.formatMessage({ id: 'gateway', defaultMessage: 'Gateway' }),
       dataIndex: 'paymentGateway',
       render(paymentGateway: string) {
         switch (paymentGateway) {
           case 'stripe':
-            return <Tag color="blue">Stripe</Tag>;
+            return <Tag color="blue">{intl.formatMessage({ id: 'stripe', defaultMessage: 'Stripe' })}</Tag>;
           case 'ccbill':
-            return <Tag color="orange">CCbill</Tag>;
+            return (
+              <Tag color="orange">
+                {intl.formatMessage({ id: 'ccbill', defaultMessage: 'CCbill' })}
+                {' '}
+              </Tag>
+            );
           default: return <Tag color="red">{paymentGateway}</Tag>;
         }
       }
     },
     {
-      title: 'Update on',
+      title: intl.formatMessage({ id: 'updatedOn', defaultMessage: 'Updated On' }),
       dataIndex: 'updatedAt',
       sorter: true,
       render(date: Date) {

@@ -28,7 +28,7 @@ import { AuthService } from 'src/modules/auth/services';
 import { FileService } from 'src/modules/file/services';
 import { MessageService, NotificationMessageService } from '../services';
 import {
-  MessageListRequest, MessageCreatePayload
+  MessageListRequest, MessageCreatePayload, MassMessagesToSubscribersCreatePayload
 } from '../payloads';
 import { MessageDto } from '../dtos';
 
@@ -285,6 +285,17 @@ export class MessageController {
     }
     const valid = await this.messageService.checkAuth(req, user);
     return DataResponse.ok(valid);
+  }
+
+  @Post('/mass-messages')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  async sendMassMessages(
+    @CurrentUser() user: UserDto,
+    @Body() payload: MassMessagesToSubscribersCreatePayload
+  ): Promise<DataResponse<any>> {
+    const data = await this.messageService.sendMassMessagesToSubscribers(user, payload);
+    return DataResponse.ok(data);
   }
 
   @Get('/counting-not-read-messages')

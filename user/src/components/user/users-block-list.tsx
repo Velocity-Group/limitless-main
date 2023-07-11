@@ -1,8 +1,9 @@
 import {
-  Table, Button, Tooltip, Avatar
+  Table, Button, Tooltip, Avatar, Empty
 } from 'antd';
 import { formatDate } from '@lib/date';
 import '../../../pages/model/block-user/index.less';
+import { useIntl } from 'react-intl';
 
 interface IProps {
   items: any[];
@@ -23,9 +24,10 @@ const UsersBlockList = ({
   unblockUser,
   submiting
 }: IProps) => {
+  const intl = useIntl();
   const columns = [
     {
-      title: 'User',
+      title: intl.formatMessage({ id: 'student', defaultMessage: 'Student' }),
       dataIndex: 'targetInfo',
       key: 'targetInfo',
       render: (targetInfo: any) => (
@@ -39,7 +41,7 @@ const UsersBlockList = ({
       )
     },
     {
-      title: 'Reason',
+      title: intl.formatMessage({ id: 'reason', defaultMessage: 'Reason' }),
       dataIndex: 'reason',
       key: 'reason',
       render: (reason: any) => (
@@ -54,14 +56,14 @@ const UsersBlockList = ({
       )
     },
     {
-      title: 'Date',
+      title: intl.formatMessage({ id: 'date', defaultMessage: 'Date' }),
       key: 'createdAt',
       dataIndex: 'createdAt',
-      render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>,
-      sorter: true
+      render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>
+      // sorter: true
     },
     {
-      title: 'Action',
+      title: intl.formatMessage({ id: 'action', defaultMessage: 'Action' }),
       key: '_id',
       render: (item) => (
         <Button
@@ -70,7 +72,7 @@ const UsersBlockList = ({
           disabled={submiting}
           onClick={() => unblockUser(item.targetId)}
         >
-          Unblock
+          {intl.formatMessage({ id: 'unblock', defaultMessage: 'Unblock' })}
         </Button>
       )
     }
@@ -79,6 +81,11 @@ const UsersBlockList = ({
 
   return (
     <Table
+      locale={{
+        emptyText: <Empty
+          description={intl.formatMessage({ id: 'emptyData', defaultMessage: 'No Data' })}
+        />
+      }}
       dataSource={dataSource}
       columns={columns}
       className="table"

@@ -1,16 +1,20 @@
 import { PureComponent } from 'react';
 import { Button } from 'antd';
 import { IGallery } from '@interfaces/index';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   submiting: boolean;
   gallery: IGallery;
   onFinish: Function;
+  intl: IntlShape
 }
 
-export class PurchaseGalleryForm extends PureComponent<IProps> {
+class PurchaseGalleryForm extends PureComponent<IProps> {
   render() {
-    const { gallery, onFinish, submiting } = this.props;
+    const {
+      gallery, onFinish, submiting, intl
+    } = this.props;
     const image = gallery?.coverPhoto?.thumbnails[0] || '/static/no-image.jpg';
 
     return (
@@ -27,7 +31,8 @@ export class PurchaseGalleryForm extends PureComponent<IProps> {
             }}
           />
           <h4>
-            Unlock Gallery:
+            {intl.formatMessage({ id: 'unlockGallery', defaultMessage: 'Unlock Gallery' })}
+            :
             {' '}
             {gallery?.title}
           </h4>
@@ -41,7 +46,8 @@ export class PurchaseGalleryForm extends PureComponent<IProps> {
             loading={submiting}
             disabled={submiting}
           >
-            Unlock for &nbsp;
+            {intl.formatMessage({ id: 'unlockFor', defaultMessage: 'Unlock for' })}
+            {' '}
             $
             {(gallery?.price || 0).toFixed(2)}
           </Button>
@@ -50,3 +56,4 @@ export class PurchaseGalleryForm extends PureComponent<IProps> {
     );
   }
 }
+export default injectIntl(PurchaseGalleryForm);

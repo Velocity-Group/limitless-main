@@ -1,9 +1,12 @@
 import { PureComponent } from 'react';
-import { Table, Tag, Button } from 'antd';
+import {
+  Table, Tag, Button, Empty
+} from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
 import { CoverGallery } from '@components/gallery/cover-gallery';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   dataSource: [];
@@ -12,9 +15,10 @@ interface IProps {
   pagination: {};
   onChange: Function;
   deleteGallery?: Function;
+  intl: IntlShape
 }
 
-export class TableListGallery extends PureComponent<IProps> {
+class TableListGallery extends PureComponent<IProps> {
   render() {
     const {
       dataSource,
@@ -22,11 +26,12 @@ export class TableListGallery extends PureComponent<IProps> {
       loading,
       pagination,
       onChange,
-      deleteGallery
+      deleteGallery,
+      intl
     } = this.props;
     const columns = [
       {
-        title: 'Thumbnail',
+        title: `${intl.formatMessage({ id: 'thumbnail', defaultMessage: 'Thumbnail' })}`,
         render(data, record) {
           return (
             <Link
@@ -42,7 +47,7 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Title',
+        title: `${intl.formatMessage({ id: 'title', defaultMessage: 'Title' })}`,
         dataIndex: 'title',
         render(title, record) {
           return (
@@ -64,7 +69,7 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'PPV',
+        title: `${intl.formatMessage({ id: 'ppv', defaultMessage: 'PPV' })}`,
         dataIndex: 'isSale',
         render(isSale: boolean) {
           switch (isSale) {
@@ -77,24 +82,24 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Total photos',
+        title: `${intl.formatMessage({ id: 'totalPhotos', defaultMessage: 'Total photos' })}`,
         dataIndex: 'numOfItems'
       },
       {
-        title: 'Status',
+        title: `${intl.formatMessage({ id: 'status', defaultMessage: 'Status' })}`,
         dataIndex: 'status',
         render(status: string) {
           switch (status) {
             case 'active':
-              return <Tag color="green">Active</Tag>;
+              return <Tag color="green">{intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}</Tag>;
             case 'inactive':
-              return <Tag color="orange">Inactive</Tag>;
+              return <Tag color="orange">{intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}</Tag>;
             default: return <Tag color="#FFCF00">{status}</Tag>;
           }
         }
       },
       {
-        title: 'Updated On',
+        title: `${intl.formatMessage({ id: 'updatedOn', defaultMessage: 'Updated On' })}`,
         dataIndex: 'updatedAt',
         sorter: true,
         render(date: Date) {
@@ -102,7 +107,7 @@ export class TableListGallery extends PureComponent<IProps> {
         }
       },
       {
-        title: 'Action',
+        title: `${intl.formatMessage({ id: 'action', defaultMessage: 'Action' })}`,
         dataIndex: '_id',
         render: (data, record) => (
           <div style={{ whiteSpace: 'nowrap' }}>
@@ -131,6 +136,11 @@ export class TableListGallery extends PureComponent<IProps> {
     return (
       <div className="table-responsive">
         <Table
+          locale={{
+            emptyText: <Empty
+              description={intl.formatMessage({ id: 'emptyData', defaultMessage: 'No Data' })}
+            />
+          }}
           dataSource={dataSource}
           columns={columns}
           rowKey={rowKey}
@@ -143,3 +153,5 @@ export class TableListGallery extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(TableListGallery);

@@ -4,6 +4,7 @@ import {
 } from 'antd';
 import { IGallery } from '@interfaces/gallery';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { injectIntl, IntlShape } from 'react-intl';
 import GalleryCard from './gallery-card';
 
 interface IProps {
@@ -12,12 +13,13 @@ interface IProps {
   loadMore(): Function;
   loading: boolean;
   notFoundText?: string;
+  intl: IntlShape
 }
 
-export class ScrollListGallery extends PureComponent<IProps> {
+class ScrollListGallery extends PureComponent<IProps> {
   render() {
     const {
-      items = [], loadMore, canLoadmore = false, loading = false, notFoundText
+      items = [], loadMore, canLoadmore = false, loading = false, notFoundText, intl
     } = this.props;
     return (
       <>
@@ -46,12 +48,18 @@ export class ScrollListGallery extends PureComponent<IProps> {
           </Row>
         </InfiniteScroll>
         {!loading && !items.length && (
-        <div className="main-container custom">
-          <Alert className="text-center" type="info" message={notFoundText || 'No gallery was found'} />
-        </div>
+          <div className="main-container custom">
+            <Alert
+              className="text-center"
+              type="info"
+              message={notFoundText || intl.formatMessage({ id: 'noGalleryWasFound', defaultMessage: 'No gallery was found' })}
+            />
+          </div>
         )}
         {loading && <div className="text-center"><Spin /></div>}
       </>
     );
   }
 }
+
+export default injectIntl(ScrollListGallery);

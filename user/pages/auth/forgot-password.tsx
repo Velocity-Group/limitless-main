@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import Link from 'next/link';
 // import { GoogleReCaptcha } from '@components/common';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   auth: any;
@@ -17,6 +18,7 @@ interface IProps {
   forgot: Function;
   forgotData: any;
   query: any;
+  intl: IntlShape;
 }
 
 interface IState {
@@ -60,16 +62,29 @@ class Forgot extends PureComponent<IProps, IState> {
     //   message.error('Are you a robot?');
     //   return;
     // }
+    const { intl } = this.props;
     await this.setState({ submiting: true });
     try {
       await authService.resetPassword({
         ...data
       });
-      message.success('An email has been sent to you to reset your password');
+      message.success(
+        intl.formatMessage({
+          id: 'emailHaveBeenSentToResetPassword',
+          defaultMessage:
+            'An email has been sent to you to reset your password'
+        })
+      );
       this.handleCountdown();
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Error occured, please try again later');
+      message.error(
+        error?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     } finally {
       this.setState({ submiting: false });
     }
@@ -84,7 +99,7 @@ class Forgot extends PureComponent<IProps, IState> {
     }
     this.setState({ countTime: countTime - 1 });
     this._intervalCountdown = setInterval(this.coundown.bind(this), 1000);
-  }
+  };
 
   async handleVerifyCapcha(resp: any) {
     if (resp?.data?.success) {
@@ -100,7 +115,7 @@ class Forgot extends PureComponent<IProps, IState> {
   }
 
   render() {
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const { submiting, countTime } = this.state;
     return (
       <>
@@ -108,7 +123,12 @@ class Forgot extends PureComponent<IProps, IState> {
           <title>
             {ui?.siteName}
             {' '}
-            | Forgot Password
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'forgotPasswordTitle',
+              defaultMessage: 'Forgot Password'
+            })}
           </title>
         </Head>
         <Layout>
@@ -121,7 +141,11 @@ class Forgot extends PureComponent<IProps, IState> {
                   md={6}
                   lg={12}
                   className="login-content left fixed"
-                  style={ui.loginPlaceholderImage ? { backgroundImage: `url(${ui?.loginPlaceholderImage})` } : null}
+                  style={
+                    ui.loginPlaceholderImage
+                      ? { backgroundImage: `url(${ui?.loginPlaceholderImage})` }
+                      : null
+                  }
                 />
                 <Col
                   xs={24}
@@ -131,17 +155,29 @@ class Forgot extends PureComponent<IProps, IState> {
                   className="login-content right"
                   style={{ paddingTop: '80px' }}
                 >
-                  {ui.logo && <div className="login-logo"><a href="/auth/login"><img alt="logo" src={ui.logo} height="80px" /></a></div>}
+                  {ui.logo && (
+                    <div className="login-logo">
+                      <a href="/auth/login">
+                        <img alt="logo" src={ui.logo} height="80px" />
+                      </a>
+                    </div>
+                  )}
                   <h3
                     style={{
                       fontSize: 30,
                       textAlign: 'center'
                     }}
                   >
-                    Reset password
+                    {intl.formatMessage({
+                      id: 'resetPassword',
+                      defaultMessage: 'Reset Password'
+                    })}
                   </h3>
                   <div>
-                    <Form name="login-form" onFinish={this.handleReset.bind(this)}>
+                    <Form
+                      name="login-form"
+                      onFinish={this.handleReset.bind(this)}
+                    >
                       <Form.Item
                         hasFeedback
                         name="email"
@@ -149,15 +185,26 @@ class Forgot extends PureComponent<IProps, IState> {
                         rules={[
                           {
                             type: 'email',
-                            message: 'Invalid email format'
+                            message: `${intl.formatMessage({
+                              id: 'invalidEmailFormat',
+                              defaultMessage: 'Invalid email format!'
+                            })}`
                           },
                           {
                             required: true,
-                            message: 'Please enter your E-mail!'
+                            message: `${intl.formatMessage({
+                              id: 'enterEmail',
+                              defaultMessage: 'Please enter your E-mail!'
+                            })}`
                           }
                         ]}
                       >
-                        <Input placeholder="Enter your email address" />
+                        <Input
+                          placeholder={intl.formatMessage({
+                            id: 'enterYourEmailAddress',
+                            defaultMessage: 'Enter your email address'
+                          })}
+                        />
                       </Form.Item>
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
                       <Form.Item style={{ textAlign: 'center' }}>
@@ -167,21 +214,48 @@ class Forgot extends PureComponent<IProps, IState> {
                           className="login-form-button"
                           disabled={submiting || countTime < 60}
                           loading={submiting || countTime < 60}
+                          style={{ textTransform: 'uppercase' }}
                         >
-                          {countTime < 60 ? 'Resend in' : 'Send'}
+                          {countTime < 60
+                            ? `${intl.formatMessage({
+                              id: 'resendIn',
+                              defaultMessage: 'Resend in'
+                            })}`
+                            : `${intl.formatMessage({
+                              id: 'send',
+                              defaultMessage: 'Send'
+                            })}`}
                           {' '}
                           {countTime < 60 && `${countTime}s`}
                         </Button>
                         <p>
-                          Have an account already?
+                          {intl.formatMessage({
+                            id: 'haveAccountAlready',
+                            defaultMessage: 'Have an account already?'
+                          })}
                           <Link href="/auth/login">
-                            <a> Log in here.</a>
+                            <a>
+                              {' '}
+                              {intl.formatMessage({
+                                id: 'logInHere',
+                                defaultMessage: 'Log in here.'
+                              })}
+                            </a>
                           </Link>
                         </p>
                         <p>
-                          Don&apos;t have an account yet?
+                          {intl.formatMessage({
+                            id: 'dontHaveAnAccountYet',
+                            defaultMessage: 'Don\'t have an account yet?'
+                          })}
                           <Link href="/auth/register">
-                            <a> Sign up here.</a>
+                            <a>
+                              {' '}
+                              {intl.formatMessage({
+                                id: 'signUpHere',
+                                defaultMessage: 'Sign up here.'
+                              })}
+                            </a>
                           </Link>
                         </p>
                       </Form.Item>
@@ -201,4 +275,4 @@ const mapStatetoProps = (state: any) => ({
   ui: { ...state.ui }
 });
 
-export default connect(mapStatetoProps)(Forgot);
+export default injectIntl(connect(mapStatetoProps)(Forgot));

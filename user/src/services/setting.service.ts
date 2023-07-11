@@ -3,12 +3,12 @@ import { APIRequest } from './api-request';
 export class SettingService extends APIRequest {
   private _settings = {} as any;
 
-  async all(group = '', forceReload = false) {
+  async all(group = '', forceReload = false, header = {}) {
     const settingGroup = group || 'all';
     if (this._settings[settingGroup] && !forceReload) {
       return this._settings[settingGroup];
     }
-    const resp = await this.get(this.buildUrl('/settings/public', { group }));
+    const resp = await this.get(this.buildUrl('/settings/public', { group }), header);
     this._settings[settingGroup] = resp;
     return resp;
   }

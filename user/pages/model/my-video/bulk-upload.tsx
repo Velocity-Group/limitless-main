@@ -12,10 +12,12 @@ import { connect } from 'react-redux';
 import Router from 'next/router';
 import { IUIConfig, IPerformer, ISettings } from 'src/interfaces';
 import { getGlobalConfig } from '@services/config';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   user: IPerformer;
+  intl: IntlShape;
   settings: ISettings;
 }
 
@@ -46,10 +48,17 @@ class BulkUploadVideo extends PureComponent<IProps> {
   formRef: any;
 
   componentDidMount() {
+    const { intl } = this.props;
     if (!this.formRef) this.formRef = createRef();
-    const { user, settings } = this.props;
+    const { user } = this.props;
     if (!user || !user.verifiedDocument) {
-      message.warning('Your ID documents are not verified yet! You could not post any content right now.');
+      message.warning(
+        intl.formatMessage({
+          id: 'yourIdDocumentsAreNotVerifiedYet',
+          defaultMessage:
+            'Your ID documents are not verified yet! You could not post any content right now.'
+        })
+      );
       Router.back();
     }
     // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
@@ -72,15 +81,26 @@ class BulkUploadVideo extends PureComponent<IProps> {
   }
 
   beforeUpload(file, listFile) {
+    const { intl } = this.props;
     const config = getGlobalConfig();
 
     if (file.size / 1024 / 1024 > (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000)) {
-      message.error(`${file.name} is over ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB`);
+      message.error(
+        `${file.name} ${intl.formatMessage({
+          id: 'isOver',
+          defaultMessage: 'is over'
+        })} ${config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000}MB`
+      );
       return false;
     }
     const { fileList } = this.state;
     this.setState({
-      fileList: [...fileList, ...listFile.filter((f) => f.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000))]
+      fileList: [
+        ...fileList,
+        ...listFile.filter(
+          (f) => f.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_VIDEO || 2000)
+        )
+      ]
     });
     return true;
   }
@@ -92,10 +112,17 @@ class BulkUploadVideo extends PureComponent<IProps> {
 
   async submit() {
     const { fileList } = this.state;
-    const { user } = this.props;
-    const uploadFiles = fileList.filter((f) => !['uploading', 'done'].includes(f.status));
+    const { user, intl } = this.props;
+    const uploadFiles = fileList.filter(
+      (f) => !['uploading', 'done'].includes(f.status)
+    );
     if (!uploadFiles.length) {
-      message.error('Please select videos');
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseSelectVideo',
+          defaultMessage: 'Please select video!'
+        })
+      );
       return;
     }
 
@@ -129,27 +156,50 @@ class BulkUploadVideo extends PureComponent<IProps> {
         file.status = 'done';
       } catch (e) {
         file.status = 'error';
-        message.error(`File ${file.name} error!`);
+        message.error(
+          `${intl.formatMessage({ id: 'file', defaultMessage: 'File' })} ${
+            file.name
+          } ${intl.formatMessage({
+            id: 'errorLowCase',
+            defaultMessage: 'error'
+          })}!`
+        );
       }
     }
-    message.success('Videos have been uploaded!');
+    message.success(
+      intl.formatMessage({
+        id: 'videosHaveBeenUploaded',
+        defaultMessage: 'Videos have been uploaded!'
+      })
+    );
     Router.push('/model/my-video');
   }
 
   render() {
     const { uploading, fileList } = this.state;
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Upload Videos
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'uploadVideos',
+              defaultMessage: 'Upload Videos'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Upload Videos" icon={<UploadOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'uploadVideos',
+              defaultMessage: 'Upload Videos'
+            })}
+            icon={<UploadOutlined />}
+          />
           <Form
             {...layout}
             onFinish={this.submit.bind(this)}
@@ -169,22 +219,27 @@ class BulkUploadVideo extends PureComponent<IProps> {
                   <UploadOutlined />
                 </p>
                 <p className="ant-upload-text">
-                  Click here or drag & drop your VIDEO files to this area to upload
+                  {intl.formatMessage({
+                    id: 'clickHereOrDragAndDropYourVideoFilesToThisAreaToUpload',
+                    defaultMessage:
+                      'Click here or drag & drop your VIDEO files to this area to upload'
+                  })}
                 </p>
               </Dragger>
             </Form.Item>
-            <VideoUploadList
-              files={fileList}
-              remove={this.remove.bind(this)}
-            />
+            <VideoUploadList files={fileList} remove={this.remove.bind(this)} />
             <Form.Item>
               <Button
                 className="secondary"
                 htmlType="submit"
                 loading={uploading}
                 disabled={uploading || !fileList.length}
+                style={{ textTransform: 'uppercase' }}
               >
-                UPLOAD ALL
+                {intl.formatMessage({
+                  id: 'uploadAll',
+                  defaultMessage: 'Upload All'
+                })}
               </Button>
             </Form.Item>
           </Form>
@@ -198,4 +253,4 @@ const mapStates = (state: any) => ({
   user: state.user.current,
   settings: state.settings
 });
-export default connect(mapStates)(BulkUploadVideo);
+export default injectIntl(connect(mapStates)(BulkUploadVideo));

@@ -5,15 +5,17 @@ import {
 import { PlusOutlined, PictureOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
-import { TableListGallery } from '@components/gallery/table-list';
-import { SearchFilter } from '@components/common/search-filter';
+import TableListGallery from '@components/gallery/table-list';
+import SearchFilter from '@components/common/search-filter';
 import Link from 'next/link';
 import { galleryService } from '@services/gallery.service';
 import { connect } from 'react-redux';
 import { IUIConfig } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 interface IStates {
@@ -65,14 +67,33 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
   }
 
   async handleDeleteGallery(id: string) {
-    if (!window.confirm('Are you sure you want to delete this gallery?')) return;
+    const { intl } = this.props;
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'areYouSureYouWantToDeleteThisGallery',
+          defaultMessage: 'Are you sure you want to delete this gallery?'
+        })
+      )
+    ) { return; }
     try {
       await galleryService.delete(id);
-      message.success('Your gallery was deleted successfully');
+      message.success(
+        intl.formatMessage({
+          id: 'yourGalleryWasDeletedSuccessfully',
+          defaultMessage: 'Your gallery was deleted successfully'
+        })
+      );
       this.search();
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
-      message.error(err.message || 'An error occurred, please try again!');
+      message.error(
+        err.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     }
   }
 
@@ -89,6 +110,7 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
   }
 
   async search() {
+    const { intl } = this.props;
     try {
       const {
         filters, pagination, sort, sortBy
@@ -108,27 +130,41 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
         }
       });
     } catch (error) {
-      message.error('Something went wrong. Please try again!');
+      message.error(
+        intl.formatMessage({
+          id: 'somethingWentWrong',
+          defaultMessage: 'Something went wrong, please try again!'
+        })
+      );
     } finally {
       this.setState({ loading: false });
     }
   }
 
   render() {
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const { galleries, pagination, loading } = this.state;
     const statuses = [
       {
         key: '',
-        text: 'Status'
+        text: intl.formatMessage({
+          id: 'status',
+          defaultMessage: 'Status'
+        })
       },
       {
         key: 'active',
-        text: 'Active'
+        text: intl.formatMessage({
+          id: 'active',
+          defaultMessage: 'Active'
+        })
       },
       {
         key: 'inactive',
-        text: 'Inactive'
+        text: intl.formatMessage({
+          id: 'inactive',
+          defaultMessage: 'Inactive'
+        })
       }
     ];
     return (
@@ -138,23 +174,42 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
             {' '}
             {ui && ui.siteName}
             {' '}
-            | My Galleries
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'myGalleries',
+              defaultMessage: 'My Galleries'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="My Galleries" icon={<PictureOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'myGalleries',
+              defaultMessage: 'My Galleries'
+            })}
+            icon={<PictureOutlined />}
+          />
           <div>
             <Row>
               <Col lg={20} xs={24}>
-                <SearchFilter statuses={statuses} searchWithKeyword onSubmit={this.handleFilter.bind(this)} />
+                <SearchFilter
+                  statuses={statuses}
+                  searchWithKeyword
+                  onSubmit={this.handleFilter.bind(this)}
+                />
               </Col>
-              <Col lg={4} xs={24} style={{ display: 'flex', alignItems: 'center' }}>
+              <Col
+                lg={4}
+                xs={24}
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
                 <Button className="secondary">
                   <Link href="/model/my-gallery/create">
                     <a>
                       <PlusOutlined />
                       {' '}
-                      Create New
+                      {intl.formatMessage({ id: 'createNew', defaultMessage: 'Create New' })}
                     </a>
                   </Link>
                 </Button>
@@ -180,4 +235,4 @@ class GalleryListingPage extends PureComponent<IProps, IStates> {
 const mapStates = (state: any) => ({
   ui: state.ui
 });
-export default connect(mapStates)(GalleryListingPage);
+export default injectIntl(connect(mapStates)(GalleryListingPage));

@@ -6,17 +6,22 @@ import { NotificationOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { payoutRequestService } from 'src/services';
 import {
-  ISettings, IUIConfig, PayoutRequestInterface, IUser
+  ISettings,
+  IUIConfig,
+  PayoutRequestInterface,
+  IUser
 } from 'src/interfaces';
 import nextCookie from 'next-cookies';
 import Router from 'next/router';
 import { connect } from 'react-redux';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface Props {
   payout: PayoutRequestInterface;
   ui: IUIConfig;
   settings: ISettings;
   user: IUser;
+  intl: IntlShape;
 }
 
 interface States {
@@ -25,7 +30,7 @@ interface States {
     totalEarnedTokens: number;
     previousPaidOutTokens: number;
     remainingUnpaidTokens: number;
-  }
+  };
 }
 
 class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
@@ -69,20 +74,31 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
   }
 
   componentDidMount() {
-    const { payout } = this.props;
+    const { payout, intl } = this.props;
     if (!payout) {
-      message.error('Could not find payout request');
+      message.error(
+        intl.formatMessage({
+          id: 'couldNotFindPayoutRequest',
+          defaultMessage: 'Could not find payout request'
+        })
+      );
       Router.back();
     }
     this.calculateStatsPayout();
   }
 
   calculateStatsPayout = async () => {
+    const { intl } = this.props;
     try {
       const resp = await payoutRequestService.calculate();
       this.setState({ statsPayout: resp.data });
     } catch {
-      message.error('Something went wrong. Please try to input date again!');
+      message.error(
+        intl.formatMessage({
+          id: 'somethingWentWrong',
+          defaultMessage: 'Something went wrong, please try again!'
+        })
+      );
     }
   };
 
@@ -91,13 +107,24 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
     requestNote: string;
     requestTokens: number;
   }) {
-    const { payout, user } = this.props;
+    const { payout, user, intl } = this.props;
     if (['done', 'approved', 'rejected'].includes(payout.status)) {
-      message.error('Please recheck request payout status');
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseRecheckRequestPayoutStatus',
+          defaultMessage: 'Please recheck request payout status'
+        })
+      );
       return;
     }
     if (data.requestTokens > user.balance) {
-      message.error('Requested amount must be less than or equal your wallet balance');
+      message.error(
+        intl.formatMessage({
+          id: 'requestedAmountMustBeLessThanOrEqualYourWalletBalance',
+          defaultMessage:
+            'Requested amount must be less than or equal your wallet balance'
+        })
+      );
       return;
     }
     try {
@@ -113,21 +140,45 @@ class PayoutRequestUpdatePage extends React.PureComponent<Props, States> {
       Router.push('/model/payout-request');
     } catch (e) {
       const error = await Promise.resolve(e);
-      message.error(error?.message || 'Error occured, please try again later');
+      message.error(
+        error?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
+    } finally {
       this.setState({ submiting: false });
     }
   }
 
   render() {
-    const { payout, ui, settings } = this.props;
+    const {
+      payout, ui, settings, intl
+    } = this.props;
     const { submiting, statsPayout } = this.state;
     return (
       <>
         <Head>
-          <title>{`${ui?.siteName} | Edit Payout Request`}</title>
+          <title>
+            {ui?.siteName}
+            {' '}
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'editPayoutRequest',
+              defaultMessage: 'Edit Payout Request'
+            })}
+          </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Edit Payout Request" icon={<NotificationOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'editPayoutRequest',
+              defaultMessage: 'Edit Payout Request'
+            })}
+            icon={<NotificationOutlined />}
+          />
           <PayoutRequestForm
             statsPayout={statsPayout}
             payout={payout}
@@ -147,4 +198,4 @@ const mapStateToProps = (state) => ({
   settings: state.settings
 });
 
-export default connect(mapStateToProps)(PayoutRequestUpdatePage);
+export default injectIntl(connect(mapStateToProps)(PayoutRequestUpdatePage));

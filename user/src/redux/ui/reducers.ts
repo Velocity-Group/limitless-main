@@ -19,8 +19,9 @@ const uiReducers = [
     on: updateUIValue,
     reducer(state: any, data: any) {
       if (process.browser) {
+        // Don't save menus data to localstorage
         Object.keys(data.payload).forEach(
-          (key) => localStorage && localStorage.setItem(key, data.payload[key])
+          (key) => key !== 'menus' && localStorage && localStorage.setItem(key, data.payload[key])
         );
       }
       return {
@@ -34,8 +35,9 @@ const uiReducers = [
     reducer(state: any) {
       const newVal = {};
       if (process.browser) {
+        // Don't get menus data from localstorage
         Object.keys(initialState).forEach((key) => {
-          const val = localStorage.getItem(key);
+          const val = key !== 'menus' && localStorage.getItem(key);
           if (val) {
             newVal[key] = val;
           }

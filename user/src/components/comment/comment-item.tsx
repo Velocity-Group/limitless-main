@@ -5,11 +5,13 @@ import { HeartOutlined, MoreOutlined, CaretUpOutlined } from '@ant-design/icons'
 import { reactionService } from '@services/index';
 import moment from 'moment';
 import { connect } from 'react-redux';
-import { CommentForm, ListComments } from '@components/comment';
+import CommentForm from '@components/comment/comment-form';
+import ListComments from '@components/comment/list-comments';
 import {
   getComments, moreComment, createComment, deleteComment
 } from '@redux/comment/actions';
 import { IUser, IComment } from 'src/interfaces/index';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   item: IComment;
@@ -22,6 +24,7 @@ interface IProps {
   createComment: Function;
   deleteComment: Function;
   commentMapping: any;
+  intl: IntlShape;
 }
 
 class CommentItem extends PureComponent<IProps> {
@@ -73,6 +76,7 @@ class CommentItem extends PureComponent<IProps> {
   }
 
   async onLikeComment(comment) {
+    const { intl } = this.props;
     const { isLiked, totalLike } = this.state;
     try {
       if (!isLiked) {
@@ -92,7 +96,10 @@ class CommentItem extends PureComponent<IProps> {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(error.message || intl.formatMessage({
+        id: 'errorOccurredPleaseTryAgainLater',
+        defaultMessage: 'Error occurred, please try again later'
+      }));
     }
   }
 
@@ -111,14 +118,17 @@ class CommentItem extends PureComponent<IProps> {
   }
 
   async deleteComment(item) {
-    const { deleteComment: handleDelete } = this.props;
-    if (!window.confirm('Are you sure to remove this comment?')) return;
+    const { deleteComment: handleDelete, intl } = this.props;
+    if (!window.confirm(intl.formatMessage({
+      id: 'areYouSureToRemoveThisComment',
+      defaultMessage: 'Are you sure to remove this comment?'
+    }))) return;
     handleDelete(item._id);
   }
 
   render() {
     const {
-      item, user, canReply, onDelete, commentMapping, comment
+      item, user, canReply, onDelete, commentMapping, comment, intl
     } = this.props;
     const { requesting: commenting } = comment;
     const fetchingComment = commentMapping.hasOwnProperty(item._id) ? commentMapping[item._id].requesting : false;
@@ -142,7 +152,7 @@ class CommentItem extends PureComponent<IProps> {
                   <Menu key={`menu_cmt_${item._id}`}>
                     <Menu.Item key={`delete_cmt_${item._id}`} onClick={() => onDelete(item)}>
                       <a>
-                        Delete
+                        {intl.formatMessage({ id: 'delete', defaultMessage: 'Delete' })}
                       </a>
                     </Menu.Item>
                   </Menu>
@@ -161,7 +171,7 @@ class CommentItem extends PureComponent<IProps> {
                 {' '}
                 {totalLike > 0 && totalLike}
               </a>
-              {canReply && <a aria-hidden className={!isReply ? 'cmt-reply' : 'cmt-reply active'} onClick={() => this.setState({ isReply: !isReply })}>Reply</a>}
+              {canReply && <a aria-hidden className={!isReply ? 'cmt-reply' : 'cmt-reply active'} onClick={() => this.setState({ isReply: !isReply })}>{intl.formatMessage({ id: 'reply', defaultMessage: 'Reply' })}</a>}
             </div>
             <div className={isReply ? 'reply-bl-form active' : 'reply-bl-form'}>
               <div className="feed-comment">
@@ -183,7 +193,7 @@ class CommentItem extends PureComponent<IProps> {
                   {' '}
                   {!isOpenComment ? 'View' : 'Hide'}
                   {' '}
-                  reply
+                  {intl.formatMessage({ id: 'reply', defaultMessage: 'Reply' })}
                 </a>
               </div>
             )}
@@ -201,7 +211,14 @@ class CommentItem extends PureComponent<IProps> {
                 user={user}
                 canReply={false}
               />
-              {comments.length < totalComments && <p className="text-center"><a aria-hidden onClick={this.moreComment.bind(this)}>more...</a></p>}
+              {comments.length < totalComments && (
+                <p className="text-center">
+                  <a aria-hidden onClick={this.moreComment.bind(this)}>
+                    {intl.formatMessage({ id: 'more', defaultMessage: 'more' })}
+                    ...
+                  </a>
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -221,4 +238,4 @@ const mapStates = (state: any) => {
 const mapDispatch = {
   getComments, moreComment, createComment, deleteComment
 };
-export default connect(mapStates, mapDispatch)(CommentItem);
+export default injectIntl(connect(mapStates, mapDispatch)(CommentItem));

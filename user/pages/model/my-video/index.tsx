@@ -6,14 +6,16 @@ import {
 import { VideoCameraOutlined, UploadOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { videoService } from '@services/video.service';
-import { SearchFilter } from '@components/common/search-filter';
-import { TableListVideo } from '@components/video/table-list';
+import SearchFilter from '@components/common/search-filter';
+import TableListVideo from '@components/video/table-list';
 import Link from 'next/link';
 import { connect } from 'react-redux';
 import { IUIConfig } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 class Videos extends PureComponent<IProps> {
@@ -55,6 +57,7 @@ class Videos extends PureComponent<IProps> {
   }
 
   async search(page = 1) {
+    const { intl } = this.props;
     try {
       const {
         filter, limit, sort, sortBy, pagination
@@ -77,14 +80,27 @@ class Videos extends PureComponent<IProps> {
         }
       });
     } catch (e) {
-      message.error('An error occurred, please try again!');
+      message.error(
+        intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
       await this.setState({ searching: false });
     }
   }
 
   async deleteVideo(id: string) {
+    const { intl } = this.props;
     // eslint-disable-next-line no-alert
-    if (!window.confirm('Are you sure you want to delete this video?')) {
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'youWantToDeleteThisVideo',
+          defaultMessage: 'Are you sure you want to delete this video?'
+        })
+      )
+    ) {
       return false;
     }
     try {
@@ -93,26 +109,41 @@ class Videos extends PureComponent<IProps> {
       await this.search(pagination.current);
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
-      message.error(err.message || 'An error occurred, please try again!');
+      message.error(
+        err.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     }
     return undefined;
   }
 
   render() {
     const { list, searching, pagination } = this.state;
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const statuses = [
       {
         key: '',
-        text: 'Status'
+        text: intl.formatMessage({
+          id: 'status',
+          defaultMessage: 'Status'
+        })
       },
       {
         key: 'active',
-        text: 'Active'
+        text: intl.formatMessage({
+          id: 'active',
+          defaultMessage: 'Active'
+        })
       },
       {
         key: 'inactive',
-        text: 'Inactive'
+        text: intl.formatMessage({
+          id: 'inactive',
+          defaultMessage: 'Inactive'
+        })
       }
     ];
 
@@ -122,11 +153,22 @@ class Videos extends PureComponent<IProps> {
           <title>
             {ui?.siteName}
             {' '}
-            | My Videos
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'myVideos',
+              defaultMessage: 'My Videos'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="My Videos" icon={<VideoCameraOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'myVideos',
+              defaultMessage: 'My Videos'
+            })}
+            icon={<VideoCameraOutlined />}
+          />
           <div>
             <Row>
               <Col lg={16} xs={24}>
@@ -136,14 +178,25 @@ class Videos extends PureComponent<IProps> {
                   onSubmit={this.handleFilter.bind(this)}
                 />
               </Col>
-              <Col lg={8} xs={24} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <Col
+                lg={8}
+                xs={24}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end'
+                }}
+              >
                 <Button className="primary">
                   <Link href="/model/my-video/upload">
                     <a>
                       {' '}
                       <UploadOutlined />
                       {' '}
-                      Upload new
+                      {intl.formatMessage({
+                        id: 'uploadNew',
+                        defaultMessage: 'Upload new'
+                      })}
                     </a>
                   </Link>
                 </Button>
@@ -153,7 +206,10 @@ class Videos extends PureComponent<IProps> {
                     <a>
                       <UploadOutlined />
                       {' '}
-                      Bulk upload
+                      {intl.formatMessage({
+                        id: 'bulkUpload',
+                        defaultMessage: 'Bulk upload'
+                      })}
                     </a>
                   </Link>
                 </Button>
@@ -178,4 +234,4 @@ class Videos extends PureComponent<IProps> {
 const mapStates = (state) => ({
   ui: state.ui
 });
-export default connect(mapStates)(Videos);
+export default injectIntl(connect(mapStates)(Videos));

@@ -3,7 +3,7 @@ import {
   Layout, message, Button, Descriptions, Tag, Spin, Divider, Select, Modal
 } from 'antd';
 import {
-  ShoppingCartOutlined, EditOutlined, PlusOutlined, DeleteOutlined
+  ShoppingCartOutlined, EditOutlined, PlusOutlined
 } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import Head from 'next/head';
@@ -13,6 +13,7 @@ import {
 import { orderService, shippingAddressService, utilsService } from 'src/services';
 import { connect } from 'react-redux';
 import Router from 'next/router';
+import { injectIntl, IntlShape } from 'react-intl';
 import { ShippingAddressForm } from '@components/product/shipping-address-form';
 
 const { Item } = Descriptions;
@@ -20,6 +21,7 @@ const { Item } = Descriptions;
 interface IProps {
   id: string;
   ui: IUIConfig;
+  intl: IntlShape;
   countries: ICountry[];
 }
 
@@ -68,6 +70,8 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
   }
 
   getData = async () => {
+    const { intl } = this.props;
+
     try {
       const { id } = this.props;
       await this.setState({ loading: true });
@@ -77,18 +81,30 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
         loading: false
       });
     } catch (e) {
-      message.error('Can not find order!');
+      message.error(
+        intl.formatMessage({
+          id: 'canNotFindOrder',
+          defaultMessage: 'Can not find order!'
+        })
+      );
       Router.back();
     }
   }
 
   downloadFile = async () => {
+    const { intl } = this.props;
+
     const { order } = this.state;
     try {
       const resp = await orderService.getDownloadLinkDigital(order.productId);
       window.open(resp?.data?.downloadLink, '_blank');
     } catch {
-      message.error('Error occured, please try again later');
+      message.error(
+        intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
     }
   }
 
@@ -156,39 +172,78 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
   };
 
   render() {
-    const { ui, countries } = this.props;
+    const { ui, countries, intl } = this.props;
     const {
       order, loading, addresses, onEditAddress, submiting, openAddAddressModal
     } = this.state;
     return (
       <Layout>
         <Head>
-          <title>
-            {`${ui?.siteName} | #${order?.orderNumber || ''}`}
-          </title>
+          <title>{`${ui?.siteName} | #${order?.orderNumber || ''}`}</title>
         </Head>
         <div className="main-container">
           {!loading && order && (
             <div className="main-container">
-              <PageHeading title={`#${order?.orderNumber}`} icon={<ShoppingCartOutlined />} />
+              <PageHeading
+                title={`#${order?.orderNumber}`}
+                icon={<ShoppingCartOutlined />}
+              />
               <Descriptions>
-                <Item key="seller" label="Model">
-                  {order?.performerInfo?.name || order?.performerInfo?.username || 'N/A'}
+                <Item
+                  key="seller"
+                  label={intl.formatMessage({
+                    id: 'model',
+                    defaultMessage: 'Model'
+                  })}
+                >
+                  {order?.performerInfo?.name
+                    || order?.performerInfo?.username
+                    || 'N/A'}
                 </Item>
-                <Item key="name" label="Product">
+                <Item
+                  key="name"
+                  label={intl.formatMessage({
+                    id: 'product',
+                    defaultMessage: 'Product'
+                  })}
+                >
                   {order?.productInfo?.name || 'N/A'}
                 </Item>
-                <Item key="description" label="Description">
+                <Item
+                  key="description"
+                  label={intl.formatMessage({
+                    id: 'description',
+                    defaultMessage: 'Description'
+                  })}
+                >
                   {order?.productInfo?.description || 'N/A'}
                 </Item>
-                <Item key="unitPrice" label="Unit price">
+                <Item
+                  key="unitPrice"
+                  label={intl.formatMessage({
+                    id: 'unitPrice',
+                    defaultMessage: 'Unit price'
+                  })}
+                >
                   $
                   {(order?.unitPrice || 0).toFixed(2)}
                 </Item>
-                <Item key="quantiy" label="Quantity">
+                <Item
+                  key="quantiy"
+                  label={intl.formatMessage({
+                    id: 'quantity',
+                    defaultMessage: 'Quantity'
+                  })}
+                >
                   {order?.quantity || '0'}
                 </Item>
-                <Item key="totalPrice" label="Total Price">
+                <Item
+                  key="totalPrice"
+                  label={intl.formatMessage({
+                    id: 'totalPrice',
+                    defaultMessage: 'Total Price'
+                  })}
+                >
                   $
                   {(order?.totalPrice || 0).toFixed(2)}
                 </Item>
@@ -197,13 +252,31 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 <>
                   {order?.deliveryStatus === 'delivered' ? (
                     <div style={{ marginBottom: '10px' }}>
-                      Download Link:
+                      {intl.formatMessage({
+                        id: 'downloadLink',
+                        defaultMessage: 'Download link'
+                      })}
+                      :
                       {' '}
-                      <a aria-hidden onClick={this.downloadFile.bind(this)}>Click to download</a>
+                      <a aria-hidden onClick={this.downloadFile.bind(this)}>
+                        {intl.formatMessage({
+                          id: 'clickToDownload',
+                          defaultMessage: 'Click to download'
+                        })}
+                      </a>
                     </div>
                   ) : (
-                    <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
-                      Delivery Status:
+                    <div
+                      style={{
+                        marginBottom: '10px',
+                        textTransform: 'capitalize'
+                      }}
+                    >
+                      {intl.formatMessage({
+                        id: 'deliveryStatus',
+                        defaultMessage: 'Delivery Status'
+                      })}
+                      :
                       {' '}
                       <Tag color="green">{order?.deliveryStatus || 'N/A'}</Tag>
                     </div>
@@ -211,9 +284,18 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                 </>
               ) : (
                 <div>
-                  <Divider>Delivery information</Divider>
+                  <Divider>
+                    {intl.formatMessage({
+                      id: 'deliveryInformation',
+                      defaultMessage: 'Delivery Information'
+                    })}
+                  </Divider>
                   <div style={{ marginBottom: '10px' }}>
-                    Delivery Address:
+                    {intl.formatMessage({
+                      id: 'deliveryAddress',
+                      defaultMessage: 'Delivery Address'
+                    })}
+                    :
                     {' '}
                     {!onEditAddress ? order?.deliveryAddress : (
                       <Select
@@ -242,7 +324,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                         <a aria-hidden onClick={() => this.setState({ onEditAddress: true })}>
                           <EditOutlined />
                           {' '}
-                          Change
+                          {intl.formatMessage({ id: 'change', defaultMessage: 'Change' })}
                         </a>
                       ) : (
                         <>
@@ -250,7 +332,7 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                           <a aria-hidden onClick={() => this.setState({ openAddAddressModal: true })}>
                             <PlusOutlined />
                             {' '}
-                            Add New Address
+                            {intl.formatMessage({ id: 'addNewAddress', defaultMessage: 'Add New Address' })}
                           </a>
                           )}
                         </>
@@ -259,17 +341,39 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
                     )}
                   </div>
                   <div style={{ marginBottom: '10px' }}>
-                    Phone Number:
+                    {intl.formatMessage({
+                      id: 'phoneNumber',
+                      defaultMessage: 'Phone Number'
+                    })}
+                    :
                     {' '}
                     {order?.phoneNumber || 'N/A'}
                   </div>
-                  <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
-                    Shipping Code:
+                  <div
+                    style={{
+                      marginBottom: '10px',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {intl.formatMessage({
+                      id: 'shippingCode',
+                      defaultMessage: 'Shipping Code'
+                    })}
+                    :
                     {' '}
                     <Tag color="blue">{order?.shippingCode || 'N/A'}</Tag>
                   </div>
-                  <div style={{ marginBottom: '10px', textTransform: 'capitalize' }}>
-                    Delivery Status:
+                  <div
+                    style={{
+                      marginBottom: '10px',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {intl.formatMessage({
+                      id: 'deliveryStatus',
+                      defaultMessage: 'Delivery Status'
+                    })}
+                    :
                     {' '}
                     <Tag color="green">{order?.deliveryStatus || 'N/A'}</Tag>
                   </div>
@@ -277,7 +381,10 @@ class OrderDetailPage extends PureComponent<IProps, IStates> {
               )}
               <div style={{ marginBottom: '10px' }}>
                 <Button danger onClick={() => Router.back()}>
-                  Back
+                  {intl.formatMessage({
+                    id: 'back',
+                    defaultMessage: 'Back'
+                  })}
                 </Button>
               </div>
             </div>
@@ -311,4 +418,4 @@ const mapStates = (state: any) => ({
   ui: state.ui
 });
 
-export default connect(mapStates)(OrderDetailPage);
+export default injectIntl(connect(mapStates)(OrderDetailPage));

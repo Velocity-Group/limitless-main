@@ -5,11 +5,13 @@ import Head from 'next/head';
 import { IUIConfig } from 'src/interfaces/';
 import Messenger from '@components/messages/Messenger';
 import { resetMessageState } from '@redux/message/actions';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   query: Record<string, string>;
   resetMessageState: Function;
+  intl: IntlShape;
 }
 
 class Messages extends PureComponent<IProps> {
@@ -27,14 +29,16 @@ class Messages extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, query = {} } = this.props;
+    const { ui, query = {}, intl } = this.props;
     return (
       <>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | Messages
+            |
+            {' '}
+            {intl.formatMessage({ id: 'messages', defaultMessage: 'Messages' })}
           </title>
         </Head>
         <Layout>
@@ -52,4 +56,4 @@ const mapStates = (state: any) => ({
 });
 
 const mapDispatch = { resetMessageState };
-export default connect(mapStates, mapDispatch)(Messages);
+export default injectIntl(connect(mapStates, mapDispatch)(Messages));

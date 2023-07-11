@@ -8,8 +8,13 @@ import { connect } from 'react-redux';
 import PayoutRequestList from 'src/components/payout-request/table';
 import { getResponseError } from '@lib/utils';
 import { payoutRequestService } from '@services/index';
+import { IUIConfig } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
-interface IProps {}
+interface IProps {
+  ui: IUIConfig;
+  intl: IntlShape;
+}
 
 class PerformerPayoutRequestPage extends PureComponent<IProps> {
   static onlyPerformer = true;
@@ -40,6 +45,7 @@ class PerformerPayoutRequestPage extends PureComponent<IProps> {
   }
 
   async getData() {
+    const { intl } = this.props;
     try {
       const {
         filter, sort, sortBy, pagination
@@ -59,30 +65,51 @@ class PerformerPayoutRequestPage extends PureComponent<IProps> {
       });
     } catch (error) {
       message.error(
-        getResponseError(await error) || 'An error occured. Please try again.'
+        getResponseError(await error)
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
       );
       this.setState({ loading: false });
     }
   }
 
   render() {
-    const {
-      pagination, items, loading
-    } = this.state;
+    const { ui, intl } = this.props;
+    const { pagination, items, loading } = this.state;
 
     return (
       <>
         <Head>
-          <title>Payout Requests</title>
+          <title>
+            {ui?.siteName}
+            {' '}
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'payoutRequests',
+              defaultMessage: 'Payout Requests'
+            })}
+          </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="Payout Requests" icon={<NotificationOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'payoutRequests',
+              defaultMessage: 'Payout Requests'
+            })}
+            icon={<NotificationOutlined />}
+          />
           <div style={{ margin: '10px 0' }}>
             <Button
               type="primary"
               onClick={() => Router.push('/model/payout-request/create')}
             >
-              Request a Payout
+              {intl.formatMessage({
+                id: 'requestAPayout',
+                defaultMessage: 'Request a Payout'
+              })}
             </Button>
           </div>
           <div className="table-responsive">
@@ -103,4 +130,4 @@ class PerformerPayoutRequestPage extends PureComponent<IProps> {
 const mapStateToProps = (state) => ({
   ui: state.ui
 });
-export default connect(mapStateToProps)(PerformerPayoutRequestPage);
+export default injectIntl(connect(mapStateToProps)(PerformerPayoutRequestPage));

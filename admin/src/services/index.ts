@@ -18,3 +18,4 @@ export * from './payout-request.service';
 export * from './token-transaction.service';
 export * from './token-package.service';
 export * from './config';
+export * from './language.service';

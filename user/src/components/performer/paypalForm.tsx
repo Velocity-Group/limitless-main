@@ -3,6 +3,7 @@ import {
   Form, Button, Input, Row, Col
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 
 const layout = {
   labelCol: { span: 24 },
@@ -21,21 +22,26 @@ interface IProps {
   onFinish: Function;
   user: IPerformer;
   updating?: boolean;
+  intl: IntlShape;
 }
 
-export class PerformerPaypalForm extends PureComponent<IProps> {
+class PerformerPaypalForm extends PureComponent<IProps> {
   render() {
-    const { onFinish, user, updating } = this.props;
+    const {
+      onFinish, user, updating, intl
+    } = this.props;
     return (
       <Form
         {...layout}
         name="nest-messages"
         onFinish={onFinish.bind(this)}
         validateMessages={validateMessages}
-        initialValues={user?.paypalSetting?.value || {
-          email: '',
-          phoneNumber: ''
-        }}
+        initialValues={
+          user?.paypalSetting?.value || {
+            email: '',
+            phoneNumber: ''
+          }
+        }
         labelAlign="left"
         className="account-form"
       >
@@ -43,14 +49,17 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
           <Col lg={12} xs={24}>
             <Form.Item
               name="email"
-              label="Paypal account email"
+              label={intl.formatMessage({
+                id: 'paypalAccountEmail',
+                defaultMessage: 'Paypal account email'
+              })}
               // help="You must upgrade to Business account to receive the payout from Admin"
             >
               <Input />
             </Form.Item>
             <Form.Item className="text-center">
               <Button className="secondary" htmlType="submit" disabled={updating} loading={updating}>
-                Submit
+                {intl.formatMessage({ id: 'submit', defaultMessage: 'Submit' })}
               </Button>
             </Form.Item>
           </Col>
@@ -73,3 +82,5 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(PerformerPaypalForm);

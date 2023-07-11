@@ -1,6 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
 import { Table, Tag } from 'antd';
 import Link from 'next/link';
+import { useIntl } from 'react-intl';
 import { PayoutRequestInterface } from 'src/interfaces';
 import { formatDate } from 'src/lib';
 
@@ -19,9 +20,10 @@ const PayoutRequestList = ({
   pageSize,
   onChange
 }: IProps) => {
+  const intl = useIntl();
   const columns = [
     {
-      title: 'ID',
+      title: intl.formatMessage({ id: 'id', defaultMessage: 'ID' }),
       dataIndex: '_id',
       key: 'id',
       render: (id: string, record) => (
@@ -42,7 +44,7 @@ const PayoutRequestList = ({
       )
     },
     {
-      title: 'Amount',
+      title: intl.formatMessage({ id: 'amount', defaultMessage: 'Amount' }),
       dataIndex: 'requestTokens',
       key: 'requestTokens',
       render: (requestTokens: number) => (
@@ -53,7 +55,7 @@ const PayoutRequestList = ({
       )
     },
     {
-      title: 'Payout Gateway',
+      title: intl.formatMessage({ id: 'payoutGateway', defaultMessage: 'Payout Gateway' }),
       dataIndex: 'paymentAccountType',
       key: 'paymentAccountType',
       render: (paymentAccountType: string) => {
@@ -61,9 +63,9 @@ const PayoutRequestList = ({
           case 'banking':
             return <Tag color="gold">Banking</Tag>;
           case 'stripe':
-            return <Tag color="#656fde">Stripe</Tag>;
+            return <Tag color="#656fde">{intl.formatMessage({ id: 'stripe', defaultMessage: 'Stripe' })}</Tag>;
           case 'paypal':
-            return <Tag color="#25397c">Paypal</Tag>;
+            return <Tag color="#25397c">{intl.formatMessage({ id: 'paypal', defaultMessage: 'Paypal' })}</Tag>;
           default:
             break;
         }
@@ -71,38 +73,38 @@ const PayoutRequestList = ({
       }
     },
     {
-      title: 'Status',
+      title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
         switch (status) {
           case 'done':
-            return <Tag color="green" style={{ textTransform: 'capitalize' }}>Done</Tag>;
+            return <Tag color="green" style={{ textTransform: 'capitalize' }}>{intl.formatMessage({ id: 'done', defaultMessage: 'Done' })}</Tag>;
           case 'pending':
-            return <Tag color="orange" style={{ textTransform: 'capitalize' }}>Pending</Tag>;
+            return <Tag color="orange" style={{ textTransform: 'capitalize' }}>{intl.formatMessage({ id: 'pending', defaultMessage: 'Pending' })}</Tag>;
           case 'rejected':
-            return <Tag color="red" style={{ textTransform: 'capitalize' }}>Rejected</Tag>;
+            return <Tag color="red" style={{ textTransform: 'capitalize' }}>{intl.formatMessage({ id: 'rejected', defaultMessage: 'Rejected' })}</Tag>;
           default: break;
         }
         return <Tag color="blue" style={{ textTransform: 'capitalize' }}>{status}</Tag>;
       }
     },
     {
-      title: 'Requested On',
+      title: intl.formatMessage({ id: 'requestedOn', defaultMessage: 'Requested On' }),
       key: 'createdAt',
       dataIndex: 'createdAt',
       render: (createdAt: Date) => <span>{formatDate(createdAt)}</span>,
       sorter: true
     },
     {
-      title: 'Updated On',
+      title: intl.formatMessage({ id: 'updatedOn', defaultMessage: 'Updated On' }),
       key: 'updatedAt',
       dataIndex: 'updatedAt',
       render: (updatedAt: Date) => <span>{formatDate(updatedAt)}</span>,
       sorter: true
     },
     {
-      title: 'Action',
+      title: intl.formatMessage({ id: 'action', defaultMessage: 'Action' }),
       key: 'details',
       render: (request: PayoutRequestInterface) => (
         <Link
@@ -115,7 +117,15 @@ const PayoutRequestList = ({
           }}
           as={`/model/payout-request/update?id=${request._id}`}
         >
-          <a>{request.status === 'pending' ? 'Edit' : 'View details'}</a>
+          <a>
+            {request.status === 'pending' ? intl.formatMessage({
+              id: 'edit',
+              defaultMessage: 'Edit'
+            }) : intl.formatMessage({
+              id: 'viewDetails',
+              defaultMessage: 'View details'
+            })}
+          </a>
         </Link>
       )
     }

@@ -2,7 +2,7 @@
 import Head from 'next/head';
 import { PureComponent, createRef } from 'react';
 import {
-  Form, Menu, message, Button, Input, Select,
+  Form, Menu, message, Button, Input,
   InputNumber, Switch, Checkbox, Radio
 } from 'antd';
 import Page from '@components/common/layout/page';
@@ -14,6 +14,8 @@ import { authService } from '@services/auth.service';
 import { FormInstance } from 'antd/lib/form';
 import { getResponseError } from '@lib/utils';
 import dynamic from 'next/dynamic';
+import { languageService } from '@services/language.service';
+import LanguageSearchFilter from '@components/language/search-filter';
 import { PaymentSettingsForm } from '@components/setting/payment-settings';
 import { S3SettingsForm } from '@components/setting/s3-settings';
 
@@ -26,7 +28,8 @@ class Settings extends PureComponent {
     updating: false,
     loading: false,
     selectedTab: 'general',
-    list: []
+    list: [],
+    allLocales: []
   };
 
   formRef: any;
@@ -74,6 +77,16 @@ class Settings extends PureComponent {
     }
 
     this.dataChange.smtpTransporter = this.smtpInfo;
+  }
+
+  async loadLocales() {
+    try {
+      const resp = await languageService.locales();
+      this.setState({ allLocales: resp.data });
+    } catch (e) {
+      const error = await Promise.resolve(e);
+      message.error(getResponseError(error));
+    }
   }
 
   async loadSettings() {
@@ -176,8 +189,7 @@ class Settings extends PureComponent {
   }
 
   renderFormItem(setting: ISetting) {
-    const { updating } = this.state;
-    // eslint-disable-next-line prefer-const
+    const { updating, allLocales } = this.state;
     let { type } = setting;
     if (setting.meta && setting.meta.textarea) {
       type = 'textarea';
@@ -282,6 +294,22 @@ class Settings extends PureComponent {
             </Radio.Group>
           </Form.Item>
         );
+      case 'locale':
+        return (
+          <Form.Item
+            label={setting.name}
+            key={setting._id}
+            help={setting.description}
+          // extra={setting.extra}
+          >
+            <LanguageSearchFilter
+              {...setting.meta}
+              initialLocales={allLocales}
+              defaultValue={setting.value}
+              onChange={(val) => this.setVal(setting.key, val)}
+            />
+          </Form.Item>
+        );
       default:
         return (
           <Form.Item label={setting.name} key={setting._id} help={setting.description} extra={setting.extra}>
@@ -328,6 +356,9 @@ class Settings extends PureComponent {
               <Menu.Item key="paymentGateways">Payment Gateways</Menu.Item>
               <Menu.Item key="socials">Socials Login</Menu.Item>
               <Menu.Item key="analytics">GG Analytics</Menu.Item>
+              <Menu.Item key="language">Language</Menu.Item>
+              {/* <Menu.Item key="recaptcha">Re-Captcha</Menu.Item> */}
+              {/* <Menu.Item key="ant">Ant Media</Menu.Item> */}
             </Menu>
           </div>
 

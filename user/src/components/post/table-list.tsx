@@ -8,6 +8,7 @@ import {
 import Link from 'next/link';
 import { IFeed } from 'src/interfaces';
 import { formatDate } from 'src/lib';
+import { useIntl } from 'react-intl';
 
 interface IProps {
   feeds: IFeed[];
@@ -26,9 +27,11 @@ const FeedList = ({
   onChange,
   onDelete
 }: IProps) => {
+  const intl = useIntl();
+
   const columns = [
     {
-      title: 'Post Type',
+      title: intl.formatMessage({ id: 'postType', defaultMessage: 'Post Type' }),
       key: 'id',
       render: (record) => {
         const images = record.files && record.files.filter((f) => f.type === 'feed-photo');
@@ -72,7 +75,7 @@ const FeedList = ({
       }
     },
     {
-      title: 'Description',
+      title: intl.formatMessage({ id: 'description', defaultMessage: 'Description' }),
       dataIndex: 'text',
       key: 'text',
       render: (text: string) => (
@@ -87,28 +90,28 @@ const FeedList = ({
       )
     },
     {
-      title: 'Status',
+      title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
         switch (status) {
           case 'active':
-            return <Tag color="green">Active</Tag>;
+            return <Tag color="green">{intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}</Tag>;
           case 'inactive':
-            return <Tag color="orange">Inactive</Tag>;
+            return <Tag color="orange">{intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}</Tag>;
           default: return <Tag color="blue">{status}</Tag>;
         }
       }
     },
     {
-      title: 'Updated On',
+      title: intl.formatMessage({ id: 'updatedOn', defaultMessage: 'Updated On' }),
       key: 'updatedAt',
       dataIndex: 'updatedAt',
       render: (updatedAt: Date) => <span>{formatDate(updatedAt)}</span>,
       sorter: true
     },
     {
-      title: 'Action',
+      title: intl.formatMessage({ id: 'action', defaultMessage: 'Action' }),
       key: 'details',
       render: (record) => [
         <Button className="info" key="edit">

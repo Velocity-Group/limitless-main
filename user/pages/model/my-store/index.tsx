@@ -6,15 +6,17 @@ import {
 import { ShopOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { productService } from '@services/product.service';
-import { SearchFilter } from '@components/common/search-filter';
-import { TableListProduct } from '@components/product/table-list-product';
+import SearchFilter from '@components/common/search-filter';
+import TableListProduct from '@components/product/table-list-product';
 import Link from 'next/link';
 import { connect } from 'react-redux';
 import { IPerformer, IUIConfig } from '@interfaces/index';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   user: IPerformer;
   ui: IUIConfig;
+  intl: IntlShape;
 }
 
 class Products extends PureComponent<IProps> {
@@ -64,6 +66,7 @@ class Products extends PureComponent<IProps> {
   }
 
   async search(page = 1) {
+    const { intl } = this.props;
     try {
       const {
         filter, limit, sort, sortBy, pagination
@@ -86,43 +89,73 @@ class Products extends PureComponent<IProps> {
         }
       });
     } catch (e) {
-      message.error('An error occurred, please try again!');
+      message.error(
+        intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
       await this.setState({ searching: false });
     }
   }
 
   async deleteProduct(id: string) {
+    const { intl } = this.props;
     // eslint-disable-next-line no-alert
-    if (!window.confirm('Are you sure you want to delete this product?')) {
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'youWantToDeleteThisProduct',
+          defaultMessage: 'Are you sure you want to delete this product?'
+        })
+      )
+    ) {
       return false;
     }
     try {
       const { pagination } = this.state;
       await productService.delete(id);
-      message.success('Deleted successfully');
+      message.success(
+        intl.formatMessage({
+          id: 'deletedSuccessfully',
+          defaultMessage: 'Deleted successfully'
+        })
+      );
       await this.search(pagination.current);
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
-      message.error(err.message || 'An error occurred, please try again!');
+      message.error(
+        err.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     }
     return true;
   }
 
   render() {
     const { list, searching, pagination } = this.state;
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     const statuses = [
       {
         key: '',
-        text: 'All'
+        text: `${intl.formatMessage({ id: 'all', defaultMessage: 'All' })}`
       },
       {
         key: 'active',
-        text: 'Active'
+        text: `${intl.formatMessage({
+          id: 'active',
+          defaultMessage: 'Active'
+        })}`
       },
       {
         key: 'inactive',
-        text: 'Inactive'
+        text: `${intl.formatMessage({
+          id: 'inactive',
+          defaultMessage: 'Inactive'
+        })}`
       }
     ];
 
@@ -132,11 +165,22 @@ class Products extends PureComponent<IProps> {
           <title>
             {ui && ui.siteName}
             {' '}
-            | My Products
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'myProducts',
+              defaultMessage: 'My Products'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="My Products" icon={<ShopOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'myProducts',
+              defaultMessage: 'My Products'
+            })}
+            icon={<ShopOutlined />}
+          />
           <div>
             <Row>
               <Col lg={20} xs={24}>
@@ -146,10 +190,19 @@ class Products extends PureComponent<IProps> {
                   searchWithKeyword
                 />
               </Col>
-              <Col lg={4} xs={24} style={{ display: 'flex', alignItems: 'center' }}>
+              <Col
+                lg={4}
+                xs={24}
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
                 <Button className="secondary">
                   <Link href="/model/my-store/create">
-                    <a>New Product</a>
+                    <a>
+                      {intl.formatMessage({
+                        id: 'newProduct',
+                        defaultMessage: 'New Product'
+                      })}
+                    </a>
                   </Link>
                 </Button>
               </Col>
@@ -174,4 +227,4 @@ class Products extends PureComponent<IProps> {
 const mapStates = (state: any) => ({
   ui: state.ui
 });
-export default connect(mapStates)(Products);
+export default injectIntl(connect(mapStates)(Products));

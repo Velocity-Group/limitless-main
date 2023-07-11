@@ -3,12 +3,14 @@ import { PureComponent } from 'react';
 import { Button, Form } from 'antd';
 import { IPerformer, IStream } from 'src/interfaces';
 import '../post/index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   activeStream: IStream;
   performer: IPerformer;
   onFinish: Function;
   submiting: boolean;
+  intl: IntlShape
 }
 
 const layout = {
@@ -16,10 +18,10 @@ const layout = {
   wrapperCol: { span: 24 }
 };
 
-export class PurchaseStreamForm extends PureComponent<IProps> {
+class PurchaseStreamForm extends PureComponent<IProps> {
   render() {
     const {
-      onFinish, performer, activeStream, submiting
+      onFinish, performer, activeStream, submiting, intl
     } = this.props;
     return (
       <div className="text-center">
@@ -38,11 +40,13 @@ export class PurchaseStreamForm extends PureComponent<IProps> {
           {...layout}
           name="nest-messages"
           onFinish={onFinish.bind(this)}
-          initialValues={{ }}
+          initialValues={{}}
         >
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Button className="primary" htmlType="submit" loading={submiting} disabled={submiting} block>
-              Confirm to join this session for $
+              {intl.formatMessage({ id: 'confirmToJoinThisSessionFor', defaultMessage: 'Confirm to join this session for' })}
+              $
+              {' '}
               {(activeStream.price || 0).toFixed(2)}
             </Button>
           </div>
@@ -51,3 +55,5 @@ export class PurchaseStreamForm extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(PurchaseStreamForm);

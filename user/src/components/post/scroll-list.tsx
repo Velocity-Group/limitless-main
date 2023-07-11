@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import { Alert, Spin } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { IFeed } from '@interfaces/index';
+import { injectIntl, IntlShape } from 'react-intl';
 import FeedCard from './post-card';
 import { FeedGridCard } from './grid-card';
 
@@ -13,9 +14,10 @@ interface IProps {
   loading?: boolean;
   isGrid?: boolean;
   notFoundText?: string;
+  intl: IntlShape
 }
 
-export default class ScrollListFeed extends PureComponent<IProps> {
+class ScrollListFeed extends PureComponent<IProps> {
   render() {
     const {
       items = [],
@@ -24,7 +26,8 @@ export default class ScrollListFeed extends PureComponent<IProps> {
       canLoadmore,
       loading = false,
       isGrid = false,
-      notFoundText
+      notFoundText,
+      intl
     } = this.props;
     return (
       <InfiniteScroll
@@ -54,7 +57,7 @@ export default class ScrollListFeed extends PureComponent<IProps> {
           <div className="main-container custom">
             <Alert
               className="text-center"
-              message={notFoundText || 'No post was found'}
+              message={notFoundText || intl.formatMessage({ id: 'noPostWasFound', defaultMessage: 'No post was found' })}
               type="info"
             />
           </div>
@@ -68,3 +71,5 @@ export default class ScrollListFeed extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(ScrollListFeed);

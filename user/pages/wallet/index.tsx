@@ -18,11 +18,12 @@ import {
   useStripe
 } from '@stripe/react-stripe-js';
 import './index.less';
+import { IntlShape, useIntl } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   user: IUser;
-  settings: ISettings
+  settings: ISettings;
 }
 
 const layout = {
@@ -36,14 +37,15 @@ function TokenPackages({ ui, user, settings }: IProps) {
   const [coupon, setCoupon] = useState(null);
   const [amount, setAmount] = useState(10);
   const stripe = useStripe();
+  const intl: IntlShape = useIntl();
 
   const addFund = async (data) => {
     if ((settings.paymentGateway === 'ccbill' && amount < 2.95) || (settings.paymentGateway === 'ccbill' && amount > 300)) {
-      message.error('Minimum amount must be $2.95 and maximum amount must be 300');
+      message.error(intl.formatMessage({ id: 'minimumAmountMustBe$2.95AndMaximumAmountMustBe300', defaultMessage: 'Minimum amount must be $2.95 and maximum amount must be 300' }));
       return;
     }
     if (settings.paymentGateway === 'stripe' && !user?.stripeCardIds?.length) {
-      message.error('Please add a payment card to complete your purchase');
+      message.error(intl.formatMessage({ id: 'pleaseAddAPaymentCardToCompleteYourPurchase', defaultMessage: 'Please add a payment card to complete your purchase' }));
       Router.push('/user/cards');
       return;
     }
@@ -63,7 +65,7 @@ function TokenPackages({ ui, user, settings }: IProps) {
       }
     } catch (e) {
       const error = await e;
-      message.error(error.message || 'Error occured, please try again later');
+      message.error(error.message || intl.formatMessage({ id: 'errorOccurredPleaseTryAgainLater', defaultMessage: 'Error occurred, please try again later' }));
       setSubmiting(false);
     }
   };
@@ -72,10 +74,10 @@ function TokenPackages({ ui, user, settings }: IProps) {
     try {
       const resp = await paymentService.applyCoupon(code);
       setCoupon(resp.data);
-      message.success('Coupon is applied');
+      message.success(intl.formatMessage({ id: 'couponApplied', defaultMessage: 'Coupon is applied' }));
     } catch (error) {
       const e = await error;
-      message.error(e?.message || 'Error occured, please try again later');
+      message.error(e?.message || intl.formatMessage({ id: 'errorOccurredPleaseTryAgainLater', defaultMessage: 'Error occurred, please try again later' }));
     }
   };
 
@@ -85,7 +87,9 @@ function TokenPackages({ ui, user, settings }: IProps) {
         <title>
           {ui?.siteName}
           {' '}
-          | Wallet
+          |
+          {' '}
+          {intl.formatMessage({ id: 'wallet', defaultMessage: 'Wallet' })}
         </title>
       </Head>
       <div className="main-container">
@@ -93,24 +97,24 @@ function TokenPackages({ ui, user, settings }: IProps) {
           <span aria-hidden onClick={() => Router.back()}>
             <ArrowLeftOutlined />
             {' '}
-            Wallet
+            {intl.formatMessage({ id: 'wallet', defaultMessage: 'Wallet' })}
           </span>
         </div>
         <div className="purchase-form">
           <div className="current-balance">
             <WalletSvg />
             <div className="balance">
-              <b>Current Balance</b>
+              <b>{intl.formatMessage({ id: 'currentBalance', defaultMessage: 'Current Balance' })}</b>
               <span className="amount">
                 $
                 {(user.balance || 0).toFixed(2)}
               </span>
             </div>
           </div>
-          <Alert type="warning" style={{ width: '100%', margin: '10px 0' }} message="Wallet Balances can be used as a convenient method to send tips to your favorite performers as well as digital content. Once your wallet balance depletes you can simply top off your wallet account to continue enjoying the benefits." />
+          <Alert type="warning" style={{ width: '100%', margin: '10px 0' }} message={intl.formatMessage({ id: 'walletBalancesCanBeUsedAsAConvenientMethodToSendTipsToYourFavoritePerformersAsWellAsDigitalContentOnceYourWalletBalanceDepletesYouCanSimplyTopOffYourWalletAccountToContinueEnjoyingTheBenefits', defaultMessage: 'Wallet Balances can be used as a convenient method to send tips to your favorite performers as well as digital content. Once your wallet balance depletes you can simply top off your wallet account to continue enjoying the benefits.' })} />
           <Form
             onFinish={addFund}
-            onFinishFailed={() => message.error('Please complete the required fields')}
+            onFinishFailed={() => message.error(intl.formatMessage({ id: 'pleaseCompleteTheRequiredFields', defaultMessage: 'Please complete the required fields' }))}
             name="form-upload"
             scrollToFirstError
             initialValues={{
@@ -120,14 +124,14 @@ function TokenPackages({ ui, user, settings }: IProps) {
           >
             <Form.Item
               name="amount"
-              label="Enter Amount"
-              rules={[{ required: true, message: 'Amount is required!' }]}
+              label={intl.formatMessage({ id: 'enterAmount', defaultMessage: 'Enter Amount' })}
+              rules={[{ required: true, message: intl.formatMessage({ id: 'amountIsRequired', defaultMessage: 'Amount is required!' }) }]}
             >
               <InputNumber onChange={(val) => setAmount(val)} style={{ width: '100%' }} min={1} max={10000} />
             </Form.Item>
             <Form.Item help={coupon && (
             <small style={{ color: 'red' }}>
-              Discount
+              {intl.formatMessage({ id: 'discount', defaultMessage: 'Discount' })}
               {' '}
               {coupon.value * 100}
               %
@@ -135,8 +139,8 @@ function TokenPackages({ ui, user, settings }: IProps) {
             )}
             >
               <Button.Group className="coupon-dc">
-                <Input disabled={!!coupon} placeholder="Enter coupon code here" onChange={(e) => setCouponCode(e.target.value)} />
-                {!coupon ? <Button disabled={!couponCode} onClick={() => applyCoupon(couponCode)}>Apply!</Button>
+                <Input disabled={!!coupon} placeholder={intl.formatMessage({ id: 'enterCouponCodeHere', defaultMessage: 'Enter coupon code here' })} onChange={(e) => setCouponCode(e.target.value)} />
+                {!coupon ? <Button disabled={!couponCode} onClick={() => applyCoupon(couponCode)}>{intl.formatMessage({ id: 'apply', defaultMessage: 'Apply!' })}</Button>
                   : (
                     <Button
                       type="primary"
@@ -145,13 +149,14 @@ function TokenPackages({ ui, user, settings }: IProps) {
                         setCouponCode('');
                       }}
                     >
-                      Use Later!
+                      {intl.formatMessage({ id: 'useLater', defaultMessage: 'Use Later!' })}
                     </Button>
                   )}
               </Button.Group>
             </Form.Item>
             <Form.Item className="total-price">
-              Total:
+              {intl.formatMessage({ id: 'total', defaultMessage: 'Total' })}
+              :
               <span className="amount">
                 $
                 {(amount - (amount * (coupon?.value || 0))).toFixed(2)}
@@ -159,12 +164,12 @@ function TokenPackages({ ui, user, settings }: IProps) {
             </Form.Item>
             <Form.Item className="text-center">
               <Button htmlType="submit" className="primary" disabled={submiting} loading={submiting}>
-                BUY NOW
+                {intl.formatMessage({ id: 'buyNow', defaultMessage: 'Buy Now' })}
               </Button>
             </Form.Item>
           </Form>
         </div>
-        {submiting && <Loader customText="We are processing your payment, please do not reload this page until it's done." />}
+        {submiting && <Loader customText={intl.formatMessage({ id: 'weAreProcessingYourPayment', defaultMessage: 'We are processing your payment, please do not reload this page until it\'s done.' })} />}
       </div>
     </Layout>
   );

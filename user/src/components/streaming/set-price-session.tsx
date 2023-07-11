@@ -3,6 +3,7 @@ import {
   Switch, Button, Form, Input, InputNumber
 } from 'antd';
 import { IPerformer } from 'src/interfaces';
+import { useIntl } from 'react-intl';
 
 const layout = {
   labelCol: { span: 24 },
@@ -15,10 +16,9 @@ interface IProps {
   submiting: boolean;
 }
 
-const StreamPriceForm = ({
-  onFinish, submiting, performer
-}: IProps) => {
+const StreamPriceForm = ({ onFinish, submiting, performer }: IProps) => {
   const [isFree, setFree] = useState(true);
+  const intl = useIntl();
   return (
     <Form
       {...layout}
@@ -34,36 +34,80 @@ const StreamPriceForm = ({
     >
       <Form.Item
         name="title"
-        label="Title"
-        rules={[{ required: true, message: 'Please enter stream title!' }]}
+        label={intl.formatMessage({ id: 'title', defaultMessage: 'Title' })}
+        rules={[
+          {
+            required: true,
+            message: `${intl.formatMessage({
+              id: 'pleaseEnterStreamTitle',
+              defaultMessage: 'Please enter stream title!'
+            })}`
+          }
+        ]}
       >
         <Input min={10} maxLength={100} />
       </Form.Item>
       <Form.Item
         name="description"
-        label="Description"
-        rules={[{ required: true, message: 'Please enter stream description!' }]}
+        label={intl.formatMessage({
+          id: 'description',
+          defaultMessage: 'Description'
+        })}
+        rules={[
+          {
+            required: true,
+            message: `${intl.formatMessage({
+              id: 'pleaseEnterStreamDescription',
+              defaultMessage: 'Please enter stream description!'
+            })}`
+          }
+        ]}
       >
         <Input.TextArea rows={2} maxLength={200} />
       </Form.Item>
       <Form.Item
         name="isFree"
-        label="Select an option"
+        label={intl.formatMessage({
+          id: 'selectAnOption',
+          defaultMessage: 'Select an option'
+        })}
         valuePropName="checked"
       >
-        <Switch unCheckedChildren="Pay Per Live for Subscribers" checkedChildren="Free for Subscribers" checked={isFree} onChange={(val) => setFree(val)} />
+        <Switch
+          unCheckedChildren={intl.formatMessage({
+            id: 'payPerLiveForSubscribers',
+            defaultMessage: 'Pay Per Live for Subscribers'
+          })}
+          checkedChildren={intl.formatMessage({
+            id: 'freeForSubscribers',
+            defaultMessage: 'Free for Subscribers'
+          })}
+          checked={isFree}
+          onChange={(val) => setFree(val)}
+        />
       </Form.Item>
       {!isFree && (
       <Form.Item
         name="price"
-        label="Price"
+        label={intl.formatMessage({
+          id: 'price',
+          defaultMessage: 'Price'
+        })}
       >
         <InputNumber min={1} />
       </Form.Item>
       )}
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={submiting} disabled={submiting}>
-          Submit
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={submiting}
+          disabled={submiting}
+        >
+          {intl.formatMessage({
+            id: 'submit',
+            defaultMessage: 'Submit'
+          })}
         </Button>
       </Form.Item>
     </Form>

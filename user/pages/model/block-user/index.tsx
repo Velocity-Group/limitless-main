@@ -7,14 +7,16 @@ import { BlockOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
 import { IUIConfig } from 'src/interfaces';
-import { SelectUserDropdown } from '@components/user/select-users-dropdown';
+import SelectUsersDropdown from '@components/user/select-users-dropdown';
 import { blockService } from 'src/services';
 import UsersBlockList from '@components/user/users-block-list';
 import './index.less';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   ui: IUIConfig;
   className: string;
+  intl: IntlShape;
 }
 
 class blockPage extends PureComponent<IProps> {
@@ -31,7 +33,7 @@ class blockPage extends PureComponent<IProps> {
     userBlockedList: [],
     totalBlockedUsers: 0,
     openBlockModal: false
-  }
+  };
 
   componentDidMount() {
     this.getBlockList();
@@ -43,142 +45,236 @@ class blockPage extends PureComponent<IProps> {
   }
 
   async handleUnblockUser(userId: string) {
-    if (!window.confirm('Are you sure to unblock this user?')) return;
+    const { intl } = this.props;
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'areYouSureToUnblockThisUser',
+          defaultMessage: 'Are you sure to unblock this user?'
+        })
+      )
+    ) { return; }
     const { userBlockedList } = this.state;
     try {
       await this.setState({ submiting: true });
       await blockService.unBlockUser(userId);
       message.success('Unblocked successfully');
-      this.setState({ submiting: false, userBlockedList: userBlockedList.filter((u) => u.targetId !== userId) });
+      this.setState({
+        submiting: false,
+        userBlockedList: userBlockedList.filter((u) => u.targetId !== userId)
+      });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'An error occured. Please try again later');
+      message.error(
+        err?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
       this.setState({ submiting: false });
     }
   }
 
-   handleBlockUser = async (data) => {
-     const { blockUserId: targetId } = this.state;
-     const { reason } = data;
-     if (!targetId) {
-       message.error('Please select a user');
-       return;
-     }
+  handleBlockUser = async (data) => {
+    const { intl } = this.props;
+    const { blockUserId: targetId } = this.state;
+    const { reason } = data;
+    if (!targetId) {
+      message.error(
+        intl.formatMessage({
+          id: 'pleaseSelectAUser',
+          defaultMessage: 'Please select a user'
+        })
+      );
+      return;
+    }
 
-     try {
-       await this.setState({ submiting: true });
-       await blockService.blockUser({ targetId, target: 'user', reason });
-       message.success('User profile is blocked successfully');
-       this.getBlockList();
-     } catch (e) {
-       const error = await Promise.resolve(e);
-       message.error(error?.message || 'An error occured, please try again later');
-     } finally {
-       this.setState({ submiting: false, openBlockModal: false });
-     }
-   }
+    try {
+      await this.setState({ submiting: true });
+      await blockService.blockUser({ targetId, target: 'user', reason });
+      message.success(
+        intl.formatMessage({
+          id: 'userProfileIsBlockedSuccessfully',
+          defaultMessage: 'User profile is blocked successfully'
+        })
+      );
+      this.getBlockList();
+    } catch (e) {
+      const error = await Promise.resolve(e);
+      message.error(
+        error?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
+    } finally {
+      this.setState({ submiting: false, openBlockModal: false });
+    }
+  };
 
-   async getBlockList() {
-     const { limit, offset } = this.state;
-     try {
-       await this.setState({ loading: true });
-       const resp = await blockService.getBlockListUsers({
-         limit,
-         offset: offset * limit
-       });
-       this.setState({
-         loading: false,
-         userBlockedList: resp.data.data,
-         totalBlockedUsers: resp.data.total
-       });
-     } catch (e) {
-       message.error('An error occured, please try again later');
-       this.setState({ loading: false });
-     }
-   }
+  async getBlockList() {
+    const { intl } = this.props;
+    const { limit, offset } = this.state;
+    try {
+      await this.setState({ loading: true });
+      const resp = await blockService.getBlockListUsers({
+        limit,
+        offset: offset * limit
+      });
+      this.setState({
+        loading: false,
+        userBlockedList: resp.data.data,
+        totalBlockedUsers: resp.data.total
+      });
+    } catch (e) {
+      message.error(
+        intl.formatMessage({
+          id: 'errorOccurredPleaseTryAgainLater',
+          defaultMessage: 'Error occurred, please try again later'
+        })
+      );
+      this.setState({ loading: false });
+    }
+  }
 
-   render() {
-     const {
-       userBlockedList, totalBlockedUsers, loading, limit, submiting, openBlockModal
-     } = this.state;
-     const { ui } = this.props;
-     return (
-       <Layout>
-         <Head>
-           <title>{`${ui?.siteName} | Blacklist`}</title>
-         </Head>
-         <div className="main-container">
-           <PageHeading icon={<BlockOutlined />} title="Blacklist" />
-           <div className="block-user">
-             <Button className="" type="primary" onClick={() => this.setState({ openBlockModal: true })}>
-               Wanna block someone, click here!
-             </Button>
-           </div>
-           <div className="users-blocked-list">
-             <UsersBlockList
-               items={userBlockedList}
-               searching={loading}
-               total={totalBlockedUsers}
-               onPaginationChange={this.handleTabChange.bind(this)}
-               pageSize={limit}
-               submiting={submiting}
-               unblockUser={this.handleUnblockUser.bind(this)}
-             />
-           </div>
-         </div>
-         <Modal
-           centered
-           title="Block user"
-           visible={openBlockModal}
-           onCancel={() => this.setState({ openBlockModal: false })}
-           footer={null}
-           destroyOnClose
-         >
-           <Form
-             name="blockForm"
-             onFinish={this.handleBlockUser.bind(this)}
-             initialValues={{ reason: '' }}
-             labelCol={{ span: 24 }}
-             wrapperCol={{ span: 24 }}
-             className="account-form"
-           >
-             <Form.Item label="Please select user you want to block">
-               <SelectUserDropdown onSelect={(val) => this.setState({ blockUserId: val })} />
-             </Form.Item>
-             <Form.Item
-               name="reason"
-               label="Reason"
-               rules={[{ required: true, message: 'Tell us your reason' }]}
-             >
-               <Input.TextArea
-                 placeholder="Enter your reason"
-               />
-             </Form.Item>
-             <Form.Item>
-               <Button
-                 className="primary"
-                 htmlType="submit"
-                 loading={submiting}
-                 disabled={submiting}
-                 style={{ marginRight: '20px' }}
-               >
-                 Submit
-               </Button>
-               <Button
-                 className="secondary"
-                 onClick={() => this.setState({ openBlockModal: false })}
-               >
-                 Close
-               </Button>
-             </Form.Item>
-           </Form>
-         </Modal>
-       </Layout>
-     );
-   }
+  render() {
+    const {
+      userBlockedList,
+      totalBlockedUsers,
+      loading,
+      limit,
+      submiting,
+      openBlockModal
+    } = this.state;
+    const { ui, intl } = this.props;
+    return (
+      <Layout>
+        <Head>
+          <title>
+            {`${ui?.siteName} | ${intl.formatMessage({
+              id: 'blacklist',
+              defaultMessage: 'Blacklist'
+            })}`}
+
+          </title>
+        </Head>
+        <div className="main-container">
+          <PageHeading
+            icon={<BlockOutlined />}
+            title={intl.formatMessage({
+              id: 'blacklist',
+              defaultMessage: 'Blacklist'
+            })}
+          />
+          <div className="block-user">
+            <Button
+              className=""
+              type="primary"
+              onClick={() => this.setState({ openBlockModal: true })}
+            >
+              {intl.formatMessage({
+                id: 'wannaBlockSomeoneClickHere',
+                defaultMessage: 'Wanna block someone, click here!'
+              })}
+            </Button>
+          </div>
+          <div className="users-blocked-list">
+            <UsersBlockList
+              items={userBlockedList}
+              searching={loading}
+              total={totalBlockedUsers}
+              onPaginationChange={this.handleTabChange.bind(this)}
+              pageSize={limit}
+              submiting={submiting}
+              unblockUser={this.handleUnblockUser.bind(this)}
+            />
+          </div>
+        </div>
+        <Modal
+          centered
+          title={intl.formatMessage({
+            id: 'blockUser',
+            defaultMessage: 'Block user'
+          })}
+          visible={openBlockModal}
+          onCancel={() => this.setState({ openBlockModal: false })}
+          footer={null}
+          destroyOnClose
+        >
+          <Form
+            name="blockForm"
+            onFinish={this.handleBlockUser.bind(this)}
+            initialValues={{ reason: '' }}
+            labelCol={{ span: 24 }}
+            wrapperCol={{ span: 24 }}
+            className="account-form"
+          >
+            <Form.Item
+              label={intl.formatMessage({
+                id: 'pleaseSelectUserYouWantToBlock',
+                defaultMessage: 'Please select user you want to block'
+              })}
+            >
+              <SelectUsersDropdown
+                onSelect={(val) => this.setState({ blockUserId: val })}
+              />
+            </Form.Item>
+            <Form.Item
+              name="reason"
+              label={intl.formatMessage({
+                id: 'reason',
+                defaultMessage: 'Reason'
+              })}
+              rules={[
+                {
+                  required: true,
+                  message: `${intl.formatMessage({
+                    id: 'tellUsYourReason',
+                    defaultMessage: 'Tell us your reason'
+                  })}`
+                }
+              ]}
+            >
+              <Input.TextArea
+                placeholder={intl.formatMessage({
+                  id: 'enterYourReason',
+                  defaultMessage: 'Enter your reason'
+                })}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                className="primary"
+                htmlType="submit"
+                loading={submiting}
+                disabled={submiting}
+                style={{ marginRight: '20px' }}
+              >
+                {intl.formatMessage({
+                  id: 'submit',
+                  defaultMessage: 'Submit'
+                })}
+              </Button>
+              <Button
+                className="secondary"
+                onClick={() => this.setState({ openBlockModal: false })}
+              >
+                {intl.formatMessage({
+                  id: 'close',
+                  defaultMessage: 'Close'
+                })}
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </Layout>
+    );
+  }
 }
 
 const mapStates = (state) => ({
   ui: { ...state.ui }
 });
-export default connect(mapStates)(blockPage);
+export default injectIntl(connect(mapStates)(blockPage));

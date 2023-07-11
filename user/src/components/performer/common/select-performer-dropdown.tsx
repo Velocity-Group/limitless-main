@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import { Select, message, Avatar } from 'antd';
 import { debounce } from 'lodash';
 import { performerService } from '@services/performer.service';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   placeholder?: string;
@@ -9,15 +10,17 @@ interface IProps {
   onSelect: Function;
   defaultValue?: string;
   disabled?: boolean;
+  intl: IntlShape
 }
 
-export class SelectPerformerDropdown extends PureComponent<IProps> {
+class SelectPerformerDropdown extends PureComponent<IProps> {
   state = {
     loading: false,
     data: [] as any
   };
 
   loadPerformers = debounce(async (q) => {
+    const { intl } = this.props;
     try {
       this.setState({ loading: true });
       const resp = await (await performerService.search({ q, limit: 99 })).data;
@@ -27,7 +30,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
       });
     } catch (e) {
       const err = await e;
-      message.error(err?.message || 'Error occured');
+      message.error(err?.message || intl.formatMessage({ id: 'errorOccured', defaultMessage: 'Error occured' }));
       this.setState({ loading: false });
     }
   }, 500);
@@ -38,14 +41,14 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
 
   render() {
     const {
-      style, onSelect, defaultValue, disabled
+      style, onSelect, defaultValue, disabled, intl
     } = this.props;
     const { data, loading } = this.state;
     return (
       <Select
         showSearch
         defaultValue={defaultValue}
-        placeholder="Type to search model..."
+        placeholder={intl.formatMessage({ id: 'typeToSearchTeacherHere', defaultMessage: 'Type to search teacher here...' })}
         style={style}
         onSearch={this.loadPerformers.bind(this)}
         onChange={(val) => onSelect(val)}
@@ -54,7 +57,7 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
         disabled={disabled}
       >
         <Select.Option value="" key="default">
-          All Model
+          {intl.formatMessage({ id: 'allModel', defaultMessage: 'All Model' })}
         </Select.Option>
         {data && data.length > 0 && data.map((u) => (
           <Select.Option value={u._id} key={u._id} style={{ textTransform: 'capitalize' }}>
@@ -67,3 +70,5 @@ export class SelectPerformerDropdown extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(SelectPerformerDropdown);

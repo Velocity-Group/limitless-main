@@ -2,6 +2,7 @@ import { PureComponent } from 'react';
 import { Alert, Spin } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { IProduct } from 'src/interfaces';
+import { injectIntl, IntlShape } from 'react-intl';
 import { PerformerListProduct } from './performer-list-product';
 
 interface IProps {
@@ -10,12 +11,13 @@ interface IProps {
   loadMore(): Function;
   loading: boolean;
   notFoundText?: string;
+  intl: IntlShape
 }
 
-export class ScrollListProduct extends PureComponent<IProps> {
+class ScrollListProduct extends PureComponent<IProps> {
   render() {
     const {
-      items = [], loadMore, canLoadmore = false, loading = false, notFoundText
+      items = [], loadMore, canLoadmore = false, loading = false, notFoundText, intl
     } = this.props;
     return (
       <>
@@ -30,7 +32,11 @@ export class ScrollListProduct extends PureComponent<IProps> {
           <PerformerListProduct products={items} />
           {!loading && !items.length && (
           <div className="main-container custom">
-            <Alert className="text-center" type="info" message={notFoundText || 'No product was found'} />
+            <Alert
+              className="text-center"
+              type="info"
+              message={notFoundText || intl.formatMessage({ id: 'noProductWasFound', defaultMessage: 'No product was found' })}
+            />
           </div>
           )}
           {loading && <div className="text-center"><Spin /></div>}
@@ -39,3 +45,5 @@ export class ScrollListProduct extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(ScrollListProduct);

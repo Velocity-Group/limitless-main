@@ -6,12 +6,15 @@ const withLess = require('@zeit/next-less');
 const withCSS = require('@zeit/next-css');
 const withPlugins = require('next-compose-plugins');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const { i18n } = require('./react-intl.config');
 
 // Where your antd-custom.less file lives
 const themeVariables = lessToJS(fs.readFileSync(path.resolve(__dirname, './style/default.less'), 'utf8'));
 
 const nextConfig = {
-  distDir: '.next'
+  distDir: '.next',
+  i18n,
+  webpack5: true
   // target: "serverless"
 };
 

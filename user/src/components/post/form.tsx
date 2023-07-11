@@ -19,6 +19,8 @@ import { getGlobalConfig } from '@services/config';
 import { VideoPlayer } from '@components/common';
 import AddPollDurationForm from './add-poll-duration';
 import './index.less';
+// eslint-disable-next-line import/order
+import { injectIntl, IntlShape } from 'react-intl';
 
 const { TextArea } = Input;
 
@@ -35,9 +37,10 @@ interface IProps {
   type?: string;
   discard?: Function;
   feed?: IFeed
+  intl: IntlShape
 }
 
-export default class FeedForm extends PureComponent<IProps> {
+class FeedForm extends PureComponent<IProps> {
   pollIds = [];
 
   thumbnailId = null;
@@ -117,14 +120,14 @@ export default class FeedForm extends PureComponent<IProps> {
   }
 
   onsubmit = async (feed, values) => {
-    const { type } = this.props;
+    const { type, intl } = this.props;
     try {
       await this.setState({ uploading: true });
       !feed ? await feedService.create({ ...values, type }) : await feedService.update(feed._id, { ...values, type: feed.type });
       message.success('Posted successfully!');
       Router.push('/model/my-post');
     } catch {
-      message.success('Something went wrong, please try again later');
+      message.success(intl.formatMessage({ id: 'somethingWentWrong', defaultMessage: 'Something went wrong, please try again!' }));
       this.setState({ uploading: false });
     }
   }
@@ -153,19 +156,32 @@ export default class FeedForm extends PureComponent<IProps> {
   }
 
   beforeUpload = async (file, listFile) => {
+    const { intl } = this.props;
     const config = getGlobalConfig();
     const { fileList, fileIds } = this.state;
     if (file.type.includes('image')) {
       const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
       if (!valid) {
-        message.error(`Image ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
+        message.error(`${intl.formatMessage({
+          id: 'image',
+          defaultMessage: 'Image'
+        })} ${file.name} ${intl.formatMessage({
+          id: 'mustBeSmallerThan',
+          defaultMessage: 'must be smaller than'
+        })} ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB!`);
         return false;
       }
     }
     if (file.type.includes('video')) {
       const valid = (file.size / 1024 / 1024) < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
       if (!valid) {
-        message.error(`Video ${file.name} must be smaller than ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
+        message.error(`${intl.formatMessage({
+          id: 'video',
+          defaultMessage: 'Video'
+        })} ${file.name} ${intl.formatMessage({
+          id: 'mustBeSmallerThan',
+          defaultMessage: 'must be smaller than'
+        })} ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB!`);
         return false;
       }
     }
@@ -210,13 +226,17 @@ export default class FeedForm extends PureComponent<IProps> {
   }
 
   beforeUploadThumbnail = async (file) => {
+    const { intl } = this.props;
     if (!file) {
       return;
     }
     const config = getGlobalConfig();
     const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5);
     if (!isLt2M) {
-      message.error(`Image is too large please provide an image ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB or below`);
+      message.error(`${intl.formatMessage({
+        id: 'imageIsTooLargePleaseProvideAnImage',
+        defaultMessage: 'Image is too large please provide an image'
+      })} ${config.NEXT_PUBLIC_MAX_SIZE_IMAGE || 5}MB ${intl.formatMessage({ id: 'orBelow', defaultMessage: 'or below' })}`);
       return;
     }
     const reader = new FileReader();
@@ -230,20 +250,33 @@ export default class FeedForm extends PureComponent<IProps> {
       ) as any;
       this.thumbnailId = resp.data._id;
     } catch (e) {
-      message.error(`Thumbnail file ${file.name} error!`);
+      message.error(`${intl.formatMessage({
+        id: 'thumbnailFile',
+        defaultMessage: 'Thumbnail file'
+      })} ${file.name} ${intl.formatMessage({
+        id: 'errorLowCase',
+        defaultMessage: 'error'
+      })}!`);
     } finally {
       this.setState({ uploading: false });
     }
   }
 
   beforeUploadteaser = async (file) => {
+    const { intl } = this.props;
     if (!file) {
       return;
     }
     const config = getGlobalConfig();
     const isLt2M = file.size / 1024 / 1024 < (config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200);
     if (!isLt2M) {
-      message.error(`Teaser is too large please provide an video ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB or below`);
+      message.error(`${intl.formatMessage({
+        id: 'teaserIsTooLargePleaseProvideAnVideo',
+        defaultMessage: 'Teaser is too large please provide an video'
+      })} ${config.NEXT_PUBLIC_MAX_SIZE_TEASER || 200}MB ${intl.formatMessage({
+        id: 'orBelow',
+        defaultMessage: 'or below'
+      })}`);
       return;
     }
     this.setState({ teaser: file });
@@ -255,28 +288,43 @@ export default class FeedForm extends PureComponent<IProps> {
       ) as any;
       this.teaserId = resp.data._id;
     } catch (e) {
-      message.error(`teaser file ${file.name} error!`);
+      message.error(`${intl.formatMessage({
+        id: 'teaserTile',
+        defaultMessage: 'Teaser file'
+      })} ${file.name} ${intl.formatMessage({
+        id: 'errorLowCase',
+        defaultMessage: 'error'
+      })}!`);
     } finally {
       this.setState({ uploading: false });
     }
   }
 
   submit = async (payload: any) => {
-    const { feed, type } = this.props;
+    const { feed, type, intl } = this.props;
     const {
       pollList, addPoll, intendedFor, expiredPollAt, fileIds, text
     } = this.state;
     const formValues = { ...payload };
     if (!text) {
-      message.error('Please add a description');
+      message.error(intl.formatMessage({
+        id: 'pleaseAddADescription',
+        defaultMessage: 'Please add a description'
+      }));
       return;
     }
     if (text.length > 300) {
-      message.error('Description is over 300 characters');
+      message.error(intl.formatMessage({
+        id: 'descriptionIsOverThreeHundredCharacters',
+        defaultMessage: 'Description is over 300 characters'
+      }));
       return;
     }
     if (formValues.price < 0) {
-      message.error('Price must be greater than 0');
+      message.error(intl.formatMessage({
+        id: 'priceMustBeGreaterThanZero',
+        defaultMessage: 'Price must be greater than 0'
+      }));
       return;
     }
     formValues.teaserId = this.teaserId;
@@ -285,13 +333,22 @@ export default class FeedForm extends PureComponent<IProps> {
     formValues.text = text;
     formValues.fileIds = fileIds;
     if (['video', 'photo'].includes(feed?.type || type) && !fileIds.length) {
-      message.error(`Please add ${feed?.type || type} file`);
+      message.error(`${intl.formatMessage({
+        id: 'pleaseAdd',
+        defaultMessage: 'Please add'
+      })} ${feed?.type || type} ${intl.formatMessage({
+        id: 'fileLowCase',
+        defaultMessage: 'file'
+      })}`);
       return;
     }
 
     // create polls
     if (addPoll && pollList.length < 2) {
-      message.error('Polls must have at least 2 options');
+      message.error(intl.formatMessage({
+        id: 'pollsMustHaveAtLeastTwoOptions',
+        defaultMessage: 'Polls must have at least 2 options'
+      }));
       return;
     } if (addPoll && pollList.length >= 2) {
       await this.setState({ uploading: true });
@@ -321,7 +378,9 @@ export default class FeedForm extends PureComponent<IProps> {
   }
 
   render() {
-    const { feed, type, discard } = this.props;
+    const {
+      feed, type, discard, intl
+    } = this.props;
     const {
       uploading, fileList, fileIds, intendedFor, pollList, text, isShowPreviewTeaser,
       addPoll, openPollDuration, expirePollTime, thumbnail, teaser
@@ -345,11 +404,29 @@ export default class FeedForm extends PureComponent<IProps> {
           <Form.Item
             name="text"
             validateTrigger={['onChange', 'onBlur']}
-            rules={[{ required: true, message: 'Please add a description' }]}
+            rules={[{ required: true, message: intl.formatMessage({ id: 'pleaseAddADescription', defaultMessage: 'Please add a description' }) }]}
           >
             <div className="input-f-desc">
-              <TextArea showCount value={text} onChange={(e) => this.setState({ text: e.target.value })} className="feed-input" minLength={1} maxLength={300} rows={3} placeholder={!fileIds.length ? 'Compose new post...' : 'Add a description'} allowClear />
-              <Popover className="emotion-popover" content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />} title={null} trigger="click">
+              <TextArea
+                showCount
+                value={text}
+                onChange={(e) => this.setState({ text: e.target.value })}
+                className="feed-input"
+                minLength={1}
+                maxLength={300}
+                rows={3}
+                placeholder={!fileIds.length ? `${intl.formatMessage({
+                  id: 'composeNewPost',
+                  defaultMessage: 'Compose new post'
+                })}...` : intl.formatMessage({ id: 'addADescription', defaultMessage: 'Add a description' })}
+                allowClear
+              />
+              <Popover
+                className="emotion-popover"
+                content={<Emotions onEmojiClick={this.onEmojiClick.bind(this)} />}
+                title={null}
+                trigger="click"
+              >
                 <span className="grp-emotions">
                   <SmileOutlined />
                 </span>
@@ -359,9 +436,22 @@ export default class FeedForm extends PureComponent<IProps> {
           {['video', 'photo'].includes(feed?.type || type) && (
           <Form.Item>
             <Radio.Group value={intendedFor} onChange={(e) => this.setState({ intendedFor: e.target.value })}>
-              <Radio key="subscriber" value="subscriber">Only for Subscribers</Radio>
-              <Radio key="sale" value="sale">Pay per View</Radio>
-              <Radio key="follower" value="follower">Free for Everyone</Radio>
+              <Radio key="subscriber" value="subscriber">
+                {intl.formatMessage({
+                  id: 'onlyForSubscribers', defaultMessage: 'Only for Subscribers'
+                })}
+              </Radio>
+              <Radio key="sale" value="sale">
+                {intl.formatMessage({
+                  id: 'payPerView', defaultMessage: 'Pay per View'
+                })}
+              </Radio>
+              <Radio key="follower" value="follower">
+                {' '}
+                {intl.formatMessage({
+                  id: 'freeForEveryone', defaultMessage: 'Free for Everyone'
+                })}
+              </Radio>
             </Radio.Group>
           </Form.Item>
           )}
@@ -390,16 +480,24 @@ export default class FeedForm extends PureComponent<IProps> {
                     {!feed ? (
                       <>
                         <span aria-hidden="true" onClick={() => this.setState({ openPollDuration: true })}>
-                          Poll duration -
+                          {intl.formatMessage({ id: 'pollDuration', defaultMessage: 'Poll duration' })}
                           {' '}
-                          {!expirePollTime ? 'No limit' : `${expirePollTime} days`}
+                          -
+                          {' '}
+                          {!expirePollTime ? intl.formatMessage({
+                            id: 'noLimit',
+                            defaultMessage: 'No limit'
+                          }) : `${expirePollTime} ${intl.formatMessage({
+                            id: 'days',
+                            defaultMessage: 'days'
+                          })}`}
                         </span>
                         <a aria-hidden="true" onClick={this.onAddPoll.bind(this)}>x</a>
                       </>
                     )
                       : (
                         <span>
-                          Poll expiration
+                          {intl.formatMessage({ id: 'pollExpiration', defaultMessage: 'Poll expiration' })}
                           {' '}
                           {formatDate(feed?.pollExpiredAt)}
                         </span>
@@ -410,24 +508,54 @@ export default class FeedForm extends PureComponent<IProps> {
                     className="form-item-no-pad"
                     validateTrigger={['onChange', 'onBlur']}
                     rules={[
-                      { required: true, message: 'Please add a question' }
+                      { required: true, message: intl.formatMessage({ id: 'pleaseAddAQuestion', defaultMessage: 'Please add a question' }) }
                     ]}
                   >
-                    <Input placeholder="Question" />
+                    <Input placeholder={intl.formatMessage({ id: 'question', defaultMessage: 'Question' })} />
                   </Form.Item>
                   {/* eslint-disable-next-line no-nested-ternary */}
-                  <Input disabled={!!feed?._id} className="poll-input" placeholder="Poll 1" value={pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''} onChange={this.onChangePoll.bind(this, 0)} />
+                  <Input
+                    disabled={!!feed?._id}
+                    className="poll-input"
+                    placeholder={intl.formatMessage({
+                      id: 'pollOne',
+                      defaultMessage: 'Poll 1'
+                    })}
+                    // eslint-disable-next-line no-nested-ternary
+                    value={pollList.length > 0 && pollList[0]._id ? pollList[0].description : pollList[0] ? pollList[0] : ''}
+                    onChange={this.onChangePoll.bind(this, 0)}
+                  />
                   {/* eslint-disable-next-line no-nested-ternary */}
-                  <Input disabled={!!feed?._id || !pollList.length} placeholder="Poll 2" className="poll-input" value={pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''} onChange={this.onChangePoll.bind(this, 1)} />
+                  <Input
+                    disabled={!!feed?._id || !pollList.length}
+                    placeholder={intl.formatMessage({
+                      id: 'pollTwo',
+                      defaultMessage: 'Poll 2'
+                    })}
+                    className="poll-input"
+                    // eslint-disable-next-line no-nested-ternary
+                    value={pollList.length > 1 && pollList[1]._id ? pollList[1].description : pollList[1] ? pollList[1] : ''}
+                    onChange={this.onChangePoll.bind(this, 1)}
+                  />
                   {pollList.map((poll, index) => {
                     if (index === 0 || index === 1) return null;
-                    return <Input autoFocus disabled={!!feed?._id} placeholder={`Poll ${index + 1}`} key={poll?.description || poll} value={(poll._id ? poll.description : poll) || ''} className="poll-input" onChange={this.onChangePoll.bind(this, index)} />;
+                    return (
+                      <Input
+                        autoFocus
+                        disabled={!!feed?._id}
+                        placeholder={`${intl.formatMessage({ id: 'poll', defaultMessage: 'Poll' })} ${index + 1}`}
+                        key={poll?.description || poll}
+                        value={(poll._id ? poll.description : poll) || ''}
+                        className="poll-input"
+                        onChange={this.onChangePoll.bind(this, index)}
+                      />
+                    );
                   })}
                   {!feed && pollList.length > 1 && (
                     <p style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <a aria-hidden onClick={() => this.setState({ pollList: pollList.concat(['']) })}>Add another option</a>
+                      <a aria-hidden onClick={() => this.setState({ pollList: pollList.concat(['']) })}>{intl.formatMessage({ id: 'addAnotherOption', defaultMessage: 'Add another option' })}</a>
                       <a aria-hidden onClick={this.onClearPolls.bind(this)}>
-                        Clear polls
+                        {intl.formatMessage({ id: 'clearPolls', defaultMessage: 'Clear polls' })}
                       </a>
                     </p>
                   )}
@@ -438,7 +566,13 @@ export default class FeedForm extends PureComponent<IProps> {
             <Col md={8} xs={12}>
               <Form.Item label="Thumbnail">
                 <div style={{ position: 'relative' }}>
-                  <Button type="primary" onClick={() => this.handleDeleteFile('thumbnail')} style={{ position: 'absolute', top: 2, left: 2 }}><DeleteOutlined /></Button>
+                  <Button
+                    type="primary"
+                    onClick={() => this.handleDeleteFile('thumbnail')}
+                    style={{ position: 'absolute', top: 2, left: 2 }}
+                  >
+                    <DeleteOutlined />
+                  </Button>
                   <Image alt="thumbnail" src={thumbnail?.url} width="150px" />
                 </div>
               </Form.Item>
@@ -493,7 +627,7 @@ export default class FeedForm extends PureComponent<IProps> {
                 <Button type="primary" style={{ marginRight: 10 }}>
                   <PictureOutlined />
                   {' '}
-                  Add thumbnail
+                  {intl.formatMessage({ id: 'addThumbnail', defaultMessage: 'Add thumbnail' })}
                 </Button>
               </Upload>
             ]}
@@ -511,28 +645,28 @@ export default class FeedForm extends PureComponent<IProps> {
                 <Button type="primary" style={{ marginRight: 10 }}>
                   <VideoCameraAddOutlined />
                   {' '}
-                  Add teaser
+                  {intl.formatMessage({ id: 'addTeaser', defaultMessage: 'Add teaser' })}
                 </Button>
               </Upload>
             ]}
             <Button disabled={(!!(feed && feed._id))} type="primary" onClick={this.onAddPoll.bind(this)}>
               <BarChartOutlined style={{ transform: 'rotate(90deg)' }} />
               {' '}
-              Add polls
+              {intl.formatMessage({ id: 'addPolls', defaultMessage: 'Add polls' })}
             </Button>
           </div>
           <AddPollDurationForm onAddPollDuration={this.onChangePollDuration.bind(this)} openDurationPollModal={openPollDuration} />
           {feed && (
           <Form.Item
             name="status"
-            label="Status"
+            label={intl.formatMessage({ id: 'status', defaultMessage: 'Status' })}
           >
             <Select>
               <Select.Option key="active" value="active">
-                Active
+                {intl.formatMessage({ id: 'active', defaultMessage: 'Active' })}
               </Select.Option>
               <Select.Option key="inactive" value="inactive">
-                Inactive
+                {intl.formatMessage({ id: 'inactive', defaultMessage: 'Inactive' })}
               </Select.Option>
             </Select>
           </Form.Item>
@@ -545,15 +679,16 @@ export default class FeedForm extends PureComponent<IProps> {
               disabled={uploading}
               style={{ marginRight: 10 }}
             >
-              SUBMIT
+              {intl.formatMessage({ id: 'submit', defaultMessage: 'Submit' })}
             </Button>
             {(!feed || !feed._id) && (
               <Button
                 onClick={() => discard()}
                 className="secondary"
                 disabled={uploading}
+                style={{ textTransform: 'uppercase' }}
               >
-                DISCARD
+                {intl.formatMessage({ id: 'discard', defaultMessage: 'Discard' })}
               </Button>
             )}
           </div>
@@ -585,3 +720,5 @@ export default class FeedForm extends PureComponent<IProps> {
     );
   }
 }
+
+export default injectIntl(FeedForm);

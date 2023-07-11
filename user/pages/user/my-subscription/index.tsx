@@ -10,13 +10,15 @@ import {
 import { subscriptionService } from '@services/index';
 import { getResponseError } from '@lib/utils';
 import { connect } from 'react-redux';
-import { SearchFilter } from '@components/common';
+import SearchFilter from '@components/common/search-filter';
 import { setSubscription } from '@redux/subscription/actions';
+import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   currentUser: IUser;
   ui: IUIConfig;
   setSubscription: Function;
+  intl: IntlShape;
 }
 
 class SubscriptionPage extends PureComponent<IProps> {
@@ -54,6 +56,7 @@ class SubscriptionPage extends PureComponent<IProps> {
   }
 
   async getData() {
+    const { intl } = this.props;
     try {
       const {
         filter, sort, sortBy, pagination
@@ -72,7 +75,11 @@ class SubscriptionPage extends PureComponent<IProps> {
       });
     } catch (error) {
       message.error(
-        getResponseError(error) || 'An error occured. Please try again.'
+        getResponseError(error)
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
       );
     } finally {
       this.setState({ loading: false });
@@ -80,14 +87,36 @@ class SubscriptionPage extends PureComponent<IProps> {
   }
 
   async cancelSubscription(subscription: ISubscription) {
-    if (!window.confirm('Are you sure you want to cancel this subscription!')) return;
+    const { intl } = this.props;
+    if (
+      !window.confirm(
+        intl.formatMessage({
+          id: 'areYouSureYouWantToCancelThisSubscription',
+          defaultMessage: 'Are you sure you want to cancel this subscription!'
+        })
+      )
+    ) { return; }
     try {
-      await subscriptionService.cancelSubscription(subscription._id, subscription.paymentGateway);
-      message.success('Subscription cancelled successfully');
+      await subscriptionService.cancelSubscription(
+        subscription._id,
+        subscription.paymentGateway
+      );
+      message.success(
+        intl.formatMessage({
+          id: 'subscriptionCancelledSuccessfully',
+          defaultMessage: 'Subscription cancelled successfully'
+        })
+      );
       this.getData();
     } catch (e) {
       const error = await e;
-      message.error(error?.message || 'Error occured, please try again later');
+      message.error(
+        error?.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     }
   }
 
@@ -102,18 +131,29 @@ class SubscriptionPage extends PureComponent<IProps> {
     const {
       subscriptionList, pagination, loading
     } = this.state;
-    const { ui } = this.props;
+    const { ui, intl } = this.props;
     return (
       <Layout>
         <Head>
           <title>
             {ui && ui.siteName}
             {' '}
-            | My Subscriptions
+            |
+            {' '}
+            {intl.formatMessage({
+              id: 'mySubscriptions',
+              defaultMessage: 'My Subscriptions'
+            })}
           </title>
         </Head>
         <div className="main-container">
-          <PageHeading title="My Subscriptions" icon={<HeartOutlined />} />
+          <PageHeading
+            title={intl.formatMessage({
+              id: 'mySubscriptions',
+              defaultMessage: 'My Subscriptions'
+            })}
+            icon={<HeartOutlined />}
+          />
           <SearchFilter
             searchWithPerformer
             onSubmit={this.handleFilter.bind(this)}
@@ -141,4 +181,4 @@ const mapState = (state: any) => ({
   settings: { ...state.settings }
 });
 const mapDispatch = { setSubscription };
-export default connect(mapState, mapDispatch)(SubscriptionPage);
+export default injectIntl(connect(mapState, mapDispatch)(SubscriptionPage));
