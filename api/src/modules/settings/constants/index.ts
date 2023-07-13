@@ -70,7 +70,12 @@ export const SETTING_KEYS = {
   GCS_PRIVATE_KEY_SECRET: 'gcsPrivateKeySecret',
   GCS_CLIENT_EMAIL: 'gcsClientEmail',
   GCS_CLIENT_ID: 'gcsClientId',
-  GCS_CLIENT_CERT_URL: 'gcsClientCertUrl'
+  GCS_CLIENT_CERT_URL: 'gcsClientCertUrl',
+  // Veriff
+  VERIFF_ENABLED: 'veriffEnabled',
+  VERIFF_PUBLIC_KEY: 'veriffPublicKey',
+  VERIFF_SECRET_KEY: 'veriffSecretKey',
+  VERIFF_BASE_URL: 'veriffBaseUrl'
 };
 
 export const MENU_SECTION = {

@@ -78,11 +78,11 @@ async function auth(
         redirectLogin(ctx);
         return;
       }
+      // console.log(user);
       store.dispatch(loginSuccess());
       store.dispatch(updateCurrentUser(user.data));
       return;
     }
-
     !noredirect && redirectLogin(ctx);
   } catch (e) {
     redirectLogin(ctx);
@@ -133,7 +133,9 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
           SETTING_KEYS.TWITTER_CLIENT_ID,
           SETTING_KEYS.PAYMENT_GATEWAY,
           SETTING_KEYS.META_KEYWORDS,
-          SETTING_KEYS.META_DESCRIPTION
+          SETTING_KEYS.META_DESCRIPTION,
+          SETTING_KEYS.VERIFF_ENABLED,
+          SETTING_KEYS.VERIFF_PUBLIC_KEY
         ]),
         locale: settings.locale,
         supportedLocales: settings.supportedLocales

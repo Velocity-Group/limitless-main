@@ -27,6 +27,7 @@ export default routes()
   .add('wallet', '/wallet', '/wallet')
   .add('payment-success', '/payment/success', '/payment/success')
   .add('payment-cancel', '/payment/cancel', '/payment/cancel')
+  .add('verification', '/id-verification', '/id-verification')
   // performer
   .add('models', '/model', '/model')
   .add('model-register', '/auth/model-register', '/auth/model-register')
@@ -80,6 +81,7 @@ export default routes()
   .add('i18n-token-package', '/:locale/token-package', '/token-package')
   .add('i18n-payment-success', '/:locale/payment/success', '/payment/success')
   .add('i18n-payment-cancel', '/:locale/payment/cancel', '/payment/cancel')
+  .add('i18n-verification', '/:locale/id-verification', '/id-verification')
 
   // locale of performer
   .add('i18n-models', '/:locale/model', '/model')

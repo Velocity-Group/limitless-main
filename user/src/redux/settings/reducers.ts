@@ -10,7 +10,10 @@ const initialState = {
   googleClientId: '',
   tokenConversionRate: 1,
   stripePublishableKey: '',
-  paymentGateway: 'stripe'
+  paymentGateway: 'stripe',
+  veriffEnabled: true,
+  veriffPublicKey: '',
+  veriffBaseUrl: ''
 };
 
 const settingReducers = [

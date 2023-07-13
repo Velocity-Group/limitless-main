@@ -16,7 +16,6 @@ import {
   StringHelper, EntityNotFoundException, QueueEventService, QueueEvent, getConfig
 } from 'src/kernel';
 import { MailerService } from 'src/modules/mailer';
-import { ConfigService } from 'nestjs-config';
 import {
   STATUS_ACTIVE, ROLE_USER, GENDER_MALE, DELETE_USER_CHANNEL
 } from 'src/modules/user/constants';
@@ -45,7 +44,6 @@ export class AuthService {
     @Inject(FORGOT_MODEL_PROVIDER)
     private readonly forgotModel: Model<ForgotModel>,
     private readonly mailService: MailerService,
-    private readonly config: ConfigService,
     private readonly queueEventService: QueueEventService
   ) {
   }

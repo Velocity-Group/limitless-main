@@ -12,10 +12,7 @@ import {
   Tooltip
 } from 'antd';
 import {
-  EyeOutlined,
-  PictureOutlined,
-  CalendarOutlined,
-  BookOutlined
+  EyeOutlined, PictureOutlined, CalendarOutlined, BookOutlined, DollarOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { connect } from 'react-redux';
@@ -39,6 +36,7 @@ import PageHeading from '@components/common/page-heading';
 import PhotoPreviewList from '@components/photo/photo-preview-list';
 import './index.less';
 import { injectIntl, IntlShape } from 'react-intl';
+import TipPerformerForm from '@components/performer/tip-form';
 
 interface IProps {
   gallery: IGallery;
@@ -81,7 +79,8 @@ class GalleryViewPage extends PureComponent<IProps> {
     isBought: false,
     isBookmarked: false,
     requesting: false,
-    openPurchaseModal: false
+    openPurchaseModal: false,
+    openTipModal: false
   };
 
   componentDidMount() {
@@ -184,6 +183,30 @@ class GalleryViewPage extends PureComponent<IProps> {
     this.getPhotos();
   }
 
+  sendTip = async (price) => {
+    const { gallery, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user._id === gallery?.performer?._id) {
+      message.error('Models cannot tip for themselves');
+      return;
+    }
+    if (user.balance < price) {
+      message.error('Your wallet balance is not enough');
+      Router.push('/wallet');
+      return;
+    }
+    try {
+      await this.setState({ requesting: true });
+      await tokenTransactionService.sendTip(gallery?.performer?._id, { performerId: gallery?.performer?._id, price });
+      message.success('Thank you for the tip');
+      handleUpdateBalance({ token: -price });
+    } catch (e) {
+      const err = await e;
+      message.error(err.message || 'error occured, please try again later');
+    } finally {
+      this.setState({ requesting: false, openTipModal: false });
+    }
+  }
+
   async purchaseGallery() {
     const {
       gallery,
@@ -263,7 +286,7 @@ class GalleryViewPage extends PureComponent<IProps> {
     }
     const {
       fetching, photos, total, isBought, requesting, openPurchaseModal,
-      isBookmarked
+      isBookmarked, openTipModal
     } = this.state;
     const canview = (gallery?.isSale && isBought)
       || (!gallery?.isSale && gallery?.isSubscribed);
@@ -503,6 +526,15 @@ class GalleryViewPage extends PureComponent<IProps> {
                     <BookOutlined />
                   </button>
                 </Tooltip>
+                <Tooltip title="Send Tip">
+                  <button
+                    onClick={() => this.setState({ openTipModal: true })}
+                    type="button"
+                    className="react-btn"
+                  >
+                    <DollarOutlined />
+                  </button>
+                </Tooltip>
               </div>
             </div>
           </div>
@@ -569,6 +601,18 @@ class GalleryViewPage extends PureComponent<IProps> {
             submiting={requesting}
             onFinish={this.purchaseGallery.bind(this)}
           />
+        </Modal>
+        <Modal
+          key="tip_performer"
+          className="tip-modal"
+          title={null}
+          width={600}
+          visible={openTipModal}
+          onOk={() => this.setState({ openTipModal: false })}
+          footer={null}
+          onCancel={() => this.setState({ openTipModal: false })}
+        >
+          <TipPerformerForm performer={gallery.performer} submiting={requesting} onFinish={this.sendTip.bind(this)} />
         </Modal>
       </Layout>
     );

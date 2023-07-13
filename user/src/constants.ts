@@ -60,7 +60,10 @@ export const SETTING_KEYS = {
   STRIPE_SECRET_KEY: 'stripeSecretKey',
   AGORA_APPID: 'agoraAppId',
   AGORA_ENABLE: 'agoraEnable',
-  PAYMENT_GATEWAY: 'paymentGateway'
+  PAYMENT_GATEWAY: 'paymentGateway',
+  VERIFF_ENABLED: 'veriffEnabled',
+  VERIFF_PUBLIC_KEY: 'veriffPublicKey',
+  VERIFF_BASE_URL: 'veriffBaseUrl'
 };
 
 export const MENU_SECTION = {

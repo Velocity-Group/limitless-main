@@ -65,6 +65,10 @@ export class PerformerService extends APIRequest {
   updateBankingSetting(id: string, payload: any) {
     return this.put(`/admin/performers/${id}/banking-settings`, payload);
   }
+
+  getDecision(performerId: string) {
+    return this.get(`/veriff/${performerId}/decision`);
+  }
 }
 
 export const performerService = new PerformerService();

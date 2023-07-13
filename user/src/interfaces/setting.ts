@@ -21,4 +21,7 @@ export interface ISettings {
   metaDescription: string;
   agoraEnable: boolean;
   paymentGateway: string;
+  veriffEnabled: boolean;
+  veriffPublicKey: string;
+  veriffBaseUrl: string;
 }

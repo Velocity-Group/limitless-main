@@ -1,4 +1,4 @@
-import { flatten, pick } from 'lodash';
+import { flatten } from 'lodash';
 import { put } from 'redux-saga/effects';
 import { createSagas } from '@lib/redux';
 import Router from 'next/router';
@@ -94,16 +94,7 @@ const authSagas = [
     on: registerPerformer,
     * worker(data: any) {
       try {
-        const verificationFiles = [{
-          fieldname: 'idVerification',
-          file: data.payload.idVerificationFile
-        }, {
-          fieldname: 'documentVerification',
-          file: data.payload.documentVerificationFile
-        }];
-        const payload = pick(data.payload, ['name', 'username', 'password',
-          'gender', 'email', 'firstName', 'lastName', 'country', 'dateOfBirth']);
-        const resp = (yield authService.registerPerformer(verificationFiles, payload, () => {})).data;
+        const resp = (yield authService.registerPerformer(data.payload)).data;
         yield put(registerPerformerSuccess(resp));
       } catch (e) {
         const error = yield Promise.resolve(e);

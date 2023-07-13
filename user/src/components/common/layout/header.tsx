@@ -10,7 +10,7 @@ import {
 import { logout } from '@redux/auth/actions';
 import {
   ShoppingCartOutlined, UserOutlined, HistoryOutlined, CreditCardOutlined,
-  VideoCameraOutlined, FireOutlined, NotificationOutlined, BookOutlined,
+  VideoCameraOutlined, FireOutlined, NotificationOutlined, BookOutlined, IdcardOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
   LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined,
   TeamOutlined, CommentOutlined
@@ -52,6 +52,7 @@ class Header extends PureComponent<IProps> {
     const { user } = this.props;
     if (user._id) {
       this.handleCountNotificationMessage();
+      this.handleCheckVerifiedDocument();
     }
   }
 
@@ -59,6 +60,7 @@ class Header extends PureComponent<IProps> {
     const { user } = this.props;
     if (user._id && prevProps.user._id !== user._id) {
       this.handleCountNotificationMessage();
+      this.handleCheckVerifiedDocument();
     }
   }
 
@@ -78,6 +80,20 @@ class Header extends PureComponent<IProps> {
   handleMessage = async (event) => {
     event && this.setState({ totalNotReadMessage: event.total });
   };
+
+  handleSubscribe = (username) => {
+    Router.push(
+      { pathname: '/streaming/details', query: { username } },
+      `/streaming/${username}`
+    );
+  };
+
+  handleCheckVerifiedDocument = () => {
+    const { user } = this.props;
+    if (user._id && user.isPerformer && !user.verifiedDocument && !Router.router.pathname.includes('/id-verification')) {
+      Router.push('/id-verification');
+    }
+  }
 
   async handleCountNotificationMessage() {
     const data = await (await messageService.countTotalNotRead()).data;
@@ -270,7 +286,6 @@ class Header extends PureComponent<IProps> {
                     </div>
                   </Link>
                 )}
-                <Divider />
                 <Link href={{ pathname: '/model/profile', query: { username: user.username || user._id } }} as={`/${user.username || user._id}`}>
                   <div className={router.asPath === `/${user.username || user._id}` ? 'menu-item active' : 'menu-item'}>
                     <HomeIcon />
@@ -278,7 +293,7 @@ class Header extends PureComponent<IProps> {
                     {intl.formatMessage({ id: 'myProfile', defaultMessage: 'My Profile' })}
                   </div>
                 </Link>
-                <Link href="/model/account" as="/model/account">
+                <Link href="/model/account">
                   <div className={router.pathname === '/model/account' ? 'menu-item active' : 'menu-item'}>
                     <UserOutlined />
                     {' '}
@@ -299,14 +314,21 @@ class Header extends PureComponent<IProps> {
                     {intl.formatMessage({ id: 'blockCountries', defaultMessage: 'Block Countries' })}
                   </div>
                 </Link>
+                <Link href={{ pathname: '/id-verification' }}>
+                  <div className={router.pathname === '/id-verification' ? 'menu-item active' : 'menu-item'}>
+                    <IdcardOutlined />
+                    {' '}
+                    {intl.formatMessage({ id: 'verificationToPost', defaultMessage: 'Verification (to post)' })}
+                  </div>
+                </Link>
                 <Link href={{ pathname: '/model/mass-messages' }} as="/model/mass-messages">
                   <div className={router.pathname === '/model/mass-messages' ? 'menu-item active' : 'menu-item'}>
                     <CommentOutlined />
                     {' '}
-                    Send Mass Messages
+                    {intl.formatMessage({ id: 'sendMassMessages', defaultMessage: 'Send Mass Messages' })}
                   </div>
                 </Link>
-                <Link href={{ pathname: '/model/banking' }} as="/model/banking">
+                <Link href={{ pathname: '/model/banking' }}>
                   <div className={router.pathname === '/model/banking' ? 'menu-item active' : 'menu-item'}>
                     <BankOutlined />
                     {' '}
@@ -381,7 +403,7 @@ class Header extends PureComponent<IProps> {
             )}
             {!user.isPerformer && (
               <div className="profile-menu-item">
-                <Link href="/user/account" as="/user/account">
+                <Link href="/user/account">
                   <div className={router.pathname === '/user/account' ? 'menu-item active' : 'menu-item'}>
                     <UserOutlined />
                     {' '}
@@ -397,7 +419,7 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 )}
-                <Link href="/user/bookmarks" as="/user/bookmarks">
+                <Link href="/user/bookmarks">
                   <div className={router.pathname === '/user/bookmarks' ? 'menu-item active' : 'menu-item'}>
                     <BookOutlined />
                     {' '}
@@ -419,21 +441,21 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 <Divider />
-                <Link href="/user/orders" as="/user/orders">
+                <Link href="/user/orders">
                   <div className={router.pathname === '/user/orders' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingCartOutlined />
                     {' '}
                     {intl.formatMessage({ id: 'orderHistory', defaultMessage: 'Order History' })}
                   </div>
                 </Link>
-                <Link href="/user/payment-history" as="/user/payment-history">
+                <Link href="/user/payment-history">
                   <div className={router.pathname === '/user/payment-history' ? 'menu-item active' : 'menu-item'}>
                     <HistoryOutlined />
                     {' '}
                     {intl.formatMessage({ id: 'paymentHistory', defaultMessage: 'Payment History' })}
                   </div>
                 </Link>
-                <Link href="/user/wallet-transaction" as="/user/wallet-transaction">
+                <Link href="/user/wallet-transaction">
                   <div className={router.pathname === '/user/wallet-transaction' ? 'menu-item active' : 'menu-item'}>
                     <DollarOutlined />
                     {' '}

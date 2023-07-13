@@ -19,7 +19,6 @@ import {
 } from '@services/index';
 import PerformerAccountForm from '@components/performer/accountForm';
 import PerformerSubscriptionForm from '@components/performer/subscriptionForm';
-import PerformerVerificationForm from '@components/performer/verificationForm';
 import '../../user/index.less';
 import { injectIntl, IntlShape } from 'react-intl';
 
@@ -35,6 +34,7 @@ interface IProps {
   intl: IntlShape
   settings: ISettings;
 }
+
 class AccountSettings extends PureComponent<IProps> {
   static authenticate = true;
 
@@ -160,11 +160,11 @@ class AccountSettings extends PureComponent<IProps> {
                 bodyInfo={bodyInfo}
               />
             </Tabs.TabPane>
-            <Tabs.TabPane tab={<span>{intl.formatMessage({ id: 'idDocuments', defaultMessage: 'ID Documents' })}</span>} key="verification">
+            {/* <Tabs.TabPane tab={<span>{intl.formatMessage({ id: 'idDocuments', defaultMessage: 'ID Documents' })}</span>} key="verification">
               <PerformerVerificationForm
                 user={currentUser}
               />
-            </Tabs.TabPane>
+            </Tabs.TabPane> */}
             <Tabs.TabPane
               tab={<span>{intl.formatMessage({ id: 'pricingSettings', defaultMessage: 'Pricing Settings' })}</span>}
               key="subscription"

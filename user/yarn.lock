@@ -594,6 +594,11 @@
     "@typescript-eslint/types" "4.22.0"
     eslint-visitor-keys "^2.0.0"
 
+"@veriff/js-sdk@^1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@veriff/js-sdk/-/js-sdk-1.5.1.tgz#f8580aa51b0404e58c66bf82a5cc22bc11aafc1b"
+  integrity sha512-THHcyRTctdtXUpKAEGnddTkwgFdRi2taAigtnhOfGmoCp23m+9vlZp5GnT7qmswfyZk48BCZ4Uc2gT7AUIhqTA==
+
 "@videojs/http-streaming@2.6.4":
   version "2.6.4"
   resolved "https://registry.yarnpkg.com/@videojs/http-streaming/-/http-streaming-2.6.4.tgz#a3d9eb62b02c6e48439f033675ec3a6f5f8cdb25"

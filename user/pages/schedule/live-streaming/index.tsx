@@ -88,7 +88,7 @@ function LiveStreamingSchedule() {
             ]}
           >
             <DatePicker
-              disabledDate={(currentDate) => currentDate && currentDate < moment().endOf('day')}
+              disabledDate={(currentDate) => currentDate && currentDate.isBefore(new Date())}
               showTime={{ format: 'HH:mm a' }}
               format="YYYY-MM-DD HH:mm a"
             />

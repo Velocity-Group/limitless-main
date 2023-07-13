@@ -68,18 +68,21 @@ export class AuthService extends APIRequest {
     return this.post('/auth/users/register', data);
   }
 
-  registerPerformer(documents: {
-    file: File;
-    fieldname: string;
-  }[], data: any, onProgress?: Function) {
-    return this.upload('/auth/performers/register', documents, {
-      onProgress,
-      customData: data
-    });
+  registerPerformer(data: any) {
+    return this.post('/auth/performers/register', data);
   }
 
   userSwitchToPerformer(userId: string) {
     return this.post(`/auth/users/${userId}/switch-to-performer`);
+  }
+
+  // veriff
+  generateVeriff(payload: any) {
+    return this.post('/veriff/generate', payload);
+  }
+
+  getDecision() {
+    return this.get('/veriff/decision');
   }
 }
 

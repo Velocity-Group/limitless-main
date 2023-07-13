@@ -8,7 +8,7 @@ import {
   PerformerFeedController, FeedFileController, UserFeedController
 } from './controllers';
 import {
-  ReactionFeedListener, CommentFeedListener, PollFeedListener, UpdatePerformerGenderListener,
+  ReactionFeedListener, CommentFeedListener, PollFeedListener,
   DeletePerformerFeedListener,
   StreamFeedListener
 } from './listeners';
@@ -34,7 +34,7 @@ import { FollowModule } from '../follow/follow.module';
   providers: [...feedProviders, ...pollProviders, ...voteProviders,
     FeedService, FeedFileService,
     ReactionFeedListener, CommentFeedListener, PollFeedListener,
-    UpdatePerformerGenderListener, DeletePerformerFeedListener, StreamFeedListener],
+    DeletePerformerFeedListener, StreamFeedListener],
   controllers: [PerformerFeedController, FeedFileController, UserFeedController],
   exports: [...feedProviders, FeedService, FeedFileService]
 })

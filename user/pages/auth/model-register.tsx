@@ -8,14 +8,16 @@ import Link from 'next/link';
 import Head from 'next/head';
 import Router from 'next/router';
 import { connect } from 'react-redux';
-import { registerPerformer, loginSocial } from '@redux/auth/actions';
+import { registerPerformer, loginSocial, loginSuccess } from '@redux/auth/actions';
+import { updateCurrentUser } from '@redux/user/actions';
 import { ISettings, IUIConfig, ICountry } from 'src/interfaces';
 import moment from 'moment';
-import { authService, utilsService } from 'src/services';
-import './index.less';
+import { authService, userService, utilsService } from 'src/services';
 import GoogleLoginButton from '@components/auth/google-login-button';
 import { injectIntl, IntlShape } from 'react-intl';
-import ImageUploadModel from '@components/file/image-upload-model';
+// import ImageUploadModel from '@components/file/image-upload-model';
+
+import './index.less';
 
 const { Option } = Select;
 
@@ -23,6 +25,8 @@ interface IProps {
   loginSocial: Function;
   registerPerformerData: any;
   registerPerformer: Function;
+  updateCurrentUser: Function;
+  loginSuccess: Function;
   ui: IUIConfig;
   settings: ISettings;
   countries: ICountry[];
@@ -34,10 +38,6 @@ class RegisterPerformer extends PureComponent<IProps> {
 
   static authenticate = false;
 
-  idVerificationFile = null;
-
-  documentVerificationFile = null;
-
   static async getInitialProps() {
     const [countries] = await Promise.all([utilsService.countriesList()]);
     return {
@@ -48,6 +48,10 @@ class RegisterPerformer extends PureComponent<IProps> {
   state = {
     isLoading: false
   };
+
+  async componentDidMount() {
+    this.redirectLogin();
+  }
 
   componentDidUpdate(prevProps) {
     const { registerPerformerData, ui, intl } = this.props;
@@ -82,16 +86,7 @@ class RegisterPerformer extends PureComponent<IProps> {
     }
   }
 
-  onFileReaded = (file: File, type: string) => {
-    if (file && type === 'idFile') {
-      this.idVerificationFile = file;
-    }
-    if (file && type === 'documentFile') {
-      this.documentVerificationFile = file;
-    }
-  };
-
-  async onGoogleLogin(resp: any) {
+  onGoogleLogin = async (resp: any) => {
     if (!resp?.credential) {
       return;
     }
@@ -116,23 +111,12 @@ class RegisterPerformer extends PureComponent<IProps> {
     }
   }
 
-  register = (values: any) => {
-    const data = values;
-    const { registerPerformer: registerPerformerHandler, intl } = this.props;
-    if (!this.idVerificationFile || !this.documentVerificationFile) {
-      return message.error(
-        intl.formatMessage({
-          id: 'idDocumentsAreRequired',
-          defaultMessage: 'ID documents are required!'
-        })
-      );
-    }
-    data.idVerificationFile = this.idVerificationFile;
-    data.documentVerificationFile = this.documentVerificationFile;
-    return registerPerformerHandler(data);
+  register = async (values: any) => {
+    const { registerPerformer: registerPerformerHandler } = this.props;
+    return registerPerformerHandler(values);
   };
 
-  async loginTwitter() {
+  loginTwitter = async () => {
     const { intl } = this.props;
     try {
       await this.setState({ isLoading: true });
@@ -157,6 +141,36 @@ class RegisterPerformer extends PureComponent<IProps> {
           })}`
       );
     } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
+  async redirectLogin() {
+    const { loginSuccess: handleLogin, updateCurrentUser: handleUpdateUser } = this.props;
+    const token = authService.getToken();
+    if (!token || token === 'null') {
+      this.setState({ isLoading: false });
+      return;
+    }
+    authService.setToken(token);
+    try {
+      await this.setState({ isLoading: true });
+      const user = await userService.me({
+        Authorization: token
+      });
+      if (!user || !user.data || !user.data._id) return;
+      handleLogin();
+      handleUpdateUser(user.data);
+      user.data.isPerformer
+        ? Router.push(
+          {
+            pathname: '/model/profile',
+            query: { username: user.data.username || user.data._id }
+          },
+          `/${user.data.username || user.data._id}`
+        )
+        : Router.push('/home');
+    } catch {
       this.setState({ isLoading: false });
     }
   }
@@ -236,7 +250,7 @@ class RegisterPerformer extends PureComponent<IProps> {
               onFinish={this.register}
               scrollToFirstError
             >
-              <Row>
+              <Row justify="center">
                 <Col xs={24} sm={24} md={14} lg={14}>
                   <Row>
                     <Col span={12}>
@@ -557,7 +571,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                     </Col>
                   </Row>
                 </Col>
-                <Col xs={24} sm={24} md={10} lg={10}>
+                {/* <Col xs={24} sm={24} md={10} lg={10}>
                   <div className="register-form">
                     <Form.Item
                       labelCol={{ span: 24 }}
@@ -602,7 +616,7 @@ class RegisterPerformer extends PureComponent<IProps> {
                       </div>
                     </Form.Item>
                   </div>
-                </Col>
+                </Col> */}
               </Row>
               <Form.Item style={{ textAlign: 'center' }}>
                 <Button
@@ -695,7 +709,9 @@ const mapStatesToProps = (state: any) => ({
   registerPerformerData: { ...state.auth.registerPerformerData }
 });
 
-const mapDispatchToProps = { registerPerformer, loginSocial };
+const mapDispatchToProps = {
+  registerPerformer, loginSocial, loginSuccess, updateCurrentUser
+};
 
 export default injectIntl(
   connect(mapStatesToProps, mapDispatchToProps)(RegisterPerformer)

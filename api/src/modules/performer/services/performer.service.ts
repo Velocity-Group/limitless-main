@@ -20,12 +20,11 @@ import { EVENT, STATUS } from 'src/kernel/constants';
 import { REACTION_TYPE, REACTION } from 'src/modules/reaction/constants';
 import { REF_TYPE } from 'src/modules/file/constants';
 import {
-  PERFORMER_UPDATE_STATUS_CHANNEL, PERFORMER_UPDATE_GENDER_CHANNEL, DELETE_PERFORMER_CHANNEL
+  DELETE_PERFORMER_CHANNEL
 } from 'src/modules/performer/constants';
 import { MailerService } from 'src/modules/mailer';
 import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';
-// import { ChangeTokenLogService } from 'src/modules/change-token-logs/services/change-token-log.service';
 import { PerformerBlockService } from 'src/modules/block/services';
 import { isObjectId, toObjectId, randomString } from 'src/kernel/helpers/string.helper';
 import { Storage } from 'src/modules/storage/contants';
@@ -500,43 +499,15 @@ export class PerformerService {
     }
     await this.performerModel.updateOne({ _id: id }, data);
     const newPerformer = await this.performerModel.findById(performer._id);
-    const oldStatus = performer.status;
-    const oldGender = performer.gender;
-    const oldVerifiedDocument = performer.verifiedDocument;
-    // const oldBalance = performer.balance;
-    // logs change token
-    // if (oldBalance !== newPerformer.balance) {
-    //   await this.changeTokenLogService.changeTokenLog({
-    //     source: CHANGE_TOKEN_LOG_SOURCES.PERFORMER,
-    //     sourceId: newPerformer._id,
-    //     token: newPerformer.balance - oldBalance
-    //   });
-    // }
+
     // fire event that updated performer status
-    if (oldVerifiedDocument !== newPerformer.verifiedDocument && newPerformer.verifiedDocument) {
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: PERFORMER_UPDATE_STATUS_CHANNEL,
-          eventName: EVENT.UPDATED,
-          data: {
-            ...new PerformerDto(newPerformer),
-            oldStatus
-          }
-        })
-      );
-    }
-    // fire event that updated performer gender
-    if (data.gender !== performer.gender) {
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: PERFORMER_UPDATE_GENDER_CHANNEL,
-          eventName: EVENT.UPDATED,
-          data: {
-            ...new PerformerDto(newPerformer),
-            oldGender
-          }
-        })
-      );
+    if (newPerformer.status !== performer.status && newPerformer.status === 'active' && newPerformer.verifiedDocument) {
+      newPerformer.email && await this.mailService.send({
+        subject: 'Account approval',
+        to: newPerformer.email,
+        data: { name: newPerformer.name || newPerformer.username },
+        template: 'approved-performer-account'
+      });
     }
     if (performer.email && performer.email !== newPerformer.email) {
       await this.authService.sendVerificationEmail(newPerformer);
@@ -595,20 +566,6 @@ export class PerformerService {
     }
     await this.performerModel.updateOne({ _id: id }, data);
     const newPerformer = await this.performerModel.findById(id);
-    const oldGender = performer.gender;
-    // fire event that updated performer gender
-    if (data.gender !== performer.gender) {
-      await this.queueEventService.publish(
-        new QueueEvent({
-          channel: PERFORMER_UPDATE_GENDER_CHANNEL,
-          eventName: EVENT.UPDATED,
-          data: {
-            ...new PerformerDto(newPerformer),
-            oldGender
-          }
-        })
-      );
-    }
     if (performer.email && performer.email !== newPerformer.email) {
       await this.authService.sendVerificationEmail(newPerformer);
       await this.authService.updateKey({
@@ -807,6 +764,23 @@ export class PerformerService {
       key: service,
       performerId
     });
+  }
+
+  public async vefifiedDocument(performerId: ObjectId) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) return;
+    if (!performer.verifiedDocument) {
+      performer.verifiedDocument = true;
+      await performer.save();
+      if (performer.status === 'active') {
+        performer.email && await this.mailService.send({
+          subject: 'Account approval',
+          to: performer.email,
+          data: { name: performer.name || performer.username },
+          template: 'approved-performer-account'
+        });
+      }
+    }
   }
 
   public async updateSubscriptionStat(performerId: string | ObjectId, num = 1) {

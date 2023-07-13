@@ -1,16 +1,16 @@
-import { Module, forwardRef } from '@nestjs/common';
+import {
+  Module, forwardRef, NestModule, MiddlewareConsumer
+} from '@nestjs/common';
 import { MongoDBModule } from 'src/kernel';
+import { RequestLoggerMiddleware } from 'src/kernel/logger/request-log.middleware';
 import { authProviders } from './providers/auth.provider';
 import { UserModule } from '../user/user.module';
-import { AuthService } from './services';
+import { AuthService, VeriffService } from './services';
 import { MailerModule } from '../mailer/mailer.module';
 import { AuthGuard, RoleGuard, LoadUser } from './guards';
-import { RegisterController } from './controllers/register.controller';
-import { LoginController } from './controllers/login.controller';
-import { PasswordController } from './controllers/password.controller';
-
-// performer
-import { PerformerRegisterController } from './controllers/performer-register.controller';
+import {
+  PerformerRegisterController, PasswordController, LoginController, RegisterController, VeriffController
+} from './controllers';
 import { FileModule } from '../file/file.module';
 import { PerformerModule } from '../performer/performer.module';
 import { SettingModule } from '../settings/setting.module';
@@ -29,13 +29,15 @@ import { SettingModule } from '../settings/setting.module';
     AuthService,
     AuthGuard,
     RoleGuard,
-    LoadUser
+    LoadUser,
+    VeriffService
   ],
   controllers: [
     RegisterController,
     LoginController,
     PasswordController,
-    PerformerRegisterController
+    PerformerRegisterController,
+    VeriffController
   ],
   exports: [
     ...authProviders,
@@ -45,4 +47,11 @@ import { SettingModule } from '../settings/setting.module';
     LoadUser
   ]
 })
-export class AuthModule { }
+
+export class AuthModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(RequestLoggerMiddleware)
+      .forRoutes('/veriff/callhook');
+  }
+}

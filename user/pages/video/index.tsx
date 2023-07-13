@@ -1,16 +1,11 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-prototype-builtins */
 import {
-  Layout, Tabs, message, Button, Spin, Tooltip, Avatar
+  Layout, Tabs, message, Button, Spin, Tooltip, Avatar, Modal
 } from 'antd';
 import {
-  BookOutlined,
-  EyeOutlined,
-  HourglassOutlined,
-  LikeOutlined,
-  CommentOutlined,
-  CalendarOutlined,
-  VideoCameraOutlined
+  BookOutlined, EyeOutlined, HourglassOutlined, LikeOutlined, CommentOutlined,
+  CalendarOutlined, VideoCameraOutlined, DollarOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import { PureComponent } from 'react';
@@ -42,6 +37,7 @@ import Error from 'next/error';
 import './index.less';
 import { injectIntl, IntlShape } from 'react-intl';
 import RelatedListVideo from '@components/video/related-list';
+import TipPerformerForm from '@components/performer/tip-form';
 
 const { TabPane } = Tabs;
 
@@ -100,7 +96,8 @@ class VideoViewPage extends PureComponent<IProps> {
     isSubscribed: false,
     totalComment: 0,
     requesting: false,
-    activeTab: 'description'
+    activeTab: 'description',
+    openTipModal: false
   };
 
   componentDidMount() {
@@ -245,6 +242,30 @@ class VideoViewPage extends PureComponent<IProps> {
     });
   };
 
+  sendTip = async (price) => {
+    const { video, user, updateBalance: handleUpdateBalance } = this.props;
+    if (user._id === video?.performer?._id) {
+      message.error('Models cannot tip for themselves');
+      return;
+    }
+    if (user.balance < price) {
+      message.error('Your wallet balance is not enough');
+      Router.push('/wallet');
+      return;
+    }
+    try {
+      await this.setState({ requesting: true });
+      await tokenTransactionService.sendTip(video?.performer?._id, { performerId: video?.performer?._id, price });
+      message.success('Thank you for the tip');
+      handleUpdateBalance({ token: -price });
+    } catch (e) {
+      const err = await e;
+      message.error(err.message || 'error occured, please try again later');
+    } finally {
+      this.setState({ requesting: false, openTipModal: false });
+    }
+  }
+
   async deleteComment(item) {
     const { intl } = this.props;
     const { deleteComment: handleDeleteComment } = this.props;
@@ -334,7 +355,7 @@ class VideoViewPage extends PureComponent<IProps> {
       ? commentMapping[video._id].total
       : 0;
     const {
-      videoStats, isLiked, isBookmarked, isSubscribed, isBought, requesting, activeTab, isFirstLoadComment
+      videoStats, isLiked, isBookmarked, isSubscribed, isBought, requesting, activeTab, isFirstLoadComment, openTipModal
     } = this.state;
     const thumbUrl = video?.thumbnail?.url
       || (video?.teaser?.thumbnails && video?.teaser?.thumbnails[0])
@@ -432,7 +453,13 @@ class VideoViewPage extends PureComponent<IProps> {
               )}
               <div className="vid-exl-group">
                 {/* eslint-disable-next-line no-nested-ternary */}
-                <h3>{(video.isSale && !isBought && !video.isSchedule) ? 'UNLOCK TO VIEW FULL CONTENT' : (!video.isSale && !isSubscribed && !video.isSchedule) ? 'SUBSCRIBE TO VIEW FULL CONTENT' : 'VIDEO IS UPCOMING'}</h3>
+                <h3>
+                  {video.isSale && !isBought && !video.isSchedule
+                    ? intl.formatMessage({ id: 'unlockToViewFullContent', defaultMessage: 'UNLOCK TO VIEW FULL CONTENT' })
+                    : !video.isSale && !isSubscribed && !video.isSchedule
+                      ? intl.formatMessage({ id: 'subscribeToViewFullContent', defaultMessage: 'SUBSCRIBE TO VIEW FULL CONTENT' })
+                      : intl.formatMessage({ id: 'videoIsUpcoming', defaultMessage: 'VIDEO IS UPCOMING' })}
+                </h3>
                 <div className="text-center">
                   {video.isSale && !isBought && (
                   <Button block className="primary" loading={requesting} disabled={requesting} onClick={this.purchaseVideo.bind(this)}>
@@ -495,56 +522,10 @@ class VideoViewPage extends PureComponent<IProps> {
 
                   </div>
                   )}
-                  {!video.teaser && (
-                    <div className="video-thumbs">
-                      <img alt="thumbnail" src={thumbUrl} />
-                    </div>
-                  )}
-                  <div className="vid-exl-group">
-                    {/* eslint-disable-next-line no-nested-ternary */}
-                    <h3>
-                      {video.isSale && !isBought && !video.isSchedule
-                        ? intl.formatMessage({ id: 'unlockToViewFullContent', defaultMessage: 'UNLOCK TO VIEW FULL CONTENT' })
-                        : !video.isSale && !isSubscribed && !video.isSchedule
-                          ? intl.formatMessage({ id: 'subscribeToViewFullContent', defaultMessage: 'SUBSCRIBE TO VIEW FULL CONTENT' })
-                          : intl.formatMessage({ id: 'videoIsUpcoming', defaultMessage: 'VIDEO IS UPCOMING' })}
-                    </h3>
-                    <div className="text-center">
-                      {video.isSale && !isBought && (
-                        <Button
-                          type="primary"
-                          loading={requesting}
-                          disabled={requesting}
-                          onClick={this.purchaseVideo.bind(this)}
-                          style={{ textTransform: 'uppercase' }}
-                        >
-                          {intl.formatMessage({ id: 'pay', defaultMessage: 'Pay' })}
-                          {' '}
-                          &nbsp;
-                          <img
-                            alt="token"
-                            src="/static/coin-ico.png"
-                            height="20px"
-                          />
-                          {' '}
-                          {video.price.toFixed(2)}
-                          {' '}
-                          {intl.formatMessage({ id: 'toUnlock', defaultMessage: 'To Unlock' })}
-                        </Button>
-                      )}
-                    </div>
-                    {video.isSchedule && (
-                      <h4>
-                        {intl.formatMessage({ id: 'mainVideoWillBePremieredAt', defaultMessage: 'Main video will be premiered at' })}
-                        {' '}
-                        {formatDate(video.scheduledAt, 'll')}
-                      </h4>
-                    )}
-                  </div>
                 </div>
                 {video.isSchedule && (
-                <h4 style={{ marginTop: 15 }}>
-                  {intl.formatMessage({ id: 'MainVideoWillBePremieredOn', defaultMessage: 'Main video will be premiered on' })}
+                <h4>
+                  {intl.formatMessage({ id: 'mainVideoWillBePremieredAt', defaultMessage: 'Main video will be premiered at' })}
                   {' '}
                   {formatDate(video.scheduledAt, 'll')}
                 </h4>
@@ -631,6 +612,15 @@ class VideoViewPage extends PureComponent<IProps> {
                   {' '}
                   <CommentOutlined />
                 </button>
+                <Tooltip title="Send Tip">
+                  <button
+                    onClick={() => this.setState({ openTipModal: true })}
+                    type="button"
+                    className="react-btn"
+                  >
+                    <DollarOutlined />
+                  </button>
+                </Tooltip>
               </div>
             </div>
           </div>
@@ -735,6 +725,18 @@ class VideoViewPage extends PureComponent<IProps> {
             )}
           </div>
         </div>
+        <Modal
+          key="tip_performer"
+          className="tip-modal"
+          title={null}
+          width={600}
+          visible={openTipModal}
+          onOk={() => this.setState({ openTipModal: false })}
+          footer={null}
+          onCancel={() => this.setState({ openTipModal: false })}
+        >
+          <TipPerformerForm performer={video.performer} submiting={requesting} onFinish={this.sendTip.bind(this)} />
+        </Modal>
       </Layout>
     );
   }
