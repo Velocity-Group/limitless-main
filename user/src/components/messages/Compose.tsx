@@ -129,7 +129,7 @@ function Compose({ conversation, disabled }: IProps) {
       });
       resetState();
       _input.current && _input.current.focus();
-      dispatch(sendMessageSuccess(resp.data));
+      dispatch(sendMessageSuccess({ ...resp.data, localFiles: files }));
     } catch (e) {
       setSubmitting(false);
       const err = await e;

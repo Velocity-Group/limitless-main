@@ -44,6 +44,8 @@ export interface IMessage {
 
   files: IFile[];
 
+  localFiles: [];
+
   isBought: boolean;
 
   text: string;

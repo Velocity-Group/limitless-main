@@ -16,6 +16,8 @@ import 'keen-slider/keen-slider.min.css';
 import './index.less';
 
 interface IProps {
+  // eslint-disable-next-line react/require-default-props
+  localImageFiles?: any[];
   photos: {
     _id: string;
     name: string;
@@ -60,7 +62,7 @@ function ThumbnailPlugin(
   };
 }
 
-export const ImagesViewer = ({ photos, thumbSpacing = 12 }: IProps) => {
+export const ImagesViewer = ({ photos, thumbSpacing = 12, localImageFiles }: IProps) => {
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     initial: 0,
     slides: {
@@ -109,20 +111,35 @@ export const ImagesViewer = ({ photos, thumbSpacing = 12 }: IProps) => {
         brokenElement={<p style={{ color: '#fff' }}>Oops! Photo is broken</p>}
       >
         <div ref={sliderRef} className="keen-slider photos">
-          {photos.map((img) => (
-            <PhotoView
-              key={img._id}
-              src={img.url}
-            >
-              <Image
+          {localImageFiles.length
+            ? localImageFiles.map((img) => (
+              <PhotoView
+                key={img.uid}
+                src={img.thumbnail}
+              >
+                <Image
+                  key={img.uid}
+                  className="keen-slider__slide"
+                  src={img.thumbnail}
+                  preview={false}
+                  fallback="/static/no-image.jpg"
+                />
+              </PhotoView>
+            ))
+            : photos.map((img) => (
+              <PhotoView
                 key={img._id}
-                className="keen-slider__slide"
                 src={img.url}
-                preview={false}
-                fallback="/static/no-image.jpg"
-              />
-            </PhotoView>
-          ))}
+              >
+                <Image
+                  key={img._id}
+                  className="keen-slider__slide"
+                  src={img.url}
+                  preview={false}
+                  fallback="/static/no-image.jpg"
+                />
+              </PhotoView>
+            ))}
         </div>
       </PhotoProvider>
       {photos.length > 1 && (

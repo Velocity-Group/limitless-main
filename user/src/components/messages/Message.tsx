@@ -46,6 +46,7 @@ export default function Message(props: IProps) {
   const user = useSelector((state: any) => state.user.current);
   const [bought, setBought] = useState(isSale && isBought);
   const images = files ? files.filter((f) => f.type === 'message-photo') : [];
+  const localImageFiles = data?.localFiles ? data.localFiles : [];
   const video = files && files.find((f) => f.type === 'message-video');
   const teaser = files && files.find((f) => f.type === 'message-teaser');
   const audio = files && files.find((f) => f.type === 'message-audio');
@@ -104,7 +105,7 @@ export default function Message(props: IProps) {
           {!isMine && <img alt="" className="avatar" src={recipient?.avatar || '/static/no-avatar.png'} />}
           <div className={['photo', 'video'].includes(type) ? 'bubble media' : 'bubble'} title={friendlyTimestamp}>
             <div className={(canView || teaser || thumbnail) ? 'media-viewer' : 'media-viewer blured'}>
-              {type === 'photo' && canView && <ImagesViewer thumbSpacing={6} photos={images} />}
+              {type === 'photo' && canView && <ImagesViewer thumbSpacing={6} photos={images} localImageFiles={localImageFiles} />}
               {!canView && !teaser && <div className="thumbnail"><Image preview={false} src={thumbUrl} alt="thumb" /></div>}
               {type === 'video' && canView && (
                 <>
