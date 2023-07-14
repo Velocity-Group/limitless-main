@@ -142,7 +142,21 @@ export const ImagesViewer = ({ photos, thumbSpacing = 12, localImageFiles }: IPr
             ))}
         </div>
       </PhotoProvider>
-      {photos.length > 1 && (
+      {localImageFiles.length && localImageFiles.length > 1
+        ? (
+          <div className="padding-thumbnails">
+            <div ref={thumbnailRef} className="keen-slider thumbnails">
+              {localImageFiles.map((img) => (
+                <img
+                  className="keen-slider__slide"
+                  key={img.uid}
+                  src={img.thumbnail}
+                  alt="thumb"
+                />
+              ))}
+            </div>
+          </div>
+        ) : photos.length > 1 && (
         <div className="padding-thumbnails">
           <div ref={thumbnailRef} className="keen-slider thumbnails">
             {photos.map((img) => (
@@ -155,7 +169,7 @@ export const ImagesViewer = ({ photos, thumbSpacing = 12, localImageFiles }: IPr
             ))}
           </div>
         </div>
-      )}
+        )}
     </>
   );
 };

@@ -1,7 +1,7 @@
 @import '../../../style/vars.less';
 
 
-.f-upload-list {
+.f-upload-list.message-upload-list {
   display: flex;
   width: 100%;
   overflow: auto;
@@ -56,8 +56,6 @@
       overflow: hidden;
       height: 180px;
       width: 120px;
-      max-width: 100%;
-      max-height: 100%;
       display: block;
     }
 
@@ -142,7 +140,7 @@
   &.message-upload-list {
     flex-wrap: nowrap;
     overflow: unset;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
     .list-files {
       display: flex;
       flex-wrap: wrap;
