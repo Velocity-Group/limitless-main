@@ -5,7 +5,10 @@ export const PAYMENT_STATUS = {
   FAIL: 'fail',
   CANCELED: 'canceled',
   REFUNDED: 'refunded',
-  REQUIRE_AUTHENTICATION: 'require_authentication'
+  REQUIRE_AUTHENTICATION: 'require_authentication',
+  DELAYED: 'delayed',
+  PENDING: 'pending',
+  RESOLED: 'resolved'
 };
 
 export const PAYMENT_TYPE = {

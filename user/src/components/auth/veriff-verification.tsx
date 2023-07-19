@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import {
-  Row, Col, Form, Image, message, Result, Spin, Button
+  Row, Col, Form, Image, message, Result, Spin
 } from 'antd';
 import { authService, performerService, userService } from 'src/services';
 import { ImageUpload } from '@components/file';
@@ -12,49 +12,20 @@ import { updateCurrentUser } from '@redux/user/actions';
 import { IntlShape, useIntl } from 'react-intl';
 
 interface IProps {
-  performer: IPerformer
+  performer: IPerformer;
+  verification: any;
 }
 const sdk = VeriffSDK as any;
 
-const IdVerificationForm = ({ performer }: IProps) => {
+const IdVerificationForm = ({ performer, verification }: IProps) => {
   const [idPhotoUrl, setIdPhoto] = useState(performer?.idVerification?.url);
   const [selfiePhotoUrl, setSelfiePhoto] = useState(performer?.documentVerification?.url);
   const settings = useSelector((state: any) => state.settings) as ISettings;
   const documentUploadUrl = performerService.getDocumentUploadUrl();
-  const [verification, setVerification] = useState(null);
+  const [veriff, setVeriff] = useState<any>(null);
   const [fetching, setFetching] = useState(true);
   const dispatch = useDispatch();
   const intl: IntlShape = useIntl();
-
-  const veriff = sdk.Veriff({
-    host: settings?.veriffBaseUrl,
-    apiKey: settings.veriffPublicKey,
-    parentId: 'veriff-root',
-    onSession: async (err, response) => {
-      // received the response, verification can be started / triggered now
-      if (err || !response || !response?.verification?.url) return;
-
-      try {
-        // save response data to this performer verification
-        await authService.generateVeriff({
-          sessionId: response?.verification?.id,
-          status: response?.verification?.status,
-          responseData: response?.verification
-        });
-        window.location.href = response?.verification?.url;
-      } catch (error) {
-        const e = await error;
-        message.error(e?.message);
-      }
-    }
-  });
-  veriff.setParams({
-    person: {
-      givenName: performer?.firstName || '',
-      lastName: performer?.lastName || ''
-    },
-    vendorData: performer?.email || ' ' // should be ' ' for blank
-  });
 
   const headers = {
     authorization: authService.getToken()
@@ -65,11 +36,6 @@ const IdVerificationForm = ({ performer }: IProps) => {
     dispatch(updateCurrentUser(resp.data));
     resp.data.verifiedDocument && setFetching(false);
     !resp.data.verifiedDocument && setTimeout(() => updateProfile(), 10000);
-  };
-
-  const getIdentity = async () => {
-    const resp = await authService.getDecision();
-    resp.data && setVerification(resp.data);
   };
 
   const onFileUploaded = (file, type) => {
@@ -83,16 +49,51 @@ const IdVerificationForm = ({ performer }: IProps) => {
   };
 
   useEffect(() => {
-    getIdentity();
     updateProfile();
-    veriff.mount({
+
+    !performer?.verifiedDocument
+     && (!verification || (verification?.status !== 'approved' && verification?.status !== 'submitted'))
+      && setVeriff(sdk.Veriff({
+        host: settings?.veriffBaseUrl,
+        apiKey: settings?.veriffPublicKey,
+        parentId: 'veriff-root',
+        onSession: async (err, response) => {
+        // received the response, verification can be started / triggered now
+          if (err || !response || !response?.verification?.url) return;
+
+          try {
+          // save response data to this performer verification
+            await authService.generateVeriff({
+              sessionId: response?.verification?.id,
+              status: response?.verification?.status,
+              responseData: response?.verification
+            });
+            window.location.href = response?.verification?.url;
+          } catch (error) {
+            const e = await error;
+            message.error(e?.message);
+          }
+        }
+      }));
+  }, []);
+
+  useEffect(() => {
+    veriff && veriff.setParams({
+      person: {
+        givenName: performer?.firstName || '',
+        lastName: performer?.lastName || ''
+      },
+      vendorData: performer?.email || ' ' // should be ' ' for blank
+    });
+
+    veriff && veriff.mount({
       formLabel: {
         givenName: 'First name',
         lastName: 'Last name'
       },
       loadingText: 'Loading...'
     });
-  }, []);
+  }, [veriff]);
 
   return (
     <div style={{ paddingBottom: 50 }}>
@@ -105,7 +106,7 @@ const IdVerificationForm = ({ performer }: IProps) => {
             {' '}
             <b color="pink">{performer?.verifiedDocument ? intl.formatMessage({ id: 'verified', defaultMessage: 'Verified!' }) : intl.formatMessage({ id: 'notVerifiedYet', defaultMessage: 'Not verified yet!' })}</b>
             &nbsp;
-            {fetching && <Spin />}
+            {fetching && <Spin style={{ display: 'block' }} />}
           </div>
         )}
         subTitle={performer?.verifiedDocument ? intl.formatMessage({ id: 'congratsYourIDDocumentsHaveBeenVerifiedYouCanStartPostingContentNow', defaultMessage: 'Congrats! Your ID documents have been verified, you can start posting content now' }) : intl.formatMessage({ id: 'verifyYourIDToStartPostingContent', defaultMessage: 'Verify your ID to start posting content!' })}

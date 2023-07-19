@@ -47,7 +47,7 @@ export class PaymentTransactionModel extends Document {
 
   paymentResponseInfo: any;
 
-  stripeInvoiceId: string;
+  token: string;
 
   stripeClientSecret: string;
 

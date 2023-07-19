@@ -80,4 +80,15 @@ export class PaymentWebhookController {
     const info = await this.paymentService.bitpaySuccessWebhook(payload);
     return DataResponse.ok(info);
   }
+
+  @Post('/coinbase/callhook')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async coinbaseCallhook(
+    @Body() payload: Record<string, any>
+  ): Promise<DataResponse<any>> {
+    if (!payload?.event || !payload?.event?.type.includes('charge')) return DataResponse.ok(false);
+    const info = await this.paymentService.coinbasePaymentWebhook(payload.event);
+    return DataResponse.ok(info);
+  }
 }

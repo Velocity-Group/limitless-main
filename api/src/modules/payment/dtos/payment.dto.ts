@@ -38,7 +38,7 @@ export class IPaymentResponse {
 
   paymentResponseInfo?: any;
 
-  stripeInvoiceId?: string;
+  token?: string;
 
   stripeClientSecret?: string;
 
@@ -80,7 +80,7 @@ export class PaymentDto {
 
   paymentResponseInfo?: any;
 
-  stripeInvoiceId?: string;
+  token?: string;
 
   stripeClientSecret?: string;
 
@@ -113,8 +113,8 @@ export class PaymentDto {
           'type',
           'products',
           'paymentResponseInfo',
-          'stripeInvoiceId',
           'stripeClientSecret',
+          'token',
           'status',
           'totalPrice',
           'originalPrice',
@@ -149,7 +149,7 @@ export class PaymentDto {
 
     const privateInfo = {
       paymentResponseInfo: this.paymentResponseInfo,
-      stripeInvoiceId: this.stripeInvoiceId
+      token: this.token
     };
     if (!includePrivateInfo) {
       return publicInfo;

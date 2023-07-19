@@ -70,6 +70,7 @@ export class PaymentSettingsForm extends PureComponent<IProps> {
     const stripePublishableKey = settings.find((s) => s.key === 'stripePublishableKey');
     const stripeSecretKey = settings.find((s) => s.key === 'stripeSecretKey');
     const paymentGateway = settings.find((s) => s.key === 'paymentGateway');
+    const coinbaseApiKey = settings.find((s) => s.key === 'coinbaseApiKey');
 
     return (
       <Form
@@ -88,7 +89,8 @@ export class PaymentSettingsForm extends PureComponent<IProps> {
           ccbillFlexformId: ccbillFlexformId?.value,
           ccbillSalt: ccbillSalt?.value,
           ccbillDatalinkUsername: ccbillDatalinkUsername?.value,
-          ccbillDatalinkPassword: ccbillDatalinkPassword?.value
+          ccbillDatalinkPassword: ccbillDatalinkPassword?.value,
+          coinbaseApiKey: coinbaseApiKey?.value
         }}
       >
         <Form.Item
@@ -99,6 +101,7 @@ export class PaymentSettingsForm extends PureComponent<IProps> {
         >
           <Select onChange={(val) => this.setState({ gateway: val })}>
             <Select.Option value="stripe" key="stripe">Stripe</Select.Option>
+            <Select.Option value="coinbase" key="coinbase">Coinbase</Select.Option>
             <Select.Option value="ccbill" key="ccbill">CCbill</Select.Option>
           </Select>
         </Form.Item>
@@ -122,6 +125,17 @@ export class PaymentSettingsForm extends PureComponent<IProps> {
               <Input />
             </Form.Item>
           </>
+        )}
+
+        {gateway === 'coinbase' && (
+        <Form.Item
+          label="Coinbase - Api Key"
+          name="coinbaseApiKey"
+          rules={[{ required: true }]}
+          extra="https://commerce.coinbase.com/settings/security"
+        >
+          <Input />
+        </Form.Item>
         )}
 
         {gateway === 'ccbill' && (

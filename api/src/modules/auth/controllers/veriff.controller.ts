@@ -59,9 +59,9 @@ export class VeriffController {
     return DataResponse.ok(data);
   }
 
-  @Post('callhook')
+  @Post('status-callhook')
   @HttpCode(HttpStatus.OK)
-  async callhook(
+  async statusCallhook(
     @Body() payload: any
   ): Promise<DataResponse<any>> {
     const data = await this.veriffService.listenStatusWebhook(payload);

@@ -7,6 +7,7 @@ import {
   Progress, Button, Upload, Tooltip, message
 } from 'antd';
 import './index.less';
+import { IntlShape, useIntl } from 'react-intl';
 
 interface IProps {
   type: string;
@@ -17,10 +18,11 @@ export const MessageUploadList = ({ type, onFilesSelected }: IProps) => {
   const [files, setFiles] = useState([]);
   const [, updateState] = useState();
   const forceUpdate = useCallback(() => updateState({} as any), []);
+  const intl: IntlShape = useIntl();
 
   const onBeforeUploadImage = async (file: any, _files: any) => {
     if (!file.type.includes('image')) {
-      message.error('Can only upload image files');
+      message.error(intl.formatMessage({ id: 'canOnlyUploadImageFiles', defaultMessage: 'Can only upload image files' }));
       return false;
     }
     const slFiles = [...files, ..._files].slice(0, 12); // limit 12
@@ -28,7 +30,7 @@ export const MessageUploadList = ({ type, onFilesSelected }: IProps) => {
       const valid = file.size / 1024 / 1024 < 20;
       if (!valid) {
         message.error(
-          `${file.name} Only send images under 20MB!`
+          `${file.name} ${intl.formatMessage({ id: 'onlySendImagesUnder20MB', defaultMessage: 'Only send images under 20MB!' })}`
         );
         return false;
       }
@@ -42,7 +44,7 @@ export const MessageUploadList = ({ type, onFilesSelected }: IProps) => {
     }
     if (_files.indexOf(file) === _files.length - 1) {
       if ([...files, ..._files].length > 12) {
-        message.error('You can only upload 12 photos');
+        message.error(intl.formatMessage({ id: 'youCanOnlyUpload12Photos', defaultMessage: 'You can only upload 12 photos' }));
       }
       setFiles(slFiles);
       onFilesSelected(slFiles);
@@ -52,14 +54,14 @@ export const MessageUploadList = ({ type, onFilesSelected }: IProps) => {
 
   const onBeforeUploadVideo = async (file: any, _files: any) => {
     if (!file.type.includes('video')) {
-      message.error('Can only upload video files');
+      message.error(intl.formatMessage({ id: 'canOnlyUploadVideoFiles', defaultMessage: 'Can only upload video files' }));
       return false;
     }
     const slFiles = [...files, ..._files].slice(0, 12); // limit 12
     if (slFiles.indexOf(file) > -1 && file.type.includes('video')) {
       const valid = file.size / 1024 / 1024 < 1024;
       if (!valid) {
-        message.error(`Video ${file.name} must be less than 1GB!`);
+        message.error(`${intl.formatMessage({ id: 'video', defaultMessage: 'Video' })} ${file.name} ${intl.formatMessage({ id: 'mustBeLessThan1GB', defaultMessage: 'must be less than 1GB!' })}`);
         return false;
       }
     }

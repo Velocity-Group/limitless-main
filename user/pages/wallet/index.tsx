@@ -60,7 +60,8 @@ function TokenPackages({ ui, user, settings }: IProps) {
       if (settings.paymentGateway === 'stripe') {
         resp?.data?.stripeClientSecret && stripe.confirmCardPayment(resp?.data?.stripeClientSecret);
       }
-      if (settings.paymentGateway === 'ccbill') {
+      // coinbase
+      if (['coinbase', 'ccbill'].includes(settings.paymentGateway)) {
         window.location.href = resp?.data?.paymentUrl;
       }
     } catch (e) {

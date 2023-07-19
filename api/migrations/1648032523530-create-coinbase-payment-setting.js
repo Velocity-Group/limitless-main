@@ -4,57 +4,23 @@ const {
 } = require('./lib');
 
 const SETTING_KEYS = {
-  VERIFF_ENABLED: 'veriffEnabled',
-  VERIFF_PUBLIC_KEY: 'veriffPublicKey',
-  VERIFF_SECRET_KEY: 'veriffSecretKey',
-  VERIFF_BASE_URL: 'veriffBaseUrl'
+  COINBASE_API_KEY: 'coinbaseApiKey'
 };
 
 const settings = [{
-  key: SETTING_KEYS.VERIFF_ENABLED,
-  value: true,
-  name: 'Veriff disabled/enabled',
-  description: 'Turn on to enabled',
-  public: true,
-  group: 'veriff',
-  editable: true,
-  type: 'boolean'
-},
-{
-  key: SETTING_KEYS.VERIFF_PUBLIC_KEY,
+  key: SETTING_KEYS.COINBASE_API_KEY,
   value: '',
-  name: 'Publishable API key',
-  description: 'https://station.veriff.com/integrations/installation',
-  public: true,
-  group: 'veriff',
-  editable: true,
-  type: 'string'
-},
-{
-  key: SETTING_KEYS.VERIFF_SECRET_KEY,
-  value: '',
-  name: 'Secret API Key',
-  description: 'https://station.veriff.com/integrations/installation',
+  name: 'Coinbase Api Key',
+  description: 'https://commerce.coinbase.com/settings/security',
   public: false,
-  group: 'veriff',
-  editable: true,
-  type: 'string'
-},
-{
-  key: SETTING_KEYS.VERIFF_BASE_URL,
-  value: '',
-  name: 'Base Url',
-  description: 'https://station.veriff.com/integrations/installation',
-  public: true,
-  group: 'veriff',
+  group: 'paymentGateways',
   editable: true,
   type: 'string'
 }];
 
 module.exports.up = async function up(next) {
   // eslint-disable-next-line no-console
-  console.log('Migrate Veriff settings');
-
+  console.log('Create Coinbase payment gateway settings');
   // eslint-disable-next-line no-restricted-syntax
   for (const setting of settings) {
     // eslint-disable-next-line no-await-in-loop
@@ -78,7 +44,7 @@ module.exports.up = async function up(next) {
   }
 
   // eslint-disable-next-line no-console
-  console.log('Migrate Veriff settings done');
+  console.log('Update payment gateway settings done');
   next();
 };
 

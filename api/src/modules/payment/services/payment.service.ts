@@ -42,6 +42,7 @@ import { CCBillService } from './ccbill.service';
 import { BitpayService } from './bitpay.service';
 import { StripeService } from './stripe.service';
 import { PaymentDto } from '../dtos';
+import { CoinbaseService } from './coinbase.service';
 
 const ccbillCancelUrl = 'https://datalink.ccbill.com/utils/subscriptionManagement.cgi';
 
@@ -61,6 +62,7 @@ export class PaymentService {
     private readonly ccbillService: CCBillService,
     private readonly stripeService: StripeService,
     private readonly bitpayService: BitpayService,
+    private readonly coinbaseService: CoinbaseService,
     private readonly queueEventService: QueueEventService,
     private readonly settingService: SettingService,
     private readonly socketUserService: SocketUserService
@@ -197,7 +199,7 @@ export class PaymentService {
       if (plan) {
         transaction.status = transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION ? PAYMENT_STATUS.SUCCESS : PAYMENT_STATUS.CREATED;
         transaction.paymentResponseInfo = plan;
-        transaction.stripeInvoiceId = plan.latest_invoice as any;
+        transaction.token = plan.latest_invoice as any;
         await transaction.save();
         await this.subscriptionService.updateSubscriptionId({
           userId: transaction.sourceId,
@@ -221,6 +223,35 @@ export class PaymentService {
         );
       }
       return new PaymentDto(transaction).toResponse();
+    }
+
+    if (paymentGateway === 'coinbase') {
+      if (transaction.type === PAYMENT_TYPE.FREE_SUBSCRIPTION) {
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: TRANSACTION_SUCCESS_CHANNEL,
+            eventName: EVENT.CREATED,
+            data: new PaymentDto(transaction)
+          })
+        );
+        await this.socketUserService.emitToUsers(
+          transaction.sourceId,
+          'payment_status_callback',
+          { redirectUrl: `/payment/success?transactionId=${transaction._id.toString().slice(16, 24)}` }
+        );
+        return transaction;
+      }
+
+      const data = await this.coinbaseService.singlePayment({ transaction });
+      if (data) {
+        transaction.token = data.id;
+        transaction.paymentResponseInfo = data;
+        await transaction.save();
+
+        return {
+          paymentUrl: data?.hosted_url
+        };
+      }
     }
     return new PaymentDto(transaction).toResponse();
   }
@@ -322,11 +353,23 @@ export class PaymentService {
         stripeCardId: user.stripeCardIds[0]
       });
       if (data) {
-        transaction.stripeInvoiceId = data.id || (data.invoice && data.invoice.toString());
+        transaction.token = data.id || (data.invoice && data.invoice.toString());
         transaction.stripeClientSecret = data.client_secret;
         await transaction.save();
       }
       return new PaymentDto(transaction).toResponse();
+    }
+    if (paymentGateway === 'coinbase') {
+      const data = await this.coinbaseService.singlePayment({ transaction });
+      if (data) {
+        transaction.token = data.id;
+        transaction.paymentResponseInfo = data;
+        await transaction.save();
+
+        return {
+          paymentUrl: data?.hosted_url
+        };
+      }
     }
     throw new MissingConfigPaymentException();
   }
@@ -554,7 +597,7 @@ export class PaymentService {
     }
     const existedTransaction = transactionId && await this.TransactionModel.findById(transactionId);
     if (existedTransaction) {
-      existedTransaction.stripeInvoiceId = data?.object?.latest_invoice;
+      existedTransaction.token = data?.object?.latest_invoice;
       existedTransaction.updatedAt = new Date();
       if (data?.object?.status === 'active') {
         // update transaction status
@@ -573,13 +616,13 @@ export class PaymentService {
     const { type, data } = payload;
     if (type === 'payment_intent.created') return { ok: true };
     const transactionId = data?.object?.metadata?.transactionId;
-    const stripeInvoiceId = data?.object?.invoice || data?.object?.id;
-    if (!stripeInvoiceId && !transactionId) {
+    const token = data?.object?.invoice || data?.object?.id;
+    if (!token && !transactionId) {
       throw new HttpException('Missing invoiceId or transactionId', 404);
     }
     let transaction = transactionId && await this.TransactionModel.findOne({ _id: transactionId });
     if (!transaction) {
-      transaction = stripeInvoiceId && await this.TransactionModel.findOne({ stripeInvoiceId });
+      transaction = token && await this.TransactionModel.findOne({ token });
     }
     if (!transaction) throw new HttpException('Transaction was not found', 404);
 
@@ -678,6 +721,48 @@ export class PaymentService {
       this.performerService.updateSubscriptionStat(subscription.performerId, -1),
       this.userService.updateStats(subscription.userId, { 'stats.totalSubscriptions': -1 })
     ]);
+    return { success: true };
+  }
+
+  public async coinbasePaymentWebhook(payload: Record<string, any>) {
+    const { type, data } = payload;
+    if (type === 'charge:created') return { ok: true };
+    const transaction = await this.TransactionModel.findOne({
+      token: data.id
+    });
+    if (!transaction) throw new HttpException('Transaction was not found', 404);
+    let redirectUrl = '';
+    switch (type) {
+      case 'charge:failed':
+        redirectUrl = `/payment/cancel?transactionId=${transaction._id.toString().slice(16, 24)}`;
+        transaction.status = PAYMENT_STATUS.FAIL;
+        break;
+      case 'charge:delayed':
+        transaction.status = PAYMENT_STATUS.DELAYED;
+        break;
+      case 'charge:pending':
+        transaction.status = PAYMENT_STATUS.PENDING;
+        break;
+      case 'charge:resolved':
+        transaction.status = PAYMENT_STATUS.RESOLED;
+        break;
+      case 'charge:confirmed':
+        transaction.status = PAYMENT_STATUS.SUCCESS;
+        await this.queueEventService.publish(
+          new QueueEvent({
+            channel: TRANSACTION_SUCCESS_CHANNEL,
+            eventName: EVENT.CREATED,
+            data: new PaymentDto(transaction)
+          })
+        );
+        redirectUrl = `/payment/success?transactionId=${transaction._id.toString().slice(16, 24)}`;
+        break;
+      default: break;
+    }
+    transaction.paymentResponseInfo = payload;
+    transaction.updatedAt = new Date();
+    await transaction.save();
+    redirectUrl && await this.socketUserService.emitToUsers(transaction.sourceId, 'payment_status_callback', { redirectUrl });
     return { success: true };
   }
 }

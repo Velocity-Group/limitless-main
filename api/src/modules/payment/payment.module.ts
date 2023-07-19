@@ -10,7 +10,7 @@ import { paymentProviders } from './providers';
 import { SettingModule } from '../settings/setting.module';
 import { MailerModule } from '../mailer/mailer.module';
 import {
-  CCBillService, PaymentService, PaymentSearchService, BitpayService, StripeService
+  CCBillService, PaymentService, PaymentSearchService, BitpayService, StripeService, CoinbaseService
 } from './services';
 import {
   PaymentController, PaymentSearchController, CancelSubscriptionController, PaymentWebhookController,
@@ -40,6 +40,7 @@ import { SocketModule } from '../socket/socket.module';
     CCBillService,
     BitpayService,
     StripeService,
+    CoinbaseService,
     PaymentSearchService,
     TransactionMailerListener,
     UpdateUserBalanceListener,
@@ -53,6 +54,7 @@ import { SocketModule } from '../socket/socket.module';
     ...paymentProviders,
     PaymentService,
     StripeService,
+    CoinbaseService,
     PaymentSearchService
   ]
 })

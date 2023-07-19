@@ -135,6 +135,7 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
           SETTING_KEYS.META_KEYWORDS,
           SETTING_KEYS.META_DESCRIPTION,
           SETTING_KEYS.VERIFF_ENABLED,
+          SETTING_KEYS.VERIFF_BASE_URL,
           SETTING_KEYS.VERIFF_PUBLIC_KEY
         ]),
         locale: settings.locale,

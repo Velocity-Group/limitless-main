@@ -75,7 +75,9 @@ export const SETTING_KEYS = {
   VERIFF_ENABLED: 'veriffEnabled',
   VERIFF_PUBLIC_KEY: 'veriffPublicKey',
   VERIFF_SECRET_KEY: 'veriffSecretKey',
-  VERIFF_BASE_URL: 'veriffBaseUrl'
+  VERIFF_BASE_URL: 'veriffBaseUrl',
+  // Coinbase
+  COINBASE_API_KEY: 'coinbaseApiKey'
 };
 
 export const MENU_SECTION = {

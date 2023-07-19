@@ -7,8 +7,7 @@ import {
   ValidationPipe,
   UseGuards,
   Post,
-  Body,
-  Param
+  Body
 } from '@nestjs/common';
 import { RoleGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';

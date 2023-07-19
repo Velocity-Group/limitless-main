@@ -81,8 +81,8 @@ export class AuthService extends APIRequest {
     return this.post('/veriff/generate', payload);
   }
 
-  getDecision() {
-    return this.get('/veriff/decision');
+  getDecision(headers?: { [key: string]: string }): Promise<any> {
+    return this.get('/veriff/decision', headers);
   }
 }
 

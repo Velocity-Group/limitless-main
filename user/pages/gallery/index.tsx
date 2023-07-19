@@ -1,15 +1,6 @@
 import { PureComponent } from 'react';
 import {
-  Layout,
-  message,
-  Row,
-  Col,
-  Spin,
-  Button,
-  Modal,
-  Tabs,
-  Avatar,
-  Tooltip
+  Layout, message, Row, Col, Spin, Button, Modal, Tabs, Avatar, Tooltip
 } from 'antd';
 import {
   EyeOutlined, PictureOutlined, CalendarOutlined, BookOutlined, DollarOutlined
@@ -35,7 +26,7 @@ import { shortenLargeNumber, formatDate } from '@lib/index';
 import PageHeading from '@components/common/page-heading';
 import PhotoPreviewList from '@components/photo/photo-preview-list';
 import './index.less';
-import { injectIntl, IntlShape } from 'react-intl';
+import { IntlShape, injectIntl } from 'react-intl';
 import TipPerformerForm from '@components/performer/tip-form';
 
 interface IProps {
@@ -305,33 +296,27 @@ class GalleryViewPage extends PureComponent<IProps> {
           {/* OG tags */}
           <meta
             property="og:title"
-            content={`${ui?.siteName} | ${
-              gallery?.title
-              || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })
-            }`}
+            content={`${ui?.siteName} | ${gallery?.title || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })}`}
             key="title"
           />
           <meta property="og:image" content={thumbUrl} />
-          <meta property="og:description" content={gallery?.description} />
+          <meta
+            property="og:description"
+            content={gallery?.description}
+          />
           {/* Twitter tags */}
           <meta
             name="twitter:title"
-            content={`${ui.siteName} | ${
-              gallery.title
-              || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })
-            }`}
+            content={`${ui.siteName} | ${gallery.title || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })}`}
           />
           <meta name="twitter:image" content={thumbUrl} />
-          <meta name="twitter:description" content={gallery.description} />
+          <meta
+            name="twitter:description"
+            content={gallery.description}
+          />
         </Head>
         <div className="main-container">
-          <PageHeading
-            icon={<PictureOutlined />}
-            title={
-              gallery?.title
-              || intl.formatMessage({ id: 'gallery', defaultMessage: 'Gallery' })
-            }
-          />
+          <PageHeading icon={<PictureOutlined />} title={gallery?.title || 'Gallery'} />
           <div className="gal-stats">
             <a>
               <EyeOutlined />
@@ -345,36 +330,27 @@ class GalleryViewPage extends PureComponent<IProps> {
             </a>
           </div>
           <div className="photo-carousel">
-            {!fetching && photos && photos.length > 0 && (
-              <PhotoPreviewList
-                isBlur={!user || !user._id || !canview}
-                photos={photos}
-              />
-            )}
+            {!fetching && photos && photos.length > 0 && <PhotoPreviewList isBlur={!user || !user._id || !canview} photos={photos} />}
             {!fetching && !photos.length && (
-              <p className="text-center">
-                {intl.formatMessage({
-                  id: 'noPhotoWasFound',
-                  defaultMessage: 'No photo was found.'
-                })}
-              </p>
+            <p className="text-center">
+              {intl.formatMessage({
+                id: 'noPhotoWasFound',
+                defaultMessage: 'No photo was found.'
+              })}
+            </p>
             )}
-            {fetching && (
-              <div className="text-center">
-                <Spin />
-              </div>
-            )}
+            {fetching && <div className="text-center"><Spin /></div>}
             {!fetching && total > photos.length && (
-              <div className="text-center" style={{ margin: 10 }}>
-                <Button type="link" onClick={this.getMorePhotos.bind(this)}>
-                  {intl.formatMessage({
-                    id: 'morePhotos',
-                    defaultMessage: 'More photos'
-                  })}
-                  {' '}
-                  ...
-                </Button>
-              </div>
+            <div className="text-center" style={{ margin: 10 }}>
+              <Button type="link" onClick={this.getMorePhotos.bind(this)}>
+                {intl.formatMessage({
+                  id: 'morePhotos',
+                  defaultMessage: 'More photos'
+                })}
+                {' '}
+                ...
+              </Button>
+            </div>
             )}
             {!canview && (
             <div className="text-center" style={{ margin: '20px 0' }}>
@@ -408,7 +384,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                   {gallery?.performer?.isFreeSubscription && (
                   <Button
                     className="primary"
-                    style={{ marginRight: '15px' }}
+                    style={{ marginRight: '15px', textTransform: 'uppercase' }}
                     disabled={!user._id}
                     onClick={() => {
                       updateSubscription({ showModal: true, subscriptionType: 'free', performer: gallery?.performer });
@@ -433,7 +409,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                   {gallery?.performer?.monthlyPrice && (
                   <Button
                     className="primary"
-                    style={{ marginRight: '15px' }}
+                    style={{ marginRight: '15px', textTransform: 'uppercase' }}
                     disabled={!user._id}
                     onClick={() => {
                       updateSubscription({ showModal: true, subscriptionType: 'monthly', performer: gallery?.performer });
@@ -449,6 +425,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                   {gallery?.performer.yearlyPrice && (
                   <Button
                     className="secondary"
+                    style={{ textTransform: 'uppercase' }}
                     disabled={!user._id}
                     onClick={() => {
                       updateSubscription({ showModal: true, subscriptionType: 'yearly', performer: gallery?.performer });
@@ -473,22 +450,15 @@ class GalleryViewPage extends PureComponent<IProps> {
               <Link
                 href={{
                   pathname: '/model/profile',
-                  query: {
-                    username:
-                      gallery?.performer?.username || gallery?.performer?._id
-                  }
+                  query: { username: gallery?.performer?.username || gallery?.performer?._id }
                 }}
-                as={`/${
-                  gallery?.performer?.username || gallery?.performer?._id
-                }`}
+                as={`/${gallery?.performer?.username || gallery?.performer?._id}`}
               >
                 <a>
                   <div className="o-w-ner">
                     <Avatar
                       alt="performer avatar"
-                      src={
-                        gallery?.performer?.avatar || '/static/no-avatar.png'
-                      }
+                      src={gallery?.performer?.avatar || '/static/no-avatar.png'}
                     />
                     <div className="owner-name">
                       <div className="name">
@@ -526,7 +496,7 @@ class GalleryViewPage extends PureComponent<IProps> {
                     <BookOutlined />
                   </button>
                 </Tooltip>
-                <Tooltip title="Send Tip">
+                <Tooltip title={intl.formatMessage({ id: 'sendTip', defaultMessage: 'Send Tip' })}>
                   <button
                     onClick={() => this.setState({ openTipModal: true })}
                     type="button"
@@ -564,27 +534,22 @@ class GalleryViewPage extends PureComponent<IProps> {
                 defaultMessage: 'You may also like'
               })}
             </h4>
-            {relatedGalleries.requesting && (
-              <div className="text-center">
-                <Spin />
-              </div>
-            )}
+            {relatedGalleries.requesting && <div className="text-center"><Spin /></div>}
             {!relatedGalleries.requesting && !relatedGalleries.items.length && (
-              <p>
-                {intl.formatMessage({
-                  id: 'noGalleryWasFound',
-                  defaultMessage: 'No gallery was found'
-                })}
-              </p>
+            <p>
+              {intl.formatMessage({
+                id: 'noGalleryWasFound',
+                defaultMessage: 'No gallery was found'
+              })}
+            </p>
             )}
             <Row>
-              {!relatedGalleries.requesting
-                && relatedGalleries.items.length > 0
-                && relatedGalleries.items.map((item: IGallery) => (
-                  <Col xs={12} sm={12} md={6} lg={6} key={item._id}>
-                    <GalleryCard gallery={item} />
-                  </Col>
-                ))}
+              {!relatedGalleries.requesting && relatedGalleries.items.length > 0
+                  && relatedGalleries.items.map((item: IGallery) => (
+                    <Col xs={12} sm={12} md={6} lg={6} key={item._id}>
+                      <GalleryCard gallery={item} />
+                    </Col>
+                  ))}
             </Row>
           </div>
         </div>
