@@ -21,6 +21,7 @@ export class AuthService extends APIRequest {
 
   removeToken(): void {
     cookie.remove(TOKEN);
+    this.setAuthHeaderToken('');
   }
 
   updatePassword(password: string, userId?: string, source?: string) {

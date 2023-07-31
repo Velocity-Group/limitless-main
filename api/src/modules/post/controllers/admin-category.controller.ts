@@ -26,7 +26,7 @@ export class AdminCategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -39,7 +39,7 @@ export class AdminCategoryController {
   }
 
   @Put('/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -57,7 +57,7 @@ export class AdminCategoryController {
   }
 
   @Delete('/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))

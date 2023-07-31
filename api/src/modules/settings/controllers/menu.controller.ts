@@ -33,7 +33,7 @@ export class MenuController {
   ) {}
 
   @Post('/admin')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -45,7 +45,7 @@ export class MenuController {
   }
 
   @Put('/admin/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -58,7 +58,7 @@ export class MenuController {
   }
 
   @Delete('/admin/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -68,7 +68,7 @@ export class MenuController {
   }
 
   @Get('/admin/search')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -90,7 +90,7 @@ export class MenuController {
   }
 
   @Get('admin/:id/view')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))

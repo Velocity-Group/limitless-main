@@ -13,6 +13,7 @@ export interface IUserResponse {
   roles?: string[];
   avatar?: string;
   status?: string;
+  pathsAllow?: string[];
   gender?: string;
   balance?: number;
   country?: string;
@@ -56,6 +57,8 @@ export class UserDto {
   avatarPath?: string;
 
   status?: string;
+
+  pathsAllow?: string[];
 
   username?: string;
 
@@ -102,6 +105,7 @@ export class UserDto {
           'avatarId',
           'avatarPath',
           'status',
+          'pathsAllow',
           'username',
           'gender',
           'balance',
@@ -151,6 +155,7 @@ export class UserDto {
       lastName: this.lastName,
       phone: this.phone,
       status: this.status,
+      pathsAllow: this.pathsAllow,
       gender: this.gender,
       balance: this.balance,
       roles: this.roles,

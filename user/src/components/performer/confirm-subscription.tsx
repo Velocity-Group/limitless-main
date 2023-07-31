@@ -1,9 +1,11 @@
 /* eslint-disable react/destructuring-assignment */
 import './performer.less';
 import {
-  Button, Avatar, message, Modal
+  Button, Avatar, message, Modal, Tabs
 } from 'antd';
-import { IPerformer, ITransaction, IUser } from 'src/interfaces';
+import {
+  IPerformer, ISettings, ITransaction, IUser
+} from 'src/interfaces';
 import {
   CheckSquareOutlined
 } from '@ant-design/icons';
@@ -29,12 +31,26 @@ interface IProps {
 function ConfirmSubscriptionPerformerForm() {
   const { subscriptionType, performer, showModal } = useSelector((state: any) => state.subscription) as IProps;
   const user = useSelector((state: any) => state.user.current) as IUser;
-  const paymentGateway = useSelector((state: any) => state.settings.paymentGateway) || 'stripe';
+  const settings: ISettings = useSelector((state: any) => state.settings);
+  const [paymentGateway, setPaymentGateway] = useState('');
   const [submiting, setSubmiting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useDispatch();
   const stripe = useStripe();
   const socket = useContext(SocketContext);
   const intl: IntlShape = useIntl();
+
+  useEffect(() => {
+    let paymentMethod;
+    if (settings?.coinbaseEnable) {
+      paymentMethod = 'coinbase';
+    } else if (settings?.ccbillEnable) {
+      paymentMethod = 'ccbill';
+    } else if (settings?.stripeEnable) {
+      paymentMethod = 'stripe';
+    }
+    setPaymentGateway(paymentMethod);
+  }, []);
 
   const subscribe = async () => {
     try {
@@ -54,7 +70,7 @@ function ConfirmSubscriptionPerformerForm() {
         performerId: performer._id,
         paymentGateway
       });
-      if (paymentGateway === 'ccbill' && subscriptionType !== 'free') {
+      if (['coinbase', 'ccbill'].includes(paymentGateway) && subscriptionType !== 'free') {
         window.location.href = resp?.data?.paymentUrl;
       }
     } catch (e) {
@@ -159,7 +175,7 @@ function ConfirmSubscriptionPerformerForm() {
               className="primary"
               disabled={submiting}
               loading={submiting}
-              onClick={() => subscribe()}
+              onClick={() => setIsModalOpen(true)}
               style={{ textTransform: 'uppercase' }}
             >
               {intl.formatMessage({ id: 'subscribe', defaultMessage: 'Subscribe' })}
@@ -169,6 +185,48 @@ function ConfirmSubscriptionPerformerForm() {
         </div>
       </Modal>
       {submiting && <Loader customText={intl.formatMessage({ id: 'weAreProcessingYourPayment', defaultMessage: 'We are processing your payment, please do not reload this page until it\'s done.' })} />}
+      <Modal
+        visible={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+      >
+        <div className="payment-select">
+          <p className="text-center payment-title">{intl.formatMessage({ id: 'selectPaymentMethod', defaultMessage: 'Select Payment Method' })}</p>
+          {settings?.coinbaseEnable || settings?.ccbillEnable || settings?.stripeEnable ? (
+            <Tabs
+              className="payment-confirm"
+              onChange={(k) => setPaymentGateway(k)}
+            >
+              {settings?.ccbillEnable && (
+              <Tabs.TabPane tab={intl.formatMessage({ id: 'creditCard', defaultMessage: 'Credit Card' })} key="ccbill">
+                <img src="/static/ccbill-img.png" alt="ccbill-img" />
+              </Tabs.TabPane>
+              )}
+              {settings?.coinbaseEnable && (
+              <Tabs.TabPane tab={intl.formatMessage({ id: 'crypto', defaultMessage: 'Crypto' })} key="coinbase">
+                <img src="/static/coinbase-commerce-img.jpg" alt="coinbase-commerce-img" />
+              </Tabs.TabPane>
+              )}
+              {settings?.stripeEnable && (
+              <Tabs.TabPane tab={intl.formatMessage({ id: 'stripe', defaultMessage: 'Stripe' })} key="stripe">
+                <img src="/static/stripe-icon.jpeg" alt="stripe-icon-img" />
+              </Tabs.TabPane>
+              )}
+            </Tabs>
+          ) : <p className="text-center">{intl.formatMessage({ id: 'noPaymentMethod', defaultMessage: 'No payment method' })}</p>}
+          {(paymentGateway === 'coinbase' || paymentGateway === 'ccbill' || paymentGateway === 'stripe')
+              && (
+                <Button
+                  className="primary confirm-btn"
+                  onClick={() => subscribe()}
+                  disabled={submiting || (!settings?.coinbaseEnable && !settings?.ccbillEnable && !settings?.stripeEnable)}
+                  loading={submiting}
+                >
+                  {intl.formatMessage({ id: 'confirm', defaultMessage: 'Confirm' })}
+                </Button>
+              )}
+        </div>
+      </Modal>
     </>
   );
 }

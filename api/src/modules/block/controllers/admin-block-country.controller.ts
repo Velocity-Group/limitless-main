@@ -22,7 +22,7 @@ export class SiteBlockCountryController {
   constructor(private readonly blockCountryService: SiteBlockCountryService) {}
 
   @Get('/search')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   async search(
@@ -32,7 +32,7 @@ export class SiteBlockCountryController {
   }
 
   @Post('/')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async createUser(
     @Body() payload: BlockCountryCreatePayload
@@ -43,7 +43,7 @@ export class SiteBlockCountryController {
   }
 
   @Delete('/:code')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   async delete(@Param('code') countryCode: string): Promise<DataResponse<boolean>> {

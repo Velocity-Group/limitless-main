@@ -157,9 +157,8 @@ export class PaymentService {
 
   public async subscribePerformer(payload: SubscribePerformerPayload, user: UserDto) {
     const {
-      type, performerId
+      type, performerId, paymentGateway
     } = payload;
-    const paymentGateway = SettingService.getValueByKey(SETTING_KEYS.PAYMENT_GATEWAY) || 'stripe';
     const performer = await this.performerService.findById(performerId);
     if (!performer) throw new EntityNotFoundException();
     // eslint-disable-next-line no-nested-ternary
@@ -283,9 +282,8 @@ export class PaymentService {
 
   public async buyTokens(payload: PurchaseTokenPayload, user: UserDto) {
     const {
-      couponCode, currency, amount
+      couponCode, currency, amount, paymentGateway
     } = payload;
-    const paymentGateway = SettingService.getValueByKey(SETTING_KEYS.PAYMENT_GATEWAY) || 'stripe';
     const totalPrice = amount;
     const products = [{
       price: totalPrice,

@@ -30,7 +30,7 @@ export class EarningController {
   constructor(private readonly earningService: EarningService) {}
 
   @Get('/admin/search')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -55,7 +55,7 @@ export class EarningController {
   }
 
   @Get('/admin/stats')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -81,7 +81,7 @@ export class EarningController {
   }
 
   @Post('/admin/update-status')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -93,7 +93,7 @@ export class EarningController {
   }
 
   @Get('/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))

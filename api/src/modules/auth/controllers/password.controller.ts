@@ -53,7 +53,7 @@ export class PasswordController {
   }
 
   @Put('users/password')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   public async updateUserPassword(
     @Body() payload: PasswordUserChangePayload

@@ -34,21 +34,21 @@ export class AdminPerformerPhotoController {
 
   @Post('/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor([
       {
-        type: 'performer-photo',
-        fieldName: 'photo',
-        options: {
-          destination: getConfig('file').photoProtectedDir,
-          acl: S3ObjectCannelACL.AuthenticatedRead,
-          server: Storage.S3
-        }
+      type: 'performer-photo',
+      fieldName: 'photo',
+      options: {
+      destination: getConfig('file').photoProtectedDir,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
       }
-    ])
+      }
+      ])
   )
   async upload(
     @FilesUploaded() files: Record<string, any>,
@@ -65,7 +65,7 @@ export class AdminPerformerPhotoController {
 
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async update(
     @Param('id') id: string,
@@ -78,7 +78,7 @@ export class AdminPerformerPhotoController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async delete(@Param('id') id: string) {
     const details = await this.photoService.delete(id);
@@ -87,7 +87,7 @@ export class AdminPerformerPhotoController {
 
   @Get('/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async search(
     @Query() query: PhotoSearchRequest,
@@ -99,7 +99,7 @@ export class AdminPerformerPhotoController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async details(
     @Param('id') id: string,

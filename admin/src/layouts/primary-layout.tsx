@@ -9,18 +9,22 @@ import {
   PieChartOutlined, ContainerOutlined, UserOutlined, WomanOutlined,
   VideoCameraOutlined, CameraOutlined, StopOutlined, FileImageOutlined,
   SkinOutlined, DollarOutlined, HeartOutlined, MenuOutlined,
-  FireOutlined, MailOutlined, LinkOutlined, NotificationOutlined, TranslationOutlined
+  FireOutlined, MailOutlined, NotificationOutlined,
+  TranslationOutlined, SecurityScanOutlined
 } from '@ant-design/icons';
 import Header from '@components/common/layout/header';
-import { Router } from 'next/router';
+import Router, { Router as RouterEvent } from 'next/router';
 import Loader from '@components/common/base/loader';
 import './primary-layout.less';
+import { ROLE_SUB_ADMIN } from 'src/constants';
+import { IUser } from 'src/interfaces';
 
 interface DefaultProps extends IUIConfig {
   children: any;
   config: IUIConfig;
   updateUIValue: Function;
   loadUIValue: Function;
+  user: IUser
 }
 
 class PrimaryLayout extends PureComponent<DefaultProps> {
@@ -51,8 +55,8 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
   }
 
   handleStateChange() {
-    Router.events.on('routeChangeStart', async () => this.setState({ routerChange: true }));
-    Router.events.on('routeChangeComplete', async () => this.setState({ routerChange: false }));
+    RouterEvent.events.on('routeChangeStart', async () => this.setState({ routerChange: true }));
+    RouterEvent.events.on('routeChangeComplete', async () => this.setState({ routerChange: false }));
   }
 
   onCollapseChange = (collapsed) => {
@@ -67,7 +71,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
 
   render() {
     const {
-      children, collapsed, fixedHeader, logo, siteName, theme
+      children, collapsed, fixedHeader, logo, siteName, theme, user
     } = this.props;
     const { isMobile, routerChange } = this.state;
     const headerProps = {
@@ -76,7 +80,7 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
       onCollapseChange: this.onCollapseChange
     };
 
-    const sliderMenus = [
+    const sliderMenusAdmin = [
       {
         id: 'blockCountry',
         name: 'Block Countries',
@@ -166,6 +170,23 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
             name: 'Upload new',
             id: 'upload-banner',
             route: '/banners/upload'
+          }
+        ]
+      },
+      {
+        id: 'sub-admin',
+        name: 'Sub Admins',
+        icon: <SecurityScanOutlined />,
+        children: [
+          {
+            name: 'All sub admins',
+            id: 'all-sub-admins',
+            route: '/sub-admins'
+          },
+          {
+            name: 'Create new',
+            id: 'sub-admins-create',
+            route: '/sub-admins/create'
           }
         ]
       },
@@ -275,12 +296,12 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
           {
             name: 'Upload new photo',
             id: 'upload-photo',
-            route: '/photos/upload'
+            route: '/gallery/photos/upload'
           },
           {
             name: 'Bulk upload',
             id: 'bulk-upload-photo',
-            route: '/photos/bulk-upload'
+            route: '/gallery/photos/bulk-upload'
           }
         ]
       },
@@ -438,13 +459,17 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
         ]
       }
     ];
+
+    const sliderMenusSubAdmin = user
+    && sliderMenusAdmin.filter((slider) => user.pathsAllow?.some((path) => slider.children[0].route.includes(path)));
+
     const siderProps = {
       collapsed,
       isMobile,
       logo,
       siteName,
       theme,
-      menus: sliderMenus,
+      menus: user && user.roles?.includes(ROLE_SUB_ADMIN) ? sliderMenusSubAdmin : sliderMenusAdmin,
       onCollapseChange: this.onCollapseChange,
       onThemeChange: this.onThemeChange
     };
@@ -487,7 +512,8 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
 
 const mapStateToProps = (state: any) => ({
   ...state.ui,
-  auth: state.auth
+  auth: state.auth,
+  user: state.user.current
 });
 const mapDispatchToProps = { updateUIValue, loadUIValue };
 

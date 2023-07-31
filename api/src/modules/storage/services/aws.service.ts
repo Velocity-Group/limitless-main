@@ -79,13 +79,13 @@ export class AwsS3Service {
     return s3.upload(params, uploadOptions).promise();
   }
 
-  static getEndpoint(upload: AWS.S3.ManagedUpload.SendData): string {
-    // eslint-disable-next-line prefer-template
-    const regex = new RegExp(upload.Bucket + '[a-z0-9.-]+', 'g');
-    const path = upload.Location.match(regex)[0];
-    // eslint-disable-next-line prefer-template
-    return path.replace(upload.Bucket + '.', '');
-  }
+  // static getEndpoint(upload: AWS.S3.ManagedUpload.SendData): string {
+  //   // eslint-disable-next-line prefer-template
+  //   const regex = new RegExp(upload.Bucket + '[a-z0-9.-]+', 'g');
+  //   const path = upload.Location.match(regex)[0];
+  //   // eslint-disable-next-line prefer-template
+  //   return path.replace(upload.Bucket + '.', '');
+  // }
 
   static checkSetting() {
     const accessKeyId = SettingService.getValueByKey(SETTING_KEYS.AWS_S3_ACCESS_KEY_ID);
@@ -97,6 +97,10 @@ export class AwsS3Service {
       return false;
     }
     return true;
+  }
+
+  static getEndpoint(): string {
+    return SettingService.getValueByKey(SETTING_KEYS.AWS_S3_BUCKET_ENDPOINT);
   }
 }
 

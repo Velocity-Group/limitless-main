@@ -24,4 +24,7 @@ export interface ISettings {
   veriffEnabled: boolean;
   veriffPublicKey: string;
   veriffBaseUrl: string;
+  coinbaseEnable: string;
+  stripeEnable: string;
+  ccbillEnable: string;
 }

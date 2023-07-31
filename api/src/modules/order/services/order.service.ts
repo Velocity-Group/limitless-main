@@ -21,6 +21,7 @@ import { uniq } from 'lodash';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { EVENT } from 'src/kernel/constants';
+import { ROLE_ADMIN, ROLE_SUB_ADMIN } from 'src/modules/user/constants';
 import { ORDER_MODEL_PROVIDER, SHIPPING_ADDRESS_MODEL_PROVIDER } from '../providers';
 import { OrderModel, ShippingAddressModel } from '../models';
 import {
@@ -65,7 +66,7 @@ export class OrderService {
     const query = {
       performerId: user._id
     } as any;
-    if (user.roles && user.roles.includes('admin')) delete query.performerId;
+    if (user.roles && user.roles.some((item) => [ROLE_ADMIN, ROLE_SUB_ADMIN].includes(item))) delete query.performerId;
     if (req.performerId) query.performerId = req.performerId;
     if (req.deliveryStatus) query.deliveryStatus = req.deliveryStatus;
     if (req.phoneNumber) query.phoneNumber = { $regex: req.phoneNumber };

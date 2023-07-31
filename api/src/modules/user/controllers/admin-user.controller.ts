@@ -43,7 +43,7 @@ export class AdminUserController {
   ) {}
 
   @Get('/search')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -54,7 +54,7 @@ export class AdminUserController {
   }
 
   @Post('/')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async createUser(
     @Body() payload: UserAuthCreatePayload
@@ -87,7 +87,7 @@ export class AdminUserController {
   }
 
   @Put('/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async updateUser(
     @Body() payload: UserAuthUpdatePayload,
@@ -99,7 +99,7 @@ export class AdminUserController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async getDetails(
     @Param('id') id: string
@@ -111,7 +111,7 @@ export class AdminUserController {
 
   @Delete('/:id/delete')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async delete(
     @Param('id') id: string

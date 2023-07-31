@@ -36,22 +36,22 @@ export class AdminBannerController {
 
   @Post('/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor([
       {
-        type: 'banner',
-        fieldName: 'banner',
-        options: {
-          destination: getConfig('file').imageDir,
-          uploadImmediately: true,
-          acl: S3ObjectCannelACL.PublicRead,
-          server: Storage.S3
-        }
+      type: 'banner',
+      fieldName: 'banner',
+      options: {
+      destination: getConfig('file').imageDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
       }
-    ])
+      }
+      ])
   )
   async upload(
     @FilesUploaded() files: Record<string, any>,
@@ -68,7 +68,7 @@ export class AdminBannerController {
 
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async update(
     @Param('id') id: string,
@@ -81,7 +81,7 @@ export class AdminBannerController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async delete(@Param('id') id: string) {
     const details = await this.bannerService.delete(id);
@@ -90,7 +90,7 @@ export class AdminBannerController {
 
   @Get('/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async search(@Query() req: BannerSearchRequest) {
     const list = await this.bannerSearchService.search(req);
@@ -99,7 +99,7 @@ export class AdminBannerController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async details(@Param('id') id: string) {
     const details = await this.bannerService.details(id);

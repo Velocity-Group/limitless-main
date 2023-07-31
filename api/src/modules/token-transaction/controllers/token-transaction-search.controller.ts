@@ -26,7 +26,7 @@ export class PaymentTokenSearchController {
 
   @Get('/admin/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async adminTranasctions(

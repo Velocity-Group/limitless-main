@@ -42,6 +42,11 @@ export const userSchema = new mongoose.Schema({
     type: String,
     default: STATUS_ACTIVE
   },
+  pathsAllow: [
+    {
+      type: String
+    }
+  ],
   gender: {
     type: String,
     index: true

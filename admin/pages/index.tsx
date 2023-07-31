@@ -2,341 +2,230 @@ import Head from 'next/head';
 import {
   Row, Col, Statistic, Card, Layout
 } from 'antd';
-import { PureComponent } from 'react';
+import { useEffect, useState } from 'react';
 import { utilsService } from '@services/utils.service';
 import {
   AreaChartOutlined, PieChartOutlined, BarChartOutlined,
   LineChartOutlined, DotChartOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
+import { IUser } from 'src/interfaces';
+import { ROLE_ADMIN } from 'src/constants';
 
-export default class Dashboard extends PureComponent<any> {
-  state = {
-    stats: {
-      totalActivePerformers: 0,
-      totalInactivePerformers: 0,
-      totalPendingPerformers: 0,
-      totalActiveUsers: 0,
-      totalInactiveUsers: 0,
-      totalPendingUsers: 0,
-      totalDeliveredOrders: 0,
-      totalGrossPrice: 0,
-      totalNetPrice: 0,
-      totalPriceCommission: 0,
-      totalOrders: 0,
-      totalPosts: 0,
-      totalPhotoPosts: 0,
-      totalVideoPosts: 0,
-      totalGalleries: 0,
-      totalPhotos: 0,
-      totalVideos: 0,
-      totalProducts: 0,
-      totalRefundedOrders: 0,
-      totalShippingdOrders: 0,
-      totalSubscribers: 0,
-      totalActiveSubscribers: 0,
-      totalInactiveSubscribers: 0
+function Dashboard() {
+  const [stats, setStats] = useState({
+    totalActivePerformers: 0,
+    totalInactivePerformers: 0,
+    totalPendingPerformers: 0,
+    totalActiveUsers: 0,
+    totalInactiveUsers: 0,
+    totalPendingUsers: 0,
+    totalDeliveredOrders: 0,
+    totalGrossPrice: 0,
+    totalNetPrice: 0,
+    totalPriceCommission: 0,
+    totalOrders: 0,
+    totalPosts: 0,
+    totalPhotoPosts: 0,
+    totalVideoPosts: 0,
+    totalGalleries: 0,
+    totalPhotos: 0,
+    totalVideos: 0,
+    totalProducts: 0,
+    totalRefundedOrders: 0,
+    totalShippingdOrders: 0,
+    totalSubscribers: 0,
+    totalActiveSubscribers: 0,
+    totalInactiveSubscribers: 0
+  });
+  const user: IUser = useSelector((state: any) => state.user.current);
+
+  const getStats = async () => {
+    const resp = await (await utilsService.statistics()).data;
+    setStats(resp);
+  };
+
+  useEffect(() => {
+    getStats();
+  }, []);
+
+  const adminDashboardItems = [
+    {
+      pathname: '/users?status=active',
+      title: 'ACTIVE USERS',
+      value: stats?.totalActiveUsers,
+      color: '#ffc107',
+      prefix: <LineChartOutlined />
+    },
+    {
+      pathname: '/users?status=inactive',
+      title: 'INACTIVE USERS',
+      value: stats?.totalInactiveUsers,
+      color: '#ffc107',
+      prefix: <LineChartOutlined />
+    },
+    {
+      pathname: '/users?verifiedEmail=false',
+      title: 'NOT VERIFIED EMAIL USERS',
+      value: stats?.totalPendingUsers,
+      color: '#ffc107',
+      prefix: <LineChartOutlined />
+    },
+    {
+      pathname: '/model?status=active',
+      title: 'ACTIVE MODELS',
+      value: stats?.totalActivePerformers,
+      color: '#009688',
+      prefix: <BarChartOutlined />
+    },
+    {
+      pathname: '/model?status=inactive',
+      title: 'INACTIVE MODELS',
+      value: stats?.totalInactivePerformers,
+      color: '#009688',
+      prefix: <BarChartOutlined />
+    },
+    {
+      pathname: '/model?verifiedDocument=false',
+      title: 'NOT VERIFIED ID MODELS',
+      value: stats?.totalPendingPerformers,
+      color: '#009688',
+      prefix: <BarChartOutlined />
+    },
+    {
+      pathname: '/feed',
+      title: 'TOTAL POSTS',
+      value: stats?.totalPosts,
+      color: '#5399d0',
+      prefix: <PieChartOutlined />
+    },
+    {
+      pathname: '/gallery',
+      title: 'TOTAL GALLERIES',
+      value: stats?.totalGalleries,
+      color: '#5399d0',
+      prefix: <PieChartOutlined />
+    },
+    {
+      pathname: '/photos',
+      title: 'TOTAL PHOTOS',
+      value: stats?.totalPhotos,
+      color: '#5399d0',
+      prefix: <PieChartOutlined />
+    },
+    {
+      pathname: '/video',
+      title: 'TOTAL VIDEOS',
+      value: stats?.totalVideos,
+      color: '#5399d0',
+      prefix: <PieChartOutlined />
+    },
+    {
+      pathname: '/product',
+      title: 'TOTAL PRODUCTS',
+      value: stats?.totalProducts,
+      color: '#5399d0',
+      prefix: <PieChartOutlined />
+    },
+    {
+      pathname: '/subscription',
+      title: 'TOTAL SUBSCRIBERS',
+      value: stats?.totalSubscribers,
+      color: '#941fd0',
+      prefix: <DotChartOutlined />
+    },
+    {
+      pathname: '/earnings',
+      title: 'TOTAL EARNINGS',
+      value: stats?.totalGrossPrice.toFixed(2),
+      color: '#fb2b2b',
+      prefix: '$'
+    },
+    {
+      pathname: '/earnings',
+      title: 'PLATFORM EARNINGS',
+      value: stats?.totalPriceCommission.toFixed(2),
+      color: '#fb2b2b',
+      prefix: '$'
+    },
+    {
+      pathname: '/earnings',
+      title: 'MODEL\'S EARNINGS',
+      value: stats?.totalNetPrice.toFixed(2),
+      color: '#fb2b2b',
+      prefix: '$'
+    },
+    {
+      pathname: '/order?deliveryStatus=shipping',
+      title: 'SHIPPED ORDERS',
+      value: stats?.totalShippingdOrders,
+      color: '#c8d841',
+      prefix: <AreaChartOutlined />
+    },
+    {
+      pathname: '/order?deliveryStatus=delivered',
+      title: 'DELIVERED ORDERS',
+      value: stats?.totalDeliveredOrders,
+      color: '#c8d841',
+      prefix: <AreaChartOutlined />
+    },
+    {
+      pathname: '/order?deliveryStatus=refunded',
+      title: 'REFUNDED ORDERS',
+      value: stats?.totalRefundedOrders,
+      color: '#c8d841',
+      prefix: <AreaChartOutlined />
     }
-  }
+  ];
 
-  async componentDidMount() {
-    const stats = await (await utilsService.statistics()).data;
-    if (stats) {
-      this.setState({ stats });
-    }
-  }
+  const subAdminDashboardItems = user
+  && adminDashboardItems.filter((item) => user.pathsAllow?.some((path) => item.pathname.includes(path)));
 
-  render() {
-    const { stats } = this.state;
-    return (
-      <Layout>
-        <Head>
-          <title>Dashboard</title>
-        </Head>
-        <Row className="dashboard-stats">
-          <Col md={8} xs={12}>
-            <Link href={{ pathname: '/users', query: { status: 'active' } }}>
-              <a>
-                <Card>
-                  <Statistic
-                    title="ACTIVE USERS"
-                    value={stats.totalActiveUsers}
-                    valueStyle={{ color: '#ffc107' }}
-                    prefix={<LineChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href={{ pathname: '/users', query: { status: 'inactive' } }}>
-              <a>
-                <Card>
-                  <Statistic
-                    title="INACTIVE USERS"
-                    value={stats.totalInactiveUsers}
-                    valueStyle={{ color: '#ffc107' }}
-                    prefix={<LineChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href={{ pathname: '/users', query: { verifiedEmail: false } }}>
-              <a>
-                <Card>
-                  <Statistic
-                    title="NOT VERIFIED EMAIL USERS"
-                    value={stats.totalPendingUsers}
-                    valueStyle={{ color: '#ffc107' }}
-                    prefix={<LineChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href={{ pathname: '/model', query: { status: 'active' } }}>
-              <a>
-                <Card>
-                  <Statistic
-                    title="ACTIVE MODELS"
-                    value={stats.totalActivePerformers}
-                    valueStyle={{ color: '#009688' }}
-                    prefix={<BarChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href={{ pathname: '/model', query: { status: 'inactive' } }}>
-              <a>
-                <Card>
-                  <Statistic
-                    title="INACTIVE MODELS"
-                    value={stats.totalInactivePerformers}
-                    valueStyle={{ color: '#009688' }}
-                    prefix={<BarChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href={{ pathname: '/model', query: { verifiedDocument: false } }}>
-              <a>
-                <Card>
-                  <Statistic
-                    title="NOT VERIFIED ID MODELS"
-                    value={stats.totalPendingPerformers}
-                    valueStyle={{ color: '#009688' }}
-                    prefix={<BarChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/feed">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL POSTS"
-                    value={stats.totalPosts}
-                    valueStyle={{ color: '#5399d0' }}
-                    prefix={<PieChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/gallery">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL GALLERIES"
-                    value={stats.totalGalleries}
-                    valueStyle={{ color: '#5399d0' }}
-                    prefix={<PieChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/photos">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL PHOTOS"
-                    value={stats.totalPhotos}
-                    valueStyle={{ color: '#5399d0' }}
-                    prefix={<PieChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/video">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL VIDEOS"
-                    value={stats.totalVideos}
-                    valueStyle={{ color: '#5399d0' }}
-                    prefix={<PieChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/product">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL PRODUCTS"
-                    value={stats.totalProducts}
-                    valueStyle={{ color: '#5399d0' }}
-                    prefix={<PieChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/subscription">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL SUBSCRIBERS"
-                    value={stats.totalSubscribers}
-                    valueStyle={{ color: '#941fd0' }}
-                    prefix={<DotChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          {/* <Col md={8} xs={12}>
-            <Link href="/subscription">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL ACTIVE SUBSCRIBERS"
-                    value={stats.totalActiveSubscribers}
-                    valueStyle={{ color: '#5399d0' }}
-                    prefix={<DotChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/subscription">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL INACTIVE SUBSCRIBERS"
-                    value={stats.totalInactiveSubscribers}
-                    valueStyle={{ color: '#5399d0' }}
-                    prefix={<DotChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col> */}
-          <Col md={8} xs={12}>
-            <Link href="/earnings">
-              <a>
-                <Card>
-                  <Statistic
-                    title="TOTAL EARNINGS"
-                    value={`${stats?.totalGrossPrice.toFixed(2)}`}
-                    valueStyle={{ color: '#fb2b2b' }}
-                    prefix="$"
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/earnings">
-              <a>
-                <Card>
-                  <Statistic
-                    title="PLATFORM EARNINGS"
-                    value={`${stats?.totalPriceCommission.toFixed(2)}`}
-                    valueStyle={{ color: '#fb2b2b' }}
-                    prefix="$"
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/earnings">
-              <a>
-                <Card>
-                  <Statistic
-                    title="MODEL'S EARNINGS"
-                    value={`${stats?.totalNetPrice.toFixed(2)}`}
-                    valueStyle={{ color: '#fb2b2b' }}
-                    prefix="$"
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/order?deliveryStatus=shipping">
-              <a>
-                <Card>
-                  <Statistic
-                    title="SHIPPED ORDERS"
-                    value={stats.totalShippingdOrders}
-                    valueStyle={{ color: '#c8d841' }}
-                    prefix={<AreaChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/order?deliveryStatus=delivered">
-              <a>
-                <Card>
-                  <Statistic
-                    title="DELIVERED ORDERS"
-                    value={stats.totalDeliveredOrders}
-                    valueStyle={{ color: '#c8d841' }}
-                    prefix={<AreaChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-          <Col md={8} xs={12}>
-            <Link href="/order?deliveryStatus=refunded">
-              <a>
-                <Card>
-                  <Statistic
-                    title="REFUNDED ORDERS"
-                    value={stats.totalRefundedOrders}
-                    valueStyle={{ color: '#c8d841' }}
-                    prefix={<AreaChartOutlined />}
-                  />
-                </Card>
-              </a>
-            </Link>
-          </Col>
-        </Row>
-      </Layout>
-    );
-  }
+  return (
+    <Layout>
+      <Head>
+        <title>Dashboard</title>
+      </Head>
+      <Row className="dashboard-stats">
+        {user?.roles && user.roles.includes(ROLE_ADMIN)
+          ? adminDashboardItems.map((item, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+            <Col md={8} xs={12} key={index}>
+              <Link href={item.pathname}>
+                <a>
+                  <Card>
+                    <Statistic
+                      title={item.title}
+                      value={item.value}
+                      valueStyle={{ color: item.color }}
+                      prefix={item.prefix}
+                    />
+                  </Card>
+                </a>
+              </Link>
+            </Col>
+          ))
+          : subAdminDashboardItems.map((item, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+            <Col md={8} xs={12} key={index}>
+              <Link href={item.pathname}>
+                <a>
+                  <Card>
+                    <Statistic
+                      title={item.title}
+                      value={item.value}
+                      valueStyle={{ color: item.color }}
+                      prefix={item.prefix}
+                    />
+                  </Card>
+                </a>
+              </Link>
+            </Col>
+          ))}
+      </Row>
+    </Layout>
+  );
 }
+
+export default Dashboard;

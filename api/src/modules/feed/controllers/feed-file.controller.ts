@@ -24,13 +24,13 @@ export class FeedFileController {
   @Post('photo/upload')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin', 'performer')
+  @Roles('admin', 'performer', 'sub-admin')
   @UseInterceptors(
     FileUploadInterceptor('feed-photo', 'file', {
       destination: getConfig('file').feedProtectedDir,
       acl: S3ObjectCannelACL.AuthenticatedRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadImage(
     @FileUploaded() file: FileDto
@@ -46,13 +46,13 @@ export class FeedFileController {
   @Post('video/upload')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin', 'performer')
+  @Roles('admin', 'performer', 'sub-admin')
   @UseInterceptors(
     FileUploadInterceptor('feed-video', 'file', {
       destination: getConfig('file').feedProtectedDir,
       acl: S3ObjectCannelACL.AuthenticatedRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadVideo(
     @FileUploaded() file: FileDto
@@ -68,13 +68,13 @@ export class FeedFileController {
   @Post('audio/upload')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin', 'performer')
+  @Roles('admin', 'performer', 'sub-admin')
   @UseInterceptors(
     FileUploadInterceptor('feed-audio', 'file', {
       destination: getConfig('file').feedProtectedDir,
       acl: S3ObjectCannelACL.AuthenticatedRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadAudio(
     @FileUploaded() file: FileDto
@@ -90,13 +90,13 @@ export class FeedFileController {
   @Post('thumbnail/upload')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin', 'performer')
+  @Roles('admin', 'performer', 'sub-admin')
   @UseInterceptors(
     FileUploadInterceptor('feed-photo', 'file', {
       destination: getConfig('file').feedDir,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadThumb(
     @FileUploaded() file: FileDto
@@ -112,13 +112,13 @@ export class FeedFileController {
   @Post('teaser/upload')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin', 'performer')
+  @Roles('admin', 'performer', 'sub-admin')
   @UseInterceptors(
     FileUploadInterceptor('feed-video', 'file', {
       destination: getConfig('file').feedDir,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadTeaser(
     @FileUploaded() file: FileDto

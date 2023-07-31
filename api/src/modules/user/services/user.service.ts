@@ -18,10 +18,12 @@ import { FileService } from 'src/modules/file/services';
 import { UserModel } from '../models';
 import { USER_MODEL_PROVIDER } from '../providers';
 import {
-  UserUpdatePayload, UserAuthUpdatePayload, UserAuthCreatePayload, UserCreatePayload
+  UserUpdatePayload, UserAuthUpdatePayload, UserAuthCreatePayload, UserCreatePayload, SubAdminAuthCreatePayload
 } from '../payloads';
 import { UserDto } from '../dtos';
-import { DELETE_USER_CHANNEL, ROLE_USER, STATUS_ACTIVE } from '../constants';
+import {
+  DELETE_USER_CHANNEL, ROLE_SUB_ADMIN, ROLE_USER, STATUS_ACTIVE
+} from '../constants';
 import { EmailHasBeenTakenException } from '../exceptions';
 import { UsernameExistedException } from '../exceptions/username-existed.exception';
 
@@ -99,6 +101,37 @@ export class UserService {
     const data = payload.username ? await this.userModel.countDocuments({ username: payload.username.trim().toLowerCase() })
       : await this.userModel.countDocuments({ email: payload.email.toLowerCase() });
     return data;
+  }
+
+  public async createSubAdmin(data: SubAdminAuthCreatePayload, options = {} as any): Promise<UserModel> {
+    if (!data || !data.email) {
+      throw new EntityNotFoundException();
+    }
+    const countUserEmail = await this.userModel.countDocuments({
+      email: data.email.toLowerCase()
+    });
+    const countPerformerEmail = await this.performerService.checkExistedEmailorUsername({ email: data.email });
+    if (countUserEmail || countPerformerEmail) {
+      throw new EmailHasBeenTakenException();
+    }
+    const countUserUsername = data.username && await this.findByUsername(data.username);
+    const countPerformerUsername = data.username && await this.performerService.checkExistedEmailorUsername({ username: data.username });
+    if (countUserUsername || countPerformerUsername) {
+      throw new UsernameExistedException();
+    }
+    const user = { ...data } as any;
+    user.email = data.email.toLowerCase();
+    user.username = data.username ? data.username.trim().toLowerCase() : `user${StringHelper.randomString(8, '0123456789')}`;
+    user.createdAt = new Date();
+    user.updatedAt = new Date();
+    user.roles = [ROLE_SUB_ADMIN];
+    user.status = options.status || STATUS_ACTIVE;
+    user.pathsAllow = data.pathsAllow || [];
+    if (!user.name) {
+      user.name = [user.firstName || '', user.lastName || ''].join(' ');
+    }
+
+    return this.userModel.create(user);
   }
 
   public async create(data: UserCreatePayload | UserAuthCreatePayload, options = {} as any): Promise<UserModel> {

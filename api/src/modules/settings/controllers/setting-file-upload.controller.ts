@@ -18,7 +18,7 @@ import { S3ObjectCannelACL, Storage } from 'src/modules/storage/contants';
 export class SettingFileUploadController {
   @Post('upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('setting', 'file', {
@@ -26,7 +26,7 @@ export class SettingFileUploadController {
       uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadFile(
     @FileUploaded() file: FileDto

@@ -12,6 +12,7 @@ import { userService } from '@services/user.service';
 import { SearchFilter } from '@components/user/search-filter';
 import Head from 'next/head';
 import Link from 'next/link';
+import { ROLE_USER } from 'src/constants';
 
 interface IProps {
   status: string
@@ -81,7 +82,8 @@ export default class Performers extends PureComponent<IProps> {
         offset: (page - 1) * limit,
         ...filter,
         sort,
-        sortBy
+        sortBy,
+        role: ROLE_USER
       });
       this.setState({
         searching: false,

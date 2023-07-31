@@ -34,7 +34,7 @@ export class SubscriptionController {
 
   @Post()
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async create(
@@ -45,7 +45,7 @@ export class SubscriptionController {
   }
 
   @Put('/admin/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -59,7 +59,7 @@ export class SubscriptionController {
 
   @Get('/admin/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async adminSearch(

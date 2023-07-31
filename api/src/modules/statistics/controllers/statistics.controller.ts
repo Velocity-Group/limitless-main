@@ -18,7 +18,7 @@ export class StatisticController {
 
   @Get('/admin')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async list() {
     const stats = await this.statisticService.stats();

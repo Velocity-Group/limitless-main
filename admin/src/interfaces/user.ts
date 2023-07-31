@@ -11,6 +11,7 @@ export interface IUser {
   balance: string;
   country: string;
   roles: string[];
+  pathsAllow: string[];
   verifiedEmail?: boolean;
 }
 

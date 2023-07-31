@@ -36,34 +36,34 @@ export class AdminPerformerProductsController {
 
   @Post('/')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor([
       {
-        type: 'performer-product-image',
-        fieldName: 'image',
-        options: {
-          destination: getConfig('file').imageDir,
-          generateThumbnail: true,
-          uploadImmediately: true,
-          thumbnailSize: getConfig('image').originThumbnail,
-          acl: S3ObjectCannelACL.PublicRead,
-          server: Storage.S3
-        }
+      type: 'performer-product-image',
+      fieldName: 'image',
+      options: {
+      destination: getConfig('file').imageDir,
+      generateThumbnail: true,
+      uploadImmediately: true,
+      thumbnailSize: getConfig('image').originThumbnail,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+      }
       },
       {
-        type: 'performer-product-digital',
-        fieldName: 'digitalFile',
-        options: {
-          destination: getConfig('file').digitalProductDir,
-          uploadImmediately: true,
-          acl: S3ObjectCannelACL.AuthenticatedRead,
-          server: Storage.S3
-        }
+      type: 'performer-product-digital',
+      fieldName: 'digitalFile',
+      options: {
+      destination: getConfig('file').digitalProductDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
       }
-    ])
+      }
+      ])
   )
   @UsePipes(new ValidationPipe({ transform: true }))
   async create(
@@ -82,34 +82,34 @@ export class AdminPerformerProductsController {
 
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor([
       {
-        type: 'performer-product-image',
-        fieldName: 'image',
-        options: {
-          destination: getConfig('file').imageDir,
-          uploadImmediately: true,
-          generateThumbnail: true,
-          thumbnailSize: getConfig('image').originThumbnail,
-          acl: S3ObjectCannelACL.PublicRead,
-          server: Storage.S3
-        }
+      type: 'performer-product-image',
+      fieldName: 'image',
+      options: {
+      destination: getConfig('file').imageDir,
+      uploadImmediately: true,
+      generateThumbnail: true,
+      thumbnailSize: getConfig('image').originThumbnail,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+      }
       },
       {
-        type: 'performer-product-digital',
-        fieldName: 'digitalFile',
-        options: {
-          destination: getConfig('file').digitalProductDir,
-          uploadImmediately: true,
-          acl: S3ObjectCannelACL.AuthenticatedRead,
-          server: Storage.S3
-        }
+      type: 'performer-product-digital',
+      fieldName: 'digitalFile',
+      options: {
+      destination: getConfig('file').digitalProductDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
       }
-    ])
+      }
+      ])
   )
   @UsePipes(new ValidationPipe({ transform: true }))
   async update(
@@ -130,7 +130,7 @@ export class AdminPerformerProductsController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async delete(@Param('id') id: string): Promise<any> {
     const resp = await this.productService.delete(id);
@@ -139,7 +139,7 @@ export class AdminPerformerProductsController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async details(
     @Param('id') id: string,
@@ -152,7 +152,7 @@ export class AdminPerformerProductsController {
 
   @Get('/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async search(@Query() req: ProductSearchRequest): Promise<any> {
     const resp = await this.productSearchService.adminSearch(req);

@@ -25,7 +25,7 @@ export class MailerController {
 
   @Post('/verify')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async verify(
@@ -36,7 +36,7 @@ export class MailerController {
 
   @Put('/templates/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async update(
@@ -49,7 +49,7 @@ export class MailerController {
 
   @Get('/templates')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async getAll(): Promise<DataResponse<any>> {
@@ -59,7 +59,7 @@ export class MailerController {
 
   @Get('/templates/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async findOne(

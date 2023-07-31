@@ -1,7 +1,7 @@
 import { merge } from 'lodash';
 import { createReducers } from '@lib/redux';
 import login from 'pages/auth/login';
-import { loginSuccess, loginFail, logoutSuccess } from './actions';
+import { loginSuccess, loginFail, logout } from './actions';
 
 const initialState = {
   loggedIn: false,
@@ -51,19 +51,9 @@ const authReducers = [
     }
   },
   {
-    on: logoutSuccess,
-    reducer(state: any) {
+    on: logout,
+    reducer() {
       return {
-        ...state,
-        logout: {
-          success: true
-        },
-        login: {
-          loginAuth: {
-            success: false,
-            error: null
-          }
-        },
         loggedIn: false,
         authUser: null
       };

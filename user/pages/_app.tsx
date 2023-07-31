@@ -136,7 +136,10 @@ async function updateSettingsStore(ctx: NextPageContext, settings) {
           SETTING_KEYS.META_DESCRIPTION,
           SETTING_KEYS.VERIFF_ENABLED,
           SETTING_KEYS.VERIFF_BASE_URL,
-          SETTING_KEYS.VERIFF_PUBLIC_KEY
+          SETTING_KEYS.VERIFF_PUBLIC_KEY,
+          SETTING_KEYS.COINBASE_ENABLE,
+          SETTING_KEYS.STRIPE_ENABLE,
+          SETTING_KEYS.CCBILL_ENABLE
         ]),
         locale: settings.locale,
         supportedLocales: settings.supportedLocales

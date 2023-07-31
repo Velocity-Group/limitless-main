@@ -35,42 +35,42 @@ export class AdminPerformerVideosController {
 
   @Post('/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor(
       [
-        {
-          type: 'performer-video',
-          fieldName: 'video',
-          options: {
-            destination: getConfig('file').videoProtectedDir,
-            acl: S3ObjectCannelACL.AuthenticatedRead,
-            server: Storage.S3
-          }
-        },
-        {
-          type: 'performer-video-teaser',
-          fieldName: 'teaser',
-          options: {
-            destination: getConfig('file').videoDir,
-            acl: S3ObjectCannelACL.PublicRead,
-            server: Storage.S3
-          }
-        },
-        {
-          type: 'performer-video-thumbnail',
-          fieldName: 'thumbnail',
-          options: {
-            destination: getConfig('file').imageDir,
-            uploadImmediately: true,
-            generateThumbnail: true,
-            thumbnailSize: getConfig('image').blurThumbnail,
-            acl: S3ObjectCannelACL.PublicRead,
-            server: Storage.S3
-          }
-        }
+      {
+      type: 'performer-video',
+      fieldName: 'video',
+      options: {
+      destination: getConfig('file').videoProtectedDir,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
+      }
+      },
+      {
+      type: 'performer-video-teaser',
+      fieldName: 'teaser',
+      options: {
+      destination: getConfig('file').videoDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+      }
+      },
+      {
+      type: 'performer-video-thumbnail',
+      fieldName: 'thumbnail',
+      options: {
+      destination: getConfig('file').imageDir,
+      uploadImmediately: true,
+      generateThumbnail: true,
+      thumbnailSize: getConfig('image').blurThumbnail,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+      }
+      }
       ]
     )
   )
@@ -89,7 +89,7 @@ export class AdminPerformerVideosController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async details(
     @Param('id') id: string,
@@ -101,7 +101,7 @@ export class AdminPerformerVideosController {
 
   @Get('/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async search(@Query() req: VideoSearchRequest) {
     const resp = await this.videoSearchService.adminSearch(req);
@@ -110,42 +110,42 @@ export class AdminPerformerVideosController {
 
   @Put('/edit/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor(
       [
-        {
-          type: 'performer-video',
-          fieldName: 'video',
-          options: {
-            destination: getConfig('file').videoProtectedDir,
-            acl: S3ObjectCannelACL.AuthenticatedRead,
-            server: Storage.S3
-          }
-        },
-        {
-          type: 'performer-video-teaser',
-          fieldName: 'teaser',
-          options: {
-            destination: getConfig('file').videoDir,
-            acl: S3ObjectCannelACL.PublicRead,
-            server: Storage.S3
-          }
-        },
-        {
-          type: 'performer-video-thumbnail',
-          fieldName: 'thumbnail',
-          options: {
-            destination: getConfig('file').imageDir,
-            uploadImmediately: true,
-            generateThumbnail: true,
-            thumbnailSize: getConfig('image').blurThumbnail,
-            acl: S3ObjectCannelACL.PublicRead,
-            server: Storage.S3
-          }
-        }
+      {
+      type: 'performer-video',
+      fieldName: 'video',
+      options: {
+      destination: getConfig('file').videoProtectedDir,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
+      }
+      },
+      {
+      type: 'performer-video-teaser',
+      fieldName: 'teaser',
+      options: {
+      destination: getConfig('file').videoDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+      }
+      },
+      {
+      type: 'performer-video-thumbnail',
+      fieldName: 'thumbnail',
+      options: {
+      destination: getConfig('file').imageDir,
+      uploadImmediately: true,
+      generateThumbnail: true,
+      thumbnailSize: getConfig('image').blurThumbnail,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+      }
+      }
       ]
     )
   )
@@ -161,7 +161,7 @@ export class AdminPerformerVideosController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async remove(
     @Param('id') id: string
@@ -172,7 +172,7 @@ export class AdminPerformerVideosController {
 
   @Delete('/remove-file/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async removeFile(
     @Param('id') id: string,

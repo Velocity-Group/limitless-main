@@ -24,7 +24,7 @@ export class AdminSettingController {
 
   @Get('')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async getAdminSettings(
     @Query('group') group: string
@@ -35,7 +35,7 @@ export class AdminSettingController {
 
   @Put('/:key')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async update(
     @Param('key') key: string,

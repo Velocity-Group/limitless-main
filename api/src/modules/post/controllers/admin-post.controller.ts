@@ -34,7 +34,7 @@ export class AdminPostController {
   ) {}
 
   @Post()
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -47,7 +47,7 @@ export class AdminPostController {
   }
 
   @Put('/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -61,7 +61,7 @@ export class AdminPostController {
   }
 
   @Delete('/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -75,7 +75,7 @@ export class AdminPostController {
 
   @Post('images/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     // TODO - check mime type?
@@ -84,7 +84,7 @@ export class AdminPostController {
       uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadImage(
     @FileUploaded() file: FileDto
@@ -97,7 +97,7 @@ export class AdminPostController {
   }
 
   @Get('/search')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -110,7 +110,7 @@ export class AdminPostController {
   }
 
   @Get('/:id/view')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))

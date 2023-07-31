@@ -25,7 +25,7 @@ export class AdminPayoutRequestController {
 
   @Post('/payout/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async payout(
@@ -37,7 +37,7 @@ export class AdminPayoutRequestController {
 
   @Post('/status/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateStatus(
@@ -50,7 +50,7 @@ export class AdminPayoutRequestController {
 
   @Get('/admin/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async adminDetails(@Param('id') id: string): Promise<DataResponse<any>> {
@@ -60,7 +60,7 @@ export class AdminPayoutRequestController {
 
   @Delete('/admin/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async delete(@Param('id') id: string): Promise<DataResponse<any>> {

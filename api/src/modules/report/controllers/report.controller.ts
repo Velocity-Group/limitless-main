@@ -48,7 +48,7 @@ export class ReportController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UsePipes(new ValidationPipe({ transform: true }))
   async remove(
     @Param('id') id: string
@@ -60,7 +60,7 @@ export class ReportController {
   @Get('')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UsePipes(new ValidationPipe({ transform: true }))
   async bookmarkFeeds(
     @Query() query: ReportSearchRequestPayload

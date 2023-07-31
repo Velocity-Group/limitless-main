@@ -34,7 +34,7 @@ export class StreamController {
   @Get('/admin/search')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getList(
     @Query() req: SearchStreamPayload
@@ -58,7 +58,7 @@ export class StreamController {
   @Post('/admin/end-session/:id')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UsePipes(new ValidationPipe({ transform: true }))
   async endSession(
     @Param('id') id: string

@@ -34,7 +34,7 @@ export class AdminTokenPackageController {
   ) {}
 
   @Post('/token')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -46,7 +46,7 @@ export class AdminTokenPackageController {
   }
 
   @Put('/token/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -59,7 +59,7 @@ export class AdminTokenPackageController {
   }
 
   @Get('/token/:id/view')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   async details(@Param('id') id: string): Promise<DataResponse<ITokenPackage>> {
@@ -68,7 +68,7 @@ export class AdminTokenPackageController {
   }
 
   @Delete('/token/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -78,7 +78,7 @@ export class AdminTokenPackageController {
   }
 
   @Get('/token/search')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))

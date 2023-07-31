@@ -7,9 +7,10 @@ import { authService, userService } from 'src/services';
 import { ILogin } from 'src/interfaces';
 import { resetUser } from '@redux/user/actions';
 import { message } from 'antd';
+import { ROLE_ADMIN, ROLE_SUB_ADMIN } from 'src/constants';
 import { updateCurrentUser } from '../user/actions';
 import {
-  login, loginSuccess, logout, loginFail, logoutSuccess
+  login, loginSuccess, logout, loginFail
 } from './actions';
 
 const authSagas = [
@@ -22,7 +23,7 @@ const authSagas = [
         // store token, update store and redirect to dashboard page
         yield authService.setToken(resp.token);
         const userResp = (yield userService.me()).data;
-        if (userResp.roles.indexOf('admin') === -1) {
+        if (userResp.roles.indexOf(ROLE_ADMIN) === -1 && userResp.roles.indexOf(ROLE_SUB_ADMIN) === -1) {
           message.error('You don\'t have permission to login to this page!');
           return yield logout();
         }
@@ -41,12 +42,9 @@ const authSagas = [
       try {
         yield authService.removeToken();
         yield put(resetUser());
-        yield put(logoutSuccess());
-        // yield put(resetAppState());
-        // TODO - should use a better way?
-        Router.push('/auth/login');
+        Router.replace('/auth/login');
       } catch (e) {
-        // message.error('Something went wrong!');
+        console.log(yield e);
       }
     }
   }

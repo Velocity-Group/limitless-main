@@ -41,7 +41,7 @@ export class SearchController {
   @Get('/list/keywords')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin', 'performer')
+  @Roles('admin', 'performer', 'sub-admin')
   @UsePipes(new ValidationPipe({ transform: true }))
   async bookmarkFeeds(
     @Query() query: SearchRequestPayload

@@ -6,17 +6,21 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
 import Link from 'next/link';
 import { IUser } from 'src/interfaces';
+import { logout } from '@redux/auth/actions';
 import './header.less';
 
 interface IProps {
   collapsed?: boolean;
   onCollapseChange?: Function;
   currentUser?: IUser;
+  logout: Function;
 }
 
 class Header extends PureComponent<IProps> {
   render() {
-    const { collapsed, onCollapseChange, currentUser } = this.props;
+    const {
+      collapsed, onCollapseChange, currentUser, logout: handleLogout
+    } = this.props;
     const rightContent = (
       <Dropdown overlay={(
         <Menu key="user" mode="horizontal">
@@ -26,9 +30,7 @@ class Header extends PureComponent<IProps> {
             </Link>
           </Menu.Item>
           <Menu.Item key="SignOut">
-            <Link href="/auth/logout">
-              <a>Log out</a>
-            </Link>
+            <a aria-hidden onClick={() => handleLogout()}>Log out</a>
           </Menu.Item>
         </Menu>
       )}
@@ -55,4 +57,4 @@ class Header extends PureComponent<IProps> {
 }
 
 const mapState = (state: any) => ({ currentUser: state.user.current });
-export default connect(mapState)(Header);
+export default connect(mapState, { logout })(Header);

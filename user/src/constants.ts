@@ -63,7 +63,10 @@ export const SETTING_KEYS = {
   PAYMENT_GATEWAY: 'paymentGateway',
   VERIFF_ENABLED: 'veriffEnabled',
   VERIFF_PUBLIC_KEY: 'veriffPublicKey',
-  VERIFF_BASE_URL: 'veriffBaseUrl'
+  VERIFF_BASE_URL: 'veriffBaseUrl',
+  COINBASE_ENABLE: 'coinbaseEnable',
+  STRIPE_ENABLE: 'stripeEnable',
+  CCBILL_ENABLE: 'ccbillEnable'
 };
 
 export const MENU_SECTION = {

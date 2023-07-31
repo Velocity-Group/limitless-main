@@ -15,6 +15,10 @@ export class UserService extends APIRequest {
     return this.post('/admin/users', payload);
   }
 
+  createSubAdmin(payload: any) {
+    return this.post('/admin/sub-admin', payload);
+  }
+
   update(id: string, payload: any) {
     return this.put(`/admin/users/${id}`, payload);
   }

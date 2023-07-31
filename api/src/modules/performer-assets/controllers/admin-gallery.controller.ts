@@ -29,7 +29,7 @@ export class AdminPerformerGalleryController {
 
   @Post('/')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async createGallery(
@@ -42,7 +42,7 @@ export class AdminPerformerGalleryController {
 
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateGallery(
@@ -56,7 +56,7 @@ export class AdminPerformerGalleryController {
 
   @Get('/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async searchGallery(@Query() req: GallerySearchRequest): Promise<any> {
@@ -66,7 +66,7 @@ export class AdminPerformerGalleryController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async view(
@@ -79,7 +79,7 @@ export class AdminPerformerGalleryController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async delete(@Param('id') id: string) {
     const details = await this.galleryService.delete(id);

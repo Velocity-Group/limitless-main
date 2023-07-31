@@ -1,12 +1,12 @@
 import Head from 'next/head';
 import {
-  Layout, message, InputNumber, Form, Input, Button, Alert
+  Layout, message, InputNumber, Form, Input, Button, Alert, Modal, Tabs
 } from 'antd';
 import {
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import { WalletSvg } from 'src/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { paymentService } from '@services/index';
 import {
   IUIConfig, IUser, ISettings
@@ -36,15 +36,29 @@ function TokenPackages({ ui, user, settings }: IProps) {
   const [couponCode, setCouponCode] = useState('');
   const [coupon, setCoupon] = useState(null);
   const [amount, setAmount] = useState(10);
+  const [paymentGateway, setPaymentGateway] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const stripe = useStripe();
   const intl: IntlShape = useIntl();
 
-  const addFund = async (data) => {
-    if ((settings.paymentGateway === 'ccbill' && amount < 2.95) || (settings.paymentGateway === 'ccbill' && amount > 300)) {
+  useEffect(() => {
+    let paymentMethod;
+    if (settings?.coinbaseEnable) {
+      paymentMethod = 'coinbase';
+    } else if (settings?.ccbillEnable) {
+      paymentMethod = 'ccbill';
+    } else if (settings?.stripeEnable) {
+      paymentMethod = 'stripe';
+    }
+    setPaymentGateway(paymentMethod);
+  }, []);
+
+  const addFund = async () => {
+    if ((paymentGateway === 'ccbill' && amount < 2.95) || (paymentGateway === 'ccbill' && amount > 300)) {
       message.error(intl.formatMessage({ id: 'minimumAmountMustBe$2.95AndMaximumAmountMustBe300', defaultMessage: 'Minimum amount must be $2.95 and maximum amount must be 300' }));
       return;
     }
-    if (settings.paymentGateway === 'stripe' && !user?.stripeCardIds?.length) {
+    if (paymentGateway === 'stripe' && !user?.stripeCardIds?.length) {
       message.error(intl.formatMessage({ id: 'pleaseAddAPaymentCardToCompleteYourPurchase', defaultMessage: 'Please add a payment card to complete your purchase' }));
       Router.push('/user/cards');
       return;
@@ -52,16 +66,16 @@ function TokenPackages({ ui, user, settings }: IProps) {
     try {
       setSubmiting(true);
       const resp = await paymentService.addFunds({
-        paymentGateway: settings.paymentGateway,
-        amount: data.amount,
+        paymentGateway,
+        amount,
         couponCode: coupon ? couponCode : ''
       });
       // to confirm 3D secure
-      if (settings.paymentGateway === 'stripe') {
+      if (paymentGateway === 'stripe') {
         resp?.data?.stripeClientSecret && stripe.confirmCardPayment(resp?.data?.stripeClientSecret);
       }
       // coinbase
-      if (['coinbase', 'ccbill'].includes(settings.paymentGateway)) {
+      if (['coinbase', 'ccbill'].includes(paymentGateway)) {
         window.location.href = resp?.data?.paymentUrl;
       }
     } catch (e) {
@@ -164,7 +178,11 @@ function TokenPackages({ ui, user, settings }: IProps) {
               </span>
             </Form.Item>
             <Form.Item className="text-center">
-              <Button htmlType="submit" className="primary" disabled={submiting} loading={submiting}>
+              <Button
+                className="primary"
+                disabled={!amount}
+                onClick={() => setIsModalOpen(true)}
+              >
                 {intl.formatMessage({ id: 'buyNow', defaultMessage: 'Buy Now' })}
               </Button>
             </Form.Item>
@@ -172,6 +190,48 @@ function TokenPackages({ ui, user, settings }: IProps) {
         </div>
         {submiting && <Loader customText={intl.formatMessage({ id: 'weAreProcessingYourPayment', defaultMessage: 'We are processing your payment, please do not reload this page until it\'s done.' })} />}
       </div>
+      <Modal
+        visible={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+      >
+        <div className="payment-select">
+          <p className="text-center payment-title">{intl.formatMessage({ id: 'selectPaymentMethod', defaultMessage: 'Select Payment Method' })}</p>
+          {settings?.coinbaseEnable || settings?.ccbillEnable || settings?.stripeEnable ? (
+            <Tabs
+              className="payment-confirm"
+              onChange={(k) => setPaymentGateway(k)}
+            >
+              {settings?.ccbillEnable && (
+              <Tabs.TabPane tab={intl.formatMessage({ id: 'creditCard', defaultMessage: 'Credit Card' })} key="ccbill">
+                <img src="/static/ccbill-img.png" alt="ccbill-img" />
+              </Tabs.TabPane>
+              )}
+              {settings?.coinbaseEnable && (
+              <Tabs.TabPane tab={intl.formatMessage({ id: 'crypto', defaultMessage: 'Crypto' })} key="coinbase">
+                <img src="/static/coinbase-commerce-img.jpg" alt="coinbase-commerce-img" />
+              </Tabs.TabPane>
+              )}
+              {settings?.stripeEnable && (
+              <Tabs.TabPane tab={intl.formatMessage({ id: 'stripe', defaultMessage: 'Stripe' })} key="stripe">
+                <img src="/static/stripe-icon.jpeg" alt="stripe-icon-img" />
+              </Tabs.TabPane>
+              )}
+            </Tabs>
+          ) : <p className="text-center">{intl.formatMessage({ id: 'noPaymentMethod', defaultMessage: 'No payment method' })}</p>}
+          {(paymentGateway === 'coinbase' || paymentGateway === 'ccbill' || paymentGateway === 'stripe')
+              && (
+                <Button
+                  className="primary confirm-btn"
+                  onClick={() => addFund()}
+                  disabled={submiting || (!settings?.coinbaseEnable && !settings?.ccbillEnable && !settings?.stripeEnable)}
+                  loading={submiting}
+                >
+                  {intl.formatMessage({ id: 'confirm', defaultMessage: 'Confirm' })}
+                </Button>
+              )}
+        </div>
+      </Modal>
     </Layout>
   );
 }

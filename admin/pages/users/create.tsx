@@ -39,7 +39,7 @@ class UserCreate extends PureComponent<IProps> {
       }
 
       if (!validateUsername(data.username)) {
-        message.error('Username must contain only alphanumerics');
+        message.error('Username must contain lowercase alphanumerics only');
         return;
       }
 

@@ -22,6 +22,7 @@ import { isObjectId } from 'src/kernel/helpers/string.helper';
 import * as moment from 'moment';
 import { Storage } from 'src/modules/storage/contants';
 import { FollowService } from 'src/modules/follow/services/follow.service';
+import { ROLE_ADMIN, ROLE_SUB_ADMIN } from 'src/modules/user/constants';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
@@ -308,11 +309,11 @@ export class FeedService {
       fromSource: FEED_SOURCE.PERFORMER
     } as any;
 
-    if (!user.roles || !user.roles.includes('admin')) {
+    if (!user.roles || !user.roles.some((item) => [ROLE_ADMIN, ROLE_SUB_ADMIN].includes(item))) {
       query.fromSourceId = user._id;
     }
 
-    if (user.roles && user.roles.includes('admin') && req.performerId) {
+    if (user.roles && user.roles.some((item) => [ROLE_ADMIN, ROLE_SUB_ADMIN].includes(item)) && req.performerId) {
       query.fromSourceId = req.performerId;
     }
 

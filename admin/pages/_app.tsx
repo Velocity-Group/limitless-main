@@ -15,6 +15,8 @@ import { settingService } from '@services/setting.service';
 import Head from 'next/head';
 import '../style/index.less';
 import { setGlobalConfig } from '@services/config';
+import { ROLE_ADMIN, ROLE_SUB_ADMIN } from 'src/constants';
+import { redirectHome } from '@components/utils';
 
 function redirectLogin(ctx: any) {
   if (process.browser) {
@@ -47,8 +49,16 @@ async function auth(ctx: NextPageContext) {
       Authorization: token
     });
     // TODO - check permission
-    if (user.data && !user.data.roles.includes('admin')) {
+    if (user.data && (!user.data.roles.includes(ROLE_ADMIN) && !user.data.roles.includes(ROLE_SUB_ADMIN))) {
       redirectLogin(ctx);
+      return;
+    }
+    // TODO - check sub admin
+    if (user.data && user.data.roles?.includes(ROLE_SUB_ADMIN)
+      && !user.data.pathsAllow?.some((path) => ctx.pathname.includes(path))
+      && (ctx.pathname !== '/' && ctx.pathname !== '/account/settings')) {
+      // redirect home
+      redirectHome(ctx);
       return;
     }
     store.dispatch(loginSuccess());

@@ -6,10 +6,10 @@ interface IProps {
   siteName?: string;
 }
 
-function Emotions({ onEmojiClick, siteName }: IProps) {
+export function Emotions({ onEmojiClick, siteName }: IProps) {
   return (
     <Picker
-      onClick={(emoji) => onEmojiClick(emoji.native)}
+      onClick={(emoji: any) => onEmojiClick(emoji.native)}
       emoji="point_up"
       set="twitter"
       title={siteName || ''}

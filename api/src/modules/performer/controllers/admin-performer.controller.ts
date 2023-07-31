@@ -53,7 +53,7 @@ export class AdminPerformerController {
   ) { }
 
   @Get('/search')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -65,7 +65,7 @@ export class AdminPerformerController {
   }
 
   @Post()
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -104,7 +104,7 @@ export class AdminPerformerController {
   }
 
   @Put('/:id')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async updateUser(
     @Body() payload: PerformerUpdatePayload,
@@ -118,7 +118,7 @@ export class AdminPerformerController {
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async getDetails(
     @Param('id') performerId: string,
@@ -132,7 +132,7 @@ export class AdminPerformerController {
 
   @Delete('/:id/delete')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async delete(
     @Param('id') performerId: string
@@ -143,7 +143,7 @@ export class AdminPerformerController {
 
   @Post('/documents/upload/:performerId/:type')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('performer-document', 'file', {
@@ -151,7 +151,7 @@ export class AdminPerformerController {
       uploadImmediately: true,
       acl: S3ObjectCannelACL.AuthenticatedRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadPerformerDocument(
     @FileUploaded() file: FileDto,
@@ -168,7 +168,7 @@ export class AdminPerformerController {
 
   @Post('/:performerId/avatar/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('avatar', 'avatar', {
@@ -176,7 +176,7 @@ export class AdminPerformerController {
       uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadPerformerAvatar(
     @FileUploaded() file: FileDto,
@@ -191,7 +191,7 @@ export class AdminPerformerController {
 
   @Post('/:performerId/cover/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('cover', 'cover', {
@@ -199,7 +199,7 @@ export class AdminPerformerController {
       uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadPerformerCover(
     @FileUploaded() file: FileDto,
@@ -215,13 +215,13 @@ export class AdminPerformerController {
   @Post('/:id/welcome-video/upload')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseInterceptors(
     FileUploadInterceptor('performer-welcome-video', 'welcome-video', {
       destination: getConfig('file').videoDir,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadPerformerVideo(
     @FileUploaded() file: FileDto,
@@ -237,7 +237,7 @@ export class AdminPerformerController {
 
   @Put('/:id/payment-gateway-settings')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async updatePaymentGatewaySetting(
     @Body() payload: PaymentGatewaySettingPayload
@@ -247,7 +247,7 @@ export class AdminPerformerController {
   }
 
   @Put('/:id/commission-settings')
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @HttpCode(HttpStatus.OK)
   async updateCommissionSetting(
@@ -263,7 +263,7 @@ export class AdminPerformerController {
 
   @Put('/:id/banking-settings')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   async updateBankingSetting(
     @Param('id') performerId: string,

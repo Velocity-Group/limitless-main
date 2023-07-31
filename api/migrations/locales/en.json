@@ -1,4 +1,6 @@
 {
+  "crypto": "Crypto",
+  "creditCard": "Credit Card",
   "signin": "Sign In",
   "yourProfileDetails": "Your Profile Details",
   "profileImages": "Profile images",
@@ -56,6 +58,8 @@
   "theModel": "the model",
   "usdMonth": "USD/month",
   "usdYear": "USD/year",
+  "unlockContent": "Unlock Content",
+  "confirmToUnlock": "Confirm To Unlock",
   "requestedPersonalisedPayPerViewContent": "Requested personalised Pay Per View content",
   "myLiveStreamingRequest": "My Live Streaming Request",
   "liveStreamingRequest": "Live Streaming Request",

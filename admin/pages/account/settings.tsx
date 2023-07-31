@@ -3,30 +3,20 @@ import { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { Tabs, message } from 'antd';
 import Page from '@components/common/layout/page';
-import { AccountForm } from '@components/user/account-form';
-import { IUser, ICountry } from 'src/interfaces';
+import { IUser } from 'src/interfaces';
 import { updateUser, updateCurrentUserAvatar } from 'src/redux/user/actions';
 import { authService, userService } from '@services/index';
 import { UpdatePaswordForm } from '@components/user/update-password-form';
-import { utilsService } from '@services/utils.service';
+import { SubAdminForm } from '@components/user/sub-admin-form';
 
 interface IProps {
   currentUser: IUser;
   updateUser: Function;
   updating?: boolean;
   updateCurrentUserAvatar: Function;
-  countries: ICountry[];
   updateSuccess?: boolean;
 }
 class AccountSettings extends PureComponent<IProps> {
-  static async getInitialProps({ ctx }) {
-    const resp = await utilsService.countriesList();
-    return {
-      countries: resp.data,
-      ...ctx.query
-    };
-  }
-
   state = {
     pwUpdating: false
   };
@@ -64,7 +54,7 @@ class AccountSettings extends PureComponent<IProps> {
   }
 
   render() {
-    const { currentUser, updating, countries } = this.props;
+    const { currentUser, updating } = this.props;
     const { pwUpdating } = this.state;
     const uploadHeaders = {
       authorization: authService.getToken()
@@ -77,7 +67,7 @@ class AccountSettings extends PureComponent<IProps> {
         <Page>
           <Tabs defaultActiveKey="basic" tabPosition="top">
             <Tabs.TabPane tab={<span>Basic info</span>} key="basic">
-              <AccountForm
+              <SubAdminForm
                 onFinish={this.submit.bind(this)}
                 user={currentUser}
                 updating={updating}
@@ -87,7 +77,6 @@ class AccountSettings extends PureComponent<IProps> {
                   onAvatarUploaded: this.onAvatarUploaded.bind(this),
                   avatarUrl: currentUser.avatar
                 }}
-                countries={countries}
               />
             </Tabs.TabPane>
             <Tabs.TabPane tab={<span>Change password</span>} key="password">

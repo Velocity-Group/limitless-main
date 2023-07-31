@@ -20,6 +20,7 @@ import { UserDto } from 'src/modules/user/dtos';
 import { OrderService } from '../services';
 import { OrderDto } from '../dtos';
 import { OrderSearchPayload, OrderUpdatePayload } from '../payloads';
+
 @Injectable()
 @Controller('orders')
 export class OrderController {
@@ -31,7 +32,7 @@ export class OrderController {
   @Get('/search')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RoleGuard)
-  @Roles('admin', 'performer')
+  @Roles('admin', 'performer', 'sub-admin')
   @UsePipes(new ValidationPipe({ transform: true }))
   async orders(
     @Query() req: OrderSearchPayload,

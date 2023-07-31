@@ -25,7 +25,7 @@ export class AdminAvatarController {
 
   @Post('/:id/avatar/upload')
   @HttpCode(HttpStatus.OK)
-  @Roles('admin')
+  @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
   @UseInterceptors(
     FileUploadInterceptor('avatar', 'avatar', {
@@ -33,7 +33,7 @@ export class AdminAvatarController {
       uploadImmediately: true,
       acl: S3ObjectCannelACL.PublicRead,
       server: Storage.S3
-    })
+      })
   )
   async uploadUserAvatar(
     @Param('id') userId: string,

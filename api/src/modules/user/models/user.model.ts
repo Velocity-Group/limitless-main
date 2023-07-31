@@ -20,6 +20,8 @@ export class UserModel extends Document {
 
   status: string;
 
+  pathsAllow?: string[];
+
   balance?: number;
 
   username?: string;
