@@ -15,7 +15,7 @@ const performerSagas = [
     on: getFeeds,
     * worker(data: IReduxAction<any>) {
       try {
-        const resp = data.payload.isHome ? yield feedService.userHomeFeeds(data.payload) : yield feedService.userSearch(data.payload);
+        const resp = data.payload.isHome ? yield feedService.userHomeFeeds(data.payload) : yield feedService.searchPerformerFeeds(data.payload.performerId, data.payload);
         yield put(getFeedsSuccess(resp.data));
       } catch (e) {
         const error = yield Promise.resolve(e);
@@ -27,7 +27,7 @@ const performerSagas = [
     on: moreFeeds,
     * worker(data: IReduxAction<any>) {
       try {
-        const resp = data.payload.isHome ? yield feedService.userHomeFeeds(data.payload) : yield feedService.userSearch(data.payload);
+        const resp = data.payload.isHome ? yield feedService.userHomeFeeds(data.payload) : yield feedService.searchPerformerFeeds(data.payload.performerId, data.payload);
         yield put(moreFeedsSuccess(resp.data));
       } catch (e) {
         const error = yield Promise.resolve(e);

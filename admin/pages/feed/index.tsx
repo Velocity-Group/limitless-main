@@ -9,6 +9,7 @@ import { SearchFilter } from '@components/common/search-filter';
 import { TableListFeed } from '@components/feed/table-list';
 import { BreadcrumbComponent } from '@components/common';
 import { withRouter } from 'next/router';
+import { IFeed } from 'src/interfaces';
 
 interface IProps {
   router: any;
@@ -76,12 +77,12 @@ class Feeds extends PureComponent<IProps> {
     this.search();
   }
 
-  async search(page = 1) {
+  search = async (page = 1) => {
     const {
       filter, limit, sort, sortBy, pagination
     } = this.state;
     try {
-      await this.setState({ searching: true });
+      this.setState({ searching: true });
       const resp = await feedService.search({
         ...filter,
         limit,
@@ -105,7 +106,7 @@ class Feeds extends PureComponent<IProps> {
     }
   }
 
-  async deleteFeed(id: string) {
+  deleteFeed = async (id: string) => {
     const { pagination } = this.state;
     if (!window.confirm('All earnings related to this post will be refunded. Are you sure to remove it?')) {
       return;
@@ -113,6 +114,23 @@ class Feeds extends PureComponent<IProps> {
     try {
       await feedService.delete(id);
       message.success('Post deleted successfully');
+      this.search(pagination.current);
+    } catch (e) {
+      const err = (await Promise.resolve(e)) || {};
+      message.error(err.message || 'An error occurred, please try again!');
+    }
+  }
+
+  onPin = async (feed: IFeed) => {
+    if (!window.confirm(feed.isPinned ? 'Unpin this post from profile?' : 'Pin this post to profile?')) {
+      return;
+    }
+    const {
+      pagination
+    } = this.state;
+    try {
+      await feedService.pinFeedProfile(feed._id);
+      message.success(`${feed.isPinned ? 'Unpinned' : 'Pinned'} post successfully`);
       this.search(pagination.current);
     } catch (e) {
       const err = (await Promise.resolve(e)) || {};
@@ -154,6 +172,7 @@ class Feeds extends PureComponent<IProps> {
               pagination={pagination}
               onChange={this.handleTableChange.bind(this)}
               deleteFeed={this.deleteFeed.bind(this)}
+              onPin={this.onPin}
             />
           </div>
         </Page>

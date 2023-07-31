@@ -5,7 +5,7 @@ import { feedService } from '@services/index';
 import SearchFilter from '@components/common/search-filter';
 import Link from 'next/link';
 import { connect } from 'react-redux';
-import { IUIConfig } from 'src/interfaces/index';
+import { IFeed, IUIConfig } from 'src/interfaces/index';
 import FeedList from '@components/post/table-list';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { injectIntl, IntlShape } from 'react-intl';
@@ -35,7 +35,7 @@ class PostListing extends PureComponent<IProps> {
     this.getData();
   }
 
-  async handleTabChange(data) {
+  handleTabChange = async (data) => {
     const { pagination } = this.state;
     await this.setState({
       pagination: { ...pagination, current: data.current }
@@ -81,6 +81,29 @@ class PostListing extends PureComponent<IProps> {
           })
       );
       this.setState({ loading: false });
+    }
+  }
+
+  onPin = async (feed: IFeed) => {
+    const { intl } = this.props;
+    if (!window.confirm(feed.isPinned
+      ? intl.formatMessage({ id: 'unpinThisPostFromYourProfile', defaultMessage: 'Unpin this post from your profile' })
+      : `${intl.formatMessage({ id: 'pinThisPostToYourProfile', defaultMessage: 'Pin this post to your profile' })}?`)) {
+      return;
+    }
+    try {
+      await feedService.pinFeedProfile(feed._id);
+      message.success(`${feed.isPinned ? 'Unpinned' : 'Pinned'} post successfully`);
+      this.getData();
+    } catch (e) {
+      const err = (await Promise.resolve(e)) || {};
+      message.error(
+        err.message
+          || intl.formatMessage({
+            id: 'errorOccurredPleaseTryAgainLater',
+            defaultMessage: 'Error occurred, please try again later'
+          })
+      );
     }
   }
 
@@ -182,7 +205,7 @@ class PostListing extends PureComponent<IProps> {
           </div>
           <div style={{ marginBottom: 25 }}>
             <SearchFilter
-              onSubmit={this.handleFilter.bind(this)}
+              onSubmit={this.handleFilter}
               type={type}
               searchWithKeyword
               dateRange
@@ -194,8 +217,9 @@ class PostListing extends PureComponent<IProps> {
             total={pagination.total}
             pageSize={pagination.pageSize}
             searching={loading}
-            onChange={this.handleTabChange.bind(this)}
-            onDelete={this.deleteFeed.bind(this)}
+            onChange={this.handleTabChange}
+            onDelete={this.deleteFeed}
+            onPin={this.onPin}
           />
         </div>
       </Layout>

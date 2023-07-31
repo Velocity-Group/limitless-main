@@ -7,16 +7,8 @@ export class FeedService extends APIRequest {
     );
   }
 
-  userSearch(query?: { [key: string]: any }) {
-    return this.get(
-      this.buildUrl('/feeds/users', query)
-    );
-  }
-
-  userHomeFeeds(query?: { [key: string]: any }) {
-    return this.get(
-      this.buildUrl('/feeds/users/home-feeds', query)
-    );
+  pinFeedProfile(id: string) {
+    return this.put(`/feeds/performers/pin/${id}`);
   }
 
   delete(id: string) {

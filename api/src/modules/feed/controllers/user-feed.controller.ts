@@ -46,6 +46,22 @@ export class UserFeedController {
     return DataResponse.ok(data);
   }
 
+  @Get('/:performerId/search')
+  @UseGuards(LoadUser)
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async searchPerFeeds(
+    @Param('performerId') id: string,
+    @Query() query: FeedSearchRequest,
+    @CurrentUser() user: UserDto,
+    @Request() req: any
+  ): Promise<DataResponse<any>> {
+    const auth = req.authUser && { _id: req.authUser.authId, source: req.authUser.source, sourceId: req.authUser.sourceId };
+    const jwToken = req.authUser && this.authService.generateJWT(auth, { expiresIn: 1 * 60 * 60 });
+    const data = await this.feedService.searchPerformerFeeds(id, query, user, jwToken);
+    return DataResponse.ok(data);
+  }
+
   @Get('/home-feeds')
   @UseGuards(LoadUser)
   @HttpCode(HttpStatus.OK)

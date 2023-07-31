@@ -13,6 +13,12 @@ export class FeedService extends APIRequest {
     );
   }
 
+  searchPerformerFeeds(performerId: string, query?: { [key: string]: any }) {
+    return this.get(
+      this.buildUrl(`/feeds/users/${performerId}/search`, query)
+    );
+  }
+
   userHomeFeeds(query?: { [key: string]: any }) {
     return this.get(
       this.buildUrl('/feeds/users/home-feeds', query)
@@ -29,6 +35,10 @@ export class FeedService extends APIRequest {
 
   findOne(id: string, headers?: { [key: string]: string }) {
     return this.get(`/feeds/users/${id}`, headers);
+  }
+
+  pinFeedProfile(id: string) {
+    return this.put(`/feeds/performers/pin/${id}`);
   }
 
   update(id: string, payload: any) {

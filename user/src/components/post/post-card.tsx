@@ -6,7 +6,7 @@ import {
 import {
   HeartOutlined, CommentOutlined, BookOutlined, UnlockOutlined,
   MoreOutlined, DollarOutlined, LockOutlined, FlagOutlined,
-  FileImageOutlined, VideoCameraOutlined
+  FileImageOutlined, VideoCameraOutlined, PushpinOutlined
 } from '@ant-design/icons';
 import { TickIcon } from 'src/icons';
 import Link from 'next/link';
@@ -15,7 +15,9 @@ import ListComments from '@components/comment/list-comments';
 import {
   getComments, moreComment, createComment, deleteComment
 } from '@redux/comment/actions';
-import { formatDate, videoDuration, shortenLargeNumber } from '@lib/index';
+import {
+  formatDate, videoDuration, shortenLargeNumber, getResponseError
+} from '@lib/index';
 import {
   reactionService, feedService, tokenTransactionService, reportService
 } from '@services/index';
@@ -28,7 +30,7 @@ import { VideoPlayer } from '@components/common/video-player';
 import ReportForm from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
-import { IFeed, ISettings, IUser } from 'src/interfaces';
+import { IFeed, IUser } from 'src/interfaces';
 import PurchaseFeedForm from './confirm-purchase';
 import FeedSlider from './post-slider';
 import './index.less';
@@ -37,6 +39,7 @@ import { injectIntl, IntlShape } from 'react-intl';
 
 interface IProps {
   feed: IFeed;
+  // eslint-disable-next-line react/require-default-props
   onDelete?: Function;
   user: IUser;
   updateBalance: Function;
@@ -46,7 +49,6 @@ interface IProps {
   deleteComment: Function;
   commentMapping: any;
   comment: any;
-  settings: ISettings;
   setSubscription: Function;
   intl: IntlShape;
 }
@@ -68,7 +70,8 @@ class FeedCard extends Component<IProps> {
     openTeaser: false,
     polls: [],
     requesting: false,
-    openReportModal: false
+    openReportModal: false,
+    isPinned: false
   }
 
   componentDidMount() {
@@ -80,7 +83,8 @@ class FeedCard extends Component<IProps> {
         isBought: feed.isBought,
         totalLike: feed.totalLike,
         totalComment: feed.totalComment,
-        polls: feed.polls ? feed.polls : []
+        polls: feed.polls ? feed.polls : [],
+        isPinned: !!feed.isPinned
       });
     }
   }
@@ -344,6 +348,17 @@ class FeedCard extends Component<IProps> {
     }
   }
 
+  pinToProfile = async () => {
+    const { feed } = this.props;
+    try {
+      const resp = await feedService.pinFeedProfile(feed._id);
+      this.setState({ isPinned: resp.data.isPinned });
+    } catch (e) {
+      const err = await e;
+      message.error(getResponseError(err));
+    }
+  }
+
   render() {
     const {
       feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment,
@@ -357,12 +372,12 @@ class FeedCard extends Component<IProps> {
     const {
       isOpenComment, isLiked, totalComment, totalLike, isHovered, isBought,
       openTipModal, openPurchaseModal, polls, isBookMarked,
-      openTeaser, openReportModal, requesting
+      openTeaser, openReportModal, requesting, isPinned
     } = this.state;
     let canView = (!feed.isSale && feed.isSubscribed)
-    || (feed.isSale && isBought)
-    || feed.type === 'text'
-    || (feed.isSale && !feed.price);
+      || (feed.isSale && isBought)
+      || feed.type === 'text'
+      || (feed.isSale && !feed.price);
 
     if (!user?._id || (`${user?._id}` !== `${feed?.fromSourceId}` && user?.isPerformer)) {
       canView = false;
@@ -388,13 +403,22 @@ class FeedCard extends Component<IProps> {
           </Link>
         </Menu.Item>
         {user._id === feed.fromSourceId && (
-          <Menu.Item key={`edit_post_${feed._id}`}>
-            <Link href={{ pathname: '/model/my-post/edit', query: { id: feed._id } }}>
-              <a>
-                {intl.formatMessage({ id: 'editPost', defaultMessage: 'Edit Post' })}
+          <>
+            <Menu.Item key={`edit_post_${feed._id}`}>
+              <Link href={{ pathname: '/model/my-post/edit', query: { id: feed._id } }}>
+                <a>
+                  {intl.formatMessage({ id: 'editPost', defaultMessage: 'Edit Post' })}
+                </a>
+              </Link>
+            </Menu.Item>
+            <Menu.Item key={`pin_${feed._id}`}>
+              <a aria-hidden onClick={() => this.pinToProfile()}>
+                {`${isPinned
+                  ? intl.formatMessage({ id: 'unpinFrom', defaultMessage: 'Unpin from' })
+                  : intl.formatMessage({ id: 'pinTo', defaultMessage: 'Pin to' })} ${intl.formatMessage({ id: 'profile', defaultMessage: 'Profile' })}`}
               </a>
-            </Link>
-          </Menu.Item>
+            </Menu.Item>
+          </>
         )}
         <Menu.Item key={`copy_link_${feed._id}`} onClick={() => this.copyLink()}>
           <a>
@@ -433,6 +457,8 @@ class FeedCard extends Component<IProps> {
                   {performer?.name || 'N/A'}
                   {' '}
                   {performer?.verifiedAccount && <TickIcon />}
+                  &nbsp;&nbsp;
+                  {isPinned && <Tooltip title={`Pinned at ${formatDate(feed.pinnedAt)}`}><a title="Unpin this post" aria-hidden onClick={() => this.pinToProfile()}><PushpinOutlined /></a></Tooltip>}
                   &nbsp;&nbsp;
                   {performer?.live > 0 && user?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
                 </h4>
@@ -701,8 +727,7 @@ const mapStates = (state: any) => {
   return {
     user: state.user.current,
     commentMapping,
-    comment,
-    settings: state.settings
+    comment
   };
 };
 

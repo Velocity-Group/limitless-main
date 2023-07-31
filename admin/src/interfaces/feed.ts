@@ -37,6 +37,8 @@ export interface IFeed {
     status: string;
     teaserId: string;
     thumbnailId: string;
+    isPinned: boolean;
+    pinnedAt: Date;
 }
 
 export interface IFeedSearch extends ISearch {

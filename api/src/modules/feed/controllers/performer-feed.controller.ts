@@ -126,4 +126,17 @@ export class PerformerFeedController {
     const data = await this.feedService.createPoll(payload, user);
     return DataResponse.ok(data);
   }
+
+  @Put('/pin/:feedId')
+  @UseGuards(RoleGuard)
+  @Roles('admin', 'performer')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async pinPost(
+    @Param('feedId') id: string,
+    @CurrentUser() user: UserDto
+  ): Promise<DataResponse<any>> {
+    const data = await this.feedService.pinFeedProfile(id, user);
+    return DataResponse.ok(data);
+  }
 }

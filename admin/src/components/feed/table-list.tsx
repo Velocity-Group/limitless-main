@@ -2,10 +2,13 @@ import { PureComponent } from 'react';
 import {
   Table, Tag
 } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+  EditOutlined, DeleteOutlined, PushpinFilled, PushpinOutlined
+} from '@ant-design/icons';
 import { formatDate } from '@lib/date';
 import Link from 'next/link';
 import { DropdownAction } from '@components/common/dropdown-action';
+import { IFeed } from 'src/interfaces';
 
 interface IProps {
     dataSource: [];
@@ -13,11 +16,12 @@ interface IProps {
     loading: boolean;
     pagination: {};
     onChange: Function;
-    deleteFeed?: Function;
+    deleteFeed: Function;
+    onPin: Function;
 }
 export class TableListFeed extends PureComponent<IProps> {
   render() {
-    const { deleteFeed } = this.props;
+    const { deleteFeed, onPin } = this.props;
     const columns = [
       {
         title: 'Model',
@@ -79,11 +83,21 @@ export class TableListFeed extends PureComponent<IProps> {
         }
       },
       {
+        title: 'Pinned',
+        dataIndex: 'isPinned',
+        render(isPinned: boolean) {
+          if (!isPinned) {
+            return <Tag color="red">N</Tag>;
+          }
+          return <Tag color="green">Y</Tag>;
+        }
+      },
+      {
         title: 'Status',
         dataIndex: 'status',
         render(status) {
           if (status === 'inactive') {
-            return <Tag color="red">Deleted</Tag>;
+            return <Tag color="red">Inactive</Tag>;
           }
           return <Tag color="green">Active</Tag>;
         }
@@ -99,7 +113,7 @@ export class TableListFeed extends PureComponent<IProps> {
       {
         title: 'Action',
         dataIndex: '_id',
-        render: (id: string) => (
+        render: (id: string, record: IFeed) => (
           <DropdownAction
             menuOptions={[
               {
@@ -120,6 +134,18 @@ export class TableListFeed extends PureComponent<IProps> {
                     </a>
                   </Link>
                 )
+              },
+              {
+                key: 'delete',
+                name: 'Delete',
+                children: (
+                  <span>
+                    {record.isPinned ? <PushpinFilled /> : <PushpinOutlined />}
+                    {' '}
+                    {record.isPinned ? 'Unpin from Profile' : 'Pin to Profile'}
+                  </span>
+                ),
+                onClick: () => onPin(record)
               },
               {
                 key: 'delete',

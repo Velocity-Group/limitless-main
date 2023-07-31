@@ -18,7 +18,7 @@ import { PurchaseItemType, PURCHASE_ITEM_STATUS, PURCHASE_ITEM_TARTGET_TYPE } fr
 import { REF_TYPE } from 'src/modules/file/constants';
 import { TokenTransactionSearchService, TokenTransactionService } from 'src/modules/token-transaction/services';
 import { UserDto } from 'src/modules/user/dtos';
-import { isObjectId } from 'src/kernel/helpers/string.helper';
+import { isObjectId, toObjectId } from 'src/kernel/helpers/string.helper';
 import * as moment from 'moment';
 import { Storage } from 'src/modules/storage/contants';
 import { FollowService } from 'src/modules/follow/services/follow.service';
@@ -472,6 +472,65 @@ export class FeedService {
     };
   }
 
+  public async searchPerformerFeeds(performerId: string, req: FeedSearchRequest, user: UserDto, jwToken: string) {
+    try {
+      const query = {
+        fromSource: FEED_SOURCE.PERFORMER,
+        fromSourceId: toObjectId(performerId),
+        status: STATUS.ACTIVE
+      } as any;
+      // to move pinned posts to first
+      const pinFeeds = await this.feedModel.find({ ...query, isPinned: true })
+        .sort({
+          pinnedAt: -1
+        }).lean();
+      const excludedIds = pinFeeds.map((f) => f._id);
+      query._id = { $nin: excludedIds };
+
+      if (req.q) {
+        const regexp = new RegExp(
+          req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+          'i'
+        );
+        const searchValue = { $regex: regexp };
+        query.$or = [
+          { text: searchValue }
+        ];
+      }
+      if (req.orientation) {
+        query.orientation = req.orientation;
+      }
+      if (req.type) {
+        query.type = req.type;
+      }
+      if (req.fromDate && req.toDate) {
+        query.createdAt = {
+          $gte: moment(req.fromDate).startOf('day').toDate(),
+          $lte: moment(req.toDate).endOf('day').toDate()
+        };
+      }
+      const sort = {
+        updatedAt: -1
+      };
+      const [data, total] = await Promise.all([
+        this.feedModel
+          .find(query)
+          .lean()
+          .sort(sort)
+          .limit(parseInt(req.limit as string, 10))
+          .skip(parseInt(req.offset as string, 10)),
+        this.feedModel.countDocuments(query)
+      ]);
+      // populate video, photo, etc...
+      return {
+        data: await this.populateFeedData([...pinFeeds, ...data], user, jwToken),
+        total
+      };
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   public async updateFeed(id: string, user: UserDto, payload: FeedCreatePayload): Promise<any> {
     const feed = await this.feedModel.findById(id);
     if (!feed || ((!user.roles || !user.roles.includes('admin')) && feed.fromSourceId.toString() !== user._id.toString())) throw new EntityNotFoundException();
@@ -630,5 +689,20 @@ export class FeedService {
     );
 
     return { voted: true };
+  }
+
+  public async pinFeedProfile(feedId: string, user: UserDto) {
+    const feed = await this.feedModel.findById(feedId);
+    if (!feed) throw new EntityNotFoundException();
+    if ((!user.roles || !user.roles.includes('admin')) && feed.fromSourceId.toString() !== user._id.toString()) {
+      throw new ForbiddenException();
+    }
+    feed.isPinned = !feed.isPinned;
+    feed.pinnedAt = feed.pinnedAt ? null : new Date();
+    await feed.save();
+    return {
+      isPinned: feed.isPinned,
+      pinnedAt: feed.pinnedAt
+    };
   }
 }

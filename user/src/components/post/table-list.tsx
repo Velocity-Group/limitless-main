@@ -3,7 +3,8 @@ import {
   Table, Tag, Tooltip, Button
 } from 'antd';
 import {
-  AudioOutlined, FileImageOutlined, VideoCameraOutlined, DeleteOutlined, EditOutlined
+  AudioOutlined, FileImageOutlined, VideoCameraOutlined, DeleteOutlined,
+  EditOutlined, PushpinOutlined, PushpinFilled
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { IFeed } from 'src/interfaces';
@@ -17,6 +18,7 @@ interface IProps {
   pageSize: number;
   onChange: Function;
   onDelete: Function;
+  onPin: Function;
 }
 
 const FeedList = ({
@@ -25,7 +27,8 @@ const FeedList = ({
   total,
   pageSize,
   onChange,
-  onDelete
+  onDelete,
+  onPin
 }: IProps) => {
   const intl = useIntl();
 
@@ -90,6 +93,20 @@ const FeedList = ({
       )
     },
     {
+      title: intl.formatMessage({ id: 'pinned', defaultMessage: 'Pinned' }),
+      dataIndex: 'isPinned',
+      key: 'isPinned',
+      render: (isPinned: boolean) => {
+        switch (isPinned) {
+          case true:
+            return <Tag color="blue">Y</Tag>;
+          case false:
+            return <Tag color="red">N</Tag>;
+          default: return <Tag color="blue">{isPinned}</Tag>;
+        }
+      }
+    },
+    {
       title: intl.formatMessage({ id: 'status', defaultMessage: 'Status' }),
       dataIndex: 'status',
       key: 'status',
@@ -113,7 +130,10 @@ const FeedList = ({
     {
       title: intl.formatMessage({ id: 'action', defaultMessage: 'Action' }),
       key: 'details',
-      render: (record) => [
+      render: (record: IFeed) => [
+        <Button className="secondary-custom" key="pin" onClick={() => onPin(record)}>
+          {record.isPinned ? <PushpinFilled /> : <PushpinOutlined />}
+        </Button>,
         <Button className="info" key="edit">
           <Link
             key="edit"
