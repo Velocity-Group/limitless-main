@@ -86,6 +86,9 @@ export interface IPerformer {
   };
   isPerformer: boolean;
   isFollowed: boolean;
+  defaultMessageText: string;
+  defaultMessagePhotoId: string;
+  messagePhoto: any;
 }
 
 export interface IBanking {

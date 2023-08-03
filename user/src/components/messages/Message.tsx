@@ -45,7 +45,7 @@ export default function Message(props: IProps) {
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.user.current);
   const [bought, setBought] = useState(isSale && isBought);
-  const images = files ? files.filter((f) => f.type === 'message-photo') : [];
+  const images = files ? files.filter((f) => ['message-photo', 'welcome-message'].includes(f.type)) : [];
   const localImageFiles = data?.localFiles ? data.localFiles : [];
   const video = files && files.find((f) => f.type === 'message-video');
   const teaser = files && files.find((f) => f.type === 'message-teaser');
@@ -211,6 +211,31 @@ export default function Message(props: IProps) {
             )}
           </div>
           {isMine && <img alt="" src={currentUser?.avatar || '/static/no-avatar.png'} className="avatar" />}
+        </div>
+      )}
+      {type === 'notify' && (
+        <div className="bubble-container">
+          {!isMine && <Avatar alt="" className="avatar" src={recipient?.avatar || '/static/no-avatar.png'} />}
+          <div className="bubble media" title={friendlyTimestamp}>
+            <div className="media-viewer">
+              {images && <ImagesViewer thumbSpacing={6} photos={images} />}
+              {/* eslint-disable-next-line react/no-danger */}
+              <div className="txt" dangerouslySetInnerHTML={{ __html: replaceURLs(text) }} />
+            </div>
+            {isMine && !data.isDeleted && (
+              <Dropdown
+                className="remove-icon"
+                overlay={menu}
+                placement="bottomCenter"
+                trigger={['click']}
+              >
+                <a>
+                  <EllipsisOutlined style={{ transform: 'rotate(90deg)' }} />
+                </a>
+              </Dropdown>
+            )}
+          </div>
+          {isMine && <Avatar alt="" src={currentUser?.avatar || '/static/no-avatar.png'} className="avatar" />}
         </div>
       )}
       {type === 'text' && (

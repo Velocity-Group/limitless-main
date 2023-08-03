@@ -12,3 +12,4 @@ export * from './scroll-list';
 export * from './grid-card';
 export * from './tip-form';
 export * from './paypalForm';
+export * from './welcome-message-form';

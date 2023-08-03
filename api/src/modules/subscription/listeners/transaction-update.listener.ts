@@ -9,6 +9,7 @@ import * as moment from 'moment';
 import { PaymentDto } from 'src/modules/payment/dtos';
 import { PerformerService } from 'src/modules/performer/services';
 import { UserService } from 'src/modules/user/services';
+import { NOTIFY_SUBSCRIBER_MESSAGE_CHANNEL } from 'src/modules/message/constants';
 import { SubscriptionModel } from '../models/subscription.model';
 import { SUBSCRIPTION_MODEL_PROVIDER } from '../providers/subscription.provider';
 import { SubscriptionDto } from '../dtos/subscription.dto';
@@ -53,6 +54,20 @@ export class TransactionSubscriptionListener {
     });
     const performer = await this.performerService.findById(transaction.performerId);
     if (!performer) return;
+    await this.queueEventService.publish({
+      channel: NOTIFY_SUBSCRIBER_MESSAGE_CHANNEL,
+      eventName: EVENT.CREATED,
+      data: {
+        sender: {
+          source: 'performer',
+          sourceId: performer._id
+        },
+        recipient: {
+          source: 'user',
+          sourceId: transaction.sourceId
+        }
+      }
+    });
     // do not pass subscriptionId to existed subscription because Stripe already have subscriptionId
     const subscriptionId = transaction?.paymentResponseInfo?.subscriptionId || transaction?.paymentResponseInfo?.subscription_id;
     // eslint-disable-next-line no-nested-ternary

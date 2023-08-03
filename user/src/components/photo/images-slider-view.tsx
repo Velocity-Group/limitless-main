@@ -111,8 +111,8 @@ export const ImagesViewer = ({ photos, thumbSpacing = 12, localImageFiles }: IPr
         brokenElement={<p style={{ color: '#fff' }}>Oops! Photo is broken</p>}
       >
         <div ref={sliderRef} className="keen-slider photos">
-          {localImageFiles.length
-            ? localImageFiles.map((img) => (
+          {localImageFiles?.length
+            ? localImageFiles?.map((img) => (
               <PhotoView
                 key={img.uid}
                 src={img.thumbnail}
@@ -142,11 +142,11 @@ export const ImagesViewer = ({ photos, thumbSpacing = 12, localImageFiles }: IPr
             ))}
         </div>
       </PhotoProvider>
-      {localImageFiles.length && localImageFiles.length > 1
+      {localImageFiles?.length && localImageFiles?.length > 1
         ? (
           <div className="padding-thumbnails">
             <div ref={thumbnailRef} className="keen-slider thumbnails">
-              {localImageFiles.map((img) => (
+              {localImageFiles?.map((img) => (
                 <img
                   className="keen-slider__slide"
                   key={img.uid}

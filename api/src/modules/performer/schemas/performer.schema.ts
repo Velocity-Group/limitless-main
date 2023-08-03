@@ -268,7 +268,9 @@ const performerSchema = new mongoose.Schema({
   commissionPercentage: {
     type: Number,
     default: 0.1
-  }
+  },
+  defaultMessageText: String,
+  defaultMessagePhotoId: mongoose.Schema.Types.ObjectId
 });
 
 performerSchema.pre<any>('updateOne', async function preUpdateOne(next) {

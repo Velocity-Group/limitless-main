@@ -149,4 +149,8 @@ export class PerformerModel extends Document {
   balance: number;
 
   commissionPercentage: number;
+
+  defaultMessageText: string;
+
+  defaultMessagePhotoId: ObjectId;
 }

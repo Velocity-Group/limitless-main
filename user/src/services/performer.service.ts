@@ -39,6 +39,11 @@ export class PerformerService extends APIRequest {
     return `${config.NEXT_PUBLIC_API_ENDPOINT}/performers/documents/upload`;
   }
 
+  getMessageUploadUrl() {
+    const config = getGlobalConfig();
+    return `${config.NEXT_PUBLIC_API_ENDPOINT}/performers/message/welcome-photo`;
+  }
+
   updateMe(id: string, payload: any) {
     return this.put(`/performers/${id}`, payload);
   }

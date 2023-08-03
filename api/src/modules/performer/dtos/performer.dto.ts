@@ -75,6 +75,9 @@ export interface IPerformerResponse {
   stripeAccount?: any;
   isFollowed?: boolean;
   commissionPercentage?: number;
+  defaultMessageText?: string;
+  defaultMessagePhotoId?: ObjectId;
+  messagePhoto?: any;
 }
 
 export class PerformerDto {
@@ -237,6 +240,12 @@ export class PerformerDto {
 
   commissionPercentage?: number;
 
+  defaultMessageText?: string;
+
+  defaultMessagePhotoId?: ObjectId;
+
+  messagePhoto?: any;
+
   constructor(data?: Partial<any>) {
     Object.assign(
       this,
@@ -313,7 +322,10 @@ export class PerformerDto {
         'bodyType',
         'balance',
         'isFollowed',
-        'commissionPercentage'
+        'commissionPercentage',
+        'defaultMessageText',
+        'defaultMessagePhotoId',
+        'messagePhoto'
       ])
     );
   }
@@ -385,6 +397,9 @@ export class PerformerDto {
       stripeAccount: this.stripeAccount,
       welcomeVideoId: this.welcomeVideoId,
       paypalSetting: this.paypalSetting,
+      defaultMessageText: this.defaultMessageText,
+      defaultMessagePhotoId: this.defaultMessagePhotoId,
+      messagePhoto: this.messagePhoto,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

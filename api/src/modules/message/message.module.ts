@@ -7,7 +7,7 @@ import { PerformerModule } from '../performer/performer.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { conversationProviders, messageProviders, notificationMessageProviders } from './providers';
 import { SocketModule } from '../socket/socket.module';
-import { MessageListener, DeleteUserMessageListener } from './listeners';
+import { MessageListener, DeleteUserMessageListener, NotifySubscriberMessageListener } from './listeners';
 import { ConversationService, MessageService, NotificationMessageService } from './services';
 import { ConversationController } from './controllers/conversation.controller';
 import { MessageController } from './controllers/message.controller';
@@ -43,7 +43,8 @@ import { TokenTransactionModule } from '../token-transaction/token-transaction.m
     MessageService,
     NotificationMessageService,
     MessageListener,
-    DeleteUserMessageListener
+    DeleteUserMessageListener,
+    NotifySubscriberMessageListener
   ],
   controllers: [ConversationController, MessageController],
   exports: [ConversationService, MessageService]

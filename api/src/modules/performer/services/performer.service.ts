@@ -234,15 +234,16 @@ export class PerformerService {
       throw new EntityNotFoundException();
     }
     const [
-      documentVerification, idVerification, welcomeVideo
+      documentVerification, idVerification, welcomeVideo, messagePhoto
     ] = await Promise.all([
       performer.documentVerificationId && this.fileService.findById(performer.documentVerificationId),
       performer.idVerificationId && this.fileService.findById(performer.idVerificationId),
-      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId)
+      performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId),
+      performer.defaultMessagePhotoId && this.fileService.findById(performer.defaultMessagePhotoId)
     ]);
-    const [paypalSetting, stripeAccount, blockCountries, bankingInformation, ccbillSetting] = await Promise.all([
+    const [paypalSetting, blockCountries, bankingInformation, ccbillSetting] = await Promise.all([
       this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'paypal' }),
-      this.stripeService.getConnectAccount(performer._id),
+      // this.stripeService.getConnectAccount(performer._id),
       this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id }),
       this.getBankInfo(performer._id),
       this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'ccbill' })
@@ -276,8 +277,19 @@ export class PerformerService {
         mimeType: documentVerification.mimeType
       };
     }
+    if (messagePhoto) {
+      let fileUrl = messagePhoto.getUrl(true);
+      if (messagePhoto.server !== Storage.S3) {
+        fileUrl = `${fileUrl}?documentId=${messagePhoto._id}&token=${jwToken}`;
+      }
+      dto.messagePhoto = {
+        _id: messagePhoto._id,
+        url: fileUrl,
+        mimeType: messagePhoto.mimeType
+      };
+    }
     dto.paypalSetting = paypalSetting;
-    dto.stripeAccount = stripeAccount;
+    // dto.stripeAccount = stripeAccount;
     dto.blockCountries = blockCountries;
     dto.bankingInformation = bankingInformation;
     dto.ccbillSetting = ccbillSetting;
@@ -623,6 +635,26 @@ export class PerformerService {
     }
     if (type === 'documentVerificationId' && performer.documentVerificationId && `${performer.documentVerificationId}` !== `${file._id}`) {
       await this.fileService.remove(performer.documentVerificationId);
+    }
+    return file;
+  }
+
+  public async updateMessagePhoto(performerId: string | ObjectId, file: FileDto) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) throw new EntityNotFoundException();
+    await this.performerModel.updateOne(
+      { _id: performerId },
+      {
+        defaultMessagePhotoId: file._id
+      }
+    );
+    await this.fileService.addRef(file._id, {
+      itemId: toObjectId(performerId),
+      itemType: REF_TYPE.PERFORMER
+    });
+
+    if (performer.defaultMessagePhotoId && `${performer.defaultMessagePhotoId}` !== `${file._id}`) {
+      await this.fileService.remove(performer.defaultMessagePhotoId);
     }
     return file;
   }

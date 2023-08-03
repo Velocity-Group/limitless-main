@@ -3,12 +3,14 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import {
-  PageableData, EntityNotFoundException
+  PageableData, EntityNotFoundException, QueueEventService
 } from 'src/kernel';
 import { uniq } from 'lodash';
 import { PerformerDto } from 'src/modules/performer/dtos';
 import { UserDto } from 'src/modules/user/dtos';
 import { UserService } from 'src/modules/user/services';
+import { NOTIFY_SUBSCRIBER_MESSAGE_CHANNEL } from 'src/modules/message/constants';
+import { EVENT } from 'src/kernel/constants';
 import { FollowModel } from '../models/follow.model';
 import { FOLLOW_MODEL_PROVIDER } from '../providers';
 import {
@@ -25,8 +27,8 @@ export class FollowService {
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     @Inject(FOLLOW_MODEL_PROVIDER)
-    private readonly followModel: Model<FollowModel>
-
+    private readonly followModel: Model<FollowModel>,
+    private readonly queueEventService: QueueEventService
   ) { }
 
   public async countOne(query) {
@@ -62,6 +64,21 @@ export class FollowService {
       this.performerService.updateStats(followingId, { 'stats.followers': 1 }),
       this.userService.updateStats(user._id, { 'stats.following': 1 })
     ]);
+    // fire event to message to user
+    await this.queueEventService.publish({
+      channel: NOTIFY_SUBSCRIBER_MESSAGE_CHANNEL,
+      eventName: EVENT.CREATED,
+      data: {
+        sender: {
+          source: 'performer',
+          sourceId: follow.followingId
+        },
+        recipient: {
+          source: 'user',
+          sourceId: user._id
+        }
+      }
+    });
     return new FollowDto(follow);
   }
 

@@ -21,6 +21,7 @@ import PerformerAccountForm from '@components/performer/accountForm';
 import PerformerSubscriptionForm from '@components/performer/subscriptionForm';
 import '../../user/index.less';
 import { injectIntl, IntlShape } from 'react-intl';
+import { PerformerWelcomeMessageForm } from '@components/performer';
 
 interface IProps {
   currentUser: IPerformer;
@@ -81,12 +82,12 @@ class AccountSettings extends PureComponent<IProps> {
     handleUpdateCover(data.response.data.url);
   }
 
-  coundown() {
+  coundown = () => {
     const { countTime } = this.state;
     this.setState({ countTime: countTime - 1 });
   }
 
-  async submit(data: any) {
+  submit = (data: any) => {
     const { currentUser, updatePerformer: handleUpdatePerformer } = this.props;
     handleUpdatePerformer({
       ...currentUser,
@@ -170,18 +171,21 @@ class AccountSettings extends PureComponent<IProps> {
               key="subscription"
             >
               <PerformerSubscriptionForm
-                onFinish={this.submit.bind(this)}
+                onFinish={this.submit}
                 updating={updating}
                 user={currentUser}
                 settings={settings}
               />
             </Tabs.TabPane>
-            {/* <Tabs.TabPane tab={<span>Change Password</span>} key="password">
-              <UpdatePaswordForm
-                onFinish={this.updatePassword.bind(this)}
-                updating={pwUpdating}
+            <Tabs.TabPane
+              tab={<span>Welcome Message</span>}
+              key="message"
+            >
+              <PerformerWelcomeMessageForm
+                user={currentUser}
+                onFinish={this.submit}
               />
-            </Tabs.TabPane> */}
+            </Tabs.TabPane>
           </Tabs>
         </div>
       </Layout>

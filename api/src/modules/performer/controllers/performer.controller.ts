@@ -101,6 +101,7 @@ export class PerformerController {
   @Put('/:id')
   @UseGuards(RoleGuard)
   @Roles('performer')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @HttpCode(HttpStatus.OK)
   async updateUser(
     @Body() payload: SelfUpdatePayload,
@@ -165,6 +166,30 @@ export class PerformerController {
     }
 
     return DataResponse.ok(performer.toPublicDetailsResponse());
+  }
+
+  @Post('/message/welcome-photo')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RoleGuard)
+  @Roles('performer')
+  @UseInterceptors(
+    FileUploadInterceptor('welcome-message', 'welcome-message', {
+      destination: getConfig('file').imageDir,
+      uploadImmediately: true,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
+    })
+  )
+  async uploadPerWelcomeMessage(
+    @FileUploaded() file: FileDto,
+    @CurrentUser() performer: UserDto
+  ): Promise<any> {
+    // TODO - define url for perfomer id if have?
+    await this.performerService.updateMessagePhoto(performer._id, file);
+    return DataResponse.ok({
+      ...file,
+      url: file.getUrl()
+    });
   }
 
   @Post('/documents/upload/:type')

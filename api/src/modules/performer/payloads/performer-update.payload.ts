@@ -74,22 +74,22 @@ export class PerformerUpdatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  coverId?: string;
+  coverId: string;
 
   @ApiProperty()
   @IsBoolean()
   @IsOptional()
-  verifiedEmail?: boolean;
+  verifiedEmail: boolean;
 
   @ApiProperty()
   @IsBoolean()
   @IsOptional()
-  verifiedAccount?: boolean;
+  verifiedAccount: boolean;
 
   @ApiProperty()
   @IsBoolean()
   @IsOptional()
-  verifiedDocument?: boolean;
+  verifiedDocument: boolean;
 
   @ApiProperty()
   @IsString()
@@ -162,22 +162,22 @@ export class PerformerUpdatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  hair?: string;
+  hair: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  pubicHair?: string;
+  pubicHair: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  butt?: string;
+  butt: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  ethnicity?: string;
+  ethnicity: string;
 
   @ApiProperty()
   @IsString()
@@ -309,11 +309,6 @@ export class SelfUpdatePayload {
   languages: string[];
 
   @ApiProperty()
-  @IsString()
-  @IsOptional()
-  studioId: string;
-
-  @ApiProperty()
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -332,22 +327,22 @@ export class SelfUpdatePayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  hair?: string;
+  hair: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  pubicHair?: string;
+  pubicHair: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  butt?: string;
+  butt: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  ethnicity?: string;
+  ethnicity: string;
 
   @ApiProperty()
   @IsString()
@@ -401,11 +396,7 @@ export class SelfUpdatePayload {
 
   @ApiProperty()
   @IsOptional()
-  bankingInfomation?: any;
-
-  @ApiProperty()
-  @IsOptional()
-  activateWelcomeVideo?: boolean;
+  activateWelcomeVideo: boolean;
 
   @ApiProperty()
   @IsString()
@@ -420,5 +411,10 @@ export class SelfUpdatePayload {
   @ApiProperty()
   @IsDateString()
   @IsOptional()
-  dateOfBirth: string
+  dateOfBirth: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  defaultMessageText: string;
 }

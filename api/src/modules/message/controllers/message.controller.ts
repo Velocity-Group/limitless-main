@@ -62,9 +62,9 @@ export class MessageController {
       'message-photo',
       'file',
       {
-        destination: getConfig('file').messageDir,
-        acl: S3ObjectCannelACL.PublicRead,
-        server: Storage.S3
+      destination: getConfig('file').messageDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
       }
     )
   )
@@ -89,9 +89,9 @@ export class MessageController {
       'message-photo',
       'file',
       {
-        destination: getConfig('file').messageProtectedDir,
-        acl: S3ObjectCannelACL.AuthenticatedRead,
-        server: Storage.S3
+      destination: getConfig('file').messageProtectedDir,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
       }
     )
   )
@@ -116,9 +116,9 @@ export class MessageController {
       'message-video',
       'file',
       {
-        destination: getConfig('file').messageProtectedDir,
-        acl: S3ObjectCannelACL.AuthenticatedRead,
-        server: Storage.S3
+      destination: getConfig('file').messageProtectedDir,
+      acl: S3ObjectCannelACL.AuthenticatedRead,
+      server: Storage.S3
       }
     )
   )
@@ -143,9 +143,9 @@ export class MessageController {
       'message-teaser',
       'file',
       {
-        destination: getConfig('file').messageDir,
-        acl: S3ObjectCannelACL.PublicRead,
-        server: Storage.S3
+      destination: getConfig('file').messageDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
       }
     )
   )
@@ -169,10 +169,10 @@ export class MessageController {
       'message-thumbnail',
       'file',
       {
-        destination: getConfig('file').messageDir,
-        acl: S3ObjectCannelACL.PublicRead,
-        server: Storage.S3,
-        uploadImmediately: true
+      destination: getConfig('file').messageDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3,
+      uploadImmediately: true
       }
     )
   )
@@ -197,10 +197,10 @@ export class MessageController {
       'message-audio',
       'file',
       {
-        destination: getConfig('file').messageDir,
-        acl: S3ObjectCannelACL.PublicRead,
-        server: Storage.S3,
-        uploadImmediately: true
+      destination: getConfig('file').messageDir,
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3,
+      uploadImmediately: true
       }
     )
   )
@@ -233,21 +233,21 @@ export class MessageController {
     // TODO - check and support multiple files!!!
     MultiFileUploadInterceptor([
       {
-        type: 'message-photo',
-        fieldName: 'message-photo',
-        options: {
-          destination: getConfig('file').imageDir,
-          uploadImmediately: true,
-          generateThumbnail: true,
-          thumbnailSize: {
-            width: 250,
-            height: 250
-          },
-          acl: S3ObjectCannelACL.PublicRead,
-          server: Storage.S3
-        }
+      type: 'message-photo',
+      fieldName: 'message-photo',
+      options: {
+      destination: getConfig('file').imageDir,
+      uploadImmediately: true,
+      generateThumbnail: true,
+      thumbnailSize: {
+      width: 250,
+      height: 250
+      },
+      acl: S3ObjectCannelACL.PublicRead,
+      server: Storage.S3
       }
-    ])
+      }
+      ])
   )
   // async createPrivateFileMessage(
   //   @FilesUploaded() files: Record<string, any>,
