@@ -299,11 +299,6 @@ export class PerformerRegisterPayload {
   verifiedEmail?: boolean;
 
   @ApiProperty()
-  @IsBoolean()
-  @IsOptional()
-  verifiedAccount?: boolean;
-
-  @ApiProperty()
   @IsString()
   @IsOptional()
   idVerificationId?: ObjectId;
@@ -326,10 +321,5 @@ export class PerformerRegisterPayload {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  invitationId: string | ObjectId;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  referralId: string | ObjectId;
+  rel: string;
 }

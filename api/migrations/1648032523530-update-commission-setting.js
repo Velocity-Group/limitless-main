@@ -21,7 +21,7 @@ module.exports.up = async function up(next) {
   // eslint-disable-next-line no-console
   console.log('Update commission settings');
 
-  await DB.collection(COLLECTION.SETTING).deleteMany({ group: 'commission' });
+  await DB.collection(COLLECTION.SETTING).deleteMany({ group: 'commission', key: { $nin: ['performerReferralCommission', 'userReferralCommission'] } });
   // eslint-disable-next-line no-restricted-syntax
   for (const setting of settings) {
     // eslint-disable-next-line no-await-in-loop

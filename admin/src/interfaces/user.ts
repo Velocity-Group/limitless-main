@@ -13,6 +13,8 @@ export interface IUser {
   roles: string[];
   pathsAllow: string[];
   verifiedEmail?: boolean;
+  paypalSetting: any;
+  bankingInformation: any;
 }
 
 export interface IUserSearch extends ISearch {

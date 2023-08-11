@@ -7,7 +7,9 @@ import { IUser, ICountry } from 'src/interfaces';
 import { authService, userService } from '@services/index';
 import { UpdatePaswordForm } from '@components/user/update-password-form';
 import Loader from '@components/common/base/loader';
-import { utilsService } from '@services/utils.service';
+import { utilsService, payoutRequestService } from 'src/services';
+import { BankingForm } from '@components/performer/BankingForm';
+import { PerformerPaypalForm } from '@components/performer/paypalForm';
 
 interface IProps {
   id: string;
@@ -77,6 +79,19 @@ class UserUpdate extends PureComponent<IProps> {
     }
   }
 
+  async updatePayoutMethodSetting(data: any, key = 'banking') {
+    const { id } = this.props;
+    try {
+      this.setState({ updating: true });
+      await payoutRequestService.updatePayoutMethod(key, { ...data, sourceId: id, source: 'performer' });
+      message.success('Updated successfully!');
+    } catch (error) {
+      message.error('An error occurred, please try again!');
+    } finally {
+      this.setState({ updating: false });
+    }
+  }
+
   render() {
     const {
       pwUpdating, user, updating, fetching
@@ -107,6 +122,21 @@ class UserUpdate extends PureComponent<IProps> {
                     avatarUrl: user?.avatar
                   }}
                   countries={countries}
+                />
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={<span>Banking</span>} key="banking">
+                <BankingForm
+                  submiting={updating}
+                  onFinish={this.updatePayoutMethodSetting.bind(this)}
+                  bankingInformation={user.bankingInformation || null}
+                  countries={countries}
+                />
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={<span>Paypal</span>} key="paypal">
+                <PerformerPaypalForm
+                  updating={updating}
+                  onFinish={this.updatePayoutMethodSetting.bind(this)}
+                  paypalSetting={user?.paypalSetting}
                 />
               </Tabs.TabPane>
               <Tabs.TabPane tab={<span>Change password</span>} key="password">

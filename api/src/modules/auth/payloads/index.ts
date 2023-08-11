@@ -6,3 +6,4 @@ export * from './performer-register.payload';
 export * from './login-by-username.payload';
 export * from './social-login.payload';
 export * from './veriff-verification.payload';
+export * from './referral.payload';

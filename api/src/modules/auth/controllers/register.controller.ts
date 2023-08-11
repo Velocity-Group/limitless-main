@@ -18,14 +18,15 @@ import { STATUS_ACTIVE, ROLE_USER } from 'src/modules/user/constants';
 import { Response } from 'express';
 import { AuthCreateDto } from '../dtos';
 import { UserRegisterPayload, EmailVerificationPayload } from '../payloads';
-import { AuthService } from '../services';
+import { AuthService, ReferralService } from '../services';
 
 @Controller('auth')
 export class RegisterController {
   constructor(
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly referralService: ReferralService
   ) {}
 
   @Post('users/register')
@@ -53,6 +54,14 @@ export class RegisterController {
         key: req.username
       }))
     ]);
+    // track referral
+    if (req.rel) {
+      await this.referralService.newReferral({
+        registerSource: 'user',
+        registerId: user._id,
+        code: req.rel
+      });
+    }
     // if require for email verification, we will send verification email
     user.email && await this.authService.sendVerificationEmail(user);
     return DataResponse.ok({

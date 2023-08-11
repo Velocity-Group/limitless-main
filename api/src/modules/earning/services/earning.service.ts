@@ -5,6 +5,7 @@ import { toObjectId } from 'src/kernel/helpers/string.helper';
 import { UserService } from 'src/modules/user/services';
 import { UserDto } from 'src/modules/user/dtos';
 import * as moment from 'moment';
+import { PURCHASE_ITEM_STATUS } from 'src/modules/token-transaction/constants';
 import { EarningModel } from '../models/earning.model';
 import { EARNING_MODEL_PROVIDER } from '../providers/earning.provider';
 import {
@@ -223,7 +224,10 @@ export class EarningService {
       ]),
       this.earningModel.aggregate([
         {
-          $match: query
+          $match: {
+            ...query,
+            transactionStatus: { $ne: PURCHASE_ITEM_STATUS.REFUNDED }
+          }
         },
         {
           $group: {

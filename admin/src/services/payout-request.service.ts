@@ -12,7 +12,7 @@ export class PayoutRequestService extends APIRequest {
   }
 
   calculate(payload: any) {
-    return this.post('/payout-requests/performer/calculate', payload);
+    return this.post('/payout-requests/admin/calculate', payload);
   }
 
   payout(id: string) {
@@ -25,6 +25,10 @@ export class PayoutRequestService extends APIRequest {
 
   delete(id: string) {
     return this.del(`/payout-requests/admin/${id}`);
+  }
+
+  updatePayoutMethod(key: string, payload: any) {
+    return this.post(`/payout-methods/admin/${key}`, payload);
   }
 }
 

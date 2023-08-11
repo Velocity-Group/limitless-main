@@ -55,4 +55,9 @@ export class UserRegisterPayload {
   @IsString()
   @IsOptional()
   country: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  rel: string;
 }

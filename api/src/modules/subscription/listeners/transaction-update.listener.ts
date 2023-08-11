@@ -42,6 +42,7 @@ export class TransactionSubscriptionListener {
   ): Promise<SubscriptionDto> {
     if (![EVENT.CREATED, EVENT.DELETED].includes(event.eventName)) return;
     const transaction = event.data as PaymentDto;
+    if (transaction.status !== 'success') return;
     if (![
       PAYMENT_TYPE.MONTHLY_SUBSCRIPTION,
       PAYMENT_TYPE.YEARLY_SUBSCRIPTION,

@@ -8,7 +8,7 @@ export const STATUSES = {
 
 export const SOURCE_TYPE = {
   PERFORMER: 'performer',
-  AGENT: 'agent'
+  USER: 'user'
 };
 
 export const PAYOUT_REQUEST_CHANEL = 'PAYOUT_REQUEST_CHANEL';

@@ -22,3 +22,4 @@ export * from './setting';
 export * from './message';
 export * from './comment';
 export * from './address';
+export * from './referral';

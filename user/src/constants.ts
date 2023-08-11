@@ -66,7 +66,9 @@ export const SETTING_KEYS = {
   VERIFF_BASE_URL: 'veriffBaseUrl',
   COINBASE_ENABLE: 'coinbaseEnable',
   STRIPE_ENABLE: 'stripeEnable',
-  CCBILL_ENABLE: 'ccbillEnable'
+  CCBILL_ENABLE: 'ccbillEnable',
+  PERFORMER_REFERRAL_COMMISSION: 'performerReferralCommission',
+  USER_REFERRAL_COMMISSION: 'userReferralCommission'
 };
 
 export const MENU_SECTION = {

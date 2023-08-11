@@ -6,15 +6,15 @@ export class EarningDto {
 
   userId: ObjectId;
 
-  userInfo?: any;
+  userInfo: any;
 
   transactionId: ObjectId;
 
-  transactionInfo?: any;
+  transactionInfo: any;
 
   performerId: ObjectId;
 
-  performerInfo?: any;
+  performerInfo: any;
 
   sourceType: string;
 
@@ -26,7 +26,7 @@ export class EarningDto {
 
   siteCommission: number;
 
-  isPaid?: boolean;
+  isPaid: boolean;
 
   createdAt: Date;
 
@@ -34,11 +34,13 @@ export class EarningDto {
 
   paidAt: Date;
 
-  paymentGateway?: string;
+  paymentGateway: string;
 
-  isToken?: boolean;
+  isToken: boolean;
 
-  constructor(data?: Partial<EarningDto>) {
+  transactionStatus: string;
+
+  constructor(data: Partial<EarningDto>) {
     Object.assign(
       this,
       pick(data, [
@@ -59,7 +61,8 @@ export class EarningDto {
         'updatedAt',
         'paidAt',
         'paymentGateway',
-        'isToken'
+        'isToken',
+        'transactionStatus'
       ])
     );
   }

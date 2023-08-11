@@ -6,7 +6,7 @@ import PageHeading from '@components/common/page-heading';
 import { productService } from '@services/product.service';
 import Router from 'next/router';
 import FormProduct from '@components/product/form-product';
-import { IUIConfig, IPerformer, ISettings } from 'src/interfaces';
+import { IUIConfig, IPerformer } from 'src/interfaces';
 import { connect } from 'react-redux';
 import { getResponseError } from '@lib/utils';
 import { injectIntl, IntlShape } from 'react-intl';
@@ -20,7 +20,6 @@ interface IProps {
   ui: IUIConfig;
   user: IPerformer;
   intl: IntlShape;
-  settings: ISettings;
 }
 
 class CreateProduct extends PureComponent<IProps> {
@@ -53,10 +52,6 @@ class CreateProduct extends PureComponent<IProps> {
       );
       Router.back();
     }
-    // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
-    //   message.warning('You have not connected with stripe. So you cannot post any content right now!');
-    //   Router.push('/model/banking');
-    // }
   }
 
   onUploading(resp: any) {

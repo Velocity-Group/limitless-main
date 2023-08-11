@@ -13,13 +13,13 @@ interface IProps {
   onChange: Function;
 }
 
-const PayoutRequestList = ({
+function PayoutRequestList({
   payouts,
   searching,
   total,
   pageSize,
   onChange
-}: IProps) => {
+}: IProps) {
   const intl = useIntl();
   const columns = [
     {
@@ -29,13 +29,13 @@ const PayoutRequestList = ({
       render: (id: string, record) => (
         <Link
           href={{
-            pathname: '/model/payout-requests/update',
+            pathname: '/payout-requests/update',
             query: {
               data: JSON.stringify(record),
               id: record._id
             }
           }}
-          as={`/model/payout-request/update?id=${record._id}`}
+          as={`/payout-request/update?id=${record._id}`}
         >
           <a>
             {id.slice(16, 24).toUpperCase()}
@@ -109,13 +109,13 @@ const PayoutRequestList = ({
       render: (request: PayoutRequestInterface) => (
         <Link
           href={{
-            pathname: '/model/payout-requests/update',
+            pathname: '/payout-requests/update',
             query: {
               data: JSON.stringify(request),
               id: request._id
             }
           }}
-          as={`/model/payout-request/update?id=${request._id}`}
+          as={`/payout-request/update?id=${request._id}`}
         >
           <a>
             {request.status === 'pending' ? intl.formatMessage({
@@ -147,6 +147,6 @@ const PayoutRequestList = ({
       onChange={onChange.bind(this)}
     />
   );
-};
+}
 PayoutRequestList.defaultProps = {};
 export default PayoutRequestList;

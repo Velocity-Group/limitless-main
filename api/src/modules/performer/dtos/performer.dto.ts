@@ -54,7 +54,6 @@ export interface IPerformerResponse {
   verifiedDocument?: boolean;
   score?: number;
   bankingInformation?: any;
-  ccbillSetting?: any;
   paypalSetting?: any;
   commissionSetting?: any;
   blockCountries?: any;
@@ -192,8 +191,6 @@ export class PerformerDto {
 
   bankingInformation?: any;
 
-  ccbillSetting?: any;
-
   paypalSetting?: any;
 
   stripeAccount?: any;
@@ -295,7 +292,6 @@ export class PerformerDto {
         'score',
         'bankingInformation',
         'stripeAccount',
-        'ccbillSetting',
         'paypalSetting',
         'commissionSetting',
         'blockCountries',
@@ -408,7 +404,6 @@ export class PerformerDto {
       return {
         ...publicInfo,
         ...privateInfo,
-        ccbillSetting: this.ccbillSetting,
         commissionPercentage: this.commissionPercentage
       };
     }

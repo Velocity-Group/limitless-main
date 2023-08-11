@@ -17,6 +17,7 @@ export interface IFanRegister {
   gender: string;
   email: string;
   password: string;
+  rel: string;
 }
 
 export interface IPerformerRegister {

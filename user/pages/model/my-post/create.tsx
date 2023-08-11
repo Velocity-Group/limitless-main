@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { Layout, message } from 'antd';
 import PageHeading from '@components/common/page-heading';
 import { connect } from 'react-redux';
-import { IPerformer, ISettings, IUIConfig } from '@interfaces/index';
+import { IPerformer, IUIConfig } from '@interfaces/index';
 import FeedForm from '@components/post/form';
 import {
   PictureOutlined,
@@ -17,7 +17,6 @@ interface IProps {
   ui: IUIConfig;
   user: IPerformer;
   intl: IntlShape;
-  settings: ISettings;
 }
 
 class CreatePost extends PureComponent<IProps> {
@@ -42,10 +41,6 @@ class CreatePost extends PureComponent<IProps> {
       );
       Router.back();
     }
-    // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
-    //   message.warning('You have not connected with stripe. So you cannot post any content right now!');
-    //   Router.push('/model/banking');
-    // }
   }
 
   render() {

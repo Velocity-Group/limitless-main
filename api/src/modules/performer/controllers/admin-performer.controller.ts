@@ -33,9 +33,7 @@ import {
   PerformerCreatePayload,
   PerformerUpdatePayload,
   PerformerSearchPayload,
-  PaymentGatewaySettingPayload,
-  CommissionSettingPayload,
-  BankingSettingPayload
+  CommissionSettingPayload
 } from '../payloads';
 import { PerformerDto, IPerformerResponse } from '../dtos';
 import { PerformerService, PerformerSearchService } from '../services';
@@ -235,17 +233,6 @@ export class AdminPerformerController {
     });
   }
 
-  @Put('/:id/payment-gateway-settings')
-  @HttpCode(HttpStatus.OK)
-  @Roles('admin', 'sub-admin')
-  @UseGuards(RoleGuard)
-  async updatePaymentGatewaySetting(
-    @Body() payload: PaymentGatewaySettingPayload
-  ) {
-    const data = await this.performerService.updatePaymentGateway(payload);
-    return DataResponse.ok(data);
-  }
-
   @Put('/:id/commission-settings')
   @Roles('admin', 'sub-admin')
   @UseGuards(RoleGuard)
@@ -257,23 +244,6 @@ export class AdminPerformerController {
     const data = await this.performerService.updateCommissionSetting(
       performerId,
       payload
-    );
-    return DataResponse.ok(data);
-  }
-
-  @Put('/:id/banking-settings')
-  @HttpCode(HttpStatus.OK)
-  @Roles('admin', 'sub-admin')
-  @UseGuards(RoleGuard)
-  async updateBankingSetting(
-    @Param('id') performerId: string,
-    @Body() payload: BankingSettingPayload,
-    @CurrentUser() user: UserDto
-  ) {
-    const data = await this.performerService.updateBankingSetting(
-      performerId,
-      payload,
-      user
     );
     return DataResponse.ok(data);
   }

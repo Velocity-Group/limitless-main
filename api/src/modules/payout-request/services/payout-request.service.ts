@@ -16,10 +16,11 @@ import {
 import { merge, uniq } from 'lodash';
 import { toObjectId } from 'src/kernel/helpers/string.helper';
 import * as moment from 'moment';
-import { EARNING_MODEL_PROVIDER } from 'src/modules/earning/providers/earning.provider';
-import { EarningModel } from 'src/modules/earning/models/earning.model';
+import { EARNING_MODEL_PROVIDER, REFERRAL_EARNING_MODEL_PROVIDER } from 'src/modules/earning/providers/earning.provider';
+import { EarningModel, ReferralEarningModel } from 'src/modules/earning/models';
 import { UserDto } from 'src/modules/user/dtos';
 import { StripeService } from 'src/modules/payment/services';
+import { PAYMENT_STATUS, PAYMENT_TYPE } from 'src/modules/payment/constants';
 import {
   PAYOUT_REQUEST_CHANEL, PAYOUT_REQUEST_EVENT, SOURCE_TYPE, STATUSES
 } from '../constants';
@@ -33,24 +34,24 @@ import {
 } from '../payloads/payout-request.payload';
 import { PayoutRequestModel } from '../models/payout-request.model';
 import { PAYOUT_REQUEST_MODEL_PROVIDER } from '../providers/payout-request.provider';
+import { PayoutMethodService } from './payout-method.service';
 
 @Injectable()
 export class PayoutRequestService {
   constructor(
-    @Inject(EARNING_MODEL_PROVIDER)
-    private readonly earningModel: Model<EarningModel>,
-    @Inject(PAYOUT_REQUEST_MODEL_PROVIDER)
-    private readonly payoutRequestModel: Model<PayoutRequestModel>,
-    @Inject(forwardRef(() => QueueEventService))
-    private readonly queueEventService: QueueEventService,
     @Inject(forwardRef(() => PerformerService))
     private readonly performerService: PerformerService,
-    @Inject(forwardRef(() => MailerService))
-    private readonly mailService: MailerService,
-    @Inject(forwardRef(() => SettingService))
-    private readonly settingService: SettingService,
     @Inject(forwardRef(() => StripeService))
-    private readonly stripeService: StripeService
+    private readonly stripeService: StripeService,
+    @Inject(EARNING_MODEL_PROVIDER)
+    private readonly earningModel: Model<EarningModel>,
+    @Inject(REFERRAL_EARNING_MODEL_PROVIDER)
+    private readonly referralEarningModel: Model<ReferralEarningModel>,
+    @Inject(PAYOUT_REQUEST_MODEL_PROVIDER)
+    private readonly payoutRequestModel: Model<PayoutRequestModel>,
+    private readonly queueEventService: QueueEventService,
+    private readonly mailService: MailerService,
+    private readonly payoutMethodService: PayoutMethodService
   ) { }
 
   public async search(
@@ -116,7 +117,7 @@ export class PayoutRequestService {
     return request;
   }
 
-  public async performerCreate(
+  public async requestPayout(
     payload: PayoutRequestCreatePayload,
     user: UserDto
   ): Promise<PayoutRequestDto> {
@@ -127,21 +128,21 @@ export class PayoutRequestService {
       }
     }
     if (payload.paymentAccountType === 'paypal') {
-      const paypalAccount = await this.performerService.getPaymentSetting(user._id, 'paypal');
-      if (!paypalAccount?.value?.email) {
+      const paymentAccountInfo = await this.payoutMethodService.findOne({ sourceId: user._id, key: 'paypal' });
+      if (!paymentAccountInfo?.value?.email) {
         throw new HttpException('You have not provided your Paypal account yet, please try again later', 422);
       }
     }
     if (payload.paymentAccountType === 'banking') {
-      const paymentAccountInfo = await this.performerService.getBankInfo(user._id);
-      if (!paymentAccountInfo || !paymentAccountInfo.firstName || !paymentAccountInfo.lastName || !paymentAccountInfo.bankAccount) {
+      const paymentAccountInfo = await this.payoutMethodService.findOne({ sourceId: user._id, key: 'banking' });
+      if (!paymentAccountInfo || !paymentAccountInfo?.value?.firstName || !paymentAccountInfo?.value?.lastName || !paymentAccountInfo?.value?.bankAccount) {
         throw new HttpException('Missing banking information', 404);
       }
     }
     const data = {
       ...payload,
-      source: SOURCE_TYPE.PERFORMER,
-      tokenConversionRate: await this.settingService.getKeyValue(SETTING_KEYS.TOKEN_CONVERSION_RATE) || 1,
+      source: user.isPerformer ? SOURCE_TYPE.PERFORMER : SOURCE_TYPE.USER,
+      tokenConversionRate: 1,
       sourceId: user._id,
       updatedAt: new Date(),
       createdAt: new Date()
@@ -149,7 +150,7 @@ export class PayoutRequestService {
 
     const query = {
       sourceId: user._id,
-      source: SOURCE_TYPE.PERFORMER,
+      source: user.isPerformer ? SOURCE_TYPE.PERFORMER : SOURCE_TYPE.USER,
       status: STATUSES.PENDING
     };
     const request = await this.payoutRequestModel.findOne(query);
@@ -160,7 +161,7 @@ export class PayoutRequestService {
       throw new InvalidRequestTokenException();
     }
     const resp = await this.payoutRequestModel.create(data);
-    const adminEmail = (await this.settingService.getKeyValue(SETTING_KEYS.ADMIN_EMAIL)) || process.env.ADMIN_EMAIL;
+    const adminEmail = (SettingService.getValueByKey(SETTING_KEYS.ADMIN_EMAIL)) || process.env.ADMIN_EMAIL;
     adminEmail && await this.mailService.send({
       subject: 'New payout request',
       to: adminEmail,
@@ -177,15 +178,37 @@ export class PayoutRequestService {
     user: UserDto,
     payload?: any
   ): Promise<any> {
-    let performerId = user._id;
-    if (user.roles && user.roles.includes('admin') && payload.performerId) {
-      performerId = payload.performerId;
+    let sourceId = user._id;
+    if (user.roles && user.roles.includes('admin') && payload.sourceId) {
+      sourceId = payload.sourceId;
     }
-    const [totalEarnedTokens, previousPaidOutTokens, performer] = await Promise.all([
+    const rejectTypes = [
+      PAYMENT_TYPE.TOKEN_PACKAGE, PAYMENT_TYPE.FREE_SUBSCRIPTION
+    ];
+    const [totalPerformerEarned, totalReferralEarned, previousPaidOut] = await Promise.all([
       this.earningModel.aggregate([
         {
           $match: {
-            performerId: toObjectId(performerId)
+            performerId: toObjectId(sourceId),
+            type: { $nin: rejectTypes },
+            transactionStatus: PAYMENT_STATUS.SUCCESS
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: '$netPrice'
+            }
+          }
+        }
+      ]),
+      this.earningModel.aggregate([
+        {
+          $match: {
+            referralId: toObjectId(sourceId),
+            type: { $nin: rejectTypes },
+            transactionStatus: PAYMENT_STATUS.SUCCESS
           }
         },
         {
@@ -200,7 +223,7 @@ export class PayoutRequestService {
       this.payoutRequestModel.aggregate([
         {
           $match: {
-            sourceId: toObjectId(performerId),
+            sourceId: toObjectId(sourceId),
             status: STATUSES.DONE
           }
         },
@@ -212,21 +235,19 @@ export class PayoutRequestService {
             }
           }
         }
-      ]),
-      this.performerService.findById(toObjectId(performerId))
+      ])
     ]);
 
     return {
-      totalEarnedTokens: totalEarnedTokens[0]?.total || 0,
-      previousPaidOutTokens: previousPaidOutTokens[0]?.total || 0,
-      remainingUnpaidTokens: performer.balance || 0
+      totalEarnings: ((totalPerformerEarned[0] && totalPerformerEarned[0].total) || 0) + ((totalReferralEarned[0] && totalReferralEarned[0].total) || 0),
+      previousPaidOut: (previousPaidOut[0] && previousPaidOut[0].total) || 0
     };
   }
 
-  public async performerUpdate(
+  public async updatePayout(
     id: string,
     payload: PayoutRequestPerformerUpdatePayload,
-    performer: UserDto
+    user: UserDto
   ): Promise<PayoutRequestDto> {
     const payout = await this.payoutRequestModel.findOne({ _id: id });
     if (!payout) {
@@ -235,33 +256,33 @@ export class PayoutRequestService {
     if (payout.status !== 'processing') {
       throw new ForbiddenException();
     }
-    if (performer._id.toString() !== payout.sourceId.toString()) {
+    if (user._id.toString() !== payout.sourceId.toString()) {
       throw new ForbiddenException();
     }
     if (payload.paymentAccountType === 'stripe') {
-      const stripeConnect = await this.stripeService.getConnectAccount(performer._id);
+      const stripeConnect = await this.stripeService.getConnectAccount(user._id);
       if (!stripeConnect || !stripeConnect.payoutsEnabled || !stripeConnect.detailsSubmitted) {
         throw new HttpException('You have not connect with Stripe yet, please try again later', 422);
       }
     }
     if (payload.paymentAccountType === 'paypal') {
-      const paypalAccount = await this.performerService.getPaymentSetting(performer._id, 'paypal');
-      if (!paypalAccount?.value?.email) {
+      const paymentAccountInfo = await this.payoutMethodService.findOne({ sourceId: user._id, key: 'paypal' });
+      if (!paymentAccountInfo?.value?.email) {
         throw new HttpException('You have not provided your Paypal account yet, please try again later', 422);
       }
     }
     if (payload.paymentAccountType === 'banking') {
-      const paymentAccountInfo = await this.performerService.getBankInfo(performer._id);
-      if (!paymentAccountInfo || !paymentAccountInfo.firstName || !paymentAccountInfo.lastName || !paymentAccountInfo.bankAccount) {
+      const paymentAccountInfo = await this.payoutMethodService.findOne({ sourceId: user._id, key: 'banking' });
+      if (!paymentAccountInfo || !paymentAccountInfo?.value?.firstName || !paymentAccountInfo?.value?.lastName || !paymentAccountInfo?.value?.bankAccount) {
         throw new HttpException('Missing banking information', 404);
       }
     }
-    if (performer.balance < payout.requestTokens) {
+    if (user.balance < payout.requestTokens) {
       throw new InvalidRequestTokenException();
     }
     merge(payout, payload);
     payout.updatedAt = new Date();
-    payout.tokenConversionRate = await this.settingService.getKeyValue(SETTING_KEYS.TOKEN_CONVERSION_RATE) || 1;
+    payout.tokenConversionRate = SettingService.getValueByKey(SETTING_KEYS.TOKEN_CONVERSION_RATE) || 1;
     await payout.save();
     // const adminEmail = (await this.settingService.getKeyValue(SETTING_KEYS.ADMIN_EMAIL)) || process.env.ADMIN_EMAIL;
     // adminEmail && await this.mailService.send({
@@ -303,10 +324,12 @@ export class PayoutRequestService {
       if (sourceInfo) {
         data.sourceInfo = new PerformerDto(sourceInfo).toResponse();
         if (paymentAccountType === 'paypal') {
-          data.paymentAccountInfo = await this.performerService.getPaymentSetting(sourceInfo._id, 'paypal');
+          const paymentAccountInfo = await this.payoutMethodService.findOne({ sourceId: sourceInfo._id, key: 'paypal' });
+          data.paymentAccountInfo = paymentAccountInfo?.value;
         }
         if (paymentAccountType === 'banking') {
-          data.paymentAccountInfo = await this.performerService.getBankInfo(sourceInfo._id);
+          const paymentAccountInfo = await this.payoutMethodService.findOne({ sourceId: sourceInfo._id, key: 'banking' });
+          data.paymentAccountInfo = paymentAccountInfo?.value;
         }
       }
     }

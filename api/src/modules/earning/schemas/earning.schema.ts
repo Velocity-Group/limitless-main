@@ -53,5 +53,9 @@ export const EarningSchema = new mongoose.Schema({
   isToken: {
     type: Boolean,
     default: true
+  },
+  transactionStatus: {
+    type: String,
+    default: 'success'
   }
 });

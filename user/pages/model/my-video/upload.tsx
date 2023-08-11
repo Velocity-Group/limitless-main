@@ -7,7 +7,7 @@ import PageHeading from '@components/common/page-heading';
 import { videoService } from '@services/video.service';
 import FormUploadVideo from '@components/video/form-upload';
 import Router from 'next/router';
-import { IUIConfig, IPerformer, ISettings } from 'src/interfaces';
+import { IUIConfig, IPerformer } from 'src/interfaces';
 import { getResponseError } from '@lib/utils';
 import { injectIntl, IntlShape } from 'react-intl';
 
@@ -15,7 +15,6 @@ interface IProps {
   ui: IUIConfig;
   user: IPerformer;
   intl: IntlShape;
-  settings: ISettings;
 }
 
 interface IFiles {
@@ -59,10 +58,6 @@ class UploadVideo extends PureComponent<IProps> {
       );
       Router.back();
     }
-    // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
-    //   message.warning('You have not connected with stripe. So you cannot post any content right now!');
-    //   Router.push('/model/banking');
-    // }
   }
 
   onUploading(resp: any) {

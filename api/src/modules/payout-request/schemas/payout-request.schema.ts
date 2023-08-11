@@ -6,7 +6,7 @@ export const payoutRequestSchema = new Schema({
   source: {
     index: true,
     type: String,
-    enum: [SOURCE_TYPE.PERFORMER, SOURCE_TYPE.AGENT],
+    enum: [SOURCE_TYPE.PERFORMER, SOURCE_TYPE.USER],
     default: SOURCE_TYPE.PERFORMER
   },
   sourceId: {

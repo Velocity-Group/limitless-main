@@ -10,10 +10,10 @@ import {
   VideoCameraOutlined, CameraOutlined, StopOutlined, FileImageOutlined,
   SkinOutlined, DollarOutlined, HeartOutlined, MenuOutlined,
   FireOutlined, MailOutlined, NotificationOutlined,
-  TranslationOutlined, SecurityScanOutlined
+  TranslationOutlined, SecurityScanOutlined, UsergroupAddOutlined
 } from '@ant-design/icons';
 import Header from '@components/common/layout/header';
-import Router, { Router as RouterEvent } from 'next/router';
+import { Router as RouterEvent } from 'next/router';
 import Loader from '@components/common/base/loader';
 import './primary-layout.less';
 import { ROLE_SUB_ADMIN } from 'src/constants';
@@ -221,6 +221,23 @@ class PrimaryLayout extends PureComponent<DefaultProps> {
             name: 'Create new',
             id: 'create-performers',
             route: '/model/create'
+          }
+        ]
+      },
+      {
+        id: 'referrals',
+        name: 'Referrals',
+        icon: <UsergroupAddOutlined />,
+        children: [
+          {
+            id: 'referrals',
+            name: 'All referrals',
+            route: '/referral'
+          },
+          {
+            id: 'referral-earning',
+            name: 'Referral earnings',
+            route: '/referral/referral-earning'
           }
         ]
       },

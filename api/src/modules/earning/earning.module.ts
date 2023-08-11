@@ -6,8 +6,8 @@ import { AuthModule } from '../auth/auth.module';
 import { PerformerModule } from '../performer/performer.module';
 import { PaymentModule } from '../payment/payment.module';
 import { SettingModule } from '../settings/setting.module';
-import { EarningController } from './controllers/earning.controller';
-import { EarningService } from './services/earning.service';
+import { EarningController, ReferralEarningController } from './controllers';
+import { EarningService, ReferralEarningService } from './services';
 import { earningProviders } from './providers/earning.provider';
 import { TransactionEarningListener, HandleDeleteItemListener } from './listeners';
 import { UserModule } from '../user/user.module';
@@ -25,8 +25,21 @@ import { OrderModule } from '../order/order.module';
     forwardRef(() => TokenTransactionModule),
     forwardRef(() => OrderModule)
   ],
-  providers: [...earningProviders, EarningService, TransactionEarningListener, HandleDeleteItemListener],
-  controllers: [EarningController],
-  exports: [...earningProviders, EarningService]
+  providers: [
+    ...earningProviders,
+    EarningService,
+    ReferralEarningService,
+    TransactionEarningListener,
+    HandleDeleteItemListener
+  ],
+  controllers: [
+    EarningController,
+    ReferralEarningController
+  ],
+  exports: [
+    ...earningProviders,
+    EarningService,
+    ReferralEarningService
+  ]
 })
-export class EarningModule {}
+export class EarningModule { }

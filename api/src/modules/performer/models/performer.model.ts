@@ -1,7 +1,5 @@
 import { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { BankingModel } from './banking.model';
-import { PaymentGatewaySettingModel } from './payment-gateway-setting.model';
 
 export class PerformerModel extends Document {
   _id: ObjectId;
@@ -97,9 +95,9 @@ export class PerformerModel extends Document {
     followers: number;
   };
 
-  bankingInfomation: BankingModel;
+  bankingInfomation: any;
 
-  ccbillSetting: PaymentGatewaySettingModel;
+  ccbillSetting: any;
 
   // score custom from other info like likes, subscribes, views....
   score: number;

@@ -4,7 +4,7 @@ import { PictureOutlined } from '@ant-design/icons';
 import Head from 'next/head';
 import FormGallery from '@components/gallery/form-gallery';
 import PageHeading from '@components/common/page-heading';
-import { IPerformer, ISettings, IUIConfig } from 'src/interfaces';
+import { IPerformer, IUIConfig } from 'src/interfaces';
 import { galleryService } from 'src/services';
 import { getResponseError } from '@lib/utils';
 import Router from 'next/router';
@@ -15,7 +15,6 @@ interface IProps {
   ui: IUIConfig;
   user: IPerformer;
   intl: IntlShape;
-  settings: ISettings;
 }
 
 interface IStates {
@@ -43,10 +42,6 @@ class GalleryCreatePage extends PureComponent<IProps, IStates> {
       );
       Router.back();
     }
-    // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
-    //   message.warning('You have not connected with stripe. So you cannot post any content right now!');
-    //   Router.push('/model/banking');
-    // }
   }
 
   async onFinish(data) {

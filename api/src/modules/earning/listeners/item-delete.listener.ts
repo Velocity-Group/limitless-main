@@ -131,6 +131,7 @@ export class HandleDeleteItemListener {
       transactionId
     });
     if (!earning) return;
+    earning.transactionStatus = PURCHASE_ITEM_STATUS.REFUNDED;
     await Promise.all([
       this.orderModel.updateOne({ transactionId }, { deliveryStatus: ORDER_STATUS.REFUNDED }),
       this.tokenTransactionModel.updateOne({ _id: transactionId }, { status: PURCHASE_ITEM_STATUS.REFUNDED }),
@@ -138,7 +139,7 @@ export class HandleDeleteItemListener {
       this.performerModel.updateOne({ _id: earning.performerId }, { $inc: { balance: -earning.grossPrice } }),
       this.notifyUserBalance(earning),
       this.notifyPerformerBalance(earning.performerId, -earning.grossPrice),
-      earning.remove()
+      earning.save()
     ]);
   }
 

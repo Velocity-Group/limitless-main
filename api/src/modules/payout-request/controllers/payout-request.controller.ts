@@ -12,38 +12,36 @@ import {
   Body,
   Put
 } from '@nestjs/common';
-import { RoleGuard } from 'src/modules/auth/guards';
+import { AuthGuard } from 'src/modules/auth/guards';
 import { DataResponse } from 'src/kernel';
-import { CurrentUser, Roles } from 'src/modules/auth';
+import { CurrentUser } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
 import { PayoutRequestCreatePayload, PayoutRequestPerformerUpdatePayload } from '../payloads/payout-request.payload';
 import { PayoutRequestService } from '../services/payout-request.service';
 
 @Injectable()
-@Controller('payout-requests/performer')
+@Controller('payout-requests')
 export class PayoutRequestController {
   constructor(private readonly payoutRequestService: PayoutRequestService) {}
 
   @Post('/')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async create(
     @Body() payload: PayoutRequestCreatePayload,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
-    const data = await this.payoutRequestService.performerCreate(payload, user);
+    const data = await this.payoutRequestService.requestPayout(payload, user);
     return DataResponse.ok(data);
   }
 
   @Post('/calculate')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer', 'admin')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async calculate(
-    @Body() payload: { performerId: string },
+    @Body() payload: { sourceId: string },
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
     const data = await this.payoutRequestService.calculate(user, payload);
@@ -52,22 +50,20 @@ export class PayoutRequestController {
 
   @Put('/:id')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async update(
     @Param('id') id: string,
     @Body() payload: PayoutRequestPerformerUpdatePayload,
-    @CurrentUser() performer: UserDto
+    @CurrentUser() user: UserDto
   ): Promise<DataResponse<any>> {
-    const data = await this.payoutRequestService.performerUpdate(id, payload, performer);
+    const data = await this.payoutRequestService.updatePayout(id, payload, user);
     return DataResponse.ok(data);
   }
 
   @Get('/:id/view')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async details(
     @Param('id') id: string,

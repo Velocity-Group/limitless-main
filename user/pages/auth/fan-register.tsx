@@ -1,4 +1,3 @@
-/* eslint-disable prefer-promise-reject-errors */
 import {
   Row, Col, Button, Layout, Form, Input, message, Divider
 } from 'antd';
@@ -22,6 +21,7 @@ interface IProps {
   registerFanData: any;
   loginSocial: Function;
   intl: IntlShape;
+  rel: string;
 }
 
 class FanRegister extends PureComponent<IProps> {
@@ -30,6 +30,12 @@ class FanRegister extends PureComponent<IProps> {
   static layout = 'blank';
 
   recaptchaSuccess = false;
+
+  static async getInitialProps({ ctx }) {
+    return {
+      rel: ctx?.query?.rel
+    };
+  }
 
   state = {
     isLoading: false
@@ -104,7 +110,7 @@ class FanRegister extends PureComponent<IProps> {
 
   render() {
     const {
-      ui, registerFanData, settings, intl
+      ui, registerFanData, settings, intl, rel
     } = this.props;
     const { requesting: submiting } = registerFanData;
     const { isLoading } = this.state;
@@ -200,7 +206,7 @@ class FanRegister extends PureComponent<IProps> {
                     <Form
                       labelCol={{ span: 24 }}
                       name="member_register"
-                      initialValues={{ remember: true, gender: 'male' }}
+                      initialValues={{ remember: true, gender: 'male', rel: rel || '' }}
                       onFinish={this.handleRegister.bind(this)}
                       scrollToFirstError
                     >
@@ -323,6 +329,12 @@ class FanRegister extends PureComponent<IProps> {
                         />
                       </Form.Item>
                       {/* <GoogleReCaptcha ui={ui} handleVerify={this.handleVerifyCapcha.bind(this)} /> */}
+                      <Form.Item
+                        name="rel"
+                        label={intl.formatMessage({ id: 'referralCode', defaultMessage: 'Referral Code' })}
+                      >
+                        <Input placeholder={intl.formatMessage({ id: 'referralCode', defaultMessage: 'Referral Code' })} />
+                      </Form.Item>
                       <Form.Item style={{ textAlign: 'center' }}>
                         <Button
                           type="primary"

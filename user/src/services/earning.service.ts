@@ -8,6 +8,14 @@ export class EarningService extends APIRequest {
   performerSearch(param?: any) {
     return this.get(this.buildUrl('/earning/performer/search', param));
   }
+
+  referralStats() {
+    return this.get('/referral-earnings/stats');
+  }
+
+  referralSearch(query?: { [key: string]: any }) {
+    return this.get(this.buildUrl('/referral-earnings/search', query));
+  }
 }
 
 export const earningService = new EarningService();

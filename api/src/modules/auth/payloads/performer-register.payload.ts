@@ -17,17 +17,17 @@ export class PerformerRegisterPayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  name?: string;
+  name: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  firstName?: string;
+  firstName: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  lastName?: string;
+  lastName: string;
 
   @ApiProperty()
   @IsString()
@@ -40,7 +40,7 @@ export class PerformerRegisterPayload {
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  password?: string;
+  password: string;
 
   @ApiProperty()
   @IsString()
@@ -56,42 +56,42 @@ export class PerformerRegisterPayload {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  phone?: string;
+  phone: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  phoneCode?: string; // international code prefix
+  phoneCode: string; // international code prefix
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  avatarId?: ObjectId;
+  avatarId: ObjectId;
 
   @ApiProperty()
   @IsBoolean()
   @IsOptional()
-  verifiedEmail?: boolean;
+  verifiedEmail: boolean;
 
   @ApiProperty()
   @IsBoolean()
   @IsOptional()
-  verifiedAccount?: boolean;
+  verifiedAccount: boolean;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  idVerificationId?: ObjectId;
+  idVerificationId: ObjectId;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  documentVerificationId?: ObjectId;
+  documentVerificationId: ObjectId;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  gender?: string;
+  gender: string;
 
   @ApiProperty()
   @IsOptional()
@@ -101,10 +101,5 @@ export class PerformerRegisterPayload {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  invitationId: string | ObjectId;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  referralId: string | ObjectId;
+  rel: string;
 }

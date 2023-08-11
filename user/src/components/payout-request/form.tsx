@@ -9,7 +9,7 @@ import {
   Alert,
   Select
 } from 'antd';
-import { PayoutRequestInterface, ISettings } from 'src/interfaces';
+import { PayoutRequestInterface, IUser } from 'src/interfaces';
 import Router from 'next/router';
 import { useIntl } from 'react-intl';
 
@@ -18,16 +18,15 @@ interface Props {
   submiting: boolean;
   payout: Partial<PayoutRequestInterface>;
   statsPayout: {
-    totalEarnedTokens: number;
-    previousPaidOutTokens: number;
-    remainingUnpaidTokens: number;
+    totalEarnings: number;
+    previousPaidOut: number;
   };
-  settings: ISettings;
+  user: IUser;
 }
 
-const PayoutRequestForm = ({
-  payout, submit, submiting, statsPayout, settings
-}: Props) => {
+function PayoutRequestForm({
+  payout, submit, submiting, statsPayout, user
+}: Props) {
   const [form] = Form.useForm();
   const intl = useIntl();
   const {
@@ -43,7 +42,7 @@ const PayoutRequestForm = ({
       onFinish={(data) => submit(data)}
       initialValues={{
         requestNote: requestNote || '',
-        requestTokens: requestTokens || statsPayout?.remainingUnpaidTokens || 0,
+        requestTokens: requestTokens || user?.balance || 0,
         paymentAccountType: paymentAccountType || 'banking'
       }}
       scrollToFirstError
@@ -52,31 +51,26 @@ const PayoutRequestForm = ({
         <Space size="large">
           <Statistic
             title={intl.formatMessage({ id: 'totalEarned', defaultMessage: 'Total Earned' })}
-            value={statsPayout?.totalEarnedTokens || 0}
+            value={statsPayout?.totalEarnings || 0}
             precision={2}
             prefix="$"
           />
           <Statistic
             title={intl.formatMessage({ id: 'withdrew', defaultMessage: 'Withdrew' })}
-            value={statsPayout?.previousPaidOutTokens || 0}
+            value={statsPayout?.previousPaidOut || 0}
             precision={2}
             prefix="$"
           />
           <Statistic
             title={intl.formatMessage({ id: 'walletBalance', defaultMessage: 'Wallet Balance' })}
-            value={statsPayout?.remainingUnpaidTokens || 0}
+            value={user?.balance || 0}
             precision={2}
             prefix="$"
           />
         </Space>
       </div>
       <Form.Item label={intl.formatMessage({ id: 'requestedAmount', defaultMessage: 'Requested amount' })} name="requestTokens">
-        <InputNumber
-          style={{ width: '100%' }}
-          disabled={payout && payout.status === 'done'}
-          min={1}
-          max={statsPayout?.remainingUnpaidTokens}
-        />
+        <InputNumber style={{ width: '100%' }} disabled={payout && payout.status === 'done'} min={1} max={user?.balance} />
       </Form.Item>
       <Form.Item label={intl.formatMessage({ id: 'noteToAdmin', defaultMessage: 'Note to Admin' })} name="requestNote">
         <Input.TextArea disabled={payout && payout.status === 'done'} placeholder={intl.formatMessage({ id: 'textSomethingToAdminHere', defaultMessage: 'Text something to admin here' })} rows={3} />
@@ -93,13 +87,6 @@ const PayoutRequestForm = ({
       )}
       <Form.Item label={intl.formatMessage({ id: 'selectPayoutMethod', defaultMessage: 'Select payout method' })} name="paymentAccountType">
         <Select>
-          {/* {settings?.paymentGateway === 'stripe' && (
-            <Select.Option value="stripe" key="stripe">
-              <img src="/static/stripe-icon.jpeg" width="30px" alt="stripe" />
-              {' '}
-              Stripe
-            </Select.Option>
-          )} */}
           <Select.Option value="banking" key="banking">
             <img src="/static/banking-ico.png" width="30px" alt="banking" />
             {' '}
@@ -135,7 +122,7 @@ const PayoutRequestForm = ({
       </Form.Item>
     </Form>
   );
-};
+}
 
 PayoutRequestForm.defaultProps = {};
 

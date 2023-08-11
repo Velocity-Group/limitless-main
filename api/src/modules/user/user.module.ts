@@ -15,6 +15,7 @@ import { FileModule } from '../file/file.module';
 import { UserConnectedListener, StripeSettingsUpdatedListener } from './listeners';
 import { PerformerModule } from '../performer/performer.module';
 import { BlockModule } from '../block/block.module';
+import { PayoutRequestModule } from '../payout-request/payout.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { BlockModule } from '../block/block.module';
   forwardRef(() => AuthModule),
   forwardRef(() => PerformerModule),
   forwardRef(() => FileModule),
-  forwardRef(() => BlockModule)
+  forwardRef(() => BlockModule),
+  forwardRef(() => PayoutRequestModule)
   ],
   providers: [
   ...userProviders,

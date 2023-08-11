@@ -23,8 +23,8 @@ const validateMessages = {
 
 interface IProps {
   onFinish: Function;
-  bankingInformation?: IBankingSetting;
-  submiting?: boolean;
+  bankingInformation: IBankingSetting;
+  submiting: boolean;
   countries: ICountry[];
 }
 

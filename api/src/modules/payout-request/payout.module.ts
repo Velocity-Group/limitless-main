@@ -4,10 +4,10 @@ import {
 import { MongoDBModule, QueueModule } from 'src/kernel';
 import { AuthModule } from '../auth/auth.module';
 import { payoutRequestProviders } from './providers/payout-request.provider';
-import { PayoutRequestService } from './services';
+import { PayoutRequestService, PayoutMethodService } from './services';
 import {
   PayoutRequestController, AdminPayoutRequestController,
-  PayoutRequestSearchController
+  PayoutRequestSearchController, PayoutMethodController
 } from './controllers';
 import { PerformerModule } from '../performer/performer.module';
 import { PerformerAssetsModule } from '../performer-assets/performer-assets.module';
@@ -33,13 +33,18 @@ import { PaymentModule } from '../payment/payment.module';
   providers: [
     ...payoutRequestProviders,
     PayoutRequestService,
+    PayoutMethodService,
     UpdatePayoutRequestListener
   ],
   controllers: [
     PayoutRequestController,
     AdminPayoutRequestController,
-    PayoutRequestSearchController
+    PayoutRequestSearchController,
+    PayoutMethodController
   ],
-  exports: [PayoutRequestService]
+  exports: [
+    PayoutMethodService,
+    PayoutRequestService
+  ]
 })
 export class PayoutRequestModule {}

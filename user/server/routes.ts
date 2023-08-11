@@ -28,6 +28,9 @@ export default routes()
   .add('payment-success', '/payment/success', '/payment/success')
   .add('payment-cancel', '/payment/cancel', '/payment/cancel')
   .add('verification', '/id-verification', '/id-verification')
+  .add('referral', '/referral', '/referral')
+  .add('payout-requests', '/payout-request', '/payout-request')
+  .add('banking', '/banking', '/banking')
   // performer
   .add('models', '/model', '/model')
   .add('model-register', '/auth/model-register', '/auth/model-register')
@@ -82,6 +85,8 @@ export default routes()
   .add('i18n-payment-success', '/:locale/payment/success', '/payment/success')
   .add('i18n-payment-cancel', '/:locale/payment/cancel', '/payment/cancel')
   .add('i18n-verification', '/:locale/id-verification', '/id-verification')
+  .add('i18n-payout-requests', '/:locale/payout-requests', '/payout-requests')
+  .add('i18n-banking', '/:locale/banking', '/banking')
 
   // locale of performer
   .add('i18n-models', '/:locale/model', '/model')

@@ -21,7 +21,7 @@ const validateMessages = {
 interface IProps {
   onFinish: Function;
   user: IPerformer;
-  updating?: boolean;
+  updating: boolean;
   intl: IntlShape;
 }
 
@@ -36,12 +36,10 @@ class PerformerPaypalForm extends PureComponent<IProps> {
         name="nest-messages"
         onFinish={onFinish.bind(this)}
         validateMessages={validateMessages}
-        initialValues={
-          user?.paypalSetting?.value || {
-            email: '',
-            phoneNumber: ''
-          }
-        }
+        initialValues={user?.paypalSetting || {
+          email: '',
+          phoneNumber: ''
+        }}
         labelAlign="left"
         className="account-form"
       >

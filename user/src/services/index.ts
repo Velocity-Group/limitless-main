@@ -30,3 +30,4 @@ export * from './language.service';
 export * from './shipping-address.service';
 export * from './follow.service';
 export * from './stream-request.service';
+export * from './referral.service';

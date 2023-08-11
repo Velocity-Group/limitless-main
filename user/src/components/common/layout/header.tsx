@@ -13,7 +13,7 @@ import {
   VideoCameraOutlined, FireOutlined, NotificationOutlined, BookOutlined, IdcardOutlined,
   DollarOutlined, PictureOutlined, StarOutlined, ShoppingOutlined, BankOutlined,
   LogoutOutlined, HeartOutlined, BlockOutlined, PlusCircleOutlined, StopOutlined,
-  TeamOutlined, CommentOutlined
+  TeamOutlined, CommentOutlined, GiftOutlined
 } from '@ant-design/icons';
 import {
   HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon, TickIcon, WalletSvg
@@ -75,7 +75,7 @@ class Header extends PureComponent<IProps> {
     this.setState({
       openProfile: false
     });
-  }
+  };
 
   handleMessage = async (event) => {
     event && this.setState({ totalNotReadMessage: event.total });
@@ -328,11 +328,19 @@ class Header extends PureComponent<IProps> {
                     {intl.formatMessage({ id: 'sendMassMessages', defaultMessage: 'Send Mass Messages' })}
                   </div>
                 </Link>
-                <Link href={{ pathname: '/model/banking' }}>
-                  <div className={router.pathname === '/model/banking' ? 'menu-item active' : 'menu-item'}>
+                <Link href={{ pathname: '/banking' }}>
+                  <div className={router.pathname === '/banking' ? 'menu-item active' : 'menu-item'}>
                     <BankOutlined />
                     {' '}
                     {intl.formatMessage({ id: 'bankingToEarn', defaultMessage: 'Banking (To Earn)' })}
+                  </div>
+                </Link>
+                <Divider />
+                <Link href="/referral" as="/referral">
+                  <div className={router.pathname === '/referral' ? 'menu-item active' : 'menu-item'}>
+                    <GiftOutlined />
+                    {' '}
+                    {intl.formatMessage({ id: 'referral', defaultMessage: 'Referral' })}
                   </div>
                 </Link>
                 <Divider />
@@ -386,8 +394,8 @@ class Header extends PureComponent<IProps> {
                     {intl.formatMessage({ id: 'earningHistory', defaultMessage: 'Earning History' })}
                   </div>
                 </Link>
-                <Link href="/model/payout-request" as="/model/payout-request">
-                  <div className={router.pathname === '/model/payout-request' ? 'menu-item active' : 'menu-item'}>
+                <Link href="/payout-request" as="/payout-request">
+                  <div className={router.pathname === '/payout-request' ? 'menu-item active' : 'menu-item'}>
                     <NotificationOutlined />
                     {' '}
                     {intl.formatMessage({ id: 'payoutRequests', defaultMessage: 'Payout Requests' })}
@@ -419,7 +427,14 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 )}
-                <Link href="/user/bookmarks">
+                <Link href={{ pathname: '/banking' }} as="/banking">
+                  <div className={router.pathname === '/banking' ? 'menu-item active' : 'menu-item'}>
+                    <BankOutlined />
+                    {' '}
+                    {intl.formatMessage({ id: 'bankingToEarn', defaultMessage: 'Banking (To Earn)' })}
+                  </div>
+                </Link>
+                <Link href="/user/bookmarks" as="/user/bookmarks">
                   <div className={router.pathname === '/user/bookmarks' ? 'menu-item active' : 'menu-item'}>
                     <BookOutlined />
                     {' '}
@@ -441,7 +456,15 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 <Divider />
-                <Link href="/user/orders">
+                <Link href="/referral" as="/referral">
+                  <div className={router.pathname === '/referral' ? 'menu-item active' : 'menu-item'}>
+                    <GiftOutlined />
+                    {' '}
+                    {intl.formatMessage({ id: 'referral', defaultMessage: 'Referral' })}
+                  </div>
+                </Link>
+                <Divider />
+                <Link href="/user/orders" as="/user/orders">
                   <div className={router.pathname === '/user/orders' ? 'menu-item active' : 'menu-item'}>
                     <ShoppingCartOutlined />
                     {' '}
@@ -463,6 +486,13 @@ class Header extends PureComponent<IProps> {
                   </div>
                 </Link>
                 <Divider />
+                <Link href="/payout-request" as="/payout-request">
+                  <div className={router.pathname === '/payout-request' ? 'menu-item active' : 'menu-item'}>
+                    <NotificationOutlined />
+                    {' '}
+                    Payout Requests
+                  </div>
+                </Link>
                 <div className="menu-item" aria-hidden onClick={() => this.beforeLogout()}>
                   <LogoutOutlined />
                   {' '}

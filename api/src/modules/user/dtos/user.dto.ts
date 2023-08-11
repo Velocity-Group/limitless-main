@@ -30,6 +30,8 @@ export interface IUserResponse {
   stripeCustomerId?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  paypalSetting?: any;
+  bankingInformation?: any;
 }
 
 export class UserDto {
@@ -90,6 +92,10 @@ export class UserDto {
 
   updatedAt?: Date;
 
+  paypalSetting?: any;
+
+  bankingInformation?: any;
+
   constructor(data?: Partial<UserDto>) {
     data
       && Object.assign(
@@ -121,7 +127,9 @@ export class UserDto {
           'stripeCardIds',
           'stripeCustomerId',
           'createdAt',
-          'updatedAt'
+          'updatedAt',
+          'paypalSetting',
+          'bankingInformation'
         ])
       );
   }
@@ -161,7 +169,9 @@ export class UserDto {
       roles: this.roles,
       verifiedEmail: this.verifiedEmail,
       stripeCardIds: this.stripeCardIds,
-      stripeCustomerId: this.stripeCustomerId
+      stripeCustomerId: this.stripeCustomerId,
+      paypalSetting: this.paypalSetting,
+      bankingInformation: this.bankingInformation
     };
 
     if (isAdmin) {

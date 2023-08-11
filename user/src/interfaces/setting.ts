@@ -27,4 +27,6 @@ export interface ISettings {
   coinbaseEnable: string;
   stripeEnable: string;
   ccbillEnable: string;
+  performerReferralCommission: number;
+  userReferralCommission: number;
 }

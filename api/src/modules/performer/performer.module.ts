@@ -22,6 +22,7 @@ import {
 } from './listeners';
 import { PaymentModule } from '../payment/payment.module';
 import { FollowModule } from '../follow/follow.module';
+import { PayoutRequestModule } from '../payout-request/payout.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { FollowModule } from '../follow/follow.module';
   forwardRef(() => ReactionModule),
   forwardRef(() => BlockModule),
   forwardRef(() => PaymentModule),
-  forwardRef(() => FollowModule)
+  forwardRef(() => FollowModule),
+  forwardRef(() => PayoutRequestModule)
   ],
   providers: [
   ...performerProviders,

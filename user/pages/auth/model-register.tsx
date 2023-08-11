@@ -31,6 +31,7 @@ interface IProps {
   settings: ISettings;
   countries: ICountry[];
   intl: IntlShape;
+  rel: string;
 }
 
 class RegisterPerformer extends PureComponent<IProps> {
@@ -38,10 +39,15 @@ class RegisterPerformer extends PureComponent<IProps> {
 
   static authenticate = false;
 
-  static async getInitialProps() {
+  idVerificationFile = null;
+
+  documentVerificationFile = null;
+
+  static async getInitialProps({ ctx }) {
     const [countries] = await Promise.all([utilsService.countriesList()]);
     return {
-      countries: countries?.data || []
+      countries: countries?.data || [],
+      rel: ctx?.query?.rel
     };
   }
 
@@ -181,7 +187,8 @@ class RegisterPerformer extends PureComponent<IProps> {
       ui,
       settings,
       countries,
-      intl
+      intl,
+      rel
     } = this.props;
     const { isLoading } = this.state;
     return (
@@ -245,7 +252,8 @@ class RegisterPerformer extends PureComponent<IProps> {
               initialValues={{
                 gender: 'male',
                 country: 'US',
-                dateOfBirth: ''
+                dateOfBirth: '',
+                rel
               }}
               onFinish={this.register}
               scrollToFirstError
@@ -567,6 +575,15 @@ class RegisterPerformer extends PureComponent<IProps> {
                             defaultMessage: 'Confirm password'
                           })}
                         />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        name="rel"
+                        validateTrigger={['onChange', 'onBlur']}
+                        label={intl.formatMessage({ id: 'referralCode', defaultMessage: 'Referral Code' })}
+                      >
+                        <Input placeholder={intl.formatMessage({ id: 'referralCode', defaultMessage: 'Referral Code' })} />
                       </Form.Item>
                     </Col>
                   </Row>

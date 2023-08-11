@@ -36,9 +36,9 @@ class PerformerBankingForm extends PureComponent<IProps> {
   state = {
     states: [],
     cities: []
-  }
+  };
 
-  formRef: any;
+  formRef = createRef() as any;
 
   componentDidMount() {
     const { user } = this.props;
@@ -60,7 +60,7 @@ class PerformerBankingForm extends PureComponent<IProps> {
     } else {
       this.formRef.setFieldsValue({ state: '', city: '' });
     }
-  }
+  };
 
   handleGetCities = async (state: string, countryCode: string) => {
     const { user } = this.props;
@@ -72,10 +72,9 @@ class PerformerBankingForm extends PureComponent<IProps> {
     } else {
       this.formRef.setFieldsValue({ city: '' });
     }
-  }
+  };
 
   render() {
-    if (!this.formRef) this.formRef = createRef();
     const {
       onFinish, user, updating, countries, intl
     } = this.props;

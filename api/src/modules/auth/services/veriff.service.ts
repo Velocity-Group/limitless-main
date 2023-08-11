@@ -9,7 +9,7 @@ import axios from 'axios';
 import { EntityNotFoundException } from 'src/kernel';
 import { PerformerService } from 'src/modules/performer/services';
 import { ObjectId } from 'mongodb';
-import { VERIFF_MODEL_PROVIDER } from '../providers/auth.provider';
+import { VERIFF_MODEL_PROVIDER } from '../providers';
 import { VeriffVerificationModel } from '../models';
 import { VeriffGeneratePayload } from '../payloads';
 

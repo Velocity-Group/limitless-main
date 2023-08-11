@@ -77,7 +77,10 @@ export const SETTING_KEYS = {
   VERIFF_SECRET_KEY: 'veriffSecretKey',
   VERIFF_BASE_URL: 'veriffBaseUrl',
   // Coinbase
-  COINBASE_API_KEY: 'coinbaseApiKey'
+  COINBASE_API_KEY: 'coinbaseApiKey',
+  // Referral
+  PERFORMER_REFERRAL_COMMISSION: 'performerReferralCommission',
+  USER_REFERRAL_COMMISSION: 'userReferralCommission'
 };
 
 export const MENU_SECTION = {

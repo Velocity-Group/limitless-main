@@ -15,6 +15,7 @@ import { PerformerDto } from 'src/modules/performer/dtos';
 import { omit } from 'lodash';
 import { REF_TYPE } from 'src/modules/file/constants';
 import { FileService } from 'src/modules/file/services';
+import { PayoutMethodService } from 'src/modules/payout-request/services';
 import { UserModel } from '../models';
 import { USER_MODEL_PROVIDER } from '../providers';
 import {
@@ -37,7 +38,8 @@ export class UserService {
     @Inject(USER_MODEL_PROVIDER)
     private readonly userModel: Model<UserModel>,
     private readonly queueEventService: QueueEventService,
-    private readonly fileService: FileService
+    private readonly fileService: FileService,
+    private readonly payoutMethodService: PayoutMethodService
   ) {}
 
   public async find(params: any): Promise<UserModel[]> {
@@ -68,19 +70,22 @@ export class UserService {
   }
 
   public async getMe(id: string, jwToken: string): Promise<any> {
-    try {
-      const user = await this.userModel.findById(id);
-      if (user) {
-        return new UserDto(user).toResponse(true);
-      }
-      const performer = await this.performerService.getDetails(id, jwToken);
-      if (!performer && !user) {
-        throw new EntityNotFoundException();
-      }
-      return new PerformerDto(performer).toResponse(true);
-    } catch (e) {
-      console.log(e);
+    const user = await this.userModel.findById(id);
+    if (user) {
+      const [paypalSetting, bankingSetting] = await Promise.all([
+        this.payoutMethodService.findOne({ sourceId: user._id, key: 'paypal' }),
+        this.payoutMethodService.findOne({ sourceId: user._id, key: 'banking' })
+      ]);
+      const resp = new UserDto(user).toResponse(true);
+      resp.paypalSetting = paypalSetting?.value;
+      resp.bankingInformation = bankingSetting?.value;
+      return new UserDto(user).toResponse(true);
     }
+    const performer = await this.performerService.getDetails(id, jwToken);
+    if (!performer && !user) {
+      throw new EntityNotFoundException();
+    }
+    return new PerformerDto(performer).toResponse(true);
   }
 
   public async findByUsername(username: string): Promise<UserDto> {

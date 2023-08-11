@@ -27,4 +27,6 @@ export class EarningModel extends Document {
   paymentGateway: string;
 
   isToken: boolean;
+
+  transactionStatus: string;
 }

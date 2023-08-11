@@ -9,7 +9,7 @@ import {
   UseGuards,
   Query
 } from '@nestjs/common';
-import { RoleGuard } from 'src/modules/auth/guards';
+import { RoleGuard, AuthGuard } from 'src/modules/auth/guards';
 import { DataResponse, PageableData } from 'src/kernel';
 import { CurrentUser, Roles } from 'src/modules/auth';
 import { UserDto } from 'src/modules/user/dtos';
@@ -38,17 +38,16 @@ export class PayoutRequestSearchController {
     return DataResponse.ok(data);
   }
 
-  @Get('/performer/search')
+  @Get('/user/search')
   @HttpCode(HttpStatus.OK)
-  @Roles('performer')
-  @UseGuards(RoleGuard)
+  @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async performerSearch(
+  async userSearch(
     @Query() req: PayoutRequestSearchPayload,
     @CurrentUser() user: UserDto
   ): Promise<DataResponse<PageableData<PayoutRequestDto>>> {
-    req.sourceId = user._id;
-    req.source = SOURCE_TYPE.PERFORMER;
+    req.sourceId = user._id.toString();
+    req.source = user.isPerformer ? SOURCE_TYPE.PERFORMER : SOURCE_TYPE.USER;
     const data = await this.payoutRequestService.search(req);
     return DataResponse.ok(data);
   }

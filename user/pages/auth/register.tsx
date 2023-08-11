@@ -17,11 +17,18 @@ interface IProps {
   loginSuccess: Function;
   updateCurrentUser: Function;
   intl: IntlShape;
+  rel: string;
 }
 class Dashboard extends PureComponent<IProps> {
   static layout = 'blank';
 
   static authenticate = false;
+
+  static async getInitialProps({ ctx }) {
+    return {
+      rel: ctx?.query?.rel
+    };
+  }
 
   state = {
     loginAs: 'user'
@@ -55,7 +62,7 @@ class Dashboard extends PureComponent<IProps> {
   }
 
   render() {
-    const { ui, intl } = this.props;
+    const { ui, intl, rel } = this.props;
     const { loginAs } = this.state;
     return (
       <div className="container">
@@ -188,7 +195,7 @@ class Dashboard extends PureComponent<IProps> {
                             </li>
                           </ul>
                         )}
-                        <Link href="/auth/model-register">
+                        <Link href={rel ? { pathname: '/auth/model-register', query: { rel } } : '/auth/model-register'}>
                           <a className="btn-primary ant-btn ant-btn-primary ant-btn-lg">
                             {intl.formatMessage({
                               id: 'modelSignUp',
@@ -261,7 +268,7 @@ class Dashboard extends PureComponent<IProps> {
                             <li />
                           </ul>
                         )}
-                        <Link href="/auth/fan-register">
+                        <Link href={rel ? { pathname: '/auth/fan-register', query: { rel } } : '/auth/fan-register'}>
                           <a className="btn-primary ant-btn ant-btn-primary ant-btn-lg">
                             {intl.formatMessage({
                               id: 'fanSignUp',

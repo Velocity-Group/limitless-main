@@ -42,9 +42,7 @@ import {
 } from '../dtos';
 import {
   SelfUpdatePayload,
-  PerformerSearchPayload,
-  BankingSettingPayload,
-  PaymentGatewaySettingPayload
+  PerformerSearchPayload
 } from '../payloads';
 import { PerformerService, PerformerSearchService } from '../services';
 
@@ -286,37 +284,6 @@ export class PerformerController {
       ...file,
       url: file.getUrl()
     });
-  }
-
-  @Put('/:id/banking-settings')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RoleGuard)
-  @Roles('performer')
-  async updateBankingSetting(
-    @Param('id') performerId: string,
-    @Body() payload: BankingSettingPayload,
-    @CurrentUser() user: UserDto
-  ) {
-    const data = await this.performerService.updateBankingSetting(
-      performerId,
-      payload,
-      user
-    );
-    return DataResponse.ok(data);
-  }
-
-  @Put('/:id/payment-gateway-settings')
-  @HttpCode(HttpStatus.OK)
-  @Roles('performer')
-  @UseGuards(RoleGuard)
-  async updatePaymentGatewaySetting(
-    @Body() payload: PaymentGatewaySettingPayload,
-    @CurrentUser() user: UserDto
-  ) {
-    // eslint-disable-next-line no-param-reassign
-    payload.performerId = user._id;
-    const data = await this.performerService.updatePaymentGateway(payload);
-    return DataResponse.ok(data);
   }
 
   @Get('/documents/auth/check')

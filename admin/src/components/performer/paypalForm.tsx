@@ -2,7 +2,6 @@ import { PureComponent } from 'react';
 import {
   Form, Button, Input, Row, Col
 } from 'antd';
-import { IPerformer } from 'src/interfaces';
 
 const layout = {
   labelCol: { span: 24 },
@@ -19,20 +18,20 @@ const validateMessages = {
 
 interface IProps {
   onFinish: Function;
-  user: IPerformer;
-  updating?: boolean;
+  paypalSetting: any;
+  updating: boolean;
 }
 
 export class PerformerPaypalForm extends PureComponent<IProps> {
   render() {
-    const { onFinish, user, updating } = this.props;
+    const { onFinish, paypalSetting, updating } = this.props;
     return (
       <Form
         {...layout}
         name="nest-messages"
         onFinish={onFinish.bind(this)}
         validateMessages={validateMessages}
-        initialValues={user?.paypalSetting?.value || {
+        initialValues={paypalSetting || {
           email: '',
           phoneNumber: ''
         }}
@@ -46,7 +45,7 @@ export class PerformerPaypalForm extends PureComponent<IProps> {
               label="Paypal business account email"
               validateTrigger={['onChange', 'onBlur']}
               rules={[{ required: true }, { type: 'email' }]}
-              help="You will need  a paypal business account to use this feature"
+              help="You will need a paypal business account to use this feature"
             >
               <Input />
             </Form.Item>

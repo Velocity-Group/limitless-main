@@ -32,28 +32,23 @@ import { StripeService } from 'src/modules/payment/services';
 import { FollowService } from 'src/modules/follow/services/follow.service';
 import * as moment from 'moment';
 import { omit } from 'lodash';
+import { PayoutMethodService } from 'src/modules/payout-request/services';
 import { PerformerDto } from '../dtos';
 import {
   UsernameExistedException, EmailExistedException
 } from '../exceptions';
 import {
-  PerformerModel,
-  PaymentGatewaySettingModel,
-  BankingModel
+  PerformerModel
 } from '../models';
 import {
   PerformerCreatePayload,
   PerformerUpdatePayload,
   PerformerRegisterPayload,
   SelfUpdatePayload,
-  PaymentGatewaySettingPayload,
-  CommissionSettingPayload,
-  BankingSettingPayload
+  CommissionSettingPayload
 } from '../payloads';
 import {
-  PERFORMER_BANKING_SETTING_MODEL_PROVIDER,
-  PERFORMER_MODEL_PROVIDER,
-  PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER
+  PERFORMER_MODEL_PROVIDER
 } from '../providers';
 
 @Injectable()
@@ -81,10 +76,7 @@ export class PerformerService {
     private readonly performerModel: Model<PerformerModel>,
     private readonly queueEventService: QueueEventService,
     private readonly mailService: MailerService,
-    @Inject(PERFORMER_PAYMENT_GATEWAY_SETTING_MODEL_PROVIDER)
-    private readonly paymentGatewaySettingModel: Model<PaymentGatewaySettingModel>,
-    @Inject(PERFORMER_BANKING_SETTING_MODEL_PROVIDER)
-    private readonly bankingSettingModel: Model<BankingModel>
+    private readonly payoutMethodService: PayoutMethodService
   ) {
     this.queueEventService.subscribe(
       'CONVERT_WELCOME_VIDEO_CHANNEL',
@@ -241,12 +233,11 @@ export class PerformerService {
       performer.welcomeVideoId && this.fileService.findById(performer.welcomeVideoId),
       performer.defaultMessagePhotoId && this.fileService.findById(performer.defaultMessagePhotoId)
     ]);
-    const [paypalSetting, blockCountries, bankingInformation, ccbillSetting] = await Promise.all([
-      this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'paypal' }),
-      // this.stripeService.getConnectAccount(performer._id),
-      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id }),
-      this.getBankInfo(performer._id),
-      this.paymentGatewaySettingModel.findOne({ performerId: id, key: 'ccbill' })
+    const [paypalSetting, bankingSetting, stripeAccount, blockCountries] = await Promise.all([
+      this.payoutMethodService.findOne({ sourceId: id, key: 'paypal' }),
+      this.payoutMethodService.findOne({ sourceId: id, key: 'banking' }),
+      this.stripeService.getConnectAccount(performer._id),
+      this.performerBlockService.findOneBlockCountriesByQuery({ sourceId: id })
     ]);
 
     // TODO - update kernel for file dto
@@ -290,9 +281,9 @@ export class PerformerService {
     }
     dto.paypalSetting = paypalSetting;
     // dto.stripeAccount = stripeAccount;
+    dto.bankingInformation = bankingSetting?.value;
+    dto.stripeAccount = stripeAccount;
     dto.blockCountries = blockCountries;
-    dto.bankingInformation = bankingInformation;
-    dto.ccbillSetting = ccbillSetting;
     return dto;
   }
 
@@ -728,13 +719,6 @@ export class PerformerService {
     return file;
   }
 
-  public async getBankInfo(performerId) {
-    const data = await this.bankingSettingModel.findOne({
-      performerId
-    });
-    return data;
-  }
-
   public async increaseViewStats(id: string | ObjectId) {
     return this.performerModel.updateOne(
       { _id: id },
@@ -772,30 +756,18 @@ export class PerformerService {
     return this.performerModel.updateOne({ _id: id }, { $set: { streamingStatus } });
   }
 
-  public async updatePaymentGateway(payload: PaymentGatewaySettingPayload) {
-    let item = await this.paymentGatewaySettingModel.findOne({
-      key: payload.key,
-      performerId: payload.performerId
-    });
-    if (!item) {
-      // eslint-disable-next-line new-cap
-      item = new this.paymentGatewaySettingModel();
-    }
-    item.key = payload.key;
-    item.performerId = payload.performerId as any;
-    item.status = 'active';
-    item.value = payload.value;
-    return item.save();
-  }
-
-  public async getPaymentSetting(
-    performerId: string | ObjectId,
-    service = 'ccbill'
-  ) {
-    return this.paymentGatewaySettingModel.findOne({
-      key: service,
-      performerId
-    });
+  public async updateSubscriptionStat(performerId: string | ObjectId, num = 1) {
+    const performer = await this.performerModel.findById(performerId);
+    if (!performer) return;
+    const minimumVerificationNumber = await this.settingService.getKeyValue(SETTING_KEYS.PERFORMER_VERIFY_NUMBER) || 5;
+    const verifiedAccount = num === 1 ? performer.stats.subscribers >= (minimumVerificationNumber - 1) : (performer.stats.subscribers - 1) < minimumVerificationNumber;
+    await this.performerModel.updateOne(
+      { _id: performerId },
+      {
+        $inc: { 'stats.subscribers': num },
+        verifiedAccount
+      }
+    );
   }
 
   public async vefifiedDocument(performerId: ObjectId) {
@@ -815,20 +787,6 @@ export class PerformerService {
     }
   }
 
-  public async updateSubscriptionStat(performerId: string | ObjectId, num = 1) {
-    const performer = await this.performerModel.findById(performerId);
-    if (!performer) return;
-    const minimumVerificationNumber = await this.settingService.getKeyValue(SETTING_KEYS.PERFORMER_VERIFY_NUMBER) || 5;
-    const verifiedAccount = num === 1 ? performer.stats.subscribers >= (minimumVerificationNumber - 1) : (performer.stats.subscribers - 1) < minimumVerificationNumber;
-    await this.performerModel.updateOne(
-      { _id: performerId },
-      {
-        $inc: { 'stats.subscribers': num },
-        verifiedAccount
-      }
-    );
-  }
-
   public async updateLikeStat(performerId: string | ObjectId, num = 1) {
     return this.performerModel.updateOne(
       { _id: performerId },
@@ -845,38 +803,6 @@ export class PerformerService {
     return this.performerModel.updateOne({ _id: performerId }, {
       commissionPercentage: payload.commissionPercentage
     });
-  }
-
-  public async updateBankingSetting(
-    performerId: string,
-    payload: BankingSettingPayload,
-    user: UserDto
-  ) {
-    const performer = await this.performerModel.findById(performerId);
-    if (!performer) throw new EntityNotFoundException();
-    if (user?.roles && !user?.roles.includes('admin') && `${user._id}` !== `${performerId}`) {
-      throw new HttpException('Permission denied', 403);
-    }
-    let item = await this.bankingSettingModel.findOne({
-      performerId
-    });
-    if (!item) {
-      // eslint-disable-next-line new-cap
-      item = new this.bankingSettingModel(payload);
-    }
-    item.performerId = performerId as any;
-    item.firstName = payload.firstName;
-    item.lastName = payload.lastName;
-    item.SSN = payload.SSN;
-    item.bankName = payload.bankName;
-    item.bankAccount = payload.bankAccount;
-    item.bankRouting = payload.bankRouting;
-    item.bankSwiftCode = payload.bankSwiftCode;
-    item.address = payload.address;
-    item.city = payload.city;
-    item.state = payload.state;
-    item.country = payload.country;
-    return item.save();
   }
 
   public async updateVerificationStatus(

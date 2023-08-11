@@ -22,7 +22,7 @@ import {
 import { SETTING_KEYS } from 'src/modules/settings/constants';
 import { EVENT, STATUS } from 'src/kernel/constants';
 import { AuthErrorException } from '../exceptions';
-import { AUTH_MODEL_PROVIDER, FORGOT_MODEL_PROVIDER, VERIFICATION_MODEL_PROVIDER } from '../providers/auth.provider';
+import { AUTH_MODEL_PROVIDER, FORGOT_MODEL_PROVIDER, VERIFICATION_MODEL_PROVIDER } from '../providers';
 import { AuthModel, ForgotModel, VerificationModel } from '../models';
 import { AuthCreateDto, AuthUpdateDto } from '../dtos';
 import { AuthGooglePayload } from '../payloads';

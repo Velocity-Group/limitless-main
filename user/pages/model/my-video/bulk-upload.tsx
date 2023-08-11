@@ -1,11 +1,10 @@
-import { PureComponent, createRef } from 'react';
+import { PureComponent } from 'react';
 import Head from 'next/head';
 import {
   Form, message, Layout, Button, Upload
 } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import PageHeading from '@components/common/page-heading';
-import { FormInstance } from 'antd/lib/form';
 import VideoUploadList from '@components/file/video-upload-list';
 import { videoService } from '@services/video.service';
 import { connect } from 'react-redux';
@@ -45,12 +44,8 @@ class BulkUploadVideo extends PureComponent<IProps> {
     fileList: []
   };
 
-  formRef: any;
-
   componentDidMount() {
-    const { intl } = this.props;
-    if (!this.formRef) this.formRef = createRef();
-    const { user } = this.props;
+    const { user, intl } = this.props;
     if (!user || !user.verifiedDocument) {
       message.warning(
         intl.formatMessage({
@@ -61,23 +56,12 @@ class BulkUploadVideo extends PureComponent<IProps> {
       );
       Router.back();
     }
-    // if (settings.paymentGateway === 'stripe' && !user?.stripeAccount?.payoutsEnabled) {
-    //   message.warning('You have not connected with stripe. So you cannot post any content right now!');
-    //   Router.push('/model/banking');
-    // }
   }
 
   onUploading(file, resp: any) {
     // eslint-disable-next-line no-param-reassign
     file.percent = resp.percentage;
     this.forceUpdate();
-  }
-
-  setFormVal(field: string, val: any) {
-    const instance = this.formRef.current as FormInstance;
-    instance.setFieldsValue({
-      [field]: val
-    });
   }
 
   beforeUpload(file, listFile) {
@@ -204,7 +188,6 @@ class BulkUploadVideo extends PureComponent<IProps> {
             {...layout}
             onFinish={this.submit.bind(this)}
             validateMessages={validateMessages}
-            ref={this.formRef}
           >
             <Form.Item>
               <Dragger
