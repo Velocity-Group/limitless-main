@@ -117,4 +117,13 @@ export class UserFeedController {
     const data = await this.feedService.votePollFeed(pollId, user);
     return DataResponse.ok(data);
   }
+
+  @Post('/view/:feedId')
+  @HttpCode(HttpStatus.OK)
+  async views(
+    @Param('feedId') id: string
+  ) {
+    const data = await this.feedService.increaseView(id);
+    return DataResponse.ok(data);
+  }
 }

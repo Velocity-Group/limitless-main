@@ -5,6 +5,7 @@ import { PerformerService } from 'src/modules/performer/services';
 import { FileService } from 'src/modules/file/services';
 import { UserDto } from 'src/modules/user/dtos';
 import { PerformerDto } from 'src/modules/performer/dtos';
+import { STATUS } from 'src/kernel/constants';
 import { PERFORMER_PRODUCT_MODEL_PROVIDER } from '../providers';
 import { ProductModel } from '../models';
 import { ProductDto } from '../dtos';
@@ -19,6 +20,65 @@ export class ProductSearchService {
     private readonly productModel: Model<ProductModel>,
     private readonly fileService: FileService
   ) {}
+
+  public async getTrendings(req: any) {
+    const query = {
+      status: STATUS.ACTIVE
+    } as any;
+    if (req.q) {
+      const regexp = new RegExp(
+        req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+        'i'
+      );
+      query.$or = [
+        {
+          name: { $regex: regexp }
+        }
+      ];
+    }
+    if (req.ids && req.ids.length > 0) {
+      query._id = { $in: req.ids };
+    }
+
+    const sort = {
+      'stats.views': -1,
+      'stats.likes': -1,
+      'stats.comments': -1,
+      'stats.bookmarks': -1,
+      updatedAt: -1
+    };
+
+    const [data] = await Promise.all([
+      this.productModel
+        .find(query)
+        .lean()
+        .sort(sort)
+        .limit(req.limit ? parseInt(req.limit as string, 10) : 10)
+        .skip(parseInt(req.offset as string, 10))
+    ]);
+
+    const imageIds = data.map((d) => d.imageId);
+    const products = data.map((v) => new ProductDto(v));
+    const performerIds = data.map((v) => v.performerId);
+    const [images, performers] = await Promise.all([
+      imageIds.length ? this.fileService.findByIds(imageIds) : [],
+      this.performerService.findByIds(performerIds)
+    ]);
+    products.forEach((v) => {
+      const file = images.length > 0 && v.imageId
+        ? images.find((f) => f._id.toString() === v.imageId.toString())
+        : null;
+      // TODO - get default image for dto?
+      if (file) {
+        // eslint-disable-next-line no-param-reassign
+        v.image = file.getUrl();
+      }
+      const performer = performers.find((p) => `${p._id}` === `${v.performerId}`);
+      // eslint-disable-next-line no-param-reassign
+      v.performer = performer.toResponse();
+    });
+    return products;
+  }
 
   public async adminSearch(
     req: ProductSearchRequest

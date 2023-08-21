@@ -16,7 +16,7 @@ import {
   TeamOutlined, CommentOutlined, GiftOutlined
 } from '@ant-design/icons';
 import {
-  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon, TickIcon, WalletSvg
+  HomeIcon, ModelIcon, PlusIcon, MessageIcon, UserIcon, LiveIcon, TickIcon, WalletSvg, TrendingIcon
 } from 'src/icons';
 import Router, { withRouter, Router as RouterEvent } from 'next/router';
 import {
@@ -181,6 +181,15 @@ class Header extends PureComponent<IProps> {
                       </a>
                     </Link>
                   </li>
+                )}
+                {user._id && (
+                <li key="trending" className={router.pathname === '/trending' ? 'active' : ''}>
+                  <Link href="/trending">
+                    <a>
+                      <TrendingIcon />
+                    </a>
+                  </Link>
+                </li>
                 )}
                 {user._id && (
                   <li key="messenger" className={router.pathname === '/messages' ? 'active' : ''}>

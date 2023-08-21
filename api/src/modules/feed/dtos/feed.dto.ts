@@ -3,11 +3,11 @@ import { pick } from 'lodash';
 import { IPerformerResponse } from 'src/modules/performer/dtos';
 
 export class FeedDto {
-  _id: ObjectId | string;
+  _id: ObjectId;
 
   type: string;
 
-  fromSourceId: ObjectId | string;
+  fromSourceId: ObjectId;
 
   fromSource: string;
 
@@ -19,15 +19,19 @@ export class FeedDto {
 
   pollDescription: string;
 
-  fileIds: Array<string | ObjectId>;
+  fileIds: Array<ObjectId>;
 
-  pollIds: Array<string | ObjectId>;
+  pollIds: Array<ObjectId>;
 
   pollExpiredAt: Date;
+
+  totalBookmark: number;
 
   totalLike: number;
 
   totalComment: number;
+
+  totalViews: number;
 
   createdAt: Date;
 
@@ -41,9 +45,9 @@ export class FeedDto {
 
   performer: IPerformerResponse;
 
-  files: any;
+  files?: any;
 
-  polls: any;
+  polls?: any;
 
   isSale: boolean;
 
@@ -55,7 +59,7 @@ export class FeedDto {
 
   teaserId: ObjectId;
 
-  teaser: any;
+  teaser?: any;
 
   thumbnailId: ObjectId;
 
@@ -71,8 +75,6 @@ export class FeedDto {
 
   scheduleAt: Date;
 
-  targetId: ObjectId;
-
   isFollowed: boolean;
 
   constructor(data: Partial<FeedDto>) {
@@ -81,8 +83,6 @@ export class FeedDto {
       pick(data, [
         '_id',
         'type',
-        'fromRef',
-        'refId',
         'fromSourceId',
         'fromSource',
         'title',
@@ -91,8 +91,10 @@ export class FeedDto {
         'pollDescription',
         'fileIds',
         'pollIds',
+        'totalBookmark',
         'totalLike',
         'totalComment',
+        'totalViews',
         'createdAt',
         'updatedAt',
         'isLiked',
@@ -115,7 +117,6 @@ export class FeedDto {
         'status',
         'isSchedule',
         'scheduleAt',
-        'targetId',
         'isFollowed'
       ])
     );

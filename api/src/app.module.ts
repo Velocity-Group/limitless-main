@@ -35,6 +35,7 @@ import { StorageModule } from './modules/storage/storage.module';
 import { TranslationModule } from './modules/translation/translation.module';
 import { LanguageModule } from './modules/language/language.module';
 import { FollowModule } from './modules/follow/follow.module';
+import { TrendingModule } from './modules/trending/trending.module';
 
 @Module({
   imports: [
@@ -72,7 +73,8 @@ import { FollowModule } from './modules/follow/follow.module';
     ReportModule,
     TranslationModule,
     LanguageModule,
-    FollowModule
+    FollowModule,
+    TrendingModule
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -274,7 +274,10 @@ class ProductViewPage extends PureComponent<IProps, IStates> {
                   </span>
                 ) : null}
                 {!product.stock && product.type === 'physical' && (
-                  <span className="prod-stock">{intl.formatMessage({ id: 'outOfStock', defaultMessage: 'Out of stock!' })}</span>
+                  <span className="prod-stock">
+                    {intl.formatMessage({ id: 'outOfStock', defaultMessage: 'Out of stock' })}
+                    !
+                  </span>
                 )}
                 {product.type === 'digital' && (
                   <span className="prod-digital">{intl.formatMessage({ id: 'digital', defaultMessage: 'Digital' })}</span>

@@ -59,6 +59,102 @@ export class GalleryService {
     private readonly queueEventService: QueueEventService
   ) {}
 
+  private async populateTrendingData(data: any, user: UserDto, jwToken: string) {
+    const performerIds = data.map((d) => d.performerId);
+    const galleries = data.map((g) => new GalleryDto(g));
+    const coverPhotoIds = data.map((d) => d.coverPhotoId);
+    const galleryIds = data.map((d) => d._id);
+
+    const [coverPhotos, subscriptions, transactions, performers] = await Promise.all([
+      coverPhotoIds.length
+        ? this.photoModel
+          .find({ _id: { $in: coverPhotoIds } })
+          .lean()
+          .exec()
+        : [],
+      user?._id ? this.subscriptionService.findSubscriptionList({
+        userId: user._id, performerId: { $in: performerIds }, expiredAt: { $gt: new Date() }
+      }) : [],
+      user?._id ? this.tokenTransactionSearchService.findByQuery({
+        sourceId: user._id,
+        targetId: { $in: galleryIds },
+        target: PURCHASE_ITEM_TARTGET_TYPE.GALLERY,
+        status: PURCHASE_ITEM_STATUS.SUCCESS
+      }) : [],
+      this.performerService.findByIds(performerIds)
+    ]);
+    const fileIds = coverPhotos.map((c) => c.fileId);
+    const files = await this.fileService.findByIds(fileIds);
+    galleries.forEach((g) => {
+      if (g.coverPhotoId) {
+        const coverPhoto = coverPhotos.find(
+          (c) => c._id.toString() === g.coverPhotoId.toString()
+        );
+        if (coverPhoto) {
+          const file = files.find(
+            (f) => f._id.toString() === coverPhoto.fileId.toString()
+          );
+          if (file) {
+            let fileUrl = file.getUrl(true);
+            if (file.server !== Storage.S3) {
+              fileUrl = `${fileUrl}?photoId=${g.coverPhotoId._id}&token=${jwToken}`;
+            }
+            // eslint-disable-next-line no-param-reassign
+            g.coverPhoto = {
+              url: fileUrl,
+              thumbnails: file.getThumbnails()
+            };
+          }
+        }
+      }
+      const isSubscribed = subscriptions.find((s) => `${s.performerId}` === `${g.performerId}`);
+      g.isSubscribed = !user ? false : !!((isSubscribed || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${g._id}`);
+      g.isBought = !user ? false : !!((bought || (`${user._id}` === `${g.performerId}`) || (user.roles && user.roles.includes('admin'))));
+      const performer = performers.find((p) => `${p._id}` === `${g.performerId}`);
+      g.performer = performer.toResponse();
+    });
+    return galleries;
+  }
+
+  public async getTrendings(req: any, user: UserDto, jwToken: string) {
+    const query = {
+      status: STATUS.ACTIVE
+    } as any;
+
+    if (req.q) {
+      const regexp = new RegExp(
+        req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+        'i'
+      );
+      query.$or = [
+        {
+          name: { $regex: regexp }
+        }
+      ];
+    }
+    if (req.ids && req.ids.length > 0) {
+      query._id = { $in: req.ids };
+    }
+    const sort = {
+      'stats.views': -1,
+      'stats.likes': -1,
+      'stats.comments': -1,
+      'stats.bookmarks': -1,
+      updatedAt: -1
+    };
+    const [data] = await Promise.all([
+      this.galleryModel
+        .find(query)
+        .lean()
+        .sort(sort)
+        .limit(parseInt(req.limit as string, 10))
+        .skip(parseInt(req.offset as string, 10))
+    ]);
+    const result = await this.populateTrendingData(data, user, jwToken);
+    return result;
+  }
+
   public async create(
     payload: GalleryCreatePayload,
     creator?: UserDto
@@ -299,9 +395,6 @@ export class GalleryService {
       query.$or = [
         {
           name: { $regex: regexp }
-        },
-        {
-          description: { $regex: regexp }
         }
       ];
     }

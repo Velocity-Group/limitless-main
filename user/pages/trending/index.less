@@ -1,0 +1,104 @@
+@import '../../style/vars.less';
+
+.trending-page {
+  margin: auto;
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 5px;
+
+  .banner-section {
+    position: relative;
+    padding-bottom: 16px;
+
+    .banner-relative {
+      .banner-img {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+      }
+
+      .mobile-img {
+        display: none;
+      }
+    }
+
+    .banner-heading {
+      position: absolute;
+      right: 0;
+      left: 0;
+      bottom: 40%;
+      display: block;
+      text-align: center;
+
+      .hero-title {
+        color: #000000;
+        font-size: 40px;
+        font-family: @primary-font-bold;
+        font-weight: 700;
+      }
+
+      .color-light-blue {
+        color: #1ea2f1 !important;
+      }
+    }
+
+    @media screen and (max-width: @tablet-screen) {
+      .banner-relative {
+        .banner-img {
+          display: none;
+        }
+
+        .mobile-img {
+          display: block;
+          width: 100%;
+          height: 286px;
+          object-fit: cover;
+          border-radius: 10px;
+        }
+      }
+
+      .banner-heading {
+        .hero-title {
+          font-size: 30px;
+        }
+
+      }
+    }
+  }
+
+  .filtering-section {
+    .tabs-bar {
+      position: relative;
+
+      .ant-tabs-nav {
+        padding: 20px 0;
+
+        .ant-tabs-tab {
+          padding: 18px;
+          margin: 0 0 0 18px;
+        }
+
+        .ant-tabs-tab:first-child {
+          margin: 0;
+        }
+      }
+
+      .filter-option {
+        position: absolute;
+        top: 35px;
+        right: 0;
+        z-index: 99;
+      }
+
+      @media screen and (max-width: 1050px) {
+        .filter-option {
+          position: unset;
+          margin-top: 20px;
+        }
+      }
+    }
+
+
+  }
+
+}

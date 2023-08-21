@@ -28,7 +28,7 @@ import { AuthService } from 'src/modules/auth/services';
 import { FileService } from 'src/modules/file/services';
 import { MessageService, NotificationMessageService } from '../services';
 import {
-  MessageListRequest, MessageCreatePayload, MassMessagesToSubscribersCreatePayload
+  MessageListRequest, MessageCreatePayload
 } from '../payloads';
 import { MessageDto } from '../dtos';
 
@@ -249,29 +249,6 @@ export class MessageController {
       }
       ])
   )
-  // async createPrivateFileMessage(
-  //   @FilesUploaded() files: Record<string, any>,
-  //   @Body() payload: PrivateMessageCreatePayload,
-  //   @Request() req: any
-  // ): Promise<DataResponse<MessageDto>> {
-  //   if (req.authUser.sourceId.toString() === payload.recipientId.toString()) {
-  //     throw new ForbiddenException();
-  //   }
-
-  //   const message = await this.messageService.createPrivateFileMessage(
-  //     {
-  //       source: req.authUser.source,
-  //       sourceId: req.authUser.sourceId
-  //     },
-  //     {
-  //       source: payload.recipientType,
-  //       sourceId: payload.recipientId
-  //     },
-  //     files['message-photo'],
-  //     payload
-  //   );
-  //   return DataResponse.ok(message);
-  // }
 
   @Get('/auth/check')
   @HttpCode(HttpStatus.OK)
@@ -285,17 +262,6 @@ export class MessageController {
     }
     const valid = await this.messageService.checkAuth(req, user);
     return DataResponse.ok(valid);
-  }
-
-  @Post('/mass-messages')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
-  async sendMassMessages(
-    @CurrentUser() user: UserDto,
-    @Body() payload: MassMessagesToSubscribersCreatePayload
-  ): Promise<DataResponse<any>> {
-    const data = await this.messageService.sendMassMessagesToSubscribers(user, payload);
-    return DataResponse.ok(data);
   }
 
   @Get('/counting-not-read-messages')

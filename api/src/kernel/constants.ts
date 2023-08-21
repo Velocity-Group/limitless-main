@@ -15,3 +15,8 @@ export const STATUS = {
   INACTIVE: 'inactive',
   PENDING: 'pending'
 };
+
+export const MASS_MESSAGE_STATUS = {
+  PENDING: 'pending',
+  SENT: 'sent'
+};

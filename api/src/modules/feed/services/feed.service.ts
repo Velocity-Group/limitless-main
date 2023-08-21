@@ -23,6 +23,8 @@ import * as moment from 'moment';
 import { Storage } from 'src/modules/storage/contants';
 import { FollowService } from 'src/modules/follow/services/follow.service';
 import { ROLE_ADMIN, ROLE_SUB_ADMIN } from 'src/modules/user/constants';
+import { TRENDING_CHANNEL } from 'src/modules/trending/trending.listener';
+import { TRENDING_SOURCES } from 'src/modules/trending/constants';
 import { FeedDto, PollDto } from '../dtos';
 import { InvalidFeedTypeException, AlreadyVotedException, PollExpiredException } from '../exceptions';
 import {
@@ -77,15 +79,16 @@ export class FeedService {
   }
 
   private async scheduleFeed(job: any, done: any) {
+    job.remove();
     try {
       const feeds = await this.feedModel.find({
         isSchedule: true,
         scheduleAt: { $lte: new Date() }
       }).lean();
-      feeds.reduce(async (lp, feed) => {
+      await feeds.reduce(async (lp, feed) => {
         await lp;
         const v = new FeedDto(feed);
-        this.feedModel.updateOne(
+        await this.feedModel.updateOne(
           {
             _id: v._id
           },
@@ -96,7 +99,7 @@ export class FeedService {
           }
         );
         const oldStatus = feed.status;
-        return this.queueEventService.publish(
+        await this.queueEventService.publish(
           new QueueEvent({
             channel: PERFORMER_FEED_CHANNEL,
             eventName: EVENT.UPDATED,
@@ -107,12 +110,12 @@ export class FeedService {
             }
           })
         );
+        return Promise.resolve();
       }, Promise.resolve());
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('Schedule feed error', e);
     } finally {
-      job.remove();
       this.agenda.schedule('1 hour from now', SCHEDULE_FEED_AGENDA, {});
       typeof done === 'function' && done();
     }
@@ -246,6 +249,87 @@ export class FeedService {
       data.push(feed);
     }, Promise.resolve());
     return data;
+  }
+
+  public async populateTrendingData(feeds: any, user: UserDto, jwToken: string) {
+    const feedIds = feeds.map((f) => f._id);
+    const performerIds = feeds.map((f) => f.fromSourceId);
+    let pollIds = [];
+    let fileIds = [];
+    feeds.forEach((f) => {
+      if (f.fileIds && f.fileIds.length) {
+        fileIds = uniq(fileIds.concat(f.fileIds.concat([f?.thumbnailId || null, f?.teaserId || null])));
+      }
+      if (f.pollIds && f.pollIds.length) {
+        pollIds = pollIds.concat(f.pollIds);
+      }
+    });
+    const [files, subscriptions, transactions, performers] = await Promise.all([
+      fileIds.length ? this.fileService.findByIds(fileIds) : [],
+      user && user._id ? this.subscriptionService.findSubscriptionList({
+        userId: user._id,
+        performerId: { $in: performerIds }
+      }) : [],
+      user && user._id ? this.tokenTransactionSearchService.findByQuery({
+        sourceId: user._id,
+        targetId: { $in: feedIds },
+        target: PURCHASE_ITEM_TARTGET_TYPE.FEED,
+        status: PURCHASE_ITEM_STATUS.SUCCESS
+      }) : [],
+      this.performerService.findByIds(performerIds)
+    ]);
+
+    return feeds.map((f) => {
+      const feed = new FeedDto(f);
+      const performer = performers.find((p) => `${p._id}` === `${feed.fromSourceId}`);
+      feed.performer = performer.toResponse();
+      const subscription = subscriptions.find((s) => `${s.performerId}` === `${f.fromSourceId}`);
+      feed.isSubscribed = subscription && moment().isBefore(subscription.expiredAt);
+      const bought = transactions.find((transaction) => `${transaction.targetId}` === `${f._id}`);
+      feed.isBought = !!bought;
+      if (feed.isSale && !feed.price) {
+        feed.isBought = true;
+      }
+      const canView = (feed.isSale && feed.isBought) || (!feed.isSale && feed.isSubscribed) || (feed.isSale && !feed.price);
+      const feedFileStringIds = (f.fileIds || []).map((fileId) => fileId.toString());
+      const feedFiles = files.filter((file) => feedFileStringIds.includes(file._id.toString()));
+      if ((user && user._id && `${user._id}` === `${f.fromSourceId}`)
+        || (user && user.roles && user.roles.includes('admin'))) {
+        feed.isSubscribed = true;
+        feed.isBought = true;
+      }
+      if (feedFiles.length) {
+        feed.files = feedFiles.map((file) => {
+          // track server s3 or local, assign jwtoken if local
+          let fileUrl = file.getUrl(canView);
+          if (file.server !== Storage.S3) {
+            fileUrl = `${fileUrl}?feedId=${feed._id}&token=${jwToken}`;
+          }
+          return {
+            ...file.toResponse(),
+            thumbnails: file.getThumbnails(),
+            url: fileUrl
+          };
+        });
+      }
+      if (feed.thumbnailId) {
+        const thumbnail = files.find((file) => file._id.toString() === feed.thumbnailId.toString());
+        feed.thumbnail = thumbnail && {
+          ...thumbnail.toResponse(),
+          thumbnails: thumbnail.getThumbnails(),
+          url: thumbnail.getUrl()
+        };
+      }
+      if (feed.teaserId) {
+        const teaser = files.find((file) => file._id.toString() === feed.teaserId.toString());
+        feed.teaser = teaser && {
+          ...teaser,
+          thumbnails: teaser.getThumbnails(),
+          url: teaser.getUrl()
+        };
+      }
+      return feed;
+    });
   }
 
   public async findOne(id: string, user: UserDto, jwToken: string): Promise<FeedDto> {
@@ -415,6 +499,43 @@ export class FeedService {
       data: await this.populateFeedData(data, user, jwToken),
       total
     };
+  }
+
+  public async getTrendings(req: any, user: UserDto, jwToken: string) {
+    const query = {
+      fromSource: FEED_SOURCE.PERFORMER,
+      status: STATUS.ACTIVE
+    } as any;
+
+    if (req.q) {
+      const regexp = new RegExp(
+        req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+        'i'
+      );
+      const searchValue = { $regex: regexp };
+      query.$or = [
+        { text: searchValue }
+      ];
+    }
+    if (req.ids && req.ids.length > 0) {
+      query._id = { $in: req.ids };
+    }
+    const sort = {
+      totalViews: -1,
+      totalLike: -1,
+      totalComment: -1,
+      updatedAt: -1
+    };
+    const [data] = await Promise.all([
+      this.feedModel
+        .find(query)
+        .lean()
+        .sort(sort)
+        .limit(parseInt(req.limit as string, 10))
+        .skip(parseInt(req.offset as string, 10))
+    ]);
+    const result = await this.populateTrendingData(data, user, jwToken);
+    return result;
   }
 
   public async searchSubscribedPerformerFeeds(req: FeedSearchRequest, user: UserDto, jwToken: string) {
@@ -704,5 +825,24 @@ export class FeedService {
       isPinned: feed.isPinned,
       pinnedAt: feed.pinnedAt
     };
+  }
+
+  public async increaseView(id: string | ObjectId): Promise<any> {
+    const feed = await this.feedModel.findById(id);
+    feed.totalViews += 1;
+    await feed.save();
+    await this.queueEventService.publish(
+      new QueueEvent({
+        channel: TRENDING_CHANNEL,
+        eventName: EVENT.CREATED,
+        data: {
+          source: TRENDING_SOURCES.FEED,
+          sourceId: feed._id,
+          type: 'totalViews',
+          performerId: feed.fromSourceId
+        }
+      })
+    );
+    return { views: feed.totalViews + 1 };
   }
 }

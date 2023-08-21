@@ -34,5 +34,5 @@ export class FeedSearchRequest extends SearchRequest {
   @IsString()
   toDate: string;
 
-  ids?: string[] | ObjectId[];
+  ids: string[] | ObjectId[];
 }

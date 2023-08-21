@@ -4,6 +4,8 @@ import { REACTION_CHANNEL, REACTION_TYPE, REACTION } from 'src/modules/reaction/
 import { EVENT } from 'src/kernel/constants';
 import { PerformerService } from 'src/modules/performer/services';
 import { Model } from 'mongoose';
+import { TRENDING_CHANNEL } from 'src/modules/trending/trending.listener';
+import { TRENDING_SOURCES } from 'src/modules/trending/constants';
 import { FEED_PROVIDER } from '../providers';
 import { FeedModel } from '../models/feed.model';
 
@@ -30,22 +32,41 @@ export class ReactionFeedListener {
       return;
     }
     const { objectId, objectType, action } = event.data;
-    if (![REACTION_TYPE.FEED].includes(objectType) || action !== REACTION.LIKE) {
+    if (![REACTION_TYPE.FEED].includes(objectType)) {
       return;
     }
-    if (REACTION.LIKE && event.eventName === EVENT.CREATED) {
-      const feed = await this.feedModel.findById(objectId);
-      if (feed) {
-        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: 1 } });
-        await this.performerService.updateLikeStat(feed.fromSourceId, 1);
-      }
+    const feed = await this.feedModel.findById(objectId);
+    if (!feed) return;
+    if (action === REACTION.LIKE) {
+      await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: event.eventName === EVENT.CREATED ? 1 : -1 } });
+      await this.performerService.updateLikeStat(feed.fromSourceId, event.eventName === EVENT.CREATED ? 1 : -1);
+      await this.queueEventService.publish(
+        new QueueEvent({
+          channel: TRENDING_CHANNEL,
+          eventName: event.eventName,
+          data: {
+            source: TRENDING_SOURCES.FEED,
+            type: 'totalLikes',
+            sourceId: objectId,
+            performerId: feed.fromSourceId
+          }
+        })
+      );
     }
-    if (REACTION.LIKE && event.eventName === EVENT.DELETED) {
-      const feed = await this.feedModel.findById(objectId);
-      if (feed) {
-        await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalLike: -1 } });
-        await this.performerService.updateLikeStat(feed.fromSourceId, -1);
-      }
+    if (action === REACTION.BOOK_MARK) {
+      await this.feedModel.updateOne({ _id: objectId }, { $inc: { totalBookmark: event.eventName === EVENT.CREATED ? 1 : -1 } });
+      await this.queueEventService.publish(
+        new QueueEvent({
+          channel: TRENDING_CHANNEL,
+          eventName: event.eventName,
+          data: {
+            source: TRENDING_SOURCES.FEED,
+            type: 'totalBookmarks',
+            sourceId: objectId,
+            performerId: feed.fromSourceId
+          }
+        })
+      );
     }
   }
 }

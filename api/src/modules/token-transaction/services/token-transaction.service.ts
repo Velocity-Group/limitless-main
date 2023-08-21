@@ -55,7 +55,6 @@ export class TokenTransactionService {
     @Inject(PAYMENT_TOKEN_MODEL_PROVIDER)
     private readonly TokenPaymentModel: Model<TokenTransactionModel>,
     private readonly queueEventService: QueueEventService,
-    private readonly socketService: SocketUserService,
     @Inject(forwardRef(() => VideoService))
     private readonly videoService: VideoService,
     @Inject(forwardRef(() => ProductService))
@@ -74,6 +73,11 @@ export class TokenTransactionService {
 
   public async findById(id: string | ObjectId) {
     return this.TokenPaymentModel.findById(id);
+  }
+
+  public async findByQuery(query) {
+    const data = await this.TokenPaymentModel.find(query);
+    return data;
   }
 
   public async checkBought(item: any, type: PurchaseItemType, user: UserDto) {

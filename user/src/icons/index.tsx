@@ -15,6 +15,36 @@ const ModelSvg = () => (
   </svg>
 );
 
+const TrendingSvg = () => (
+  <svg
+    version="1.0"
+    xmlns="http://www.w3.org/2000/svg"
+    width="1em"
+    height="1em"
+    fill="currentColor"
+    viewBox="0 0 225.000000 225.000000"
+    preserveAspectRatio="xMidYMid meet"
+  >
+
+    <g
+      transform="translate(0.000000,225.000000) scale(0.100000,-0.100000)"
+      stroke="none"
+    >
+      <path d="M1159 2069 c-82 -53 -215 -186 -267 -267 -143 -222 -170 -488 -79
+ -774 22 -68 23 -79 10 -98 -23 -33 -54 -24 -104 28 -97 101 -130 184 -133 335
+ -1 53 -7 102 -13 108 -6 6 -23 9 -39 7 -24 -3 -34 -14 -66 -78 -54 -108 -79
+ -212 -85 -360 -5 -107 -2 -139 16 -210 65 -264 252 -457 521 -542 66 -20 94
+ -23 235 -23 155 1 163 2 257 34 285 97 458 333 458 620 -1 217 -77 363 -282
+ 538 -291 248 -349 356 -319 597 12 93 11 101 -5 113 -26 19 -35 17 -105 -28z
+ m38 -817 c13 -28 67 -96 127 -159 130 -139 150 -174 151 -268 0 -60 -5 -81
+ -33 -137 -53 -107 -136 -161 -252 -162 -67 0 -150 29 -206 73 l-25 19 54 25
+ c30 13 71 41 92 62 77 78 90 154 55 325 -11 52 -20 112 -20 132 0 45 19 138
+ 28 138 4 -1 17 -22 29 -48z"
+      />
+    </g>
+  </svg>
+);
+
 const HomeSvg = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 28 28">
     <path d="M29,13.82a1,1,0,0,0-.37-.77l-12-9.82a1,1,0,0,0-1.26,0l-12,9.82a1,1,0,0,0-.37.77,1,1,0,0,0,1,1,.94.94,0,0,0,.63-.23L6,13.47V24.2A2.81,2.81,0,0,0,8.8,27h2.9a2.81,2.81,0,0,0,2.8-2.8V22.8a.8.8,0,0,1,.8-.8h1.4a.8.8,0,0,1,.8.8v1.4A2.81,2.81,0,0,0,20.3,27h2.9A2.81,2.81,0,0,0,26,24.2V13.47l1.37,1.12a.94.94,0,0,0,.63.23A1,1,0,0,0,29,13.82ZM24,24.2a.8.8,0,0,1-.8.8H20.3a.8.8,0,0,1-.8-.8V22.8A2.81,2.81,0,0,0,16.7,20H15.3a2.81,2.81,0,0,0-2.8,2.8v1.4a.8.8,0,0,1-.8.8H8.8a.8.8,0,0,1-.8-.8V11.84l8-6.55,8,6.55Z" />
@@ -127,4 +157,10 @@ export const LiveIcon = ({
   style, rotate, spin, className
 }: IIcons) => (
   <Icon component={LiveIconSvg} className={className ? `${className} anticon-custom` : 'anticon-custom'} {...{ style, rotate, spin }} />
+);
+
+export const TrendingIcon = ({
+  style, rotate, spin, className
+}: IIcons) => (
+  <Icon component={TrendingSvg} className={className ? `${className} anticon-custom` : 'anticon-custom'} {...{ style, rotate, spin }} />
 );

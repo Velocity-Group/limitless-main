@@ -121,6 +121,10 @@ export class FeedService extends APIRequest {
     return this.post(`/feeds/users/vote/${pollId}`);
   }
 
+  views(feedId: string) {
+    return this.post(`/feeds/users/view/${feedId}`);
+  }
+
   getBookmark(payload) {
     return this.get(this.buildUrl('/reactions/feeds/bookmark', payload));
   }

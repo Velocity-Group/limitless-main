@@ -66,3 +66,17 @@ export interface IMessage {
 
   isDeleted: boolean;
 }
+
+export interface IMassMessage {
+  _id: string;
+
+  text: string;
+
+  status: string;
+
+  scheduledAt: Date;
+
+  createdAt: Date;
+
+  updatedAt: Date;
+}

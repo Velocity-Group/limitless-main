@@ -5,3 +5,4 @@ export * from './message-list.payload';
 export * from './private-message-create.payload';
 export * from './read-messages-conversation.payload';
 export * from './conversation-update.payload';
+export * from './mass-message-search.payload';

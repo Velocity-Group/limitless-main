@@ -9,7 +9,8 @@ import {
   UseGuards,
   ValidationPipe,
   UsePipes,
-  Request
+  Request,
+  Post
 } from '@nestjs/common';
 import { DataResponse, ForbiddenException } from 'src/kernel';
 import { CurrentUser } from 'src/modules/auth';

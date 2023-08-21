@@ -31,6 +31,7 @@ import ReportForm from '@components/report/report-form';
 import Router from 'next/router';
 import { updateBalance } from '@redux/user/actions';
 import { IFeed, IUser } from 'src/interfaces';
+import { InView } from 'react-intersection-observer';
 import PurchaseFeedForm from './confirm-purchase';
 import FeedSlider from './post-slider';
 import './index.less';
@@ -359,6 +360,11 @@ class FeedCard extends Component<IProps> {
     }
   }
 
+  onView = async (inView: boolean) => {
+    const { feed } = this.props;
+    inView && await feedService.views(feed._id);
+  }
+
   render() {
     const {
       feed, user, commentMapping, comment, onDelete: handleDelete, createComment: handleCreateComment,
@@ -447,38 +453,41 @@ class FeedCard extends Component<IProps> {
     );
 
     return (
-      <div className="feed-card">
-        <div className="feed-top">
-          <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
-            <div className="feed-top-left">
-              <Avatar alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} size={40} />
-              <div className="feed-name">
-                <h4>
-                  {performer?.name || 'N/A'}
-                  {' '}
-                  {performer?.verifiedAccount && <TickIcon />}
+      <InView
+        onChange={this.onView}
+      >
+        <div className="feed-card">
+          <div className="feed-top">
+            <Link href={{ pathname: '/model/profile', query: { username: performer?.username || performer?._id } }} as={`/${performer?.username || performer?._id}`}>
+              <div className="feed-top-left">
+                <Avatar alt="per_atv" src={performer?.avatar || '/static/no-avatar.png'} size={40} />
+                <div className="feed-name">
+                  <h4>
+                    {performer?.name || 'N/A'}
+                    {' '}
+                    {performer?.verifiedAccount && <TickIcon />}
                   &nbsp;&nbsp;
-                  {isPinned && <Tooltip title={`Pinned at ${formatDate(feed.pinnedAt)}`}><a title="Unpin this post" aria-hidden onClick={() => this.pinToProfile()}><PushpinOutlined /></a></Tooltip>}
+                    {isPinned && <Tooltip title={`Pinned at ${formatDate(feed.pinnedAt)}`}><a title="Unpin this post" aria-hidden onClick={() => this.pinToProfile()}><PushpinOutlined /></a></Tooltip>}
                   &nbsp;&nbsp;
-                  {performer?.live > 0 && user?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
-                </h4>
-                <h5>
-                  @
-                  {performer?.username || 'n/a'}
-                </h5>
+                    {performer?.live > 0 && user?._id !== performer?._id && <a aria-hidden onClick={this.handleJoinStream} className="live-status">Live</a>}
+                  </h4>
+                  <h5>
+                    @
+                    {performer?.username || 'n/a'}
+                  </h5>
+                </div>
+                {!performer?.isOnline ? <span className="online-status" /> : <span className="online-status active" />}
               </div>
-              {!performer?.isOnline ? <span className="online-status" /> : <span className="online-status active" />}
+            </Link>
+            <div className="feed-top-right">
+              <span className="feed-time">{formatDate(feed.updatedAt, 'MMM DD')}</span>
+              {dropdown}
             </div>
-          </Link>
-          <div className="feed-top-right">
-            <span className="feed-time">{formatDate(feed.updatedAt, 'MMM DD')}</span>
-            {dropdown}
           </div>
-        </div>
-        <div className="feed-container">
-          <div className="feed-text">
-            {feed.text}
-            {polls && polls.length > 0 && (
+          <div className="feed-container">
+            <div className="feed-text">
+              {feed.text}
+              {polls && polls.length > 0 && (
               <div className="feed-polls">
                 {feed.pollDescription && <h4 className="p-question">{feed.pollDescription}</h4>}
                 {polls.map((poll) => (
@@ -504,45 +513,45 @@ class FeedCard extends Component<IProps> {
                   ) : <span>{intl.formatMessage({ id: 'closed', defaultMessage: 'Closed' })}</span>}
                 </div>
               </div>
-            )}
-          </div>
-          {canView && (
+              )}
+            </div>
+            {canView && (
             <div className="feed-content">
               <FeedSlider feed={feed} />
             </div>
-          )}
-          {!canView && (
+            )}
+            {!canView && (
             <div className="lock-content">
               {/* eslint-disable-next-line no-nested-ternary */}
               <div className="feed-bg" style={{ backgroundImage: `url(${thumbUrl})`, filter: thumbUrl === '/static/leaf.jpg' ? 'blur(2px)' : 'blur(20px)' }} />
               <div className="lock-middle">
                 {(isHovered) ? <UnlockOutlined /> : <LockOutlined />}
                 {!feed.isSale && !feed.isSubscribed && (
-                  <Button
-                    onMouseEnter={() => this.setState({ isHovered: true })}
-                    onMouseLeave={() => this.setState({ isHovered: false })}
-                    disabled={user.isPerformer}
-                    className="secondary"
-                    onClick={() => updateSubscription({ showModal: true, performer: feed?.performer, subscriptionType: 'monthly' })}
-                  >
-                    {intl.formatMessage({ id: 'subscribeToUnlock', defaultMessage: 'Subscribe to unlock' })}
-                  </Button>
+                <Button
+                  onMouseEnter={() => this.setState({ isHovered: true })}
+                  onMouseLeave={() => this.setState({ isHovered: false })}
+                  disabled={user.isPerformer}
+                  className="secondary"
+                  onClick={() => updateSubscription({ showModal: true, performer: feed?.performer, subscriptionType: 'monthly' })}
+                >
+                  {intl.formatMessage({ id: 'subscribeToUnlock', defaultMessage: 'Subscribe to unlock' })}
+                </Button>
                 )}
                 {feed.isSale && feed.price > 0 && !isBought && (
-                  <Button
-                    onMouseEnter={() => this.setState({ isHovered: true })}
-                    onMouseLeave={() => this.setState({ isHovered: false })}
-                    disabled={user.isPerformer}
-                    className="secondary"
-                    onClick={() => this.setState({ openPurchaseModal: true })}
-                  >
-                    {intl.formatMessage({ id: 'pay', defaultMessage: 'Pay' })}
-                    {' '}
-                    $
+                <Button
+                  onMouseEnter={() => this.setState({ isHovered: true })}
+                  onMouseLeave={() => this.setState({ isHovered: false })}
+                  disabled={user.isPerformer}
+                  className="secondary"
+                  onClick={() => this.setState({ openPurchaseModal: true })}
+                >
+                  {intl.formatMessage({ id: 'pay', defaultMessage: 'Pay' })}
+                  {' '}
+                  $
                     {(feed.price || 0).toFixed(2)}
-                    {' '}
-                    {intl.formatMessage({ id: 'toUnlockLowCase', defaultMessage: 'to unlock' })}
-                  </Button>
+                  {' '}
+                  {intl.formatMessage({ id: 'toUnlockLowCase', defaultMessage: 'to unlock' })}
+                </Button>
                 )}
                 {(feed.isSale && !feed.price && !user._id) && (
                 <Button
@@ -556,78 +565,78 @@ class FeedCard extends Component<IProps> {
                 </Button>
                 )}
                 {feed.teaser && (
-                  <Button className="teaser-btn" type="link" onClick={() => this.setState({ openTeaser: true })}>
-                    {intl.formatMessage({ id: 'viewTeaser', defaultMessage: 'View teaser' })}
-                  </Button>
+                <Button className="teaser-btn" type="link" onClick={() => this.setState({ openTeaser: true })}>
+                  {intl.formatMessage({ id: 'viewTeaser', defaultMessage: 'View teaser' })}
+                </Button>
                 )}
               </div>
               {feed.files && feed.files.length > 0 && (
-                <div className="count-media">
-                  <span className="count-media-item">
-                    {images.length > 0 && (
-                      <span>
-                        {images.length}
-                        {' '}
-                        <FileImageOutlined />
-                        {' '}
-                      </span>
-                    )}
-                    {videos.length > 0 && images.length > 0 && '|'}
-                    {videos.length > 0 && (
-                      <span>
-                        {videos.length > 1 && videos.length}
-                        {' '}
-                        <VideoCameraOutlined />
-                        {' '}
-                        {videos.length === 1 && videoDuration(videos[0].duration)}
-                      </span>
-                    )}
+              <div className="count-media">
+                <span className="count-media-item">
+                  {images.length > 0 && (
+                  <span>
+                    {images.length}
+                    {' '}
+                    <FileImageOutlined />
+                    {' '}
                   </span>
-                </div>
+                  )}
+                  {videos.length > 0 && images.length > 0 && '|'}
+                  {videos.length > 0 && (
+                  <span>
+                    {videos.length > 1 && videos.length}
+                    {' '}
+                    <VideoCameraOutlined />
+                    {' '}
+                    {videos.length === 1 && videoDuration(videos[0].duration)}
+                  </span>
+                  )}
+                </span>
+              </div>
               )}
             </div>
-          )}
-        </div>
-        <div className="feed-bottom">
-          <div className="feed-actions">
-            <div className="action-item">
-              <span aria-hidden className={isLiked ? 'action-ico active' : 'action-ico'} onClick={this.handleLike.bind(this)}>
-                <HeartOutlined />
-                {' '}
-                {shortenLargeNumber(totalLike)}
-              </span>
-              <span aria-hidden className={isOpenComment ? 'action-ico active' : 'action-ico'} onClick={this.onOpenComment.bind(this)}>
-                <CommentOutlined />
-                {' '}
-                {shortenLargeNumber(totalComment)}
-              </span>
-              {performer && (
+            )}
+          </div>
+          <div className="feed-bottom">
+            <div className="feed-actions">
+              <div className="action-item">
+                <span aria-hidden className={isLiked ? 'action-ico active' : 'action-ico'} onClick={this.handleLike.bind(this)}>
+                  <HeartOutlined />
+                  {' '}
+                  {shortenLargeNumber(totalLike)}
+                </span>
+                <span aria-hidden className={isOpenComment ? 'action-ico active' : 'action-ico'} onClick={this.onOpenComment.bind(this)}>
+                  <CommentOutlined />
+                  {' '}
+                  {shortenLargeNumber(totalComment)}
+                </span>
+                {performer && (
                 <span aria-hidden className="action-ico" onClick={() => this.setState({ openTipModal: true })}>
                   <DollarOutlined />
                   {' '}
                   {intl.formatMessage({ id: 'sendTip', defaultMessage: 'Send Tip' })}
                 </span>
-              )}
+                )}
+              </div>
+              <div className="action-item">
+                <span aria-hidden className={openReportModal ? 'action-ico active' : 'action-ico'} onClick={() => this.setState({ openReportModal: true })}>
+                  <Tooltip title={intl.formatMessage({ id: 'report', defaultMessage: 'Report' })}><FlagOutlined /></Tooltip>
+                </span>
+                <span aria-hidden className={isBookMarked ? 'action-ico active' : 'action-ico'} onClick={this.handleBookmark.bind(this)}>
+                  <Tooltip title={!isBookMarked ? intl.formatMessage({
+                    id: 'addToBookmarks',
+                    defaultMessage: 'Add to Bookmarks'
+                  }) : intl.formatMessage({
+                    id: 'removeFromBookmarks',
+                    defaultMessage: 'Remove from Bookmarks'
+                  })}
+                  >
+                    <BookOutlined />
+                  </Tooltip>
+                </span>
+              </div>
             </div>
-            <div className="action-item">
-              <span aria-hidden className={openReportModal ? 'action-ico active' : 'action-ico'} onClick={() => this.setState({ openReportModal: true })}>
-                <Tooltip title={intl.formatMessage({ id: 'report', defaultMessage: 'Report' })}><FlagOutlined /></Tooltip>
-              </span>
-              <span aria-hidden className={isBookMarked ? 'action-ico active' : 'action-ico'} onClick={this.handleBookmark.bind(this)}>
-                <Tooltip title={!isBookMarked ? intl.formatMessage({
-                  id: 'addToBookmarks',
-                  defaultMessage: 'Add to Bookmarks'
-                }) : intl.formatMessage({
-                  id: 'removeFromBookmarks',
-                  defaultMessage: 'Remove from Bookmarks'
-                })}
-                >
-                  <BookOutlined />
-                </Tooltip>
-              </span>
-            </div>
-          </div>
-          {isOpenComment && (
+            {isOpenComment && (
             <div className="feed-comment">
               <CommentForm
                 creator={user}
@@ -646,78 +655,79 @@ class FeedCard extends Component<IProps> {
                 canReply
               />
               {comments.length < totalComments && (
-                <p className="text-center">
-                  <a aria-hidden onClick={this.moreComment.bind(this)}>
-                    {intl.formatMessage({ id: 'moreComments', defaultMessage: 'More comments' })}
-                    ...
-                  </a>
-                </p>
+              <p className="text-center">
+                <a aria-hidden onClick={this.moreComment.bind(this)}>
+                  {intl.formatMessage({ id: 'moreComments', defaultMessage: 'More comments' })}
+                  ...
+                </a>
+              </p>
               )}
             </div>
-          )}
+            )}
+          </div>
+          <Modal
+            key="tip_performer"
+            className="tip-modal"
+            title={null}
+            width={600}
+            visible={openTipModal}
+            onOk={() => this.setState({ openTipModal: false })}
+            footer={null}
+            onCancel={() => this.setState({ openTipModal: false })}
+          >
+            <TipPerformerForm performer={performer} submiting={requesting} onFinish={this.sendTip.bind(this)} />
+          </Modal>
+          <Modal
+            key="purchase_post"
+            className="purchase-modal"
+            title={null}
+            visible={openPurchaseModal}
+            footer={null}
+            width={600}
+            destroyOnClose
+            onCancel={() => this.setState({ openPurchaseModal: false })}
+          >
+            <PurchaseFeedForm feed={feed} submiting={requesting} onFinish={this.purchaseFeed.bind(this)} />
+          </Modal>
+          <Modal
+            key="report_post"
+            className="subscription-modal"
+            title={null}
+            visible={openReportModal}
+            footer={null}
+            destroyOnClose
+            onCancel={() => this.setState({ openReportModal: false })}
+          >
+            <ReportForm performer={performer} submiting={requesting} onFinish={this.handleReport.bind(this)} />
+          </Modal>
+          <Modal
+            key="teaser_video"
+            title="Teaser video"
+            visible={openTeaser}
+            footer={null}
+            onCancel={() => this.setState({ openTeaser: false })}
+            width={650}
+            destroyOnClose
+            className="modal-teaser-preview"
+          >
+            <VideoPlayer
+              key={feed?.teaser?._id}
+              {...{
+                autoplay: true,
+                controls: true,
+                playsinline: true,
+                fluid: true,
+                sources: [
+                  {
+                    src: feed?.teaser?.url,
+                    type: 'video/mp4'
+                  }
+                ]
+              }}
+            />
+          </Modal>
         </div>
-        <Modal
-          key="tip_performer"
-          className="tip-modal"
-          title={null}
-          width={600}
-          visible={openTipModal}
-          onOk={() => this.setState({ openTipModal: false })}
-          footer={null}
-          onCancel={() => this.setState({ openTipModal: false })}
-        >
-          <TipPerformerForm performer={performer} submiting={requesting} onFinish={this.sendTip.bind(this)} />
-        </Modal>
-        <Modal
-          key="purchase_post"
-          className="purchase-modal"
-          title={null}
-          visible={openPurchaseModal}
-          footer={null}
-          width={600}
-          destroyOnClose
-          onCancel={() => this.setState({ openPurchaseModal: false })}
-        >
-          <PurchaseFeedForm feed={feed} submiting={requesting} onFinish={this.purchaseFeed.bind(this)} />
-        </Modal>
-        <Modal
-          key="report_post"
-          className="subscription-modal"
-          title={null}
-          visible={openReportModal}
-          footer={null}
-          destroyOnClose
-          onCancel={() => this.setState({ openReportModal: false })}
-        >
-          <ReportForm performer={performer} submiting={requesting} onFinish={this.handleReport.bind(this)} />
-        </Modal>
-        <Modal
-          key="teaser_video"
-          title="Teaser video"
-          visible={openTeaser}
-          footer={null}
-          onCancel={() => this.setState({ openTeaser: false })}
-          width={650}
-          destroyOnClose
-          className="modal-teaser-preview"
-        >
-          <VideoPlayer
-            key={feed?.teaser?._id}
-            {...{
-              autoplay: true,
-              controls: true,
-              playsinline: true,
-              fluid: true,
-              sources: [
-                {
-                  src: feed?.teaser?.url,
-                  type: 'video/mp4'
-                }
-              ]
-            }}
-          />
-        </Modal>
-      </div>
+      </InView>
     );
   }
 }

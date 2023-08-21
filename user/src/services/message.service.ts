@@ -26,10 +26,6 @@ export class MessageService extends APIRequest {
     return this.post(`/messages/conversations/${conversationId}`, data);
   }
 
-  sendMassMessages(data: Record<string, any>) {
-    return this.post('/messages/mass-messages', data);
-  }
-
   countTotalNotRead() {
     return this.get('/messages/counting-not-read-messages');
   }

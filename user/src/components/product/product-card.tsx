@@ -33,7 +33,10 @@ class ProductCard extends PureComponent<IProps, IStates> {
               </span>
               )}
               {!product.stock && product.type === 'physical' && (
-                <div className="label-wrapper-digital">{intl.formatMessage({ id: 'outOfStock', defaultMessage: 'Out of stock!' })}</div>
+                <div className="label-wrapper-digital">
+                  {intl.formatMessage({ id: 'outOfStock', defaultMessage: 'Out of stock' })}
+                  !
+                </div>
               )}
               {product.stock > 0 && product.type === 'physical' && (
                 <div className="label-wrapper-digital">

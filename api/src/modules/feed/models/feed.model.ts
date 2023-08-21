@@ -6,7 +6,7 @@ export class FeedModel extends Document {
 
   type: string;
 
-  fromSourceId: ObjectId | string;
+  fromSourceId: ObjectId;
 
   fromSource: string;
 
@@ -18,13 +18,17 @@ export class FeedModel extends Document {
 
   pollDescription: string;
 
-  fileIds: Array<string | ObjectId>;
+  fileIds: Array<ObjectId>;
 
-  pollIds: Array<string | ObjectId>;
+  pollIds: Array<ObjectId>;
+
+  totalBookmark: number;
 
   totalLike: number;
 
   totalComment: number;
+
+  totalViews: number;
 
   isSale: boolean;
 
@@ -45,8 +49,6 @@ export class FeedModel extends Document {
   scheduleAt: Date;
 
   pinnedAt: Date;
-
-  targetId: ObjectId;
 
   createdAt: Date;
 

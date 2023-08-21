@@ -43,4 +43,25 @@ export class MassMessagesToSubscribersCreatePayload {
   @IsString()
   @IsOptional()
   subscriptionType: string;
+
+  @ApiProperty()
+  @IsOptional()
+  isSchedule: boolean;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  scheduledAt: string;
+}
+
+export class MassMessagesUpdatePayload {
+  @ApiProperty()
+  @ValidateIf((o) => o.type === MESSAGE_TYPE.TEXT)
+  @IsString()
+  text: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  scheduledAt: Date;
 }
